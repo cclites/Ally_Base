@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use Auth;
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Client;
-use App\CreditCard;
-use App\GatewayTransaction;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\GatewayTransaction;
 use App\Http\Controllers\Controller;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\ClientChargesReport;
@@ -16,7 +16,7 @@ use App\Reports\DuplicateDepositReport;
 use App\Reports\EVVReport;
 use App\Reports\OnHoldReport;
 use App\Reports\PendingTransactionsReport;
-use App\Payment;
+use App\Billing\Payment;
 use App\Reports\ShiftsReport;
 use App\Reports\UnpaidShiftsReport;
 use App\Reports\UnsettledReport;

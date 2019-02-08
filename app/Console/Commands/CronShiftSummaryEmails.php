@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Mail\ClientShiftSummaryEmail;
-use App\Shift;
 use Illuminate\Support\Str;
-use App\ShiftConfirmationToken;
 use App\ShiftConfirmation;
 use App\Reports\UnconfirmedShiftsReport;
 use App\Business;
@@ -53,7 +52,8 @@ class CronShiftSummaryEmails extends Command
             }
 
             $report = new UnconfirmedShiftsReport();
-            $shifts = $report->includeConfirmed()
+            $shifts = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime())
+                ->includeConfirmed()
                 ->includeClockedIn()
                 ->includeInProgress()
                 ->forBusinesses($business)
@@ -116,5 +116,15 @@ class CronShiftSummaryEmails extends Command
                 ->get()
                 ->pluck('id')
                 ->toArray();
+    }
+
+    /**
+     * Get the cut off time for when a shift is excluded from this email (Sunday at 11:59:59 in EST)
+     *
+     * @return \Carbon\Carbon
+     */
+    public function cutOffDateTime()
+    {
+        return Carbon::now('America/New_York')->startOfWeek()->subSecond();
     }
 }
