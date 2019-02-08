@@ -115,7 +115,7 @@ class ReportsController extends BaseController
         return view('business.reports.overtime');
     }
 
-    public function overtimeData(Request $request, ScheduleAggregator $aggregator)
+    public function overtimeData(Request $request)
     {
         $timezone = $this->business()->timezone;
 
@@ -140,20 +140,20 @@ class ReportsController extends BaseController
         $weekEndUTC = $weekEnd->copy()->setTimezone('UTC');
 
         // Pull the list of relevant caregivers to loop through
-        $query = Caregiver::forRequestedBusinesses()->ordered();
-        $query->whereHas('shifts', function ($query) use ($weekStartUTC, $weekEndUTC) {
-            $query->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC]);
-        });
-        $query->when($request->filled('caregiver_id'), function ($query) use ($request) {
-            $query->where('caregiver_id', $request->caregiver_id);
-        });
-        $caregivers = $query->get();
-
+        $caregivers = Caregiver::forRequestedBusinesses()
+            ->with('shifts')
+            ->ordered()
+            ->whereHas('shifts', function ($query) use ($weekStartUTC, $weekEndUTC) {
+                $query->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC]);
+            })
+            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
+                $query->where('caregiver_id', $request->caregiver_id);
+            })
+            ->get();
 
         // Loop through caregivers, calculate hours, add to $results
         $results = [];
         foreach ($caregivers as $caregiver) {
-
             // Create a new result template
             $hours = [
                 'worked' => 0,
@@ -162,94 +162,32 @@ class ReportsController extends BaseController
             ];
 
             // Calculate total number of hours in finished shifts
-            $shifts = $caregiver->shifts()
-                                ->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC])
-                                ->whereNotNull('checked_out_time')
-                                ->get();
-            foreach($shifts as $shift) {
+            foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
                 $hours['worked'] += $shift->duration();
             }
 
             // Calculate number of hours in current shift
-            $shifts = $caregiver->shifts()
-                                ->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC])
-                                ->whereNull('checked_out_time')
-                                ->get();
-            foreach($shifts as $shift) {
+            foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
                 $hours['worked'] += $shift->duration();
                 $hours['scheduled'] += $shift->remaining();
             }
 
-
             // Calculate number of hours in future shifts
-            $schedules = $aggregator->fresh()
-                                    ->where('caregiver_id', $caregiver->id)
-                                    ->getFutureShifts($weekEndUTC);
-            foreach ($schedules as $schedule) {
-                $hours['scheduled'] += round($schedule->duration / 60, 2);
-            }
+            $schedules = Schedule::future($timezone)
+                ->where('caregiver_id', $caregiver->id)
+                ->where('starts_at', '<=', $weekEndUTC)
+                ->sum('duration');
+            $hours['scheduled'] += $schedules;
+            $hours['worked'] = round($hours['worked'] / 60, 2);
+            $hours['scheduled'] = round($hours['scheduled'] / 60, 2);
 
             // Calculate total expected hours (still scheduled + already worked)
-            $hours['total'] = $hours['scheduled'] + $hours['worked'];
+            $hours['total'] = $hours['worked'] - $hours['scheduled'];
 
             // Aggregate results
-            $results[] = array_merge($caregiver->toArray(), $hours);
+            $results[] = array_merge($caregiver->only('id', 'firstname', 'lastname'), $hours);
         }
 
-//        $timezone = $this->business()->timezone;
-//
-//        $week = Carbon::now($timezone)->weekOfYear;
-//        $year = Carbon::now($timezone)->year;
-//        $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
-//        $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
-//
-//        if ($request->filled('start') && $request->filled('end')) {
-//            $weekStart = Carbon::parse($request->start)->setTime(0, 0, 0);
-//            $weekEnd = Carbon::parse($request->end)->setTime(23, 59, 59);
-//        }
-//        $caregivers = $this->business()
-//            ->caregivers()
-//            ->with('shifts')
-//            ->whereHas('shifts', function ($query) use ($weekStart, $weekEnd) {
-//                $query->whereBetween('checked_in_time', [$weekStart, $weekEnd]);
-//            })
-//            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
-//                $query->where('caregiver_id', $request->caregiver_id);
-//            })
-//            ->get();
-//        $results = collect([]);
-//        foreach ($caregivers as $caregiver) {
-//            $user = $caregiver->user;
-//            // Calculate total number of hours in finished shifts
-//            $worked = $caregiver->shifts->where('checked_out_time', '!=', null)
-//                ->reduce(function ($carry, $item) {
-//                    return $carry + $item->duration();
-//                });
-//
-//            $lastShiftEnd = new Carbon();
-//            $scheduled = round($aggregator->fresh()
-//                    ->where('caregiver_id', $caregiver->id)
-//                    ->getSchedulesBetween($weekStart, $weekEnd)
-//                    ->sum('duration') / 60, 2);
-//            // Calculate number of hours in current shift
-//            foreach ($caregiver->shifts->where('check_out_time', null) as $shift) {
-//                $worked += $shift->duration();
-//                //$scheduled += $shift->remaining();
-//                //$lastShiftEnd = $shift->scheduledEndTime();
-//            }
-//
-//            $worked = round($worked / 60, 2);
-//
-////            $schedules = $aggregator->fresh()
-////                        ->where('caregiver_id', $caregiver->id)
-////                        ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
-////            foreach ($schedules as $schedule) {
-////                $scheduled += round($schedule->duration / 60, 2);
-////            }
-//
-//            $results->push(compact('user', 'worked', 'scheduled'));
-//        }
-//
         $date_range = [$weekStart->toDateString(), $weekEnd->toDateString()];
         return response()->json(compact('results', 'date_range'));
     }
@@ -523,7 +461,7 @@ class ReportsController extends BaseController
         if ($request->input('transaction_id')) {
             $transaction = GatewayTransaction::findOrFail($request->input('transaction_id'));
             $report->forTransaction($transaction);
-            
+
             if ($request->input('reconciliation_report')) {
                 $report->forReconciliationReport($transaction);
             }
@@ -728,7 +666,7 @@ class ReportsController extends BaseController
             })
             ->groupBy('client_id');
     }
-    
+
     /**
      * List of referral sources and how many clients have been referred by each
      *
@@ -822,7 +760,7 @@ class ReportsController extends BaseController
             ->where('user_type', 'client')
             ->with('options')
             ->get();
-        
+
         return view('business.reports.client_directory', compact('clients', 'fields'));
     }
 
@@ -837,7 +775,7 @@ class ReportsController extends BaseController
             ->with('address')
             ->with('meta')
             ->get();
-            
+
         $fields = CustomField::forAuthorizedChain()
             ->where('user_type', 'caregiver')
             ->with('options')
@@ -848,7 +786,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the prospect directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -878,7 +816,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the caregiver directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -914,7 +852,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the client directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -969,7 +907,7 @@ class ReportsController extends BaseController
                         'user_id' => $item->caregiver->id,
                     ]);
                 });
-            
+
             return response()->json($report);
         }
 
@@ -1000,11 +938,11 @@ class ReportsController extends BaseController
                         'user_id' => $item->client->id,
                     ]);
                 });
-            
+
             return response()->json($report);
         }
 
-        
+
         $type = 'client';
         $users = Client::forRequestedBusinesses()->active()->ordered()->get();
 
@@ -1172,7 +1110,7 @@ class ReportsController extends BaseController
 
     /**
      * Show the page to generate a sales pipeline report
-     * 
+     *
      * @return Response
      */
     public function showSalesPipeline(Request $request)
@@ -1187,7 +1125,7 @@ class ReportsController extends BaseController
     /**
      * Handle the request to generate a report for the sales pipeline
      * @param Request $request
-     * 
+     *
      * @return array
      */
     protected function salesPipelineReport(Request $request) {
@@ -1196,7 +1134,7 @@ class ReportsController extends BaseController
             'start_date' => 'required|string|date',
             'end_date' => 'required|string|date',
         ]);
-        
+
         $startDate = new Carbon($request->start_date);
         $endDate = new Carbon($request->end_date);
         if($startDate->diffInMonths($endDate) > 6) {
@@ -1208,7 +1146,7 @@ class ReportsController extends BaseController
                 'business_id', 
                 'firstname',
                 'lastname',
-                'closed_loss', 
+                'closed_loss',
                 'closed_win', 
                 'referred_by',
                 'referral_source_id',
