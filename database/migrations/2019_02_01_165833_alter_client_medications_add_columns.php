@@ -14,7 +14,7 @@ class AlterClientMedicationsAddColumns extends Migration
     public function up()
     {
         Schema::table('client_medications', function (Blueprint $table) {
-            $table->binary('description', 65535);
+            $table->binary('description', 65535)->nullable();
             $table->binary('side_effects', 65535)->nullable();
             $table->binary('notes', 65535)->nullable();
             $table->binary('tracking', 65535)->nullable();
