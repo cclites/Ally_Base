@@ -1,6 +1,10 @@
 <?php
 namespace App;
 
+use App\Billing\Payer;
+use App\Billing\Service;
+
+
 /**
  * App\BusinessChain
  *
@@ -45,7 +49,7 @@ class BusinessChain extends AuditableModel
 
     protected $table = 'business_chains';
     protected $guarded = ['id'];
-    protected $orderedColumn = 'id';
+    protected $orderedColumn = 'name';
 
     ////////////////////////////////////
     //// Static Methods
@@ -96,6 +100,26 @@ class BusinessChain extends AuditableModel
     public function statusAliases()
     {
         return $this->hasMany(StatusAlias::class, 'chain_id')->orderBy('name');
+    }
+
+    /**
+     * Get the Payers relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function payers()
+    {
+        return $this->hasMany(Payer::class, 'chain_id');
+    }
+
+    /**
+     * Get the Services relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'chain_id');
     }
 
     ////////////////////////////////////

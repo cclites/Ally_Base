@@ -2,7 +2,7 @@
 namespace App\Reports;
 
 use App\Shift;
-use App\Payment;
+use App\Billing\Payment;
 
 class ActiveClientsReport extends BusinessResourceReport
 {

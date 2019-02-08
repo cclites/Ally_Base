@@ -6,9 +6,9 @@ use App\Business;
 use App\Businesses\Timezone;
 use App\Caregiver;
 use App\Client;
-use App\Deposit;
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -55,6 +55,7 @@ class ImportShiftReconciliation extends Command
      */
     public function handle()
     {
+        exit('This command is not compatible with new shift properties.');
         $objPHPExcel = $this->loadFile();
 
         $this->importShifts();

@@ -115,10 +115,10 @@ class CaregiverApplicationStoreRequest extends FormRequest
         $data = $this->validated();
 
         // Handle arrays
-        $data['preferred_days'] = count($data['preferred_days']) ? implode(',', $data['preferred_days']) : '';
-        $data['preferred_times'] = count($data['preferred_times']) ? implode(',', $data['preferred_times']) : '';
-        $data['preferred_shift_length'] = count($data['preferred_shift_length']) ? implode(',', $data['preferred_shift_length']) : '';
-        $data['heard_about'] = count($data['heard_about']) ? implode(',', $data['heard_about']) : '';
+        $data['preferred_days'] = is_array($data['preferred_days']) ? implode(',', $data['preferred_days']) : '';
+        $data['preferred_times'] = is_array($data['preferred_times']) ? implode(',', $data['preferred_times']) : '';
+        $data['preferred_shift_length'] = is_array($data['preferred_shift_length']) ? implode(',', $data['preferred_shift_length']) : '';
+        $data['heard_about'] = is_array($data['heard_about']) ? implode(',', $data['heard_about']) : '';
 
         // Handle dates
         $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);

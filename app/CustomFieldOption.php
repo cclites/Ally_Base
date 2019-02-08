@@ -67,7 +67,7 @@ class CustomFieldOption extends Model
     /**
      * Get the custom dropdown field that this option belongs to
      *
-     * @return \App\CustomField
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function field()
     {
