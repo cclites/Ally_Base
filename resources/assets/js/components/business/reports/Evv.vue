@@ -86,13 +86,6 @@
                 :sort-desc.sync="sortDesc"
                 :filter="filter"
             >
-                <template slot="checked_in_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_in_distance) }}
-                </template>
-
-                <template slot="checked_out_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_out_distance) }}
-                </template>
             </b-table>
         </div>
     </b-card>
@@ -244,6 +237,12 @@
                                     item.checked_out_distance = 'Unknown'; // Usually an address issue
                                 }
                             }
+                            if (item.checked_in_distance == null) {
+                                item.checked_in_distance = 'No EVV Data';
+                            }
+                            if (item.checked_out_distance == null) {
+                                item.checked_out_distance = 'No EVV Data';
+                            }
 
                             return item;
                         });
@@ -261,6 +260,12 @@
             },
 
             distanceFormat(val) {
+                if (isNaN(val)) {
+                    return val;
+                }
+
+                val = this.convertToMiles(val);
+
                 return (val === 0) ? '<1' : val;
             }
         }
