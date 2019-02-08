@@ -43,8 +43,8 @@
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
                     <b-form-group label="Case Manager" label-for="case_manager">
-                        <b-form-select 
-                                v-model="form.case_manager_id" 
+                        <b-form-select
+                                v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
@@ -315,7 +315,18 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
                     <hr />
@@ -416,7 +427,11 @@
             'client': {},
             'lastStatusDate' : {},
             'confirmUrl': {},
-            'referralsources': {}
+            'referralsources': {},
+            salesPeople: {
+                type: Array,
+                required: true
+            }
         },
 
         mixins: [ClientForm, FormatsDates],
@@ -462,6 +477,7 @@
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updated_at,
                     receive_summary_email: this.client.receive_summary_email,
+                    sales_person_id: this.client.sales_person_id
                     status_alias_id: this.client.status_alias_id || '',
                 }),
                 preferences: new Form({

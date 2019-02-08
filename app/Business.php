@@ -209,7 +209,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     ];
 
     protected $appends = [];
-    
+
     /**
      * The "booting" method of the model.
      *
@@ -222,7 +222,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         static::creating(function ($model) {
             // populate settings defaults here because the change() method
             // on migration columns is not supported due to the business
-            // table having an enum column. 
+            // table having an enum column.
             $model->shift_confirmation_email = false;
             $model->allow_client_confirmations = false;
         });
@@ -418,9 +418,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(SmsThread::class);
     }
 
-    ///////////////////////////////////////////
-    /// Attributes
-    ///////////////////////////////////////////
+    public function salesPeople()
+    {
+        return $this->hasMany(SalesPerson::class);
+    }
 
     ///////////////////////////////////////////
     /// Other Methods

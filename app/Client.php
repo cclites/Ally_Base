@@ -283,6 +283,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'disaster_planning',
         'caregiver_1099',
         'case_manager_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
+        'sales_person_id',
     ];
 
     ///////////////////////////////////////////

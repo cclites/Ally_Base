@@ -162,6 +162,12 @@ Route::group([
     Route::resource('status-aliases', 'Business\StatusAliasController');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
+    Route::get('sales-people/{business}', 'Business\SalesPersonController@index')->name('sales-people.index');
+    Route::post('sales-people', 'Business\SalesPersonController@store')->name('sales-people.store');
+    Route::delete('sales-people/{salesPerson}', 'Business\SalesPersonController@destroy')->name('sales-people.destroy');
+    Route::put('sales-people/{salesPerson}', 'Business\SalesPersonController@update')->name('sales-people.update');
+
+
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
     Route::post('care-match/client-matches/{client}', 'Business\CareMatchController@clientMatch')->name('care-match.client-matches');
 

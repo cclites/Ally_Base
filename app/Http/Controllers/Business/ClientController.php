@@ -17,6 +17,7 @@ use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use App\Billing\Service;
@@ -212,7 +213,12 @@ class ClientController extends BaseController
         $auths = (new ClientAuthController())->listByClient($client->id);
         $invoices = $invoiceQuery->forClient($client->id)->get();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths', 'invoices'));
+        $salesPeople = SalesPerson::forRequestedBusinesses()
+            ->whereActive()
+            ->orWhere('id', $client->sales_person_id)
+            ->get();
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices'));
     }
 
     public function edit(Client $client)
