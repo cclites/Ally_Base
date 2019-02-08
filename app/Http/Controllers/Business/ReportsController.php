@@ -779,7 +779,9 @@ class ReportsController extends BaseController
             }])
             ->get();
         $ids = $clients->pluck('case_manager_id');
-        $caseManagers = OfficeUser::whereIn('id', $ids)->get();
+        $caseManagers = OfficeUser::forRequestedBusinesses()
+            ->whereIn('id', $ids)
+            ->get();
         return view('business.reports.case_manager', compact('caseManagers', 'clients'));
     }
 
