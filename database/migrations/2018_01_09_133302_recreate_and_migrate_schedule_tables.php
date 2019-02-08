@@ -95,8 +95,7 @@ class RecreateAndMigrateScheduleTables extends Migration
                 if ($start->format('Y-m-d') < $schedule->start_date) {
                     $start = new Carbon($schedule->start_date . ' ' . $schedule->time, $business->timezone);
                 }
-                $parser = new RuleParser();
-                $occurrences = $parser->setRule($start, $schedule->rrule)
+                $occurrences = RuleParser::create($start, $schedule->rrule)
                                       ->getOccurrencesBetween($start, $end, 400);
             }
 

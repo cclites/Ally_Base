@@ -1,12 +1,12 @@
 <template>
-    <b-card>
+    <b-card class="mt-5">
         <b-row>
-            <b-col lg="12">
+            <b-col lg="12" class="mt-3">
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
+                    <b-form inline @submit.prevent="loadItems()" class="mt-2">
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -55,7 +55,8 @@
                             <option value="0">Unverified</option>
                             <option value="1">Verified</option>
                         </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                        <br />
+                        <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -74,10 +75,10 @@
             </b-col>
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
-            <b-table 
+            <b-table
                 bordered
-                striped 
-                hover 
+                striped
+                hover
                 show-empty
                 :items="items"
                 :fields="fields"
@@ -98,12 +99,14 @@
 </template>
 
 <script>
-    import FormatsDistance from "../../../mixins/FormatsDistance";
+    import FormatsDistance from "../../../mixins/FormatsDistance"
+    import FormatsDates from '../../../mixins/FormatsDates'
 
     export default {
-        props: {},
-
-        mixins: [FormatsDistance],
+        mixins: [
+            FormatsDistance,
+            FormatsDates
+        ],
 
         data() {
             return {
@@ -205,12 +208,7 @@
             this.loadFilters();
         },
 
-        computed: {
-
-        },
-
         methods: {
-
             loadFilters() {
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
                 axios.get('/business/clients').then(response => this.clients = response.data);

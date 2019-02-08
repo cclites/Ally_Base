@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <admin-pending-charges></admin-pending-charges>
+    <admin-payments :chains="{{ $chains }}"></admin-payments>
 @endsection

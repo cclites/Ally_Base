@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Bug;
 
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Shift;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

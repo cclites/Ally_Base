@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverApplication;
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateCaregiverRequest;
@@ -220,7 +220,7 @@ class CaregiverController extends BaseController
         if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
             return new SuccessResponse('The caregiver has been re-activated.');
         }
-        return new ErrorResponse('Could not re-activate the selected caregiver.');
+        return new ErrorResponse(500, 'Could not re-activate the selected caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)

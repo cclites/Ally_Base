@@ -11,6 +11,7 @@ $factory->define(Address::class, function(Faker $faker) {
         'city' => $faker->city,
         'state' => $faker->randomElement(['CA', 'OH', 'NY', 'MI', 'PA', 'FL', 'TX', 'WA']),
         'country' => 'US',
-        'zip' => $faker->randomNumber(5)
+        'zip' => $faker->randomNumber(5),
+        'user_id' => 1, // Override this
     ];
 });
