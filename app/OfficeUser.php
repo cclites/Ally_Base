@@ -104,7 +104,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
         $builder->whereHas('businesses', function($q) use ($businessIds) {
-            $q->whereIn('id', $businessIds);
+            $q->whereIn('business_id', $businessIds);
         });
     }
 }
