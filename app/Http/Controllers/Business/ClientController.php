@@ -9,6 +9,7 @@ use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
+use App\Http\Requests\UpdateClientPOAContactRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
@@ -16,6 +17,7 @@ use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use App\Billing\Service;
@@ -44,6 +46,9 @@ class ClientController extends BaseController
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
                 $query->where('active', $request->input('active', 1));
+            }
+            if ($request->input('status') !== null) {
+                $query->where('status_alias_id', $request->input('status', null));
             }
             // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
@@ -165,17 +170,20 @@ class ClientController extends BaseController
             'payments',
             'payments.invoices',
             'user.documents',
+            'medications',
             'meta',
             'notes.creator',
             'careDetails',
             'carePlans',
             'caseManager',
+            'deactivationReason',
             'payers',
             'rates',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
-        ]);
+        ])
+        ->append('last_service_date');
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
@@ -205,7 +213,12 @@ class ClientController extends BaseController
         $auths = (new ClientAuthController())->listByClient($client->id);
         $invoices = $invoiceQuery->forClient($client->id)->get();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths', 'invoices'));
+        $salesPeople = SalesPerson::forRequestedBusinesses()
+            ->whereActive()
+            ->orWhere('id', $client->sales_person_id)
+            ->get();
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices'));
     }
 
     public function edit(Client $client)
@@ -258,13 +271,19 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
+        $data = request()->all();
+
         try {
-            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+            $data['inactive_at'] = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
         } catch (\Exception $ex) {
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
 
-        if ($client->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        if (request()->filled('reactivation_date')) {
+            $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
+        }
+
+        if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
@@ -401,6 +420,15 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    public function updateContacts(UpdateClientPOAContactRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $client->update($request->validated());
+
+        return new SuccessResponse('Client contacts updated.');
     }
 
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)

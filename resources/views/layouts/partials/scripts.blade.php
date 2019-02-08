@@ -8,9 +8,17 @@
 <!-- App Initial State -->
 <script>
     @if(is_office_user())
-        window.Store.commit('setBusinesses', @json(Auth::user()->officeUser->businesses));
+        window.Store.commit('setBusinesses', @json(
+            \App\Http\Resources\BusinessSettingsResource::collection(
+                Auth::user()->officeUser->businesses
+            )->toArray(request())
+        ));
     @elseif(is_admin())
-        window.Store.commit('setBusinesses', @json(\App\Business::all()));
+        window.Store.commit('setBusinesses', @json(
+            \App\Http\Resources\BusinessSettingsResource::collection(
+                \App\Business::all()
+            )->toArray(request())
+        ));
     @elseif(is_client())
         window.Store.commit('setBusinesses', @json(
             [(new \App\Http\Resources\BusinessSettingsResource(

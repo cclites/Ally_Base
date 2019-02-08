@@ -10,7 +10,7 @@ const getters = {
         return (state.businesses.length === 1) ? state.businesses[0] : {};
     },
     getBusiness(state) {
-        return id =>  getBusinessFromState(state, id);  // use as getBusiness(id)
+        return id => getBusinessFromState(state, id);  // use as getBusiness(id)
     }
 }
 
