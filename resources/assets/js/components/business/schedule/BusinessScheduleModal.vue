@@ -344,7 +344,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Care Match" button-id="care-match-tab">
+                    <b-tab title="Find a Caregiver with CareMatch" button-id="care-match-tab">
                         <business-care-match :clients="clients" :schedule="careMatchSchedule">
                             <template scope="row">
                                 <b-button size="sm" variant="info" @click="selectCaregiver(row.item.id)">Select Caregiver</b-button>
