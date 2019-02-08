@@ -59,7 +59,7 @@
             <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
+            <a data-toggle="tab" role="tab" href="#contact_list" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
@@ -93,7 +93,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
-                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#contact_list" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -211,9 +211,9 @@
                 </client-payment-history>
             </b-card>
         </div>
-        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
-                                    :user-id="{{ $client->id }}"></emergency-contacts-tab>
+        <div class="tab-pane" id="contact_list" role="tabpanel">
+            <contact-list-tab :emergency-contacts="{{ $client->user->emergencyContacts }}" :user-id="{{ $client->id }}"></contact-list-tab>
+            <emergency-contacts-tab :client="{{ $client }}"></emergency-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>

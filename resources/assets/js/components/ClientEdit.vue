@@ -258,63 +258,6 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <p class="h6">Power of Attorney</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="poa_first_name"
-                                      v-model="form.poa_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="poa_phone"
-                                      v-model="form.poa_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="poa_last_name"
-                                      v-model="form.poa_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Relationship">
-                        <b-form-input id="poa_relationship"
-                                      v-model="form.poa_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <p class="h6">Physician</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="dr_first_name"
-                                      v-model="form.dr_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="dr_phone"
-                                      v-model="form.dr_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="dr_last_name"
-                                      v-model="form.dr_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Fax">
-                        <b-form-input id="dr_fax"
-                                      v-model="form.dr_fax"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col>
                     <p class="h6">Preferences</p>
                     <hr>
                 </b-col>
@@ -519,14 +462,6 @@
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
-                    poa_first_name: this.client.poa_first_name,
-                    poa_last_name: this.client.poa_last_name,
-                    poa_phone: this.client.poa_phone,
-                    poa_relationship: this.client.poa_relationship,
-                    dr_first_name: this.client.dr_first_name,
-                    dr_last_name: this.client.dr_last_name,
-                    dr_phone: this.client.dr_phone,
-                    dr_fax: this.client.dr_fax,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
