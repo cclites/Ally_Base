@@ -253,7 +253,7 @@ class ScheduleController extends BaseController
         $schedule->update(['status' => request()->status]);
 
         // clear caregiver if open shift
-        if (in_array(request()->status, [Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT])) {
+        if (in_array(request()->status, [Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT])) {
             $schedule->update(['caregiver_id' => null]);
         }
 

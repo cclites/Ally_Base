@@ -61,7 +61,7 @@ class CreateScheduleRequest extends BusinessClientRequest
         $data = Arr::except($this->validated(), ['services', 'notes', 'group_update']);
 
         // unset caregiver on certain statuses
-        if (in_array($data['status'], [Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT])) {
+        if (in_array($data['status'], [Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT])) {
             $data['caregiver_id'] = null;
         }
 
