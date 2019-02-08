@@ -113,7 +113,7 @@
 
             items() {
                 const reports = [
-                    // For admin only 
+                    // For admin only
                     {
                         name: 'Unsettled Report',
                         url: 'reports/unsettled',
@@ -230,18 +230,18 @@
                         allowed: ['admin','office_user'],
                     },
 
-                    // For office users only 
+                    // For office users only
 
                     {
                         name: 'Client Directory',
-                        url: 'clients',
+                        url: 'reports/client-directory',
                         description: 'Shows the full list of clients',
                         category: 2,
                         allowed: ['office_user'],
                     },
                     {
                         name: 'Caregiver Directory',
-                        url: 'caregivers',
+                        url: 'reports/caregiver-directory',
                         description: 'Shows the full list of caregivers',
                         category: 3,
                         allowed: ['office_user'],
@@ -268,7 +268,7 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Caregiver Cert & License Expirations',
+                        name: 'Caregiver Expirations',
                         url: 'reports/certification_expirations',
                         description: 'See a list of caregivers with an expiring certification or license',
                         category: 3,
@@ -345,6 +345,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Case Managers',
+                        url: 'reports/case-manager',
+                        description: 'Shows all clients each case manager is assigned',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Overtime',
                         url: 'reports/overtime',
                         description: 'See what caregivers are at risk of overtime',
@@ -386,8 +393,15 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Projected Billing',
+                        url: 'reports/projected-billing',
+                        description: 'See forecasting billing amounts based on scheduled and completed visits',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
 
-                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },                        
+                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },
                     // { name: 'Client Progression Report', url: 'reports/', description: 'See how a client is progressing over time' },

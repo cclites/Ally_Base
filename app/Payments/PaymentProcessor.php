@@ -3,7 +3,7 @@ namespace App\Payments;
 
 use App\Business;
 use App\Contracts\PaymentAggregatorInterface;
-use App\Exceptions\PaymentMethodError;
+use App\Billing\Exceptions\PaymentMethodError;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
 

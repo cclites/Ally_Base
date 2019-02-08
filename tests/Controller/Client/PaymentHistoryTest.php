@@ -3,7 +3,7 @@
 namespace Tests\Controller\Client;
 
 use App\Client;
-use App\Payment;
+use App\Billing\Payment;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;

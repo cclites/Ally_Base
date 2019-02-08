@@ -90,7 +90,7 @@ class CustomField extends Model implements BelongsToChainsInterface
     /**
      * Get the business chain that this field was created for
      *
-     * @return \App\BusinessChain
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function businessChain()
     {
@@ -100,7 +100,7 @@ class CustomField extends Model implements BelongsToChainsInterface
     /**
      * Get the dropdown custom fields options associated with this field
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function options()
     {
@@ -110,7 +110,7 @@ class CustomField extends Model implements BelongsToChainsInterface
     /**
      * Get the value of the custom field for the caregivers who have set one
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function caregivers()
     {

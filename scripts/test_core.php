@@ -17,15 +17,26 @@ $appDir = base_path('app');
 $packageDir = base_path('packages');
 $vendorDir = base_path('vendor');
 
-$cmd = sprintf('find %s %s -type f -name \'*.php\' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )',
+$cmd = sprintf($vendorDir.'/bin/phplint',
     escapeshellarg($appDir), escapeshellarg($packageDir));
 
 $recursiveLint = new Process($cmd);
 $recursiveLint->run();
+echo($recursiveLint->getOutput() . "\n");
 if (!$recursiveLint->isSuccessful()) {
-    echo($recursiveLint->getOutput() . "\n");
     echo($recursiveLint->getErrorOutput() . "\n");
     exit(1);
+}
+
+$cmd = sprintf('php %s ide-helper:models -N -F .test_core_models.php',
+    escapeshellarg(base_path('artisan')));
+
+$ideHelper = new Process($cmd);
+$ideHelper->run();
+if (!$ideHelper->isSuccessful()) {
+    echo($ideHelper->getOutput() . "\n");
+    echo($ideHelper->getErrorOutput() . "\n");
+    exit(4);
 }
 
 $phpunitConfig = base_path('phpunit.xml');
@@ -39,7 +50,8 @@ $phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConf
 $phpunitCmds = [
     "$phpunit --testsuite Model",
     "$phpunit --testsuite Bugs",
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData/'",
+    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|RateFactory|ScheduleConverter|ScheduleCreator|ScheduleEditor|QueryTest/'", // core feature tests
+    "$phpunit --filter '/Payer|InvoiceTest|ClientRateTest|ApplyPaymentTest/'", // new billing tests (add invoice generators once done)
 ];
 
 foreach($phpunitCmds as $cmdline) {

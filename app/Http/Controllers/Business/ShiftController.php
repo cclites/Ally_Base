@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftController extends BaseController
 {
@@ -36,15 +37,12 @@ class ShiftController extends BaseController
      */
     public function store(UpdateShiftRequest $request)
     {
-        $data = $request->filtered();
-        $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-        $data['verified'] = false;
-
-        $this->authorize('create', [Shift::class, $data]);
+        $defaultStatus = Shift::WAITING_FOR_AUTHORIZATION;
+        $this->authorize('create', [Shift::class, $request->getShiftArray($defaultStatus)]);
 
         \DB::beginTransaction();
 
-        if ($shift = Shift::create($data)) {
+        if ($shift = $request->createShift($defaultStatus)) {
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
 
@@ -55,6 +53,9 @@ class ShiftController extends BaseController
             }
 
             \DB::commit();
+
+            event(new ShiftFlagsCouldChange($shift));
+            
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -68,7 +69,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
@@ -119,7 +120,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
-        $data = $request->filtered();
+        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
@@ -141,9 +142,11 @@ class ShiftController extends BaseController
 
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
-            $shift->syncGoals($request->goals);
+            $shift->syncGoals($request->getGoals());
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
+            $shift->syncServices($request->getServices());
 
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -212,49 +215,12 @@ class ShiftController extends BaseController
         return view('business.shifts.print', compact('shift', 'timezone'));
     }
 
-    public function convertSchedule(Request $request, Schedule $schedule)
-    {
-        $this->authorize('read', $schedule);
-
-        $request->validate([
-            'date' => 'required|date_format:Y-m-d',
-        ]);
-
-        $date = $request->input('date');
-
-        // Make sure schedule has proper assignments
-        if (!$schedule->caregiver_id) return new ErrorResponse(400, 'There is no caregiver assigned to this scheduled shift, cannot convert.');
-        if (!$schedule->client_id) return new ErrorResponse(400, 'There is no client assigned to this scheduled shift, cannot convert.');
-
-        $searchStart = (new Carbon($date, $this->business()->timezone))->setTime(0, 0, 0);
-        $searchEnd = $searchStart->copy()->addDay();
-        $occurrences = $schedule->getOccurrencesStartingBetween($searchStart, $searchEnd);
-
-        // Make sure 1 occurrence was found
-        if (count($occurrences) !== 1) return new ErrorResponse(400, 'Unable to match the schedule for conversion.');
-
-        // Create Shift
-        $start = Carbon::instance(current($occurrences))->setTimezone('UTC');
-        $shift = Shift::create([
-            'business_id' => $this->business()->id,
-            'caregiver_id' => $schedule->caregiver_id,
-            'client_id' => $schedule->client_id,
-            'checked_in_time' => $start,
-            'checked_out_time' => $start->copy()->addMinutes($schedule->duration),
-            'schedule_id' => $schedule->id,
-            'hours_type' => $schedule->hours_type,
-            'caregiver_rate' => $schedule->getCaregiverRate(),
-            'provider_fee' => $schedule->getProviderFee(),
-            'status' => Shift::WAITING_FOR_AUTHORIZATION,
-        ]);
-        return new CreatedResponse('The scheduled shift has been converted to an actual shift.', $shift->toArray());
-    }
-
     public function duplicate(Shift $shift)
     {
         $this->authorize('read', $shift);
 
         // Duplicate an existing shift and advance one day
+        /** @var Shift $shift */
         $shift = $shift->replicate();
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
@@ -264,6 +230,8 @@ class ShiftController extends BaseController
         $checked_out_distance = null;
         $activities = $shift->business->allActivities();
 
+        event(new ShiftFlagsCouldChange($shift));
+
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
     }
@@ -272,7 +240,7 @@ class ShiftController extends BaseController
      * Handles manual clock out of shift for office users.
      *
      * @param Shift $shift
-     * @return void
+     * @return \Illuminate\Http\Response
      */
     public function officeClockOut(Shift $shift)
     {
@@ -297,6 +265,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
+            event (new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('Shift was successfully clocked out.');
         }
 

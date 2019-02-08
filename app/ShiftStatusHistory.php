@@ -17,6 +17,7 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory whereShiftId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \App\Shift $shift
  */
 class ShiftStatusHistory extends AuditableModel
 {

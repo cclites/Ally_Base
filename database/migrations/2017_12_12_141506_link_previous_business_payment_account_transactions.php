@@ -1,7 +1,7 @@
 <?php
 
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 use Illuminate\Database\Migrations\Migration;
 
 class LinkPreviousBusinessPaymentAccountTransactions extends Migration
@@ -69,7 +69,7 @@ class LinkPreviousBusinessPaymentAccountTransactions extends Migration
         $cacheKey = 'tmp_transaction_' . $transaction->id;
         if (!Cache::has($cacheKey)) {
             usleep(50000);
-            $query = new \App\Gateway\ECSQuery();
+            $query = new \App\Billing\Gateway\ECSQuery();
             $result = $query->find($transaction->transaction_id);
             if (!$result) {
                 return false;

@@ -2,7 +2,12 @@
         @if (config('app.env') == 'staging')
         style="background:#ce4747;"
         @endif
-        class="topbar">
+        @if(is_mobile_app() && is_ios())
+            class="topbar extra-top-pad"
+        @else
+            class="topbar"
+        @endif
+    >
     <nav class="navbar top-navbar navbar-expand-md navbar-light">
         <div class="navbar-collapse">
             <!-- ============================================================== -->

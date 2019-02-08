@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Responses\ErrorResponse;
 
 class TransactionController extends BaseController
