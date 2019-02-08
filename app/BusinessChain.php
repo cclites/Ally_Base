@@ -117,6 +117,65 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(Service::class, 'chain_id');
     }
 
+    /**
+     * Get the chain's deactivation reasons relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function deactivationReasons()
+    {
+        return $this->hasMany(DeactivationReason::class, 'chain_id')
+            ->ordered();
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    /**
+     * Get all deactivation reasons including factory defaults.
+     *
+     * @return mixed
+     */
+    public function getAllDeactivationReasonsAttribute()
+    {
+        return $this->deactivationReasons
+            ->merge(DeactivationReason::whereNull('chain_id')->get())
+            ->values();
+    }
+
+    /**
+     * Get the Client deactivation reasons.
+     *
+     * @return mixed
+     */
+    public function getClientDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('chain_id')
+            ->where('type', 'client')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'client')
+                ->get())
+            ->values();
+    }
+
+    /**
+     * Get the Caregiver deactivation reasons.
+     *
+     * @return mixed
+     */
+    public function getCaregiverDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('chain_id')
+            ->where('type', 'caregiver')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'caregiver')
+                ->get())
+            ->values();
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

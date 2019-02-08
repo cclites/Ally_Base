@@ -163,6 +163,7 @@ Vue.component('business-scheduled-payments', require('./components/business/repo
 Vue.component('business-schedule', require('./components/business/schedule/BusinessSchedule.vue'));
 Vue.component('business-schedule-modal', require('./components/business/schedule/BusinessScheduleModal'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
+Vue.component('deactivation-reason-manager', require('./components/business/modals/DeactivationReasonManager'));
 Vue.component('custom-field-form', require('./components/business/custom_fields/CustomFieldForm.vue'));
 Vue.component('custom-field-list', require('./components/business/custom_fields/CustomFieldList'));
 Vue.component('custom-field-edit', require('./components/business/custom_fields/CustomFieldEdit.vue'));

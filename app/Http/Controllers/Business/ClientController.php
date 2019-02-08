@@ -172,12 +172,14 @@ class ClientController extends BaseController
             'careDetails',
             'carePlans',
             'caseManager',
+            'deactivationReason',
             'payers',
             'rates',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
-        ]);
+        ])
+        ->append('last_service_date');
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
@@ -260,13 +262,19 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
+        $data = request()->all();
+
         try {
-            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+            $data['inactive_at'] = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
         } catch (\Exception $ex) {
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
 
-        if ($client->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        if (request()->filled('reactivation_date')) {
+            $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
+        }
+
+        if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }

@@ -110,7 +110,7 @@
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
-                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
+                    <b-button variant="danger" @click="$refs.deactivateCaregiverModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
                     <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                 </b-col>
             </b-row>
@@ -119,36 +119,7 @@
         <reset-password-modal v-model="passwordModal" :url="'/business/caregivers/' + this.caregiver.id + '/password'"></reset-password-modal>
         <send-welcome-email-modal v-model="welcomeEmailModal" :user='caregiver' :url="'/business/caregivers/' + this.caregiver.id + '/send_confirmation_email'"></send-welcome-email-modal>
 
-        <b-modal id="deactivateModal"
-                 title="Are you sure?"
-                 v-model="deactivateModal"
-                 ok-title="OK">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12" class="text-center">
-                        <div class="mb-3">Are you sure you wish to archive {{ this.caregiver.name }}?</div>
-                        <div v-if="caregiver.future_schedules > 0">All <span class="text-danger">{{ this.caregiver.future_schedules }}</span> of their future scheduled shifts will be unassigned.</div>
-                        <div v-else>They have no future scheduled shifts.</div>
-                        
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
-                            <date-picker
-                                class="w-50 mx-auto"
-                                v-model="inactive_at"
-                                id="inactive_at"
-                                placeholder="Inactive Date">
-                            </date-picker>
-                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
-                        </b-form-group>
-                        
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn v-if="caregiver.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveCaregiver">Yes - Unassign Future Schedules</b-btn>
-                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveCaregiver">Yes</b-btn>
-               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <deactivate-caregiver-modal :caregiver="caregiver" ref="deactivateCaregiverModal"></deactivate-caregiver-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -160,9 +131,15 @@
 </template>
 
 <script>
+    import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
+
     export default {
         props: {
             'caregiver': {},
+        },
+
+        components: {
+          DeactivateCaregiverModal
         },
 
         data() {
@@ -184,9 +161,7 @@
                 passwordModal: false,
                 welcomeEmailModal: false,
                 active: this.caregiver.active,
-                deactivateModal: false,
                 activateModal: false,
-                inactive_at: '',
             }
         },
 
@@ -204,11 +179,6 @@
                         this.form.email = null;
                     }
                 }
-            },
-
-            archiveCaregiver() {
-                let form = new Form();
-                form.submit('delete', `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}`);
             },
 
             reactivateCaregiver() {

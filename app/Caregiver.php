@@ -163,6 +163,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'hourly_rate_id',
         'fixed_rate_id',
         'referral_source_id',
+        'deactivation_note'
     ];
     protected $appends = ['masked_ssn'];
 
@@ -399,7 +400,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Unassign all Caregiver's schedules from now on. 
+     * Unassign all Caregiver's schedules from now on.
      *
      * @return void
      */

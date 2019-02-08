@@ -270,6 +270,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'qb_customer_id',
         'hourly_rate_id',
         'fixed_rate_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
         'hic',
         'travel_directions',
         'created_by',
@@ -468,7 +473,10 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->getAllyPercentage();
     }
 
-
+    public function getLastServiceDateAttribute()
+    {
+        return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
+    }
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////

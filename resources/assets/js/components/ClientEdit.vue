@@ -364,45 +364,18 @@
                 <b-col lg="12">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
-                    <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                    <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
+                    <template v-else>
+                        <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                        <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
+                    </template>
                 </b-col>
             </b-row>
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
 
-        <b-modal id="deactivateModal"
-                 title="Are you sure?"
-                 v-model="deactivateModal"
-                 ok-title="OK">
-
-            <b-container>
-                <b-row>
-                    <b-col lg="12" class="text-center">
-                        <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
-                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
-                        <div v-else>They have no future scheduled shifts.</div>
-
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
-                            <date-picker
-                                class="w-50 mx-auto"
-                                v-model="inactive_at"
-                                id="inactive_at"
-                                placeholder="Inactive Date">
-                            </date-picker>
-                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
-                        </b-form-group>
-
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn v-if="client.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveClient">Yes - Delete Future Schedules</b-btn>
-                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveClient">Yes</b-btn>
-               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <deactivate-client-modal :client="client" ref="deactivateClientModal"></deactivate-client-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -411,12 +384,13 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <business-referral-source-modal 
+        <business-referral-source-modal
             @saved="savedReferralSource"
             v-model="showReferralModal"
             :source="{}"
             source-type="client"
         ></business-referral-source-modal>
+        <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
     </b-card>
 </template>
 
@@ -426,6 +400,9 @@
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from './business/BusinessLocationSelect'
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import DeactivateClientModal from './modals/DeactivateClientModal';
+    import DischargeSummaryModal from './modals/DischargeSummaryModal'
+
     window.croppie = require('croppie');
 
     export default {
@@ -442,6 +419,8 @@
             BusinessLocationFormGroup,
             DatePicker,
             BusinessLocationSelect,
+            DeactivateClientModal,
+            DischargeSummaryModal
         },
 
         data() {
@@ -487,7 +466,6 @@
                 active: this.client.active,
                 deactivateModal: false,
                 activateModal: false,
-                inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
             }
@@ -522,11 +500,6 @@
                 }
             },
 
-            archiveClient() {
-                let form = new Form();
-                form.submit('delete', `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}`);
-            },
-
             reactivateClient() {
                 let form = new Form();
                 form.post('/business/clients/' + this.client.id + '/reactivate')
@@ -554,7 +527,6 @@
                         component.lastStatusDate = moment.utc().format();
                     });
             }
-
         },
 
         computed: {

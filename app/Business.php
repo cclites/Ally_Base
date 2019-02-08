@@ -208,6 +208,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         'unpaired_pay_rates' => 'json',
     ];
 
+    protected $appends = [];
+    
     /**
      * The "booting" method of the model.
      *
@@ -415,7 +417,11 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         return $this->hasMany(SmsThread::class);
     }
-    
+
+    ///////////////////////////////////////////
+    /// Attributes
+    ///////////////////////////////////////////
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
