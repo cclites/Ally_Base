@@ -331,7 +331,7 @@
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                                     </b-form-select>
                                 </b-form-group>
-                                <b-form-group label="Schedule Notes" label-for="notes">
+                                <b-form-group label="Add a note for the Caregiver to see" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
                                             name="notes"
@@ -339,7 +339,7 @@
                                             v-model="form.notes"
                                     >
                                     </b-form-textarea>
-                                    <input-help :form="form" field="notes" text="Enter any notes relating to this scheduled shift." />
+                                    <input-help :form="form" field="notes" text="Note will be visible to Caregiver when clocking in on the Ally mobile app." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
