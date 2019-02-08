@@ -919,7 +919,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemNotes(): ?string
     {
-        return null;
+        if (empty($this->activities)) {
+            return null;
+        }
+
+        return $this->activities->implode('name', ', ');
     }
 
     /**
