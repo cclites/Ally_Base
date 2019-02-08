@@ -345,6 +345,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Case Managers',
+                        url: 'reports/case-manager',
+                        description: 'Shows all clients each case manager is assigned',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Overtime',
                         url: 'reports/overtime',
                         description: 'See what caregivers are at risk of overtime',

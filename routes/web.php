@@ -9,7 +9,7 @@
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+*/  
 
 //Auth::loginUsingId(2);
 
@@ -270,6 +270,7 @@ Route::group([
     Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
     Route::post('reports/claims-report', 'Business\ClaimController@data');
     Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
+    Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
     Route::get('reports/referral-sources', 'Business\ReportsController@referralSources')->name('reports.referral_sources');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
