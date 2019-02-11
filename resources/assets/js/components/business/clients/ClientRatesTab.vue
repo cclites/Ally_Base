@@ -42,7 +42,7 @@
                      class="table-fit-more"
             >
                 <template slot="caregiver_id" scope="row">
-                    {{ getCaregiverName(row.item.caregiver_id) }}
+                    {{ row.item.caregiver_name }}
                     <!-- <b-select v-model="row.item.caregiver_id" size="sm">
                         <option :value="null">(All)</option>
                         <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
@@ -286,11 +286,11 @@
                 totalRows: 0,
                 perPage: 30,
                 currentPage: 1,
-                sortBy: 'service.name',
+                sortBy: 'caregiver_name',
                 sortDesc: false,
                 fields: [
                     {
-                        key: 'caregiver_id',
+                        key: 'caregiver_name',
                         label: 'Caregiver',
                         sortable: true
                     },
@@ -421,6 +421,7 @@
             addRate(rateObject={}) {
                 this.addNewCaregiver = false;
                 this.items.push({
+                    caregiver_name: this.getCaregiverName(rateObject.caregiver_id),
                     service_id: rateObject.service_id || null,
                     payer_id: rateObject.payer_id || null,
                     caregiver_id: rateObject.caregiver_id ||null,
@@ -453,18 +454,19 @@
                 }
             },
 
-            saveRates() {
+            async saveRates() {
                 let form = new Form({
-                    rates: this.items,
+                    rates: this.items.map(x => { delete x.caregiver_name; return x; }),
                 });
                 form.patch(`/business/clients/${this.client.id}/rates`)
-                    .then( ({ data }) => {
+                    .then( async ({ data }) => {
+                        await this.fetchAssignedCaregivers();
                         this.setItems(data.data);
                     })
                     .catch(e => {
+                        this.fetchAssignedCaregivers();
                     })
                     .finally(() => {
-                        this.fetchAssignedCaregivers();
                         this.fetchOtherCaregivers();
                     })
             },
@@ -540,6 +542,7 @@
             setItems(data) {
                 if (data) {
                     this.items = data.map(x => {
+                        x.caregiver_name = this.getCaregiverName(x.caregiver_id);
                         x.caregiver_hourly_rate = parseFloat(x.caregiver_hourly_rate).toFixed(2);
                         x.caregiver_fixed_rate = parseFloat(x.caregiver_fixed_rate).toFixed(2);
                         x.client_hourly_rate = parseFloat(x.client_hourly_rate).toFixed(2);
@@ -663,12 +666,12 @@
                     return cg.name;
                 }
 
-                return 'All';
+                return '(All)';
             },
         },
 
-        mounted() {
-            this.fetchAssignedCaregivers();
+        async mounted() {
+            await this.fetchAssignedCaregivers();
             this.fetchExcludedCaregivers();
             this.fetchServices();
             this.fetchPayers();
