@@ -41,7 +41,7 @@ class ShiftFactory implements Arrayable
         ?Carbon $clockOutTime = null,
         ?string $currentStatus = null,
         ?Service $service = null,
-        ?ClientPayer $clientPayer = null
+        ?Payer $payer = null
     ): self
     {
         return new self([
@@ -49,7 +49,7 @@ class ShiftFactory implements Arrayable
             'caregiver_id'      => $caregiver->id,
             'client_id'         => $client->id,
             'service_id'        => $service ? $service->id : self::getDefaultServiceId($client),
-            'client_payer_id'   => $clientPayer->id ?? null,
+            'payer_id'          => $payer->id ?? null,
             'checked_in_method' => $clockInMethod,
             'checked_in_time'   => $clockInTime->setTimezone('UTC'),
             'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
@@ -71,23 +71,13 @@ class ShiftFactory implements Arrayable
         ?string $currentStatus = null
     ): self
     {
-        if ($schedule->payer_id) {
-            $client = $schedule->client;
-            $date = $clockInTime->setTimezone($client->getTimezone())->toDateString();
-            $clientPayer = $client->getPayers($date)
-                ->where('payer_id', $schedule->payer_id)
-                ->first();
-
-            // TODO: Send notification / system exception if matching client payer isn't found
-        }
-
         $self = new self([
             'schedule_id'       => $schedule->id,
             'business_id'       => $schedule->business_id,
             'caregiver_id'      => $schedule->caregiver_id,
             'client_id'         => $schedule->client_id,
             'service_id'        => $schedule->service_id,
-            'client_payer_id'   => $clientPayer->id ?? null,
+            'payer_id'          => $schedule->payer_id,
             'checked_in_method' => $clockInMethod,
             'checked_in_time'   => $clockInTime->setTimezone('UTC'),
             'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
@@ -128,6 +118,10 @@ class ShiftFactory implements Arrayable
         return $this;
     }
 
+    /**
+     * @param \App\Billing\Invoiceable\ShiftService[] $services
+     * @return \App\Shifts\ShiftFactory
+     */
     public function withServices(array $services): self
     {
         $this->services = $services;

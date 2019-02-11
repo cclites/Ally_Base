@@ -4,11 +4,11 @@ namespace App;
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\ClientPayer;
 use App\Billing\Deposit;
 use App\Billing\Invoiceable\InvoiceableModel;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Queries\InvoiceableQuery;
 use App\Billing\Service;
@@ -382,9 +382,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftExpense::class);
     }
 
-    public function clientPayer()
+    public function payer()
     {
-        return $this->belongsTo(ClientPayer::class);
+        return $this->belongsTo(Payer::class);
     }
 
     public function service()
@@ -948,16 +948,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
-    }
-
-    /**
-     * Get the client payer record
-     *
-     * @return \App\Billing\ClientPayer|null
-     */
-    public function getClientPayer(): ?ClientPayer
-    {
-        return $this->clientPayer;
     }
 
     /**

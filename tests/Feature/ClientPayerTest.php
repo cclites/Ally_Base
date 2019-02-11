@@ -208,4 +208,16 @@ class ClientPayerTest extends TestCase
         $this->assertEquals('2019-02-12 23:59:59', $dailyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
         $this->assertNull($balancePayer->getAllowanceRange('2019-02-12'));
     }
+
+    /**
+     * @test
+     */
+    function two_of_the_same_payer_that_overlap_is_invalid()
+    {
+        $clientPayerA = $this->createPayer('balance', ['effective_start' => '2019-01-01', 'effective_end' => '2021-12-31']);
+        $this->createPayer('manual', ['payer_id' => $clientPayerA->payer_id, 'effective_start' => '2020-01-01']);
+
+        $this->assertFalse($this->validate());
+    }
+
 }

@@ -74,6 +74,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     const ALLOCATION_MONTHLY = 'monthly';
     const ALLOCATION_DAILY = 'daily';
     const ALLOCATION_SPLIT = 'split';
+    const ALLOCATION_MANUAL = 'manual';
 
     /**
      * @var string[]
@@ -84,6 +85,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         self::ALLOCATION_MONTHLY,
         self::ALLOCATION_DAILY,
         self::ALLOCATION_SPLIT,
+        self::ALLOCATION_MANUAL,
     ];
 
 
@@ -259,6 +261,14 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     function isSplitType(): bool
     {
         return $this->payment_allocation === self::ALLOCATION_SPLIT;
+    }
+
+    /**
+     * @return bool
+     */
+    function isManualType(): bool
+    {
+        return $this->payment_allocation === self::ALLOCATION_MANUAL;
     }
 
     /**
