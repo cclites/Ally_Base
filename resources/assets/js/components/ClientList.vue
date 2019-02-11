@@ -188,30 +188,6 @@
 
                 return `/business/clients?json=1&address=1&businesses[]=${this.business_id}&active=${active}&status=${aliasId}&client_type=${client_type}`;
             },
-
-            items() {
-                const {search, active} = this.filters;
-                let simpleMatches = ['client_type', 'business_id'];
-                let results = this.clients;
-                
-                simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
-                results = results.filter((client) => {
-                    const val = simpleMatches.every(key => client[key] == this.filters[key])
-                    debugger;
-                    return val;
-                });
-                
-                if(active === 1 || active === 0) {
-                    results = results.filter((client) => client.active == active);
-                } 
-
-                if(caseManager) {
-                    results = results.filter((client) => client.case_manager_id === caseManager);
-                }
-
-                return results;
-            },
-
         },
 
         methods: {
