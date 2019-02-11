@@ -127,8 +127,8 @@
                                             <small class="form-text text-muted">The total hourly rate charged to the client.</small>
                                         </b-form-group>
                                     </b-tab>
-                                    <b-tab title="Daily Rates (Live-in)" class="pt-3">
-                                        <b-form-group label="Caregiver Daily Rate" label-for="caregiver_fixed">
+                                    <b-tab title="Fixed/Daily Rates (Live-in)" class="pt-3">
+                                        <b-form-group label="Caregiver Fixed/Daily Rate" label-for="caregiver_fixed">
                                             <b-form-input
                                                     id="caregiver_fixed"
                                                     name="caregiver_fixed"
@@ -141,7 +141,7 @@
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the daily earnings for this caregiver.</small>
                                         </b-form-group>
-                                        <b-form-group label="Registry Daily Fee" label-for="provider_fixed">
+                                        <b-form-group label="Registry Fixed/Daily Fee" label-for="provider_fixed">
                                             <b-form-input
                                                     id="provider_fixed"
                                                     name="provider_fixed"
@@ -154,7 +154,7 @@
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the registry daily fee.</small>
                                         </b-form-group>
-                                        <b-form-group label="Ally Daily Fee" label-for="ally_fixed">
+                                        <b-form-group label="Ally Fixed/Daily Fee" label-for="ally_fixed">
                                             <b-form-input
                                                     id="ally_fixed"
                                                     name="ally_fixed"
@@ -166,7 +166,7 @@
                                             >
                                             </b-form-input>
                                         </b-form-group>
-                                        <b-form-group label="Total Daily Rate" label-for="total_fixed">
+                                        <b-form-group label="Total Fixed/Daily Rate" label-for="total_fixed">
                                             <b-form-input
                                                     id="total_fixed"
                                                     name="total_fixed"

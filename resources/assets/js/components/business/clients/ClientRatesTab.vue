@@ -334,21 +334,21 @@
                     },
                     {
                         key: 'client_fixed_rate',
-                        label: 'Client Fixed Rate',
+                        label: 'Client Fixed/Daily Rate',
                         sortable: true,
                     },
                     {
                         key: 'caregiver_fixed_rate',
-                        label: 'CG Fixed Rate',
+                        label: 'CG Fixed/Daily Rate',
                         sortable: true,
                     },
                     {
                         key: 'provider_fixed_fee',
-                        label: 'Provider Fixed Fee*'
+                        label: 'Provider Fixed/Daily Fee*'
                     },
                     {
                         key: 'ally_fixed_fee',
-                        label: 'Ally Fixed Fee*'
+                        label: 'Ally Fixed/Daily Fee*'
                     },
                     {
                         key: 'actions',
