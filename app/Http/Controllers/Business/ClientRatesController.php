@@ -52,6 +52,13 @@ class ClientRatesController extends Controller
             if (! empty($caregivers)) {
                 $client->caregivers()->syncWithoutDetaching($caregivers);
             }
+
+            // Unassign any caregivers that do not have set rates
+            $unassignIds = $client->caregivers()
+                ->whereNotIn('caregiver_id', $caregivers)
+                ->get()
+                ->pluck('id');
+            $client->caregivers()->detach($unassignIds);
     
             if ($client->syncRates($data['rates'])) {
                 $validator = new ClientRateValidator();
