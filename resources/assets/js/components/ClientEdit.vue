@@ -68,15 +68,18 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
                         <b-row>
                             <b-col cols="8">
                                 <b-form-input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        v-model="form.email"
-                                        :disabled="form.no_email"
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    @blur.native="form.username = $event.target.value"
+                                    v-model="form.email"
+                                    :disabled="form.no_email"
                                 >
                                 </b-form-input>
                             </b-col>
@@ -94,8 +97,6 @@
                         <input-help :form="form" field="email"
                                     text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
-                </b-col>
-                <b-col lg="6">
                     <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
@@ -147,9 +148,11 @@
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
 
-                    <b-form-group>
+                    <b-form-group class="mb-2">
                         <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
-                        <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+                        <div class="d-flex justify-content-end">
+                            <input-help :form="form" field="referred_by" text="Enter how the prospect was referred."/>
+                        </div>
                     </b-form-group>
 
                     <b-form-group>
@@ -161,14 +164,7 @@
                         </b-form-checkbox>
                     </b-form-group>
 
-                    <b-form-group>
-                        <b-form-checkbox id="caregiver_1099"
-                                         v-model="form.caregiver_1099"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Send 1099 to caregivers on the client’s behalf
-                        </b-form-checkbox>
-                    </b-form-group>
+
 
                     <b-form-group v-if="businessSendsSummaryEmails">
                         <div class="form-check">
@@ -378,6 +374,18 @@
                 </b-col>
             </b-row>
             <b-row>
+                <b-col>
+                    <b-form-group>
+                        <b-form-checkbox id="caregiver_1099"
+                                         v-model="form.caregiver_1099"
+                                         :value="true"
+                                         :unchecked-value="false">
+                            Send 1099 to caregivers on the client’s behalf
+                        </b-form-checkbox>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="12">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
@@ -473,9 +481,9 @@
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
-                    created_at: this.client.created_at,
+                    created_at: this.formatDateTime(this.client.created_at.date),
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
-                    modified_at: this.client.updated_at,
+                    modified_at: this.formatDateTime(this.client.updated_at.date),
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',

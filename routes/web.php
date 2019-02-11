@@ -106,6 +106,7 @@ Route::group([
     Route::patch('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@update')->name('caregivers.clients.narrative.update');
     Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
     Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
+    Route::get('caregiver/schedules/{client}/adjoining', 'Caregivers\ClientController@adjoiningSchedules')->name('clients.schedules.adjoining');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
@@ -116,6 +117,7 @@ Route::group([
     Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
     Route::get('clocked-in', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
     Route::get('clock-out', 'Caregivers\ShiftController@showClockOut')->name('clock_out');
+    Route::get('clock-out/{client_id}', 'Caregivers\ShiftController@showClockOutForClient')->name('clock_out_by_client');
     Route::post('clock-out', 'Caregivers\ShiftController@clockOut');
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
 

@@ -5,6 +5,7 @@ use App\Billing\Payer;
 use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
+use App\Rules\ValidEffectivePayer;
 use App\Shift;
 use App\Shifts\Data\ClockOutData;
 use App\Shifts\ShiftFactory;
@@ -34,7 +35,10 @@ class UpdateShiftRequest extends BusinessClientRequest
             'caregiver_rate' => 'nullable|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
             'hours_type' => 'required|in:default,overtime,holiday',
             'service_id' => 'nullable|exists:services,id',
-            'payer_id' => 'nullable|exists:payers,id',
+            'payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('checked_in_time')))
+            ],
             'issues.id' => 'nullable|numeric',
             'issues.caregiver_injury' => 'boolean',
             'issues.client_injury' => 'boolean',
@@ -43,7 +47,10 @@ class UpdateShiftRequest extends BusinessClientRequest
             'services' => 'array|required_without:service_id',
             'services.*.id' => 'nullable|exists:schedule_services,id',
             'services.*.service_id' => 'required_with:services|exists:services,id',
-            'services.*.payer_id' => 'nullable|exists:payers,id',
+            'services.*.payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('checked_in_time')))
+            ],
             'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',

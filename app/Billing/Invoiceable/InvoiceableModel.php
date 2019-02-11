@@ -89,7 +89,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      */
     public function getPayerId(): ?int
     {
-        return $this->getClientPayer()->payer_id ?? null;
+        return $this->payer_id ?? null;
     }
 
     /**

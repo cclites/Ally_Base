@@ -19,13 +19,13 @@
             </div>
         @endif
         <div class="col-lg-6">
-            <clock-out 
-                :shift="{{ $shift }}" 
-                :activities="{{ $activities }}" 
-                :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" 
-                :business="{{ $business }}" 
-                :questions="{{ $questions }}"
-                :goals="{{ $goals }}"
+            <clock-out
+                    :shift="{{ $shift }}"
+                    :activities="{{ $activities }}"
+                    :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"
+                    :business="{{ $business }}"
+                    :questions="{{ $questions }}"
+                    :goals="{{ $goals }}"
             />
         </div>
         <div class="col-lg-6">
@@ -41,9 +41,10 @@
                     </div>
                 </div>
             @endif
-
+            <adjoining-caregivers-card client="{{ $shift->client->id }}" shift="{{ $shift->id }}" :auto-load="true"></adjoining-caregivers-card>
             @if(config('services.gmaps.key') && $shift->verified)
-                <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ config('services.gmaps.key') }}"></iframe>
+                <iframe width="100%" height="450" frameborder="0" style="border:0"
+                        src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ config('services.gmaps.key') }}"></iframe>
             @endif
         </div>
     </div>

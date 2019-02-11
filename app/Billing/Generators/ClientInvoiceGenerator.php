@@ -7,6 +7,7 @@ use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\BaseInvoiceItem;
+use App\Billing\Payer;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Billing\ClientPayer;
@@ -227,6 +228,9 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             if ($invoiceable->getPayerId() !== null && $invoiceable->getPayerId() !== $clientPayer->payer_id) {
                 continue;
             }
+            if ($invoiceable->getPayerId() === null && $clientPayer->isManualType()) {
+                continue;
+            }
             // Get invoiceable item data
             $allowance = $this->getPayerAllowance($clientPayer, $invoiceable->getItemDate());
             $clientRate = $this->getClientRate($clientPayer, $invoiceable);
@@ -251,6 +255,16 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         }
 
         if ($invoiceable->getAmountDue() > 0.0) {
+            if ($invoiceable->getPayerId()) {
+                $identifier = get_class($invoiceable) . ':' . $invoiceable->id ?? '';
+                $assignedPayer = Payer::find($invoiceable->getPayerId());
+                if (!$assignedPayer) {
+                    throw new InvalidClientPayers("Invoiceable $identifier was added to an unknown payer.");
+                }
+                $payerName = $assignedPayer->name();
+                throw new InvalidClientPayers("Invoiceable $identifier was added to $payerName but this payer is not available for this client.");
+            }
+
             throw new InvalidClientPayers('Unable to assign invoiceable due to an invalid client structure for client ' . $client->id . '.');
         }
     }

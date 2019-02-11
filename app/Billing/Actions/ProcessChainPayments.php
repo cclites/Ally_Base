@@ -99,7 +99,11 @@ class ProcessChainPayments
      */
     function getInvoices(BusinessChain $chain): Collection
     {
-        return $this->invoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
+        return $this->invoiceQuery
+            ->forBusinessChain($chain)
+            ->notPaidInFull()
+            ->notOnHold()
+            ->get();
     }
 
     /**
