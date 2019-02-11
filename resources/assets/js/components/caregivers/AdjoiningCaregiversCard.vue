@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="hasAdjoiningCaregivers" class="card">
+        <div v-if="client && hasAdjoiningCaregivers" class="card">
             <div class="card-body">
                 <div v-if="before" class="mb-4">
                     <h4 class="card-title">Previous Shift Caregiver(s):</h4>
@@ -28,15 +28,8 @@
         mixins: [ FormatsDates, AuthUser ],
 
         props: {
-            client: {
-                type: String,
-                required: true,
-            },
-            shift: {
-                type: String,
-                default: '',
-                required: false,
-            },
+            'client': {},
+            'shift': {},
             autoLoad: {
                 type: Boolean,
                 default: false,
@@ -53,7 +46,7 @@
 
         computed: {
             hasAdjoiningCaregivers() {
-                return this.before != [] && this.after != [];
+                return this.before.length > 0 || this.after.length > 0;
             },
         },
 
@@ -62,7 +55,11 @@
                 this.before = [];
                 this.after = [];
 
-                let response = await axios.get(`/caregiver/schedules/${this.client}/adjoining?shift=${this.shift}`);
+                let url = `/caregiver/schedules/${this.client}/adjoining`;
+                if (this.shift) {
+                    url += `?shift=${this.shift}`;
+                }
+                let response = await axios.get(url);
                 if (response.data.before) {
                     // filter results to not show the current logged in caregiver 
                     // for adjoining schedules.

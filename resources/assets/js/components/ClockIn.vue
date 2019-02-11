@@ -71,7 +71,7 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col md="12">
+                    <b-col md="12" class="mt-3">
                         <adjoining-caregivers-card ref="adjoiningCaregivers" :client="form.client_id" :auto-load="false"></adjoining-caregivers-card>
                     </b-col>
                 </b-row>
