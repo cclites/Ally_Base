@@ -519,6 +519,46 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             ?? 0;
     }
 
+    ///////////////////////////////////////////
+    /// Static Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Get the caregiver information for the schedules surrounding
+     * the given start and end times for the specified client.
+     *
+     * @param \App\Client $client
+     * @param \Carbon\Carbon $startTime
+     * @param \Carbon\Carbon $endTime
+     * @param ?int $windowSize
+     * @return array
+     */
+    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, ?int $windowSize = 4) : array
+    {
+        $beforeWindow = [
+            $startTime->copy()->subHours($windowSize),
+            $startTime->subMinute()
+        ];
+
+        $afterWindow = [
+            $endTime->copy()->addMinute(),
+            $endTime->copy()->addHours($windowSize)
+        ];
+
+        return [
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $beforeWindow)
+                ->get()
+                ->unique('caregiver_id'),
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $afterWindow)
+                ->get()
+                ->unique('caregiver_id')
+        ];
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

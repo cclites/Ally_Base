@@ -475,43 +475,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     //////////////////////////////////////
 
     /**
-     * Get the caregivers for shifts withing +- 4 hours of this shift
-     *
-     * @return array
-     */
-    public function getNextAndPreviousShiftCaregiverInfo(): array
-    {
-        $start = $this->checked_in_time ? $this->checked_in_time : Carbon::now();
-        $end = Carbon::now();
-        if (! empty($this->schedule)) {
-            $start = Carbon::parse($this->schedule->starts_at);
-            $end = $start->copy()->addMinutes($this->schedule->duration);
-        }
-
-        $beforeWindow = [
-            $start->copy()->subHours(4),
-            $start->subMinute()
-        ];
-        $afterWindow = [
-            $end->copy()->addMinute(),
-            $end->copy()->addHours(4)
-        ];
-
-        return [
-            'before' => $this->client->schedules()
-                ->with('caregiver.phoneNumber')
-                ->whereBetween('starts_at', $beforeWindow)
-                ->get()
-                ->unique('caregiver_id'),
-            'after' => $this->client->schedules()
-                ->with('caregiver.phoneNumber')
-                ->whereBetween('starts_at', $afterWindow)
-                ->get()
-                ->unique('caregiver_id')
-        ];
-    }
-
-    /**
      * Get an instance of the shift's flag manager class.
      *
      * @return App\Shifts\ShiftFlagManager

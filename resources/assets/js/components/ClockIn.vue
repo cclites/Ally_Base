@@ -70,6 +70,11 @@
                         </div>
                     </b-col>
                 </b-row>
+                <b-row>
+                    <b-col md="12">
+                        <adjoining-caregivers-card ref="adjoiningCaregivers" :client="form.client_id" :auto-load="false"></adjoining-caregivers-card>
+                    </b-col>
+                </b-row>
             </form>
         </b-card>
         <b-card class="loading-card" v-show="!!loadingText">
@@ -81,8 +86,6 @@
             </div>
         </b-card>
     </div>
-
-
 </template>
 
 <script>
@@ -188,6 +191,9 @@
                 catch (err) {
                     alert('Unable to load available shifts.  Make sure you have network connectivity.');
                 }
+
+                await this.$refs.adjoiningCaregivers.fetch();
+
                 this.hideLoading();
 
                 // After loading schedules, verify the location.

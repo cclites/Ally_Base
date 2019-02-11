@@ -183,8 +183,6 @@ class ShiftController extends BaseController
             }
         }
 
-        $caregiverSchedules = $shift->getNextAndPreviousShiftCaregiverInfo();
-
         return view('caregivers.clock_out', compact(
             'shift',
             'activities',
@@ -192,8 +190,7 @@ class ShiftController extends BaseController
             'carePlanActivityIds',
             'business',
             'questions',
-            'goals',
-            'caregiverSchedules'
+            'goals'
         ));
     }
 
