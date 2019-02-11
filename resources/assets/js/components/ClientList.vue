@@ -109,7 +109,6 @@
                 selectedItem: {},
                 clients: [],
                 caseManagers: [],
-                caseManagers: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -185,7 +184,7 @@
                     }
                 }
 
-                return `/business/clients?json=1&address=1&businesses[]=${business_id}&active=${active}&status=${aliasId}&client_type=${client_type}&case_manager_id=${caseManager}`;
+                return `/business/clients?json=1&address=1&case_managers=1&businesses[]=${business_id}&active=${active}&status=${aliasId}&client_type=${client_type}&case_manager_id=${caseManager}`;
             },
 
             filteredCaseManagers() {

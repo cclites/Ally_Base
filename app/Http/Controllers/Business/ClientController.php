@@ -54,7 +54,7 @@ class ClientController extends BaseController
                     $q->where('id', $caseManagerId);
                 });
             }
-            // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
+            // Use query string ?address=1&phone_number=1&care_plans=1&case_managers=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
@@ -64,9 +64,12 @@ class ClientController extends BaseController
             if ($request->input('care_plans')) {
                 $query->with('carePlans');
             }
+            if ($request->input('case_managers')) {
+                $query->with('caseManager');
+            }
 
 
-            $clients = $query->with('caseManager')->get();
+            $clients = $query->get();
             return $clients;
         }
 
