@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-card title="Confirm Clock Out Details" :class="{ translucent: !!loadingText }">
+        <b-card :title="`Confirm Clock Out for ${shift.client.name}`" :class="{ translucent: !!loadingText }">
             <form @submit.prevent="clockOut()" @keydown="form.clearError($event.target.name)">
                 <b-row>
                     <b-col lg="12">

@@ -371,7 +371,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      */
     public function isClockedIn($client_id = null)
     {
-        return $this->shifts()
+        return (bool) $this->shifts()
             ->whereNull('checked_out_time')
             ->when($client_id, function ($query) use ($client_id) {
                 return $query->where('client_id', $client_id);
@@ -384,9 +384,24 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return \App\Shift|null
      */
-    public function getActiveShift()
+    public function getActiveShift($client_id = null)
     {
-        return $this->shifts()->whereNull('checked_out_time')->first();
+        return $this->shifts()
+            ->whereNull('checked_out_time')
+            ->when($client_id, function ($query) use ($client_id) {
+                return $query->where('client_id', $client_id);
+            })
+            ->first();
+    }
+
+    /**
+     * If clocked in, return the active shift model
+     *
+     * @return \App\Shift|null
+     */
+    public function getActiveShifts()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->get();
     }
 
     /**
