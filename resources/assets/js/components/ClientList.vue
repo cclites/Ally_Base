@@ -166,7 +166,7 @@
 
         computed: {
             listUrl() {
-                const {business_id, status, caseManager} = this.filters;
+                const {client_type, business_id, status, caseManager} = this.filters;
                 const activeValue = (active !== null) ? active : '';
 
                 let active = '';
@@ -186,7 +186,7 @@
                     }
                 }
 
-                return `/business/clients?json=1&address=1&businesses[]=${this.business_id}&active=${active}&status=${aliasId}`;
+                return `/business/clients?json=1&address=1&businesses[]=${this.business_id}&active=${active}&status=${aliasId}&client_type=${client_type}`;
             },
 
             items() {
