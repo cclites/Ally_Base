@@ -70,7 +70,7 @@
                     <b-form-input name="caregiver_hourly_rate"
                         class="money-input"
                         type="number"
-                        step="any"
+                        step="0.01"
                         min="0"
                         max="999.99"
                         required
@@ -82,7 +82,7 @@
                     <b-form-input name="caregiver_fixed_rate"
                         class="money-input"
                         type="number"
-                        step="any"
+                        step="0.01"
                         min="0"
                         max="999.99"
                         required
@@ -94,7 +94,7 @@
                     <b-form-input name="client_hourly_rate"
                         class="money-input"
                         type="number"
-                        step="any"
+                        step="0.01"
                         min="0"
                         max="999.99"
                         required
@@ -106,7 +106,7 @@
                     <b-form-input name="client_fixed_rate"
                         class="money-input"
                         type="number"
-                        step="any"
+                        step="0.01"
                         min="0"
                         max="999.99"
                         required
