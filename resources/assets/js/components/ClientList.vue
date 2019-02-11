@@ -10,7 +10,7 @@
                 <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null">-- Case Manager --</option>
+                        <option value="">-- Case Manager --</option>
                     </template>
                     <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
                 </b-form-select>
@@ -47,7 +47,7 @@
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
-                    :items="filteredClients"
+                    :items="items"
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
@@ -109,8 +109,6 @@
                 selectedItem: {},
                 clients: [],
                 caseManagers: [],
-                filteredCaseManagers: [],
-                filteredClients: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -191,14 +189,13 @@
             },
 
             items() {
-                const {search, active} = this.filters;
+                const {search, active, caseManager} = this.filters;
                 let simpleMatches = ['client_type', 'business_id'];
                 let results = this.clients;
                 
                 simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
                 results = results.filter((client) => {
                     const val = simpleMatches.every(key => client[key] == this.filters[key])
-                    debugger;
                     return val;
                 });
                 
@@ -212,6 +209,12 @@
 
                 return results;
             },
+
+            filteredCaseManagers() {
+                return (!this.filters.business_id)
+                    ? this.caseManagers
+                    : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
+            }
 
         },
 
@@ -229,7 +232,6 @@
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
                 this.caseManagers = response.data;
-                this.filterCaseManagers();
             },
             details(item, index, button) {
                 this.selectedItem = item;
@@ -246,13 +248,6 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            },
-            filterCaseManagers() {
-                if (this.business_id == '') {
-                    this.filteredCaseManagers = this.caseManagers;
-                } else {
-                    this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))
-                }
             },
             async fetchStatusAliases() {
                 this.loading = true;
@@ -276,9 +271,6 @@
             listUrl() {
                 this.loadClients();
             },
-            business_id(value) {
-                this.filterCaseManagers();
-            }
         }
     }
 </script>
