@@ -83,9 +83,13 @@ class Form {
     /**
      * Reset the form fields.
      */
-    reset() {
+    reset(keepOriginalData = false) {
         for (let field in this.originalData) {
-            this[field] = '';
+            if (keepOriginalData) {
+                this[field] = this.originalData[field];
+            } else {
+                this[field] = '';
+            }
         }
 
         this.clearError();
@@ -214,6 +218,21 @@ class Form {
             this.errorMods++;
         }
     }
+
+    /**
+     * Fill the orignal form fields with the data of
+     * the same name from the given object.
+     */
+    fill(newData, clearErrors = true) {
+        for (let field in this.originalData) {
+            this[field] = newData[field];
+        }
+
+        if (clearErrors) {
+            this.clearError();
+        }
+    }
+
 }
 
 export default Form;

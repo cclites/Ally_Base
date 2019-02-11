@@ -46,6 +46,11 @@ class CaregiverController extends BaseController
             if ($request->input('active', 1) !== null) {
                 $query->where('active', $request->input('active', 1));
             }
+
+            if ($request->input('status') !== null) {
+                $query->where('status_alias_id', $request->input('status', null));
+            }
+
             // Use query string ?address=1&phone_number=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
@@ -211,8 +216,14 @@ class CaregiverController extends BaseController
         } catch (\Exception $ex) {
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
+        $data = [
+            'active' => false,
+            'inactive_at' => $inactive_at,
+            'deactivation_reason_id' => request('deactivation_reason_id'),
+            'deactivation_note' => request('note')
+        ];
 
-        if ($caregiver->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        if ($caregiver->update($data)) {
             $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }

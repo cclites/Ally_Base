@@ -38,10 +38,7 @@ class TelephonySMSController extends BaseTelefonyController
 
         $to = PhoneNumber::formatNational($request->To);
         $from = PhoneNumber::formatNational($request->From);
-
         $thread = SmsThread::where('from_number', $to)->latest()->first();
-        $business_id = optional($thread)->business_id;
-
         $matchingPhone = PhoneNumber::where('national_number', $from)->first();
         $user_id = optional($matchingPhone)->user_id;
 
@@ -49,7 +46,8 @@ class TelephonySMSController extends BaseTelefonyController
             $business = Business::where('outgoing_sms_number', $to)->first();
             $business_id = optional($business)->id;
         } else {
-            if (! $thread->isAcceptingReplies()) {
+            $business_id = $thread->business_id;
+            if (! $thread->isAcceptingReplies() || ! $thread->hasRecipient($user_id)) {
                 $thread = null;
             }
         }

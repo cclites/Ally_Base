@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="d-flex">
-            <h3 class="f-1">Payer Rates</h3>
+            <h3 class="f-1">Contracted Rates With Payer</h3>
             <div class="ml-auto">
                 <b-btn variant="info" size="sm" @click="add()">Add Rate</b-btn>
             </div>

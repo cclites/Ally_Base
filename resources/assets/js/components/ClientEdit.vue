@@ -43,8 +43,8 @@
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
                     <b-form-group label="Case Manager" label-for="case_manager">
-                        <b-form-select 
-                                v-model="form.case_manager_id" 
+                        <b-form-select
+                                v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
@@ -113,6 +113,12 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
                             id="hic"
@@ -142,7 +148,7 @@
                     </b-form-group>
 
                     <b-form-group>
-                        <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                         <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                     </b-form-group>
 
@@ -258,63 +264,6 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <p class="h6">Power of Attorney</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="poa_first_name"
-                                      v-model="form.poa_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="poa_phone"
-                                      v-model="form.poa_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="poa_last_name"
-                                      v-model="form.poa_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Relationship">
-                        <b-form-input id="poa_relationship"
-                                      v-model="form.poa_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <p class="h6">Physician</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="dr_first_name"
-                                      v-model="form.dr_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="dr_phone"
-                                      v-model="form.dr_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="dr_last_name"
-                                      v-model="form.dr_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Fax">
-                        <b-form-input id="dr_fax"
-                                      v-model="form.dr_fax"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col>
                     <p class="h6">Preferences</p>
                     <hr>
                 </b-col>
@@ -366,7 +315,18 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
                     <hr />
@@ -421,45 +381,18 @@
                 <b-col lg="12">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
-                    <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                    <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
+                    <template v-else>
+                        <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                        <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
+                    </template>
                 </b-col>
             </b-row>
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
 
-        <b-modal id="deactivateModal"
-                 title="Are you sure?"
-                 v-model="deactivateModal"
-                 ok-title="OK">
-
-            <b-container>
-                <b-row>
-                    <b-col lg="12" class="text-center">
-                        <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
-                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
-                        <div v-else>They have no future scheduled shifts.</div>
-
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
-                            <date-picker
-                                class="w-50 mx-auto"
-                                v-model="inactive_at"
-                                id="inactive_at"
-                                placeholder="Inactive Date">
-                            </date-picker>
-                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
-                        </b-form-group>
-
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn v-if="client.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveClient">Yes - Delete Future Schedules</b-btn>
-                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveClient">Yes</b-btn>
-               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <deactivate-client-modal :client="client" ref="deactivateClientModal"></deactivate-client-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -468,7 +401,13 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
+        <business-referral-source-modal
+            @saved="savedReferralSource"
+            v-model="showReferralModal"
+            :source="{}"
+            source-type="client"
+        ></business-referral-source-modal>
+        <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
     </b-card>
 </template>
 
@@ -477,8 +416,10 @@
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from './business/BusinessLocationSelect'
-    import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import DeactivateClientModal from './modals/DeactivateClientModal';
+    import DischargeSummaryModal from './modals/DischargeSummaryModal'
+
     window.croppie = require('croppie');
 
     export default {
@@ -486,16 +427,21 @@
             'client': {},
             'lastStatusDate' : {},
             'confirmUrl': {},
-            'referralsources': {}
+            'referralsources': {},
+            salesPeople: {
+                type: Array,
+                required: true
+            }
         },
 
         mixins: [ClientForm, FormatsDates],
 
         components: {
             BusinessLocationFormGroup,
-            ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
+            DeactivateClientModal,
+            DischargeSummaryModal
         },
 
         data() {
@@ -516,14 +462,6 @@
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
-                    poa_first_name: this.client.poa_first_name,
-                    poa_last_name: this.client.poa_last_name,
-                    poa_phone: this.client.poa_phone,
-                    poa_relationship: this.client.poa_relationship,
-                    dr_first_name: this.client.dr_first_name,
-                    dr_last_name: this.client.dr_last_name,
-                    dr_phone: this.client.dr_phone,
-                    dr_fax: this.client.dr_fax,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
@@ -539,6 +477,8 @@
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updated_at,
                     receive_summary_email: this.client.receive_summary_email,
+                    sales_person_id: this.client.sales_person_id,
+                    status_alias_id: this.client.status_alias_id || '',
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
@@ -549,21 +489,22 @@
                 active: this.client.active,
                 deactivateModal: false,
                 activateModal: false,
-                inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
+                statusAliases: [],
             }
         },
 
         mounted() {
             this.checkForNoEmailDomain();
             this.loadOfficeUsers();
+            this.fetchStatusAliases();
         },
 
         methods: {
-            newrefsourcedata(data) {
+            savedReferralSource(data) {
                 if(data) {
-                    this.show = false;
+                    this.showReferralModal = false;
                     this.referralsources.push(data);
                     this.form.referral_source_id = data.id;
                 }
@@ -574,10 +515,6 @@
                 this.caseManagers = response.data;
             },
 
-            closemodal(status) {
-                this.show = status;
-            },
-
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -586,11 +523,6 @@
                         this.form.email = null;
                     }
                 }
-            },
-
-            archiveClient() {
-                let form = new Form();
-                form.submit('delete', `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}`);
             },
 
             reactivateClient() {
@@ -619,8 +551,20 @@
                     .then(function(response) {
                         component.lastStatusDate = moment.utc().format();
                     });
-            }
+            },
 
+            fetchStatusAliases() {
+                axios.get(`/business/status-aliases?business_id=${this.client.business_id}`)
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data;
+                        } else {
+                            this.statusAliases = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         },
 
         computed: {
@@ -649,9 +593,23 @@
                     return 'The status was last updated ' + this.lastStatusUpdated;
                 }
                 return 'Select the Ally Agreement status of the client.';
-            }
-        }
+            },
 
+            statusAliasOptions() {
+                if (! this.statusAliases || !this.statusAliases.client) {
+                    return [];
+                }
+
+                return this.statusAliases.client.filter(item => {
+                    return item.active == this.active;
+                }).map(item => {
+                    return {
+                        value: item.id,
+                        text: item.name,
+                    };
+                });
+            },
+        },
     }
 </script>
 

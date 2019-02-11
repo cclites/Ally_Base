@@ -54,6 +54,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $poa_first_name
  * @property string|null $poa_last_name
  * @property string|null $poa_phone
+ * @property string|null $poa_email
  * @property string|null $poa_relationship
  * @property string|null $import_identifier
  * @property string|null $dr_first_name
@@ -242,6 +243,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'poa_first_name',
         'poa_last_name',
         'poa_phone',
+        'poa_email',
         'poa_relationship',
         'import_identifier',
         'dr_first_name',
@@ -268,6 +270,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'qb_customer_id',
         'hourly_rate_id',
         'fixed_rate_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
         'hic',
         'travel_directions',
         'created_by',
@@ -276,6 +283,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'disaster_planning',
         'caregiver_1099',
         'case_manager_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
+        'sales_person_id',
     ];
 
     ///////////////////////////////////////////
@@ -466,7 +479,10 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->getAllyPercentage();
     }
 
-
+    public function getLastServiceDateAttribute()
+    {
+        return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
+    }
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////

@@ -157,8 +157,18 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::get('settings/deactivation-reasons', 'Business\DeactivationReasonController@index')->name('deactivation_reasons');
+    Route::post('settings/deactivation-reasons', 'Business\DeactivationReasonController@store')->name('deactivation_reasons.store');
+    Route::delete('settings/deactivation-reasons/{reason}', 'Business\DeactivationReasonController@destroy')->name('deactivation_reasons.destroy');
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
+    Route::resource('status-aliases', 'Business\StatusAliasController');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
+
+    Route::get('sales-people/{business}', 'Business\SalesPersonController@index')->name('sales-people.index');
+    Route::post('sales-people', 'Business\SalesPersonController@store')->name('sales-people.store');
+    Route::delete('sales-people/{salesPerson}', 'Business\SalesPersonController@destroy')->name('sales-people.destroy');
+    Route::put('sales-people/{salesPerson}', 'Business\SalesPersonController@update')->name('sales-people.update');
+
 
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
     Route::post('care-match/client-matches/{client}', 'Business\CareMatchController@clientMatch')->name('care-match.client-matches');
@@ -190,6 +200,8 @@ Route::group([
     Route::patch('caregivers/{caregiver}/notification-options', 'Business\CaregiverController@updateNotificationOptions');
     Route::post('caregivers/{caregiver}/notification-preferences', 'Business\CaregiverController@updateNotificationPreferences');
 
+
+    Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
     Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
     Route::put('clients/onboarding/{clientOnboarding}', 'Business\ClientOnboardingController@update')->name('clients.onboarding.update');
@@ -207,8 +219,10 @@ Route::group([
     Route::delete('clients/excluded-caregiver/{id}', 'Business\ClientExcludedCaregiverController@destroy')->name('clients.remove-excluded-caregiver');
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
+    Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
+    Route::patch('clients/{client}/other-contacts', 'Business\ClientController@updateContacts');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
@@ -274,7 +288,9 @@ Route::group([
     Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
     Route::post('reports/claims-report', 'Business\ClaimController@data');
     Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
-    Route::get('reports/referral-sources', 'Business\ReportsController@referralSources')->name('reports.referral_sources');
+    Route::get('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources')->name('reports.client_referral_sources');
+    Route::get('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources')->name('reports.caregiver_referral_sources');
+    Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
     Route::get('reports/prospects', 'Business\ReportsController@prospects')->name('reports.prospects');
@@ -294,6 +310,10 @@ Route::group([
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
+    Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
+    Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
+
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');

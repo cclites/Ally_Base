@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Caregiver Cert & License Expirations')
+@section('title', 'Caregiver Expirations')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="/business/reports">Reports</a></li>
-    <li class="breadcrumb-item active">Caregiver Cert & License Expirations</li>
+    <li class="breadcrumb-item active">Caregiver Expirations</li>
 @endsection
 
 @section('content')
