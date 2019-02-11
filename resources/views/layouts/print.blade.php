@@ -55,6 +55,20 @@
         table, tr, td, th, tbody, thead, tfoot {
             page-break-inside: avoid !important;
         }
+        .print-controls {
+            padding: 20px 10px;
+        }
+        .print-content, 
+        .print-content h4,
+        .print-content th,
+        .print-content td {
+            color: black;
+        }
+        @media print {
+            .print-controls {
+                display: none;
+            }
+        }
     </style>
 
     @stack('head')

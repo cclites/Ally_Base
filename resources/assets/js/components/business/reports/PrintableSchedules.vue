@@ -8,7 +8,7 @@
                 <input type="hidden" name="_token" :value="token">
                 <div class="row">
                     <b-col lg="3">
-                        <b-form-group label="Start Date">
+                        <b-form-group label="Start Date" label-class="required">
                             <date-picker
                                     class="mb-1"
                                     name="start_date"
@@ -17,7 +17,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <b-form-group label="End Date">
+                        <b-form-group label="End Date" label-class="required">
                             <date-picker
                                     class="mb-1"
                                     name="end_date"
@@ -31,6 +31,17 @@
                                                       field="business_id"
                                                       help-text="">
                         </business-location-form-group>
+                    </b-col>
+                </div>
+                <div class="row">
+                    <b-col lg="12">
+                        <b-form-group label="Group By">
+                            <b-form-radio-group name="group_by" v-model="group_by">
+                                <b-form-radio value="none">None</b-form-radio>
+                                <b-form-radio value="client">Client</b-form-radio>
+                                <b-form-radio value="caregiver">Caregiver</b-form-radio>
+                            </b-form-radio-group>
+                        </b-form-group>
                     </b-col>
                 </div>
                 <div class="row">
@@ -49,6 +60,22 @@
     export default {
         name: "PrintableSchedules",
         components: {BusinessLocationFormGroup},
+        data() {
+            return {
+                group_by: 'none',
+                form: this.makeForm()
+            }
+        },
+        methods: {
+            makeForm(defaults = {}) {
+                return new Form({
+                    organization: defaults.organization,
+                    contact_name: defaults.contact_name,
+                    phone: defaults.phone,
+                    business_id: defaults.business_id || ""
+                });
+            },
+        },
         props: ['token'],
     }
 </script>

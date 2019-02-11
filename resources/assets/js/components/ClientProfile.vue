@@ -75,6 +75,11 @@
                                           v-model="form.poa_phone"
                                           :readonly="authInactive"></b-form-input>
                         </b-form-group>
+                        <b-form-group label="Email">
+                            <b-form-input id="poa_email"
+                                          v-model="form.poa_email"
+                                          :readonly="authInactive"></b-form-input>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Last Name">
@@ -101,22 +106,6 @@
                                 <span class="custom-control-description">Send 1099 to caregivers on the client’s behalf</span>
                             </label>
                             <input-help :form="form" field="caregiver_1099" text=""></input-help>
-                        </div>
-                    </b-col>
-                    <b-col lg="12">
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox"
-                                    class="custom-control-input"
-                                    name="receive_summary_email"
-                                    v-model="form.receive_summary_email"
-                                    :true-value="1"
-                                    :false-value="0"
-                                    :disabled="authInactive">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Receive the weekly shift summary email</span>
-                            </label>
-                            <input-help :form="form" field="receive_summary_email" text=""></input-help>
                         </div>
                     </b-col>
                 </b-row>
@@ -152,8 +141,8 @@
                     poa_first_name: this.client.poa_first_name,
                     poa_last_name: this.client.poa_last_name,
                     poa_phone: this.client.poa_phone,
+                    poa_email: this.client.poa_email,
                     poa_relationship: this.client.poa_relationship,
-                    receive_summary_email: this.client.receive_summary_email,
                     caregiver_1099: this.client.caregiver_1099
                 })
             }

@@ -100,6 +100,66 @@ a.franchisor-navlink {
   }
 }
 
+/* Customize modals, make wider, but slimmed down padding */
+.modal-header {
+  padding: 10px 15px;
+  .modal-title {
+    font-weight: 500;
+  }
+}
+@media (min-width: 992px) {
+  .modal-lg {
+    max-width: 900px;
+  }
+}
+@media (min-width: 1170px) {
+  .modal-lg {
+    max-width: 1070px;
+  }
+}
+
+label.custom-checkbox {
+  cursor: pointer;
+}
+
+.table-fit-more {
+  .money-input { width: 85px!important }
+  .date-input { max-width: 120px!important }
+  th { font-size: 13px; font-weight: 500; }
+  .form-control { min-width: 80px; }
+  select.form-control { min-width: 120px; }
+}
+
+.modal-fit-more {
+  .modal-body {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+  .custom-control-description {
+    padding-top: 3px;
+  }
+  .form-control {
+    font-size: 14px;
+    min-height: 24px;
+    padding: 0.25rem 0.5rem;
+  }
+  select.form-control {
+    height: 2rem !important;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .col-form-label {
+    padding-bottom: 2px;
+  }
+}
+
 
 /* Smaller device adjustments */
 @media (max-width: 768px) {
@@ -241,28 +301,6 @@ td .fc-event-container {
   }
 }
 
-.modal-fit-more {
-  .modal-body {
-    font-size: 14px;
-  }
-  .card-title {
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 0;
-  }
-  .custom-control-description {
-    padding-top: 2px;
-  }
-  .form-control {
-    font-size: 14px;
-    min-height: 28px;
-  }
-  .form-group {
-    margin-bottom: 15px;
-  }
-}
-
 /* Chartist */
 .ct-series-a .ct-line,
 .ct-series-a .ct-point,
@@ -345,11 +383,19 @@ label.required::after, legend.required::after {
   padding-left: 3px;
 }
 
+.datepicker-dropdown {
+  z-index: 10000 !important; /* ALLY-761 - Header hides datepicker under certain circumstances */
+}
+
+.extra-top-pad {
+  padding-top: 30px;
+}
+
 .clock-out-list {
   h1 {
     margin-top: 30px;
   }
-  
+
   p {
     max-width: 300px;
     margin: 20px auto 50px;

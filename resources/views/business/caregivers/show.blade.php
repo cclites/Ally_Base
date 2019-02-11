@@ -145,8 +145,8 @@
             <business-caregiver-skills-tab :caregiver="{{ $caregiver }}"></business-caregiver-skills-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
-                                    :user-id="{{ $caregiver->id }}"></emergency-contacts-tab>
+            <contact-list-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
+                                    :user-id="{{ $caregiver->id }}"></contact-list-tab>
         </div>
         <div class="tab-pane" id="payment_statement" role="tabpanel">
             <!-- Check access to caregiver statements tab via Gate -->

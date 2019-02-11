@@ -148,7 +148,7 @@ class ScheduleEvents implements Responsable
         }
 
         if ($shift === Schedule::UNCONFIRMED) {
-            return '#D0C3D3';
+            return '#ad92b0';
         }
 
         if ($status === Schedule::CAREGIVER_CANCELED) {
@@ -159,11 +159,14 @@ class ScheduleEvents implements Responsable
             return '#730073';
         }
 
+        if ($status == Schedule::CAREGIVER_NOSHOW) {
+            return '#63cbc7';
+        }
+        
         if (!$schedule->caregiver_id) {
             // Open shift
             return '#d9c01c';
         }
-
         return '#1c81d9';
     }
 

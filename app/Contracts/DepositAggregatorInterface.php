@@ -4,7 +4,7 @@ namespace App\Contracts;
 interface DepositAggregatorInterface
 {
     /**
-     * @return \App\Deposit
+     * @return \App\Billing\Deposit
      */
     public function getDeposit();
 
@@ -19,7 +19,7 @@ interface DepositAggregatorInterface
     public function getShiftIds();
 
     /**
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function deposit();
 

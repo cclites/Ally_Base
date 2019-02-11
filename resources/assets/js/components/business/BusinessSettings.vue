@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-card header="Select a Office Location" header-variant="info">
+        <b-card header="Select an Office Location" header-variant="info">
             <b-row>
                 <b-col lg="4" md="6">
                     <business-location-select v-model="businessId"></business-location-select>
@@ -8,8 +8,8 @@
             </b-row>
         </b-card>
         <b-card no-body v-if="business.id">
-            <b-tabs pills card>
-                <b-tab title="System" active>
+            <b-tabs pills card v-model="tabIndex">
+                <b-tab title="System" href="#system">
                     <b-row>
                         <b-col lg="6">
                             <!--<div v-if="business.logo" class="mb-3">-->
@@ -136,7 +136,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Phone &amp; Address">
+                <b-tab title="Phone &amp; Address" href="#phone">
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="Phone 1">
@@ -207,7 +207,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Medicaid">
+                <b-tab title="Medicaid" href="#medicaid">
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="EIN">
@@ -239,7 +239,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Clock Out Questions">
+                <b-tab title="Clock Out Questions" href="#questions">
                     <b-row>
                         <b-col lg="12">
                             <h4>Options</h4>
@@ -327,13 +327,13 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Payroll Policy" v-if="business.type == 'Agency'">
+                <b-tab title="Payroll Policy" href="#payroll" v-if="business.type == 'Agency'">
                     <payroll-policy :business="business"></payroll-policy>
                 </b-tab>
-                <b-tab title="Shift Confirmations">
+                <b-tab title="Shift Confirmations" href="#shift-confirmations">
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Allow clients to confirm and modify visits in the client portal"
+                            <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
                                           label-for="allow_client_confirmations" label-class="required">
                                  <b-form-select id="allow_client_confirmations"
                                                :disabled="businessSettings.auto_confirm == 1"
@@ -352,17 +352,16 @@
                                     <option :value="1">Yes</option>
                                 </b-form-select>
                             </b-form-group>
-                            <!-- Summary email is disabled and set to no (by watcher) when allow_client_confirmation == 0 -->
                             <b-form-group
-                                    label="Send client visit summary and pending charge email Monday of each week"
+                                    label="Enable the 'Visit Summary with Pending Charges' email"
                                     label-for="shift_confirmation_email" label-class="required">
                                 <b-form-select id="shift_confirmation_email"
-                                               :disabled="businessSettings.auto_confirm == 1 || businessSettings.allow_client_confirmations == 0"
                                                v-model="businessSettings.shift_confirmation_email"
                                 >
                                     <option :value="0">No</option>
                                     <option :value="1">Yes</option>
                                 </b-form-select>
+                                <input-help :form="businessSettings" field="shift_confirmation_email" class="text-danger" text="Note: You will then need to enable this for each client on their profile."></input-help>
                             </b-form-group>
                             <div class="pl-5">
                                 <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
@@ -433,8 +432,7 @@
                                     <option :value="0">No</option>
                                     <option :value="1">Yes</option>
                                 </b-form-select>
-                                <input-help :form="businessSettings" field="auto_confirm" class="text-danger"
-                                            text="Note: Setting this to Yes may lead to billing errors and unhappy clients."></input-help>
+                                <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
                             </b-form-group>
                             <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm" label-class="required">
                                 <b-form-select id="ask_on_confirm"
@@ -458,6 +456,28 @@
                         </b-col>
                     </b-row>
                 </b-tab>
+                <b-tab title="Sales People" href="#sales-people">
+                    <business-salesperson-list :business-id="businessId"></business-salesperson-list>
+                </b-tab>
+                <b-tab title="Custom fields" href="#custom-fields">
+                    <custom-field-list />
+                </b-tab>
+                <b-tab title="Deactivation Reasons" href="#deactivation-reasons">
+                    <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
+                    <b-row>
+                        <b-col lg="6">
+                            <h3>Client Reason Codes</h3>
+                            <deactivation-reason-manager type="client"></deactivation-reason-manager>
+                        </b-col>
+                        <b-col lg="6">
+                            <h3>Caregiver Reason Codes</h3>
+                            <deactivation-reason-manager type="caregiver"></deactivation-reason-manager>
+                        </b-col>
+                    </b-row>
+                </b-tab>
+                <b-tab title="Status Aliases" href="#status-aliases">
+                    <business-status-alias-manager :business="this.business"></business-status-alias-manager>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -465,6 +485,8 @@
 
 <script>
     import BusinessLocationSelect from "./BusinessLocationSelect";
+
+    import {mapGetters, mapState, mapMutations} from 'vuex';
 
     export default {
         components: {BusinessLocationSelect},
@@ -496,20 +518,36 @@
                     }
                 },
                 signatureOption: null,
+                tabIndex: 0,
             }
         },
 
         computed: {
             business() {
                 return this.$store.getters.getBusiness(this.businessId) || ""
-            }
+            },
+
+            tabs() {
+                if (this.business.type == 'agency') {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                } else {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                }
+            },
         },
 
         mounted() {
-
+            let index = this.tabs.findIndex(tab => tab === window.location.hash);
+            if (index >= 0) {
+                this.tabIndex = index;
+            }
         },
 
         methods: {
+            ...mapMutations(['updateBusiness']),
+
+            ...mapGetters(['defaultBusiness', 'getBusiness']),
+
             makeForm(business) {
                 return new Form({
                     //logo: business.logo,
@@ -556,10 +594,12 @@
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
                 });
             },
+
             async update() {
                 const response = await this.businessSettings.put('/business/settings/' + this.business.id);
                 this.$store.commit('updateBusiness', response.data.data);
             },
+
             getSignatureOption(business) {
                 for (var option of Object.keys(this.signatureMapping)) {
                     let obj = this.signatureMapping[option];
@@ -569,17 +609,27 @@
                     }
                 }
             },
+
             updateSignatureValues() {
                 if (!this.signatureOption) return;
                 Object.assign(this.businessSettings, this.signatureMapping[this.signatureOption]);
             },
+
         },
 
         watch: {
             signatureOption() {
                 this.updateSignatureValues()
             },
+
             business(business, oldBusiness) {
+                console.dir(business);
+                if (!oldBusiness && business) {
+                    this.businessSettings = this.makeForm (business);
+                    this.signatureOption = this.getSignatureOption (business);
+                    return;
+                }
+
                 if (business.id !== oldBusiness.id) {
                     this.businessSettings = this.makeForm(business);
                     this.signatureOption = this.getSignatureOption(business);

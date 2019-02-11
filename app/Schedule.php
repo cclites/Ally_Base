@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
@@ -126,6 +127,8 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+    const CAREGIVER_NOSHOW = 'CAREGIVER_NOSHOW';
+    const OPEN_SHIFT = 'OPEN_SHIFT';
 
     ///////////////////////////////////////////
     /// Related Shift Statuses
@@ -182,6 +185,16 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(ScheduleNote::class, 'note_id');
     }
 
+    public function services()
+    {
+        return $this->hasMany(ScheduleService::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(ScheduleGroup::class, 'group_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -193,7 +206,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
     public function getStartsAtAttribute()
     {
-        return new Carbon($this->attributes['starts_at'], Timezone::getTimezone($this->business_id));
+        return Carbon::parse($this->attributes['starts_at'], $this->getTimezone());
     }
 
     public function setStartsAtAttribute($value) {
@@ -207,7 +220,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      * Returns the first available connected shift that is currently
      * clocked in.
      *
-     * @return bool
+     * @return \App\Shift|null
      */
     public function getClockedInShiftAttribute()
     {
@@ -224,8 +237,35 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    /**
+     * @param iterable $services
+     */
+    public function syncServices(iterable $services)
+    {
+        $savedIds = [];
+        foreach($services as $data) {
+            $service = null;
+            if (isset($data['id'])) {
+                $service = $this->services()->find($data['id']);
+            }
+            if (!$service) {
+                $service = new ScheduleService();
+            }
+            $service->fill($data);
+            $this->services()->save($service);
+            $savedIds[] = $service->id;
+        }
+        // Delete Others
+        $this->services()->whereNotIn('id', $savedIds)->delete();
+    }
+
+    public function getGroupStatistics()
+    {
+        return optional($this->group)->getStatistics($this->getTimezone(), $this->starts_at->toDateString());
+    }
 
     /**
      * Return the related shift status
@@ -262,7 +302,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             if (empty($note->id)) return false;
             $note = $note->id;
         }
-        return $this->update(['note_id' => $note]);
+        $result = $this->note()->associate($note)->save();
+        $this->load('note');
+        return $result;
     }
 
     /**
@@ -272,7 +314,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function deleteNote()
     {
-        return $this->update(['note_id' => null]);
+        return $this->note()->dissociate()->save();
     }
 
     /**
@@ -477,6 +519,46 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             ?? 0;
     }
 
+    ///////////////////////////////////////////
+    /// Static Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Get the caregiver information for the schedules surrounding
+     * the given start and end times for the specified client.
+     *
+     * @param \App\Client $client
+     * @param \Carbon\Carbon $startTime
+     * @param \Carbon\Carbon $endTime
+     * @param ?int $windowSize
+     * @return array
+     */
+    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, ?int $windowSize = 4) : array
+    {
+        $beforeWindow = [
+            $startTime->copy()->subHours($windowSize),
+            $startTime->subMinute()
+        ];
+
+        $afterWindow = [
+            $endTime->copy()->addMinute(),
+            $endTime->copy()->addHours($windowSize)
+        ];
+
+        return [
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $beforeWindow)
+                ->get()
+                ->unique('caregiver_id'),
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $afterWindow)
+                ->get()
+                ->unique('caregiver_id')
+        ];
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -503,13 +585,16 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      * Get only schedules that are after right now.
      * Adjusts to timezone.
      *
-     * @param [type] $query
-     * @param [type] $timezone
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $fromDate
      * @return void
      */
-    public function scopeFuture($query, $timezone)
+    public function scopeFuture($query, $timezone, $fromDate = 'now')
     {
-        return $query->where('starts_at', '>=', Carbon::now($timezone)->subHour());
+        $from = Carbon::parse($fromDate, $timezone)->subHour();
+
+        $query->where('starts_at', '>=', $from);
     }
 
 }
