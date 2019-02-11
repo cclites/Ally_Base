@@ -47,7 +47,7 @@
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
-                    :items="filteredClients"
+                    :items="clients"
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
@@ -110,7 +110,6 @@
                 clients: [],
                 caseManagers: [],
                 filteredCaseManagers: [],
-                filteredClients: [],
                 fields: [
                     {
                         key: 'firstname',
