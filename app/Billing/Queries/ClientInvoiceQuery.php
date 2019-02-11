@@ -66,4 +66,13 @@ class ClientInvoiceQuery extends BaseQuery
 
         return $this;
     }
+
+    function notOnHold(): self
+    {
+        $this->whereDoesntHave('client', function($q) {
+            $q->has('paymentHold');
+        });
+
+        return $this;
+    }
 }
