@@ -35,6 +35,9 @@
             </b-col>
         </b-row>
 
+        <b-row v-if="client.medications">
+            <client-medication :client="client" :medications="client.medications" />
+        </b-row>
     </div>
 
 </template>

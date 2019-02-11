@@ -112,7 +112,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\ReferralSource[] $referralSources
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThread[] $smsThreads
@@ -209,6 +208,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         'unpaired_pay_rates' => 'json',
     ];
 
+    protected $appends = [];
+
     /**
      * The "booting" method of the model.
      *
@@ -221,7 +222,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         static::creating(function ($model) {
             // populate settings defaults here because the change() method
             // on migration columns is not supported due to the business
-            // table having an enum column. 
+            // table having an enum column.
             $model->shift_confirmation_email = false;
             $model->allow_client_confirmations = false;
         });
@@ -333,11 +334,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(RateCode::class, 'business_id');
     }
 
-    public function referralSources()
-    {
-        return $this->hasMany(ReferralSource::class, 'business_id');
-    }
-
     public function users()
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');
@@ -421,7 +417,12 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         return $this->hasMany(SmsThread::class);
     }
-    
+
+    public function salesPeople()
+    {
+        return $this->hasMany(SalesPerson::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

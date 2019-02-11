@@ -2,7 +2,7 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="3">
-                <b-btn variant="info" @click="showModal=true">Add Referral Sources</b-btn>
+                <b-btn variant="info" @click="showModal=true">Add Referral Source</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -16,9 +16,11 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <!--<b-btn size="sm" @click="edit(row.item.id)">-->
                     <b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
                         <i class="fa fa-edit"></i>
+                    </b-btn>
+                    <b-btn size="sm" @click="destroy(row.item)" variant="danger">
+                        <i class="fa fa-trash"></i>
                     </b-btn>
                 </template>
             </b-table>
@@ -33,7 +35,12 @@
             </b-col>
         </b-row>
 
-        <client-referral-modal v-model="showModal" :source="editSource" @saved="updateList"></client-referral-modal>
+        <business-referral-source-modal
+            v-model="showModal"
+            :source="editSource" 
+            @saved="updateList"
+            :source-type="sourceType"
+        ></business-referral-source-modal>
     </b-card>
 </template>
 
@@ -44,7 +51,7 @@
     export default {
         mixins: [FormatsDates, FormatsListData],
 
-        props: ['referralSources', 'editSourceId', 'createSource'],
+        props: ['referralSources', 'editSourceId', 'createSource', 'sourceType'],
 
         data() {
             return {
@@ -74,12 +81,6 @@
                         key: 'phone',
                         label: 'Phone',
                         sortable: true
-                    },
-                    {
-                        key: 'business_id',
-                        label: 'Location',
-                        sortable: true,
-                        formatter: this.showBusinessName,
                     },
                     {
                         key: 'created_at',
@@ -117,7 +118,23 @@
                 else {
                     Vue.set(this.items, index, source);
                 }
-            }
+            },
+            destroy(item) {
+                if (! confirm('Are you sure you want to delete this referral source?')) {
+                    return;
+                }
+                
+                let form = new Form({});
+                form.submit('DELETE', `/business/referral-sources/${item.id}`)
+                    .then(response => {
+                        let index = this.items.findIndex(x => x.id == item.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1);
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         }
     }
 </script>

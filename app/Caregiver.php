@@ -161,7 +161,9 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'referral_source_id',
+        'deactivation_note'
     ];
     protected $appends = ['masked_ssn'];
 
@@ -263,6 +265,10 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     public function skills()
     {
         return $this->belongsToMany(Activity::class, 'caregiver_skills');
+    }
+
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
     }
 
     ///////////////////////////////////////////
@@ -394,7 +400,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Unassign all Caregiver's schedules from now on. 
+     * Unassign all Caregiver's schedules from now on.
      *
      * @return void
      */

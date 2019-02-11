@@ -16,7 +16,12 @@
             </b-form-group>
         </b-col>
 
-        <client-referral-modal @saved="newReferralSource" v-model="showReferralModal" :source="{}"></client-referral-modal>
+        <business-referral-source-modal
+            @saved="newReferralSource"
+            v-model="showReferralModal" 
+            :source="{}"
+            :source-type="sourceType"
+        ></business-referral-source-modal>
     </b-row>
 </template>
 
@@ -24,7 +29,7 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'businessId'],
+        props: ['value', 'sourceType'],
 
         data() {
             return {
@@ -43,8 +48,7 @@
                 }
             },
             filteredSources() {
-                return (this.businessId === undefined) ? this.referralSources
-                    : this.referralSources.filter(source => source.business_id === this.businessId);
+                return this.referralSources;
             }
         },
 
@@ -57,7 +61,7 @@
                 }
             },
             async loadReferralSources() {
-                const response = await axios('/business/referral-sources');
+                const response = await axios(`/business/referral-sources?type=${this.sourceType}`);
                 this.referralSources = response.data || [];
             }
         },

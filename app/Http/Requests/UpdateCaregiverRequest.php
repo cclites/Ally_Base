@@ -3,6 +3,7 @@ namespace App\Http\Requests;
 
 use App\Rules\Avatar;
 use App\Rules\ValidSSN;
+use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,13 +16,17 @@ class UpdateCaregiverRequest extends FormRequest
 
     public function rules()
     {
+        /** @var \App\Caregiver $caregiver */
+        $caregiver = $this->route('caregiver');
+        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => [
                 'required',
-                Rule::unique('users')->ignore($this->route('caregiver')->id ?? null, 'id'),
+                Rule::unique('users')->ignore($caregiver->id ?? null, 'id'),
             ],
             'date_of_birth' => 'nullable|date',
             'ssn' => [
@@ -36,6 +41,8 @@ class UpdateCaregiverRequest extends FormRequest
                 'nullable',
                 new Avatar()
             ],
+            'referral_source_id' => 'nullable|exists:referral_sources,id',
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
         ];
     }
 
