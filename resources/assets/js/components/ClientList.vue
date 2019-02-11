@@ -97,7 +97,7 @@
                     client_type: '',
                     business_id: '',
                     search: null,
-                    caseManager: '',
+                    caseManager: null,
                 },
                 totalRows: 0,
                 perPage: 15,
