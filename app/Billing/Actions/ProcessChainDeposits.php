@@ -96,8 +96,16 @@ class ProcessChainDeposits
      */
     function getInvoices(BusinessChain $chain): Collection
     {
-        $caregiverInvoices = $this->caregiverInvoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
-        $businessInvoices = $this->businessInvoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
+        $caregiverInvoices = $this->caregiverInvoiceQuery
+            ->forBusinessChain($chain)
+            ->notPaidInFull()
+            ->notOnHold()
+            ->get();
+        $businessInvoices = $this->businessInvoiceQuery
+            ->forBusinessChain($chain)
+            ->notPaidInFull()
+            ->notOnHold()
+            ->get();
         return $caregiverInvoices->merge($businessInvoices);
     }
 }

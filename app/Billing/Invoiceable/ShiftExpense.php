@@ -164,16 +164,6 @@ class ShiftExpense extends InvoiceableModel
     }
 
     /**
-     * Get the client payer record
-     *
-     * @return \App\Billing\ClientPayer|null
-     */
-    public function getClientPayer(): ?ClientPayer
-    {
-        return $this->shift->getClientPayer();
-    }
-
-    /**
      * Add an amount that has been invoiced to a payer
      *
      * @param \App\Billing\ClientInvoiceItem $invoiceItem

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Referral Sources')
+@section('title', ucwords($type) . ' Referral Sources')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="/business/reports">Reports</a></li>
-    <li class="breadcrumb-item active">Referral Sources</li>
+    <li class="breadcrumb-item active">{{ ucwords($type) }} Referral Sources</li>
 @endsection
 
 @section('content')
-    <referral-sources-report  :reports="{{ $reports }}"/>
+    <referral-sources-report :reports="{{ $reports }}" source-type="{{ $type }}" />
 @endsection

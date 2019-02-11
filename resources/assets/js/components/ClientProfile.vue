@@ -75,6 +75,11 @@
                                           v-model="form.poa_phone"
                                           :readonly="authInactive"></b-form-input>
                         </b-form-group>
+                        <b-form-group label="Email">
+                            <b-form-input id="poa_email"
+                                          v-model="form.poa_email"
+                                          :readonly="authInactive"></b-form-input>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Last Name">
@@ -136,6 +141,7 @@
                     poa_first_name: this.client.poa_first_name,
                     poa_last_name: this.client.poa_last_name,
                     poa_phone: this.client.poa_phone,
+                    poa_email: this.client.poa_email,
                     poa_relationship: this.client.poa_relationship,
                     caregiver_1099: this.client.caregiver_1099
                 })

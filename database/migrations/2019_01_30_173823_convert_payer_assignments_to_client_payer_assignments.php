@@ -13,35 +13,6 @@ class ConvertPayerAssignmentsToClientPayerAssignments extends Migration
      */
     public function up()
     {
-        Schema::table('shifts', function (Blueprint $table) {
-            $table->dropColumn(['payer_id']);
-        });
-
-        Schema::table('shifts', function (Blueprint $table) {
-            $table->unsignedInteger('client_payer_id')->after('service_id')->nullable();
-            $table->foreign('client_payer_id')->references('id')->on('client_payers')->onDelete('restrict');
-        });
-
-        Schema::table('shift_services', function (Blueprint $table) {
-            $table->dropForeign(['payer_id']);
-            $table->dropColumn(['payer_id']);
-        });
-
-        Schema::table('shift_services', function (Blueprint $table) {
-            $table->unsignedInteger('client_payer_id')->after('service_id')->nullable();
-            $table->foreign('client_payer_id')->references('id')->on('client_payers')->onDelete('restrict');
-        });
-
-        Schema::table('shift_adjustments', function (Blueprint $table) {
-            $table->dropColumn(['payer_id']);
-        });
-
-        Schema::table('shift_adjustments', function (Blueprint $table) {
-            $table->unsignedInteger('client_payer_id')->after('service_id')->nullable();
-            $table->foreign('client_payer_id')->references('id')->on('client_payers')->onDelete('restrict');
-        });
-
-
         Schema::table('client_invoices', function (Blueprint $table) {
             $table->dropForeign(['payer_id']);
             $table->dropColumn(['payer_id']);
@@ -60,38 +31,6 @@ class ConvertPayerAssignmentsToClientPayerAssignments extends Migration
      */
     public function down()
     {
-        Schema::table('shifts', function (Blueprint $table) {
-            $table->dropForeign(['client_payer_id']);
-            $table->dropColumn(['client_payer_id']);
-            $table->unsignedInteger('payer_id')->after('service_id')->nullable();
-            $table->foreign('payer_id')->references('id')->on('payers')->onDelete('restrict');
-        });
-
-        Schema::table('shifts', function (Blueprint $table) {
-            $table->unsignedInteger('payer_id')->after('service_id')->nullable();
-            $table->foreign('payer_id')->references('id')->on('payers')->onDelete('restrict');
-        });
-
-        Schema::table('shift_services', function (Blueprint $table) {
-            $table->dropForeign(['client_payer_id']);
-            $table->dropColumn(['client_payer_id']);
-        });
-
-        Schema::table('shift_services', function (Blueprint $table) {
-            $table->unsignedInteger('payer_id')->after('service_id')->nullable();
-            $table->foreign('payer_id')->references('id')->on('payers')->onDelete('restrict');
-        });
-
-        Schema::table('shift_adjustments', function (Blueprint $table) {
-            $table->dropForeign(['client_payer_id']);
-            $table->dropColumn(['client_payer_id']);
-        });
-
-        Schema::table('shift_adjustments', function (Blueprint $table) {
-            $table->unsignedInteger('payer_id')->after('service_id')->nullable();
-            $table->foreign('payer_id')->references('id')->on('payers')->onDelete('restrict');
-        });
-
         Schema::table('client_invoices', function (Blueprint $table) {
             $table->dropForeign(['client_payer_id']);
             $table->dropColumn(['client_payer_id']);

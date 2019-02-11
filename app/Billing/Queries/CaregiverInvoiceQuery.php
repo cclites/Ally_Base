@@ -51,4 +51,13 @@ class CaregiverInvoiceQuery extends BaseQuery
 
         return $this;
     }
+
+    function notOnHold(): self
+    {
+        $this->whereDoesntHave('caregiver', function($q) {
+            $q->has('paymentHold');
+        });
+
+        return $this;
+    }
 }

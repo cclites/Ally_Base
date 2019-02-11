@@ -63,6 +63,7 @@ class ProfileController extends Controller
                 'poa_first_name' => 'nullable|string',
                 'poa_last_name' => 'nullable|string',
                 'poa_phone' => 'nullable|string',
+                'poa_email' => 'nullable|string',
                 'poa_relationship' => 'nullable|string',
                 'caregiver_1099' => 'boolean',
             ]);
