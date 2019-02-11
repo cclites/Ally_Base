@@ -37,11 +37,7 @@ class ClientController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Client::forRequestedBusinesses()
-                ->when($request->filled('client_type'), function($query) use ($request) {
-                    $query->where('client_type', $request->input('client_type'));
-                })
-                ->ordered();
+            $query = Client::forRequestedBusinesses()->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -49,6 +45,14 @@ class ClientController extends BaseController
             }
             if ($request->input('status') !== null) {
                 $query->where('status_alias_id', $request->input('status', null));
+            }
+            if ($clientType = $request->input('client_type')) {
+                $query->where('client_type', $clientType);
+            }
+            if ($caseManagerId = $request->input('case_manager_id')) {
+                $query->whereHas('caseManager', function($q) use ($caseManagerId) {
+                    $q->where('id', $caseManagerId);
+                });
             }
             // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
@@ -60,6 +64,7 @@ class ClientController extends BaseController
             if ($request->input('care_plans')) {
                 $query->with('carePlans');
             }
+
 
             $clients = $query->with('caseManager')->get();
             return $clients;

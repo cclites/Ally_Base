@@ -10,7 +10,7 @@
                 <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option value="">-- Case Manager --</option>
+                        <option value="">All Case Managers</option>
                     </template>
                     <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
                 </b-form-select>
@@ -30,7 +30,7 @@
             </b-col>
             <b-col lg="3">
                 <b-form-select v-model="filters.client_type">
-                    <option value="">--Select--</option>
+                    <option value="">All Client Types</option>
                     <option value="private_pay">Private Pay</option>
                     <option value="medicaid">Medicaid</option>
                     <option value="VA">VA</option>
@@ -47,7 +47,7 @@
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
-                    :items="items"
+                    :items="clients"
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
@@ -109,6 +109,7 @@
                 selectedItem: {},
                 clients: [],
                 caseManagers: [],
+                caseManagers: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -165,8 +166,7 @@
 
         computed: {
             listUrl() {
-                const {business_id, status, caseManager} = this.filters;
-                const activeValue = (active !== null) ? active : '';
+                const {client_type, business_id, status, caseManager} = this.filters;
 
                 let active = '';
                 let aliasId = '';
@@ -185,29 +185,7 @@
                     }
                 }
 
-                return `/business/clients?json=1&address=1&businesses[]=${this.business_id}&active=${active}&status=${aliasId}`;
-            },
-
-            items() {
-                const {search, active, caseManager} = this.filters;
-                let simpleMatches = ['client_type', 'business_id'];
-                let results = this.clients;
-                
-                simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
-                results = results.filter((client) => {
-                    const val = simpleMatches.every(key => client[key] == this.filters[key])
-                    return val;
-                });
-                
-                if(active === 1 || active === 0) {
-                    results = results.filter((client) => client.active == active);
-                } 
-
-                if(caseManager) {
-                    results = results.filter((client) => client.case_manager_id === caseManager);
-                }
-
-                return results;
+                return `/business/clients?json=1&address=1&businesses[]=${business_id}&active=${active}&status=${aliasId}&client_type=${client_type}&case_manager_id=${caseManager}`;
             },
 
             filteredCaseManagers() {
