@@ -2,8 +2,8 @@
 namespace App\Shifts;
 
 use App\Client;
-use App\Contracts\ChargeableInterface;
-use App\CreditCard;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Payments\Methods\CreditCard;
 
 /**
  * Class AllyFeeCalculator
@@ -58,7 +58,7 @@ class AllyFeeCalculator
      * Return a float of the percentage used for the Ally Fee (5% is returned as 0.05)
      *
      * @param \App\Client $client
-     * @param \App\Contracts\ChargeableInterface|null $paymentMethod
+     * @param \App\Billing\Contracts\ChargeableInterface|null $paymentMethod
      * @return float
      */
     public static function getPercentage(Client $client, ChargeableInterface $paymentMethod = null)

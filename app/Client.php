@@ -2,12 +2,20 @@
 
 namespace App;
 
+use App\Billing\ClientPayer;
+use App\Billing\ClientRate;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Businesses\Timezone;
 use App\Confirmations\Confirmation;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\CanBeConfirmedInterface;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
@@ -18,6 +26,7 @@ use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
 use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
@@ -46,6 +55,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property string|null $poa_first_name
  * @property string|null $poa_last_name
  * @property string|null $poa_phone
+ * @property string|null $poa_email
  * @property string|null $poa_relationship
  * @property string|null $import_identifier
  * @property string|null $dr_first_name
@@ -83,16 +93,16 @@ use App\Traits\CanHaveEmptyEmail;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
  * @property-read \App\CareDetails $careDetails
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $defaultPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \App\Address $evvAddress
  * @property-read \App\PhoneNumber $evvPhone
@@ -118,7 +128,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\ClientPreferences $preferences
  * @property-read \App\ClientReferralServiceAgreement $referralServiceAgreement
@@ -197,8 +207,14 @@ use App\Traits\CanHaveEmptyEmail;
  * @mixin \Eloquent
  * @property-read string $masked_ssn
  * @property null|string $w9_ssn
+ * @property-read \App\OfficeUser|null $caseManager
+ * @property-read mixed $masked_name
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
+ * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
+class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold,
+    HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
@@ -228,6 +244,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'poa_first_name',
         'poa_last_name',
         'poa_phone',
+        'poa_email',
         'poa_relationship',
         'import_identifier',
         'dr_first_name',
@@ -254,6 +271,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'qb_customer_id',
         'hourly_rate_id',
         'fixed_rate_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
         'hic',
         'travel_directions',
         'created_by',
@@ -262,6 +284,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'disaster_planning',
         'caregiver_1099',
         'case_manager_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
+        'sales_person_id',
     ];
 
     ///////////////////////////////////////////
@@ -427,6 +455,17 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             ->latest();
     }
 
+    public function payers()
+    {
+        return $this->hasMany(ClientPayer::class, 'client_id')
+            ->orderBy('priority');
+    }
+
+    public function rates()
+    {
+        return $this->hasMany(ClientRate::class, 'client_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -441,10 +480,68 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->getAllyPercentage();
     }
 
+    public function getLastServiceDateAttribute()
+    {
+        return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
+    }
+    ///////////////////////////////////////////
+    /// Instance Methods
+    ///////////////////////////////////////////
 
-    ///////////////////////////////////////////
-    /// Other Methods
-    ///////////////////////////////////////////
+    public function getAddress(): ?Address
+    {
+        return $this->evvAddress;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->evvPhone;
+    }
+
+    /**
+     * Get the client timezone (currently retrieved from the business record)
+     *
+     * @return mixed
+     */
+    public function getTimezone()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
+
+    /**
+     * Get effective client payers
+     *
+     * @param string $date
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[]
+     */
+    public function getPayers(string $date = 'now'): Collection
+    {
+        $date = Carbon::parse($date, $this->getTimezone());
+
+        return $query = $this->payers()->ordered()
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->get();
+    }
+
+    /**
+     * Get the default ClientRate for this client
+     *
+     * @param string $date
+     * @return \App\Billing\ClientRate|null
+     */
+    public function getDefaultRate(string $date = 'now'): ?ClientRate
+    {
+        $date = Carbon::parse($date, $this->getTimezone());
+
+        return $this->rates()
+            ->whereNull('caregiver_id')
+            ->whereNull('payer_id')
+            ->whereNull('service_id')
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->first();
+    }
 
     /**
      * Set the client's preference data
@@ -488,7 +585,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     /**
      * @param bool $backup
-     * @return \App\Contracts\ChargeableInterface
+     * @return \App\Billing\Contracts\ChargeableInterface
      */
     public function getPaymentMethod($backup = false)
     {
@@ -551,7 +648,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     }
 
     /**
-     * @param \App\Contracts\ChargeableInterface $method
+     * @param \App\Billing\Contracts\ChargeableInterface $method
      * @param bool $backup
      * @return ChargeableInterface|false
      */
@@ -633,7 +730,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     /**
      * Get all gateway transactions that relate to this client
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {
@@ -665,4 +762,27 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return (float) config('ally.credit_card_fee');
     }
 
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $rates
+     * @return bool
+     */
+    public function syncRates(?iterable $rates) : bool
+    {
+        return ClientRate::sync($this, $rates);
+    }
+
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $payers
+     * @return bool
+     */
+    public function syncPayers(?iterable $payers) : bool
+    {
+        return ClientPayer::sync($this, $payers);
+    }
 }

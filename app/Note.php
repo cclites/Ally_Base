@@ -42,6 +42,10 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $title
+ * @property string|null $call_direction
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCallDirection($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereTitle($value)
  */
 class Note extends AuditableModel implements BelongsToBusinessesInterface
 {

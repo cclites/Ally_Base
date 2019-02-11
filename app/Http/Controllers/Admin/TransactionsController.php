@@ -4,12 +4,12 @@
 namespace App\Http\Controllers\Admin;
 
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Http\Controllers\Controller;
 use App\Payments\RefundProcessor;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
-use App\TransactionRefund;
+use App\Billing\TransactionRefund;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

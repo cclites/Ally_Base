@@ -1,8 +1,8 @@
 <?php
 namespace App\Reports;
 
-use App\Deposit;
-use App\Payment;
+use App\Billing\Deposit;
+use App\Billing\Payment;
 use Carbon\Carbon;
 
 class AdminBucketReport extends BaseReport

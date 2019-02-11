@@ -3,11 +3,11 @@
 namespace Tests\Model;
 
 use App\Address;
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Client;
-use App\CreditCard;
-use App\Payment;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payment;
 use App\PhoneNumber;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;

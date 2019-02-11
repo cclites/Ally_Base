@@ -28,6 +28,9 @@ class Schedule implements Responsable
         if ($shift = $this->schedule->clockedInShift) {
             $array['clocked_in_shift'] = $shift->load('caregiver');
         }
+
+        $array['group_data'] = $this->schedule->getGroupStatistics();
+
         return $array;
     }
 

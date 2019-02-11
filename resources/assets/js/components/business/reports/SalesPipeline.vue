@@ -53,15 +53,49 @@
                             <span class="display-6">Closed Lost: {{pipeline.closed_loss}}</span>
                         </b-row>
                         <hr/>
-                        <b-row>
+                        <b-col lg="2">
+                            <b-button variant="primary" class="mb-3" @click="showGraph = !showGraph">Show/Hide graphs</b-button>
+                        </b-col>
+                        <b-row v-show="showGraph">
                             <b-col lg="6">
-                                <h1>Prospects Funnel</h1>
+                                <h1 class="text-center">Prospects Funnel</h1>
                                 <e-charts ref="funnel" :options="chartOptions" class="chart" auto-resize></e-charts>
                             </b-col>
                             <b-col lg="6">
-                                <h1>Prospects by Referral Source</h1>
+                                <h1 class="text-center">Prospects by Referral Source</h1>
                                 <e-charts ref="bar" :options="barOptions" class="chart" auto-resize></e-charts>
                             </b-col>
+                        </b-row>
+                        <b-row v-if="dataIsReady && ! loading">
+                            <hr/>
+                            <div class="table-responsive">
+                                <b-table bordered striped hover show-empty
+                                    :items="table.items"
+                                    :fields="table.fields"
+                                    :current-page="table.currentPage"
+                                    :per-page="table.perPage"
+                                    empty-text="No related prospects data found for the generated date range."
+                                    @filtered="onFiltered"
+                                >
+                                    <template slot="name" scope="row">
+                                        <a :href="`/business/prospects/${row.item.id}`">{{ row.item.name }}</a>
+                                    </template>
+                                    <template slot="status" scope="row">
+                                        {{ findStatus(row.item) }}
+                                    </template>
+                                    <template slot="referral" scope="row">
+                                        {{ row.item.referral_source ? row.item.referral_source.organization : '-' }}
+                                    </template>
+                                </b-table>
+                            </div>
+                            <b-row style="width: 100%">
+                                <b-col lg="6">
+                                    <b-pagination :total-rows="table.totalRows" :per-page="table.perPage" v-model="table.currentPage"/>
+                                </b-col>
+                                <b-col lg="6" class="text-right">
+                                    Showing {{ table.perPage < table.totalRows ? table.perPage : table.totalRows }} of {{ table.totalRows }} results
+                                </b-col>
+                            </b-row>
                         </b-row>
                     </div>
                 </b-card>
@@ -87,12 +121,24 @@ export default {
         return {
             loading: false,
             dataIsReady: false,
+            showGraph: true,
             form: new Form({
                 start_date: '09/01/2018',
                 end_date: '12/01/2018',
-                businesses: [""],
+                businesses: [''],
             }),
             totalProspects: 0,
+            prospect_status_label: {
+                general: 'General',
+                had_assessment_scheduled: 'Assessment Scheduled', 
+                had_assessment_performed: 'Assessment Performed', 
+                needs_contract: 'Needs Contract', 
+                expecting_client_signature: 'Expecting Signature', 
+                needs_payment_info: 'Collected Payment Info', 
+                ready_to_schedule:'Ready to Schedule', 
+                closed_loss: 'Closed - Loss',
+                closed_win: 'Closed - Win',
+            },
             pipeline: {
                 closed_loss: 0,
                 closed_win: 0,
@@ -107,21 +153,45 @@ export default {
             hotOptions: {
                 width: '80%',
             },
+            table: {
+                totalRows: 0,
+                perPage: 30,
+                currentPage: 1,
+                fields: [
+                    {
+                        key: 'name',
+                        sortable: true,
+                    },
+                    {
+                        key: 'created_at',
+                        label: 'Date entered',
+                        sortable: true,
+                        formatter: (value) => moment(value).format('MM/DD/YYYY'),
+                    },
+                    {
+                        key: 'status',
+                        sortable: true,
+                    },
+                    {
+                        key: 'referral',
+                        label: 'Related referral source',
+                        sortable: true,
+                    },
+                ],
+                items: [],
+            },
             referralData: {},
         };
     },
     computed: {
         chartOptions() {
-            const calculatePercentage = (status) => (this.pipeline[status] / this.totalProspects * 100).toFixed(2);
-            const data = [
-                {name: 'General', value: 70, count: this.pipeline.general, percentage: calculatePercentage('general') },
-                {name: 'Assessment Scheduled', value: 60, count: this.pipeline.had_assessment_scheduled, percentage: calculatePercentage('had_assessment_scheduled') },
-                {name: 'Assessment Performed', value: 50, count: this.pipeline.had_assessment_performed, percentage: calculatePercentage('had_assessment_performed') },
-                {name: 'Needs Contract', value: 40, count: this.pipeline.needs_contract, percentage: calculatePercentage('needs_contract') },
-                {name: 'Expecting Signature', value: 30, count: this.pipeline.expecting_client_signature, percentage: calculatePercentage('expecting_client_signature') },
-                {name: 'Collected Payment Info', value: 20, count: this.pipeline.needs_payment_info, percentage: calculatePercentage('needs_payment_info') },
-                {name: 'Ready to Schedule', value: 10, count: this.pipeline.ready_to_schedule, percentage: calculatePercentage('ready_to_schedule') },
-            ];
+            let data = Object.keys(this.prospect_status_label).reverse().map((key, i) => ({
+                    value: i * 10,
+                    count: this.pipeline[key],
+                    name: this.prospect_status_label[key],
+                    percentage: this.calculatePercentage(key),
+            }));
+            data = data.filter(({name}) => !name.match(/close/i));
 
             return {
                 title: {
@@ -256,6 +326,7 @@ export default {
                         this.monthLabels.push(month.format('MMM'));
                     }
 
+                    this.table.items = data;
                     this.crunchDataForBar(data);
                     this.crunchDataForFunnel(data);
                 })
@@ -263,6 +334,11 @@ export default {
                     console.error(err);
                     this.loading = false;
                 });
+        },
+        calculatePercentage(category) {
+            return this.totalProspects != 0 
+                ? (this.pipeline[category] / this.totalProspects * 100).toFixed(2)
+                : 0;
         },
         crunchDataForFunnel(data) {
             data.forEach(prospect => {
@@ -310,6 +386,35 @@ export default {
             });
 
             this.referralData = result;
+        },
+        findStatus(prospect) {
+            const statuses = Object.keys(this.prospect_status_label);
+            statuses.shift();
+
+            if(prospect.closed_loss) {
+                return this.prospect_status_label.closed_loss;
+            }
+
+            if(prospect.closed_win) {
+                return this.prospect_status_label.closed_win;
+            }
+
+            const hasNoStatus = statuses.every(status => !prospect[status]);
+            if(hasNoStatus) {
+                return this.prospect_status_label.general;
+            }
+
+            let latestStatus = '';
+            statuses.forEach(status => {
+                if(prospect[status]) latestStatus = status;
+            });
+            debugger; // Debug why some prospects dont have a status
+            return this.prospect_status_label[latestStatus];
+        },
+        onFiltered(filteredItems) {
+            // Trigger pagination to update the number of buttons/pages due to filtering
+            this.table.totalRows = filteredItems.length;
+            this.table.currentPage = 1;
         },
     }
 }

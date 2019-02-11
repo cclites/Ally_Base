@@ -23,5 +23,7 @@ $factory->define(Client::class, function(Faker $faker) {
         'dr_fax' => $faker->phoneNumber,
         'hospital_name' => $faker->company,
         'hospital_number' => $faker->phoneNumber,
+        'inquiry_date' => null,
+        'service_start_date' => null,
     ]);
 });

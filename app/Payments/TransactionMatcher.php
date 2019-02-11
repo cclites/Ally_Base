@@ -2,16 +2,16 @@
 
 namespace App\Payments;
 
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
-use App\CreditCard;
-use App\Gateway\ECSQuery;
-use App\GatewayTransaction;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Gateway\ECSQuery;
+use App\Billing\GatewayTransaction;
 use App\User;
 
 class TransactionMatcher {
     /**
-     * @var \App\Gateway\ECSQuery
+     * @var \App\Billing\Gateway\ECSQuery
      */
     private $query;
 
@@ -24,7 +24,7 @@ class TransactionMatcher {
      * Find a payment method matching the transaction information
      *
      * @param $transaction_id
-     * @return \App\Contracts\ChargeableInterface|null
+     * @return \App\Billing\Contracts\ChargeableInterface|null
      */
     public function findMethod($transaction_id)
     {

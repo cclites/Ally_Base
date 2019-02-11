@@ -3,7 +3,7 @@
 
 namespace App\Traits;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 
 trait ChargedTransactionsTrait
 {

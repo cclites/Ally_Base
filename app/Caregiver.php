@@ -2,11 +2,16 @@
 
 namespace App;
 
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Confirmations\Confirmation;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
@@ -52,14 +57,14 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\CaregiverAvailability $availability
- * @property-read \App\BankAccount|null $bankAccount
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar
@@ -78,7 +83,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverMeta[] $meta
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \App\PhoneNumber $phoneNumber
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
@@ -121,8 +126,13 @@ use App\Traits\CanHaveEmptyEmail;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
  * @property-read string $masked_ssn
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
+class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface,
+    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
@@ -152,7 +162,9 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'referral_source_id',
+        'deactivation_note'
     ];
     protected $appends = ['masked_ssn'];
 
@@ -256,6 +268,10 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->belongsToMany(Activity::class, 'caregiver_skills');
     }
 
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -274,8 +290,18 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->phoneNumber;
+    }
 
     /**
      * Set the caregiver's availability data
@@ -292,8 +318,8 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Set the caregiver's primary deposit account
      *
-     * @param \App\BankAccount $account
-     * @return \App\BankAccount|bool
+     * @param \App\Billing\Payments\Methods\BankAccount $account
+     * @return \App\Billing\Payments\Methods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount(BankAccount $account)
@@ -353,7 +379,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Unassign all Caregiver's schedules from now on. 
+     * Unassign all Caregiver's schedules from now on.
      *
      * @return void
      */
@@ -397,7 +423,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return string
      */
-    public function name()
+    public function name(): string
     {
         return trim($this->user->name() . ' ' . $this->title);
     }
@@ -407,7 +433,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return string
      */
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return trim($this->user->nameLastFirst() . ' ' . $this->title);
     }
@@ -434,7 +460,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Get all gateway transactions that relate to this caregiver
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {
