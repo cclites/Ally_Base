@@ -349,10 +349,14 @@ Route::group([
     Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
     Route::post('businesses/{business}/hold', 'Admin\BusinessController@addHold');
     Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
-    Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::put('businesses/{business}/contact-info', 'Admin\BusinessController@updateContactInfo');
     Route::patch('businesses/{business}/sms-settings', 'Admin\BusinessController@updateSmsSettings');
+    Route::get('chains', "Admin\BusinessChainController@index")->name("businesses.chains");
+    Route::get('chains/{chain}', "Admin\BusinessChainController@show")->name("businesses.chains.show");
+    Route::patch('chains/{chain}', "Admin\BusinessChainController@update")->name("businesses.chains.update");
+    Route::resource('chains/{chain}/users', 'Admin\OfficeUserController');
+
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');

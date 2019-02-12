@@ -1,23 +1,26 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use App\Business;
+use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\OfficeUser as OfficeUserResource;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class OfficeUserController extends Controller
 {
-    public function index(Business $business)
+    public function index(BusinessChain $chain)
     {
-        return $business->users->sortBy('name');
+        $users = $chain->users->sortBy('name');
+
+        return OfficeUserResource::collection($users);
     }
 
-    public function store(Request $request, Business $business)
+    public function store(Request $request, BusinessChain $chain)
     {
         $data = $request->validate([
             'email' => 'required|email',
@@ -28,19 +31,27 @@ class OfficeUserController extends Controller
         ]);
         $data['password'] = bcrypt($data['password']);
 
-        if ($user = $business->users()->create($data)) {
-            return new CreatedResponse('The user has been created.', $user->toArray());
+        $request->validate(
+            ['businesses' => 'required|array', 'businesses.*' => 'required|exists:businesses,id'],
+            ['*' => 'An office user needs to be assigned at least one location.']
+        );
+        $businessIds = $request->businesses;
+
+        if ($user = $chain->users()->create($data)) {
+            $user->businesses()->sync($businessIds);
+            $resource = new OfficeUserResource($user);
+            return new CreatedResponse('The user has been created.', $resource->toArray($request));
         }
 
         return new ErrorResponse(500, 'Unknown error');
     }
 
-    public function show(Request $request, Business $business, OfficeUser $user)
+    public function show(Request $request, BusinessChain $chain, OfficeUser $user)
     {
         return $user;
     }
 
-    public function update(Request $request, Business $business, OfficeUser $user)
+    public function update(Request $request, BusinessChain $chain, OfficeUser $user)
     {
         $data = $request->validate([
             'email' => 'required|email',
@@ -49,19 +60,26 @@ class OfficeUserController extends Controller
             'lastname' => 'required',
         ]);
 
+        $request->validate(
+            ['businesses' => 'required|array', 'businesses.*' => 'required|exists:businesses,id'],
+            ['*' => 'An office user needs to be assigned at least one location.']
+        );
+        $businessIds = $request->businesses;
+
         if ($password = $request->input('password')) {
             $request->validate(['password' => 'confirmed']);
             $data['password'] = bcrypt($password);
         }
 
         if ($user->update($data)) {
+            $user->businesses()->sync($businessIds);
             return new SuccessResponse('The user has been updated.', $user->toArray());
         }
 
         return new ErrorResponse(500, 'Unknown error');
     }
 
-    public function destroy(Request $request, Business $business, OfficeUser $user)
+    public function destroy(Request $request, BusinessChain $chain, OfficeUser $user)
     {
         if ($user->delete()) {
             return new SuccessResponse('The user has been deleted.');

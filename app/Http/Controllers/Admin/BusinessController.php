@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\BusinessChain;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -21,7 +22,7 @@ class BusinessController extends Controller
      */
     public function index(Request $request)
     {
-        $businesses = Business::with('paymentHold')->orderBy('name')->get();
+        $businesses = Business::with(['paymentHold', 'chain'])->orderBy('name')->get();
 
         if ($request->expectsJson()) {
             return $businesses;
@@ -37,7 +38,9 @@ class BusinessController extends Controller
      */
     public function create()
     {
-        return view('admin.businesses.create');
+        $chains = BusinessChain::ordered()->get();
+
+        return view('admin.businesses.create', compact('chains'));
     }
 
     /**
@@ -48,37 +51,47 @@ class BusinessController extends Controller
      */
     public function store(Request $request)
     {
+        \DB::beginTransaction();
+
         $businessData = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:70',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
             'state' => 'string|nullable',
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
-            'multi_location_registry' => 'string',
             'type' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
+            'chain_id' => 'nullable|exists:business_chains,id',
         ]);
+
+        $request->validate([
+            'chain_id' => 'nullable|exists:business_chains,id',
+            'new_chain_name' => 'required_without:chain_id|nullable|string|max:70'
+
+        ], ['*' => 'You must select, or create, a business chain.']);
+
+
         $businessData['country'] = 'US';
-
-        $userData = $request->validate([
-            'email' => 'required|email',
-            'username' => 'nullable|unique:users',
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'password' => 'required|confirmed',
-        ]);
-        $userData['username'] = $userData['username'] ?? $userData['email'];
-        $userData['password'] = bcrypt($userData['password']);
-
         $business = Business::create($businessData);
         if (!$business) return new ErrorResponse(500, 'Unable to create business');
 
-        $user = OfficeUser::create($userData);
-        if (!$user) return new ErrorResponse(500, 'Unable to create office user');
+        if (!$request->input('chain_id')) {
+            $chain = BusinessChain::create([
+                'name' => $request->new_chain_name,
+                'slug' => BusinessChain::generateSlug($request->new_chain_name),
+                'address1' => $request->address1,
+                'city' => $request->city,
+                'state' => $request->state,
+                'zip' => $request->zip,
+                'phone1' => $request->phone1,
+            ]);
 
-        $business->users()->attach($user);
-        return new CreatedResponse('The business and office user have been created.', [], route('admin.businesses.show', [$business->id]));
+            $business->chain()->associate($chain)->save();
+        }
+
+        \DB::commit();
+        return new CreatedResponse('The business has been created.', [], route('admin.businesses.show', [$business->id]));
     }
 
     /**
@@ -119,7 +132,6 @@ class BusinessController extends Controller
             'state' => 'string|nullable',
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
-            'multi_location_registry' => 'string',
             'type' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
