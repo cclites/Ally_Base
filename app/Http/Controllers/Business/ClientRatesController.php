@@ -95,7 +95,7 @@ class ClientRatesController extends Controller
     public function canUnassign(Client $client, Caregiver $caregiver)
     {
         if ($error = $this->getUnassignmentError($client, $caregiver)) {
-            return response()->json(['error' => 'Cannot not remove this rate row because it would unassign the caregier.  ' . $error]);
+            return response()->json(['error' => 'Cannot not remove this rate row because it would unassign the caregiver.  ' . $error]);
         }
 
         return response()->json(['status' => 1]);
