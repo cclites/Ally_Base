@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Address;
 use App\Client;
 use App\Confirmations\Confirmation;
-use App\OnboardStatusHistory;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -17,7 +16,7 @@ use Illuminate\Http\Request;
 class ClientConfirmationController extends Controller
 {
 
-    protected $validStatuses = ['needs_agreement', 'emailed_reconfirmation'];
+    protected $validStatuses = [Client::NEEDS_AGREEMENT];
 
     public function show($token)
     {
@@ -28,7 +27,7 @@ class ClientConfirmationController extends Controller
 
         $client = Client::find($confirmation->user->id);
 
-        if (!in_array($client->onboard_status, $this->validStatuses)) {
+        if (!in_array($client->agreement_status, $this->validStatuses)) {
             return view('confirmation.expired');
         }
 
@@ -75,7 +74,7 @@ class ClientConfirmationController extends Controller
             'date_of_birth' => 'nullable|date',
         ]);
         if ($client_data['date_of_birth']) $client_data['date_of_birth'] = filter_date($client_data['date_of_birth']);
-        $client_data['onboard_status'] = 'reconfirmed_checkbox';
+        $client_data['agreement_status'] = Client::SIGNED_ELECTRONICALLY;
 
         // Password Data
         $request->validate([
@@ -98,8 +97,7 @@ class ClientConfirmationController extends Controller
             $client->user->changePassword($request->input('password'));
 
             // Save Onboard Status
-            $history = new OnboardStatusHistory(['status' => 'reconfirmed_checkbox']);
-            $client->onboardStatusHistory()->save($history);
+            $client->agreementStatusHistory()->create(['status' => Client::SIGNED_ELECTRONICALLY]);
 
             // Save Phone Number
             if (!$client->evvPhone) {

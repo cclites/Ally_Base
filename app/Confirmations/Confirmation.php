@@ -27,7 +27,7 @@ class Confirmation
 
     public function touchTimestamp()
     {
-        $this->user->update(['email_sent_at' => Carbon::now()]);
+        $this->user->update(['welcome_email_sent_at' => Carbon::now()]);
     }
 
     public function isValid($type = 'caregiver')
@@ -37,7 +37,7 @@ class Confirmation
         }
 
         if(Carbon::now()->diffInDays($this->user->created_at) > 7) {
-            if (!$timestamp = $this->user->email_sent_at) {
+            if (!$timestamp = $this->user->welcome_email_sent_at) {
                 return false;
             }
 
@@ -52,6 +52,6 @@ class Confirmation
 
     public function expire()
     {
-        $this->user->update(['email_sent_at' => null]);
+        $this->user->update(['welcome_email_sent_at' => null]);
     }
 }

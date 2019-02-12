@@ -22,7 +22,7 @@ class CreateClientRequest extends BusinessRequest
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
             'ssn' => ['nullable', new ValidSSN()],
-            'onboard_status' => 'required',
+            'agreement_status' => 'required',
             'gender' => 'nullable|in:M,F',
             'password' => 'nullable|string',
         ];

@@ -12,7 +12,6 @@ use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientPOAContactRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
-use App\OnboardStatusHistory;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -138,10 +137,7 @@ class ClientController extends BaseController
                 $client->setAutoEmail()->save();
             }
 
-            $history = new OnboardStatusHistory([
-                'status' => $data['onboard_status']
-            ]);
-            $client->onboardStatusHistory()->save($history);
+            $client->agreementStatusHistory()->save(['status' => $data['agreement_status']]);
 
             // Provider pay
             if ($request->provider_pay) {
@@ -214,7 +210,7 @@ class ClientController extends BaseController
         }
         $client->future_schedules = $client->futureSchedules()->count();
 
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $lastStatusDate = $client->agreementStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
@@ -248,16 +244,13 @@ class ClientController extends BaseController
         $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
-        if ($client->onboard_status != $data['onboard_status']) {
+        if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
         if ($client->update($data)) {
             if ($addOnboardRecord) {
-                $history = new OnboardStatusHistory([
-                    'status' => $data['onboard_status']
-                ]);
-                $client->onboardStatusHistory()->save($history);
+                $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
             return new SuccessResponse('The client has been updated.', $client);

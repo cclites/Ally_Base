@@ -43,7 +43,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property string|null $backup_payment_id
  * @property string $client_type
  * @property mixed|null $ssn
- * @property string|null $onboard_status
+ * @property string|null $agreement_status
  * @property string|null $deleted_at
  * @property float|null $fee_override
  * @property float $max_weekly_hours
@@ -126,7 +126,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientNarrative[] $narrative
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientAgreementStatusHistory[] $agreementStatusHistory
  * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
@@ -290,7 +290,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'discharge_disposition',
         'discharge_internal_notes',
         'sales_person_id',
+        'agreement_status',
     ];
+
+    ///////////////////////////////////////////
+    /// Client Agreement Statuses
+    ///////////////////////////////////////////
+
+    const NEEDS_AGREEMENT = 'needs_agreement';
+    const SIGNED_ELECTRONICALLY = 'electronic';
+    const SIGNED_PAPER = 'paper';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -690,17 +699,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         $confirmation = new Confirmation($this);
         $confirmation->touchTimestamp();
 
-        $status = 'emailed_reconfirmation';
-        $this->update(['onboard_status' => $status]);
-        $history = new OnboardStatusHistory(compact('status'));
-        $this->onboardStatusHistory()->save($history);
-
         $this->notify(new ClientConfirmation($this, $this->business));
     }
 
-    public function onboardStatusHistory()
+    public function agreementStatusHistory()
     {
-        return $this->hasMany(OnboardStatusHistory::class);
+        return $this->hasMany(ClientAgreementStatusHistory::class);
     }
 
     /**

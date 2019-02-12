@@ -100,16 +100,16 @@
                 <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                 <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
             </b-form-group>
-            <b-form-group label="Ally Onboard Status" label-for="onboard_status" label-class="required">
+            <b-form-group label="Ally Onboard Status" label-for="agreement_status" label-class="required">
                 <b-form-select
-                        id="onboard_status"
-                        name="onboard_status"
-                        v-model="form.onboard_status"
+                        id="agreement_status"
+                        name="agreement_status"
+                        v-model="form.agreement_status"
                 >
                     <option value="">--Select--</option>
                     <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
                 </b-form-select>
-                <input-help :form="form" field="onboard_status" text="Select the Ally Agreement status of the client"></input-help>
+                <input-help :form="form" field="agreement_status" text="Select the Ally Agreement status of the client"></input-help>
             </b-form-group>
         </b-col>
     </b-row>
@@ -138,7 +138,7 @@
                     date_of_birth: this.value.date_of_birth || null,
                     client_type: this.value.client_type || "",
                     ssn: this.value.ssn || null,
-                    onboard_status: this.value.onboard_status || "",
+                    agreement_status: this.value.agreement_status || "",
                     override: false,
                     provider_pay: 0,
                     business_id: this.value.business_id || "",

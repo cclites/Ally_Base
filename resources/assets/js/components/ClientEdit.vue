@@ -330,22 +330,22 @@
                 <b-col lg="8">
                     <b-row>
                         <b-col lg="6" sm="12">
-                            <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
+                            <b-form-group label="Ally Client Agreement Status" label-for="agreement_status">
                                 <b-form-select
-                                        id="onboard_status"
-                                        name="onboard_status"
-                                        v-model="form.onboard_status"
-                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
+                                        id="agreement_status"
+                                        name="agreement_status"
+                                        v-model="form.agreement_status"
+                                        :disabled="form.agreement_status == 'electronic'"
                                 >
                                     <option value="">--Please Select--</option>
-                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
+                                    <option v-if="hiddenOnboardStatuses[form.agreement_status]" :value="form.agreement_status">{{ hiddenOnboardStatuses[form.agreement_status] }}</option>
                                     <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
                                 </b-form-select>
-                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
+                                <input-help :form="form" field="agreement_status" :text="onboardStatusText"></input-help>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6" sm="12">
-                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
+                            <b-form-group v-if="client.agreement_status == 'needs_agreement'">
                                 <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
                                 <br>
                                 <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
@@ -357,17 +357,11 @@
                                 <br>
                                 <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
-                            <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Resend Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
                         </b-col>
                     </b-row>
                 </b-col>
                 <b-col lg="4">
-                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
+                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && form.agreement_status=='needs_agreement'">
                         <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
                         <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
                     </b-form-group>
@@ -477,7 +471,7 @@
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
-                    onboard_status: this.client.onboard_status,
+                    agreement_status: this.client.agreement_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
                     referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
@@ -563,8 +557,8 @@
                 this.preferences.alertOnResponse = false;
                 this.preferences.post('/business/clients/' + this.client.id + '/preferences');
                 if (this.form.ssn) this.form.ssn = '***-**-****';
-                if (this.form.wasModified('onboard_status')) {
-                    this.client.onboard_status = this.form.onboard_status;
+                if (this.form.wasModified('agreement_status')) {
+                    this.client.agreement_status = this.form.agreement_status;
                     this.localLastStatusDate = moment.utc().format();
                 }
             },
@@ -608,12 +602,10 @@
 
             onboardStatusText() {
                 if (this.localLastStatusDate) {
-                    switch (this.form.onboard_status) {
-                        case 'emailed_reconfirmation':
-                            return 'The confirmation email was sent ' + this.lastStatusUpdated;
-                        case 'agreement_signed': // paper signature
+                    switch (this.form.agreement_status) {
+                        case 'paper': // paper signature
                             return 'Signed: ' + this.lastStatusUpdated;
-                        case 'reconfirmed_checkbox': // electronic signature
+                        case 'electronic': // electronic signature
                             return 'Signed Electronically: ' + this.lastStatusUpdated;
                     }
                     return 'The status was last updated ' + this.lastStatusUpdated;

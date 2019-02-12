@@ -31,7 +31,7 @@ class UpdateClientRequest extends BusinessRequest
             'case_manager_id' => 'nullable',
             'ssn' => ['nullable', new ValidSSN()],
             'gender' => 'nullable|in:M,F',
-            'onboard_status' => 'required',
+            'agreement_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
             'diagnosis' => 'nullable|string|max:100',
