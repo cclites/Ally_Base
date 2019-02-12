@@ -465,9 +465,7 @@
                 }
 
                 if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
-                    if (item.id) {
-                        this.items = this.items.filter(x => { return x.id !== item.id });
-                    }
+                    this.items = this.items.filter(x => { return JSON.stringify(x) !== JSON.stringify(item) });
                 }
                 this.busyRemoving = null;
             },
