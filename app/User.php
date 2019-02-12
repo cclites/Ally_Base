@@ -206,6 +206,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             ->whereNull('completed_at');
     }
 
+    /**
+     * Get the user's setup status history relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function setupStatusHistory()
+    {
+        return $this->hasMany(SetupStatusHistory::class);
+    }
+    
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

@@ -302,6 +302,15 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     const SIGNED_PAPER = 'paper';
 
     ///////////////////////////////////////////
+    /// Client Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
+    ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
 
