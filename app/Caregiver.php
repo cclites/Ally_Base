@@ -540,6 +540,21 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->clients()->where('client_id', $client)->exists();
     }
 
+    /**
+     * Check if Caregiver has any scheduled shifts for the
+     * specified Client.
+     *
+     * @param Client $client
+     * @return boolean
+     */
+    public function hasScheduledShifts(Client $client) : bool
+    {
+        return $this->schedules()
+            ->forClient($client)
+            ->future($client->business->timezone)
+            ->exists();
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
