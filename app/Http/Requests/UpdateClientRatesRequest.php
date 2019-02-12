@@ -68,6 +68,7 @@ class UpdateClientRatesRequest extends FormRequest
         $data = $this->validated();
         if (isset($data['rates'])) {
             $data['rates'] = collect($data['rates'])->map(function ($rate) {
+                unset($rate['caregiver_name']);
                 return array_merge($rate, [
                     'effective_start' => (new Carbon($rate['effective_start']))->format('Y-m-d'),
                     'effective_end' => (new Carbon($rate['effective_end']))->format('Y-m-d'),

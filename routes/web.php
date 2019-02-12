@@ -251,6 +251,7 @@ Route::group([
     Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
     Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
     Route::patch('clients/{client}/rates', 'Business\ClientRatesController@update')->name('clients.rates.update');
+    Route::get('clients/{client}/can-unassign/{caregiver}', 'Business\ClientRatesController@canUnassign');
 
     Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');

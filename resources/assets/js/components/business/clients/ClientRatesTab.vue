@@ -115,8 +115,9 @@
                     ></b-form-input>
                 </template>
                 <template slot="actions" scope="data">
-                    <b-btn size="sm" @click="removeRate(data.index)">
-                        <i class="fa fa-trash"></i>
+                    <b-btn size="sm" @click="removeRate(data.item)" :disabled="busyRemoving === data.item.id">
+                        <i v-if="busyRemoving === data.item.id" class="fa fa-spinner fa-spin"></i>
+                        <i v-else class="fa fa-trash"></i>
                     </b-btn>
                 </template>
                 <template slot="provider_hourly_fee" scope="row">
@@ -281,6 +282,7 @@
                     effective_at: moment().format('MM/DD/YYYY'),
                 }),
                 caregiverForm: new Form({caregiver_id: ""}),
+                busyRemoving: null,
 
                 items: [],
                 totalRows: 0,
@@ -446,17 +448,33 @@
                 }, 500, 'linear');
             },
 
-            removeRate(index) {
-                if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
-                    if (index >= 0) {
-                        this.items.splice(index, 1);
+            async removeRate(item) {
+                this.busyRemoving = item.id;
+
+                // If there is only one rate entry for the caregiver, check if
+                // they can be unassigned here and block the action if there
+                // is a conflict.
+                let caregiversRates = this.items.filter(x => x.caregiver_id === item.caregiver_id).length;
+                if (caregiversRates === 1) {
+                    let response = await axios.get(`/business/clients/${this.client.id}/can-unassign/${item.caregiver_id}`);
+                    if (response.data.error) {
+                        alert(response.data.error);
+                        this.busyRemoving = null;
+                        return;
                     }
                 }
+
+                if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
+                    if (item.id) {
+                        this.items = this.items.filter(x => { return x.id !== item.id });
+                    }
+                }
+                this.busyRemoving = null;
             },
 
             async saveRates() {
                 let form = new Form({
-                    rates: this.items.map(x => { delete x.caregiver_name; return x; }),
+                    rates: this.items,
                 });
                 form.patch(`/business/clients/${this.client.id}/rates`)
                     .then( async ({ data }) => {
@@ -487,14 +505,14 @@
             //     this.clientCaregiverModal = false;
             // },
 
-            async removeAssignedCaregiver(caregiver_id) {
-                if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
-                    let form = new Form({caregiver_id: caregiver_id});
-                    await form.post('/business/clients/'+this.client.id+'/detach-caregiver');
-                    this.fetchAssignedCaregivers();
-                    this.fetchOtherCaregivers();
-                }
-            },
+            // async removeAssignedCaregiver(caregiver_id) {
+            //     if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
+            //         let form = new Form({caregiver_id: caregiver_id});
+            //         await form.post('/business/clients/'+this.client.id+'/detach-caregiver');
+            //         this.fetchAssignedCaregivers();
+            //         this.fetchOtherCaregivers();
+            //     }
+            // },
 
             async excludeCaregiver() {
                 if (this.excludeForm.id) {

@@ -10,6 +10,7 @@ use App\Billing\ClientRate;
 use App\Client;
 use App\Http\Requests\UpdateClientRatesRequest;
 use App\Billing\Validators\ClientRateValidator;
+use App\Caregiver;
 
 class ClientRatesController extends Controller
 {
@@ -44,22 +45,27 @@ class ClientRatesController extends Controller
         
         \DB::beginTransaction();
         try {
-            // Ensure all caregivers are attached to the client
+            // Ensure all caregivers are attached to the client and
+            // remove any caregivers that were previously attached
+            // but no longer have any rates set.
             $caregivers = collect($data['rates'])
                 ->where('caregiver_id', '<>', null)
                 ->pluck('caregiver_id');
-    
-            if (! empty($caregivers)) {
-                $client->caregivers()->syncWithoutDetaching($caregivers);
-            }
 
-            // Unassign any caregivers that do not have set rates
             $unassignIds = $client->caregivers()
                 ->whereNotIn('caregiver_id', $caregivers)
-                ->get()
-                ->pluck('id');
-            $client->caregivers()->detach($unassignIds);
-    
+                ->get();
+
+            foreach ($unassignIds as $caregiver) {
+                if ($error = $this->getUnassignmentError($client, $caregiver)) {
+                    return new ErrorResponse(400, $error);
+                }
+            }
+
+            if (! empty($caregivers)) {
+                $client->caregivers()->sync($caregivers);
+            }
+
             if ($client->syncRates($data['rates'])) {
                 $validator = new ClientRateValidator();
                 if (! $validator->validate($client->fresh())) {
@@ -77,5 +83,43 @@ class ClientRatesController extends Controller
             \DB::rollBack();
             return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
+    }
+
+    /**
+     * Check if a caregiver can be removed from a client.
+     *
+     * @param Client $client
+     * @param Caregiver $caregiver
+     * @return \Illuinate\Http\Response
+     */
+    public function canUnassign(Client $client, Caregiver $caregiver)
+    {
+        if ($error = $this->getUnassignmentError($client, $caregiver)) {
+            return response()->json(['error' => 'Cannot not remove this rate row because it would unassign the caregier.  ' . $error]);
+        }
+
+        return response()->json(['status' => 1]);
+    }
+
+    /**
+     * Helper function to check if a caregiver can be unassigned
+     * from a client.  Results in an error message for the reason
+     * why they cannot be unassigned, or null if they can be.
+     *
+     * @param Client $client
+     * @param Caregiver $caregiver
+     * @return string|null
+     */
+    public function getUnassignmentError(Client $client, Caregiver $caregiver) : ?string
+    {
+        if ($caregiver->isClockedIn($client->id)) {
+            return $caregiver->name() . ' cannot be unassigned because they are currently clocked in for this client.';
+        }
+        
+        if ($caregiver->hasScheduledShifts($client)) {
+            return $caregiver->name() . ' cannot be unassigned because they have future scheduled shifts for ' . $client->name() . '.';
+        }
+        
+        return null;
     }
 }
