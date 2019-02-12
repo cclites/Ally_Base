@@ -279,24 +279,6 @@
                                 <small>* Provider Fee &amp; Ally Fee are estimated.  (Payment Type: {{ paymentType }} {{ displayAllyPct }}%)</small>
                             </b-col>
                         </b-row>
-                        <b-row>
-                            <b-col sm="6">
-                                <b-form-group label="Shift Status" label-for="status" v-if="schedule.id">
-                                    <b-form-select
-                                            id="status"
-                                            name="status"
-                                            v-model="form.status"
-                                    >
-                                        <option value="OK">No Status</option>
-                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
-                                        <option value="CLIENT_CANCELED">Client Canceled</option>
-                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
-                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
-                                        <option value="OPEN_SHIFT">Open Shift</option>
-                                    </b-form-select>
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
                     </b-tab>
                     <b-tab title="Recurrence" id="schedule-recurrence" v-if="!schedule.id">
                         <b-row>
@@ -347,6 +329,8 @@
                                         <option value="ATTENTION_REQUIRED">Attention Required</option>
                                         <option value="CLIENT_CANCELED">Client Canceled</option>
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
+                                        <option value="OPEN_SHIFT">Open Shift</option>
                                     </b-form-select>
                                 </b-form-group>
                                 <b-form-group label="Add a note for the Caregiver to see" label-for="notes">
@@ -673,7 +657,7 @@
                     'care_plan_id': schedule.care_plan_id || '',
                     'status': schedule.status || 'OK',
                     'service_id': schedule.service_id || this.defaultService.id,
-                    'payer_id': null,
+                    'payer_id': schedule.payer_id || null,
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],

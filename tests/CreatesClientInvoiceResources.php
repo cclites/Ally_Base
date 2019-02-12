@@ -69,11 +69,11 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createService(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => null,
+            'payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',
             'status' => Shift::WAITING_FOR_INVOICE,
@@ -81,7 +81,7 @@ trait CreatesClientInvoiceResources
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'duration' => 1,
             'client_rate' => $amount,
             'caregiver_rate' => round($amount * .75, 2),
@@ -91,11 +91,11 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
-    private function createServiceHours(float $rate, float $duration, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createServiceHours(float $rate, float $duration, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => null,
+            'payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',
             'status' => Shift::WAITING_FOR_INVOICE,
@@ -103,7 +103,7 @@ trait CreatesClientInvoiceResources
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'duration' => $duration,
             'client_rate' => $rate,
             'caregiver_rate' => round($rate * .75, 2),
@@ -113,11 +113,11 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
-    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'service_id' => null,
             'caregiver_rate' => 0,
             'client_rate' => 0,
@@ -129,11 +129,11 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
-    private function createShiftWithMileage(float $rate, float $miles, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createShiftWithMileage(float $rate, float $miles, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'service_id' => null,
             'caregiver_rate' => 0,
             'client_rate' => 0,
@@ -146,11 +146,11 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
-    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null)
+    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $payerId = null)
     {
         $adjustment = factory(ShiftAdjustment::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'client_rate' => -$amount,
             'units' => 1,
             'status' => 'WAITING_FOR_INVOICE',

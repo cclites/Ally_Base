@@ -106,6 +106,7 @@ Route::group([
     Route::patch('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@update')->name('caregivers.clients.narrative.update');
     Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
     Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
+    Route::get('caregiver/schedules/{client}/adjoining', 'Caregivers\ClientController@adjoiningSchedules')->name('clients.schedules.adjoining');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
@@ -116,6 +117,7 @@ Route::group([
     Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
     Route::get('clocked-in', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
     Route::get('clock-out', 'Caregivers\ShiftController@showClockOut')->name('clock_out');
+    Route::get('clock-out/{client_id}', 'Caregivers\ShiftController@showClockOutForClient')->name('clock_out_by_client');
     Route::post('clock-out', 'Caregivers\ShiftController@clockOut');
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
 
@@ -211,6 +213,7 @@ Route::group([
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
+    Route::patch('clients/{client}/exclude-caregiver/{clientExcludedCaregiver}', 'Business\ClientExcludedCaregiverController@update')->name('clients.exclude-caregiver');
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');
     Route::delete('clients/excluded-caregiver/{id}', 'Business\ClientExcludedCaregiverController@destroy')->name('clients.remove-excluded-caregiver');
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
@@ -248,6 +251,7 @@ Route::group([
     Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
     Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
     Route::patch('clients/{client}/rates', 'Business\ClientRatesController@update')->name('clients.rates.update');
+    Route::get('clients/{client}/can-unassign/{caregiver}', 'Business\ClientRatesController@canUnassign');
 
     Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
