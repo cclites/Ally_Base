@@ -309,7 +309,7 @@ class CaregiverController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        $data = $request->validate(['misc' => 'required|string']);
+        $data = $request->validate(['misc' => 'nullable|string']);
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }
