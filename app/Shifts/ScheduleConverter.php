@@ -33,6 +33,13 @@ class ScheduleConverter
      */
     protected $aggregator;
 
+    /**
+     * The Schedule statuses that should be allowed to be converted.
+     *
+     * @var array
+     */
+    protected $convertibleStatuses = [Schedule::OK, Schedule::ATTENTION_REQUIRED];
+    
     public function __construct(Business $business, ScheduleAggregator $aggregator = null)
     {
         $this->business = $business;
@@ -71,6 +78,7 @@ class ScheduleConverter
     {
         $shifts = [];
         $schedules = $this->aggregator->where('business_id', $this->business->id)
+                                      ->onlyStatus($this->convertibleStatuses)
                                       ->getSchedulesStartingBetween($start, $end);
 
         foreach ($schedules as $schedule) {
