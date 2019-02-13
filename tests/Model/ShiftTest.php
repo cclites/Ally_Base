@@ -3,7 +3,6 @@
 namespace Tests\Model;
 
 use App\Activity;
-use App\Address;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -11,11 +10,7 @@ use App\Schedule;
 use App\Shift;
 use App\ShiftActivity;
 use App\ShiftIssue;
-use App\Shifts\Data\ClockOutData;
-use App\Shifts\ShiftFactory;
-use App\Shifts\EVVClockInData;
 use Carbon\Carbon;
-use Packages\GMaps\GeocodeCoordinates;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -44,63 +39,6 @@ class ShiftTest extends TestCase
     public function testShiftCanBeCreated()
     {
         return $this->assertTrue(true);
-    }
-
-    /**
-     * @test
-     */
-    function a_shift_can_be_created_using_the_factory_with_minimum_data()
-    {
-        $factory = ShiftFactory::withoutSchedule(
-            $this->client,
-            $this->caregiver,
-            'default',
-            false,
-            20.00,
-            12.00,
-            Shift::METHOD_GEOLOCATION,
-            Carbon::now()
-        );
-
-        $shift = $factory->create();
-        $this->assertInstanceOf(Shift::class, $shift, "The withoutSchedule shift data did not create a Shift instance.");
-        $this->assertGreaterThan(0, $shift->id, "The withoutSchedule shift data did not get persisted to the database.");
-
-        $schedule = factory(Schedule::class)->create();
-        $factory = ShiftFactory::withSchedule(
-            $schedule,
-            Shift::METHOD_GEOLOCATION,
-            Carbon::now()
-        );
-
-        $shift = $factory->create();
-        $this->assertInstanceOf(Shift::class, $shift, "The withSchedule shift data did not create a Shift instance.");
-        $this->assertGreaterThan(0, $shift->id, "The withSchedule shift data did not get persisted to the database.");
-        $this->assertEquals($schedule->id, $shift->schedule_id, "The withSchedule shift data did not persist the schedule_id.");
-    }
-
-    /**
-     * @test
-     */
-    function a_shift_can_be_created_with_additional_data_classes()
-    {
-        $schedule = factory(Schedule::class)->create();
-        $factory = ShiftFactory::withSchedule(
-            $schedule,
-            Shift::METHOD_GEOLOCATION,
-            Carbon::now()
-        );
-
-        $address = factory(Address::class)->create();
-        $coordinates = new GeocodeCoordinates(50.0, -50.0);
-        $clockInData = new EVVClockInData($address, $coordinates, true, '127.0.0.1', 'Some User Agent String');
-        $clockOutData = new ClockOutData(1.0, 0.0);
-
-        $shift = $factory->create($clockInData, $clockOutData);
-        $this->assertInstanceOf(Shift::class, $shift, "The additional shift data did not create a Shift instance.");
-        $this->assertGreaterThan(0, $shift->id, "The additional shift data did not get persisted to the database.");
-        $this->assertEquals($coordinates->latitude, $shift->checked_in_latitude, 'The additional clock in data did not get added to the shift instance.');
-        $this->assertEquals(1.0, $shift->mileage, 'The additional clock out data did not get added to the shift instance.');
     }
 
     public function testShiftDuration()

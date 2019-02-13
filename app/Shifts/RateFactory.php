@@ -45,9 +45,9 @@ class RateFactory
         if ($clientRate) {
             return new Rates(
                 $fixedRates ? $clientRate->caregiver_fixed_rate : $clientRate->caregiver_hourly_rate,
-                0,
+                null,
                 $fixedRates ? $clientRate->client_fixed_rate : $clientRate->client_hourly_rate,
-                0,
+                null,
                 true,
                 $fixedRates
             );
