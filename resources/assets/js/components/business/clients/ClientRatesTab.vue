@@ -479,8 +479,8 @@
                         await this.fetchAssignedCaregivers();
                         this.setItems(data.data);
                     })
-                    .catch(e => {
-                        this.fetchAssignedCaregivers();
+                    .catch( async (e) => {
+                        await this.fetchAssignedCaregivers();
                     })
                     .finally(() => {
                         this.fetchOtherCaregivers();
@@ -677,6 +677,11 @@
 
             getCaregiverName(id) {
                 let cg = this.caregivers.find(x => x.id === id);
+                if (cg) {
+                    return cg.name;
+                }
+
+                cg = this.otherCaregivers.find(x => x.id === id);
                 if (cg) {
                     return cg.name;
                 }
