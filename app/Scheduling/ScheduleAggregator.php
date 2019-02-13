@@ -66,6 +66,22 @@ class ScheduleAggregator
     }
 
     /**
+     * Only include the schedule if it has one of the given statuses.
+     *
+     * @param string|array $status
+     * @return $this
+     */
+    public function onlyStatus($status)
+    {
+        if (! is_array($status)) {
+            $status = [$status];
+        }
+
+        $this->query()->whereIn('status', $status);
+        return $this;
+    }
+
+    /**
      * Only include the schedule if the date range matches the start time, not accounting for the end time
      *
      * @param bool $bool
