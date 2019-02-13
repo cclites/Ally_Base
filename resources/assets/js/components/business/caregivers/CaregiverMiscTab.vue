@@ -56,8 +56,13 @@
             updateCaregiver() {
                 const {id} = this.caregiver;
 
-                this.form.put(`/business/caregivers/${id}/misc`);
-                this.options.post(`/business/custom-fields/caregiver/${id}`);
+                this.form.put(`/business/caregivers/${id}/misc`)
+                    .then(response => {
+                        this.options.alertOnSuccess = false;
+                        this.options.post(`/business/custom-fields/caregiver/${id}`)
+                            .catch(e => {});
+                    })
+                    .catch(e => {});
             }
         }
 
