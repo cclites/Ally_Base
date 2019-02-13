@@ -40,15 +40,14 @@ class ClientRatesController extends Controller
     public function update(UpdateClientRatesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
-
-        $data = $request->filtered();
+        $rates = $request->filtered();
         
         \DB::beginTransaction();
         try {
             // Ensure all caregivers are attached to the client and
             // remove any caregivers that were previously attached
             // but no longer have any rates set.
-            $caregivers = collect($data['rates'])
+            $caregivers = collect($rates)
                 ->where('caregiver_id', '<>', null)
                 ->pluck('caregiver_id');
 
@@ -66,7 +65,7 @@ class ClientRatesController extends Controller
                 $client->caregivers()->sync($caregivers);
             }
 
-            if ($client->syncRates($data['rates'])) {
+            if ($client->syncRates($rates)) {
                 $validator = new ClientRateValidator();
                 if (! $validator->validate($client->fresh())) {
                     \DB::rollBack();
