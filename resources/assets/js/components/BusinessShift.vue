@@ -126,13 +126,14 @@
 
                 <b-row class="mt-2">
                     <b-col lg="12">
-                        <strong>Shift Billing Type: </strong>
-                        <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
-                        <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
-                        <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
-                        <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
-                        <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
-                        <label for="create_service_rates" class="rate-label">Service Breakout</label>
+                        <strong>Shift Billing Type</strong>
+                        <b-form-group class="pt-2 mb-0">
+                            <b-form-radio-group v-model="billingType">
+                                <b-form-radio value="hourly">Actual Hours</b-form-radio>
+                                <b-form-radio value="fixed">Fixed Rate</b-form-radio>
+                                <b-form-radio value="services">Service Breakout</b-form-radio>
+                            </b-form-radio-group>
+                        </b-form-group>
                     </b-col>
                 </b-row>
 
@@ -718,22 +719,25 @@
             },
 
             resetForm(shift) {
+                console.log('New Shift', shift);
                 // Reset values
                 this.deleted = false;
+                this.billingType = shift.fixed_rates ? 'fixed' : 'hourly';
+                this.defaultRates = shift.client_rate === null;
 
                 // Initialize form
-                this.form = new Form(this.initForm(shift));
+                this.$nextTick(() => {
+                    this.form = new Form(this.initForm(shift));
 
-                if (shift) {
-                    // Initialize form values from services
-                    this.defaultRates = this.form.client_rate === null;
-                    this.billingType = this.form.fixed_rates ? 'fixed' : 'hourly';
-                    this.initServicesFromObject(shift);
+                    if (shift) {
+                        // Initialize form values from services
+                        this.initServicesFromObject(shift);
 
-                    // Initialize additional data from shift
-                    this.status = (this.shift) ? this.shift.status : null;
-                    this.fixDateTimes();
-                }
+                        // Initialize additional data from shift
+                        this.status = (this.shift) ? this.shift.status : null;
+                        this.fixDateTimes();
+                    }
+                });
             },
 
             setDefaultDateTimes() {
@@ -759,26 +763,27 @@
             },
 
             initForm(shift = {}) {
+                console.log('initForm', this.form);
                 return {
-                    client_id: ('client_id' in shift) ? shift.client_id : null,
-                    caregiver_id: ('caregiver_id' in shift) ? shift.caregiver_id : null,
-                    caregiver_comments: ('caregiver_comments' in shift) ? shift.caregiver_comments : null,
-                    checked_in_time: ('checked_in_time' in shift) ? shift.checked_in_time : null,
-                    checked_out_time: ('checked_out_time' in shift) ? shift.checked_out_time : null,
-                    mileage: ('mileage' in shift) ? shift.mileage : 0,
-                    other_expenses: ('other_expenses' in shift) ? shift.other_expenses : 0,
-                    other_expenses_desc: ('other_expenses_desc' in shift) ? shift.other_expenses_desc : null,
-                    hours_type: ('hours_type' in shift) ? shift.hours_type : 'default',
-                    verified: ('verified' in shift) ? shift.verified : true,
-                    fixed_rates: ('fixed_rates' in shift) ? shift.fixed_rates : 0,
-                    caregiver_rate: ('caregiver_rate' in shift) ? shift.caregiver_rate : '',
-                    client_rate: ('client_rate' in shift) ? shift.client_rate : '',
+                    client_id: shift.client_id || null,
+                    caregiver_id: shift.caregiver_id || null,
+                    caregiver_comments: shift.caregiver_comments || null,
+                    checked_in_time: shift.checked_in_time || null,
+                    checked_out_time: shift.checked_out_time || null,
+                    mileage: shift.mileage || 0,
+                    other_expenses: shift.other_expenses || 0,
+                    other_expenses_desc: shift.other_expenses_desc || null,
+                    hours_type: shift.hours_type || 'default',
+                    verified: shift.verified || true,
+                    fixed_rates: shift.fixed_rates || 0,
+                    caregiver_rate: shift.caregiver_rate || '',
+                    client_rate: shift.client_rate || '',
                     provider_fee: null, // for show
                     ally_fee: null, // for show
                     service_id: shift.service_id || null,
                     payer_id: shift.payer_id || null,
-                    activities: this.getShiftActivityList(), //[],//('activities' in shift) ? shift.activities : [],
-                    issues: ('issues' in shift) ? shift.issues : [],
+                    activities: this.getShiftActivityList(),
+                    issues: shift.issues || [],
                     override: false,
                     duplicate_confirm: 0,
                     modal: this.is_modal,

@@ -210,10 +210,10 @@ class ShiftFactory implements Arrayable
      * @param int|null $caregiverId
      * @param int|null $serviceId
      * @param int|null $payerId
-     * @return \App\Scheduling\Data\ScheduledRates|\App\Shifts\Rates|null
+     * @return \App\Scheduling\Data\ScheduledRates|null
      */
-    protected static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
-        ?int $serviceId, ?int $payerId)
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
+        ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
         if (!$rates || $rates->clientRate === null) {
             $client = Client::findOrFail($clientId);

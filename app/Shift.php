@@ -21,7 +21,9 @@ use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
 use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\CostCalculator;
+use App\Shifts\Data\ClockData;
 use App\Shifts\DurationCalculator;
+use App\Shifts\ShiftFactory;
 use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
 use App\Traits\BelongsToOneBusiness;
@@ -511,6 +513,21 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if (!$service) {
                 $service = new ShiftService();
             }
+
+            // Resolve default rates
+            if ($data['client_rate'] === null) {
+                $rates = ShiftFactory::resolveRates(
+                    new ClockData($this->checked_in_method, $this->checked_in_time->toDateTimeString()),
+                    null,
+                    $this->client_id,
+                    $this->caregiver_id,
+                    $data['service_id'],
+                    $data['payer_id']
+                );
+                $data['client_rate'] = $rates->clientRate;
+                $data['caregiver_rate'] = $rates->caregiverRate;
+            }
+
             $service->fill($data);
             $this->services()->save($service);
             $savedIds[] = $service->id;
