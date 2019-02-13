@@ -465,6 +465,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->hasMany(ClientRate::class, 'client_id');
     }
 
+    /**
+     * Get the ClientContacts relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
