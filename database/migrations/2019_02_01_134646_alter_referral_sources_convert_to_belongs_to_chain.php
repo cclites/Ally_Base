@@ -28,7 +28,7 @@ class AlterReferralSourcesConvertToBelongsToChain extends Migration
         Schema::table('referral_sources', function (Blueprint $table) {
             $table->dropColumn('business_id');
             $table->unsignedInteger('chain_id')->nullable(false)->change();
-            $table->string('type', 30)->default('client');
+            $table->string('type', 30)->after('chain_id')->default('client');
             $table->foreign('chain_id')->references('id')->on('business_chains');
         });
     }
@@ -52,7 +52,7 @@ class AlterReferralSourcesConvertToBelongsToChain extends Migration
         }
 
         Schema::table('referral_sources', function (Blueprint $table) {
-            $table->dropColumn('chain_id');
+            $table->dropColumn(['chain_id', 'type']);
             $table->unsignedInteger('business_id')->nullable(false)->change();
             $table->foreign('business_id')->references('id')->on('businesses');
         });

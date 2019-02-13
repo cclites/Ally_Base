@@ -83,7 +83,7 @@
                                                     step="0.01"
                                                     v-model="caregiver_hourly"
                                                     min="0"
-                                                    @change="updateRatesFromCaregiverHourly"
+                                                    @change="updateProviderHourlyRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the hourly earnings for this caregiver.</small>
@@ -96,7 +96,7 @@
                                                     step="0.01"
                                                     v-model="provider_hourly"
                                                     min="0"
-                                                    @change="updateRatesFromCaregiverHourly"
+                                                    @change="updateClientHourlyRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the registry hourly fee.</small>
@@ -121,7 +121,7 @@
                                                     step="0.01"
                                                     v-model="total_hourly"
                                                     min="0"
-                                                    @change="updateRatesFromTotalHourly"
+                                                    @change="updateProviderHourlyRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">The total hourly rate charged to the client.</small>
@@ -136,7 +136,7 @@
                                                     step="0.01"
                                                     v-model="caregiver_fixed"
                                                     min="0"
-                                                    @change="updateRatesFromCaregiverDaily"
+                                                    @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the daily earnings for this caregiver.</small>
@@ -149,7 +149,7 @@
                                                     step="0.01"
                                                     v-model="provider_fixed"
                                                     min="0"
-                                                    @change="updateRatesFromCaregiverDaily"
+                                                    @change="updateClientFixedRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">Enter the registry daily fee.</small>
@@ -174,7 +174,7 @@
                                                     step="0.01"
                                                     v-model="total_fixed"
                                                     min="0"
-                                                    @change="updateRatesFromTotalDaily"
+                                                    @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
                                             <small class="form-text text-muted">The total daily rate charged to the client.</small>
@@ -254,6 +254,8 @@
 </template>
 
 <script>
+    import RateFactory from "../../../classes/RateFactory";
+
     const initialState = () => ({
         step: 1,
         caregiver_type: "specific",
@@ -279,7 +281,7 @@
 
     export default {
         name: "ClientRateWizard",
-        props: ["value", "client", "caregivers", "services", "payers", "defaultRate", 'addMode', 'potentialCaregivers', 'allyRateOriginal'],
+        props: ["value", "client", "caregivers", "services", "payers", "defaultRate", 'addMode', 'potentialCaregivers', 'allyPctOriginal'],
         data() {
             return initialState();
         },
@@ -305,8 +307,8 @@
                     effective_end: this.end_date,
                 }
             },
-            allyRate() {
-                return this.paymentMethodDetail.allyRate || this.allyRateOriginal;
+            allyPct() {
+                return this.paymentMethodDetail.allyRate || this.allyPctOriginal || 0.05;
             },
             paymentMethodDetail() {
                 return this.$store.getters.getPaymentMethodDetail();
@@ -338,70 +340,49 @@
                 this.closeModal();
             },
             updateAllyHourlyFee() {
-                let cgRate = parseFloat(this.caregiver_hourly);
-                let provFee = parseFloat(this.provider_hourly);
-                if (isNaN(cgRate) || isNaN(provFee)) {
-                    this.ally_hourly = 0;
-                    return;
-                }
-                let computed = (cgRate + provFee) * this.allyRate;
-                this.ally_hourly = computed.toFixed(2);
+                this.ally_hourly = RateFactory.getAllyFee(this.allyPct, this.total_hourly).toFixed(2);
             },
-            updateRatesFromCaregiverHourly() {
+            updateProviderHourlyRate() {
                 this.updateAllyHourlyFee();
-                let cgRate = parseFloat(this.caregiver_hourly);
-                let provFee = parseFloat(this.provider_hourly);
-                let allyFee = parseFloat(this.ally_hourly);
-                if (isNaN(cgRate) || isNaN(provFee)) {
+                let rate = RateFactory.getProviderFee(this.total_hourly, this.caregiver_hourly, this.allyPct);
+                if (isNaN(rate)) {
                     return;
                 }
-                let computed = cgRate + provFee + allyFee;
-                this.total_hourly = computed.toFixed(2);
+                this.provider_hourly = rate.toFixed(2);
+                this.highlightInput('#provider_hourly');
+            },
+            updateClientHourlyRate()
+            {
+                // debugger;
+                let rate = RateFactory.getClientRate(this.provider_hourly, this.caregiver_hourly, this.allyPct);
+                if (isNaN(rate)) {
+                    return;
+                }
+                this.total_hourly = rate.toFixed(2);
+                this.updateAllyHourlyFee();
                 this.highlightInput('#total_hourly');
             },
-            updateRatesFromTotalHourly() {
-                let cgRate = parseFloat(this.caregiver_hourly);
-                let totalRate = parseFloat(this.total_hourly);
-                if (isNaN(cgRate) || isNaN(totalRate)) {
-                    return;
-                }
-                let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
-                this.provider_hourly = computed.toFixed(2);
-                this.highlightInput('#provider_hourly');
-                this.updateAllyHourlyFee();
+            updateAllyFixedFee() {
+                this.ally_fixed = RateFactory.getAllyFee(this.allyPct, this.total_fixed).toFixed(2);
             },
-            updateAllyDailyFee() {
-                let cgRate = parseFloat(this.caregiver_fixed);
-                let provFee = parseFloat(this.provider_fixed);
-                if (isNaN(cgRate) || isNaN(provFee)) {
-                    this.ally_fixed = 0;
+            updateProviderFixedRate() {
+                this.updateAllyFixedFee();
+                let rate = RateFactory.getProviderFee(this.total_fixed, this.caregiver_fixed, this.allyPct);
+                if (isNaN(rate)) {
                     return;
                 }
-                let computed = (cgRate + provFee) * this.allyRate;
-                this.ally_fixed = computed.toFixed(2);
-            },
-            updateRatesFromCaregiverDaily() {
-                this.updateAllyDailyFee();
-                let cgRate = parseFloat(this.caregiver_fixed);
-                let provFee = parseFloat(this.provider_fixed);
-                let allyFee = parseFloat(this.ally_fixed);
-                if (isNaN(cgRate) || isNaN(provFee)) {
-                    return;
-                }
-                let computed = cgRate + provFee + allyFee;
-                this.total_fixed = computed.toFixed(2);
-                this.highlightInput('#total_fixed');
-            },
-            updateRatesFromTotalDaily() {
-                let cgRate = parseFloat(this.caregiver_fixed);
-                let totalRate = parseFloat(this.total_fixed);
-                if (isNaN(cgRate) || isNaN(totalRate)) {
-                    return;
-                }
-                let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
-                this.provider_fixed = computed.toFixed(2);
+                this.provider_fixed = rate.toFixed(2);
                 this.highlightInput('#provider_fixed');
-                this.updateAllyDailyFee();
+            },
+            updateClientFixedRate()
+            {
+                let rate = RateFactory.getClientRate(this.provider_fixed, this.caregiver_fixed, this.allyPct);
+                if (isNaN(rate)) {
+                    return;
+                }
+                this.total_fixed = rate.toFixed(2);
+                this.updateAllyFixedFee();
+                this.highlightInput('#total_fixed');
             },
             highlightInput(selector) {
                 $(selector).addClass('highlight-input');

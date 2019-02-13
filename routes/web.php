@@ -317,6 +317,8 @@ Route::group([
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
+    Route::get('statements/payments/{payment}/{view?}', 'Business\StatementController@payment')->name('statements.payment');
+    Route::get('statements/deposits/{deposit}/{view?}', 'Business\StatementController@deposit')->name('statements.deposit');
 
     Route::get('services', 'Business\ServiceController@index')->name('services.index');
     Route::post('services', 'Business\ServiceController@store');
