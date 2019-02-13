@@ -7,6 +7,7 @@
         <div class="d-flex">
             <div class="mb-3">
                 <h5><strong>Referred Caregivers and Rates</strong></h5>
+                <small>Any caregiver listed below has the ability to clock in and out for this client, independent of a schedule.</small>
             </div>
             <div class="ml-auto">
                 {{ paymentText }}
@@ -14,8 +15,7 @@
         </div>
         <div class="mb-3">
             <b-btn variant="info" @click="addCaregiver()">Add Caregiver</b-btn>
-            <b-btn variant="info" @click="openExcludeModal()">Exclude Caregiver</b-btn>
-            <b-btn variant="info" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
+            <b-btn variant="primary" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
             <!-- <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn> -->
         </div>
 
@@ -162,7 +162,7 @@
             </b-table>
         </div>
 
-        <div class="row col-lg-12 pull-right">
+        <div class="text-right">
             <b-btn id="save-rates" @click="saveRates()" variant="success">Save Client Rates</b-btn>
         </div>
 
@@ -171,6 +171,9 @@
             <h5>
                 <strong>Excluded Caregivers </strong>
             </h5>
+        </div>
+        <div class="mb-3">
+            <b-btn variant="info" @click="openExcludeModal()">Exclude Caregiver</b-btn>
         </div>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
