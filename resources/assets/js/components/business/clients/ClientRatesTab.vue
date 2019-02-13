@@ -479,8 +479,8 @@
                         await this.fetchAssignedCaregivers();
                         this.setItems(data.data);
                     })
-                    .catch( async (e) => {
-                        await this.fetchAssignedCaregivers();
+                    .catch(e => {
+                        this.fetchAssignedCaregivers();
                     })
                     .finally(() => {
                         this.fetchOtherCaregivers();
