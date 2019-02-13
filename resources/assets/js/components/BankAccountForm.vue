@@ -84,7 +84,7 @@
                 </b-form-group>
             </b-col>
         </b-row>
-        <b-form-group>
+        <b-form-group v-if="submitUrl">
             <b-button :variant="buttonVariant" type="submit" size="" :disabled="readonly || submitting">
                 <i class="fa fa-spin fa-spinner" v-show="submitting"></i> {{ buttonText }}
             </b-button>
@@ -125,6 +125,9 @@
 
         methods: {
             async submit() {
+                if (! this.submitUrl) {
+                    return;
+                }
                 this.buttonText = 'Verifying Account...';
                 this.submitting = true;
                 try {

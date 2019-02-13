@@ -2,7 +2,7 @@
     <div>
         <loading-card v-if="loading" text="Loading account information..."></loading-card>
 
-        <form v-else @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
+        <form v-else @submit.prevent="submit()" @keydown="form.clearError($event.target.name)" autocomplete="off">
             <b-row>
                 <b-col lg="6" offset-lg="3" offset-xs="0" xs="12">
                     <b-card header="Username &amp; Password Creation"
@@ -21,12 +21,13 @@
                                             id="username"
                                             name="username"
                                             type="text"
-                                            :value="client.username"
+                                            v-model="form.username"
                                             :disabled="busy"
                                             required
+                                            autocomplete="off"
                                     >
                                     </b-form-input>
-                                    <input-help :form="form" field="username" text="View your username which will be used to logging in."></input-help>
+                                    <input-help :form="form" field="username" text="Your username which will be used to logging in."></input-help>
                                 </b-form-group>
                                 <b-form-group label="Password" label-for="password" label-class="required">
                                     <b-form-input
@@ -36,6 +37,7 @@
                                             v-model="form.password"
                                             required
                                             :disabled="busy"
+                                            autocomplete="new-password"
                                     >
                                     </b-form-input>
                                     <input-help :form="form" field="password" text="Enter a new password that will be used for logging in."></input-help>
@@ -48,6 +50,7 @@
                                             v-model="form.password_confirmation"
                                             required
                                             :disabled="busy"
+                                            autocomplete="new-password"
                                     >
                                     </b-form-input>
                                     <input-help :form="form" field="password_confirmation" text="Re-enter the above password for confirmation."></input-help>

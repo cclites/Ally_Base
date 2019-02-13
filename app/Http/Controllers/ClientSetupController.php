@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AccountSetup\Clients\ClientStep1Request;
 use App\Responses\SuccessResponse;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
-use App\Http\Requests\AccountSetup\Clients\ClientStep1Request;
 
 class ClientSetupController extends Controller
 {
@@ -14,10 +15,11 @@ class ClientSetupController extends Controller
      *
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function show($token)
     {
-        $client = Client::findEncrypted($token);
+        $client = Client::findEncryptedOrFail($token);
         if (empty($client)) {
             abort(404, 'Not Found');
         }
@@ -33,10 +35,11 @@ class ClientSetupController extends Controller
      * @param ClientStep1Request $request
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function step1(ClientStep1Request $request, $token)
     {
-        $client = Client::findEncrypted($token);
+        $client = Client::findEncryptedOrFail($token);
         if (empty($client)) {
             abort(404, 'Not Found');
         }
@@ -80,18 +83,30 @@ class ClientSetupController extends Controller
     /**
      * Submit step 2 form.
      *
-     * @param ClientStep1Request $request
+     * @param \Illuminate\Http\Request $request
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function step2(ClientStep1Request $request, $token)
+    public function step2(Request $request, $token)
     {
-        $client = Client::findEncrypted($token);
-        if (empty($client)) {
-            abort(404, 'Not Found');
-        }
+        $client = Client::findEncryptedOrFail($token);
 
-        $data = $request->validated();
+        $request->validate([
+            'password' => 'required|confirmed|min:8',
+            'username' => ['required', 'min:3', 'max:255', Rule::unique('users')->ignore($client->id)],
+        ]);
+
+        \DB::beginTransaction();
+
+        $client->update([
+            'username' => $request->username,
+            'setup_status' => Client::SETUP_CREATED_ACCOUNT
+        ]);
+        $client->setupStatusHistory()->create(['status' => Client::SETUP_CREATED_ACCOUNT]);
+        $client->user->changePassword($request->password);
+
+        \DB::commit();
 
         $client = $client->fresh()->load(['address', 'phoneNumber']);
         return new SuccessResponse('Your information has been updated, please continue.', $client);
@@ -102,10 +117,11 @@ class ClientSetupController extends Controller
      *
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function terms($token)
     {
-        $client = Client::findEncrypted($token);
+        $client = Client::findEncryptedOrFail($token);
         if (empty($client)) {
             abort(404, 'Not Found');
         }

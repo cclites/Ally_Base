@@ -10,12 +10,18 @@
             :token="token"
             @updated="updateClient"
         ></step2>
+        <step3 v-if="client.setup_status == 'created_account'" 
+            :client="client"
+            :token="token"
+            @updated="updateClient"
+        ></step3>
     </div>
 </template>
 
 <script>
     import step1 from './clients/Step1';
     import step2 from './clients/Step2';
+    import step3 from './clients/Step3';
     
     export default {
         props: {
@@ -23,7 +29,7 @@
             'clientData': {},
         },
 
-        components: { step1, step2 },
+        components: { step1, step2, step3 },
 
         data() {
             return {
@@ -35,9 +41,6 @@
             updateClient(data) {
                 this.client = data;
             }
-        },
-
-        mounted() {
         },
     }
 </script>

@@ -42,7 +42,7 @@
                 </b-col>
             </b-row>
         </b-form-group>
-        <b-form-group>
+        <b-form-group v-if="submitUrl">
             <b-button variant="success" type="submit" size="" :disabled="readonly">Save Credit Card</b-button>
         </b-form-group>
     </form>
@@ -85,6 +85,9 @@
 
         methods: {
             submit() {
+                if (! this.submitUrl) {
+                    return;
+                }
                 this.form.post(this.submitUrl)
                     .then((response) => {
                         this.form.number = '************ ' + this.form.number.slice(-4);
