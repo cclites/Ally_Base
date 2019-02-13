@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\ClientExcludedCaregiver;
 use App\Responses\ErrorResponse;
-use App\Responses\SuccessResponse;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
 use App\Http\Requests\ExcludeCaregiverRequest;
 
 class ClientExcludedCaregiverController extends BaseController
@@ -30,11 +27,12 @@ class ClientExcludedCaregiverController extends BaseController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Exclude a Caregiver from a Client.
      *
      * @param ExcludeCaregiverRequest $request
      * @param \App\Client $client
      * @return ErrorResponse|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(ExcludeCaregiverRequest $request, Client $client)
     {
@@ -42,7 +40,6 @@ class ClientExcludedCaregiverController extends BaseController
 
         $data = $request->filtered();
         $data['client_id'] = $client->id;
-        $caregiver = ClientExcludedCaregiver::create($data);
 
         if ($caregiver = ClientExcludedCaregiver::create($data)) {
             return response()->json($caregiver);
@@ -51,6 +48,15 @@ class ClientExcludedCaregiverController extends BaseController
         return new ErrorResponse(500, 'Error excluding caregiver.');
     }
 
+    /**
+     * Update ExcludedCaregiver data.
+     *
+     * @param ExcludeCaregiverRequest $request
+     * @param Client $client
+     * @param ClientExcludedCaregiver $clientExcludedCaregiver
+     * @return ErrorResponse|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function update(ExcludeCaregiverRequest $request, Client $client, ClientExcludedCaregiver $clientExcludedCaregiver)
     {
         $this->authorize('update', $client);
@@ -58,18 +64,17 @@ class ClientExcludedCaregiverController extends BaseController
         $data = $request->filtered();
         $data['client_id'] = $client->id;
         
-        if ($clientExcludedCaregiver->update($data)) {
-            return response()->json($clientExcludedCaregiver);
-        };
-
-        return new ErrorResponse(500, 'Error updating excluded caregiver.');
+        $clientExcludedCaregiver->update($data);
+        return response()->json($clientExcludedCaregiver);
     }
     
     /**
-     * Remove the specified resource from storage.
+     * Remove the Caregiver exclusion.
      *
-     * @param  int $id
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function destroy($id)
     {
