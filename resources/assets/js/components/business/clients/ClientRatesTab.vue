@@ -14,7 +14,7 @@
         </div>
         <div class="mb-3">
             <b-btn variant="info" @click="addCaregiver()">Add Caregiver</b-btn>
-            <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver</b-btn>
+            <b-btn variant="info" @click="openExcludeModal()">Exclude Caregiver</b-btn>
             <b-btn variant="info" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
             <!-- <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn> -->
         </div>
@@ -175,7 +175,6 @@
                         </b-form-group>
                         <b-form-group label="Reason" label-for="exclude_reason">
                             <b-form-select name="exclude_reason" v-model="excludeForm.reason">
-                                <option value="">--Reason for excluding--</option>
                                 <option v-for="(item, index) in exclusionReasons" :value="index" :key="index">{{ item }}</option>
                             </b-form-select>
                         </b-form-group>
@@ -278,7 +277,7 @@
                     caregiver_name: "",
                     caregiver_id: "",
                     note: "",
-                    reason: '',
+                    reason: 'service_not_needed',
                     effective_at: moment().format('MM/DD/YYYY'),
                 }),
                 caregiverForm: new Form({caregiver_id: ""}),
@@ -366,11 +365,11 @@
                     { key: 'actions', label: '', class: 'hidden-print' },
                 ],
                 exclusionReasons: {
-                    'unhappy_client': 'Client not happy and refuses service from this caregiver',
-                    'retired': 'Retired',
-                    'no_shows': 'Continual no shows',
                     'quit': 'Caregiver quit',
                     'service_not_needed': 'Client no longer needs service',
+                    'unhappy_client': 'Client not happy and refuses service from this caregiver',
+                    'no_shows': 'Continual no shows',
+                    'retired': 'Retired',
                 },
             }
         },
@@ -413,6 +412,17 @@
         },
 
         methods: {
+            openExcludeModal() {
+                this.excludeForm = new Form({
+                    id: "",
+                    caregiver_name: "",
+                    caregiver_id: "",
+                    note: "",
+                    reason: 'service_not_needed',
+                    effective_at: moment().format('MM/DD/YYYY'),
+                });
+                this.clientExcludeCaregiverModal = true;
+            },
 
             addRateWizard(defaultRate=false) {
                 this.addNewCaregiver = false;
@@ -520,14 +530,6 @@
                 }
                 this.fetchExcludedCaregivers();
                 this.fetchOtherCaregivers();
-                this.excludeForm = new Form({
-                    id: "",
-                    caregiver_name: "",
-                    caregiver_id: "",
-                    note: "",
-                    reason: '',
-                    effective_at: moment().format('MM/DD/YYYY'),
-                });
                 this.clientExcludeCaregiverModal = false;
             },
 
