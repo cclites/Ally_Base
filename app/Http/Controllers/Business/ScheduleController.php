@@ -230,10 +230,6 @@ class ScheduleController extends BaseController
     {
         $this->authorize('update', $schedule);
 
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
-        }
-
         // update notes
         if (request()->has('notes')) {
             $notes = request()->notes;
