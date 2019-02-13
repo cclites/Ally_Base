@@ -38,7 +38,7 @@ class PrepareRequiredDataForPayersAndInvoices extends Migration
             ////////////////////////////////////
 
             $service = \App\Billing\Service::create([
-                'name' => 'Caregiver Service',
+                'name' => 'General',
                 'code' => '',
                 'default' => true,
                 'chain_id' => $chain->id,
