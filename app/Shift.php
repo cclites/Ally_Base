@@ -19,6 +19,7 @@ use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
+use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\CostCalculator;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftFlagManager;
@@ -471,8 +472,20 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     //////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     //////////////////////////////////////
+
+    /**
+     * Add data to the shift from a shift data class
+     *
+     * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
+     */
+    public function addData(ShiftDataInterface ...$dataObjects): void
+    {
+        foreach($dataObjects as $data) {
+            $this->fill($data->toArray());
+        }
+    }
 
     /**
      * Get an instance of the shift's flag manager class.

@@ -6,6 +6,7 @@ use App\Business;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use App\Shift;
+use App\Shifts\Data\ClockData;
 use Carbon\Carbon;
 use DateTimeZone;
 use App\Events\ShiftFlagsCouldChange;
@@ -125,7 +126,7 @@ class ScheduleConverter
      * Convert a schedule to an actual shift for a specified clock in time
      *
      * @param \App\Schedule $schedule
-     * @param $date
+     * @param \Carbon\Carbon $clockIn
      * @param string $status
      * @return Shift|false
      */
@@ -151,13 +152,16 @@ class ScheduleConverter
         }
 
         // Create Shift
-        $start = $clockIn->setTimezone('UTC');
+        $clockIn = $clockIn->setTimezone('UTC');
+        $clockOut = $clockIn->copy()->addMinutes($schedule->duration);
+
+        $clockIn = new ClockData(Shift::METHOD_CONVERTED, $clockIn->toDateTimeString());
+        $clockOut = new ClockData(Shift::METHOD_CONVERTED, $clockOut->toDateTimeString());
+
         $factory = ShiftFactory::withSchedule(
             $schedule,
-            Shift::METHOD_CONVERTED,
-            $start,
-            Shift::METHOD_CONVERTED,
-            $start->copy()->addMinutes($schedule->duration),
+            $clockIn,
+            $clockOut,
             $status
         );
         $shift = $factory->create();

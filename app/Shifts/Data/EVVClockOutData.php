@@ -1,28 +1,23 @@
 <?php
 namespace App\Shifts;
 
-use App\Address;
 use App\Shifts\Contracts\ShiftDataInterface;
-use Packages\GMaps\GeocodeCoordinates;
+use App\Shifts\Data\EVVData;
 
 class EVVClockOutData implements ShiftDataInterface
 {
     protected $attributes;
 
-    public function __construct(
-        Address $address,
-        GeocodeCoordinates $coordinates,
-        bool $verified,
-        ?string $ipAddress = null,
-        ?string $userAgent = null
-    ) {
+    public function __construct(EVVData $data)
+    {
         $this->attributes = [
-            'address_id' => $address->id,
-            'checked_out_latitude' => $coordinates->latitude,
-            'checked_out_longitude' => $coordinates->longitude,
-            'checked_out_verified' => $verified,
-            'checked_out_ip' => $ipAddress,
-            'checked_out_agent' => $userAgent,
+            'address_id' => $data->address->id ?? null,
+            'checked_out_latitude' => $data->coordinates->latitude,
+            'checked_out_longitude' => $data->coordinates->longitude,
+            'checked_out_verified' => $data->verified,
+            'checked_out_distance' => $data->distance,
+            'checked_out_ip' => $data->ipAddress,
+            'checked_out_agent' => $data->userAgent,
         ];
     }
 

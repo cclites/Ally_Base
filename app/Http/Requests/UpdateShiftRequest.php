@@ -6,8 +6,10 @@ use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Rules\ValidEffectivePayer;
+use App\Scheduling\Data\ScheduledRates;
 use App\Shift;
-use App\Shifts\Data\ClockOutData;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -107,23 +109,29 @@ class UpdateShiftRequest extends BusinessClientRequest
 
     public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): ShiftFactory
     {
-        $clockOutData = new ClockOutData(
+        $clockIn = new ClockData($clockInMethod, $this->input('checked_in_time'));
+        $clockOut = new ClockData($clockOutMethod ?? $clockInMethod, $this->input('checked_out_time'));
+        $rates = new ScheduledRates(
+            $this->input('client_rate'),
+            $this->input('caregiver_rate'),
+            $this->input('fixed_rates') ?? false,
+            $this->input('hours_type') ?? 'default'
+        );
+
+        $clockOutData = new CaregiverClockoutData(
+            $clockOut,
             $this->input('mileage') ?? 0.0,
             $this->input('other_expenses') ?? 0.0,
             $this->input('other_expenses_desc'),
             $this->input('caregiver_comments')
         );
+
         $shiftData = ShiftFactory::withoutSchedule(
             $this->getClient(),
             Caregiver::findOrFail($this->input('caregiver_id')),
-            $this->input('hours_type'),
-            $this->input('fixed_rates'),
-            $this->input('client_rate'),
-            $this->input('caregiver_rate'),
-            $clockInMethod,
-            Carbon::parse($this->input('checked_in_time')),
-            $clockOutMethod ?? $clockInMethod,
-            Carbon::parse($this->input('checked_out_time')),
+            $clockIn,
+            $clockOut,
+            $rates,
             $status,
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
             $this->input('payer') ? Payer::find($this->input('payer')) : null

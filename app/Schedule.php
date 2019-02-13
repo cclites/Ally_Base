@@ -5,6 +5,7 @@ use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
+use App\Scheduling\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Traits\BelongsToOneBusiness;
@@ -288,6 +289,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         // Suppress missed clock in status for now
 //        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
         return self::SCHEDULED;
+    }
+
+    /**
+     * Return a ScheduledRates object
+     *
+     * @return \App\Scheduling\Data\ScheduledRates
+     */
+    public function getRates(): ScheduledRates
+    {
+        return new ScheduledRates(
+            $this->client_rate,
+            $this->caregiver_rate,
+            $this->fixed_rates,
+            $this->hours_type
+        );
     }
 
     /**

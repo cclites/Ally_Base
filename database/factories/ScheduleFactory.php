@@ -37,5 +37,6 @@ $factory->define(Schedule::class, function(Faker $faker) {
         'caregiver_rate' => $faker->randomFloat(2, 10, 25),
         'provider_fee' => $faker->randomFloat(2, 5, 10),
         'fixed_rates' => 0,
+        'hours_type' => 'default',
     ];
 });

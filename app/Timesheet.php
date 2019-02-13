@@ -2,7 +2,9 @@
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Shifts\Data\ClockOutData;
+use App\Scheduling\Data\ScheduledRates;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use App\Shifts\Data\TimesheetData;
 use App\Traits\BelongsToOneBusiness;
@@ -296,20 +298,16 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             $shiftFactory = ShiftFactory::withoutSchedule(
                 Client::findOrFail($this->client_id),
                 Caregiver::findOrFail($this->caregiver_id),
-                Shift::HOURS_DEFAULT,
-                false,
-                $entry['caregiver_rate'],
-                $entry['client_rate'], // TODO: This needs to be converted from provider_fee structure
-                Shift::METHOD_TIMESHEET,
-                Carbon::parse($entry['checked_in_time']),
-                Shift::METHOD_TIMESHEET,
-                Carbon::parse($entry['checked_out_time']),
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_in_time']),
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_out_time']),
+                new ScheduledRates($entry['client_rate'], $entry['caregiver_rate']),
                 Shift::WAITING_FOR_AUTHORIZATION
             );
 
             $timesheetData = new TimesheetData($this);
 
-            $clockOutData = new ClockOutData(
+            $clockOutData = new CaregiverClockoutData(
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_out_time']),
                 $entry['mileage'] ?? 0.0,
                 $entry['other_expenses'] ?? 0.0,
                 null,
