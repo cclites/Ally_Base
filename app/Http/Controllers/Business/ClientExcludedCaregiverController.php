@@ -8,6 +8,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use App\Http\Requests\ExcludeCaregiverRequest;
 
 class ClientExcludedCaregiverController extends BaseController
 {
@@ -31,53 +32,37 @@ class ClientExcludedCaregiverController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param ExcludeCaregiverRequest $request
      * @param \App\Client $client
      * @return ErrorResponse|\Illuminate\Http\Response
      */
-    public function store(Request $request, Client $client)
+    public function store(ExcludeCaregiverRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
-        $data = $request->validate([
-            'caregiver_id' => 'required|int',
-            'effective_at' => 'nullable|date',
-            'reason' => 'required|in:' . join(',', ClientExcludedCaregiver::exclusionReasons()),
-        ]);
+        $data = $request->filtered();
+        $data['client_id'] = $client->id;
+        $caregiver = ClientExcludedCaregiver::create($data);
 
-        $caregiver = ClientExcludedCaregiver::create([
-            'client_id' => $client->id,
-            'caregiver_id' => $data['caregiver_id'],
-            'note' => $request->input('note', null),
-            'reason' => $request->input('reason', null),
-            'effective_at' => filter_date($request->effective_at),
-        ]);
-
-        if ($caregiver) {
+        if ($caregiver = ClientExcludedCaregiver::create($data)) {
             return response()->json($caregiver);
         }
 
         return new ErrorResponse(500, 'Error excluding caregiver.');
     }
 
-    public function update(Request $request, Client $client, ClientExcludedCaregiver $clientExcludedCaregiver)
+    public function update(ExcludeCaregiverRequest $request, Client $client, ClientExcludedCaregiver $clientExcludedCaregiver)
     {
         $this->authorize('update', $client);
 
-        $data = $request->validate([
-            'caregiver_id' => 'required|int',
-            'effective_at' => 'nullable|date',
-            'reason' => 'required|in:' . join(',', ClientExcludedCaregiver::exclusionReasons()),
-        ]);
+        $data = $request->filtered();
+        $data['client_id'] = $client->id;
+        
+        if ($clientExcludedCaregiver->update($data)) {
+            return response()->json($clientExcludedCaregiver);
+        };
 
-        $clientExcludedCaregiver->update([
-            'client_id' => $client->id,
-            'note' => $request->input('note', null),
-            'reason' => $request->input('reason', null),
-            'effective_at' => filter_date($request->effective_at),
-        ]);
-
-        return response()->json($clientExcludedCaregiver);
+        return new ErrorResponse(500, 'Error updating excluded caregiver.');
     }
     
     /**
