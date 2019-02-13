@@ -36,6 +36,18 @@ class MigrateExistingShiftsToNewStructure extends Migration
         });
 
         ////////////////////////////////////
+        //// Migrate all other shifts
+        ////////////////////////////////////
+
+        $shifts = \App\Shift::with(['client', 'client.defaultPayment'])->whereNotIn('status', $statuses)->get();
+        $shifts->each(function (\App\Shift $shift) use (&$count) {
+            $rate = $shift->costs()->getTotalHourlyCost();
+            $count += \DB::table('shifts')->where('id', $shift->id)->update([
+                'client_rate' => $rate,
+            ]);
+        });
+
+        ////////////////////////////////////
         //// Migrate polymorphic relations
         ////////////////////////////////////
 
