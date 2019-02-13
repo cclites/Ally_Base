@@ -20,7 +20,7 @@ class PrepareRequiredDataForPayersAndInvoices extends Migration
 
         DB::beginTransaction();
 
-        echo("Part 1\n");
+        echo("Part 1/5\n");
 
         ////////////////////////////////////
         //// Run preparation for each business chain
@@ -88,7 +88,7 @@ class PrepareRequiredDataForPayersAndInvoices extends Migration
         //// Update all previous private pay payments with their payment method
         ////////////////////////////////////
 
-        echo("Part 2\n");
+        echo("Part 2/5\n");
 
         DB::statement("
 UPDATE payments p
@@ -101,7 +101,7 @@ WHERE p.client_id IS NOT NULL
         //// Assign Balance Payers to Clients
         ////////////////////////////////////
 
-        echo("Part 3\n");
+        echo("Part 3/5\n");
 
         $rows = DB::affectingStatement("
 INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
@@ -112,13 +112,37 @@ WHERE c.default_payment_type = 'businesses'
 ");
         echo "$rows affected by provider pay setting\n";
 
-        echo("Part 4\n");
+        echo("Part 4/5\n");
 
         $rows = DB::affectingStatement("
 INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
 SELECT id, '0', '2018-01-01', '9999-12-31', 'balance' FROM clients WHERE default_payment_type != 'businesses' OR default_payment_type IS NULL
 ");
         echo "$rows affected by private pay setting\n";
+
+
+        echo("Part 5/5\n");
+
+        ////////////////////////////////////
+        //// Migrate client caregiver rates
+        ////////////////////////////////////
+
+        $clients = \App\Client::has('caregivers')->with(['caregivers', 'defaultPayment'])->get();
+        $clients->each(function(\App\Client $client) {
+            foreach($client->caregivers as $caregiver) {
+                $paymentMethod = $client->getPaymentMethod() ?? new \App\Billing\Payments\Methods\CreditCard();
+                \App\Billing\ClientRate::create([
+                    'client_id' => $client->id,
+                    'caregiver_id' => $caregiver->id,
+                    'client_hourly_rate' => multiply(add($caregiver->pivot->caregiver_hourly_rate, $caregiver->pivot->provider_hourly_fee), add(1, $paymentMethod->getAllyPercentage())),
+                    'caregiver_hourly_rate' => $caregiver->pivot->caregiver_hourly_rate ?? 0,
+                    'client_fixed_rate' => multiply(add($caregiver->pivot->caregiver_fixed_rate, $caregiver->pivot->provider_fixed_fee), add(1, $paymentMethod->getAllyPercentage())),
+                    'caregiver_fixed_rate' => $caregiver->pivot->caregiver_fixed_rate ?? 0,
+                    'effective_start' => '2018-01-01',
+                    'effective_end' => '9999-12-31',
+                ]);
+            }
+        });
 
         \DB::commit();
     }
