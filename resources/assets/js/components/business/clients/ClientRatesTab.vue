@@ -14,7 +14,7 @@
         </div>
         <div class="mb-3">
             <b-btn variant="info" @click="addCaregiver()">Add Caregiver</b-btn>
-            <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver</b-btn>
+            <b-btn variant="info" @click="openExcludeModal()">Exclude Caregiver</b-btn>
             <b-btn variant="info" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
             <!-- <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn> -->
         </div>
@@ -412,6 +412,17 @@
         },
 
         methods: {
+            openExcludeModal() {
+                this.excludeForm = new Form({
+                    id: "",
+                    caregiver_name: "",
+                    caregiver_id: "",
+                    note: "",
+                    reason: 'service_not_needed',
+                    effective_at: moment().format('MM/DD/YYYY'),
+                });
+                this.clientExcludeCaregiverModal = true;
+            },
 
             addRateWizard(defaultRate=false) {
                 this.addNewCaregiver = false;
@@ -519,14 +530,6 @@
                 }
                 this.fetchExcludedCaregivers();
                 this.fetchOtherCaregivers();
-                this.excludeForm = new Form({
-                    id: "",
-                    caregiver_name: "",
-                    caregiver_id: "",
-                    note: "",
-                    reason: 'service_not_needed',
-                    effective_at: moment().format('MM/DD/YYYY'),
-                });
                 this.clientExcludeCaregiverModal = false;
             },
 
