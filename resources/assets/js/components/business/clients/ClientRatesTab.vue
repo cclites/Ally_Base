@@ -683,6 +683,11 @@
                     return cg.name;
                 }
 
+                cg = this.otherCaregivers.find(x => x.id === id);
+                if (cg) {
+                    return cg.name;
+                }
+
                 return '(All)';
             },
         },
