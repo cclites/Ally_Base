@@ -230,6 +230,7 @@ Vue.component('adjoining-caregivers-card', require('./components/caregivers/Adjo
 
 Vue.component('caregiver-confirmation', require('./components/CaregiverConfirmation.vue'));
 Vue.component('client-confirmation', require('./components/ClientConfirmation.vue'));
+Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
 
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));

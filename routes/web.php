@@ -46,6 +46,13 @@ Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('rec
 Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
 Route::redirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
 
+Route::get('/account-setup/clients/{token}', 'ClientSetupController@show')->name('setup.clients');
+Route::post('/account-setup/clients/{token}/step1', 'ClientSetupController@step1');
+Route::post('/account-setup/clients/{token}/step2', 'ClientSetupController@step2');
+Route::post('/account-setup/clients/{token}/step3', 'ClientSetupController@step3');
+Route::get('/account-setup/clients/{token}/terms', 'ClientSetupController@terms');
+
+
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
 
