@@ -6,6 +6,7 @@ use App\Client;
 use App\ClientExcludedCaregiver;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class ClientExcludedCaregiverController extends BaseController
@@ -41,6 +42,7 @@ class ClientExcludedCaregiverController extends BaseController
         $data = $request->validate([
             'caregiver_id' => 'required|int',
             'effective_at' => 'nullable|date',
+            'reason' => 'required|in:' . join(',', ClientExcludedCaregiver::exclusionReasons()),
         ]);
 
         $caregiver = ClientExcludedCaregiver::create([
@@ -65,6 +67,7 @@ class ClientExcludedCaregiverController extends BaseController
         $data = $request->validate([
             'caregiver_id' => 'required|int',
             'effective_at' => 'nullable|date',
+            'reason' => 'required|in:' . join(',', ClientExcludedCaregiver::exclusionReasons()),
         ]);
 
         $clientExcludedCaregiver->update([
