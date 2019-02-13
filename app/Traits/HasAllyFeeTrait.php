@@ -19,7 +19,7 @@ trait HasAllyFeeTrait
     {
         $allyPct = $this->getAllyPercentage();
         $amount = $allyFeeIncluded
-            ? divide($paymentAmount, multiply(add(1, $allyPct), $allyPct))
+            ? multiply(divide($paymentAmount, add(1, $allyPct)), $allyPct)
             : multiply($paymentAmount, $allyPct);
 
         return (float) round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
