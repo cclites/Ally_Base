@@ -231,7 +231,7 @@
                             :default-rate="defaultRateOnWizard"
                             :potential-caregivers="otherCaregivers"
                             :add-mode="addNewCaregiver"
-                            :ally-rate-original="allyRateOriginal"
+                            :ally-pct-original="allyRateOriginal"
                             @new-rate="addRate">
         </client-rate-wizard>
     </b-card>
@@ -614,13 +614,12 @@
             },
 
             getAllyFee(clientRate) {
-                let computed = (clientRate) * this.allyRate;
+                let computed = RateFactory.getAllyFee(this.allyRate, clientRate);
                 return computed.toFixed(2);
             },
 
             getProviderFee(clientRate, caregiverRate) {
-                let allyFee = this.getAllyFee(clientRate);
-                let computed = clientRate - caregiverRate - allyFee;
+                let computed = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyRate);
                 return computed.toFixed(2);
             },
 

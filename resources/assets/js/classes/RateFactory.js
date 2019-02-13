@@ -1,29 +1,44 @@
 import moment from "moment";
 
+/**
+ * RateFactory class for calculating rates
+ *
+ * Notes:
+ *
+ * allyFeeIncluded is a boolean used to designate whether or not the given clientRate includes the ally fee.  Shift expenses usually do not include the fee.
+ */
 class RateFactory {
 
-    static getChargedRate(caregiverRate, providerFee = 0.0, clientRate = 0.0, clientRateStructure = false)
+    static getAllyFee(allyPct, clientRate, allyFeeIncluded = true)
     {
-        return clientRateStructure ?  parseFloat(clientRate) : parseFloat(providerFee) + parseFloat(caregiverRate);
+        clientRate = parseFloat(clientRate);
+        allyPct = parseFloat(allyPct);  // Ex: 0.05
+        if (isNaN(clientRate)) {
+            return 0;
+        }
+
+        return allyFeeIncluded
+            ? clientRate / (1+allyPct) * allyPct
+            : clientRate * allyPct;
     }
 
-    static getAllyFee(percentage, chargedRate)
+    static getProviderFee(clientRate, caregiverRate, allyPct, allyFeeIncluded = true)
     {
-        let allyFee = parseFloat(percentage) * parseFloat(chargedRate);
-        return parseFloat(allyFee.toFixed(2));
+        clientRate = parseFloat(clientRate);
+        caregiverRate = parseFloat(caregiverRate);
+        let allyFee = this.getAllyFee(allyPct, clientRate, allyFeeIncluded);
+        let providerFee = clientRate - caregiverRate - allyFee;
+
+        return (providerFee.toFixed(2)) === "-0.00" ? 0 : providerFee;
     }
 
-    static getProviderFee(clientRate, caregiverRate, allyPct, allyFeeIncluded = false)
+    static getClientRate(providerFee, caregiverRate, allyPct, allyFeeIncluded = true)
     {
-        let chargedRate = parseFloat(clientRate);
-        let allyFee = this.getAllyFee(allyPct, chargedRate);
+        providerFee = parseFloat(providerFee);
+        caregiverRate = parseFloat(caregiverRate);
+        let allyFee = this.getAllyFee(allyPct, caregiverRate + providerFee, false);
 
-        return chargedRate - parseFloat(caregiverRate) - (allyFeeIncluded ? allyFee : 0);
-    }
-
-    static getClientRate(providerFee, caregiverRate, allyPct)
-    {
-        return this.getChargedRate(caregiverRate, providerFee);
+        return providerFee + caregiverRate + (allyFeeIncluded ? allyFee : 0);
     }
 
     static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
