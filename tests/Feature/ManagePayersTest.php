@@ -93,23 +93,6 @@ class ManagePayersTest extends TestCase
     }
 
     /** @test */
-    public function a_payer_requires_an_email()
-    {
-        $this->withExceptionHandling();
-
-        $payer = factory('App\Billing\Payer')->make();
-        $payer->email = null;
-
-        $this->assertCount(0, $this->chain->payers);
-
-        $this->postJson(route('business.payers.store'), $payer->toArray())
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('email');
-
-        $this->assertCount(0, $this->chain->fresh()->payers);
-    }
-
-    /** @test */
     public function an_office_user_can_update_a_payer()
     {
         $this->withExceptionHandling();
