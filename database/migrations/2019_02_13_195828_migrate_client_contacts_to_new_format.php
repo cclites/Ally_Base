@@ -85,7 +85,7 @@ class MigrateClientContactsToNewFormat extends Migration
             $table->string('poa_last_name', 50)->nullable()->after('poa_first_name');
             $table->string('poa_phone', 25)->nullable()->after('poa_last_name');
             $table->string('poa_email', 128)->nullable()->after('poa_phone');
-            $table->string('poa_relationship', 100)->nullable()->after('poa_phone');
+            $table->string('poa_relationship', 100)->nullable()->after('poa_email');
 
             $table->string('dr_first_name', 50)->nullable()->after('import_identifier');
             $table->string('dr_last_name', 50)->nullable()->after('dr_first_name');
