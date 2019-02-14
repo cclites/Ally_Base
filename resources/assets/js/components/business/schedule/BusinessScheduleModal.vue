@@ -268,6 +268,10 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
+                                    Warning: The scheduled hours ({{ scheduledHours }}) do not match the broken out service hours.
+                                </div>
                             </b-col>
                         </b-row>
                         <b-row>

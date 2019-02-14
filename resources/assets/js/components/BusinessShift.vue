@@ -285,6 +285,10 @@
                             </table>
                         </div>
 
+                        <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-warning">
+                            Warning: The shift's actual hours ({{ duration }}) do not match the broken out service hours.
+                        </div>
+
                         <label class="mt-1">
                             <b-form-checkbox v-model="defaultRates">
                                 Use Default Rates from Client Rates Tab

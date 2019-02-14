@@ -17,6 +17,11 @@ export default {
 
         defaultService() {
             return this.services.find(item => item.default === true) || {};
+        },
+
+        serviceHours()
+        {
+            return this.form.services.reduce((carry, service) => carry + parseFloat(service.duration), 0);
         }
 
     },
@@ -137,7 +142,7 @@ export default {
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
                     console.log('added service from handleChangedBillingType');
-                    this.addService();
+                    this.addService({duration: this.scheduledHours || this.duration || 1 });
                 }
             } else {
                 this.form.service_id = this.defaultService.id;
