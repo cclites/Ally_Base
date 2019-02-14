@@ -51,16 +51,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $referral
  * @property string|null $diagnosis
  * @property int|null $ambulatory
- * @property string|null $poa_first_name
- * @property string|null $poa_last_name
- * @property string|null $poa_phone
- * @property string|null $poa_email
- * @property string|null $poa_relationship
  * @property string|null $import_identifier
- * @property string|null $dr_first_name
- * @property string|null $dr_last_name
- * @property string|null $dr_phone
- * @property string|null $dr_fax
  * @property string|null $ltci_name
  * @property string|null $ltci_address
  * @property string|null $ltci_city
@@ -240,16 +231,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral',
         'diagnosis',
         'ambulatory',
-        'poa_first_name',
-        'poa_last_name',
-        'poa_phone',
-        'poa_email',
-        'poa_relationship',
         'import_identifier',
-        'dr_first_name',
-        'dr_last_name',
-        'dr_phone',
-        'dr_fax',
         'hospital_name',
         'hospital_number',
         'ltci_name',

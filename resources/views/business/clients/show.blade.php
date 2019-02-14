@@ -213,7 +213,6 @@
         </div>
         <div class="tab-pane" id="contact_list" role="tabpanel">
             <contact-list-tab :emergency-contacts="{{ $client->user->emergencyContacts }}" :user-id="{{ $client->id }}"></contact-list-tab>
-            <emergency-contacts-tab :client="{{ $client }}"></emergency-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>

@@ -9,7 +9,6 @@ use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
-use App\Http\Requests\UpdateClientPOAContactRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
@@ -428,15 +427,6 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
-    }
-
-    public function updateContacts(UpdateClientPOAContactRequest $request, Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $client->update($request->validated());
-
-        return new SuccessResponse('Client contacts updated.');
     }
 
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
