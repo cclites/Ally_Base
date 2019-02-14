@@ -386,7 +386,7 @@ class ClientController extends BaseController
     {
         return [
             'payment_type' => $client->getPaymentType(),
-            'percentage_fee' => AllyFeeCalculator::getPercentage($client)
+            'percentage_fee' => $client->getAllyPercentage(),
         ];
     }
 

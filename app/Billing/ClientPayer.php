@@ -353,12 +353,6 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     public function getAllyPercentage()
     {
-        if ($this->isPrivatePay()) {
-            if ($this->client->fee_override) {
-                return (float) $this->client->fee_override;
-            }
-        }
-
         try {
             return $this->getPaymentMethod()->getAllyPercentage();
         }

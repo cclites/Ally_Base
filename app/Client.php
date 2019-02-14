@@ -4,6 +4,7 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
+use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
@@ -107,7 +108,6 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \App\PhoneNumber $evvPhone
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
  * @property-read mixed $active
- * @property-read mixed $ally_percentage
  * @property mixed $avatar
  * @property-read mixed $date_of_birth
  * @property-read mixed $email
@@ -209,6 +209,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \App\OfficeUser|null $caseManager
  * @property-read mixed $masked_name
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
+ * @property-read \App\Billing\ClientPayer $primaryPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
@@ -222,7 +223,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public $timestamps = false;
     public $hidden = ['ssn'];
     public $dates = ['service_start_date', 'inquiry_date'];
-    public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -460,6 +460,17 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             ->orderBy('priority');
     }
 
+    /** Current primary payer */
+    public function primaryPayer()
+    {
+        $date = Carbon::now();
+
+        return $this->hasOne(ClientPayer::class, 'client_id')
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->orderBy('priority');
+    }
+
     public function rates()
     {
         return $this->hasMany(ClientRate::class, 'client_id');
@@ -469,20 +480,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     /// Mutators
     ///////////////////////////////////////////
 
-    public function getPaymentTypeAttribute()
-    {
-        return $this->getPaymentType();
-    }
-
-    public function getAllyPercentageAttribute()
-    {
-        return $this->getAllyPercentage();
-    }
-
     public function getLastServiceDateAttribute()
     {
         return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
     }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
@@ -560,30 +562,26 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getPaymentType($method = null)
     {
-
-        $payers = $this->getPayers();
-
-        /** @var ClientPayer|null $payer */
-        if (!$payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_BALANCE)->first()) {
-            $payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_SPLIT)->sortByDesc('split_percentage')->first();
-        }
-
-        if ($payer && $method = $payer->getPaymentMethod()) {
-            if ($method instanceof Business) {
-                return 'ACH-P';
-            }
-
-            if ($method instanceof CreditCard) {
-                if ($method->type == 'amex') {
-                    return 'AMEX';
+        try {
+            $payer = $this->primaryPayer;
+            if ($payer && $method = $payer->getPaymentMethod()) {
+                if ($method instanceof Business) {
+                    return 'ACH-P';
                 }
-                return 'CC';
-            }
 
-            if ($method instanceof BankAccount) {
-                return 'ACH';
+                if ($method instanceof CreditCard) {
+                    if ($method->type == 'amex') {
+                        return 'AMEX';
+                    }
+                    return 'CC';
+                }
+
+                if ($method instanceof BankAccount) {
+                    return 'ACH';
+                }
             }
         }
+        catch (PaymentMethodError $e) {}
 
         return 'NONE';
     }
@@ -773,14 +771,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getAllyPercentage()
     {
-        $payers = $this->getPayers();
-
-        /** @var ClientPayer|null $payer */
-        if (!$payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_BALANCE)->first()) {
-            $payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_SPLIT)->sortByDesc('split_percentage')->first();
+        if ($this->fee_override) {
+            return (float) $this->fee_override;
         }
 
-        if ($payer) {
+        if ($payer = $this->primaryPayer) {
             return $payer->getAllyPercentage();
         }
 
