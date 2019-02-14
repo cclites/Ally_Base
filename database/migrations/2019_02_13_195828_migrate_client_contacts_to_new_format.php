@@ -61,15 +61,17 @@ class MigrateClientContactsToNewFormat extends Migration
         }
 
         Schema::table('clients', function (Blueprint $table) {
-            $table->dropColumn('poa_first_name');
-            $table->dropColumn('poa_last_name');
-            $table->dropColumn('poa_phone');
-            $table->dropColumn('poa_email');
-            $table->dropColumn('poa_relationship');
-            $table->dropColumn('dr_first_name');
-            $table->dropColumn('dr_last_name');
-            $table->dropColumn('dr_phone');
-            $table->dropColumn('dr_fax');
+            $table->dropColumn([
+                'poa_first_name',
+                'poa_last_name',
+                'poa_phone',
+                'poa_email',
+                'poa_relationship',
+                'dr_first_name',
+                'dr_last_name',
+                'dr_phone',
+                'dr_fax',
+            ]);
         });
     }
 
