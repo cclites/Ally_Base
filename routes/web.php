@@ -221,7 +221,10 @@ Route::group([
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
-    Route::patch('clients/{client}/other-contacts', 'Business\ClientController@updateContacts');
+    Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
+    Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
+    Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
+    Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

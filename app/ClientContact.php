@@ -101,4 +101,20 @@ class ClientContact extends Model
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
+
+    /**
+     * Get the valid relationship values.
+     *
+     * @return array
+     */
+    public static function validRelationships() : array
+    {
+        return [
+            self::RELATION_CUSTOM,
+            self::RELATION_FAMILY,
+            self::RELATION_PHYSICIAN,
+            self::RELATION_POA,
+            self::RELATION_OTHER,
+        ];
+    }
 }

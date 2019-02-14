@@ -59,7 +59,7 @@
             <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#contact_list" class="nav-link">Contacts</a>
+            <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
@@ -93,7 +93,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
-                <a class="dropdown-item" data-toggle="tab" href="#contact_list" role="tab">Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -211,7 +211,7 @@
                 </client-payment-history>
             </b-card>
         </div>
-        <div class="tab-pane" id="contact_list" role="tabpanel">
+        <div class="tab-pane" id="contacts" role="tabpanel">
             <client-contacts-tab :contacts="{{ $client->contacts }}" :client="{{ $client }}"></client-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
