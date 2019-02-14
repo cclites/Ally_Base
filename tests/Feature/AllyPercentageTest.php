@@ -70,10 +70,11 @@ class AllyPercentageTest extends TestCase
     /**
      * @test
      */
-    public function a_split_payer_uses_the_higher_split_percentage()
+    public function a_split_payer_uses_the_higher_priority()
     {
-        $clientPayer1 = $this->createPrivateSplitPayer(0.49);
-        $clientPayer2 = $this->createSplitPayer(0.51);
+        $clientPayer1 = $this->createPrivateSplitPayer(0.50);
+        $clientPayer1->update(['priority' => 2]);
+        $clientPayer2 = $this->createSplitPayer(0.50);
         $clientPayer2->payer->setProviderPay();
 
         $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
