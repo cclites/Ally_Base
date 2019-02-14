@@ -36,7 +36,7 @@ class CreatePayerRequest extends FormRequest
             'city' => 'nullable',
             'state' => 'nullable',
             'zip' => 'nullable|min:5',
-            'email' => 'required|email',
+            'email' => 'nullable|email',
             'phone_number' => ['nullable', new PhonePossible()],
             'fax_number' => ['nullable', new PhonePossible()],
             'rates' => 'nullable|array',

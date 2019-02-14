@@ -36,8 +36,8 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Email" label-for="email" label-class="required">
-                        <b-form-input type="email" v-model="form.email" required />
+                    <b-form-group label="Email" label-for="email">
+                        <b-form-input type="email" v-model="form.email" />
                         <input-help :form="form" field="email" text=""></input-help>
                     </b-form-group>
                 </b-col>
