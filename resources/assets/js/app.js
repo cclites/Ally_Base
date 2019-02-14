@@ -66,6 +66,8 @@ Vue.component('edit-avatar', require('./components/EditAvatar'));
 Vue.component('user-avatar', require('./components/UserAvatar'));
 Vue.component('checkbox-group', require('./components/CheckboxGroup'));
 Vue.component('ally-table', require('./components/AllyTable'));
+Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
+Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));

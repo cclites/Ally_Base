@@ -189,6 +189,7 @@ class ClientController extends BaseController
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
+            'contacts',
         ])
         ->append('last_service_date');
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
