@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Shifts\RateFactory;
 use Illuminate\Http\Request;
 use App\Billing\ClientRate;
 use App\Client;
@@ -44,7 +45,11 @@ class ClientRatesController extends Controller
 
         // Verify no negative provider fees
         foreach($rates as $rate) {
-            // .. calculate provider fee here based on current payment method .. //
+            foreach(['hourly', 'fixed'] as $type) {
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $rate["client_${type}_rate"], $rate["caregiver_${type}_rate"])) {
+                    return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+                }
+            }
         }
         
         \DB::beginTransaction();
