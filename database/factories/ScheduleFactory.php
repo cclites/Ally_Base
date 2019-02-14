@@ -38,5 +38,6 @@ $factory->define(Schedule::class, function(Faker $faker) {
         'provider_fee' => $faker->randomFloat(2, 5, 10),
         'fixed_rates' => 0,
         'hours_type' => 'default',
+        'status' => Schedule::OK,
     ];
 });

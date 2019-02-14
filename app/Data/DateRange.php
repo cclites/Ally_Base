@@ -3,6 +3,10 @@ namespace App\Data;
 
 use Carbon\Carbon;
 
+/**
+ * Class DateRange
+ * @package App\Data
+ */
 class DateRange
 {
     /** @var \Carbon\Carbon */

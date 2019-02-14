@@ -6,7 +6,7 @@ use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Rules\ValidEffectivePayer;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 use App\Shift;
 use App\Shifts\Data\CaregiverClockoutData;
 use App\Shifts\Data\ClockData;
@@ -47,7 +47,7 @@ class UpdateShiftRequest extends BusinessClientRequest
             'issues.comments' => 'nullable',
             'activities' => 'array|nullable',
             'services' => 'array|required_without:service_id',
-            'services.*.id' => 'nullable|exists:schedule_services,id',
+            'services.*.id' => 'nullable|exists:shift_services,id',
             'services.*.service_id' => 'required_with:services|exists:services,id',
             'services.*.payer_id' => [
                 'nullable',

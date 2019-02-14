@@ -97,7 +97,11 @@ class RateFactory
     }
 
 
-
+    public function hasNegativeProviderFee(HasAllyFeeInterface $entity, float $clientRate, float $caregiverRate): bool
+    {
+        $maxCaregiverRate = subtract($clientRate, $entity->getAllyFee($clientRate, true));
+        return $caregiverRate > $maxCaregiverRate;
+    }
 
     ////////////////////////////////////
     //// OLD STRUCTURE

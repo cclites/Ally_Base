@@ -7,7 +7,7 @@ use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Schedule;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 use App\Shift;
 use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\Data\ClockData;
@@ -35,7 +35,7 @@ class ShiftFactory implements Arrayable
      * @param \App\Caregiver $caregiver
      * @param \App\Shifts\Data\ClockData $clockIn
      * @param \App\Shifts\Data\ClockData|null $clockOut
-     * @param \App\Scheduling\Data\ScheduledRates|null $rates
+     * @param \App\Data\ScheduledRates|null $rates
      * @param string|null $currentStatus
      * @param \App\Billing\Service|null $service
      * @param \App\Billing\Payer|null $payer
@@ -205,15 +205,15 @@ class ShiftFactory implements Arrayable
      * Resolve default rates from the rate factory if none are provided
      *
      * @param \App\Shifts\Data\ClockData $clockIn
-     * @param \App\Scheduling\Data\ScheduledRates|null $rates
+     * @param \App\Data\ScheduledRates|null $rates
      * @param int $clientId
      * @param int|null $caregiverId
      * @param int|null $serviceId
      * @param int|null $payerId
-     * @return \App\Scheduling\Data\ScheduledRates|\App\Shifts\Rates|null
+     * @return \App\Data\ScheduledRates|null
      */
-    protected static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
-        ?int $serviceId, ?int $payerId)
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
+        ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
         if (!$rates || $rates->clientRate === null) {
             $client = Client::findOrFail($clientId);

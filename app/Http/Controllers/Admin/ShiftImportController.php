@@ -11,7 +11,7 @@ use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 use App\Shift;
 use App\Shifts\Data\CaregiverClockoutData;
 use App\Shifts\Data\ClockData;

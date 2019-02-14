@@ -5,7 +5,7 @@ use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Traits\BelongsToOneBusiness;
@@ -294,7 +294,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Return a ScheduledRates object
      *
-     * @return \App\Scheduling\Data\ScheduledRates
+     * @return \App\Data\ScheduledRates
      */
     public function getRates(): ScheduledRates
     {

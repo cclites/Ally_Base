@@ -120,7 +120,7 @@
                 ],
                 loading: false,
                 statuses: {caregiver: [], client: []},
-                statusFilter: '',
+                statusFilter: 'active',
             }
         },
 

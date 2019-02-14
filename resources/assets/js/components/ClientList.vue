@@ -93,7 +93,7 @@
         data() {
             return {
                 filters: {
-                    status: '',
+                    status: 'active',
                     client_type: '',
                     business_id: '',
                     search: null,

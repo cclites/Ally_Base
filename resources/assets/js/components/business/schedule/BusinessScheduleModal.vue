@@ -105,15 +105,18 @@
                         </b-row>
 
                         <b-row>
-                            <b-col lg="12">
-                                <strong>Scheduled Billing: </strong>
-                                <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
-                                <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
-                                <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
-                                <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
-                                <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
-                                <label for="create_service_rates" class="rate-label">Service Breakout</label>
-                            </b-col>
+                            <b-row class="mt-2">
+                                <b-col lg="12">
+                                    <strong>Scheduled Billing</strong>
+                                    <b-form-group class="pt-2 mb-0">
+                                        <b-form-radio-group v-model="billingType">
+                                            <b-form-radio value="hourly">Actual Hours</b-form-radio>
+                                            <b-form-radio value="fixed">Fixed Rate</b-form-radio>
+                                            <b-form-radio value="services">Service Breakout</b-form-radio>
+                                        </b-form-radio-group>
+                                    </b-form-group>
+                                </b-col>
+                            </b-row>
                         </b-row>
 
                         <b-row>

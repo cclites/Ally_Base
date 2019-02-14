@@ -67,6 +67,7 @@ export default {
         },
 
         addService(service = {}) {
+            console.log('Adding service', service);
             const newService = {
                 id: service.id || null,
                 service_id: service.service_id ? service.service_id : (this.defaultService ? this.defaultService.id : null),
@@ -130,6 +131,7 @@ export default {
         },
 
         handleChangedBillingType(form, type) {
+            console.log('handleChangedBillingType', form);
             if (type === 'services') {
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
@@ -145,6 +147,7 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
+            console.log('handleChangedDefaultRates', form);
             // initiated from watcher
             if (value) {
                 form.client_rate = null;
