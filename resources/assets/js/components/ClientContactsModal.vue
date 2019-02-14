@@ -130,6 +130,7 @@
                     is_emergency: defaults.is_emergency ? true : false,
                 });
             },
+
             submit() {
                 this.busy = true;
                 let method = this.source.id ? 'patch' : 'post';
@@ -139,14 +140,15 @@
                     url = this.source.id ? `/contacts/${this.source.id}` : '/contacts';
                 }
                 this.form.submit(method, url)
-                    .then(response => {
-                        this.$emit(this.source.id ? 'updated' : 'created', response.data.data);
+                    .then( ({ data }) => {
+                        this.$emit(this.source.id ? 'updated' : 'created', data.data);
                         this.showModal = false;
                     })
                     .catch(e => {
                     })
                     .finally(() => this.busy = false)
             },
+
             onCancel() {
                 this.value = {};
             },
@@ -163,12 +165,10 @@
                 }
                 this.showModal = val;
             },
+            
             showModal(val) {
                 this.$emit('input', val);
             }
         }
     }
 </script>
-
-<style scoped>
-</style>

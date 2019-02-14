@@ -38,4 +38,26 @@ class CreateClientContactRequest extends FormRequest
             'is_emergency' => 'nullable|boolean',
         ];
     }
+
+    /**
+     * Get the filtered request data.
+     *
+     * @return array
+     */
+    public function filtered()
+    {
+        $data = $this->validated();
+        
+        $data['is_emergency'] = $data['is_emergency'] ? 1 : 0;
+        
+        if ($data['relationship'] != 'custom') {
+            $data['relationship_custom'] = null;
+        }
+
+        if (! $data['is_emergency']) {
+            $data['emergency_priority'] = null;
+        }
+        
+        return $data;
+    }
 }

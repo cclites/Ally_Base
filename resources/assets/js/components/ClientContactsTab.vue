@@ -12,10 +12,10 @@
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
                     :items="emergencyContacts"
-                    :fields="fields"
-                    :sort-by.sync="emergencySortBy"
-                    :sort-desc.sync="emergencySortDesc"
+                    :fields="emergencyFields"
+                    sortBy="emergency_priority"
                     empty-text="No emergency contacts available."
+                    class="table-fit-more"
                 >
                     <template slot="relationship" scope="data">
                         {{ formatRelationship(data.item) }}
@@ -24,7 +24,12 @@
                         {{ formatAddress(data.item) }}
                     </template>
                     <template slot="actions" scope="data">
-                        <b-btn v-if="data.item.priority > 1" variant="secondary" size="sm" @click="raisePriority(data.item)" :disabled="busy || authInactive">
+                        <b-btn v-if="data.item.emergency_priority > 1"
+                            title="Increase Priority"
+                            variant="primary" size="sm"
+                            @click="raisePriority(data.item)" 
+                            :disabled="busy || authInactive"
+                        >
                             <i class="fa fa-chevron-up"></i>
                         </b-btn>
                         <b-btn variant="secondary" title="Edit" @click="edit(data.item)" size="sm" :disabled="busy || authInactive">
@@ -78,8 +83,8 @@
                 :source="currentContact" 
                 :client="client"
                 v-model="contactModal"
-                @updated="updateRecord"
-                @created="createRecord"
+                @updated="setItems"
+                @created="setItems"
             ></client-contacts-modal>
         </b-card>
     </div>
@@ -96,19 +101,8 @@
         data() {
             return {
                 items: [],
-                fields: [
-                    { key: 'name', sortable: true },
-                    { key: 'relationship', sortable: true },
-                    { key: 'phone1', label: 'Phone Number 1', sortable: true },
-                    { key: 'phone2', label: 'Phone Number 2', sortable: true },
-                    { key: 'email', label: 'Email Address', sortable: true },
-                    { key: 'address', label: 'Address', sortable: true },
-                    { key: 'actions', sortable: false },
-                ],
                 sortBy: 'name',
                 sortDesc: false,
-                emergencySortBy: 'name',
-                emergencySortDesc: false,
                 currentContact: {},
                 contactModal: false,
                 busy: false,
@@ -119,15 +113,120 @@
             emergencyContacts() {
                 return this.items.filter(x => x.is_emergency == 1); 
             },
+
             otherContacts() {
                 return this.items.filter(x => x.is_emergency == 0); 
             },
+
             isClient() {
                 return this.authUser.id === this.client.id;
+            },
+
+            fields() {
+                let fields = [
+                    { key: 'name', sortable: true },
+                    { key: 'relationship', sortable: true },
+                    { key: 'phone1', label: 'Phone Number 1', sortable: true },
+                    { key: 'phone2', label: 'Phone Number 2', sortable: true },
+                    { key: 'email', label: 'Email Address', sortable: true },
+                    { key: 'address', label: 'Address', sortable: true },
+                    { key: 'actions', sortable: false },
+                ];
+
+                if (this.isClient) {
+                    fields = fields.filter(x => ['name', 'relationship', 'actions'].includes(x.key) );
+                }
+                return fields;
+            },
+
+            emergencyFields() {
+                let fields = [
+                    { key: 'name', sortable: false },
+                    { key: 'relationship', sortable: false },
+                    { key: 'phone1', label: 'Phone Number 1', sortable: false },
+                    { key: 'phone2', label: 'Phone Number 2', sortable: false },
+                    { key: 'email', label: 'Email Address', sortable: false },
+                    { key: 'address', label: 'Address', sortable: false },
+                    { key: 'actions', sortable: false },
+                ];
+
+                if (this.isClient) {
+                    fields = fields.filter(x => ['name', 'relationship', 'actions'].includes(x.key) );
+                }
+                return fields;
             },
         },
 
         methods: {
+            add(emergency = false) {
+                this.currentContact = { is_emergency: emergency };
+                this.contactModal = true;
+            },
+
+            edit(item) {
+                this.currentContact = item;
+                this.contactModal = true;  
+            },
+
+            destroy(item) {
+                if (! confirm('Are you sure you wish to remove this contact?  This cannot be undone.')) {
+                    return;
+                }
+
+                this.busy = true;
+                let form = new Form({});
+                form.submit('DELETE', this.itemUrl(item))
+                    .then( ({ data }) => {
+                        this.setItems(data.data);
+                    })
+                    .catch(e => {})
+                    .finally(() => { this.busy = false; });
+            },
+
+            setItems(items) {
+                this.items = items;
+            },
+
+            raisePriority(item) {
+                this.busy = true;
+                let form = new Form({ priority: item.emergency_priority - 1 });
+                form.patch(this.itemUrl(item) + '/priority')
+                    .then( ({ data }) => {
+                        this.setItems(data.data);
+                    })
+                    .catch(e => {})
+                    .finally(() => { this.busy = false; });
+            },
+
+            moveToEmergency(item) {
+                if (! confirm('Move this contact to the Emergency Contact list?')) {
+                    return;
+                }
+
+                this.updateEmergencyValue(item, 1);
+            },
+
+            destroyEmergency(item) {
+                if (! confirm('Remove this contact from the Emergency Contact list?')) {
+                    return;
+                }
+
+                this.updateEmergencyValue(item, 0);
+            },
+
+            updateEmergencyValue(item, value) {
+                this.busy = true;
+                let form = new Form(item);
+                form.is_emergency = value;
+                form.submit('patch', this.itemUrl(item))
+                    .then( ({ data }) => {
+                        this.setItems(data.data);
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => this.busy = false)
+            },
+
             formatAddress(item) {
                 let address = item.address;
                 if (item.city) {
@@ -141,6 +240,7 @@
                 }
                 return address;
             },
+
             formatRelationship(item) {
                 switch (item.relationship) {
                     case 'family': return 'Family';
@@ -153,91 +253,18 @@
                 }
                 return '-';
             },
-            add(emergency = false) {
-                this.currentContact = { is_emergency: emergency };
-                this.contactModal = true;
-            },
-            edit(item) {
-                this.currentContact = item;
-                this.contactModal = true;  
-            },
-            destroy(item) {
-                if (! confirm('Are you sure you wish to remove this contact?  This cannot be undone.')) {
-                    return;
-                }
 
-                this.busy = true;
+            itemUrl(item) {
                 let url = `/business/clients/${this.client.id}/contacts/${item.id}`
                 if (this.isClient) {
                     url = `/contacts/${item.id}`;
                 }
-                let form = new Form({});
-                form.submit('DELETE', url)
-                    .then(response => {
-                        this.removeRecord(item);
-                    })
-                    .catch(e => {})
-                    .finally(() => { this.busy = false; });
+                return url;
             },
-            removeRecord(item) {
-                let index = this.items.findIndex(x => x.id === item.id);
-                if (index >= 0) {
-                    this.items.splice(index, 1);
-                }
-            },
-            updateRecord(item) {
-                let index = this.items.findIndex(x => x.id === item.id);
-                if (index >= 0) {
-                    this.items.splice(index, 1, item);
-                }
-            },
-            createRecord(item) {
-                this.items.push(item);
-            },
-            raisePriority(contact) {
-                let priority = contact.priority - 1;
-                axios.patch(`/emergency-contacts/${this.userId}/${contact.id}`, { priority })
-                    .then(response => {
-                        alerts.addMessage('success', 'Emergency Contact Priority Updated');
-                        this.contacts = response.data;
-                    }).catch(error => {
-                        console.error(error.response);
-                    });
-            },
-            moveToEmergency(item) {
-                if (! confirm('Move this contact to the Emergency Contact list?')) {
-                    return;
-                }
-
-                this.updateEmergencyValue(item, 1);
-            },
-            destroyEmergency(item) {
-                if (! confirm('Remove this contact from the Emergency Contact list?')) {
-                    return;
-                }
-
-                this.updateEmergencyValue(item, 0);
-            },
-            updateEmergencyValue(item, value) {
-                this.busy = true;
-                let url = `/business/clients/${this.client.id}/contacts/${item.id}`;
-                if (this.isClient) {
-                    url = `/contacts/${item.id}`;
-                }
-                let form = new Form(item);
-                form.is_emergency = value;
-                form.submit('patch', url)
-                    .then( ({ data }) => {
-                        this.updateRecord(data.data);
-                    })
-                    .catch(e => {
-                    })
-                    .finally(() => this.busy = false)
-            }
         },
 
         mounted() {
-            this.items = this.contacts;  
+            this.setItems(this.contacts);
         },
     }
 </script>
