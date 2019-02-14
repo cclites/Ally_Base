@@ -88,8 +88,7 @@ class ProcessPayment
             return $this->allyFee;
         }
 
-        $percentage = $strategy->getPaymentMethod()->getAllyPercentage();
-        $allyFee = subtract($amount, divide($amount, add(1, $percentage)));
+        $allyFee = $strategy->getPaymentMethod()->getAllyFee($amount, true);
         return $allyFee;
     }
 }
