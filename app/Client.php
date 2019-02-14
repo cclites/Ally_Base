@@ -560,23 +560,29 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getPaymentType($method = null)
     {
-        if (!$method) {
-            $method = $this->getPaymentMethod();
+
+        $payers = $this->getPayers();
+
+        /** @var ClientPayer|null $payer */
+        if (!$payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_BALANCE)->first()) {
+            $payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_SPLIT)->sortByDesc('split_percentage')->first();
         }
 
-        if ($method instanceof Business) {
-            return 'ACH-P';
-        }
-
-        if ($method instanceof CreditCard) {
-            if ($method->type == 'amex') {
-                return 'AMEX';
+        if ($payer && $method = $payer->getPaymentMethod()) {
+            if ($method instanceof Business) {
+                return 'ACH-P';
             }
-            return 'CC';
-        }
 
-        if ($method instanceof BankAccount) {
-            return 'ACH';
+            if ($method instanceof CreditCard) {
+                if ($method->type == 'amex') {
+                    return 'AMEX';
+                }
+                return 'CC';
+            }
+
+            if ($method instanceof BankAccount) {
+                return 'ACH';
+            }
         }
 
         return 'NONE';
@@ -584,9 +590,9 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     /**
      * @param bool $backup
-     * @return \App\Billing\Contracts\ChargeableInterface
+     * @return \App\Billing\Contracts\ChargeableInterface|null
      */
-    public function getPaymentMethod($backup = false)
+    public function getPaymentMethod($backup = false): ?ChargeableInterface
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
         return $method;
@@ -767,16 +773,15 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getAllyPercentage()
     {
-        if ($this->fee_override) {
-            return (float) $this->fee_override;
+        $payers = $this->getPayers();
+
+        /** @var ClientPayer|null $payer */
+        if (!$payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_BALANCE)->first()) {
+            $payer = $payers->where('payment_allocation', ClientPayer::ALLOCATION_SPLIT)->sortByDesc('split_percentage')->first();
         }
 
-        if ($this->defaultPayment) {
-            return $this->defaultPayment->getAllyPercentage();
-        }
-
-        if ($this->backupPayment) {
-            return $this->backupPayment->getAllyPercentage();
+        if ($payer) {
+            return $payer->getAllyPercentage();
         }
 
         // Default to CC fee

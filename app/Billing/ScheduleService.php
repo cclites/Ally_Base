@@ -4,7 +4,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Schedule;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 
 /**
  * \App\Billing\ScheduleService
@@ -44,7 +44,7 @@ class ScheduleService extends AuditableModel
     /**
      * Return a ScheduledRates object
      *
-     * @return \App\Scheduling\Data\ScheduledRates
+     * @return \App\Data\ScheduledRates
      */
     public function getRates(): ScheduledRates
     {

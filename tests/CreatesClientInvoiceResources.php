@@ -40,11 +40,14 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    private function createSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null): ClientPayer
     {
-        $payer = factory(Payer::class)->create();
+        if ($payerId === null) {
+            $payer = factory(Payer::class)->create();
+            $payerId = $payer->id;
+        }
         $clientPayer = new ClientPayer([
-            'payer_id' => $payer->id,
+            'payer_id' => $payerId,
             'effective_start' => $effective_start,
             'effective_end' => $effective_end,
             'payment_allocation' => ClientPayer::ALLOCATION_SPLIT,
@@ -55,11 +58,14 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null): ClientPayer
     {
-        $payer = factory(Payer::class)->create();
+        if ($payerId === null) {
+            $payer = factory(Payer::class)->create();
+            $payerId = $payer->id;
+        }
         $clientPayer = new ClientPayer([
-            'payer_id' => $payer->id,
+            'payer_id' => $payerId,
             'effective_start' => $effective_start,
             'effective_end' => $effective_end,
             'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
@@ -68,6 +74,19 @@ trait CreatesClientInvoiceResources
         $this->client->payers()->save($clientPayer);
         return $clientPayer;
     }
+
+    private function createPrivateBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        return $this->createBalancePayer($effective_start, $effective_end, Payer::PRIVATE_PAY_ID);
+    }
+
+
+    private function createPrivateSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        return $this->createSplitPayer($splitPercentage, $effective_start, $effective_end, Payer::PRIVATE_PAY_ID);
+    }
+
+
 
     private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {

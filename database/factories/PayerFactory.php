@@ -19,5 +19,7 @@ $factory->define(\App\Billing\Payer::class, function (Faker $faker) {
         'fax_number' => $faker->phoneNumber,
         'week_start' => $faker->numberBetween(0, 6),
         'email' => $faker->email,
+        'payment_method_type' => 'businesses',
+        'payment_method_id' => null,
     ];
 });

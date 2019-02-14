@@ -41,6 +41,11 @@ class ClientRatesController extends Controller
     {
         $this->authorize('update', $client);
         $rates = $request->filtered();
+
+        // Verify no negative provider fees
+        foreach($rates as $rate) {
+            // .. calculate provider fee here based on current payment method .. //
+        }
         
         \DB::beginTransaction();
         try {

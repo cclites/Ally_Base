@@ -6,7 +6,7 @@ use App\Business;
 use App\Businesses\Timezone;
 use App\Caregiver;
 use App\Client;
-use App\Scheduling\Data\ScheduledRates;
+use App\Data\ScheduledRates;
 use App\Shift;
 use App\Shifts\Data\CaregiverClockoutData;
 use App\Shifts\Data\ClockData;

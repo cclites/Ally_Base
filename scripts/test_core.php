@@ -51,7 +51,7 @@ $phpunitCmds = [
     "$phpunit --testsuite Model",
     "$phpunit --testsuite Bugs",
     "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|ShiftFactory|RateFactory|ScheduleConverter|ScheduleCreator|ScheduleEditor|QueryTest/'", // core feature tests
-    "$phpunit --filter '/Payer|InvoiceTest|ClientRateTest|ApplyPaymentTest|ProcessPaymentTest/'", // new billing tests (add invoice generators once done)
+    "$phpunit --filter '/Payer|InvoiceTest|ClientRateTest|ApplyPaymentTest|ProcessPaymentTest|AllyPercentageTest/'", // new billing tests (add invoice generators once done)
 ];
 
 foreach($phpunitCmds as $cmdline) {

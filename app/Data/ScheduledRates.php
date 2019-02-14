@@ -1,9 +1,12 @@
 <?php
+namespace App\Data;
 
-
-namespace App\Scheduling\Data;
-
-
+/**
+ * Class ScheduledRates
+ * Rate data used in both shifts and scheduling
+ * 
+ * @package App\Data
+ */
 class ScheduledRates
 {
     public $clientRate;
