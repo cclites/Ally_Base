@@ -37,7 +37,7 @@ class ShiftFlagManager
             $flags = ShiftFlag::FLAGS;
         }
 
-        $this->shift->syncFlags($this->getFlags());
+        $this->shift->syncFlags($this->getFlags($flags));
 
         if ($this->isDuplicate()) {
             $this->attachDuplicates();
@@ -50,10 +50,10 @@ class ShiftFlagManager
      *
      * @return array
      */
-    public function getFlags()
+    public function getFlags(?array $flagsToCheck = null) : array
     {
         $flags = [];
-        foreach(ShiftFlag::FLAGS as $flag) {
+        foreach($flagsToCheck as $flag) {
             $method = 'is' . studly_case($flag);
             if (method_exists($this, $method) && $this->$method($this->shift)) {
                 $flags[] = $flag;
