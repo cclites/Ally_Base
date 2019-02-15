@@ -273,7 +273,7 @@ class ClockOutTest extends TestCase
             'goals' => [],
         ];
 
-        $this->postJson(route('clock_out'), $data)
+        $this->postJson(route('clock_out.show', $shift), $data)
             ->assertStatus(200);
 
         $this->assertCount(1, $shift->fresh()->questions);
@@ -298,7 +298,7 @@ class ClockOutTest extends TestCase
             'goals' => [],
         ];
 
-        $this->postJson(route('clock_out'), $data)
+        $this->postJson(route('clock_out.show', $shift), $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors('questions.1');
     }
