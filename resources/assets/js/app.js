@@ -55,7 +55,6 @@ Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 Vue.component('contact-list-tab', require('./components/users/ContactListTab'));
-Vue.component('emergency-contacts-tab', require('./components/users/EmergencyContactsTab'));
 Vue.component('loading-card', require('./components/LoadingCard.vue'));
 Vue.component('signature-pad', require('./components/SignaturePad'));
 Vue.component('select2', require('./components/Select2'));
@@ -67,6 +66,8 @@ Vue.component('edit-avatar', require('./components/EditAvatar'));
 Vue.component('user-avatar', require('./components/UserAvatar'));
 Vue.component('checkbox-group', require('./components/CheckboxGroup'));
 Vue.component('ally-table', require('./components/AllyTable'));
+Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
+Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));

@@ -88,7 +88,11 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
-
+    Route::get('contacts', 'Clients\ClientContactController@index');
+    Route::post('contacts', 'Clients\ClientContactController@store');
+    Route::patch('contacts/{clientContact}', 'Clients\ClientContactController@update');
+    Route::delete('contacts/{clientContact}', 'Clients\ClientContactController@destroy');
+    Route::patch('contacts/{clientContact}/priority', 'Clients\ClientContactController@raisePriority');
     Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
@@ -113,12 +117,14 @@ Route::group([
     Route::get('caregiver/deposits', 'Caregivers\DepositController@index')->name('caregiver.deposits');
     Route::get('caregiver/deposits/{deposit}/{view?}', 'Caregivers\DepositController@show')->name('caregiver.deposits.show');
 
-    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
-    Route::get('clocked-in', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
-    Route::get('clock-out', 'Caregivers\ShiftController@showClockOut')->name('clock_out');
-    Route::get('clock-out/{client_id}', 'Caregivers\ShiftController@showClockOutForClient')->name('clock_out_by_client');
-    Route::post('clock-out', 'Caregivers\ShiftController@clockOut');
+    Route::get('clock-in/{schedule?}', 'Caregivers\ClockInController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ClockInController@clockIn')->name('clock_in');
+    Route::get('clocked-in', 'Caregivers\ClockInController@clockedIn')->name('clocked_in');
+
+    Route::get('clock-out', 'Caregivers\ClockOutController@index')->name('clock_out');
+    Route::get('clock-out/{shift}', 'Caregivers\ClockOutController@show')->name('clock_out.show');
+    Route::post('clock-out/{shift}', 'Caregivers\ClockOutController@clockOut');
+
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
 
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
@@ -221,7 +227,11 @@ Route::group([
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
-    Route::patch('clients/{client}/other-contacts', 'Business\ClientController@updateContacts');
+    Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
+    Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
+    Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
+    Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
+    Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

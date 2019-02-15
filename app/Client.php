@@ -53,16 +53,7 @@ use App\Billing\ClientAuthorization;
  * @property string|null $referral
  * @property string|null $diagnosis
  * @property int|null $ambulatory
- * @property string|null $poa_first_name
- * @property string|null $poa_last_name
- * @property string|null $poa_phone
- * @property string|null $poa_email
- * @property string|null $poa_relationship
  * @property string|null $import_identifier
- * @property string|null $dr_first_name
- * @property string|null $dr_last_name
- * @property string|null $dr_phone
- * @property string|null $dr_fax
  * @property string|null $ltci_name
  * @property string|null $ltci_address
  * @property string|null $ltci_city
@@ -155,10 +146,6 @@ use App\Billing\ClientAuthorization;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDiagnosis($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFax($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereEmail($email = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
@@ -184,10 +171,6 @@ use App\Billing\ClientAuthorization;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereName($firstname = null, $lastname = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReceiveSummaryEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
@@ -241,16 +224,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral',
         'diagnosis',
         'ambulatory',
-        'poa_first_name',
-        'poa_last_name',
-        'poa_phone',
-        'poa_email',
-        'poa_relationship',
         'import_identifier',
-        'dr_first_name',
-        'dr_last_name',
-        'dr_phone',
-        'dr_fax',
         'hospital_name',
         'hospital_number',
         'ltci_name',
@@ -485,6 +459,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public function serviceAuthorizations()
     {
         return $this->hasMany(ClientAuthorization::class);
+    }
+
+    /**
+     * Get the ClientContacts relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
     }
 
     ///////////////////////////////////////////

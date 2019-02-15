@@ -14,6 +14,7 @@ use App\Shifts\Data\ClockData;
 use App\Shifts\Data\EVVData;
 use App\Shifts\EVVClockInData;
 use App\Shifts\ShiftFactory;
+use Carbon\Carbon;
 use Packages\GMaps\GeocodeCoordinates;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -166,4 +167,40 @@ class ShiftFactoryTest extends TestCase
         $this->assertEquals(22.50, $shift->client_rate, "The shift data did not pull in the client rate.");
         $this->assertEquals(16.25, $shift->caregiver_rate, "The shift data did not pull in the caregiver rate");
     }
+
+    /**
+     * Make sure the timezone is not mutated during creation
+     *
+     * @test
+     */
+    function shift_factory_produces_UTC_timestamps()
+    {
+        $this->client->business->update(['timezone' => 'America/New_York']);
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+        ]);
+
+        $now = Carbon::now('UTC');
+        $factory = ShiftFactory::withSchedule(
+            $schedule,
+            new ClockData(Shift::METHOD_GEOLOCATION),
+            new ClockData(Shift::METHOD_GEOLOCATION)
+        );
+
+        $shift = $factory->create();
+
+        $this->assertNotEquals('UTC', $this->client->getTimezone(),  'For this test to be accurate, the client timezone should not be UTC.');
+        $this->assertEquals('UTC', $factory->toArray()['checked_in_time']->getTimezone()->getName());
+        $this->assertEquals('UTC', $factory->toArray()['checked_out_time']->getTimezone()->getName());
+        $this->assertEquals('UTC', $shift->checked_in_time->getTimezone()->getName());
+        $this->assertEquals('UTC', $shift->checked_out_time->getTimezone()->getName());
+        $this->assertEquals($now->toDateTimeString(), $shift->checked_in_time->toDateTimeString());
+        $this->assertEquals($now->toDateTimeString(), $shift->checked_out_time->toDateTimeString());
+    }
+
 }

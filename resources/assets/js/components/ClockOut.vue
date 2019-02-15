@@ -264,7 +264,7 @@
             async submitForm() {
                 this.showLoading('Clocking out..');
                 try {
-                    await this.form.post('/clock-out');
+                    await this.form.post(`/clock-out/${this.shift.id}`);
                     window.location = '/schedule?clocked_out=1'
                 }
                 catch (err) {}

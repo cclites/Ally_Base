@@ -15,10 +15,10 @@
                     <b-col><b>Physician Information</b></b-col>
                 </b-row>
                 <b-row class="mb-1">
-                    <b-col>Name: {{ client.dr_first_name }} {{ client.dr_last_name }}</b-col>
+                    <b-col>Name: {{ doctor ? doctor.name : 'N/A' }}</b-col>
                 </b-row>
                 <b-row class="mb-3">
-                    <b-col>Phone: {{ client.dr_phone }}</b-col>
+                    <b-col>Phone: {{ doctor ? doctor.phone1 : 'N/A' }}</b-col>
                 </b-row>
                 <b-row class="mb-1">
                     <b-col><b>Primary Diagnosis</b></b-col>
@@ -113,7 +113,11 @@
         computed: {
             address () {
                 return this.addressFormat(this.client.addresses[0])
-            }
+            },
+
+            doctor() {
+                return this.client.contacts.find(x => x.relationship == 'physician');
+            },
         },
 
         methods: {
