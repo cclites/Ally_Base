@@ -22,7 +22,11 @@ export default {
                     'icon': 'fa fa-pencil mr-1',
                     'color': 'orange',
                 },
-                // 'outside_auth': 'Outside Service Auth',
+                'outside_auth': {
+                    'text': 'Outside Service Auth',
+                    'icon': 'fa fa-exclamation mr-1',
+                    'color': 'red',
+                },
                 'time_excessive': {
                     'text': 'Excessive Length',
                     'icon': 'fa fa-clock-o mr-1',
