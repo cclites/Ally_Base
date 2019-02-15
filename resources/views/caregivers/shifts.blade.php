@@ -11,7 +11,7 @@
                 <div class="">
                     @foreach($shifts as $shift)
                         <div class="btn-client">
-                            <b-btn href="/clock-out/{{$shift->client->id}}" size="lg" variant="info" class="btn-block" :disabled="authInactive">{{$shift->client->name}}</b-btn>                            
+                            <b-btn href="/clock-out/{{$shift->id}}" size="lg" variant="info" class="btn-block" :disabled="authInactive">{{$shift->client->name}}</b-btn>
                         </div>
                     @endforeach
                 </div>
