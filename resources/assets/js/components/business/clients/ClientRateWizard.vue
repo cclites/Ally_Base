@@ -139,7 +139,7 @@
                                                     @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">Enter the daily rate for this caregiver.</small>
+                                            <small class="form-text text-muted">Enter the per-visit rate for this caregiver.</small>
                                         </b-form-group>
                                         <b-form-group label="Registry Fixed/Daily Fee" label-for="provider_fixed">
                                             <b-form-input
@@ -152,7 +152,7 @@
                                                     @change="updateClientFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">Enter the registry fixed fee.</small>
+                                            <small class="form-text text-muted">Enter the registry's per-visit fee.</small>
                                         </b-form-group>
                                         <b-form-group label="Ally Fixed/Daily Fee" label-for="ally_fixed">
                                             <b-form-input
@@ -177,7 +177,7 @@
                                                     @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">The total daily rate charged to the client.</small>
+                                            <small class="form-text text-muted">The total per-visit rate charged to the client.</small>
                                         </b-form-group>
                                     </b-tab>
                                 </b-tabs>
