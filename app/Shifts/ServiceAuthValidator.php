@@ -23,6 +23,11 @@ class ServiceAuthValidator
         $this->shift = $shift;
     }
 
+    /**
+     * Check if the shift would exceed the client weekly hours limit.
+     *
+     * @return boolean
+     */
     public function exceedsMaxClientHours() : bool
     {
         // Check if shift would exceed clients max hours
@@ -33,8 +38,8 @@ class ServiceAuthValidator
             ->get();
 
         $total = 0;
-        foreach ($shifts as $s) {
-            $total += $s->getBillableHours();
+        foreach ($shifts as $shift) {
+            $total += $shift->getBillableHours();
         }
 
         if ($total > $this->shift->client->max_weekly_hours) {
@@ -64,8 +69,8 @@ class ServiceAuthValidator
                 $shifts = $this->getMatchingShifts($auth)->get();
 
                 $total = 0;
-                foreach ($shifts as $s) {
-                    $total += $s->getBillableHours($auth->service_id, $auth->payer_id);
+                foreach ($shifts as $shift) {
+                    $total += $shift->getBillableHours($auth->service_id, $auth->payer_id);
                 }
 
                 if ($total > $auth->units) {
