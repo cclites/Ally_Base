@@ -119,7 +119,7 @@ class ShiftFlagManager
      */
     public function isOutsideAuth() : bool
     {
-        // check if shift would exceed clients max hours
+        // Check if shift would exceed clients max hours
         $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
         $shifts = Shift::where('client_id', $this->shift->client_id)
             ->whereBetween('checked_in_time', [$period])
@@ -134,27 +134,15 @@ class ShiftFlagManager
             return true;
         }
 
-        // check every active service auth 
-        foreach ($this->shift->client->getActiveServiceAuths() as $auth) {
-            switch ($auth->period) {
-                case ClientAuthorization::PERIOD_DAILY:
-                    $period = [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()];
-                    break;
-                case ClientAuthorization::PERIOD_WEEKLY:
-                    $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
-                    break;
-                case ClientAuthorization::PERIOD_MONTHLY:
-                    $period = [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()];
-                    break;
-                default:
-                    continue;
-            }
+        // Check every service auth active during the time of the shift. 
+        foreach ($this->shift->getActiveServiceAuths() as $auth) {
+            $period = $auth->getPeriodDates();
 
             $query = Shift::where('client_id', $this->shift->client_id)
                 ->whereBetween('checked_in_time', [$period])
                 ->where('fixed_rates', $auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
 
-            // must match service
+            // Must match service
             $query->where(function($q) use ($auth) {
                 $q->where(function($q3) use ($auth) {
                     $q3->where('service_id', $auth->service_id);

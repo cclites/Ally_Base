@@ -1025,6 +1025,19 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
     }
 
+    /**
+     * Get the client's service authorizations active during the time
+     * of the shift.  Defaults to today.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     */
+    public function getActiveServiceAuths() : iterable
+    {
+        return $this->client->serviceAuthorizations()
+            ->effectiveOn($this->checked_in_time)
+            ->get();
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////

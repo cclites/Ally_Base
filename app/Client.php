@@ -803,12 +803,19 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     }
 
     /**
-     * Get the client's active service authorizations.
+     * Get the client's service authorizations active on the 
+     * specified date.  Defaults to today.
      *
      * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
      */
-    public function getActiveServiceAuths() : Collection
+    public function getActiveServiceAuths($date = null) : Collection
     {
-        return $this->serviceAuthorizations()->active()->get();
+        if (empty($date)) {
+            $date = Carbon::now();
+        }
+
+        return $this->serviceAuthorizations()
+            ->effectiveOn($date)
+            ->get();
     }
 }
