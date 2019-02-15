@@ -58,41 +58,6 @@
             </b-row>
             <template v-if="user.role_type === 'client'">
                 <b-row>
-                    <b-col>
-                        <p class="h6">Power of Attorney</p>
-                        <hr>
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col lg="6">
-                        <b-form-group label="First Name">
-                            <b-form-input id="poa_first_name"
-                                          v-model="form.poa_first_name"
-                                          :readonly="authInactive"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Phone">
-                            <b-form-input id="poa_phone"
-                                          v-model="form.poa_phone"
-                                          :readonly="authInactive"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Email">
-                            <b-form-input id="poa_email"
-                                          v-model="form.poa_email"
-                                          :readonly="authInactive"></b-form-input>
-                        </b-form-group>
-                    </b-col>
-                    <b-col lg="6">
-                        <b-form-group label="Last Name">
-                            <b-form-input id="poa_last_name"
-                                          v-model="form.poa_last_name"
-                                          :readonly="authInactive"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Relationship">
-                            <b-form-input id="poa_relationship"
-                                          v-model="form.poa_relationship"
-                                          :readonly="authInactive"></b-form-input>
-                        </b-form-group>
-                    </b-col>
                     <b-col lg="12">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
@@ -138,11 +103,6 @@
                     lastname: this.user.lastname,
                     email: this.user.email,
                     date_of_birth: (this.user.date_of_birth) ? this.formatDate(this.user.date_of_birth) : '',
-                    poa_first_name: this.client.poa_first_name,
-                    poa_last_name: this.client.poa_last_name,
-                    poa_phone: this.client.poa_phone,
-                    poa_email: this.client.poa_email,
-                    poa_relationship: this.client.poa_relationship,
                     caregiver_1099: this.client.caregiver_1099
                 })
             }

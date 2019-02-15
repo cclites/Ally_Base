@@ -88,7 +88,11 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
-
+    Route::get('contacts', 'Clients\ClientContactController@index');
+    Route::post('contacts', 'Clients\ClientContactController@store');
+    Route::patch('contacts/{clientContact}', 'Clients\ClientContactController@update');
+    Route::delete('contacts/{clientContact}', 'Clients\ClientContactController@destroy');
+    Route::patch('contacts/{clientContact}/priority', 'Clients\ClientContactController@raisePriority');
     Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
@@ -221,7 +225,11 @@ Route::group([
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
-    Route::patch('clients/{client}/other-contacts', 'Business\ClientController@updateContacts');
+    Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
+    Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
+    Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
+    Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
+    Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
