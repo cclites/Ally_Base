@@ -1,14 +1,14 @@
 <template>
-    <b-modal :title="defaultRate ? 'New Default Rate' : 'Add Caregiver Wizard'"
+    <b-modal :title="defaultRate ? 'New Default Rate' : 'Add Caregiver'"
              v-model="localValue"
              ref="rateWizardModal">
         <b-container fluid>
             <b-row>
                 <b-col lg="12">
                     <template v-if="step === 1">
-                        <h4>Caregiver Assignment</h4>
+                        <h4>Select a Caregiver</h4>
                         <p>
-                            <strong v-if="addMode">Which caregiver(s) do you want to assign to the client?</strong>
+                            <strong v-if="addMode">Which caregiver do you want to refer to the client?</strong>
                             <strong v-else>Which caregiver(s) do you want this rate applied to?</strong>
                         </p>
 
@@ -31,11 +31,11 @@
                     <template v-if="step === 2">
                         <h4>Service Type</h4>
                         <p>
-                            <strong>Would you like to set the rate for ALL service types or a specific service type?</strong>
+                            <strong>Will this caregivers's rate apply to all service types or to specific service types like respite or personal care?</strong>
                         </p>
                         <b-form-radio-group v-model="service_type">
-                            <b-radio value="all">All Service Types</b-radio><br />
-                            <b-radio value="specific">A specific service type:</b-radio><br />
+                            <b-radio value="all">All Service Types (Common)</b-radio><br />
+                            <b-radio value="specific">A Specific Service Type: (Medicaid/Insurance)</b-radio><br />
                         </b-form-radio-group>
                         <b-form-select v-if="service_type === 'specific'" v-model="service_select">
                             <option value="">--Select a specific service type--</option>
@@ -69,7 +69,7 @@
                     <template v-if="step === 4">
                         <b-row>
                             <b-col lg="12">
-                                <strong>Fill in two of the three fields below, our system will automatically calculate the third field and the Ally fee.</strong>
+                                <strong>Fill in two of the three fields below, Ally will automatically calculate the third field.</strong>
                                 <hr />
                             </b-col>
                             <b-col lg="12">
@@ -86,7 +86,7 @@
                                                     @change="updateProviderHourlyRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">Enter the hourly earnings for this caregiver.</small>
+                                            <small class="form-text text-muted">Enter the hourly rate for this caregiver.</small>
                                         </b-form-group>
                                         <b-form-group label="Registry Hourly Fee" label-for="provider_hourly">
                                             <b-form-input
@@ -127,7 +127,7 @@
                                             <small class="form-text text-muted">The total hourly rate charged to the client.</small>
                                         </b-form-group>
                                     </b-tab>
-                                    <b-tab title="Fixed/Daily Rates (Live-in)" class="pt-3">
+                                    <b-tab title="Fixed/Daily Rates" class="pt-3">
                                         <b-form-group label="Caregiver Fixed/Daily Rate" label-for="caregiver_fixed">
                                             <b-form-input
                                                     id="caregiver_fixed"
@@ -139,7 +139,7 @@
                                                     @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">Enter the daily earnings for this caregiver.</small>
+                                            <small class="form-text text-muted">Enter the per-visit rate for this caregiver.</small>
                                         </b-form-group>
                                         <b-form-group label="Registry Fixed/Daily Fee" label-for="provider_fixed">
                                             <b-form-input
@@ -152,7 +152,7 @@
                                                     @change="updateClientFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">Enter the registry daily fee.</small>
+                                            <small class="form-text text-muted">Enter the registry's per-visit fee.</small>
                                         </b-form-group>
                                         <b-form-group label="Ally Fixed/Daily Fee" label-for="ally_fixed">
                                             <b-form-input
@@ -177,7 +177,7 @@
                                                     @change="updateProviderFixedRate"
                                             >
                                             </b-form-input>
-                                            <small class="form-text text-muted">The total daily rate charged to the client.</small>
+                                            <small class="form-text text-muted">The total per-visit rate charged to the client.</small>
                                         </b-form-group>
                                     </b-tab>
                                 </b-tabs>
@@ -213,12 +213,12 @@
                     <template v-if="step === 5">
                         <h4>Effective Date Range</h4>
 
-                        <b-form-group label="When do you want this rate to go into effect?">
+                        <b-form-group label="When will this rate to go into effect?">
                             <mask-input v-model="start_date" type="date" class="date-input"></mask-input>
                             <small>Enter the start of the date range (ex. {{ today }})</small>
                         </b-form-group>
 
-                        <b-form-group label="When do you want this rate to be valid until?">
+                        <b-form-group label="When will this rate expire?">
                             <mask-input v-model="end_date" type="date" class="date-input"></mask-input>
                             <small>Enter the end of the date range.  If you are unsure, leave it at 12/31/9999 to remain in effect forever.</small>
                         </b-form-group>
