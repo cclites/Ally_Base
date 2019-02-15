@@ -22,8 +22,9 @@ class ShiftFlagManager
     }
 
     /**
-     * Check all available flags and save the applicable flags to the shift
+     * Check all available flags and save the applicable flags to the shift.
      *
+     * @param array $flags
      * return void
      */
     public function generate(array $flags = null) : void
@@ -48,6 +49,7 @@ class ShiftFlagManager
      * Return an array of flags that match the Shift details
      * Checks all is"Flag"() methods for a boolean value
      *
+     * @param array|null $flagsToCheck
      * @return array
      */
     public function getFlags(?array $flagsToCheck = null) : array
@@ -63,22 +65,42 @@ class ShiftFlagManager
         return $flags;
     }
 
-    public function isAdded()
+    /**
+     * Handle 'added' flag check.
+     *
+     * @return bool
+     */
+    public function isAdded() : bool
     {
         return in_array($this->shift->checked_in_method, [Shift::METHOD_OFFICE, Shift::METHOD_UNKNOWN, Shift::METHOD_TIMESHEET]);
     }
 
-    public function isConverted()
+    /**
+     * Handle 'converted' flag check.
+     *
+     * @return bool
+     */
+    public function isConverted() : bool
     {
         return $this->shift->checked_in_method === Shift::METHOD_CONVERTED;
     }
 
-    public function isDuplicate()
+    /**
+     * Handle 'duplicate' flag check.
+     *
+     * @return bool
+     */
+    public function isDuplicate() : bool
     {
-        return $this->duplicateQuery($this->shift)->exists();
+        return $this->duplicateQuery()->exists();
     }
 
-    public function isModified()
+    /**
+     * Handle 'modified' flag check.
+     *
+     * @return bool
+     */
+    public function isModified() : bool
     {
         $requiredUpdates = in_array($this->shift->checked_in_method, [Shift::METHOD_TELEPHONY, Shift::METHOD_GEOLOCATION]) ? 2 : 1;
 
@@ -88,24 +110,44 @@ class ShiftFlagManager
                 ->count() >= $requiredUpdates;
     }
 
-    public function isOutsideAuth()
+    /**
+     * Handle 'outside_auth' flag check.
+     *
+     * @return bool
+     */
+    public function isOutsideAuth() : bool
     {
         return false; // TODO
     }
 
-    public function isTimeExcessive()
+    /**
+     * Handle 'time_excessive' flag check.
+     *
+     * @return bool
+     */
+    public function isTimeExcessive() : bool
     {
         return $this->shift->duration() > 24;
     }
 
-    public function getDuplicates()
+    /**
+     * Get all duplicates of the shift.
+     *
+     * @return Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getDuplicates() : ?iterable
     {
-        return $this->duplicateQuery($this->shift)->get();
+        return $this->duplicateQuery()->get();
     }
 
-    public function attachDuplicates()
+    /**
+     * Attach duplicates to the shift.
+     *
+     * @return void
+     */
+    public function attachDuplicates() : void
     {
-        $duplicates = $this->getDuplicates($this->shift);
+        $duplicates = $this->getDuplicates();
         $this->shift->update(['duplicated_by' => $duplicates->first()->id]);
         foreach($duplicates as $duplicate) {
             if (!$duplicate->duplicated_by) {
@@ -115,7 +157,12 @@ class ShiftFlagManager
         }
     }
 
-    protected function duplicateQuery()
+    /**
+     * Get the query for all duplicates of the shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function duplicateQuery() : \Illuminate\Database\Eloquent\Builder
     {
         return Shift::where('id', '!=', $this->shift->id)
             ->where('caregiver_id', $this->shift->caregiver_id)
