@@ -34,7 +34,8 @@ class ShiftFlagsTest extends TestCase
         $shift1 = $this->createDuplicateShift('12:00:00', '18:00:00');
         $shift2 = $this->createDuplicateShift('02:00:00', '08:00:00');
 
-        // $shift1->flagManager()->generate();
+        $shift1->flagManager()->generate();
+        $shift2->flagManager()->generate();
 
         $this->assertFalse($shift1->fresh()->hasFlag('duplicate'), 'The original shift should not have a duplicate flag');
         $this->assertFalse($shift2->hasFlag('duplicate'), 'The new shift should not have a duplicate flag');
