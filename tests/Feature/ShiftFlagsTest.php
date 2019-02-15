@@ -10,6 +10,10 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\ShiftFlag;
 use App\ShiftStatusHistory;
+use App\Billing\ClientRate;
+use App\Billing\Service;
+use Carbon\Carbon;
+use App\Billing\Invoiceable\ShiftService;
 
 class ShiftFlagsTest extends TestCase
 {
@@ -17,6 +21,7 @@ class ShiftFlagsTest extends TestCase
 
     protected $caregiver;
     protected $client;
+    protected $service;
 
     protected function setUp()
     {
@@ -24,6 +29,88 @@ class ShiftFlagsTest extends TestCase
 
         $this->client = factory(Client::class)->create();
         $this->caregiver = factory(Caregiver::class)->create();
+
+        $this->business = $this->client->business;
+        $this->caregiver = factory('App\Caregiver')->create();
+        $this->business->caregivers()->save($this->caregiver);
+        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->officeUser = factory('App\OfficeUser')->create();
+        $this->officeUser->businesses()->attach($this->business->id);
+
+        $this->service = factory(Service::class)->create(['chain_id' => $this->client->business->businessChain->id, 'default' => true]);
+        factory(ClientRate::class)->create([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+        ]);
+    }
+
+    /**
+     * @param $in
+     * @param $out
+     * @return Shift
+     */
+    protected function createDuplicateShift($in, $out)
+    {
+        if (strlen($in) === 8) $in = date('Y-m-d') . ' ' . $in;
+        if (strlen($out) === 8) $out = date('Y-m-d') . ' ' . $out;
+        return factory(Shift::class)->create([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+            'business_id' => $this->client->business_id,
+            'checked_in_time' => $in,
+            'checked_out_time' => $out,
+            'status' => Shift::CLOCKED_IN,
+            'service_id' => $this->service->id,
+        ]);
+    }
+
+    /**
+     * @param \Carbon\Carbon $date
+     * @param string $in
+     * @param string $out
+     * @return Shift
+     */
+    public function createServiceBreakoutShift(Carbon $date, string $in, int $services, int $hoursPerService) : Shift
+    {
+        $out = Carbon::parse($date->format('Y-m-d') . ' ' . $in)->addHours($services * $hoursPerService)->toTimeString();
+        $data = $this->makeShift($date, $in, $out);
+
+        $data['service_id'] = null;
+
+        $shift = Shift::create($data);
+        factory(ShiftService::class, $services)->create([
+            'shift_id' => $shift->id,
+            'duration' => $hoursPerService,
+        ]);
+
+        return $shift->fresh();
+    }
+
+    /**
+     * @param \Carbon\Carbon $date
+     * @param string $in
+     * @param string $out
+     * @return array
+     */
+    protected function makeShift(Carbon $date, string $in, string $out) : array
+    {
+        if (strlen($in) === 8) $in = $date->format('Y-m-d') . ' ' . $in;
+        if (strlen($out) === 8) $out = $date->format('Y-m-d') . ' ' . $out;
+        
+        $data = factory(Shift::class)->raw([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+            'business_id' => $this->client->business_id,
+            'checked_in_time' => $in,
+            'checked_out_time' => $out,
+            'hours_type' => 'default',
+            'fixed_rates' => 1,
+            'mileage' => 0,
+            'other_expenses' => 0,
+            'service_id' => $this->service->id,
+        ]);
+
+        return $data;
     }
 
     /**
@@ -170,22 +257,40 @@ class ShiftFlagsTest extends TestCase
         $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::ADDED));
     }
 
-    /**
-     * @param $in
-     * @param $out
-     * @return Shift
-     */
-    protected function createDuplicateShift($in, $out)
+    /** @test */
+    public function a_shift_should_be_flagged_when_actual_hours_shift_exceeds_clients_max_weekly_hours()
     {
-        if (strlen($in) === 8) $in = date('Y-m-d') . ' ' . $in;
-        if (strlen($out) === 8) $out = date('Y-m-d') . ' ' . $out;
-        return factory(Shift::class)->create([
-            'caregiver_id' => $this->caregiver->id,
-            'client_id' => $this->client->id,
-            'business_id' => $this->client->business_id,
-            'checked_in_time' => $in,
-            'checked_out_time' => $out,
-            'status' => Shift::CLOCKED_IN
-        ]);
+        $this->actingAs($this->officeUser->user);
+
+        $this->client->update(['max_weekly_hours' => 10]);
+        $this->assertEquals(10, $this->client->fresh()->max_weekly_hours);
+
+        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $shift = Shift::create($data);
+        $shift->flagManager()->generate();
+        $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
+        $shift2 = Shift::create($data);
+        $shift2->flagManager()->generate();
+        $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
+
+    /** @test */
+    public function a_shift_should_be_flagged_when_service_breakout_shift_exceeds_clients_max_weekly_hours()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $this->client->update(['max_weekly_hours' => 10]);
+        $this->assertEquals(10, $this->client->fresh()->max_weekly_hours);
+
+        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $shift = Shift::create($data);
+        $shift->flagManager()->generate();
+        $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        $shift2 = $this->createServiceBreakoutShift(Carbon::now(), '12:00:00', 3, 2);
+        $shift2->flagManager()->generate();
+        $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
 }

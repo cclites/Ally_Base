@@ -3,6 +3,7 @@ namespace App\Shifts;
 
 use App\Shift;
 use App\ShiftFlag;
+use Carbon\Carbon;
 
 class ShiftFlagManager
 {
@@ -117,7 +118,23 @@ class ShiftFlagManager
      */
     public function isOutsideAuth() : bool
     {
-        return false; // TODO
+        // check if shift would exceed clients max hours
+        $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
+        $shifts = Shift::where('caregiver_id', $this->shift->caregiver_id)
+            ->where('client_id', $this->shift->client_id)
+            ->whereBetween('checked_in_time', [$period])
+            ->get();
+
+        $total = 0;
+        foreach ($shifts as $s) {
+            $total += $s->getBillableHours();
+        }
+
+        if ($total > $this->shift->client->max_weekly_hours) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
