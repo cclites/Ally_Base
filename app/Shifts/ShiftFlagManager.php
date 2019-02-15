@@ -4,6 +4,7 @@ namespace App\Shifts;
 use App\Shift;
 use App\ShiftFlag;
 use Carbon\Carbon;
+use App\Billing\ClientAuthorization;
 
 class ShiftFlagManager
 {
@@ -120,8 +121,7 @@ class ShiftFlagManager
     {
         // check if shift would exceed clients max hours
         $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
-        $shifts = Shift::where('caregiver_id', $this->shift->caregiver_id)
-            ->where('client_id', $this->shift->client_id)
+        $shifts = Shift::where('client_id', $this->shift->client_id)
             ->whereBetween('checked_in_time', [$period])
             ->get();
 
@@ -132,6 +132,61 @@ class ShiftFlagManager
 
         if ($total > $this->shift->client->max_weekly_hours) {
             return true;
+        }
+
+        // check every active service auth 
+        foreach ($this->shift->client->getActiveServiceAuths() as $auth) {
+            switch ($auth->period) {
+                case ClientAuthorization::PERIOD_DAILY:
+                    $period = [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()];
+                    break;
+                case ClientAuthorization::PERIOD_WEEKLY:
+                    $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
+                    break;
+                case ClientAuthorization::PERIOD_MONTHLY:
+                    $period = [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()];
+                    break;
+                default:
+                    continue;
+            }
+
+            $query = Shift::where('client_id', $this->shift->client_id)
+                ->whereBetween('checked_in_time', [$period])
+                ->where('fixed_rates', $auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
+
+            // must match service
+            $query->where(function($q) use ($auth) {
+                $q->where(function($q3) use ($auth) {
+                    $q3->where('service_id', $auth->service_id);
+                    if (! empty($auth->payer_id)) {
+                        $q3->where('payer_id', $auth->payer_id);
+                    }
+                })->orWhereHas('services', function ($q2) use ($auth) {
+                        $q2->where('service_id', $auth->service_id);
+                        if (! empty($auth->payer_id)) {
+                            $q2->where('payer_id', $auth->payer_id);
+                        }
+                    });
+            });
+            
+            if ($auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED) {
+                // If fixed limit then just check the count of the fixed shifts
+                if ($query->count() > $auth->units) {
+                    return true;
+                }
+            } else {
+                // Calculate the duration of the shifts to measure hourly units
+                $shifts = $query->get();
+
+                $total = 0;
+                foreach ($shifts as $s) {
+                    $total += $s->getBillableHours($auth->service_id, $auth->payer_id);
+                }
+
+                if ($total > $auth->units) {
+                    return true;
+                }
+            }
         }
 
         return false;

@@ -854,7 +854,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      *
      * @param \App\Client $client
      * @param \Carbon\Carbon $endDateUtc
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
+     * @return \Illuminate\Support\Collection
      */
     public function getItemsForPayment(Client $client, Carbon $endDateUtc): Collection
     {
@@ -998,16 +998,28 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     /**
      * Get the total billable hours of the shift, including service breakouts.
      *
+     * @param int|null $service_id
+     * @param int|null $payer_id
      * @return float
      */
-    public function getBillableHours() : float
+    public function getBillableHours(?int $service_id = null, ?int $payer_id = null) : float
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
             return $this->duration(true);
         } else if (! empty($this->services)) {
             // service breakout shift
-            return floatval($this->services->sum('duration'));
+            $services = $this->services;
+
+            if (! empty($service_id)) {
+                $services = $services->where('service_id', $service_id);
+            }
+
+            if (! empty($payer_id)) {
+                $services = $services->where('payer_id', $payer_id);
+            }
+
+            return floatval($services->sum('duration'));
         } else {
             return floatval(0);
         }

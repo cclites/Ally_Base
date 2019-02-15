@@ -30,6 +30,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
+use App\Billing\ClientAuthorization;
 
 /**
  * App\Client
@@ -476,6 +477,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->hasMany(ClientRate::class, 'client_id');
     }
 
+    /**
+     * Get the client authorizations relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function serviceAuthorizations()
+    {
+        return $this->hasMany(ClientAuthorization::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -805,5 +816,15 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public function syncPayers(?iterable $payers) : bool
     {
         return ClientPayer::sync($this, $payers);
+    }
+
+    /**
+     * Get the client's active service authorizations.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     */
+    public function getActiveServiceAuths() : Collection
+    {
+        return $this->serviceAuthorizations()->active()->get();
     }
 }

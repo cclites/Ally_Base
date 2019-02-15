@@ -2,6 +2,7 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use Carbon\Carbon;
 use App\Client;
 
 /**
@@ -26,6 +27,21 @@ class ClientAuthorization extends AuditableModel
     ];
 
     ////////////////////////////////////
+    //// Periods
+    ////////////////////////////////////
+
+    const PERIOD_DAILY = 'daily';
+    const PERIOD_WEEKLY = 'weekly';
+    const PERIOD_MONTHLY = 'monthly';
+    
+    ////////////////////////////////////
+    //// Unit Types
+    ////////////////////////////////////
+
+    const UNIT_TYPE_HOURLY = 'hourly';
+    const UNIT_TYPE_FIXED = 'fixed';
+    
+    ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
 
@@ -42,5 +58,21 @@ class ClientAuthorization extends AuditableModel
     function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * Get only the active serice authorizations.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('effective_start', '<=', Carbon::now()->toDateString())
+            ->where('effective_end', '>=', Carbon::now()->toDateString());
     }
 }
