@@ -52,7 +52,7 @@ class ShiftFactory implements Arrayable
         ?Payer $payer = null
     ): self
     {
-        $rates = self::resolveRates($clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
+        $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
         return new self([
             'business_id'       => $client->business_id,
             'caregiver_id'      => $caregiver->id,
@@ -87,7 +87,7 @@ class ShiftFactory implements Arrayable
         ?string $currentStatus = null
     ): self
     {
-        $rates = self::resolveRates($clockIn, $schedule->getRates(), $schedule->client_id, $schedule->caregiver_id, $schedule->service_id, $schedule->payer_id);
+        $rates = self::resolveRates(clone $clockIn, $schedule->getRates(), $schedule->client_id, $schedule->caregiver_id, $schedule->service_id, $schedule->payer_id);
         $self = new self([
             'schedule_id'       => $schedule->id,
             'business_id'       => $schedule->business_id,
@@ -109,7 +109,7 @@ class ShiftFactory implements Arrayable
         if ($schedule->services->count()) {
             $self->withServices($schedule->services->map(function(ScheduleService $service) use ($schedule, $clockIn) {
                 $serviceData = array_except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
-                $rates = self::resolveRates($clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
+                $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
                 $serviceData = array_merge($serviceData, [
                     'client_rate' => $rates->clientRate,
                     'caregiver_rate' => $rates->caregiverRate,
@@ -218,7 +218,7 @@ class ShiftFactory implements Arrayable
         if (!$rates || $rates->clientRate === null) {
             $client = Client::findOrFail($clientId);
             $timezone = $client->getTimezone();
-            $effectiveDate = $clockIn->time->setTimezone($timezone ?? 'UTC')->toDateString();
+            $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
 
             $rates = app(RateFactory::class)->findMatchingRate($client, $effectiveDate,
                 $rates->fixedRates ?? false, $serviceId, $payerId, $caregiverId);
