@@ -5,6 +5,7 @@ use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
+use App\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Traits\BelongsToOneBusiness;
@@ -127,6 +128,8 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+    const CAREGIVER_NOSHOW = 'CAREGIVER_NOSHOW';
+    const OPEN_SHIFT = 'OPEN_SHIFT';
 
     ///////////////////////////////////////////
     /// Related Shift Statuses
@@ -286,6 +289,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         // Suppress missed clock in status for now
 //        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
         return self::SCHEDULED;
+    }
+
+    /**
+     * Return a ScheduledRates object
+     *
+     * @return \App\Data\ScheduledRates
+     */
+    public function getRates(): ScheduledRates
+    {
+        return new ScheduledRates(
+            $this->client_rate,
+            $this->caregiver_rate,
+            $this->fixed_rates,
+            $this->hours_type
+        );
     }
 
     /**
@@ -515,6 +533,46 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return app(RateFactory::class)->getRatesForSchedule($this)->provider_fee
             ?? $this->provider_fee
             ?? 0;
+    }
+
+    ///////////////////////////////////////////
+    /// Static Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Get the caregiver information for the schedules surrounding
+     * the given start and end times for the specified client.
+     *
+     * @param \App\Client $client
+     * @param \Carbon\Carbon $startTime
+     * @param \Carbon\Carbon $endTime
+     * @param ?int $windowSize
+     * @return array
+     */
+    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, ?int $windowSize = 4) : array
+    {
+        $beforeWindow = [
+            $startTime->copy()->subHours($windowSize),
+            $startTime->subMinute()
+        ];
+
+        $afterWindow = [
+            $endTime->copy()->addMinute(),
+            $endTime->copy()->addHours($windowSize)
+        ];
+
+        return [
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $beforeWindow)
+                ->get()
+                ->unique('caregiver_id'),
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $afterWindow)
+                ->get()
+                ->unique('caregiver_id')
+        ];
     }
 
     ////////////////////////////////////

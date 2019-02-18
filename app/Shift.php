@@ -1,14 +1,15 @@
 <?php
+
 namespace App;
 
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\ClientPayer;
 use App\Billing\Deposit;
 use App\Billing\Invoiceable\InvoiceableModel;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Queries\InvoiceableQuery;
 use App\Billing\Service;
@@ -18,8 +19,11 @@ use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
+use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\CostCalculator;
+use App\Shifts\Data\ClockData;
 use App\Shifts\DurationCalculator;
+use App\Shifts\ShiftFactory;
 use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
 use App\Traits\BelongsToOneBusiness;
@@ -194,9 +198,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
     public static function recalculateDurationOnChange()
     {
-        self::saving(function(Shift $shift) {
+        self::saving(function (Shift $shift) {
             if ($shift->checked_out_time &&
-                ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
+                ($shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time'))
             ) {
                 $shift->hours = $shift->duration(true);
             }
@@ -269,13 +273,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function client()
     {
         return $this->belongsTo(Client::class)
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class)
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     public function business()
@@ -291,8 +295,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'shift_activities')
-                    ->orderBy('code')
-                    ->withPivot(['completed', 'other']);
+            ->orderBy('code')
+            ->withPivot(['completed', 'other']);
     }
 
     public function otherActivities()
@@ -382,9 +386,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftExpense::class);
     }
 
-    public function clientPayer()
+    public function payer()
     {
-        return $this->belongsTo(ClientPayer::class);
+        return $this->belongsTo(Payer::class);
     }
 
     public function service()
@@ -470,8 +474,20 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     //////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     //////////////////////////////////////
+
+    /**
+     * Add data to the shift from a shift data class
+     *
+     * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
+     */
+    public function addData(ShiftDataInterface ...$dataObjects): void
+    {
+        foreach($dataObjects as $data) {
+            $this->fill($data->toArray());
+        }
+    }
 
     /**
      * Get an instance of the shift's flag manager class.
@@ -497,6 +513,21 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if (!$service) {
                 $service = new ShiftService();
             }
+
+            // Resolve default rates
+            if ($data['client_rate'] === null) {
+                $rates = ShiftFactory::resolveRates(
+                    new ClockData($this->checked_in_method, $this->checked_in_time->toDateTimeString()),
+                    null,
+                    $this->client_id,
+                    $this->caregiver_id,
+                    $data['service_id'],
+                    $data['payer_id']
+                );
+                $data['client_rate'] = $rates->clientRate;
+                $data['caregiver_rate'] = $rates->caregiverRate;
+            }
+
             $service->fill($data);
             $this->services()->save($service);
             $savedIds[] = $service->id;
@@ -579,7 +610,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function isVerified()
     {
-        return (bool) $this->verified;
+        return (bool)$this->verified;
     }
 
     /**
@@ -600,8 +631,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function hasDuplicate()
     {
         $query = self::where('checked_in_time', $this->checked_in_time)
-                     ->where('client_id', $this->client_id)
-                     ->where('caregiver_id', $this->caregiver_id);
+            ->where('client_id', $this->client_id)
+            ->where('caregiver_id', $this->caregiver_id);
         if ($this->id) {
             $query->where('id', '!=', $this->id);
         }
@@ -617,11 +648,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function syncIssues($issues)
     {
-        $new = collect($issues)->filter(function($item) {
+        $new = collect($issues)->filter(function ($item) {
             return !isset($item['id']);
         });
 
-        $existing = collect($issues)->filter(function($item) {
+        $existing = collect($issues)->filter(function ($item) {
             return isset($item['id']);
         });
 
@@ -633,7 +664,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 ->delete();
 
             // update the existing issues in case they changed
-            foreach($existing as $item) {
+            foreach ($existing as $item) {
                 $issue = ShiftIssue::where('id', $item['id'])->first();
                 if ($issue) {
                     $issue->update($item);
@@ -645,7 +676,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
 
         // create new issues from the issues that have no id
-        foreach($new as $item) {
+        foreach ($new as $item) {
             ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
         }
     }
@@ -658,7 +689,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function getAllyPercentage()
     {
         if ($this->costs()->hasPersistedCosts()) {
-            return (float) $this->costs()->getPersistedCosts()->ally_pct;
+            return (float)$this->costs()->getPersistedCosts()->ally_pct;
         }
 
         if ($this->client) {
@@ -666,7 +697,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
 
         // Default to CC fee
-        return (float) config('ally.credit_card_fee');
+        return (float)config('ally.credit_card_fee');
     }
 
     /**
@@ -695,7 +726,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         // first reformat array to work with sync
         // and drop any values with empty comments.
         $data = [];
-        foreach($goals as $goalId => $comments) {
+        foreach ($goals as $goalId => $comments) {
             if (empty($comments)) {
                 continue;
             }
@@ -718,7 +749,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function syncQuestions($questions, $answers)
     {
         $items = [];
-        foreach($questions as $q) {
+        foreach ($questions as $q) {
             $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
             $items[$q->id] = ['answer' => $answer];
         }
@@ -760,7 +791,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function removeFlag($flag)
     {
-        return (bool) $this->shiftFlags()->where('flag', $flag)->delete();
+        return (bool)$this->shiftFlags()->where('flag', $flag)->delete();
     }
 
     /**
@@ -772,10 +803,10 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         $removeFlags = array_diff($this->flags, $flags);
         $addFlags = array_diff($flags, $this->flags);
-        foreach($addFlags as $flag) {
+        foreach ($addFlags as $flag) {
             $this->addFlag($flag);
         }
-        foreach($removeFlags as $flag) {
+        foreach ($removeFlags as $flag) {
             $this->removeFlag($flag);
         }
     }
@@ -956,16 +987,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the client payer record
-     *
-     * @return \App\Billing\ClientPayer|null
-     */
-    public function getClientPayer(): ?ClientPayer
-    {
-        return $this->clientPayer;
-    }
-
-    /**
      * Add an amount that has been invoiced to a payer
      *
      * @param \App\Billing\ClientInvoiceItem $invoiceItem
@@ -1019,13 +1040,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 
-    public function scopeWhereTelephonyVerified($query) 
+    public function scopeWhereTelephonyVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_number');
     }
 
-    public function scopeWhereMobileVerified($query) 
+    public function scopeWhereMobileVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
@@ -1115,7 +1136,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function scopeWhereFlagsIn(Builder $query, array $flags)
     {
-        $query->whereHas('shiftFlags', function($q) use ($flags) {
+        $query->whereHas('shiftFlags', function ($q) use ($flags) {
             $q->whereIn('flag', $flags);
         });
     }

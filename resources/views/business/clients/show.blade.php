@@ -59,7 +59,7 @@
             <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
+            <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
@@ -93,7 +93,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
-                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -104,7 +104,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-edit :client="{{ $client }}" confirm-url="{{ route('reconfirm.encrypted_id', [$client->getEncryptedKey()]) }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
+                    <client-edit :client="{{ $client }}" :sales-people="{{ $salesPeople }}" confirm-url="{{ route('reconfirm.encrypted_id', [$client->getEncryptedKey()]) }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
                 </div>
             </div>
         </div>
@@ -158,6 +158,7 @@
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
+            <client-medication :client="{{ $client }}" :medications="{{ $client->medications }}"></client-medication>
             <b-card
                 header="Client Narrative"
                 header-text-variant="white"
@@ -210,9 +211,8 @@
                 </client-payment-history>
             </b-card>
         </div>
-        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
-                                    :user-id="{{ $client->id }}"></emergency-contacts-tab>
+        <div class="tab-pane" id="contacts" role="tabpanel">
+            <client-contacts-tab :contacts="{{ $client->contacts }}" :client="{{ $client }}"></client-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>

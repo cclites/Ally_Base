@@ -45,9 +45,9 @@ class RateFactory
         if ($clientRate) {
             return new Rates(
                 $fixedRates ? $clientRate->caregiver_fixed_rate : $clientRate->caregiver_hourly_rate,
-                0,
+                null,
                 $fixedRates ? $clientRate->client_fixed_rate : $clientRate->client_hourly_rate,
-                0,
+                null,
                 true,
                 $fixedRates
             );
@@ -97,7 +97,11 @@ class RateFactory
     }
 
 
-
+    public function hasNegativeProviderFee(HasAllyFeeInterface $entity, float $clientRate, float $caregiverRate): bool
+    {
+        $maxCaregiverRate = subtract($clientRate, $entity->getAllyFee($clientRate, true));
+        return $caregiverRate > $maxCaregiverRate;
+    }
 
     ////////////////////////////////////
     //// OLD STRUCTURE

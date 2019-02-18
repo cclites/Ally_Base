@@ -5,7 +5,7 @@
             <b-row align-h="between">
                 <b-col>Emergency Contacts</b-col>
                 <b-col>
-                    <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || contacts.length >= 3 || authInactive">New Contact</b-btn>
+                    <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || authInactive">New Contact</b-btn>
                 </b-col>
             </b-row>
         </div>

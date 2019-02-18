@@ -1,82 +1,22 @@
 <template>
     <b-card
-        header="Caregivers &amp; Rates"
-        header-text-variant="white"
-        header-bg-variant="info"
-        >
-
-        <b-row class="mb-2">
-            <b-col sm="7">
-                <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
-                <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
-            </b-col>
-            <b-col sm="5" class="text-right">
+            header="Caregivers &amp; Rates"
+            header-text-variant="white"
+            header-bg-variant="info"
+    >
+        <div class="d-flex">
+            <div class="mb-3">
+                <h5><strong>Referred Caregivers and Rates</strong></h5>
+                <small>Any caregiver listed below has the ability to clock in and out for this client, independent of a schedule.</small>
+            </div>
+            <div class="ml-auto">
                 {{ paymentText }}
-            </b-col>
-        </b-row>
-
-        <b-row>
-            <b-col lg="7">
-                <div class="table-responsive">
-                    <table class="table table-bordered caregiver-list-table">
-                        <thead>
-                        <tr>
-                            <th>Referred Caregiver</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="caregiver in caregivers" :key="caregiver.id">
-                            <td>{{ caregiver.firstname }} {{ caregiver.lastname }}</td>
-                            <td>
-                                <b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(caregiver.id)">
-                                    <i class="fa fa-times"></i>
-                                </b-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!caregivers.length">
-                            <td colspan="3">There are no referred, or assigned, caregivers for this client.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </b-col>
-            <b-col lg="5">
-                <div class="table-responsive">
-                    <table class="table table-bordered caregiver-list-table">
-                        <thead>
-                        <tr>
-                            <th>Excluded Caregiver</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="exGiver in excludedCaregivers">
-                            <td class="sized">
-                                {{ exGiver.caregiver.name }}
-                            </td>
-                            <td class="sized">{{ exGiver.note }}</td>
-                            <td class="sized" style="white-space: nowrap">
-                                <b-btn @click="removeExcludedCaregiver(exGiver.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!excludedCaregivers.length">
-                            <td colspan="3">There are no excluded caregivers for this client.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </b-col>
-        </b-row>
-
-        <hr />
-
-        <div class="ml-auto mb-3">
-            <h5>
-                <strong>Client Rates </strong>
-                <b-btn variant="info" @click="addRateWizard()" class="ml-2">Add Rate Wizard</b-btn>
-                <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn>
-            </h5>
+            </div>
+        </div>
+        <div class="mb-3">
+            <b-btn variant="info" @click="addCaregiver()">Add Caregiver</b-btn>
+            <b-btn variant="primary" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
+            <!-- <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn> -->
         </div>
 
         <div v-if="filterByCaregiverId">
@@ -90,7 +30,7 @@
             </b-badge>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive mb-2">
             <b-table bordered striped hover show-empty
                      :items="filteredItems"
                      :fields="fields"
@@ -101,10 +41,18 @@
                      ref="table"
                      class="table-fit-more"
             >
+                <template slot="caregiver_id" scope="row">
+                    {{ row.item.caregiver_name }}
+                    <!-- <b-select v-model="row.item.caregiver_id" size="sm">
+                        <option :value="null">(All)</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
+                    </b-select> -->
+                </template>
                 <template slot="service_id" scope="row">
                     <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
                         <option :value="null">(All)</option>
-                        <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
+                        <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}
+                        </option>
                     </b-select>
                 </template>
                 <template slot="payer_id" scope="row">
@@ -113,101 +61,158 @@
                         <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
                     </b-select>
                 </template>
-                <template slot="caregiver_id" scope="row">
-                    <b-select v-model="row.item.caregiver_id" size="sm">
-                        <option :value="null">(All)</option>
-                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
-                    </b-select>
-                </template>
                 <template slot="effective_start" scope="row">
-                    <mask-input v-model="row.item.effective_start" type="date" class="date-input form-control-sm"></mask-input>
+                    <mask-input v-model="row.item.effective_start" type="date"
+                                class="date-input form-control-sm"></mask-input>
                 </template>
                 <template slot="effective_end" scope="row">
-                    <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
+                    <mask-input v-model="row.item.effective_end" type="date"
+                                class="date-input form-control-sm"></mask-input>
                 </template>
                 <template slot="caregiver_hourly_rate" scope="row">
                     <b-form-input name="caregiver_hourly_rate"
-                        class="money-input"
-                        type="number"
-                        step="any"
-                        min="0"
-                        max="999.99"
-                        required
-                        v-model="row.item.caregiver_hourly_rate"
-                        size="sm"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.caregiver_hourly_rate"
+                                  @change="updateProviderRates(row.item)"
+                                  size="sm"
                     ></b-form-input>
                 </template>
                 <template slot="caregiver_fixed_rate" scope="row">
                     <b-form-input name="caregiver_fixed_rate"
-                        class="money-input"
-                        type="number"
-                        step="any"
-                        min="0"
-                        max="999.99"
-                        required
-                        v-model="row.item.caregiver_fixed_rate"
-                        size="sm"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.caregiver_fixed_rate"
+                                  @change="updateProviderRates(row.item)"
+                                  size="sm"
                     ></b-form-input>
                 </template>
                 <template slot="client_hourly_rate" scope="row">
                     <b-form-input name="client_hourly_rate"
-                        class="money-input"
-                        type="number"
-                        step="any"
-                        min="0"
-                        max="999.99"
-                        required
-                        v-model="row.item.client_hourly_rate"
-                        size="sm"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.client_hourly_rate"
+                                  @change="updateProviderRates(row.item)"
+                                  size="sm"
                     ></b-form-input>
                 </template>
                 <template slot="client_fixed_rate" scope="row">
                     <b-form-input name="client_fixed_rate"
-                        class="money-input"
-                        type="number"
-                        step="any"
-                        min="0"
-                        max="999.99"
-                        required
-                        v-model="row.item.client_fixed_rate"
-                        size="sm"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.client_fixed_rate"
+                                  @change="updateProviderRates(row.item)"
+                                  size="sm"
                     ></b-form-input>
                 </template>
                 <template slot="actions" scope="data">
-                    <b-btn size="sm" @click="removeRate(data.index)">
-                        <i class="fa fa-trash"></i>
+                    <b-btn size="sm" @click="removeRate(data.item)" :disabled="busyRemoving === data.item.id">
+                        <i v-if="busyRemoving === data.item.id" class="fa fa-spinner fa-spin"></i>
+                        <i v-else class="fa fa-trash"></i>
                     </b-btn>
                 </template>
-                <template slot="provider_hourly_fee" scope="row">
-                    {{ getProviderFee(row.item.client_hourly_rate, row.item.caregiver_hourly_rate) }}
+                <template slot="provider_hourly_rate" scope="row">
+                    <b-form-input name="provider_hourly_rate"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.provider_hourly_rate"
+                                  @change="updateClientRates(row.item)"
+                                  size="sm"
+                    ></b-form-input>
                 </template>
-                <template slot="ally_hourly_fee" scope="row">
+                <template slot="ally_hourly_rate" scope="row">
                     {{ getAllyFee(row.item.client_hourly_rate) }}
                 </template>
-                <template slot="provider_fixed_fee" scope="row">
-                    {{ getProviderFee(row.item.client_fixed_rate, row.item.caregiver_fixed_rate) }}
+                <template slot="provider_fixed_rate" scope="row">
+                    <b-form-input name="provider_fixed_rate"
+                                  class="money-input"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="999.99"
+                                  required
+                                  v-model="row.item.provider_fixed_rate"
+                                  @change="updateClientRates(row.item)"
+                                  size="sm"
+                    ></b-form-input>
                 </template>
-                <template slot="ally_fixed_fee" scope="row">
+                <template slot="ally_fixed_rate" scope="row">
                     {{ getAllyFee(row.item.client_fixed_rate) }}
                 </template>
             </b-table>
         </div>
-        <b-btn id="save-rates" @click="saveRates()" variant="success">Save Client Rates</b-btn>
 
-        <div class="mt-4"><small>* Provider fees and Ally fees are estimated based on the primary payment method.</small></div>
+        <div class="text-right">
+            <b-btn id="save-rates" @click="saveRates()" variant="success">Save Rates</b-btn>
+        </div>
 
+        <hr/>
+        <div class="mt-4">
+            <h5>
+                <strong>Excluded Caregivers </strong>
+            </h5>
+        </div>
+        <div class="mb-3">
+            <b-btn variant="info" @click="openExcludeModal()">Exclude Caregiver</b-btn>
+        </div>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="excludedCaregivers"
+                     :fields="excludedFields"
+                     empty-text="There are no excluded caregivers for this client."
+            >
+                <template slot="actions" scope="data">
+                    <b-btn @click="editExcludedCaregiver(data.item)" size="sm" variant="info"><i class="fa fa-edit"></i>
+                    </b-btn>
+                    <b-btn @click="removeExcludedCaregiver(data.item.id)" size="sm" variant="danger"><i
+                            class="fa fa-times"></i></b-btn>
+                </template>
+            </b-table>
+        </div>
 
         <!-- MODALS -->
         <b-modal id="clientExcludeCargiver"
-                 title="Exclude Caregiver"
+                 :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
                  v-model="clientExcludeCaregiverModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
-                            <b-form-select name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
+                            <div v-if="excludeForm.id">
+                                {{ excludeForm.caregiver_name }}
+                            </div>
+                            <b-form-select v-else name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
                                 <option value="">--Select a Caregiver--</option>
-                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name
+                                    }}
+                                </option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Reason" label-for="exclude_reason">
+                            <b-form-select name="exclude_reason" v-model="excludeForm.reason">
+                                <option v-for="(item, index) in exclusionReasons" :value="index" :key="index">{{ item
+                                    }}
+                                </option>
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Note" label-for="note">
@@ -215,16 +220,22 @@
                                              :rows="3">
                             </b-form-textarea>
                         </b-form-group>
+                        <b-form-group label="Effective Date" label-for="exclude_effective_at">
+                            <mask-input v-model="excludeForm.effective_at" id="exclude_effective_at"
+                                        type="date"></mask-input>
+                        </b-form-group>
                     </b-col>
                 </b-row>
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="clientExcludeCaregiverModal=false">Close</b-btn>
-                <b-btn variant="info" @click="excludeCaregiver()" :disabled="!excludeForm.caregiver_id">Exclude Caregiver</b-btn>
+                <b-btn variant="info" @click="excludeCaregiver()" :disabled="!excludeForm.caregiver_id">
+                    {{ excludeForm.id ? 'Save' : 'Exclude Caregiver' }}
+                </b-btn>
             </div>
         </b-modal>
 
-        <b-modal title="Add Caregiver Assignment"
+        <!-- <b-modal title="Add Caregiver Assignment"
                  v-model="clientCaregiverModal"
                  ref="clientCaregiverModal">
             <b-container fluid>
@@ -247,7 +258,7 @@
                 <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
                 <b-btn variant="info" @click="saveCaregiver()" :disabled="!caregiverForm.caregiver_id">Add Caregiver</b-btn>
             </div>
-        </b-modal>
+        </b-modal> -->
 
         <client-rate-wizard v-model="rateWizardModal"
                             :client="client"
@@ -255,6 +266,9 @@
                             :services="services"
                             :payers="payers"
                             :default-rate="defaultRateOnWizard"
+                            :potential-caregivers="otherCaregivers"
+                            :add-mode="addNewCaregiver"
+                            :ally-pct-original="allyRateOriginal"
                             @new-rate="addRate">
         </client-rate-wizard>
     </b-card>
@@ -278,7 +292,7 @@
             }
         },
 
-        mixins: [ FormatsDates ],
+        mixins: [FormatsDates],
 
         data() {
             return {
@@ -294,20 +308,31 @@
                 clientExcludeCaregiverModal: false,
                 rateWizardModal: false,
                 defaultRateOnWizard: false,
+                addNewCaregiver: false,
 
                 excludeForm: new Form({
+                    id: "",
+                    caregiver_name: "",
                     caregiver_id: "",
                     note: "",
+                    reason: 'service_not_needed',
+                    effective_at: moment().format('MM/DD/YYYY'),
                 }),
                 caregiverForm: new Form({caregiver_id: ""}),
+                busyRemoving: null,
 
                 items: [],
                 totalRows: 0,
                 perPage: 30,
                 currentPage: 1,
-                sortBy: 'service.name',
+                sortBy: 'caregiver_name',
                 sortDesc: false,
                 fields: [
+                    {
+                        key: 'caregiver_name',
+                        label: 'Caregiver',
+                        sortable: true
+                    },
                     {
                         key: 'service_id',
                         label: 'Service',
@@ -316,11 +341,6 @@
                     {
                         key: 'payer_id',
                         label: 'Payer',
-                        sortable: true
-                    },
-                    {
-                        key: 'caregiver_id',
-                        label: 'Caregiver',
                         sortable: true
                     },
                     {
@@ -344,30 +364,30 @@
                         sortable: true,
                     },
                     {
-                        key: 'provider_hourly_fee',
+                        key: 'provider_hourly_rate',
                         label: 'Provider Hourly Fee*'
                     },
                     {
-                        key: 'ally_hourly_fee',
+                        key: 'ally_hourly_rate',
                         label: 'Ally Hourly Fee*'
                     },
                     {
                         key: 'client_fixed_rate',
-                        label: 'Client Fixed Rate',
+                        label: 'Client Fixed/Daily Rate',
                         sortable: true,
                     },
                     {
                         key: 'caregiver_fixed_rate',
-                        label: 'CG Fixed Rate',
+                        label: 'CG Fixed/Daily Rate',
                         sortable: true,
                     },
                     {
-                        key: 'provider_fixed_fee',
-                        label: 'Provider Fixed Fee*'
+                        key: 'provider_fixed_rate',
+                        label: 'Provider Fixed/Daily Fee*'
                     },
                     {
-                        key: 'ally_fixed_fee',
-                        label: 'Ally Fixed Fee*'
+                        key: 'ally_fixed_rate',
+                        label: 'Ally Fixed/Daily Fee*'
                     },
                     {
                         key: 'actions',
@@ -375,6 +395,29 @@
                         class: 'hidden-print'
                     },
                 ],
+                excludedFields: [
+                    {key: 'caregiver_name', label: 'Name', sortable: true},
+                    {
+                        key: 'effective_at',
+                        label: 'Date Excluded',
+                        sortable: true,
+                        formatter: x => this.formatDateFromUTC(x)
+                    },
+                    {
+                        key: 'reason', label: 'Reason Code', sortable: true, formatter: x => {
+                            return x ? this.exclusionReasons[x] : 'None'
+                        }
+                    },
+                    {key: 'note', sortable: true},
+                    {key: 'actions', label: '', class: 'hidden-print'},
+                ],
+                exclusionReasons: {
+                    'quit': 'Caregiver quit',
+                    'service_not_needed': 'Client no longer needs service',
+                    'unhappy_client': 'Client not happy and refuses service from this caregiver',
+                    'no_shows': 'Continual no shows',
+                    'retired': 'Retired',
+                },
             }
         },
 
@@ -392,7 +435,10 @@
             },
 
             filteredItems() {
-                let rates = this.items;
+                let rates = this.items.map(item => {
+                    this.updateProviderRates(item);
+                    return item;
+                });
                 let filtered = false;
 
                 if (this.filterByCaregiverId) {
@@ -401,6 +447,7 @@
                     });
                     filtered = true;
                 }
+
 
                 if (filtered) {
                     // Sort by most specific first
@@ -417,16 +464,41 @@
 
         methods: {
 
-            addRateWizard(defaultRate=false) {
+            updateProviderRates(item) {
+                item.provider_hourly_rate = RateFactory.getProviderFee(item.client_hourly_rate, item.caregiver_hourly_rate, this.allyRate).toFixed(2);
+                item.provider_fixed_rate = RateFactory.getProviderFee(item.client_fixed_rate, item.caregiver_fixed_rate, this.allyRate).toFixed(2);
+            },
+
+            updateClientRates(item) {
+                item.client_hourly_rate = RateFactory.getClientRate(item.provider_hourly_rate, item.caregiver_hourly_rate, this.allyRate).toFixed(2);
+                item.client_fixed_rate = RateFactory.getProviderFee(item.provider_fixed_rate, item.caregiver_fixed_rate, this.allyRate).toFixed(2);
+            },
+
+            openExcludeModal() {
+                this.excludeForm = new Form({
+                    id: "",
+                    caregiver_name: "",
+                    caregiver_id: "",
+                    note: "",
+                    reason: 'service_not_needed',
+                    effective_at: moment().format('MM/DD/YYYY'),
+                });
+                this.clientExcludeCaregiverModal = true;
+            },
+
+            addRateWizard(defaultRate = false) {
+                this.addNewCaregiver = false;
                 this.defaultRateOnWizard = defaultRate;
                 this.rateWizardModal = true;
             },
 
-            addRate(rateObject={}) {
+            addRate(rateObject = {}) {
+                this.addNewCaregiver = false;
                 this.items.push({
+                    caregiver_name: this.getCaregiverName(rateObject.caregiver_id),
                     service_id: rateObject.service_id || null,
                     payer_id: rateObject.payer_id || null,
-                    caregiver_id: rateObject.caregiver_id ||null,
+                    caregiver_id: rateObject.caregiver_id || null,
                     effective_start: rateObject.effective_start || moment().format('MM/DD/YYYY'),
                     effective_end: rateObject.effective_end || moment('9999-12-31').format('MM/DD/YYYY'),
                     caregiver_hourly_rate: rateObject.caregiver_hourly_rate || '0.00',
@@ -448,63 +520,86 @@
                 }, 500, 'linear');
             },
 
-            removeRate(index) {
-                if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
-                    if (index >= 0) {
-                        this.items.splice(index, 1);
+            async removeRate(item) {
+                this.busyRemoving = item.id;
+
+                // If there is only one rate entry for the caregiver, check if
+                // they can be unassigned here and block the action if there
+                // is a conflict.
+                let caregiversRates = this.items.filter(x => x.caregiver_id === item.caregiver_id).length;
+                if (caregiversRates === 1) {
+                    let response = await axios.get(`/business/clients/${this.client.id}/can-unassign/${item.caregiver_id}`);
+                    if (response.data.error) {
+                        alert(response.data.error);
+                        this.busyRemoving = null;
+                        return;
                     }
                 }
+
+                if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
+                    this.items = this.items.filter(x => {
+                        return JSON.stringify(x) !== JSON.stringify(item)
+                    });
+                }
+                this.busyRemoving = null;
             },
 
-            saveRates() {
+            async saveRates() {
                 let form = new Form({
                     rates: this.items,
                 });
                 form.patch(`/business/clients/${this.client.id}/rates`)
-                    .then( ({ data }) => {
+                    .then(async ({data}) => {
+                        await this.fetchAssignedCaregivers();
                         this.setItems(data.data);
                     })
                     .catch(e => {
+                        this.fetchAssignedCaregivers();
+                    })
+                    .finally(() => {
+                        this.fetchOtherCaregivers();
                     })
             },
 
             addCaregiver() {
-                this.caregiverForm = new Form({
-                    caregiver_id: null,
-                });
-                this.clientCaregiverModal = true;
+                this.addNewCaregiver = true;
+                this.rateWizardModal = true;
+                // this.caregiverForm = new Form({
+                //     caregiver_id: null,
+                // });
+                // this.clientCaregiverModal = true;
             },
 
-            async saveCaregiver() {
-                await this.caregiverForm.post('/business/clients/' + this.client.id + '/caregivers');
-                this.fetchAssignedCaregivers();
-                this.fetchOtherCaregivers();
-                this.clientCaregiverModal = false;
-            },
+            // async saveCaregiver() {
+            //     await this.caregiverForm.post('/business/clients/' + this.client.id + '/caregivers');
+            //     this.fetchAssignedCaregivers();
+            //     this.fetchOtherCaregivers();
+            //     this.clientCaregiverModal = false;
+            // },
 
-            async removeAssignedCaregiver(caregiver_id) {
-                if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
-                    let form = new Form({caregiver_id: caregiver_id});
-                    await form.post('/business/clients/'+this.client.id+'/detach-caregiver');
-                    this.fetchAssignedCaregivers();
-                    this.fetchOtherCaregivers();
-                }
-            },
+            // async removeAssignedCaregiver(caregiver_id) {
+            //     if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
+            //         let form = new Form({caregiver_id: caregiver_id});
+            //         await form.post('/business/clients/'+this.client.id+'/detach-caregiver');
+            //         this.fetchAssignedCaregivers();
+            //         this.fetchOtherCaregivers();
+            //     }
+            // },
 
             async excludeCaregiver() {
-                const response = await this.excludeForm.post('/business/clients/'+this.client.id+'/exclude-caregiver');
+                if (this.excludeForm.id) {
+                    const response = await this.excludeForm.patch('/business/clients/' + this.client.id + '/exclude-caregiver/' + this.excludeForm.id);
+                } else {
+                    const response = await this.excludeForm.post('/business/clients/' + this.client.id + '/exclude-caregiver');
+                }
                 this.fetchExcludedCaregivers();
                 this.fetchOtherCaregivers();
-                this.excludeForm = new Form({
-                    caregiver_id: "",
-                    note: "",
-                });
                 this.clientExcludeCaregiverModal = false;
             },
 
             removeExcludedCaregiver(id) {
                 if (confirm('Are you sure you want to re-include this caregiver for this client?')) {
-                    axios.delete('/business/clients/excluded-caregiver/'+id)
+                    axios.delete('/business/clients/excluded-caregiver/' + id)
                         .then(response => {
                             this.fetchExcludedCaregivers();
                             this.fetchOtherCaregivers();
@@ -514,9 +609,22 @@
                 }
             },
 
+            editExcludedCaregiver(item) {
+                this.excludeForm = new Form({
+                    id: item.id,
+                    caregiver_name: item.caregiver.name,
+                    caregiver_id: item.caregiver_id,
+                    note: item.note,
+                    reason: item.reason,
+                    effective_at: moment(item.effective_at).format('MM/DD/YYYY'),
+                });
+                this.clientExcludeCaregiverModal = true
+            },
+
             setItems(data) {
                 if (data) {
                     this.items = data.map(x => {
+                        x.caregiver_name = this.getCaregiverName(x.caregiver_id);
                         x.caregiver_hourly_rate = parseFloat(x.caregiver_hourly_rate).toFixed(2);
                         x.caregiver_fixed_rate = parseFloat(x.caregiver_fixed_rate).toFixed(2);
                         x.client_hourly_rate = parseFloat(x.client_hourly_rate).toFixed(2);
@@ -572,13 +680,12 @@
             },
 
             getAllyFee(clientRate) {
-                let computed = (clientRate) * this.allyRate;
+                let computed = RateFactory.getAllyFee(this.allyRate, clientRate);
                 return computed.toFixed(2);
             },
 
             getProviderFee(clientRate, caregiverRate) {
-                let allyFee = this.getAllyFee(clientRate);
-                let computed = clientRate - caregiverRate - allyFee;
+                let computed = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyRate);
                 return computed.toFixed(2);
             },
 
@@ -596,8 +703,8 @@
 
             setDefaultRates(item, payer_id, service_id) {
                 let payer = this.payers.find(x => x.id == payer_id);
-                
-                if (! payer) {
+
+                if (!payer) {
                     // no matching rate for payer / service
                     console.log('no payer match for the business');
                     return;
@@ -617,7 +724,7 @@
                     return;
                 }
 
-                console.log('no matching rate for payer '+payer_id+' / service '+service_id);
+                console.log('no matching rate for payer ' + payer_id + ' / service ' + service_id);
 
                 rate = payer.rates.find(x => {
                     // pull the default rate for the payer (if one exists)
@@ -631,12 +738,26 @@
                     return;
                 }
 
-                console.log('no default rate for payer '+payer_id);
+                console.log('no default rate for payer ' + payer_id);
+            },
+
+            getCaregiverName(id) {
+                let cg = this.caregivers.find(x => x.id === id);
+                if (cg) {
+                    return cg.firstname + ' ' + cg.lastname;
+                }
+
+                cg = this.otherCaregivers.find(x => x.id === id);
+                if (cg) {
+                    return cg.firstname + ' ' + cg.lastname;
+                }
+
+                return '(All)';
             },
         },
 
-        mounted() {
-            this.fetchAssignedCaregivers();
+        async mounted() {
+            await this.fetchAssignedCaregivers();
             this.fetchExcludedCaregivers();
             this.fetchServices();
             this.fetchPayers();

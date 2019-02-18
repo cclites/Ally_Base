@@ -1,20 +1,13 @@
 <?php
 namespace App\Billing\Invoiceable;
 
-use App\AuditableModel;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\ClientPayer;
 use App\Billing\Invoiceable\Traits\BelongsToThroughShift;
 use App\Billing\Service;
-use App\Business;
-use App\Caregiver;
 use App\Billing\Payer;
 use App\Client;
-use App\Contracts\BelongsToBusinessesInterface;
 use App\Shift;
-use App\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -73,9 +66,9 @@ class ShiftService extends InvoiceableModel
     //// Relationship Methods
     ////////////////////////////////////
 
-    function clientPayer()
+    function payer()
     {
-        return $this->belongsTo(ClientPayer::class);
+        return $this->belongsTo(Payer::class);
     }
 
     function shift()
@@ -177,24 +170,12 @@ class ShiftService extends InvoiceableModel
     }
 
     /**
-     * TODO Implement caregiver deposit invoicing
      * @return float
      */
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
     }
-
-    /**
-     * Get the client payer record
-     *
-     * @return \App\Billing\ClientPayer|null
-     */
-    public function getClientPayer(): ?ClientPayer
-    {
-        return $this->clientPayer;
-    }
-
 
     /**
      * Add an amount that has been invoiced to a payer

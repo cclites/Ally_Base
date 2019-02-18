@@ -123,10 +123,17 @@ label.custom-checkbox {
 }
 
 .table-fit-more {
-  .money-input { width: 85px!important }
-  .date-input { max-width: 120px!important }
+  .money-input {
+    max-width: 85px;
+  }
+  .date-input {
+    min-width: 95px !important;
+    max-width: 120px;
+  }
   th { font-size: 13px; font-weight: 500; }
-  .form-control { min-width: 80px; }
+  .form-control {
+    min-width: 80px;
+  }
   select.form-control { min-width: 120px; }
 }
 
@@ -389,4 +396,20 @@ label.required::after, legend.required::after {
 
 .extra-top-pad {
   padding-top: 30px;
+}
+
+.clock-out-list {
+  h1 {
+    margin-top: 30px;
+  }
+
+  p {
+    max-width: 300px;
+    margin: 20px auto 50px;
+    opacity: 0.7;
+  }
+
+  .btn-client {
+    margin-bottom: 20px;
+  }
 }

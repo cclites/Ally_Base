@@ -32,7 +32,7 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
+            <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
     </ul>
 
@@ -45,7 +45,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
-                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
             </div>
         </li>
     </ul>
@@ -101,8 +101,8 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></emergency-contacts-tab>
+        <div class="tab-pane" id="contacts" role="tabpanel">
+            <client-contacts-tab :contacts="{{ $user->role->contacts }}" :client="{{ $user->role }}"></client-contacts-tab>
         </div>
     </div>
 @endsection

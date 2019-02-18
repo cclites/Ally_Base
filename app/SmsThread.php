@@ -56,8 +56,12 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      *
      * @var array
      */
-    protected $appends = ['unique_recipient_count'];
+    protected $appends = ['unique_recipient_count', 'unread_replies_count'];
 
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+    
     /**
      * Get the business relation.
      *
@@ -79,6 +83,31 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * Get the thread replies relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function replies()
+    {
+        return $this->hasMany(SmsThreadReply::class);
+    }
+
+    /**
+     * Get the unread thread replies relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function unreadReplies()
+    {
+        return $this->hasMany(SmsThreadReply::class)
+            ->whereNull('read_at');
+    }
+    
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+    
+    /**
      * Get the thread recipients.
      *
      * @return Illuminate\Database\Eloquent\Relations\HasMany
@@ -92,14 +121,58 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * Get the thread replies relation.
+     * Get the number of unread replies.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return int
      */
-    public function replies()
+    public function getUnreadRepliesCountAttribute()
     {
-        return $this->hasMany(SmsThreadReply::class);
+        return $this->unreadReplies()->count();
     }
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+    
+    /**
+     * Gets shifts that are checked in between given given start and end dates.
+     * Automatically applies timezone transformation.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $start
+     * @param string $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeBetweenDates($query, $start, $end)
+    {
+        if (empty($start) || empty($end)) {
+            return $query;
+        }
+
+        $startDate = (new Carbon($start . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
+        return $query->whereBetween('sent_at', [$startDate, $endDate]);
+    }
+
+    /**
+     * Get the threads that have replies.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWithReplies($query, bool $onOff = false)
+    {
+        if ($onOff) {
+            return $query->whereHas('replies', function ($q) {
+                $q->whereNotNull('id');
+            });
+        }
+
+        return $query;
+    }
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
 
     /**
      * Determine if the thread was flagged to accept replies
@@ -120,5 +193,20 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
         }
 
         return true;
+    }
+    
+    /**
+     * Check if the thread was created with the given user as a recipient.
+     *
+     * @param string|null $user_id
+     * @return boolean
+     */
+    public function hasRecipient(?string $user_id = null) : bool 
+    {
+        if (empty($user_id)) {
+            return false;
+        }
+
+        return $this->recipients()->where('user_id', $user_id)->exists();
     }
 }

@@ -17,6 +17,11 @@ export default {
 
         defaultService() {
             return this.services.find(item => item.default === true) || {};
+        },
+
+        serviceHours()
+        {
+            return this.form.services.reduce((carry, service) => carry + parseFloat(service.duration), 0);
         }
 
     },
@@ -67,6 +72,7 @@ export default {
         },
 
         addService(service = {}) {
+            console.log('Adding service', service);
             const newService = {
                 id: service.id || null,
                 service_id: service.service_id ? service.service_id : (this.defaultService ? this.defaultService.id : null),
@@ -130,12 +136,13 @@ export default {
         },
 
         handleChangedBillingType(form, type) {
+            console.log('handleChangedBillingType', form);
             if (type === 'services') {
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
                     console.log('added service from handleChangedBillingType');
-                    this.addService();
+                    this.addService({duration: this.scheduledHours || this.duration || 1 });
                 }
             } else {
                 this.form.service_id = this.defaultService.id;
@@ -145,6 +152,7 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
+            console.log('handleChangedDefaultRates', form);
             // initiated from watcher
             if (value) {
                 form.client_rate = null;

@@ -127,16 +127,16 @@ class ClientInvoiceTest extends TestCase
          * The invoice should be successfully generated for $100.00 due, taking the credit into account before issuing a PayerAllowanceExceeded exception
          */
 
-        $payer = $this->createAllowancePayer(100.0);
+        $clientPayer = $this->createAllowancePayer(100.0);
         $this->createBalancePayer();
 
-        $this->createService(150.00, '2019-01-15', $payer->id);
-        $this->createCreditAdjustment(50.00, '2019-01-15', $payer->id);
+        $this->createService(150.00, '2019-01-15', $clientPayer->payer_id);
+        $this->createCreditAdjustment(50.00, '2019-01-15', $clientPayer->payer_id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerInvoice = $invoices->where('client_payer_id', $payer->id)->first();
+        $clientPayerInvoice = $invoices->where('client_payer_id', $clientPayer->id)->first();
 
-        $this->assertEquals(100.0, $payerInvoice->getAmountDue());
+        $this->assertEquals(100.0, $clientPayerInvoice->getAmountDue());
         $this->assertCount(1, $invoices, 'Only one invoice should have been generated since the service was assigned to a payer.');
     }
 
@@ -154,7 +154,7 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(100.00);
         $payerB = $this->createBalancePayer();
         $serviceA = $this->createService(70.00, '2019-01-15');
-        $serviceB = $this->createService(80.00, '2019-01-17', $payerA->id);
+        $serviceB = $this->createService(80.00, '2019-01-17', $payerA->payer_id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
         $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
@@ -179,8 +179,8 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(50.00);
         $payerB = $this->createBalancePayer();
 
-        $serviceA = $this->createService(30.00, '2019-01-15', $payerA->id);
-        $serviceB = $this->createService(30.00, '2019-01-17', $payerA->id);
+        $serviceA = $this->createService(30.00, '2019-01-15', $payerA->payer_id);
+        $serviceB = $this->createService(30.00, '2019-01-17', $payerA->payer_id);
 
         $invoices = $this->invoicer->generateAll($this->client);
         dump(null);

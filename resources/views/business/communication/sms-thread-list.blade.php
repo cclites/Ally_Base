@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <business-sms-thread-list :threads="{{ $threads }}" />
+    <business-sms-thread-list />
 @endsection

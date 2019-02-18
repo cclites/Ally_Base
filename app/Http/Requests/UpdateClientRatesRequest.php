@@ -44,9 +44,10 @@ class UpdateClientRatesRequest extends FormRequest
             'rates.*.caregiver_id' => [
                 'nullable',
                 'numeric',
-                Rule::exists('client_caregivers', 'caregiver_id')->where(function ($query) {
-                    $query->where('client_id', $this->route('client')->id);
-                })
+                'exists:caregivers,id'
+                // Rule::exists('client_caregivers', 'caregiver_id')->where(function ($query) {
+                //     $query->where('client_id', $this->route('client')->id);
+                // })
             ],
             'rates.*.effective_start' => 'required|date',
             'rates.*.effective_end' => 'required|date', 
@@ -65,16 +66,25 @@ class UpdateClientRatesRequest extends FormRequest
     public function filtered() : array
     {
         $data = $this->validated();
-        if (isset($data['rates'])) {
-            $data['rates'] = collect($data['rates'])->map(function ($rate) {
-                return array_merge($rate, [
-                    'effective_start' => (new Carbon($rate['effective_start']))->format('Y-m-d'),
-                    'effective_end' => (new Carbon($rate['effective_end']))->format('Y-m-d'),
-                ]);
-            })->toArray();
-        } else {
-            $data['rates'] = [];
-        }
-        return $data;
+
+        // Get the valid keys from the rules because of the nesting
+        $keys = array_map(
+            function($key) {
+                return str_replace("rates.*.",  "", $key);
+            },
+            array_keys($this->rules())
+        );
+
+        $rates = array_map(
+            function($rate) use ($keys) {
+                $rate = array_only($rate, $keys);
+                $rate['effective_start'] = (new Carbon($rate['effective_start']))->format('Y-m-d');
+                $rate['effective_end'] = (new Carbon($rate['effective_end']))->format('Y-m-d');
+                return $rate;
+            },
+            $data['rates']
+        );
+
+        return $rates;
     }
 }

@@ -60,10 +60,6 @@ class ProfileController extends Controller
 
         if(auth()->user()->role_type == 'client') {
             $client_data = request()->validate([
-                'poa_first_name' => 'nullable|string',
-                'poa_last_name' => 'nullable|string',
-                'poa_phone' => 'nullable|string',
-                'poa_relationship' => 'nullable|string',
                 'caregiver_1099' => 'boolean',
             ]);
             auth()->user()->role->update($client_data);

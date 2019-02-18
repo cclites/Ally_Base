@@ -114,6 +114,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
 
     protected $appends = ['name', 'nameLastFirst'];
 
+    protected $dates = ['reactivation_date'];
+
     ///////////////////////////////////////////
     /// Name Concatenation Methods
     ///////////////////////////////////////////

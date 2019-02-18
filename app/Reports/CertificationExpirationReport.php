@@ -111,6 +111,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
                 'expiration_date' => (new Carbon($license->expires_at))->format('Y-m-d'),
                 'caregiver_id' => $license->caregiver->id,
                 'caregiver_name' => $license->caregiver->nameLastFirst(),
+                'caregiver_active' => $license->caregiver->active,
             ];
         });
         return $rows;

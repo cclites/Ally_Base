@@ -140,9 +140,19 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
         }
 
         // Allow for provider pay to be defined from the Payer without linking directly to a business bank account
-        $this->payment_method_type = maps_from_class($paymentMethod);
+        $this->payment_method_type = maps_from_model($paymentMethod);
         $this->payment_method_id = null;
         return $this->save();
+    }
+
+    /**
+     * A shortcut to setting provider pay (no business ID since that will be resolved based on which business invoice is being paid)
+     *
+     * @return bool
+     */
+    function setProviderPay()
+    {
+        return $this->setPaymentMethod(new Business());
     }
 
     function getPaymentMethod(): ?ChargeableInterface

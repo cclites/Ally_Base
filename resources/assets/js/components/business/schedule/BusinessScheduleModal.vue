@@ -105,15 +105,18 @@
                         </b-row>
 
                         <b-row>
-                            <b-col lg="12">
-                                <strong>Scheduled Billing: </strong>
-                                <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
-                                <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
-                                <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
-                                <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
-                                <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
-                                <label for="create_service_rates" class="rate-label">Service Breakout</label>
-                            </b-col>
+                            <b-row class="mt-2">
+                                <b-col lg="12">
+                                    <strong>Scheduled Billing</strong>
+                                    <b-form-group class="pt-2 mb-0">
+                                        <b-form-radio-group v-model="billingType">
+                                            <b-form-radio value="hourly">Actual Hours</b-form-radio>
+                                            <b-form-radio value="fixed">Fixed Rate</b-form-radio>
+                                            <b-form-radio value="services">Service Breakout</b-form-radio>
+                                        </b-form-radio-group>
+                                    </b-form-group>
+                                </b-col>
+                            </b-row>
                         </b-row>
 
                         <b-row>
@@ -265,6 +268,10 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
+                                    Warning: The scheduled hours ({{ scheduledHours }}) do not match the broken out service hours.
+                                </div>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -329,9 +336,11 @@
                                         <option value="ATTENTION_REQUIRED">Attention Required</option>
                                         <option value="CLIENT_CANCELED">Client Canceled</option>
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
+                                        <option value="OPEN_SHIFT">Open Shift</option>
                                     </b-form-select>
                                 </b-form-group>
-                                <b-form-group label="Schedule Notes" label-for="notes">
+                                <b-form-group label="Add a note for the Caregiver to see" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
                                             name="notes"
@@ -339,12 +348,12 @@
                                             v-model="form.notes"
                                     >
                                     </b-form-textarea>
-                                    <input-help :form="form" field="notes" text="Enter any notes relating to this scheduled shift." />
+                                    <input-help :form="form" field="notes" text="Note will be visible to Caregiver when clocking in on the Ally mobile app." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Care Match" button-id="care-match-tab">
+                    <b-tab title="Find a Caregiver with CareMatch" button-id="care-match-tab">
                         <business-care-match :clients="clients" :schedule="careMatchSchedule">
                             <template scope="row">
                                 <b-button size="sm" variant="info" @click="selectCaregiver(row.item.id)">Select Caregiver</b-button>
@@ -549,6 +558,9 @@
                 }
             },
 
+            isPast() {
+                return moment(this.schedule.starts_at).isBefore(moment());
+            },
             scheduledWeekdayInt() {
                 return this.selectedSchedule ? moment(this.selectedSchedule.starts_at).day() : 0;
             },
@@ -576,6 +588,14 @@
 
             changedCaregiver(caregiverId) {
                 this.fetchAllRates();
+
+                // Automatically reset the schedule status when it is a
+                // no show or open shift and a new caregiver is set otherwise
+                // saving the schedule will clear the caregiver_id because of
+                // its status.
+                if (! old_val && val && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
+                    this.form.status = 'OK';
+                }
             },
 
             changedStartDate(startDate) {
@@ -644,7 +664,7 @@
                     'care_plan_id': schedule.care_plan_id || '',
                     'status': schedule.status || 'OK',
                     'service_id': schedule.service_id || this.defaultService.id,
-                    'payer_id': null,
+                    'payer_id': schedule.payer_id || null,
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
@@ -679,6 +699,12 @@
             },
 
             submitForm(groupUpdate = null) {
+                if (this.isPast) {
+                    if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
+                        return;
+                    }
+                }
+
                 if (this.selectedSchedule.group_id && !groupUpdate) {
                     this.groupModal = true;
                     return;
@@ -746,8 +772,8 @@
 
             deleteSchedule() {
                 let confirmMessage = 'Are you sure you wish to delete this scheduled shift?';
-                if (moment(this.schedule.starts_at).isBefore(moment())) {
-                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: This will not affect any shift already in the Shift History.";
+                if (this.isPast) {
+                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: Modifying past schedules will NOT change the shift history or billing.";
                 }
                 if (this.schedule.id && confirm(confirmMessage)) {
                     let form = new Form();
@@ -902,7 +928,6 @@
                     this.loadClientData();
                 }
             },
-
         },
     }
 </script>

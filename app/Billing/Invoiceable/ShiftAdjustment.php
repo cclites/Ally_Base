@@ -2,7 +2,7 @@
 namespace App\Billing\Invoiceable;
 
 use App\Billing\ClientInvoiceItem;
-use App\Billing\ClientPayer;
+use App\Billing\Payer;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -66,9 +66,9 @@ class ShiftAdjustment extends InvoiceableModel
     //// Relationship Methods
     ////////////////////////////////////
 
-    public function clientPayer()
+    public function payer()
     {
-        return $this->belongsTo(ClientPayer::class);
+        return $this->belongsTo(Payer::class);
     }
 
     public function shift()
@@ -219,16 +219,6 @@ class ShiftAdjustment extends InvoiceableModel
     public function getProviderRate(): float
     {
         // TODO: Implement getProviderRate() method.
-    }
-
-    /**
-     * Get the client payer record
-     *
-     * @return \App\Billing\ClientPayer|null
-     */
-    public function getClientPayer(): ?ClientPayer
-    {
-        return $this->clientPayer;
     }
 
     /**

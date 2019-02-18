@@ -126,7 +126,7 @@ class TelefonyCheckInController extends BaseVoiceController
         }
         else {
             try {
-                if ($shift = $clockIn->clockInWithoutSchedule($this->client->business, $this->client)) {
+                if ($shift = $clockIn->clockInWithoutSchedule($this->client)) {
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }

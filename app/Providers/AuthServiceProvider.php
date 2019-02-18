@@ -58,6 +58,10 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\ClientNarrative;
 use App\Policies\ClientNarrativePolicy;
+use App\DeactivationReason;
+use App\Policies\DeactivationReasonPolicy;
+use App\SalesPerson;
+use App\Policies\SalesPersonPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -74,6 +78,9 @@ class AuthServiceProvider extends ServiceProvider
         Client::class => ClientPolicy::class,
         ClientInvoice::class => ClientInvoicePolicy::class,
         ClientNarrative::class => ClientNarrativePolicy::class,
+        CustomField::class => CustomFieldPolicy::class,
+        CustomFieldOption::class => CustomFieldOptionPolicy::class,
+        DeactivationReason::class => DeactivationReasonPolicy::class,
         Deposit::class => DepositPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
@@ -84,6 +91,7 @@ class AuthServiceProvider extends ServiceProvider
         Prospect::class => ProspectPolicy::class,
         RateCode::class => RateCodePolicy::class,
         ReferralSource::class => ReferralSourcePolicy::class,
+        SalesPerson::class => SalesPersonPolicy::class,
         Schedule::class => SchedulePolicy::class,
         Service::class => ServicePolicy::class,
         Shift::class => ShiftPolicy::class,
@@ -92,8 +100,6 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
-        CustomField::class => CustomFieldPolicy::class,
-        CustomFieldOption::class => CustomFieldOptionPolicy::class,
     ];
 
     /**

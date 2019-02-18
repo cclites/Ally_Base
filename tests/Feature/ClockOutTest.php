@@ -37,9 +37,11 @@ class ClockOutTest extends TestCase
         $shift = $this->createShift();
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->clockOut($shift);
+        $now = Carbon::now()->toDateTimeString();
 
         $this->assertTrue($result);
         $this->assertFalse($shift->statusManager()->isClockedIn());
+        $this->assertEquals($now, $shift->checked_out_time->toDateTimeString(), 'The clocked out time does not match now.');
     }
 
     public function test_hours_are_set_once_clocked_out()
@@ -71,7 +73,7 @@ class ClockOutTest extends TestCase
         $this->client->phoneNumbers()->save($phone);
 
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->business, $this->client);
+        $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->client);
         $this->assertFalse($shift->isVerified());
 
         $clockOut = new ClockOut($this->caregiver);
@@ -152,8 +154,7 @@ class ClockOutTest extends TestCase
     {
         $shift = $this->createShift(['verified' => true, 'checked_in_number' => 5555555555]);
         $clockOut = new ClockOut($this->caregiver);
-        $result = $clockOut->setManual()
-                           ->clockOut($shift);
+        $result = $clockOut->clockOut($shift);
 
         $this->assertTrue($result);
         $this->assertFalse($shift->isVerified());
@@ -272,7 +273,7 @@ class ClockOutTest extends TestCase
             'goals' => [],
         ];
 
-        $this->postJson(route('clock_out'), $data)
+        $this->postJson(route('clock_out.show', $shift), $data)
             ->assertStatus(200);
 
         $this->assertCount(1, $shift->fresh()->questions);
@@ -297,7 +298,7 @@ class ClockOutTest extends TestCase
             'goals' => [],
         ];
 
-        $this->postJson(route('clock_out'), $data)
+        $this->postJson(route('clock_out.show', $shift), $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors('questions.1');
     }

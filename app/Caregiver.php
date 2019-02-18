@@ -161,7 +161,9 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'referral_source_id',
+        'deactivation_note'
     ];
     protected $appends = ['masked_ssn'];
 
@@ -265,6 +267,10 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->belongsToMany(Activity::class, 'caregiver_skills');
     }
 
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -365,7 +371,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      */
     public function isClockedIn($client_id = null)
     {
-        return $this->shifts()
+        return (bool) $this->shifts()
             ->whereNull('checked_out_time')
             ->when($client_id, function ($query) use ($client_id) {
                 return $query->where('client_id', $client_id);
@@ -378,9 +384,24 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return \App\Shift|null
      */
-    public function getActiveShift()
+    public function getActiveShift($client_id = null)
     {
-        return $this->shifts()->whereNull('checked_out_time')->first();
+        return $this->shifts()
+            ->whereNull('checked_out_time')
+            ->when($client_id, function ($query) use ($client_id) {
+                return $query->where('client_id', $client_id);
+            })
+            ->first();
+    }
+
+    /**
+     * If clocked in, return the active shift model
+     *
+     * @return \App\Shift|null
+     */
+    public function getActiveShifts()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->get();
     }
 
     /**
@@ -394,7 +415,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Unassign all Caregiver's schedules from now on. 
+     * Unassign all Caregiver's schedules from now on.
      *
      * @return void
      */
@@ -517,6 +538,21 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         }
 
         return $this->clients()->where('client_id', $client)->exists();
+    }
+
+    /**
+     * Check if Caregiver has any scheduled shifts for the
+     * specified Client.
+     *
+     * @param Client $client
+     * @return boolean
+     */
+    public function hasScheduledShifts(Client $client) : bool
+    {
+        return $this->schedules()
+            ->forClient($client)
+            ->future($client->business->timezone)
+            ->exists();
     }
 
     ////////////////////////////////////
