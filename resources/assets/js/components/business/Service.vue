@@ -71,7 +71,7 @@
                     },
                     {
                         key: 'code',
-                        label: 'code',
+                        label: 'Code',
                         sortable: true
                     },
                     {
