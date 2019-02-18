@@ -32,7 +32,6 @@ class PaymentQueryTest extends TestCase
         \DB::table('invoice_payments')->insert(['invoice_id' => 1, 'payment_id' => $payment1->id, 'amount_applied' => 20]);
 
         $results = $this->paymentQuery->hasAmountAvailable()->get();
-        var_dump($results[0]->toArray());
 
         $this->assertCount(1, $results);
         $this->assertTrue($payment2->is($results[0]));
