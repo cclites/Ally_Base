@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AccountSetup\Clients\ClientStep1Request;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Traits\Request\PaymentMethodRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
 
 class ClientSetupController extends Controller
 {
+    use PaymentMethodRequest;
+
     /**
      * Display the specified resource.
      *
@@ -30,7 +34,7 @@ class ClientSetupController extends Controller
     }
 
     /**
-     * Submit step 1 form.
+     * Submit info and agree to terms step.
      *
      * @param ClientStep1Request $request
      * @param string $token
@@ -81,7 +85,7 @@ class ClientSetupController extends Controller
     }
 
     /**
-     * Submit step 2 form.
+     * Submit create username/password step.
      *
      * @param \Illuminate\Http\Request $request
      * @param string $token
@@ -110,6 +114,37 @@ class ClientSetupController extends Controller
 
         $client = $client->fresh()->load(['address', 'phoneNumber']);
         return new SuccessResponse('Your information has been updated, please continue.', $client);
+    }
+
+    /**
+     * Submit payment settings step.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $token
+     * @return \Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function step3(Request $request, $token)
+    {
+        $client = Client::findEncryptedOrFail($token);
+
+        \DB::beginTransaction();
+
+        $method = $this->validatePaymentMethod($request, $client->defaultPayment);
+        if (! $client->setPaymentMethod($method)) {
+            \DB::rollBack();
+            return new ErrorResponse(500, 'There was an error saving your payment details.  Please try again.');
+        }
+
+        $client->update([
+            'setup_status' => Client::SETUP_ADDED_PAYMENT
+        ]);
+        $client->setupStatusHistory()->create(['status' => Client::SETUP_ADDED_PAYMENT]);
+
+        \DB::commit();
+
+        $client = $client->fresh()->load(['address', 'phoneNumber']);
+        return new SuccessResponse('Your account has been set up!', $client);
     }
 
     /**

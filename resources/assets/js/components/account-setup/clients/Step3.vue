@@ -85,8 +85,13 @@
 
         methods: {
             submit() {
+                let form = this.$refs.creditCardForm.form;
+                if (this.type === 'bank_account') {
+                    form = this.$refs.bankAccountForm.form;
+                }
+
                 this.busy = true;
-                this.form.post(`/account-setup/clients/${this.token}/step2`)    
+                form.post(`/account-setup/clients/${this.token}/step3`)
                     .then( ({ data }) => {
                         this.$emit('updated', data.data);
                     })

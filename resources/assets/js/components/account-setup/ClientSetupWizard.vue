@@ -5,16 +5,21 @@
             :token="token"
             @updated="updateClient"
         ></step1>
-        <step2 v-if="client.setup_status == 'accepted_terms'" 
+        <step2 v-else-if="client.setup_status == 'accepted_terms'" 
             :client="client"
             :token="token"
             @updated="updateClient"
         ></step2>
-        <step3 v-if="client.setup_status == 'created_account'" 
+        <step3 v-else-if="client.setup_status == 'created_account'" 
             :client="client"
             :token="token"
             @updated="updateClient"
         ></step3>
+        <b-card v-else 
+            header="Your account is set up!"
+            header-bg-variant="info"
+            header-text-variant="white"
+        ></b-card>
     </div>
 </template>
 
