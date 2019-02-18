@@ -163,7 +163,7 @@
         </div>
 
         <div class="text-right">
-            <b-btn id="save-rates" @click="saveRates()" variant="success">Save Client Rates</b-btn>
+            <b-btn id="save-rates" @click="saveRates()" variant="success">Save Rates</b-btn>
         </div>
 
         <hr/>
