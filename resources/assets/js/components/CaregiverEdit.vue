@@ -38,12 +38,6 @@
                         </b-form-input>
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
-                    <b-form-group label="Caregiver Status">
-                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
-                    </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                     </b-form-group>
@@ -108,6 +102,12 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
