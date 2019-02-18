@@ -744,12 +744,12 @@
             getCaregiverName(id) {
                 let cg = this.caregivers.find(x => x.id === id);
                 if (cg) {
-                    return cg.name;
+                    return cg.firstname + ' ' + cg.lastname;
                 }
 
                 cg = this.otherCaregivers.find(x => x.id === id);
                 if (cg) {
-                    return cg.name;
+                    return cg.firstname + ' ' + cg.lastname;
                 }
 
                 return '(All)';
