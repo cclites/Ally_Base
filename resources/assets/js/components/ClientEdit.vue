@@ -54,6 +54,12 @@
                         </b-form-select>
                         <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
                                                   field="business_id"
@@ -113,12 +119,6 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
-                    </b-form-group>
-                    <b-form-group label="Client Status">
-                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
