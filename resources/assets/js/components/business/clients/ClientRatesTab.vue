@@ -163,7 +163,7 @@
         </div>
 
         <div class="text-right">
-            <b-btn id="save-rates" @click="saveRates()" variant="success">Save Client Rates</b-btn>
+            <b-btn id="save-rates" @click="saveRates()" variant="success">Save Rates</b-btn>
         </div>
 
         <hr/>
@@ -744,12 +744,12 @@
             getCaregiverName(id) {
                 let cg = this.caregivers.find(x => x.id === id);
                 if (cg) {
-                    return cg.name;
+                    return cg.firstname + ' ' + cg.lastname;
                 }
 
                 cg = this.otherCaregivers.find(x => x.id === id);
                 if (cg) {
-                    return cg.name;
+                    return cg.firstname + ' ' + cg.lastname;
                 }
 
                 return '(All)';
