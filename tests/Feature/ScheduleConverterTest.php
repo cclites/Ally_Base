@@ -124,8 +124,10 @@ class ScheduleConverterTest extends TestCase
     /** @test */
     public function only_schedules_with_ok_status_should_be_converted()
     {
+        Carbon::setTestNow(Carbon::parse('2019-02-21 12:00:00'));
+
         $schedule = factory(Schedule::class)->create([
-            'starts_at' => Carbon::yesterday(),
+            'starts_at' => '2019-02-20 12:00:00',
             'business_id' => $this->business->id,
             'client_id' => $this->client->id,
             'caregiver_id' => $this->caregiver->id,
