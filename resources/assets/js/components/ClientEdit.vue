@@ -42,17 +42,31 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Case Manager" label-for="case_manager">
+                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
                                 v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
                         >
-                            <option :value="null">-- Case Manager --</option>
+                            <option :value="null">-- Client Services Coordinator --</option>
                             <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select case manager for the client."></input-help>
+                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
@@ -113,12 +127,6 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
-                    </b-form-group>
-                    <b-form-group label="Client Status">
-                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
@@ -308,18 +316,6 @@
                     <b-form-group label="Hospital Phone Number">
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Salesperson">
-                        <b-form-select v-model="form.sales_person_id">
-                            <option :value="null">None</option>
-                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
-                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
-                            </option>
-                        </b-form-select>
                     </b-form-group>
                 </b-col>
             </b-row>
