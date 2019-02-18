@@ -2,7 +2,7 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="12">
-                <b-btn variant="info" @click="addService()">Add Service</b-btn>
+                <b-btn variant="info" @click="addService()">Add Service Code</b-btn>
             </b-col>
         </b-row>
         <div>
