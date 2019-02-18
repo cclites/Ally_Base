@@ -42,17 +42,17 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Case Manager" label-for="case_manager">
+                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
                                 v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
                         >
-                            <option :value="null">-- Case Manager --</option>
+                            <option :value="null">-- Client Services Coordinator --</option>
                             <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select case manager for the client."></input-help>
+                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
