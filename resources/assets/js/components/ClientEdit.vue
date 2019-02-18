@@ -54,6 +54,14 @@
                         </b-form-select>
                         <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
                     <b-form-group label="Client Status">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
@@ -308,18 +316,6 @@
                     <b-form-group label="Hospital Phone Number">
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Salesperson">
-                        <b-form-select v-model="form.sales_person_id">
-                            <option :value="null">None</option>
-                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
-                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
-                            </option>
-                        </b-form-select>
                     </b-form-group>
                 </b-col>
             </b-row>
