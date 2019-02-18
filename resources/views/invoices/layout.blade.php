@@ -164,7 +164,7 @@
         <div class="row mt-5">
             <div class="col">
                 @if (! empty($sender->getPhoneNumber()))
-                <p class="text-center"><em>For questions regarding hours, rates or shift defaults: {{ $sender->getPhoneNumber()->number() }}</em></p>
+                <p class="text-center"><em>For questions regarding hours, rates or shift defailts: {{ $sender->getPhoneNumber()->number() }}</em></p>
                 @endif
                 <p class="text-center">
                     For questions regarding payments: support@allyms.com - (800) 930-0587
