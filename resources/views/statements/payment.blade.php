@@ -179,10 +179,10 @@
         @endif
 
         <div class="row">
-            <div class="footer-left">
-                <p>This is a statement. Your payment was processed on {{ $payment->created_at->format('m/d/Y') }} using your payment information on file.</p>
-            </div>
-            <div class="footer-right">
+            <div class="col text-center p-4">
+                <h5>
+                    This is a statement. Your payment was processed on {{ $payment->created_at->format('m/d/Y') }} using your payment information on file.
+                </h5>
             </div>
         </div>
 
