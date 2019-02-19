@@ -151,7 +151,7 @@
                                     <th>Provider Fee</th>
                                     <th>Ally Fee</th>
                                     <th>Payer</th>
-                                    <th></th>
+                                    <th class="service-actions"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -164,7 +164,7 @@
                                         </b-form-select>
                                     </td>
                                     <td>
-                                        <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type">
+                                        <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;">
                                             <option value="default">REG</option>
                                             <option value="holiday">HOL</option>
                                             <option value="overtime">OT</option>
@@ -276,7 +276,7 @@
                                             <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                         </b-form-select>
                                     </td>
-                                    <td class="text-nowrap">
+                                    <td class="service-actions text-nowrap">
                                         <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
                                             <i class="fa fa-times"></i>
                                         </b-btn>
@@ -1041,6 +1041,9 @@
     }
     select.payers, select.services {
         min-width: 120px;
+    }
+    .service-actions {
+        min-width: 0px !important;
     }
 </style>
 

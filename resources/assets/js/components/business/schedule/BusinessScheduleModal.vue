@@ -131,7 +131,7 @@
                                             <th>Provider Fee</th>
                                             <th>Ally Fee</th>
                                             <th>Payer</th>
-                                            <th></th>
+                                            <th class="service-actions"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -212,7 +212,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type">
+                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -274,7 +274,7 @@
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
-                                            <td class="text-nowrap">
+                                            <td class="service-actions text-nowrap">
                                                 <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
                                                     <i class="fa fa-times"></i>
                                                 </b-btn>
@@ -666,41 +666,47 @@
 
             makeForm(schedule) {
                 if (!schedule) schedule = this.schedule;
-                this.form = new Form({
-                    'starts_at': schedule.starts_at || "",
-                    'duration': schedule.duration || 0,
-                    'caregiver_id': schedule.caregiver_id || "",
-                    'client_id': schedule.client_id || "",
-                    'fixed_rates': schedule.fixed_rates ? 1 : 0,
-                    'caregiver_rate': schedule.caregiver_rate || null,
-                    'caregiver_rate_id': schedule.caregiver_rate_id || "",
-                    'client_rate': schedule.client_rate || null,
-                    'client_rate_id': schedule.client_rate_id || "",
-                    'notes': schedule.notes || "",
-                    'hours_type': schedule.hours_type || "default",
-                    'overtime_duration': schedule.overtime_duration || 0,
-                    'care_plan_id': schedule.care_plan_id || '',
-                    'status': schedule.status || 'OK',
-                    'service_id': schedule.service_id || this.defaultService.id,
-                    'payer_id': schedule.payer_id || null,
-                    'interval_type': "",
-                    'recurring_end_date': "",
-                    'bydays': [],
-                    'services': [],
-                    'provider_fee': null,
-                    'ally_fee': null,
-                    'group_update': null,
-                    'default_rates': {
-                        'client_rate': null,
-                        'caregiver_rate': null,
+
+                this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
+                this.defaultRates = schedule.client_rate === null;
+
+                // Initialize form
+                this.$nextTick(() => {
+                    this.form = new Form({
+                        'starts_at': schedule.starts_at || "",
+                        'duration': schedule.duration || 0,
+                        'caregiver_id': schedule.caregiver_id || "",
+                        'client_id': schedule.client_id || "",
+                        'fixed_rates': schedule.fixed_rates ? 1 : 0,
+                        'caregiver_rate': schedule.caregiver_rate || null,
+                        'caregiver_rate_id': schedule.caregiver_rate_id || "",
+                        'client_rate': schedule.client_rate || null,
+                        'client_rate_id': schedule.client_rate_id || "",
+                        'notes': schedule.notes || "",
+                        'hours_type': schedule.hours_type || "default",
+                        'overtime_duration': schedule.overtime_duration || 0,
+                        'care_plan_id': schedule.care_plan_id || '',
+                        'status': schedule.status || 'OK',
+                        'service_id': schedule.service_id || this.defaultService.id,
+                        'payer_id': schedule.payer_id || null,
+                        'interval_type': "",
+                        'recurring_end_date': "",
+                        'bydays': [],
+                        'services': [],
                         'provider_fee': null,
                         'ally_fee': null,
-                    }
+                        'group_update': null,
+                        'default_rates': {
+                            'client_rate': null,
+                            'caregiver_rate': null,
+                            'provider_fee': null,
+                            'ally_fee': null,
+                        }
+                    });
+                    this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
+                    this.initServicesFromObject(schedule);
+                    this.setDateTimeFromSchedule(schedule);
                 });
-                this.defaultRates = this.form.client_rate === null;
-                this.billingType = this.form.fixed_rates ? 'fixed' : 'hourly';
-                this.initServicesFromObject(schedule);
-                this.setDateTimeFromSchedule(schedule);
             },
 
             setDateTimeFromSchedule(schedule) {
@@ -960,5 +966,8 @@
     }
     select.payers, select.services {
         min-width: 120px;
+    }
+    .service-actions {
+        min-width: 0px !important;
     }
 </style>
