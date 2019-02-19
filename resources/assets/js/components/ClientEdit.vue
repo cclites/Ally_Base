@@ -172,8 +172,6 @@
                         </b-form-checkbox>
                     </b-form-group>
 
-
-
                     <b-form-group v-if="businessSendsSummaryEmails">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
@@ -189,6 +187,14 @@
                             </label>
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
+                    </b-form-group>
+                    
+                    <b-form-group label="Send 1099" v-if="authRole == 'admin'">
+                        <b-form-select v-model="form.caregiver_1099">
+                            <option value="">No</option>
+                            <option value="client">On Client's Behalf</option>
+                            <option value="ally">On Ally’s Behalf</option>
+                        </b-form-select>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -370,18 +376,6 @@
                 </b-col>
             </b-row>
             <b-row>
-                <b-col>
-                    <b-form-group>
-                        <b-form-checkbox id="caregiver_1099"
-                                         v-model="form.caregiver_1099"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Send 1099 to caregivers on the client’s behalf
-                        </b-form-checkbox>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
                 <b-col lg="12">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
@@ -419,10 +413,11 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
-    import BusinessLocationSelect from './business/BusinessLocationSelect'
+    import BusinessLocationSelect from './business/BusinessLocationSelect';
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import DeactivateClientModal from './modals/DeactivateClientModal';
-    import DischargeSummaryModal from './modals/DischargeSummaryModal'
+    import DischargeSummaryModal from './modals/DischargeSummaryModal';
+    import AuthUser from '../mixins/AuthUser';
 
     window.croppie = require('croppie');
 
@@ -438,7 +433,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates],
+        mixins: [ClientForm, FormatsDates, AuthUser],
 
         components: {
             BusinessLocationFormGroup,
@@ -473,7 +468,7 @@
                     case_manager_id: this.client.case_manager_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
-                    caregiver_1099: !!this.client.caregiver_1099,
+                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
