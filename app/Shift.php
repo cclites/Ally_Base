@@ -929,8 +929,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 break;
         }
 
-
-        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j g:iA') . ': ' . $name;
+        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j g:iA')
+            . '-' . $this->checked_out_time->setTimezone($this->getTimezone())->format('g:iA')
+            . ': ' . $name;
     }
 
     /**
@@ -949,7 +950,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemNotes(): ?string
     {
-        return null;
+        if (empty($this->activities)) {
+            return null;
+        }
+
+        return $this->activities->implode('name', ', ');
     }
 
     /**
