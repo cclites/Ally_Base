@@ -109,6 +109,18 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
+                    <b-form-group label="Is the caregiver okay with smoking?" label-for="smoking_okay">
+                        <b-form-select id="smoking_okay" v-model="form.smoking_okay">
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
+                        </b-form-select>
+                        <input-help :form="form" field="smoking_okay" text="" />
+                    </b-form-group>
+                    <b-form-group label="Acceptable Pets:">
+                        <b-form-checkbox v-model="form.pets_dogs_okay" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_birds_okay" value="1" unchecked-value="0">Birds</b-form-checkbox>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -165,6 +177,10 @@
                     avatar: this.caregiver.avatar,
                     referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
                     status_alias_id: this.caregiver.status_alias_id || '',
+                    smoking_okay: this.caregiver.smoking_okay,
+                    pets_dogs_okay: this.caregiver.pets_dogs_okay,
+                    pets_cats_okay: this.caregiver.pets_cats_okay,
+                    pets_birds_okay: this.caregiver.pets_birds_okay,
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

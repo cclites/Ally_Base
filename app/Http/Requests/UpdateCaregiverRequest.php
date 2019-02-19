@@ -43,6 +43,10 @@ class UpdateCaregiverRequest extends FormRequest
             ],
             'referral_source_id' => 'nullable|exists:referral_sources,id',
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),
+            'smoking_okay' => 'nullable|boolean',
+            'pets_dogs_okay' => 'nullable|boolean',
+            'pets_cats_okay' => 'nullable|boolean',
+            'pets_birds_okay' => 'nullable|boolean',
         ];
     }
 
