@@ -3,7 +3,7 @@
         <div class="form-control icon-control">
             <i v-if="loading" class="fa fa-spinner fa-spin"></i>
             <i v-else :class="`fa ${icon}`"></i>
-            <input type="text" 
+            <input type="text" autocomplete="off"
                 :placeholder="placeholder"
                 v-model="filter" 
                 @input="onSearch" 
