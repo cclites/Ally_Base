@@ -56,12 +56,17 @@ class ClockInController extends BaseController
         }
 
         if ($this->caregiver()->isClockedIn($request->input('client_id'))) {
-            return new ErrorResponse(500, 'You are already clocked in for this client.');
+            return new ErrorResponse(400, 'You are already clocked in for this client.');
             // return redirect()->route('clocked_in')->with('error', 'You are already clocked in.');
         }
 
+        $schedule = Schedule::find($request->input('schedule_id'));
+        if ($schedule && !$schedule->canBeClockedIn()) {
+            return new ErrorResponse(400, "This scheduled visit is no longer available to be clocked in to.");
+        }
+
+
         if ($request->input('debugMode')) {
-            $schedule = Schedule::find($request->input('schedule_id'));
             $address = ($schedule) ? $schedule->client->evvAddress : null;
             $geocode = ($address) ? $address->getGeocode() : null;
 

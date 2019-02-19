@@ -79,6 +79,10 @@ class ClientController extends BaseController
             ->where('client_id', $client->id)
             ->getSchedulesBetween($start, $end);
 
+        $schedules = $schedules->filter(function(Schedule $schedule) {
+            return $schedule->canBeClockedIn();
+        });
+
         // Sort schedules by closest starts_at
         if ($schedules->count() > 1) {
             $now = Carbon::now();
