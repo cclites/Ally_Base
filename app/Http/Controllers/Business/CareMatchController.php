@@ -34,7 +34,7 @@ class CareMatchController extends BaseController
             'matches_activities' => 'nullable|numeric', // should be a decimal representing the minimum percent match
 //            'matches_preferences' => 'boolean',
             'matches_gender' => 'nullable|string',
-            'matches_license' => 'nullable|string',
+            'matches_certification' => 'nullable|string',
             'matches_language' => 'nullable|string',
             'matches_days' => 'nullable|array',
             'matches_existing_assignments' => 'boolean',
@@ -61,8 +61,8 @@ class CareMatchController extends BaseController
             $preferences['gender'] = $request->matches_gender === 'client' ? optional($client->preferences)->gender : $request->matches_gender;
         }
 
-        if ($request->matches_license) {
-            $preferences['license'] = $request->matches_license === 'client' ? optional($client->preferences)->license : $request->matches_license;
+        if ($request->matches_certification) {
+            $preferences['certification'] = $request->matches_certification === 'client' ? optional($client->preferences)->license : $request->matches_certification;
         }
 
         if ($request->matches_language) {

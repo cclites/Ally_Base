@@ -286,8 +286,8 @@ class CareMatch
 
     protected function queryPreferences($builder)
     {
-        if ($license = array_get($this->preferences, 'license')) {
-            $builder->where('title', 'LIKE', '%'.$license.'%');
+        if ($certification = array_get($this->preferences, 'certification')) {
+            $builder->where('certification', $certification);
         }
 
         if ($gender = array_get($this->preferences, 'gender')) {

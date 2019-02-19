@@ -111,16 +111,18 @@
                             </b-form-select>
                             <input-help :form="form" field="matches_gender" text="" />
                         </b-form-group>
-                        <b-form-group label="Caregiver License" label-for="license">
-                            <b-form-select id="license"
-                                            v-model="license"
+                        <b-form-group label="Caregiver Certification" label-for="certification">
+                            <b-form-select id="certification"
+                                            v-model="certification"
                             >
                                 <option value="">No Preference</option>
                                 <option value="client">Match Client Preference</option>
                                 <option value="CNA">CNA</option>
                                 <option value="HHA">HHA</option>
+                                <option value="RN">RN</option>
+                                <option value="LPN">LPN</option>
                             </b-form-select>
-                            <input-help :form="form" field="matches_license" text="" />
+                            <input-help :form="form" field="matches_certification" text="" />
                         </b-form-group>
                         <b-form-group label="Spoken Language" label-for="language">
                             <b-form-select id="language"
@@ -242,7 +244,7 @@
                 radiusEnabled: false,
                 ratingEnabled: false,
                 gender: "",
-                license: "",
+                certification: "",
                 language: "",
                 days: [],
                 smoking: 'client',
@@ -340,7 +342,7 @@
                     matches_activities: this.activities,
                     // matches_preferences: this.preferences,
                     matches_gender: this.gender,
-                    matches_license: this.license,
+                    matches_certification: this.certification,
                     matches_language: this.language,
                     matches_days: this.days,
                     matches_existing_assignments: this.existing,

@@ -292,6 +292,8 @@
                             <option :value="null">No Preference</option>
                             <option value="CNA">CNA</option>
                             <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
                         </b-form-select>
                         <input-help :form="preferences" field="license" text="" />
                     </b-form-group>

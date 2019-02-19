@@ -35,6 +35,7 @@ class UpdateCaregiverRequest extends FormRequest
             ],
             'password' => 'nullable|confirmed',
             'title' => 'required|string|max:32',
+            'certification' => 'required|in:CNA,HHA,RN,LPN',
             'medicaid_id' => 'nullable|string|max:100',
             'gender' => 'nullable|in:M,F',
             'avatar' => [

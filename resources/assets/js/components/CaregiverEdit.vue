@@ -38,6 +38,20 @@
                         </b-form-input>
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
+                    <b-form-group label="Certification" label-for="certification" label-class="required">
+                        <b-form-select
+                                id="certification"
+                                name="certification"
+                                v-model="form.certification"
+                        >
+                            <option value="">None</option>
+                            <option value="CNA">CNA</option>
+                            <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
+                        </b-form-select>
+                        <input-help :form="form" field="certification" text="Select the caregiver's certification / license."></input-help>
+                    </b-form-group>
                     <b-form-group label="Caregiver Status">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
@@ -169,6 +183,7 @@
                     email: this.caregiver.email,
                     username: this.caregiver.username,
                     title: this.caregiver.title,
+                    certification: this.caregiver.certification ? this.caregiver.certification : '',
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
                     ssn: this.caregiver.masked_ssn,

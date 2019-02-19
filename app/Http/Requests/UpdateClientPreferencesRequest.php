@@ -25,7 +25,7 @@ class UpdateClientPreferencesRequest extends FormRequest
     {
         return [
             'gender' => 'nullable|in:M,F',
-            'license' => 'nullable|in:HHA,CNA',
+            'license' => 'nullable|in:CNA,HHA,RN,LPN',
             'language' => 'nullable|string|size:2',
             'minimum_rating' => 'nullable|integer',
             'smokes' => 'nullable|boolean',

@@ -143,6 +143,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'ssn',
         'bank_account_id',
         'title',
+        'certification',
         'hire_date',
         'onboarded',
         'misc',
