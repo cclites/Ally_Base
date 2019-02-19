@@ -242,7 +242,7 @@ class GenerateShiftFlagsTest extends TestCase
         
         $this->expectsEvents(ShiftFlagsCouldChange::class);
 
-        $this->postJson(route('clock_out'), $shift->toArray())
+        $this->postJson("/clock-out/{$shift->id}", $shift->toArray())
             ->assertStatus(200);
     }
 
