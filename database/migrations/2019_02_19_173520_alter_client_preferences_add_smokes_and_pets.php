@@ -29,7 +29,7 @@ class AlterClientPreferencesAddSmokesAndPets extends Migration
     public function down()
     {
         Schema::table('client_preferences', function (Blueprint $table) {
-            $table->dropColumn(['smokes' ,'pets_dogs', 'pets_cats', 'pets_birds']);
+            $table->dropColumn(['smokes', 'pets_dogs', 'pets_cats', 'pets_birds']);
         });
     }
 }
