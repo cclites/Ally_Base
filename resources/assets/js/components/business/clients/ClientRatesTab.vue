@@ -471,7 +471,7 @@
 
             updateClientRates(item) {
                 item.client_hourly_rate = RateFactory.getClientRate(item.provider_hourly_rate, item.caregiver_hourly_rate, this.allyRate).toFixed(2);
-                item.client_fixed_rate = RateFactory.getProviderFee(item.provider_fixed_rate, item.caregiver_fixed_rate, this.allyRate).toFixed(2);
+                item.client_fixed_rate = RateFactory.getClientRate(item.provider_fixed_rate, item.caregiver_fixed_rate, this.allyRate).toFixed(2);
             },
 
             openExcludeModal() {
