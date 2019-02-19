@@ -371,7 +371,7 @@ class ClientController extends BaseController
         $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
         $data['payment_text'] = $paymentTypeMessage;
         $data['ally_rate'] = $allyRate;
-        return new SuccessResponse($message, $data);
+        return new SuccessResponse($message, $data, '.');
     }
 
     public function sendConfirmationEmail(Client $client)
