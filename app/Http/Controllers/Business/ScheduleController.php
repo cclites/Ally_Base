@@ -21,6 +21,7 @@ use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Scheduling\ScheduleEditor;
+use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
@@ -91,6 +92,10 @@ class ScheduleController extends BaseController
         $this->authorize('create', [Schedule::class, $data]);
         $business = $request->getBusiness();
 
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         $creator->startsAt(Carbon::parse($request->input('starts_at')))
@@ -156,6 +161,10 @@ class ScheduleController extends BaseController
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
 
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
         if ($request->input('group_update') && !$schedule->group) {
             return new ErrorResponse(400, 'A group update was attempted without a schedule group');
         }
@@ -194,6 +203,29 @@ class ScheduleController extends BaseController
 
         return new SuccessResponse('The schedule has been updated.');
     }
+
+
+    protected function validateAgainstNegativeRates(CreateScheduleRequest $request)
+    {
+        $client = $request->getClient();
+        $services = $request->getServices();
+
+        if (count($services)) {
+            foreach($services as $service) {
+                if ($service['client_rate'] === null) continue;
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
+                    return false;
+                }
+            }
+        } else if ($request->client_rate !== null) {
+            if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     /**
      * Protected function for making sure a client caregiver relationship exists

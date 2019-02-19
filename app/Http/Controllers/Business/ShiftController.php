@@ -12,6 +12,7 @@ use App\Schedule;
 use App\Shift;
 use App\ShiftFlag;
 use App\ShiftIssue;
+use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
@@ -39,6 +40,10 @@ class ShiftController extends BaseController
     {
         $defaultStatus = Shift::WAITING_FOR_AUTHORIZATION;
         $this->authorize('create', [Shift::class, $request->getShiftArray($defaultStatus)]);
+
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
 
         \DB::beginTransaction();
 
@@ -120,6 +125,10 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
         $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
@@ -150,6 +159,32 @@ class ShiftController extends BaseController
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
+    }
+
+
+    /**
+     * @param \App\Http\Requests\UpdateShiftRequest $request
+     * @return bool
+     */
+    protected function validateAgainstNegativeRates(UpdateShiftRequest $request)
+    {
+        $client = $request->getClient();
+        $services = $request->getServices();
+
+        if (count($services)) {
+            foreach($services as $service) {
+                if ($service['client_rate'] === null) continue;
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
+                    return false;
+                }
+            }
+        } else if ($request->client_rate !== null) {
+            if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function destroy(Shift $shift)
