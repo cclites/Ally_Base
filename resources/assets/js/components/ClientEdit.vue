@@ -274,7 +274,7 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <p class="h6">Preferences</p>
+                    <p class="h6">CareMatch Preferences</p>
                     <hr>
                 </b-col>
             </b-row>
@@ -298,6 +298,8 @@
                             <option :value="null">No Preference</option>
                             <option value="CNA">CNA</option>
                             <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
                         </b-form-select>
                         <input-help :form="preferences" field="license" text="" />
                     </b-form-group>
@@ -322,6 +324,20 @@
                     <b-form-group label="Hospital Phone Number">
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Does the client smoke?" label-for="smokes">
+                        <b-form-select id="smokes"
+                                       v-model="preferences.smokes"
+                        >
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="smokes" text="" />
+                    </b-form-group>
+                    <b-form-group label="Does this client have pets?">
+                        <b-form-checkbox v-model="preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -483,6 +499,10 @@
                     gender: this.client.preferences ? this.client.preferences.gender : null,
                     license: this.client.preferences ? this.client.preferences.license : null,
                     language: this.client.preferences ? this.client.preferences.language : null,
+                    smokes: this.client.preferences ? this.client.preferences.smokes : 0,
+                    pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : '',
+                    pets_cats: this.client.preferences ? this.client.preferences.pets_cats : '',
+                    pets_birds: this.client.preferences ? this.client.preferences.pets_birds : '',
                 }),
                 passwordModal: false,
                 active: this.client.active,

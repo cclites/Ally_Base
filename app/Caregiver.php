@@ -143,6 +143,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'ssn',
         'bank_account_id',
         'title',
+        'certification',
         'hire_date',
         'onboarded',
         'misc',
@@ -163,7 +164,11 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'hourly_rate_id',
         'fixed_rate_id',
         'referral_source_id',
-        'deactivation_note'
+        'deactivation_note',
+        'smoking_okay',
+        'pets_dogs_okay',
+        'pets_cats_okay',
+        'pets_birds_okay',
     ];
     protected $appends = ['masked_ssn'];
 

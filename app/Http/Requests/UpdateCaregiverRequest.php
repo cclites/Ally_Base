@@ -35,6 +35,7 @@ class UpdateCaregiverRequest extends FormRequest
             ],
             'password' => 'nullable|confirmed',
             'title' => 'required|string|max:32',
+            'certification' => 'required|in:CNA,HHA,RN,LPN',
             'medicaid_id' => 'nullable|string|max:100',
             'gender' => 'nullable|in:M,F',
             'avatar' => [
@@ -43,6 +44,10 @@ class UpdateCaregiverRequest extends FormRequest
             ],
             'referral_source_id' => 'nullable|exists:referral_sources,id',
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),
+            'smoking_okay' => 'nullable|boolean',
+            'pets_dogs_okay' => 'nullable|boolean',
+            'pets_cats_okay' => 'nullable|boolean',
+            'pets_birds_okay' => 'nullable|boolean',
         ];
     }
 
