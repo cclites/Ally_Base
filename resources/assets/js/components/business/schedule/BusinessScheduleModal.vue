@@ -661,7 +661,7 @@
             openCareMatchTab() {
                 const tabs = this.$refs.tabs.tabs;
                 for (let i = 0; i < tabs.length; i ++) {
-                    if (tabs[i].title === 'Care Match') {
+                    if (tabs[i].title.toString().match(/CareMatch/)) {
                         this.activeTab = i;
                         break;
                     }
