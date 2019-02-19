@@ -83,7 +83,7 @@ class ClientRatesController extends Controller
                 }
 
                 \DB::commit();
-                return new SuccessResponse('Client Rates saved successfully.', $client->fresh()->rates);
+                return new SuccessResponse('Client Rates saved successfully.', $client->fresh()->rates, '.');
             } 
 
             throw new \Exception();
