@@ -115,17 +115,17 @@ class ClientAuthorization extends AuditableModel
      *
      * @return array|null
      */
-    public function getPeriodDates() : ?array
+    public function getPeriodDates($date) : ?array
     {
         switch ($this->period) {
             case self::PERIOD_DAILY:
-                return [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()];
+                return [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
                 break;
             case self::PERIOD_WEEKLY:
-                return [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
+                return [$date->copy()->startOfWeek(), $date->copy()->endOfWeek()];
                 break;
             case self::PERIOD_MONTHLY:
-                return [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()];
+                return [$date->copy()->startOfMonth(), $date->copy()->endOfMonth()];
                 break;
             default:
                 return null;

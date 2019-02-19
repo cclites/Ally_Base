@@ -31,7 +31,10 @@ class ServiceAuthValidator
     public function exceedsMaxClientHours() : bool
     {
         // Check if shift would exceed clients max hours
-        $period = [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()];
+        $period = [
+            $this->shift->checked_in_time->copy()->startOfWeek(),
+            $this->shift->checked_in_time->copy()->endOfWeek()
+        ];
 
         $shifts = Shift::where('client_id', $this->shift->client_id)
             ->whereBetween('checked_in_time', [$period])
@@ -92,7 +95,7 @@ class ServiceAuthValidator
     protected function getMatchingShifts(ClientAuthorization $auth) : Builder
     {
         $query = Shift::where('client_id', $this->shift->client_id)
-            ->whereBetween('checked_in_time', [$auth->getPeriodDates()])
+            ->whereBetween('checked_in_time', $auth->getPeriodDates($this->shift->checked_in_time))
             ->where('fixed_rates', $auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
 
         // Must match service
