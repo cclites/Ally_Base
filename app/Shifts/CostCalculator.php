@@ -292,6 +292,52 @@ class CostCalculator
         );
     }
 
+    public function getTotalRates():  Rates
+    {
+        return new Rates(
+            $this->getCaregiverCost(true),
+            $this->getProviderFee(),
+            $this->getClientCost(),
+            $this->getAllyFee(),
+            true,
+            $this->shift->fixed_rates
+        );
+    }
+
+    public function getHourlyRates(): Rates
+    {
+        if ($this->shift->fixed_rates) {
+            return $this->getTotalRates();
+        }
+
+        $hours = $this->getBillableUnits();
+
+        return new Rates(
+            $this->getCaregiverCost(false) / $hours,
+            $this->getProviderFee() / $hours,
+            $this->getClientCost() / $hours,
+            $this->getAllyFee() /  $hours,
+            true,
+            false
+        );
+    }
+
+    public function getBillableUnits(): float
+    {
+        if ($this->shift->fixed_rates) {
+            return 1;
+        }
+
+        if ($this->shift->services->count()) {
+            return $this->shift->services->reduce(function($carry, ShiftService $service) {
+                return add($carry, $service->duration);
+            }, 0.0);
+        }
+
+        return $this->shift->duration();
+    }
+
+
     /**
      *  Get the total cost per hour of this shift
      */

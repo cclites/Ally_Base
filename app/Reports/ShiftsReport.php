@@ -113,59 +113,8 @@ class ShiftsReport extends BusinessResourceReport
     protected function getRates(Shift $shift)
     {
         $rates = new ShiftsReportRates();
-
-        $hourlyTotal = null;
-        $caregiverRate = null;
-        $allyFee = null;
-        $providerFee = null;
-        $shiftTotal = null;
-        $caregiverTotal = null;
-        $providerTotal = null;
-        $allyTotal = null;
-
-        if ($shift->service_id) {
-            if ($shift->client_rate !== null) {
-                $hourlyTotal = $shift->client_rate;
-                $caregiverRate = $shift->caregiver_rate;
-            } else {
-                $rates = app(RateFactory::class)->findMatchingRate($shift->client, $shift->checked_in_time->toDateString(), $shift->fixed_rates, $shift->service_id, $shift->payer_id, $shift->caregiver_id);
-                $hourlyTotal = $rates->client_rate;
-                $caregiverRate = $rates->caregiver_rate;
-            }
-            if ($shift->fixed_rates) {
-                $shiftTotal = $hourlyTotal;
-                $caregiverTotal = $caregiverRate;
-            } else {
-                $units = $shift->duration;
-                $shiftTotal = round($hourlyTotal * $units, 2);
-                $caregiverTotal = round($caregiverRate * $units, 2);
-            }
-        } else {
-            // Service Breakout
-            $units = 0;
-            $caregiverTotal = 0;
-            $shiftTotal = 0;
-            foreach($shift->services as $service) {
-                $units += $service->duration;
-                if ($service->client_rate !== null) {
-                    $shiftTotal += $service->client_rate * $service->duration;
-                    $caregiverTotal += $service->caregiver_rate * $service->duration;
-                } else {
-                    $rates = app(RateFactory::class)->findMatchingRate($shift->client, $shift->checked_in_time->toDateString(), $shift->fixed_rates, $service->service_id, $service->payer_id, $shift->caregiver_id);
-                    $shiftTotal += $rates->client_rate * $service->duration;
-                    $caregiverTotal += $rates->caregiver_rate * $service->duration;
-                }
-                $hourlyTotal = round($shiftTotal / $units, 2);
-                $caregiverRate = round($caregiverTotal / $units, 2);
-            }
-        }
-        $allyFee = $shift->client->getAllyFee($hourlyTotal, true);
-        $providerFee = $hourlyTotal - $caregiverRate - $allyFee;
-        $allyTotal = $shift->client->getAllyFee($shiftTotal, true);
-        $providerTotal = $shiftTotal - $caregiverTotal - $allyTotal;
-
-        $rates->hourly = new Rates($caregiverRate, $providerFee, $hourlyTotal, $allyFee, true, $shift->fixed_rates);
-        $rates->total = new Rates($caregiverTotal, $providerTotal, $shiftTotal, $allyTotal, true, $shift->fixed_rates);
+        $rates->hourly = $shift->costs()->getHourlyRates();
+        $rates->total = $shift->costs()->getTotalRates();
 
         return $rates;
     }
