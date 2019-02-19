@@ -269,12 +269,15 @@ class CostCalculator
         // New (February 2019)
         if ($this->isUsingClientRate()) {
             if ($this->shift->services->count()) {
-                return $this->sumServices('client_rate');
+                $shiftTotal = $this->sumServices('client_rate');
             } else if ($this->shift->fixed_rates) {
-                return $this->shift->client_rate;
+                $shiftTotal = $this->shift->client_rate;
             } else {
-                return multiply($this->shift->duration(), $this->shift->client_rate);
+                $shiftTotal = multiply($this->shift->duration(), $this->shift->client_rate);
             }
+
+            $expenseTotal = add($this->getMileageCost(true), $this->getOtherExpenses(true));
+            return add($shiftTotal, $expenseTotal);
         }
 
         // Old (Pre-February 2019)
