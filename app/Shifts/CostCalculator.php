@@ -132,7 +132,7 @@ class CostCalculator
 
         // New (February 2019)
         if ($this->isUsingClientRate()) {
-            $leftover = subtract($this->getClientCost(), $this->getCaregiverCost(false));
+            $leftover = subtract($this->getClientCost(), $this->getCaregiverCost());
             $providerFee = subtract($leftover, $this->getAllyFee());
             return $providerFee;
         }
