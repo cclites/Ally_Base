@@ -96,6 +96,7 @@ use Illuminate\Support\Collection;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
  * @property-read \App\Billing\Payment|null $payment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\ShiftService[] $services
  * @property-read \App\Schedule|null $schedule
  * @property-read \App\Signature $signature
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory

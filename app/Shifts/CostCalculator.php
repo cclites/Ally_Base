@@ -1,6 +1,7 @@
 <?php
 namespace App\Shifts;
 
+use App\Billing\Invoiceable\ShiftService;
 use App\Payments\MileageExpenseCalculator;
 use App\ShiftCostHistory;
 
@@ -72,25 +73,50 @@ class CostCalculator
             return $this->getPersistedCosts()->ally_fee;
         }
 
-        $hourlyRate = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
+        if ($this->isUsingClientRate()) {
+            // New (February 2019)
+            if ($this->shift->services->count()) {
+                $shiftFee = $this->shift->services->reduce(function($carry, ShiftService $service) {
+                    $amount = multiply($service->client_rate ?? 0, $service->duration);
+                    $fee = ($this->paymentType)
+                        ? $this->paymentType->getAllyFee($amount, true)
+                        : $this->client->getAllyFee($amount, true);
+                    return add($carry, $fee);
+                }, 0.0);
+            } else if ($this->shift->fixed_rates) {
+                $shiftFee = ($this->paymentType)
+                    ? $this->paymentType->getAllyFee($this->getClientCost(), true)
+                    : $this->client->getAllyFee($this->getClientCost(), true);
 
-        if ($this->shift->fixed_rates) {
-            // Still use getHourlyRate method for ease of use, but don't do any multiplication
-            $shiftFee = $hourlyRate;
-        }
-        else {
-            $hours = $this->shift->duration();
-            $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
+            } else {
+                $hourlyRate = ($this->paymentType)
+                    ? $this->paymentType->getAllyFee($this->shift->client_rate, true)
+                    : $this->client->getAllyFee($this->shift->client_rate, true);
+                $shiftFee = multiply($hourlyRate, $this->shift->duration());
+            }
+        } else {
+            // Old (Pre-February 2019)
+            $hourlyRate = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
+
+            if ($this->shift->fixed_rates) {
+                // Still use getHourlyRate method for ease of use, but don't do any multiplication
+                $shiftFee = $hourlyRate;
+            }
+            else {
+                $hours = $this->shift->duration();
+                $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
+            }
         }
 
         $expenses = $this->getCaregiverExpenses();
         $expenseFee = AllyFeeCalculator::getFee($this->client, $this->paymentType, $expenses);
 
-        return round(
-            bcadd($shiftFee, $expenseFee, self::DEFAULT_SCALE),
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
-        );
+        return add($shiftFee, $expenseFee);
+    }
+
+    public function getClientCost()
+    {
+        return $this->getTotalCost();
     }
 
     /**
@@ -104,6 +130,14 @@ class CostCalculator
             return $this->getPersistedCosts()->provider_fee;
         }
 
+        // New (February 2019)
+        if ($this->isUsingClientRate()) {
+            $leftover = subtract($this->getClientCost(), $this->getCaregiverCost(false));
+            $providerFee = subtract($leftover, $this->getAllyFee());
+            return $providerFee;
+        }
+
+        // Old (Pre-February 2019)
         if ($this->shift->fixed_rates) {
             return $this->shift->provider_fee;
         }
@@ -129,11 +163,14 @@ class CostCalculator
             return $this->getPersistedCosts()->caregiver_shift;
         }
 
-        if ($this->shift->fixed_rates) {
-            $shift = $this->shift->caregiver_rate;
-        }
-        else {
-            $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        if ($this->shift->services->count()) {
+            $shift = $this->sumServices('caregiver_rate');
+        } else {
+            if ($this->shift->fixed_rates) {
+                $shift = $this->shift->caregiver_rate;
+            } else {
+                $shift = multiply($this->shift->duration(), $this->shift->caregiver_rate);
+            }
         }
 
         $expenses = 0;
@@ -229,7 +266,18 @@ class CostCalculator
      */
     public function getTotalCost()
     {
+        // New (February 2019)
+        if ($this->isUsingClientRate()) {
+            if ($this->shift->services->count()) {
+                return $this->sumServices('client_rate');
+            } else if ($this->shift->fixed_rates) {
+                return $this->shift->client_rate;
+            } else {
+                return multiply($this->shift->duration(), $this->shift->client_rate);
+            }
+        }
 
+        // Old (Pre-February 2019)
         return round(
             bcadd(
                 bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
@@ -298,5 +346,18 @@ class CostCalculator
             return true;
         }
         return false;
+    }
+
+    protected function sumServices(string $field): float
+    {
+        return $this->shift->services->reduce(function($carry, ShiftService $service) use ($field) {
+            $amount = multiply($service->{$field} ?? 0, $service->duration);
+            return add($carry, $amount);
+        }, 0.0);
+    }
+
+    protected function isUsingClientRate()
+    {
+        return $this->shift->client_rate || $this->shift->services->count();
     }
 }
