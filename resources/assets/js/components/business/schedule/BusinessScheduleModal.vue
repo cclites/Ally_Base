@@ -577,7 +577,11 @@
             },
 
             isPast() {
-                return moment(this.schedule.starts_at).isBefore(moment());
+                if (this.selectedSchedule.id) {
+                    return moment(this.selectedSchedule.starts_at).isBefore(moment());
+                } else {
+                    return moment(this.getStartsAt()).isBefore(moment());
+                }
             },
             scheduledWeekdayInt() {
                 return this.selectedSchedule ? moment(this.selectedSchedule.starts_at).day() : 0;
