@@ -41,6 +41,7 @@ class CareMatchController extends BaseController
             'exclude_overtime' => 'boolean',
             'radius' => 'nullable|numeric',
             'rating' => 'nullable|numeric',
+            'smoking' => 'required|in:1,0,client'
         ], [
             'starts_at.*' => 'The start date and time are invalid.',
             'duration.*' => 'The start time and end time are required for overtime calculations.',
@@ -68,6 +69,43 @@ class CareMatchController extends BaseController
             $preferences['language'] = $request->matches_language === 'client' ? optional($client->preferences)->language : $request->matches_language;
         }
 
+        if ($request->smoking) {
+            if ($request->smoking == 'client') {
+                if (optional($client->preferences)->smokes) {
+                    // only add preference check if the client smokes, otherwise there
+                    // is no need to narrow the search because allowed/no allowed would
+                    // both fit clients that do not smoke.
+                    $preferences['smoking'] = 1;
+                }
+            } else {
+                $preferences['smoking'] = $request->smoking;
+            }
+        }
+        
+        if ($request->pets) {
+            if ($request->pets == 'client') {
+                if (optional($client->preferences)->pets_dogs) {
+                    $preferences['pets_dogs'] = 1;
+                }
+                if (optional($client->preferences)->pets_cats) {
+                    $preferences['pets_cats'] = 1;
+                }
+                if (optional($client->preferences)->pets_birds) {
+                    $preferences['pets_birds'] = 1;
+                }
+            } else if ($request->pets == 'select') {
+                if ($request->pets_dogs) {
+                    $preferences['pets_dogs'] = $request->pets_dogs;
+                }
+                if ($request->pets_cats) {
+                    $preferences['pets_cats'] = $request->pets_cats;
+                }
+                if ($request->pets_birds) {
+                    $preferences['pets_birds'] = $request->pets_birds;
+                }
+            }
+        }
+        
         if (isset($preferences)) {
             $this->careMatch->matchesPreferences(array_filter($preferences));
         }

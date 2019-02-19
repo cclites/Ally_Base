@@ -132,6 +132,27 @@
                             </b-form-select>
                             <input-help :form="form" field="matches_language" text="" />
                         </b-form-group>
+                        <b-form-group label="Smoking" label-for="smoking">
+                            <b-form-select id="smoking" v-model="smoking">
+                                <option value="client">Match Client Preference</option>
+                                <option :value="1">Okay with smoking</option>
+                                <option :value="0">Not okay with smoking</option>
+                            </b-form-select>
+                            <input-help :form="form" field="smoking" text="" />
+                        </b-form-group>
+                        <b-form-group label="Pets">
+                            <b-form-select v-model="pets">
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="select">Select Pet Types</option>
+                            </b-form-select>
+                            <input-help :form="form" field="pets" text="" />
+                            <div v-if="pets == 'select'">
+                                <b-form-checkbox v-model="pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                                <b-form-checkbox v-model="pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                                <b-form-checkbox v-model="pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
+                            </div>
+                        </b-form-group>
                     </div>
 
                     <!--<div class="form-check">-->
@@ -224,6 +245,11 @@
                 license: "",
                 language: "",
                 days: [],
+                smoking: 'client',
+                pets: 'client',
+                pets_dogs: 0,
+                pets_cats: 0,
+                pets_birds: 0,
 
                 languages: new Languages(),
                 daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
@@ -321,6 +347,11 @@
                     exclude_overtime: this.excludesOvertime,
                     radius: this.radiusEnabled ? this.radius : null,
                     rating: this.ratingEnabled ? this.rating : null,
+                    smoking: this.smoking,
+                    pets_dogs: this.pets_dogs,
+                    pets_cats: this.pets_cats,
+                    pets_birds: this.pets_birds,
+                    pets: this.pets,
                 })
             },
 
