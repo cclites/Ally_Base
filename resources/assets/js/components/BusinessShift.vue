@@ -140,7 +140,7 @@
                 <b-row>
                     <b-col>
                         <div class="table-responsive">
-                            <table class="table table-bordered mb-0">
+                            <table class="table table-bordered table-fit-more mb-0">
                                 <thead>
                                 <tr>
                                     <th>Service</th>
@@ -183,6 +183,7 @@
                                                 step="any"
                                                 v-model="form.client_rate"
                                                 @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                                class="money-input"
                                         />
                                     </td>
                                     <td class="text-only" v-if="defaultRates">
@@ -195,6 +196,7 @@
                                                 step="any"
                                                 v-model="form.caregiver_rate"
                                                 @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                                class="money-input"
                                         />
                                     </td>
                                     <td class="text-only">
@@ -244,6 +246,7 @@
                                                 step="any"
                                                 v-model="service.client_rate"
                                                 @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                class="money-input"
                                         />
                                     </td>
                                     <td class="text-only" v-if="defaultRates">
@@ -256,6 +259,7 @@
                                                 step="any"
                                                 v-model="service.caregiver_rate"
                                                 @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                class="money-input"
                                         />
                                     </td>
                                     <td class="text-only">

@@ -115,8 +115,17 @@ export default {
         },
 
         recalculateRates(rates, clientRate, caregiverRate) {
-            rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate);
-            rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true);
+            rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate).toFixed(2);
+            rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true).toFixed(2);
+        },
+
+        updateProviderRates(item) {
+            this.recalculateRates(item, item.client_rate, item.caregiver_rate);
+        },
+
+        updateClientRates(item) {
+            item.client_rate = RateFactory.getClientRate(item.provider_fee, item.caregiver_rate, this.allyPct).toFixed(2);
+            item.ally_fee = RateFactory.getAllyFee(this.allyPct, item.client_rate).toFixed(2);
         },
 
         fetchDefaultRate(service) {

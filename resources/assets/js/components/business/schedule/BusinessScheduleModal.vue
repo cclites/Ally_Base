@@ -104,25 +104,23 @@
                             </b-col>
                         </b-row>
 
-                        <b-row>
-                            <b-row class="mt-2">
-                                <b-col lg="12">
-                                    <strong>Scheduled Billing</strong>
-                                    <b-form-group class="pt-2 mb-0">
-                                        <b-form-radio-group v-model="billingType">
-                                            <b-form-radio value="hourly">Actual Hours</b-form-radio>
-                                            <b-form-radio value="fixed">Fixed Rate</b-form-radio>
-                                            <b-form-radio value="services">Service Breakout</b-form-radio>
-                                        </b-form-radio-group>
-                                    </b-form-group>
-                                </b-col>
-                            </b-row>
+                        <b-row class="mt-2">
+                            <b-col lg="12">
+                                <strong>Scheduled Billing</strong>
+                                <b-form-group class="pt-2 mb-0">
+                                    <b-form-radio-group v-model="billingType">
+                                        <b-form-radio value="hourly">Actual Hours</b-form-radio>
+                                        <b-form-radio value="fixed">Fixed Rate</b-form-radio>
+                                        <b-form-radio value="services">Service Breakout</b-form-radio>
+                                    </b-form-radio-group>
+                                </b-form-group>
+                            </b-col>
                         </b-row>
 
                         <b-row>
                             <b-col>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered">
+                                    <table class="table table-bordered table-fit-more">
                                         <thead>
                                         <tr>
                                             <th>Service</th>
@@ -162,9 +160,10 @@
                                                 <b-form-input
                                                         name="client_rate"
                                                         type="number"
-                                                        step="any"
+                                                        step="0.01"
                                                         v-model="form.client_rate"
-                                                        @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                                        @change="updateProviderRates(form)"
+                                                        class="money-input"
                                                 />
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
@@ -174,14 +173,24 @@
                                                 <b-form-input
                                                     name="caregiver_rate"
                                                     type="number"
-                                                    step="any"
+                                                    step="0.01"
                                                     v-model="form.caregiver_rate"
-                                                    @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                                    @change="updateProviderRates(form)"
+                                                    class="money-input"
                                                 />
                                             </td>
-                                            <td class="text-only">
-                                                <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
-                                                <span v-else>{{ numberFormat(form.provider_fee) }}</span>
+                                            <td class="text-only"  v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.provider_fee) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="caregiver_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="form.provider_fee"
+                                                        @change="updateClientRates(form)"
+                                                        class="money-input"
+                                                />
                                             </td>
                                             <td class="text-only">
                                                 <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
@@ -223,9 +232,10 @@
                                                 <b-form-input
                                                         name="client_rate"
                                                         type="number"
-                                                        step="any"
+                                                        step="0.01"
                                                         v-model="service.client_rate"
-                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                        @change="updateProviderRates(service)"
+                                                        class="money-input"
                                                 />
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
@@ -235,14 +245,24 @@
                                                 <b-form-input
                                                         name="caregiver_rate"
                                                         type="number"
-                                                        step="any"
+                                                        step="0.01"
                                                         v-model="service.caregiver_rate"
-                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                        @change="updateProviderRates(service)"
+                                                        class="money-input"
                                                 />
                                             </td>
-                                            <td class="text-only">
-                                                <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
-                                                <span v-else>{{ numberFormat(service.provider_fee) }}</span>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.provider_fee) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="provider_fee"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="service.provider_fee"
+                                                        @change="updateClientRates(service)"
+                                                        class="money-input"
+                                                />
                                             </td>
                                             <td class="text-only">
                                                 <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
@@ -263,8 +283,6 @@
                                                 </b-btn>
                                             </td>
                                         </tr>
-
-
                                         </tbody>
                                     </table>
                                 </div>
