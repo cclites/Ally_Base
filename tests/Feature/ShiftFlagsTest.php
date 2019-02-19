@@ -269,7 +269,7 @@ class ShiftFlagsTest extends TestCase
         $this->client->update(['max_weekly_hours' => 10]);
         $this->assertEquals(10, $this->client->fresh()->max_weekly_hours);
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create($data);
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -286,7 +286,7 @@ class ShiftFlagsTest extends TestCase
         $this->client->update(['max_weekly_hours' => 10]);
         $this->assertEquals(10, $this->client->fresh()->max_weekly_hours);
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create($data);
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -310,7 +310,7 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -335,7 +335,7 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_MONTHLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now()->startOfMonth(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now()->startOfMonth(), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -360,12 +360,12 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_DAILY,
         ]);
 
-        $data = $this->makeShift(Carbon::yesterday(), '01:00:00', '05:00:00');
+        $data = $this->makeShift(Carbon::yesterday(), '10:00:00', '14:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '06:30:00');
+        $data = $this->makeShift(Carbon::now(), '10:00:00', '15:30:00');
         $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift2->flagManager()->generate();
         $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -385,7 +385,7 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now()->startOfWeek(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now()->startOfWeek(), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -415,7 +415,7 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -440,7 +440,7 @@ class ShiftFlagsTest extends TestCase
         ]);
 
         // shift with only 3 hours of specified service id should not flag yet
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '07:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '17:00:00');
         $shift = Shift::create(array_merge($data, ['service_id' => null]));
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
@@ -461,7 +461,7 @@ class ShiftFlagsTest extends TestCase
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
         // a second shift with 3 more hours of specified service id should flag
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '05:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '15:00:00');
         $shift = Shift::create(array_merge($data, ['service_id' => null]));
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
@@ -498,7 +498,7 @@ class ShiftFlagsTest extends TestCase
         ]);
 
         // shift with only 3 hours of specified payer id should not flag yet
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '07:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '17:00:00');
         $shift = Shift::create(array_merge($data, ['service_id' => null]));
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
@@ -520,7 +520,7 @@ class ShiftFlagsTest extends TestCase
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
         // a second shift with 3 more hours of payer service id should flag
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '05:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '15:00:00');
         $shift = Shift::create(array_merge($data, ['service_id' => null]));
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
@@ -554,7 +554,7 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::today(), '01:00:00', '03:00:00');
+        $data = $this->makeShift(Carbon::today(), '11:00:00', '13:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null, 'fixed_rates' => 1]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -586,13 +586,13 @@ class ShiftFlagsTest extends TestCase
             'effective_end' => Carbon::today()->subDays(1),
         ]);
 
-        $data = $this->makeShift(Carbon::now(), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $this->assertCount(0, $shift->getActiveServiceAuths());
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
-        $data = $this->makeShift(Carbon::today()->subMonths(2), '01:00:00', '08:00:00');
+        $data = $this->makeShift(Carbon::today()->subMonths(2), '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $this->assertCount(1, $shift->getActiveServiceAuths());
         $shift->flagManager()->generate();
@@ -615,7 +615,7 @@ class ShiftFlagsTest extends TestCase
 
         $date = Carbon::now()->subMonth(1)->startOfWeek();
 
-        $data = $this->makeShift($date, '01:00:00', '08:00:00');
+        $data = $this->makeShift($date, '11:00:00', '18:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
@@ -633,7 +633,7 @@ class ShiftFlagsTest extends TestCase
         $this->assertEquals(10, $this->client->fresh()->max_weekly_hours);
 
         $date = Carbon::now()->subMonth(1)->startOfWeek();
-        $data = $this->makeShift($date, '01:00:00', '08:00:00');
+        $data = $this->makeShift($date, '11:00:00', '18:00:00');
         $shift = Shift::create($data);
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));

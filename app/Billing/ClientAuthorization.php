@@ -110,8 +110,8 @@ class ClientAuthorization extends AuditableModel
     // **********************************************************
 
     /**
-     * Get an array containing the start and end dates of the
-     * authorization period.
+     * Get an array containing the start and end dates of the authorization
+     * period.  Returns UTC dates to be accurate when querying shifts.
      *
      * @return array|null
      */
@@ -119,13 +119,13 @@ class ClientAuthorization extends AuditableModel
     {
         switch ($this->period) {
             case self::PERIOD_DAILY:
-                return [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
+                return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
                 break;
             case self::PERIOD_WEEKLY:
-                return [$date->copy()->startOfWeek(), $date->copy()->endOfWeek()];
+                return [$date->copy()->startOfWeek()->setTimezone('UTC'), $date->copy()->endOfWeek()->setTimezone('UTC')];
                 break;
             case self::PERIOD_MONTHLY:
-                return [$date->copy()->startOfMonth(), $date->copy()->endOfMonth()];
+                return [$date->copy()->startOfMonth()->setTimezone('UTC'), $date->copy()->endOfMonth()->setTimezone('UTC')];
                 break;
             default:
                 return null;

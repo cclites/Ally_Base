@@ -32,8 +32,8 @@ class ServiceAuthValidator
     {
         // Check if shift would exceed clients max hours
         $period = [
-            $this->shift->checked_in_time->copy()->startOfWeek(),
-            $this->shift->checked_in_time->copy()->endOfWeek()
+            $this->getRelativeShiftTime()->startOfWeek(),
+            $this->getRelativeShiftTime()->endOfWeek()
         ];
 
         $shifts = Shift::where('client_id', $this->shift->client_id)
@@ -95,7 +95,7 @@ class ServiceAuthValidator
     protected function getMatchingShifts(ClientAuthorization $auth) : Builder
     {
         $query = Shift::where('client_id', $this->shift->client_id)
-            ->whereBetween('checked_in_time', $auth->getPeriodDates($this->shift->checked_in_time))
+            ->whereBetween('checked_in_time', $auth->getPeriodDates($this->getRelativeShiftTime()))
             ->where('fixed_rates', $auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
 
         // Must match service
@@ -114,5 +114,17 @@ class ServiceAuthValidator
         });
 
         return $query;
+    }
+
+    /**
+     * Get the time of the current shift, based on the Client's timezone.
+     *
+     * @return \Carbon\Carbon
+     */
+    public function getRelativeShiftTime()
+    {
+        return $this->shift->checked_in_time
+            ->copy()
+            ->setTimezone($this->shift->client->getTimezone());
     }
 }
