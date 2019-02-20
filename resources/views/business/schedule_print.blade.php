@@ -8,7 +8,11 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                
+
+                @if($schedules->count() === 0)
+                    <b>No scheduled shifts found.</b>
+                @endif
+
                 @foreach($schedules->groupBy('date') as $scheduleGroup)
                     <h4 class="">
                         {{ $scheduleGroup->first()->date }}
@@ -16,10 +20,10 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
-                                <th>Client</th>
-                                <th>Caregiver</th>
-                                <th>Start</th>
-                                <th>End</th>
+                                <th width="25%">Client</th>
+                                <th width="35%">Caregiver</th>
+                                <th width="20%">Start</th>
+                                <th width="20%">End</th>
                             </tr>
                         </thead>
                         <tbody>

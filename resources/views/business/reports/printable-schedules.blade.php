@@ -9,5 +9,9 @@
 @endsection
 
 @section('content')
+    @foreach($errors->all() as $message)
+        <div class="alert alert-danger alert-dismissible"><strong>Error:</strong> {{ $message }}</div>
+    @endforeach
+
     <business-printable-schedules token="{{ csrf_token() }}"></business-printable-schedules>
 @endsection

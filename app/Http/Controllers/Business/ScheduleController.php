@@ -418,13 +418,17 @@ class ScheduleController extends BaseController
         $start = Carbon::parse($request->input('start', 'First day of this month'));
         $end = Carbon::parse($request->input('end', 'First day of next month'));
         $business = $request->getBusiness();
-        $schedules = $business->schedules()->whereBetween('starts_at', [$start, $end])->get();
+        $schedules = $business->schedules()
+            ->whereBetween('starts_at', [$start, $end])
+            ->orderBy('starts_at')
+            ->get();
 
         $schedules = $schedules->map(function ($schedule) {
             $schedule->date = $schedule->starts_at->format('m/d/Y');
             $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
             return $schedule;
         });
+
         return view('business.schedule_print', compact('schedules'));
     }
 
