@@ -110,6 +110,16 @@ export default {
             });
         },
 
+        recalculateAllRates(form) {
+            if (form.services.length) {
+                for(let service of this.form.services) {
+                    this.updateProviderRates(service);
+                }
+            } else {
+                this.updateProviderRates(this.form);
+            }
+        },
+
         recalculateRates(rates, clientRate, caregiverRate) {
             rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate).toFixed(2);
             rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true).toFixed(2);

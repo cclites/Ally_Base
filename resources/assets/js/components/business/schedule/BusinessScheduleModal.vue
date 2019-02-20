@@ -602,6 +602,9 @@
             },
 
             changedClient(clientId) {
+                if (!clientId || this.client_id === clientId) {
+                    return;
+                }
                 this.loadCaregivers(clientId);
                 this.loadAllyPctFromClient(clientId);
                 this.loadCarePlans(clientId);
@@ -819,10 +822,9 @@
 
             loadAllyPctFromClient(client_id) {
                 if (!client_id) return;
-                let component = this;
-                axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
-                    component.allyPct = response.data.percentage_fee;
-                    component.paymentType = response.data.payment_type;
+                axios.get('/business/clients/' + client_id + '/payment_type').then(response => {
+                    this.allyPct = response.data.percentage_fee;
+                    this.paymentType = response.data.payment_type;
                 });
             },
 
@@ -840,8 +842,8 @@
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers(this.client_id);
                     this.loadAllyPctFromClient(this.client_id);
-                    this.loadClientRates();
-                    this.loadClientPayers();
+                    this.loadClientRates(this.client_id);
+                    this.loadClientPayers(this.client_id);
                 }
             },
 
@@ -956,6 +958,10 @@
                 if (val) {
                     this.loadClientData();
                 }
+            },
+
+            allyPct() {
+                this.recalculateAllRates(this.form)
             },
         },
     }

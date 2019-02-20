@@ -181,7 +181,7 @@
                                             <b-form-input
                                                     name="client_rate"
                                                     type="number"
-                                                    step="any"
+                                                    step="0.01"
                                                     v-model="form.client_rate"
                                                     @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                     class="money-input"
@@ -194,7 +194,7 @@
                                             <b-form-input
                                                     name="caregiver_rate"
                                                     type="number"
-                                                    step="any"
+                                                    step="0.01"
                                                     v-model="form.caregiver_rate"
                                                     @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                     class="money-input"
@@ -244,7 +244,7 @@
                                             <b-form-input
                                                     name="client_rate"
                                                     type="number"
-                                                    step="any"
+                                                    step="0.01"
                                                     v-model="service.client_rate"
                                                     @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                     class="money-input"
@@ -257,7 +257,7 @@
                                             <b-form-input
                                                     name="caregiver_rate"
                                                     type="number"
-                                                    step="any"
+                                                    step="0.01"
                                                     v-model="service.caregiver_rate"
                                                     @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                     class="money-input"
@@ -682,6 +682,7 @@
                 // Initialize form
                 this.$nextTick(() => {
                     this.form = new Form(this.initForm(shift));
+                    this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
 
                     if (shift) {
                         // Initialize form values from services
@@ -972,6 +973,9 @@
             shift(newVal, oldVal) {
                 if (newVal.id !== oldVal.id) this.changedShift(newVal);
             },
+            allyPct() {
+                this.recalculateAllRates(this.form)
+            }
         },
     }
 </script>
