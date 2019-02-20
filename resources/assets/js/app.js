@@ -158,7 +158,6 @@ Vue.component('business-rate-codes', require('./components/business/rate_codes/B
 Vue.component('business-reconciliation-report', require('./components/BusinessReconciliationReport'));
 Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('shift-evv-data-table', require('./components/shifts/EvvDataTable'));
-Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/business/reports/ScheduledPaymentsReport.vue'));
 // Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
