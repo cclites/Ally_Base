@@ -334,7 +334,6 @@
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
-                                          label-for="allow_client_confirmations" label-class="required">
                                  <b-form-select id="allow_client_confirmations"
                                                :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.allow_client_confirmations"
