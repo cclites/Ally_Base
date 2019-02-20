@@ -312,6 +312,10 @@ class CostCalculator
 
         $hours = $this->getBillableUnits();
 
+        if ($hours == 0) {
+            return new Rates(0, 0, 0, 0, true, false);
+        }
+
         return new Rates(
             $this->getCaregiverCost(false) / $hours,
             $this->getProviderFee() / $hours,
