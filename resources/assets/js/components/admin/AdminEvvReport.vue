@@ -90,13 +90,6 @@
                      :sort-desc.sync="sortDesc"
                      :filter="filter"
             >
-                <template slot="checked_in_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_in_distance) }}
-                </template>
-
-                <template slot="checked_out_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_out_distance) }}
-                </template>
             </b-table>
         </div>
     </b-card>
@@ -176,7 +169,7 @@
                     {
                         key: 'checked_out_time',
                         label: 'Clock Out',
-                        formatter: (val) => this.formatTimeFromUTC(val),
+                        formatter: (val) => !val ? '-' : this.formatTimeFromUTC(val),
                         sortable: true,
                     },
                     {
@@ -273,7 +266,19 @@
             },
 
             distanceFormat(val) {
-                return (val === 0) ? '<1' : val;
+                if (val === 0) {
+                    return '<1';
+                }
+
+                if (! val) {
+                    return '-';
+                }
+
+                if (isNaN(val)) {
+                    return val;
+                }
+
+                return this.convertToMiles(val);
             }
         }
     }
