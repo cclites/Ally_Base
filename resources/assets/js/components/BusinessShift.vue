@@ -426,7 +426,7 @@
                 </b-row>
                 <b-row v-else-if="!is_modal">
                     <b-col lg="4">
-                        <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
+                        <b-row><span><strong>Added:</strong>&nbsp;{{ shift.created_at ? formatDateTimeFromUTC(shift.created_at) : 'Unknown' }}</span></b-row>
                         <b-row>
                             <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
                             <span v-else><strong>Not Confirmed</strong></span>
