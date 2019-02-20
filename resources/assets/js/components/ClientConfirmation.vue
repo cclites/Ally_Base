@@ -29,7 +29,7 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Confirm your last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Email Address" label-for="email">
+                    <b-form-group label="Email Address" label-for="email" label-class="required">
                         <b-form-input
                                 id="email"
                                 name="email"
@@ -78,11 +78,11 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
-                    <b-form-group label="Phone Number" label-for="phone_number">
+                    <b-form-group label="Phone Number" label-for="phone_number" label-class="required">
                         <mask-input v-model="form.phone_number" id="phone_number" type="phone"></mask-input>
                         <input-help :form="form" field="phone_number" text="Confirm your full phone number."></input-help>
                     </b-form-group>
-                    <b-form-group label="Address">
+                    <b-form-group label="Address" label-class="required">
                         <b-row>
                             <b-col sm="12">
                                 <b-form-input

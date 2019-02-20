@@ -210,7 +210,7 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id)->get();
+        $invoices = $invoiceQuery->forClient($client->id, false)->get();
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()

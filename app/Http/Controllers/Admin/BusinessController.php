@@ -59,6 +59,7 @@ class BusinessController extends Controller
 
         $businessData = $request->validate([
             'name' => 'required|string|max:70',
+            'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
             'state' => 'string|nullable',
@@ -89,7 +90,7 @@ class BusinessController extends Controller
             $businessData['chain_id'] = $chain->id;
         }
 
-        $business = Business::create($businessData);
+        $business = $action->create($businessData);
         if (!$business) return new ErrorResponse(500, 'Unable to create business');
 
         \DB::commit();
@@ -128,7 +129,8 @@ class BusinessController extends Controller
     public function update(Request $request, Business $business)
     {
         $businessData = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:70',
+            'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
             'state' => 'string|nullable',

@@ -318,6 +318,7 @@ Route::group([
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
