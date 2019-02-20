@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $name
+ * @property string $short_name
  * @property string $type
  * @property int|null $bank_account_id
  * @property int|null $active

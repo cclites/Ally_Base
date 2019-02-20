@@ -11,7 +11,7 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Provider Name" label-for="name" label-class="required">
+                    <b-form-group label="Full Name" label-for="name" label-class="required">
                         <b-form-input
                                 id="name"
                                 name="name"
@@ -20,7 +20,18 @@
                                 required
                         >
                         </b-form-input>
-                        <input-help :form="form" field="name" text="Enter the provider name."></input-help>
+                        <input-help :form="form" field="name" text="Enter the full name. (Shows on statements)"></input-help>
+                    </b-form-group>
+                    <b-form-group label="Short Name" label-for="short_name" label-class="required">
+                        <b-form-input
+                                id="short_name"
+                                name="short_name"
+                                type="text"
+                                v-model="form.short_name"
+                                required
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="name" text="Enter the short name (Shows in location dropdowns)."></input-help>
                     </b-form-group>
                     <b-form-group label="Phone Number" label-for="phone1" label-class="required">
                         <mask-input type="phone"
@@ -139,6 +150,7 @@
             return {
                 form: new Form({
                     name: "",
+                    short_name: "",
                     phone1: "",
                     timezone: 'America/New_York',
                     type: 'Registry',
