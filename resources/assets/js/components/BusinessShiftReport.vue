@@ -554,21 +554,19 @@
                 }
             },
 
-            async reloadShift(id) {
-                const response = await axios.get(this.urlPrefix + 'shifts' + this.queryString + '&shift_id=' + id);
-
-                let shift = response.data[0];
-                if (!shift) return;
-
-                let index = this.items.shifts.findIndex(item => shift.id === item.id);
-                if (index !== -1) {
-                    let index = this.items.shifts.findIndex(x => x.id == id);
-                    if (index >= 0) {
-                        this.items.shifts.splice(index, 1, shift)
-                    }
-                }
-
-                this.loadSummaries();
+            reloadShift(id) {
+                console.log(`Reloading shift #${id}`);
+                axios.get(`${this.urlPrefix}shift/${id}`)
+                    .then( ({ data }) => {
+                        let index = this.items.shifts.findIndex(x => x.id === id);
+                        if (index >= 0) {
+                            this.items.shifts.splice(index, 1, data)
+                        } else {
+                            console.log(`Could not reload shift #${id}`, data);
+                        }
+                        this.loadSummaries();
+                    })
+                    .catch(e => {})
             },
 
             loadSummaries() {
