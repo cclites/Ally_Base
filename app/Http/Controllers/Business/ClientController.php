@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Actions\CreateClient;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Http\Controllers\AddressController;
@@ -115,9 +116,11 @@ class ClientController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CreateClientRequest $request
+     * @param \App\Actions\CreateClient $action
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(CreateClientRequest $request)
+    public function store(CreateClientRequest $request, CreateClient $action)
     {
         $data = $request->filtered();
         $this->authorize('create', [Client::class, $data]);
@@ -132,21 +135,9 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
-        if ($client = Client::create($data)) {
-            if ($request->input('no_email')) {
-                $client->setAutoEmail()->save();
-            }
+        $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
-            $history = new OnboardStatusHistory([
-                'status' => $data['onboard_status']
-            ]);
-            $client->onboardStatusHistory()->save($history);
-
-            // Provider pay
-            if ($request->provider_pay) {
-                $client->setPaymentMethod($client->business);
-            }
-
+        if ($client = $action->create($data, $paymentMethod)) {
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 

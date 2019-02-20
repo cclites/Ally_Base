@@ -38,7 +38,7 @@ class PrepareRequiredDataForPayersAndInvoices extends Migration
             ////////////////////////////////////
 
             $service = \App\Billing\Service::create([
-                'name' => 'General',
+                'name' => \App\Billing\Service::DEFAULT_SERVICE_NAME,
                 'code' => '',
                 'default' => true,
                 'chain_id' => $chain->id,

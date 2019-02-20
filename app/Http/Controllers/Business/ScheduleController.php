@@ -101,7 +101,7 @@ class ScheduleController extends BaseController
         $creator->startsAt(Carbon::parse($request->input('starts_at')))
             ->duration($request->duration)
             ->assignments($business->id, $request->client_id, $request->caregiver_id, $request->service_id, $request->payer_id)
-            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates)
+            ->rates($request->caregiver_rate, $request->client_rate, $request->fixed_rates)
             ->addServices($request->getServices());
 
         if ($request->hours_type == 'overtime') {

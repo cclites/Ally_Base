@@ -9,6 +9,10 @@
 @endsection
 
 @section('content')
+    @if($business->chain_id)
+        <a href="{{ route('admin.businesses.chains.show', ['chain' => $business->chain_id]) }}" class="btn btn-primary mb-2">View Business Chain Record</a>
+    @endif
+
     <!-- Nav tabs -->
     <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
         <li class="nav-item">
@@ -34,13 +38,15 @@
             </div>
         </div>
 
+        @if($business->chain)
         <div class="tab-pane" id="users" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-office-user-list :business="{{ $business OR '{}' }}"></business-office-user-list>
+                    <business-office-user-list :chain="{{ $business->chain }}" :businesses="{{ $business->chain->businesses OR '[]' }}"></business-office-user-list>
                 </div>
             </div>
         </div>
+        @endif
 
         <div class="tab-pane" id="point_of_contact" role="tabpanel">
             <div class="row">

@@ -117,9 +117,11 @@ Vue.component('admin-active-clients-report', require('./components/admin/reports
 Vue.component('admin-audit-log', require('./components/admin/reports/AuditLog'));
 Vue.component('authorized-payment-checkbox', require('./components/admin/AuthorizePaymentCheckbox.vue'));
 Vue.component('charge-payment-button', require('./components/admin/ChargePaymentButton.vue'));
-Vue.component('business-create', require('./components/BusinessCreate.vue'));
-Vue.component('business-edit', require('./components/BusinessEdit.vue'));
-Vue.component('business-list', require('./components/BusinessList.vue'));
+Vue.component('business-create', require('./components/admin/BusinessCreate.vue'));
+Vue.component('business-edit', require('./components/admin/BusinessEdit.vue'));
+Vue.component('business-list', require('./components/admin/BusinessList.vue'));
+Vue.component('business-chain-edit', require('./components/admin/BusinessChainEdit'));
+Vue.component('business-chain-list', require('./components/admin/BusinessChainList'));
 Vue.component('business-office-user-list', require('./components/admin/BusinessOfficeUserList'));
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
 Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
