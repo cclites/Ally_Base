@@ -28,7 +28,7 @@
                     >
                         {{ option.text }}
                     </b-form-checkbox>
-                    <b-btn @click="filterList()" variant="primary">Generate</b-btn>
+                    <b-btn @click="loadData()" variant="primary">Generate</b-btn>
                 </b-form>
             </div>
         </div>
@@ -128,10 +128,6 @@
             this.loadData();
         },
         methods: {
-            filterList() {
-                this.loadData();
-            },
-
             printTable() {
                 $(".shift-table").print();
             },
