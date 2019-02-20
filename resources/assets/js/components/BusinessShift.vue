@@ -488,13 +488,12 @@
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
-    import FormatsDistance from "../mixins/FormatsDistance";
     import ConfirmationModal from "./modals/ConfirmationModal";
     import ShiftServices from "../mixins/ShiftServices";
 
     export default {
         components: {ConfirmationModal},
-        mixins: [FormatsNumbers, FormatsDates, FormatsDistance, ShiftServices],
+        mixins: [FormatsNumbers, FormatsDates, ShiftServices],
 
         props: {
             'shift': {
@@ -504,8 +503,6 @@
             },
             'caregiver': {},
             'client': {},
-            'in_distance': {},
-            'out_distance': {},
             'activities': Array,
             'admin': Number,
             'is_modal': 0,

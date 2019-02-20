@@ -123,11 +123,7 @@
 </template>
 
 <script>
-    import FormatsDistance from "../../mixins/FormatsDistance";
-
     export default {
-        mixins: [FormatsDistance],
-
         props: {
             value: {},
             selectedItem: {},

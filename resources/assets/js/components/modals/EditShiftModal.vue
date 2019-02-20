@@ -5,8 +5,6 @@
             <business-shift
                 v-if="shift && !loading"
                 :shift="shift"
-                :in_distance="shift.checked_in_distance"
-                :out_distance="shift.checked_out_distance"
                 :activities="activities"
                 :admin="1"
                 :caregiver="shift.caregiver"
