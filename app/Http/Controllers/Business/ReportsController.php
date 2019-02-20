@@ -340,6 +340,13 @@ class ReportsController extends BaseController
         return $report->rows();
     }
 
+    public function shift(Request $request, $id)
+    {
+        $report = new ShiftsReport();
+        $report->where('id', $id);
+        return $report->rows()->first();
+    }
+
     public function caregiverPayments(Request $request)
     {
         $report = new CaregiverPaymentsReport();
