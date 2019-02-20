@@ -8,8 +8,15 @@ use DB;
 
 class ProviderReconciliationReport extends BaseReport implements BusinessReportInterface
 {
+    /**
+     * @var string
+     */
+    protected $dateField = "created_at";
+
+    /**
+     * @var \Illuminate\Database\Query\Builder
+     */
     protected $query;
-    protected $business;
 
     public function __construct()
     {
@@ -43,12 +50,8 @@ class ProviderReconciliationReport extends BaseReport implements BusinessReportI
         return $this;
     }
 
-    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null, $dates = null, $types = [])
+    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null)
     {
-        if ($types === null) {
-            $types = [];
-        }
-
         if ($businessIds === null) $businessIds = array_filter((array) request()->input('businesses', []));
         if ($authorizedUser === null) $authorizedUser = auth()->user();
 
@@ -57,16 +60,22 @@ class ProviderReconciliationReport extends BaseReport implements BusinessReportI
 
         $this->query()->whereIn('business_id', (array) $businessIds);
         
-        if ($dates !== null) {
-            $this->query()->whereBetween('created_at', $dates->values()->toArray());
-        }
-        if (in_array('deposits', $types)) {
-            $this->query()->where('amount_deposited', '!=', 0);
-        }
-        if (in_array('withdrawls', $types)) {
-            $this->query()->where('amount_withdrawn', '!=', 0);
-        }
 
         return $this;
     }
+
+    public function forTypes(array $types): self
+    {
+        $this->query()->where(function($q) use ($types) {
+            if (in_array('deposits', $types)) {
+                $q->where('amount_deposited', '>', 0);
+            }
+            if (in_array('withdrawals', $types)) {
+                $q->orWhere('amount_withdrawn', '>', 0);
+            }
+        });
+
+        return $this;
+    }
+
 }

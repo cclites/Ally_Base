@@ -5,30 +5,35 @@
         header-bg-variant="info"
         >
         <div class="row">
-            <div class="col-lg-3">
-                <date-picker
-                        v-model="start_date"
-                        placeholder="Start Date"
-                >
-                </date-picker>
-            </div>
-            <div class="col-lg-3">
-                <date-picker
-                        v-model="end_date"
-                        placeholder="End Date"
-                >
-                </date-picker>
-            </div>
-            <div class="col-lg-3">
-                <b-form-group>
-                    <b-form-checkbox-group v-model="types" name="types" :options="options">
-                    </b-form-checkbox-group>
-                </b-form-group>
-            </div>
-            <div class="col-lg-3 text-right">
-                <b-btn @click="filterList()" variant="primary">Generate</b-btn>
+            <div class="col-lg-12">
+                <b-form inline>
+                    <date-picker
+                            v-model="start_date"
+                            placeholder="Start Date"
+                            class="mr-1"
+                    >
+                    </date-picker> -
+                    <date-picker
+                            v-model="end_date"
+                            placeholder="End Date"
+                            class="ml-1 mr-2"
+                    >
+                    </date-picker>
+                    <b-form-checkbox
+                            v-for="option in typeOptions"
+                            v-model="types"
+                            :key="option.value"
+                            :value="option.value"
+                            inline
+                    >
+                        {{ option.text }}
+                    </b-form-checkbox>
+                    <b-btn @click="filterList()" variant="primary">Generate</b-btn>
+                </b-form>
             </div>
         </div>
+
+        <hr />
 
         <div class="text-right mb-2">
             <b-btn href="/business/reports/reconciliation?export=1" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
@@ -83,15 +88,14 @@
                 'sortBy': 'created_at',
                 'sortDesc': true,
                 'items': [],
-                types: [],
+                types: ['deposits', 'withdrawals'],
                 loading: false,
                 start_date: moment().subtract(4, 'weeks').format('MM/DD/YYYY'),
                 end_date: moment().format('MM/DD/YYYY'),
-                options: [
+                typeOptions: [
                     {text: 'Deposits', value: 'deposits'},
-                    {text: 'Withdrawls', value: 'withdrawls'}
+                    {text: 'Withdrawals', value: 'withdrawals'}
                 ],
-                types: [],
                 'fields': [
                     {
                         key: 'created_at',
