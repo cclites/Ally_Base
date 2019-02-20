@@ -24,6 +24,11 @@ class Service extends AuditableModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;
 
+    /**
+     * The name of the initial default service for new registries
+     */
+    const DEFAULT_SERVICE_NAME = "General";
+
     protected $orderedColumn = 'name';
 
     protected $fillable = ['name', 'code', 'default', 'chain_id'];
