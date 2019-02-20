@@ -39,15 +39,15 @@ export default {
 
         async loadClientRates(clientId) {
             if (clientId) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/rates`);
+                const response = await axios.get(`/business/clients/${clientId}/rates`);
                 this.clientRates = response.data;
                 this.fetchAllRates();
             }
         },
 
         async loadClientPayers(clientId, resetPayers = false) {
-            if (this.form.client_id) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/payers/unique`);
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
                 this.clientPayers = response.data;
                 if (resetPayers) this.resetServicePayers();
             }
