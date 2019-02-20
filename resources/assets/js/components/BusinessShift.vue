@@ -415,68 +415,7 @@
                             </div>
                         </b-col>
                     </b-row>
-                    <b-row v-if="shift.id">
-                        <b-col sm="6">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th colspan="2">Clock In EVV</th>
-                                </tr>
-                                </thead>
-                                <tbody v-if="shift.checked_in_latitude || shift.checked_in_longitude">
-                                <!-- <tr>
-                                    <th>Geocode</th>
-                                    <td>{{ shift.checked_in_latitude.slice(0,8) }},<br />{{ shift.checked_in_longitude.slice(0,8) }}</td>
-                                </tr> -->
-                                <tr>
-                                    <th>Distance</th>
-                                    <td>{{ convertToMiles(in_distance) }}m</td>
-                                </tr>
-                                </tbody>
-                                <tbody v-else-if="shift.checked_in_number">
-                                <tr>
-                                    <th>Phone Number</th>
-                                    <td>{{ shift.checked_in_number }}</td>
-                                </tr>
-                                </tbody>
-                                <tbody v-else>
-                                <tr>
-                                    <td colspan="2">No EVV data</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </b-col>
-                        <b-col sm="6">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th colspan="2">Clock Out EVV</th>
-                                </tr>
-                                </thead>
-                                <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
-                                <!-- <tr>
-                                    <th>Geocode</th>
-                                    <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
-                                </tr> -->
-                                <tr>
-                                    <th>Distance</th>
-                                    <td>{{ convertToMiles(out_distance) }}m</td>
-                                </tr>
-                                </tbody>
-                                <tbody v-else-if="shift.checked_out_number">
-                                <tr>
-                                    <th>Phone Number</th>
-                                    <td>{{ shift.checked_out_number }}</td>
-                                </tr>
-                                </tbody>
-                                <tbody v-else>
-                                <tr>
-                                    <td colspan="2">No EVV data</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </b-col>
-                    </b-row>
+                    <shift-evv-data-table v-if="shift.id" :shift="shift"></shift-evv-data-table>
                 </div> <!-- // end ! isClient -->
                 <b-row v-if="isClient">
                     <b-col lg="12" class="text-right mt-3">
@@ -544,7 +483,6 @@
             </confirmation-modal>
         </div>
     </div>
-
 </template>
 
 <script>

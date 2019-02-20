@@ -1,23 +1,28 @@
 <template>
-    <GmapMap
-            :center="position"
-            :options="options"
-            :zoom="13"
-            map-type-id="roadmap"
-    >
-        <GmapMarker
-            :position="position"
-            :draggable="false"
-        />
-        <GmapCircle
-            :center="addressPosition"
-            :draggable="false"
-            :editable="false"
-            :radius="circleRadius"
-            :options="circleOptions"
-            v-if="addressPosition"
-        />
-    </GmapMap>
+    <div>
+        <GmapMap class="shift-map"
+                :center="position"
+                :options="options"
+                :zoom="13"
+                map-type-id="roadmap"
+        >
+            <GmapMarker
+                :position="position"
+                :draggable="false"
+            />
+            <GmapCircle
+                :center="addressPosition"
+                :draggable="false"
+                :editable="false"
+                :radius="circleRadius"
+                :options="circleOptions"
+                v-if="addressPosition"
+            />
+        </GmapMap>
+        <div v-if="noAddress" class="text-muted">
+            Note: No EVV Address set for this shift.
+        </div>
+    </div>
 </template>
 
 <script>
@@ -59,11 +64,17 @@
                 }
             },
             addressPosition() {
-                if (!this.address.latitude) return null;
+                if (this.noAddress) {
+                    return null;
+                }
+
                 return {
                     lat: parseFloat(this.address.latitude),
                     lng: parseFloat(this.address.longitude),
                 }
+            },
+            noAddress() {
+                return ! this.address || ! this.address.latitude || ! this.address.longitude;
             },
         },
 
@@ -74,3 +85,10 @@
         methods: {},
     }
 </script>
+
+<style>
+    .shift-map {
+        width: 100%;
+        height: 200px;
+    }
+</style>
