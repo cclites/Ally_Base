@@ -47,6 +47,7 @@ class ClientAuthorization extends AuditableModel
     // **********************************************************
     // Unit Types
     // **********************************************************
+    const UNIT_TYPE_FIFTEEN = '15m';  // converted to hourly units
     const UNIT_TYPE_HOURLY = 'hourly';
     const UNIT_TYPE_FIXED = 'fixed';
 
@@ -85,29 +86,40 @@ class ClientAuthorization extends AuditableModel
     }
 
     // **********************************************************
-    // MUTATORS
-    // **********************************************************
-
-    // **********************************************************
-    // QUERY SCOPES
+    // Instance FUNCTIONS
     // **********************************************************
 
     /**
-     * Get only the service authorizations effective during the
-     * given date.
+     * Get the number of units this instance authorizes
+     * Note: This should be used instead of directly accessing the units property
      *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
+     * @return float
      */
-    public function scopeEffectiveOn($query, \Carbon\Carbon $date)
+    public function getUnits(): float
     {
-        return $query->where('effective_start', '<=', $date->toDateString())
-            ->where('effective_end', '>=', $date->toDateString());
+        if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
+            // Convert to hourly units
+            return divide($this->units, 4);
+        }
+
+        return $this->units;
     }
 
-    // **********************************************************
-    // OTHER FUNCTIONS
-    // **********************************************************
+    /**
+     * Get the unit type for this authorization
+     * Note: This should be used instead of directly accessing the unit_type property
+     *
+     * @return string
+     */
+    public function getUnitType(): string
+    {
+        if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
+            // Convert to hourly units
+            return self::UNIT_TYPE_HOURLY;
+        }
+
+        return $this->unit_type;
+    }
 
     /**
      * Get an array containing the start and end dates of the authorization
@@ -131,4 +143,22 @@ class ClientAuthorization extends AuditableModel
                 return null;
         }
     }
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    /**
+     * Get only the service authorizations effective during the
+     * given date.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeEffectiveOn($query, \Carbon\Carbon $date)
+    {
+        return $query->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString());
+    }
+
 }

@@ -76,7 +76,8 @@
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Unit Type" label-class="required">
-                                <b-form-select v-model="form.unit_type" class="mr-1 mb-1" name="report_type">
+                                <b-form-select v-model="form.unit_type" class="mr-1 mb-1">
+                                    <option value="15m">15 Minutes</option>
                                     <option value="hourly">Hourly</option>
                                     <option value="fixed">Fixed</option>
                                 </b-form-select>
@@ -84,7 +85,7 @@
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Period" label-class="required">
-                                <b-form-select v-model="form.period" class="mr-1 mb-1" name="report_type">
+                                <b-form-select v-model="form.period" class="mr-1 mb-1">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="monthly">Monthly</option>
@@ -115,7 +116,11 @@
 </template>
 
 <script>
+    import FormatsStrings from "../../../mixins/FormatsStrings";
+
     export default {
+        mixins: [FormatsStrings],
+
         props: ['auths', 'payers', 'services', 'clientId'],
 
         data() {
@@ -161,13 +166,16 @@
                         key: 'unit_type',
                         label: 'Unit Type',
                         sortable: true,
-                        formatter: (val) => val.substr(0, 1).toUpperCase() + val.substr(1)
+                        formatter: (val) => {
+                            if (val === '15m') return '15 Minutes';
+                            return this.stringFormat(val);
+                        }
                     },
                     {
                         key: 'period',
                         label: 'Period',
                         sortable: true,
-                        formatter: (val) => val.substr(0, 1).toUpperCase() + val.substr(1)
+                        formatter: (val) => this.stringFormat(val),
                     },
                     {
                         key: 'notes',

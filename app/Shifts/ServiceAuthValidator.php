@@ -62,9 +62,9 @@ class ServiceAuthValidator
     public function exceededServiceAuthorization() : ?ClientAuthorization
     {
         foreach ($this->shift->getActiveServiceAuths() as $auth) {
-            if ($auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED) {
+            if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
                 // If fixed limit then just check the count of the fixed shifts
-                if ($this->getMatchingShifts($auth)->count() > $auth->units) {
+                if ($this->getMatchingShifts($auth)->count() > $auth->getUnits()) {
                     return $auth;
                 }
             } else {
@@ -76,7 +76,7 @@ class ServiceAuthValidator
                     $total += $shift->getBillableHours($auth->service_id, $auth->payer_id);
                 }
 
-                if ($total > $auth->units) {
+                if ($total > $auth->getUnits()) {
                     return $auth;
                 }
             }
@@ -96,7 +96,7 @@ class ServiceAuthValidator
     {
         $query = Shift::where('client_id', $this->shift->client_id)
             ->whereBetween('checked_in_time', $auth->getPeriodDates($this->getRelativeShiftTime()))
-            ->where('fixed_rates', $auth->unit_type === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
+            ->where('fixed_rates', $auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
 
         // Must match service
         $query->where(function($q) use ($auth) {
