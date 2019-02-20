@@ -267,7 +267,6 @@ Vue.component('reset-password-modal', require('./components/ResetPasswordModal.v
 Vue.component('send-welcome-email-modal', require('./components/SendWelcomeEmailModal.vue'));
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
-Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
 Vue.component('tasks-icon', require('./components/TasksIcon.vue'));

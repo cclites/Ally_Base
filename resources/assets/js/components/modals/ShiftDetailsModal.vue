@@ -114,7 +114,7 @@
                     {{ evvMethod(selectedItem) }}
                 </b-col>
             </b-row>
-            <shift-evv-data-table :shift="selectedItem"></shift-evv-data-table>
+            <shift-evv-data-table v-if="['admin', 'office_user'].includes(authRole)" :shift="selectedItem"></shift-evv-data-table>
         </b-container>
         <div slot="modal-footer">
             <slot name="buttons" :item="selectedItem"></slot>
@@ -123,7 +123,11 @@
 </template>
 
 <script>
+    import authUser from '../../mixins/AuthUser';
+
     export default {
+        mixins: [authUser],
+
         props: {
             value: {},
             selectedItem: {},
