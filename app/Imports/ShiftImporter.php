@@ -103,9 +103,10 @@ class ShiftImporter
         $caregiverComments = null;
 
         if ($checkIn) {
-            $clockIn = new ClockData(Shift::METHOD_IMPORTED, $checkIn);
-            $checkOut = Carbon::parse($checkIn)->copy()->addMinutes(round($duration * 60))->toDateTimeString();
-            $clockOut = new ClockData(Shift::METHOD_IMPORTED, $checkOut);
+            $checkIn = Carbon::parse($checkIn, $timezone)->setTimezone('UTC');
+            $clockIn = new ClockData(Shift::METHOD_IMPORTED, $checkIn->toDateTimeString());
+            $checkOut = $checkIn->copy()->addMinutes(round($duration * 60));
+            $clockOut = new ClockData(Shift::METHOD_IMPORTED, $checkOut->toDateTimeString());
         }
         else {
             // Allow for an expense only record, set in/out time equal to midnight, 0 duration

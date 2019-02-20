@@ -499,6 +499,8 @@
 
         props: {
             'shift': {
+                required: true,
+                type: Object,
                 default() {
                     return {};
                 }
@@ -513,7 +515,7 @@
         data() {
             return {
                 form: new Form(this.initForm(this.shift)),
-                status: (this.shift) ? this.shift.status : null,
+                status: (this.shift.id) ? this.shift.status : null,
                 startTime: '',
                 startDate: '',
                 endTime: '',
@@ -668,6 +670,10 @@
 
             resetForm(shift) {
                 console.log('New Shift', shift);
+                if (!shift) {
+                    shift = {};
+                }
+
                 // Reset values
                 this.deleted = false;
                 this.billingType = shift.fixed_rates ? 'fixed' : 'hourly';
@@ -684,7 +690,7 @@
                         }
 
                         // Initialize additional data from shift
-                        this.status = (this.shift) ? this.shift.status : null;
+                        this.status = (this.shift.id) ? this.shift.status : null;
                         this.fixDateTimes();
                     }
                 });
@@ -730,7 +736,7 @@
                     client_rate: shift.client_rate || '',
                     provider_fee: null, // for show
                     ally_fee: null, // for show
-                    service_id: shift.service_id || null,
+                    service_id: shift.service_id || (this.defaultService ? this.defaultService.id : null),
                     payer_id: shift.payer_id || null,
                     activities: this.getShiftActivityList(),
                     issues: shift.issues || [],

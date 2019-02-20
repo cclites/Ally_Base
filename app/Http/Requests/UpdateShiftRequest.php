@@ -109,8 +109,15 @@ class UpdateShiftRequest extends BusinessClientRequest
 
     public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): ShiftFactory
     {
-        $clockIn = new ClockData($clockInMethod, $this->input('checked_in_time'));
-        $clockOut = new ClockData($clockOutMethod ?? $clockInMethod, $this->input('checked_out_time'));
+        $checkedInTime = Carbon::parse($this->input('checked_in_time'), $this->getClient()->getTimezone())
+            ->setTimezone('UTC')
+            ->toDateTimeString();
+        $checkedOutTime = Carbon::parse($this->input('checked_out_time'), $this->getClient()->getTimezone())
+            ->setTimezone('UTC')
+            ->toDateTimeString();
+
+        $clockIn = new ClockData($clockInMethod, $checkedInTime);
+        $clockOut = new ClockData($clockOutMethod ?? $clockInMethod, $checkedOutTime);
         $rates = new ScheduledRates(
             $this->input('client_rate'),
             $this->input('caregiver_rate'),
