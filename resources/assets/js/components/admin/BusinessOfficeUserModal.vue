@@ -51,6 +51,11 @@
                         </b-form-input>
                         <input-help :form="form" field="password" text="Confirm the new password (if entered above)."></input-help>
                     </b-form-group>
+                    <b-form-group label="Business Locations">
+                        <b-form-checkbox-group stacked v-model="form.businesses" name="businesses">
+                            <b-form-checkbox v-for="business in businesses" :key="business.id" :value="business.id">{{ business.name }}</b-form-checkbox>
+                        </b-form-checkbox-group>
+                    </b-form-group>
                 </b-col>
             </b-row>
         </b-container>
@@ -64,7 +69,8 @@
 <script>
     export default {
         props: {
-            business: Object,
+            chain: Object,
+            businesses: Array,
             value: {},
             selectedItem: Object,
             items: Array,
@@ -91,6 +97,7 @@
                     'lastname': (this.selectedItem) ? this.selectedItem.lastname : '',
                     'password': '',
                     'password_confirmation': '',
+                    'businesses': (this.selectedItem) ? this.selectedItem.businesses : [],
                 });
             },
             title() {
@@ -101,7 +108,7 @@
         methods: {
             save() {
                 let method = 'post';
-                let url = '/admin/businesses/' + this.business.id + '/users';
+                let url = '/admin/chains/' + this.chain.id + '/users';
                 if (this.selectedItem) {
                     method = 'patch';
                     url = url + '/' + this.selectedItem.id;

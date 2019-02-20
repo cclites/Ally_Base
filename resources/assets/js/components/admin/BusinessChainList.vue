@@ -2,7 +2,6 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="6">
-                <b-btn variant="info" href="/admin/businesses/create">Add a New Provider</b-btn>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -21,9 +20,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click="addHold(row.item)" variant="danger" v-if="!row.item.payment_hold">Add Hold</b-btn>
-                    <b-btn size="sm" @click="removeHold(row.item)" variant="primary" v-else>Remove Hold</b-btn>
-                    <b-btn size="sm" :href="'/admin/businesses/' + row.item.id">Edit</b-btn>
+                    <b-btn size="sm" :href="'/admin/chains/' + row.item.id">Edit</b-btn>
                 </template>
             </b-table>
         </div>
@@ -42,7 +39,7 @@
 <script>
     export default {
         props: {
-            'businesses': {},
+            'chains': {},
         },
 
         data() {
@@ -53,10 +50,11 @@
                 sortBy: null,
                 sortDesc: false,
                 filter: null,
+                items: this.chains,
                 fields: [
                     {
                         key: 'name',
-                        label: 'Provider Name',
+                        label: 'Chain',
                         sortable: true,
                     },
                     {
@@ -75,16 +73,10 @@
                         sortable: true,
                     },
                     {
-                        key: 'outgoing_sms_number',
-                        label: 'Text Message Number',
-                        sortable: true,
-                    },
-                    {
                         key: 'actions',
                         class: 'hidden-print'
                     }
                 ],
-                items: this.businesses,
             }
         },
 
@@ -101,20 +93,6 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            },
-            addHold(business) {
-                let form = new Form();
-                form.submit('post', '/admin/businesses/' + business.id + '/hold')
-                    .then(response => {
-                        business.payment_hold = true;
-                    });
-            },
-            removeHold(business) {
-                let form = new Form();
-                form.submit('delete', '/admin/businesses/' + business.id + '/hold')
-                    .then(response => {
-                        business.payment_hold = false;
-                    });
             },
         }
     }

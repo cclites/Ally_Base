@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Edit Provider"
+    <b-card header="Edit Business Location"
             header-bg-variant="info"
             header-text-variant="white"
     >
@@ -18,14 +18,13 @@
                         <input-help :form="form" field="name" text="Enter the provider name."></input-help>
                     </b-form-group>
                     <b-form-group label="Phone Number" label-for="phone1" label-class="required">
-                        <b-form-input
+                        <mask-input type="phone"
                                 id="phone1"
                                 name="phone1"
-                                type="text"
                                 v-model="form.phone1"
                                 required
                         >
-                        </b-form-input>
+                        </mask-input>
                         <input-help :form="form" field="phone1" text="Enter their phone number."></input-help>
                     </b-form-group>
                     <b-form-group label="Time Zone" label-for="timezone">
@@ -37,17 +36,6 @@
                         >
                         </b-form-select>
                         <input-help :form="form" field="timezone" text="Select the city that matches their timezone."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Multi Location Registry" label-for="multi_location_registry">
-                        <b-form-select
-                                id="multi_location_registry"
-                                name="multi_location_registry"
-                                v-model="form.multi_location_registry">
-
-                            <option value="no">No</option>
-                            <option value="yes">Yes</option>
-                        </b-form-select>
-                        <input-help :form="form" field="multi_location_registry" text="Select multi location registry "></input-help>
                     </b-form-group>
                     <b-form-group label="Type" label-for="type">
                         <b-form-select
@@ -132,7 +120,6 @@
                     city: this.business.city,
                     state: this.business.state,
                     zip: this.business.zip,
-                    multi_location_registry: this.business.multi_location_registry,
                     type: this.business.type
                 })
             }
