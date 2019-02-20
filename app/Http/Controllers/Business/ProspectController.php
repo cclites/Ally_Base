@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Requests\UpdateProspectRequest;
 use App\Prospect;
-use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;

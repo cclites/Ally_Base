@@ -1,14 +1,16 @@
 <?php
 namespace App\Shifts;
 
+use App\Billing\ClientRate;
 use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
 use App\Contracts\HasAllyFeeInterface;
-use App\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\RateCode;
 use App\Schedule;
 use App\Shift;
+use Illuminate\Support\Collection;
 
 class RateFactory
 {
@@ -26,6 +28,84 @@ class RateFactory
     {
         $this->settings = $settings;
     }
+
+    ////////////////////////////////////
+    //// NEW STRUCTURE (2019-01-13)
+    ////////////////////////////////////
+
+    public function findMatchingRate(Client $client, string $effectiveDateYMD, bool $fixedRates = false, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): Rates
+    {
+        $effectiveRates = $client->rates()
+            ->where('effective_start', '<=', $effectiveDateYMD)
+            ->where('effective_end', '>=', $effectiveDateYMD)
+            ->get();
+
+        $clientRate = $this->findMatchingClientRate($effectiveRates, $serviceId, $payerId, $caregiverId);
+
+        if ($clientRate) {
+            return new Rates(
+                $fixedRates ? $clientRate->caregiver_fixed_rate : $clientRate->caregiver_hourly_rate,
+                null,
+                $fixedRates ? $clientRate->client_fixed_rate : $clientRate->client_hourly_rate,
+                null,
+                true,
+                $fixedRates
+            );
+        }
+
+        return new Rates(0, 0, 0, 0, false, $fixedRates);
+    }
+
+    protected function findMatchingClientRate(Collection $rates, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): ?ClientRate
+    {
+        // First check for an exact match
+        if ($rate = $this->searchRates($rates, $serviceId, $payerId, $caregiverId)) {
+            return $rate;
+        }
+
+        // Find partial matches in order of caregiver ID, payer ID, then service ID
+        if ($rate = $this->searchRates($rates, null, $payerId, $caregiverId)) {
+            return $rate;
+        }
+        if ($rate = $this->searchRates($rates, $serviceId, null, $caregiverId)) {
+            return $rate;
+        }
+        if ($rate = $this->searchRates($rates, null, null, $caregiverId)) {
+            return $rate;
+        }
+        if ($rate = $this->searchRates($rates, $serviceId, $payerId, null)) {
+            return $rate;
+        }
+        if ($rate = $this->searchRates($rates, null, $payerId, null)) {
+            return $rate;
+        }
+        if ($rate = $this->searchRates($rates, $serviceId, null, null)) {
+            return $rate;
+        }
+
+        // Find fallback/default rate or return null
+        return $this->searchRates($rates, null, null, null);
+    }
+
+    protected function searchRates(Collection $rates, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): ?ClientRate
+    {
+        return $rates->first(function(ClientRate $item) use ($serviceId, $payerId, $caregiverId) {
+            return $item->service_id === $serviceId
+                && $item->payer_id === $payerId
+                && $item->caregiver_id === $caregiverId;
+        });
+    }
+
+
+    public function hasNegativeProviderFee(HasAllyFeeInterface $entity, float $clientRate, float $caregiverRate): bool
+    {
+        $maxCaregiverRate = subtract($clientRate, $entity->getAllyFee($clientRate, true));
+        return $caregiverRate > $maxCaregiverRate;
+    }
+
+    ////////////////////////////////////
+    //// OLD STRUCTURE
+    ////////////////////////////////////
 
     /**
      * Get the rate structure setting of a given business

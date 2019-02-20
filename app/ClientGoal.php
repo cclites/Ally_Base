@@ -23,6 +23,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereQuestion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int $track_goal_progress
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal tracked($areTracked = true)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereTrackGoalProgress($value)
  */
 class ClientGoal extends AuditableModel
 {

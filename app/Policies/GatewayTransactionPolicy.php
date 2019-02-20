@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\User;
 
 /**

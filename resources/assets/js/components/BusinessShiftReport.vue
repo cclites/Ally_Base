@@ -562,8 +562,10 @@
 
                 let index = this.items.shifts.findIndex(item => shift.id === item.id);
                 if (index !== -1) {
-                    this.items.shifts[index] = shift;
-                    this.items.shifts.push(); // needed for Vue to detect change
+                    let index = this.items.shifts.findIndex(x => x.id == id);
+                    if (index >= 0) {
+                        this.items.shifts.splice(index, 1, shift)
+                    }
                 }
 
                 this.loadSummaries();
@@ -711,13 +713,7 @@
                 form.post('/business/shifts/' + id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
-                        this.items.shifts.map(shift => {
-                            if (shift.id === id) {
-                                shift.status = response.data.data.status;
-                                shift.confirmed = true;
-                            }
-                            return shift;
-                        });
+                        this.reloadShift(id);
                     });
             },
 
@@ -800,7 +796,6 @@
             },
 
             onShiftCreate() {
-                debugger;
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();

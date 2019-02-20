@@ -3,7 +3,7 @@ namespace App\Payments;
 
 use App\Business;
 use App\Client;
-use App\Payment;
+use App\Billing\Payment;
 
 /**
  * Class SinglePaymentProcessor

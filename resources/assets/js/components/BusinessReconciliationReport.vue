@@ -54,8 +54,12 @@
                 <template slot="amount_withdrawn" scope="data">
                     {{ numberFormat(data.value) }}
                 </template>
+                <template slot="success" scope="data">
+                    <span v-if="data.value" style="color: green">OK</span>
+                    <span v-else style="color: darkred">Failed</span>
+                </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/business/transactions/' + row.item.id">View Transaction Details</b-btn>
+                    <b-btn size="sm" :href="statementUrl(row.item)">View Statement</b-btn>
                 </template>
             </b-table>
         </div>
@@ -105,6 +109,10 @@
                         sortable: true,
                     },
                     {
+                        key: 'success',
+                        label: 'Status'
+                    },
+                    {
                         key: 'actions',
                         class: 'hidden-print'
                     }
@@ -145,6 +153,14 @@
                     .catch(e => {
                         this.loading = false;
                     });
+            },
+
+            statementUrl(item)
+            {
+                if (item.payment_id) {
+                    return `/business/statements/payments/${item.payment_id}/pdf`
+                }
+                return `/business/statements/deposits/${item.deposit_id}/pdf`
             }
         },
     }

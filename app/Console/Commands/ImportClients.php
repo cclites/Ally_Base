@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\CreateClient;
 use App\Address;
 use App\Business;
 use App\Client;
@@ -28,6 +29,16 @@ class ImportClients extends BaseImport
      * @var \App\Business
      */
     protected $business;
+    /**
+     * @var \App\Actions\CreateClient
+     */
+    protected $createClient;
+
+
+    public function __construct(CreateClient $createClient)
+    {
+        $this->createClient = $createClient;
+    }
 
 
     /**
@@ -61,6 +72,7 @@ class ImportClients extends BaseImport
             'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),
             'password' => bcrypt(str_random(12)),
             'active' => $this->resolve('Active', $row),
+            'business_id' => $this->business()->id,
         ];
 
         // Prevent Duplicates
@@ -70,15 +82,12 @@ class ImportClients extends BaseImport
         }
         else if (!$data['email']) {
             $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100,9999));
-            $data['email'] = 'placeholder' . uniqid();
-            $noemail = true;
+
         }
 
         /** @var Client $client */
-        $client = $this->business()->clients()->create($data);
+        $client = $this->createClient->create($data);
         if ($client) {
-            // Replace placeholder email
-            if (isset($noemail)) $client->setAutoEmail()->save();
 
             $this->importMeta($client, $row);
             $this->importAddresses($client, $row);

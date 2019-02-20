@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="spaced">
         <h3 class="mb-3" v-if="!hideTitle">{{ item.title }}</h3>
 
         <div v-if="item.body" class="mb-3" v-html="item.body"></div>
@@ -63,5 +63,8 @@
         width: 100%;
         height: 100%;
         left: 0; top: 0;
+    }
+    .spaced {
+        white-space: pre-line;
     }
 </style>

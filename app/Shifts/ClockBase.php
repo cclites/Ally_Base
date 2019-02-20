@@ -5,8 +5,13 @@ use App\Caregiver;
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\UnverifiedLocationException;
+use App\PhoneNumber;
 use App\Schedule;
 use App\Shift;
+use App\Shifts\Contracts\ShiftDataInterface;
+use App\Shifts\Data\EVVData;
+use App\Shifts\Data\TVVData;
+use Packages\GMaps\GeocodeCoordinates;
 
 abstract class ClockBase
 {
@@ -27,12 +32,6 @@ abstract class ClockBase
         $this->caregiver = $caregiver;
     }
 
-    public function setManual($manual = true)
-    {
-        $this->manual = $manual;
-        return $this;
-    }
-
     public function setGeocode($latitude, $longitude)
     {
         $this->latitude = $latitude;
@@ -46,6 +45,56 @@ abstract class ClockBase
         return $this;
     }
 
+    public function getMethod()
+    {
+        if ($this->number) {
+            return Shift::METHOD_TELEPHONY;
+        }
+        return Shift::METHOD_GEOLOCATION;
+    }
+
+    protected function buildVerificationData(Client $client)
+    {
+        if ($this->getMethod() === Shift::METHOD_TELEPHONY) {
+            return new TVVData($this->number, $client->phoneNumbers()->where('national_number', $this->number)->exists());
+        }
+
+        $address = $client->getAddress();
+        $distance = null;
+        $verified = false;
+        if ($address) {
+            $distance = $address->distanceTo($this->latitude, $this->longitude, 'm');
+            $verified = is_numeric($distance) && $distance <= self::MAXIMUM_DISTANCE_METERS;
+        }
+
+        return new EVVData(
+            $address,
+            new GeocodeCoordinates($this->latitude, $this->longitude),
+            $verified,
+            $distance !== false  ? $distance : null,
+            request()->ip(),
+            request()->userAgent()
+        );
+    }
+
+    protected function getClockInVerificationData(Client $client): ShiftDataInterface
+    {
+        $data = $this->buildVerificationData($client);
+        if ($data instanceof TVVData) {
+            return new TVVClockInData($data);
+        }
+        return new EVVClockInData($data);
+    }
+
+    protected function getClockOutVerificationData(Client $client): ShiftDataInterface
+    {
+        $data = $this->buildVerificationData($client);
+        if ($data instanceof TVVData) {
+            return new TVVClockOutData($data);
+        }
+        return new EVVClockOutData($data);
+    }
+
     protected function validateSchedule(Schedule $schedule)
     {
         if (!$schedule->client) {
@@ -55,50 +104,5 @@ abstract class ClockBase
         if ($schedule->caregiver_id != $this->caregiver->id) {
             throw new InvalidScheduleParameters('This caregiver is not assigned to this shift.');
         }
-    }
-
-    public function verifyGeocode(Client $client)
-    {
-        if (!$client->evvAddress) throw new UnverifiedLocationException('Client does not have a service (EVV) address.');
-
-        $distance = $client->evvAddress->distanceTo($this->latitude, $this->longitude, 'm');
-
-        if ($distance === false) {
-            throw new UnverifiedLocationException('Your location was unable to be verified.');
-        }
-
-        $this->setDistance($distance);
-        if ($distance > self::MAXIMUM_DISTANCE_METERS) {
-            throw new UnverifiedLocationException('Your location does not match the service address.');
-        }
-    }
-
-    public function verifyPhoneNumber(Client $client)
-    {
-        if (!$client->phoneNumbers()->where('national_number', $this->number)->exists()) {
-            throw new UnverifiedLocationException('The phone number does not match the client record.');
-        }
-    }
-
-    public function verifyEVV(Client $client)
-    {
-        if (!is_null($this->latitude)) {
-            $this->verifyGeocode($client);
-        } else {
-            $this->verifyPhoneNumber($client);
-        }
-    }
-
-    protected function setDistance($meters)
-    {
-        $this->distance = $meters;
-    }
-
-    protected function getMethod()
-    {
-        if ($this->number) {
-            return Shift::METHOD_TELEPHONY;
-        }
-        return Shift::METHOD_GEOLOCATION;
     }
 }

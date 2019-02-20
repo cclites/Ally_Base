@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Address;
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Client;
-use App\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Http\Requests\UpdatePaymentMethodRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\PhoneNumber;
@@ -60,11 +60,6 @@ class ProfileController extends Controller
 
         if(auth()->user()->role_type == 'client') {
             $client_data = request()->validate([
-                'poa_first_name' => 'nullable|string',
-                'poa_last_name' => 'nullable|string',
-                'poa_phone' => 'nullable|string',
-                'poa_relationship' => 'nullable|string',
-                'receive_summary_email' => 'boolean',
                 'caregiver_1099' => 'boolean',
             ]);
             auth()->user()->role->update($client_data);
