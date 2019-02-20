@@ -307,10 +307,9 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import RateFactory from "../../../classes/RateFactory";
     import ClientRateWizard from "./ClientRateWizard";
-    import ClientRatesTable from './ClientRatesTable';
 
     export default {
-        components: {ClientRateWizard, ClientRatesTable},
+        components: {ClientRateWizard},
         props: {
             'client': {},
             'rates': Array,
