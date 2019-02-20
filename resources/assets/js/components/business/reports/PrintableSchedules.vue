@@ -26,9 +26,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <business-location-form-group v-model="form.business_id"
-                                                      :form="form"
-                                                      field="business_id"
+                        <business-location-form-group name="business_id"
                                                       help-text="">
                         </business-location-form-group>
                     </b-col>
