@@ -25,11 +25,7 @@ export default {
         }
 
     },
-
-    mounted() {
-        this.fetchServices();
-    },
-
+    
     methods: {
 
         async fetchServices() {
