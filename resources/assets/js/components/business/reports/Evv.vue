@@ -164,7 +164,7 @@
                     {
                         key: 'checked_out_time',
                         label: 'Clock Out',
-                        formatter: (val) => this.formatTimeFromUTC(val),
+                        formatter: (val) => !val ? '-' : this.formatTimeFromUTC(val),
                         sortable: true,
                     },
                     {

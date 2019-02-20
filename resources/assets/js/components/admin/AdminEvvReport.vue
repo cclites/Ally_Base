@@ -249,6 +249,12 @@
                                     item.checked_out_distance = 'Unknown'; // Usually an address issue
                                 }
                             }
+                            if (item.checked_in_distance == null) {
+                                item.checked_in_distance = 'No EVV Data';
+                            }
+                            if (item.checked_out_distance == null) {
+                                item.checked_out_distance = 'No EVV Data';
+                            }
 
                             return item;
                         });
@@ -266,19 +272,13 @@
             },
 
             distanceFormat(val) {
-                if (val === 0) {
-                    return '<1';
-                }
-
-                if (! val) {
-                    return '-';
-                }
-
                 if (isNaN(val)) {
                     return val;
                 }
 
-                return this.convertToMiles(val);
+                val = this.convertToMiles(val);
+
+                return (val === 0) ? '<1' : val;
             }
         }
     }
