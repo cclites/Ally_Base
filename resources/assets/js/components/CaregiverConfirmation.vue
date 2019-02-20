@@ -86,15 +86,15 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
-                    <b-form-group label="Social Security Number" label-for="ssn">
+                    <b-form-group label="Social Security Number" label-for="ssn" label-class="required">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Confirm your social security number."></input-help>
                     </b-form-group>
-                    <b-form-group label="Phone Number" label-for="phone_number">
+                    <b-form-group label="Phone Number" label-for="phone_number" label-class="required">
                         <mask-input v-model="form.phone_number" id="phone_number" type="phone"></mask-input>
                         <input-help :form="form" field="phone_number" text="Confirm your full phone number."></input-help>
                     </b-form-group>
-                    <b-form-group label="Address">
+                    <b-form-group label="Address" label-class="required">
                         <b-row>
                             <b-col sm="12">
                                 <b-form-input
@@ -170,7 +170,7 @@
                         </b-form-input>
                         <input-help :form="form" field="nickname" text="Optionally provide a nickname for this account."></input-help>
                     </b-form-group>
-                    <b-form-group label="Name on Account" label-for="name_on_account">
+                    <b-form-group label="Name on Account" label-for="name_on_account" label-class="required">
                         <b-form-input
                                 id="name_on_account"
                                 name="name_on_account"
@@ -181,7 +181,7 @@
                     </b-form-group>
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Routing Number" label-for="routing_number">
+                            <b-form-group label="Routing Number" label-for="routing_number" label-class="required">
                                 <b-form-input
                                         id="routing_number"
                                         name="routing_number"
@@ -196,7 +196,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Confirm Routing Number" label-for="routing_number_confirmation">
+                            <b-form-group label="Confirm Routing Number" label-for="routing_number_confirmation" label-class="required">
                                 <b-form-input
                                         id="routing_number_confirmation"
                                         name="routing_number_confirmation"
@@ -214,7 +214,7 @@
                     </b-row>
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Account Number" label-for="account_number">
+                            <b-form-group label="Account Number" label-for="account_number" label-class="required">
                                 <b-form-input
                                         id="account_number"
                                         name="account_number"
@@ -230,7 +230,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Confirm Account Number" label-for="account_number_confirmation">
+                            <b-form-group label="Confirm Account Number" label-for="account_number_confirmation" label-class="required">
                                 <b-form-input
                                         id="account_number_confirmation"
                                         name="account_number_confirmation"
@@ -248,7 +248,7 @@
                     </b-row>
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Account Type" label-for="account_type">
+                            <b-form-group label="Account Type" label-for="account_type" label-class="required">
                                 <b-form-select
                                         id="account_type"
                                         name="account_type"
@@ -261,7 +261,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Holder Type" label-for="account_holder_type">
+                            <b-form-group label="Holder Type" label-for="account_holder_type" label-class="required">
                                 <b-form-select
                                         id="account_holder_type"
                                         name="account_holder_type"
