@@ -25,11 +25,7 @@ export default {
         }
 
     },
-
-    mounted() {
-        this.fetchServices();
-    },
-
+    
     methods: {
 
         async fetchServices() {
@@ -43,15 +39,15 @@ export default {
 
         async loadClientRates(clientId) {
             if (clientId) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/rates`);
+                const response = await axios.get(`/business/clients/${clientId}/rates`);
                 this.clientRates = response.data;
                 this.fetchAllRates();
             }
         },
 
         async loadClientPayers(clientId, resetPayers = false) {
-            if (this.form.client_id) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/payers/unique`);
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
                 this.clientPayers = response.data;
                 if (resetPayers) this.resetServicePayers();
             }
@@ -171,6 +167,9 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
+                if (! form.default_rates) {
+                    return;
+                }
                 form.client_rate = form.default_rates.client_rate || 0;
                 form.caregiver_rate = form.default_rates.caregiver_rate || 0;
                 this.recalculateRates(form, form.client_rate, form.caregiver_rate);

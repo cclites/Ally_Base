@@ -67,7 +67,7 @@ class CostCalculator
      * @return float
      * @throws \Exception
      */
-    public function getAllyFee()
+    public function getAllyFee($expensesIncluded = true)
     {
         if ($this->hasPersistedCosts()) {
             return $this->getPersistedCosts()->ally_fee;
@@ -109,14 +109,14 @@ class CostCalculator
         }
 
         $expenses = $this->getCaregiverExpenses();
-        $expenseFee = AllyFeeCalculator::getFee($this->client, $this->paymentType, $expenses);
+        $expenseFee = $expensesIncluded ? AllyFeeCalculator::getFee($this->client, $this->paymentType, $expenses) : 0;
 
         return add($shiftFee, $expenseFee);
     }
 
-    public function getClientCost()
+    public function getClientCost($expensesIncluded = true)
     {
-        return $this->getTotalCost();
+        return $this->getTotalCost($expensesIncluded);
     }
 
     /**
@@ -264,7 +264,7 @@ class CostCalculator
      *
      * @return float
      */
-    public function getTotalCost()
+    public function getTotalCost($expensesIncluded = true)
     {
         // New (February 2019)
         if ($this->isUsingClientRate()) {
@@ -276,7 +276,7 @@ class CostCalculator
                 $shiftTotal = multiply($this->shift->duration(), $this->shift->client_rate);
             }
 
-            $expenseTotal = add($this->getMileageCost(true), $this->getOtherExpenses(true));
+            $expenseTotal = $expensesIncluded ? add($this->getMileageCost(true), $this->getOtherExpenses(true)) : 0;
             return add($shiftTotal, $expenseTotal);
         }
 
@@ -312,11 +312,15 @@ class CostCalculator
 
         $hours = $this->getBillableUnits();
 
+        if ($hours == 0) {
+            return new Rates(0, 0, 0, 0, true, false);
+        }
+
         return new Rates(
-            $this->getCaregiverCost(false) / $hours,
-            $this->getProviderFee() / $hours,
-            $this->getClientCost() / $hours,
-            $this->getAllyFee() /  $hours,
+            divide($this->getCaregiverCost(false), $hours),
+            divide($this->getProviderFee(), $hours),
+            divide($this->getClientCost(false), $hours),
+            divide($this->getAllyFee(false), $hours),
             true,
             false
         );

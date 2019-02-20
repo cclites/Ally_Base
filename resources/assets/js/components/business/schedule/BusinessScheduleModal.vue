@@ -473,6 +473,7 @@
         },
 
         mounted() {
+            this.fetchServices(); // from ShiftServices mixin
             this.loadClientData();
             this.loadAllCaregivers();
             this.fetchRateCodes();

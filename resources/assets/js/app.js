@@ -159,7 +159,7 @@ Vue.component('business-overtime-report', require('./components/BusinessOvertime
 Vue.component('business-rate-codes', require('./components/business/rate_codes/BusinessRateCodes'));
 Vue.component('business-reconciliation-report', require('./components/BusinessReconciliationReport'));
 Vue.component('business-shift', require('./components/BusinessShift.vue'));
-Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
+Vue.component('shift-evv-data-table', require('./components/shifts/EvvDataTable'));
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/business/reports/ScheduledPaymentsReport.vue'));
 // Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
@@ -268,7 +268,6 @@ Vue.component('payment-method-provider', require('./components/PaymentMethodProv
 Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
 Vue.component('send-welcome-email-modal', require('./components/SendWelcomeEmailModal.vue'));
 
-Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('system-notifications', require('./components/SystemNotifications.vue'));

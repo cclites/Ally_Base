@@ -74,39 +74,24 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions', 'address']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
-
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
+        $data += [
+            'client_name' => $shift->client->name(),
+            'caregiver_name' => $shift->caregiver->name(),
+            'address' => optional($shift->address)->only(['latitude', 'longitude']),
+        ];
 
         if ($request->expectsJson()) {
-            $data += [
-                'checked_in_distance' => $checked_in_distance,
-                'checked_out_distance' => $checked_out_distance,
-                'client_name' => $shift->client->name(),
-                'caregiver_name' => $shift->caregiver->name(),
-                'address' => optional($shift->address)->only(['latitude', 'longitude']),
-            ];
-
             return response()->json($data);
         }
 
         $activities = $shift->business->allActivities();
 
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+        return view('business.shifts.show', compact('shift', 'activities'));
     }
 
     /**
@@ -259,15 +244,16 @@ class ShiftController extends BaseController
         $shift = $shift->replicate();
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
+        $shift->checked_in_distance = null;
+        $shift->checked_out_distance = null;
+        
         $shift->status = null;
 
-        $checked_in_distance = null;
-        $checked_out_distance = null;
         $activities = $shift->business->allActivities();
 
         event(new ShiftFlagsCouldChange($shift));
 
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+        return view('business.shifts.show', compact('shift', 'activities'));
 
     }
 
