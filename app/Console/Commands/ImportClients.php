@@ -37,6 +37,7 @@ class ImportClients extends BaseImport
 
     public function __construct(CreateClient $createClient)
     {
+        parent::__construct();
         $this->createClient = $createClient;
     }
 
