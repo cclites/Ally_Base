@@ -615,7 +615,7 @@
                 // no show or open shift and a new caregiver is set otherwise
                 // saving the schedule will clear the caregiver_id because of
                 // its status.
-                if (! old_val && val && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
+                if (caregiverId && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
                     this.form.status = 'OK';
                 }
             },
