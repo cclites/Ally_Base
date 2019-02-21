@@ -233,7 +233,7 @@
                     // For office users only
 
                     {
-                        name: 'Clients Birthday',
+                        name: 'Client Birthdays',
                         url: 'reports/birthdays?type=clients',
                         description: 'Shows the list of clients\'s birthdays',
                         category: 2,
@@ -247,14 +247,14 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Caregivers Birthday',
+                        name: 'Caregiver Birthdays',
                         url: 'reports/birthdays?type=caregivers',
                         description: 'Shows the list of caregivers\'s birthdays',
                         category: 3,
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Caregivers Anniversary',
+                        name: 'Caregiver Anniversary',
                         url: 'reports/anniversary',
                         description: 'Shows the caregivers\'s and their work anniversaries',
                         category: 3,
