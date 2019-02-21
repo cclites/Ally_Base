@@ -188,7 +188,7 @@
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
                     </b-form-group>
-                    
+
                     <b-form-group label="Send 1099" v-if="authRole == 'admin'">
                         <b-form-select v-model="form.caregiver_1099">
                             <option value="">No</option>
@@ -373,7 +373,7 @@
                             <b-form-group v-if="client.onboarding_step < 6">
                                 <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
                                 <br>
-                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
+                                <b-button @click="startOnboarding" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
                             <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
                                 <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
@@ -421,7 +421,13 @@
             :source="{}"
             source-type="client"
         ></business-referral-source-modal>
+
         <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
+
+        <b-modal v-model="onboardingWarning" title="Not Available">
+            Contact Ally support to configure this feature.
+        </b-modal>
+
     </b-card>
 </template>
 
@@ -511,6 +517,7 @@
                 showReferralModal: false,
                 caseManagers: [],
                 statusAliases: [],
+                onboardingWarning: false
             }
         },
 
@@ -570,6 +577,14 @@
                     .then(function(response) {
                         component.lastStatusDate = moment.utc().format();
                     });
+            },
+
+            startOnboarding() {
+                if (this.business.enable_client_onboarding) {
+                    window.location = `/business/clients/${this.client.id}/onboarding`
+                } else {
+                    this.onboardingWarning = true;
+                }
             },
 
             fetchStatusAliases() {
