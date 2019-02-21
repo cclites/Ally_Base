@@ -70,8 +70,8 @@
                         <th scope="col">Time</th>
                         <th scope="col">Miles</th>
                         <th scope="col">Expenses</th>
+                        <th scope="col">Total Rate</th>
                         <th scope="col">CG Rate</th>
-                        <th scope="col">PV Rate</th>
                         <th scope="col">ADLs</th>
                         <th scope="col">Notes</th>
                         <th scope="col"></th>
@@ -91,11 +91,11 @@
                         <td scope="row"> <!-- other_expenses -->
                             ${{ shifts[index].other_expenses }}
                         </td>
+                        <td scope="row"> <!-- client_rate -->
+                            ${{ shifts[index].client_rate }}
+                        </td>
                         <td scope="row"> <!-- caregiver_rate -->
                             ${{ shifts[index].caregiver_rate }}
-                        </td>
-                        <td scope="row"> <!-- provider_fee -->
-                            ${{ shifts[index].provider_fee }}
                         </td>
                         <td scope="row"> <!-- activities -->
                             {{ shifts[index].activities.length }}
@@ -248,8 +248,8 @@
 
                 this.form.entries.splice(index, 1, {
                     ...this.emptyShift,
-                    caregiver_rate: this.defaultRate || 0.00,
-                    provider_fee: this.defaultFee || 0.00,
+                    caregiver_rate: this.defaultRate.caregiver_rate || 0.00,
+                    client_rate: this.defaultRate.client_rate || 0.00,
                 });
                 this.shifts = this.form.entries;
                 this.deleteIndex = null;

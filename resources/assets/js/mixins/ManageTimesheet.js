@@ -1,4 +1,5 @@
 import FormatDates from './FormatsDates';
+import RateFactory from "../classes/RateFactory";
 
 export default {
     mixins: [ FormatDates ],
@@ -29,6 +30,8 @@ export default {
             weekRanges: [],
             week: {},
             shifts: [],
+            services: [],
+            clientRates: [],
             form: new Form({}),
             selectedEntry: {},
             selectedIndex: null,
@@ -45,7 +48,7 @@ export default {
                 mileage: '',
                 other_expenses: '',
                 caregiver_rate: 0.00,
-                provider_fee: 0.00, 
+                client_rate: 0.00,
                 caregiver_comments: '',
                 activities: [],
             };
@@ -81,12 +84,15 @@ export default {
             return this.caregiver.clients && this.caregiver.clients.length > 0;
         },
 
-        defaultRate() {
-            return this.client.caregiver_hourly_rate || 0;
+        defaultService() {
+            return this.services.find(item => item.default === true) || {};
         },
 
-        defaultFee() {
-            return this.client.provider_hourly_fee || 0;
+        defaultRate() {
+            let effectiveDate = this.week.days ? this.week.days[0] : moment().format('YYYY-MM-DD');
+            let serviceId = this.defaultService ? this.defaultService.id : null;
+
+            return RateFactory.findMatchingRate(this.clientRates, effectiveDate, serviceId, null, this.timesheet.caregiver_id, false);
         },
 
         canEdit() {
@@ -149,7 +155,7 @@ export default {
             return moment(date).format(full ? 'dddd' : 'ddd');
         },
 
-        generateEntriesForWeek(week, entriesForDate, rate, fee) {
+        generateEntriesForWeek(week, entriesForDate, caregiverRate, clientRate) {
             let entries = [];
             week.days.forEach( (date) => {
                 var index = entriesForDate.findIndex(item => { return item.date == date });
@@ -158,8 +164,8 @@ export default {
                 } else {
                     entries.push({
                         ...this.emptyShift,
-                        caregiver_rate: rate || 0.00,
-                        provider_fee: fee || 0.00,
+                        caregiver_rate: caregiverRate || 0.00,
+                        client_rate: clientRate || 0.00,
                     });
                 }
             });
@@ -253,12 +259,30 @@ export default {
                     }
                 });
             }
-            this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, this.defaultRate, this.defaultFee);
+            this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, this.defaultRate.caregiver_rate, this.defaultRate.client_rate);
             this.form.entries = this.shifts;
+        },
+
+        async fetchServices() {
+            let response = await axios.get('/business/services?json=1');
+            if (Array.isArray(response.data)) {
+                this.services = response.data;
+            } else {
+                this.services = [];
+            }
+        },
+
+        async loadClientRates(clientId) {
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/rates`);
+                this.clientRates = response.data;
+            }
         },
     },
 
     mounted() {
+        this.fetchServices();
+        this.loadClientRates();
         this.prepareTimesheet();
     },
 
