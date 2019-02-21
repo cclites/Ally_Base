@@ -50,7 +50,7 @@
                         label: 'Birthday',
                         sortable: true,
                         shouldShow: true,
-                        formatter: (v) => v ? v : '-',
+                        formatter: (v) => v ? moment(v).format('MM/DD/YYYY') : '-',
                     },
                 ],
             };
