@@ -59,7 +59,7 @@
             <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#contact_list" class="nav-link">Contacts</a>
+            <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
@@ -93,7 +93,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
-                <a class="dropdown-item" data-toggle="tab" href="#contact_list" role="tab">Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -149,12 +149,6 @@
                               payment-type-message="{{ $defaultPaymentTypeMessage }}"
             />
         </div>
-        {{--<div class="tab-pane" id="caregivers" role="tabpanel">--}}
-            {{--<business-client-caregivers :client="{{ $client }}"--}}
-                                        {{--:ally-rate-original="{{ floatval($client->allyFee) }}"--}}
-                                        {{--payment-type-message="{{ $defaultPaymentTypeMessage }}"--}}
-            {{--></business-client-caregivers>--}}
-        {{--</div>--}}
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
@@ -211,9 +205,8 @@
                 </client-payment-history>
             </b-card>
         </div>
-        <div class="tab-pane" id="contact_list" role="tabpanel">
-            <contact-list-tab :emergency-contacts="{{ $client->user->emergencyContacts }}" :user-id="{{ $client->id }}"></contact-list-tab>
-            <emergency-contacts-tab :client="{{ $client }}"></emergency-contacts-tab>
+        <div class="tab-pane" id="contacts" role="tabpanel">
+            <client-contacts-tab :contacts="{{ $client->contacts }}" :client="{{ $client }}"></client-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>

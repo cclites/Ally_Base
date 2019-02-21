@@ -16,6 +16,7 @@ class Form {
         this.handler = new AxiosResponseHandler();
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
+        this.alertOnSucess = true;
         this.errorMods = 0;
         this.hideErrors = [];
     }
@@ -153,7 +154,7 @@ class Form {
                 .then(response => {
                     console.log('Axios success');
                     this.handler = new AxiosResponseHandler();
-                    this.handler.handleResponse(response, this.alertOnResponse);
+                    this.handler.handleResponse(response, this.alertOnResponse && this.alertOnSuccess);
                     if (this.resetOnSuccess) this.reset();
                     resolve(response);
                 })

@@ -11,7 +11,7 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Provider Name" label-for="name" label-class="required">
+                    <b-form-group label="Full Name" label-for="name" label-class="required">
                         <b-form-input
                                 id="name"
                                 name="name"
@@ -20,17 +20,27 @@
                                 required
                         >
                         </b-form-input>
-                        <input-help :form="form" field="name" text="Enter the provider name."></input-help>
+                        <input-help :form="form" field="name" text="Enter the full name. (Shows on statements)"></input-help>
                     </b-form-group>
-                    <b-form-group label="Phone Number" label-for="phone1" label-class="required">
+                    <b-form-group label="Short Name" label-for="short_name" label-class="required">
                         <b-form-input
-                                id="phone1"
-                                name="phone1"
+                                id="short_name"
+                                name="short_name"
                                 type="text"
-                                v-model="form.phone1"
+                                v-model="form.short_name"
                                 required
                         >
                         </b-form-input>
+                        <input-help :form="form" field="name" text="Enter the short name (Shows in location dropdowns)."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Phone Number" label-for="phone1" label-class="required">
+                        <mask-input type="phone"
+                                    id="phone1"
+                                    name="phone1"
+                                    v-model="form.phone1"
+                                    required
+                        >
+                        </mask-input>
                         <input-help :form="form" field="phone1" text="Enter their phone number."></input-help>
                     </b-form-group>
                     <b-form-group label="Time Zone" label-for="timezone">
@@ -43,17 +53,30 @@
                         </b-form-select>
                         <input-help :form="form" field="timezone" text="Select the city that matches their timezone."></input-help>
                     </b-form-group>
-                    <b-form-group label="Multi Location Registry" label-for="multi_location_registry">
+                    <b-form-group label="Business Chain" label-for="chain_id">
                         <b-form-select
-                            id="multi_location_registry"
-                            name="multi_location_registry"
-                            v-model="form.multi_location_registry">
+                            id="chain_id"
+                            name="chain_id"
+                            v-model="form.chain_id">
 
-                            <option value="no">No</option>
-                            <option value="yes">Yes</option>
+                            <option value="">--Select--</option>
+                            <option :value="null">New Business Chain</option>
+                            <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="multi_location_registry" text="Select multi location registry "></input-help>
+                        <input-help :form="form" field="chain_id" text=""></input-help>
                     </b-form-group>
+                    <b-form-group v-if="form.chain_id === null">
+                        <b-form-input
+                                type="text"
+                                v-model="form.new_chain_name"
+                                required
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="new_chain_name" text="Enter the new business chain name"></input-help>
+                    </b-form-group>
+                    <input-help v-if="form.chain_id !== null" :form="form" field="new_chain_name" text=""></input-help>
+                </b-col>
+                <b-col lg="6">
                     <b-form-group label="Type" label-for="type">
                         <b-form-select
                                 id="type"
@@ -67,8 +90,6 @@
                         </b-form-select>
                         <input-help :form="form" field="type" text="Select provider type"></input-help>
                     </b-form-group>
-                </b-col>
-                <b-col lg="6">
                     <b-form-group label="Street Address" label-for="address1">
                         <b-form-input
                             id="address1"
@@ -114,81 +135,6 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <hr />
-                    <h4>Office User Details</h4>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name" label-for="firstname" label-class="required">
-                        <b-form-input
-                            id="firstname"
-                            name="firstname"
-                            type="text"
-                            v-model="form.firstname"
-                            required
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="firstname" text="Enter their first name."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
-                        <b-form-input
-                            id="lastname"
-                            name="lastname"
-                            type="text"
-                            v-model="form.lastname"
-                            required
-                            >
-                        </b-form-input>
-                        <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Email Address" label-for="email">
-                        <b-form-input
-                                id="email"
-                                name="email"
-                                type="email"
-                                v-model="form.email"
-                                @change="copyEmailToUsername()"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
-                    </b-form-group>
-                    <b-form-group label="Username" label-for="username">
-                        <b-form-input
-                                id="username"
-                                name="username"
-                                type="text"
-                                v-model="form.username"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Password" label-for="password">
-                        <b-form-input
-                                id="password"
-                                name="ssn"
-                                type="password"
-                                v-model="form.password"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="password" text="Enter the password they will use to login for the first time."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Confirm Password" label-for="password_confirmation">
-                        <b-form-input
-                                id="password_confirmation"
-                                name="ssn"
-                                type="password"
-                                v-model="form.password_confirmation"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="password_confirmation" text="Re-enter the above password."></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="12">
                     <b-button id="save-business" variant="success" type="submit">Create &amp; Continue</b-button>
                 </b-col>
             </b-row>
@@ -198,20 +144,22 @@
 
 <script>
     export default {
-        props: {},
+        props: ['chains'],
 
         data() {
             return {
                 form: new Form({
-                    name: null,
-                    phone1: null,
+                    name: "",
+                    short_name: "",
+                    phone1: "",
                     timezone: 'America/New_York',
-                    multi_location_registry: 'no',
                     type: 'Registry',
                     address1: null,
                     city: null,
                     state: null,
                     zip: null,
+                    chain_id: "",
+                    new_chain_name: "",
                     //
                     firstname: null,
                     lastname: null,
@@ -236,6 +184,10 @@
             submitForm() {
                 this.form.post('/admin/businesses');
             }
+        },
+
+        watch: {
+
         }
     }
 </script>

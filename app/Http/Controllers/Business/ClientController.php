@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Actions\CreateClient;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Http\Controllers\AddressController;
@@ -9,7 +10,6 @@ use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
-use App\Http\Requests\UpdateClientPOAContactRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\Responses\ConfirmationResponse;
@@ -115,9 +115,11 @@ class ClientController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CreateClientRequest $request
+     * @param \App\Actions\CreateClient $action
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(CreateClientRequest $request)
+    public function store(CreateClientRequest $request, CreateClient $action)
     {
         $data = $request->filtered();
         $this->authorize('create', [Client::class, $data]);
@@ -132,18 +134,12 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
-        if ($client = Client::create($data)) {
-            if ($request->input('no_email')) {
-                $client->setAutoEmail()->save();
-            }
+        
+        $client->agreementStatusHistory()->save(['status' => $data['agreement_status']]);
 
-            $client->agreementStatusHistory()->save(['status' => $data['agreement_status']]);
+        $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
-            // Provider pay
-            if ($request->provider_pay) {
-                $client->setPaymentMethod($client->business);
-            }
-
+        if ($client = $action->create($data, $paymentMethod)) {
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
@@ -186,6 +182,7 @@ class ClientController extends BaseController
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
+            'contacts',
         ])
         ->append('last_service_date');
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
@@ -215,7 +212,7 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id)->get();
+        $invoices = $invoiceQuery->forClient($client->id, false)->get();
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()
@@ -364,7 +361,7 @@ class ClientController extends BaseController
         $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
         $data['payment_text'] = $paymentTypeMessage;
         $data['ally_rate'] = $allyRate;
-        return new SuccessResponse($message, $data);
+        return new SuccessResponse($message, $data, '.');
     }
 
     public function sendConfirmationEmail(Client $client)
@@ -383,7 +380,7 @@ class ClientController extends BaseController
     {
         return [
             'payment_type' => $client->getPaymentType(),
-            'percentage_fee' => AllyFeeCalculator::getPercentage($client)
+            'percentage_fee' => $client->getAllyPercentage(),
         ];
     }
 
@@ -425,15 +422,6 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
-    }
-
-    public function updateContacts(UpdateClientPOAContactRequest $request, Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $client->update($request->validated());
-
-        return new SuccessResponse('Client contacts updated.');
     }
 
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)

@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 use App\Traits\HasSSNAttribute;
+use Carbon\Carbon;
 
 /**
  * \App\CaregiverApplication
@@ -268,6 +269,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
                 'username' => $alternativeUsername ?? $this->email,
                 'date_of_birth' => $this->date_of_birth,
                 'password' => bcrypt(random_bytes(32)),
+                'application_date' => Carbon::now(),
             ]);
 
             $this->businessChain->caregivers()->attach($caregiver);

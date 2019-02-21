@@ -195,7 +195,12 @@ class ReportsController extends BaseController
     public function reconciliation(Request $request, ProviderReconciliationReport $report)
     {
         if ($request->expectsJson() && $request->input('json')) {
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date));
+            }
+
             return $report->forRequestedBusinesses()
+                ->forTypes($request->input('types'))
                 ->orderBy('created_at', 'DESC')
                 ->rows();
         }
@@ -333,6 +338,13 @@ class ReportsController extends BaseController
         }
 
         return $report->rows();
+    }
+
+    public function shift(Request $request, $id)
+    {
+        $report = new ShiftsReport();
+        $report->where('id', $id);
+        return $report->rows()->first();
     }
 
     public function caregiverPayments(Request $request)
@@ -764,6 +776,43 @@ class ReportsController extends BaseController
             ->whereIn('id', $ids)
             ->get();
         return view('business.reports.case_manager', compact('caseManagers', 'clients'));
+    }
+
+    /**
+     * Display a listing of the caregiver's working anniversaries
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function caregiverAnniversary()
+    {
+        $users = Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
+            return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
+        });
+        return view('business.reports.caregiver_anniversary', compact('users'));
+    }
+
+    /**
+     * Display a listing of the users and their birthdays.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userBirthday(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+        $type = ucfirst($type);
+        return view('business.reports.user_birthday', compact('type'));
+    }
+
+    public function userBirthdayData(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+
+        if($type == 'clients') {
+            return Client::forRequestedBusinesses()->get();
+        }
+
+        return Caregiver::forRequestedBusinesses()->get();
     }
 
     /**

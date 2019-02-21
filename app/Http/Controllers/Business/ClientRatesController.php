@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Shifts\RateFactory;
 use Illuminate\Http\Request;
 use App\Billing\ClientRate;
 use App\Client;
@@ -40,15 +41,23 @@ class ClientRatesController extends Controller
     public function update(UpdateClientRatesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
+        $rates = $request->filtered();
 
-        $data = $request->filtered();
+        // Verify no negative provider fees
+        foreach($rates as $rate) {
+            foreach(['hourly', 'fixed'] as $type) {
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $rate["client_${type}_rate"], $rate["caregiver_${type}_rate"])) {
+                    return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+                }
+            }
+        }
         
         \DB::beginTransaction();
         try {
             // Ensure all caregivers are attached to the client and
             // remove any caregivers that were previously attached
             // but no longer have any rates set.
-            $caregivers = collect($data['rates'])
+            $caregivers = collect($rates)
                 ->where('caregiver_id', '<>', null)
                 ->pluck('caregiver_id');
 
@@ -66,7 +75,7 @@ class ClientRatesController extends Controller
                 $client->caregivers()->sync($caregivers);
             }
 
-            if ($client->syncRates($data['rates'])) {
+            if ($client->syncRates($rates)) {
                 $validator = new ClientRateValidator();
                 if (! $validator->validate($client->fresh())) {
                     \DB::rollBack();
@@ -74,7 +83,7 @@ class ClientRatesController extends Controller
                 }
 
                 \DB::commit();
-                return new SuccessResponse('Client Rates saved successfully.', $client->fresh()->rates);
+                return new SuccessResponse('Client Rates saved successfully.', $client->fresh()->rates, '.');
             } 
 
             throw new \Exception();

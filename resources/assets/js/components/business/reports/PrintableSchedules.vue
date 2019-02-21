@@ -26,9 +26,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <business-location-form-group v-model="form.business_id"
-                                                      :form="form"
-                                                      field="business_id"
+                        <business-location-form-group name="business_id"
                                                       help-text="">
                         </business-location-form-group>
                     </b-col>
@@ -37,7 +35,7 @@
                     <b-col lg="12">
                         <b-form-group label="Group By">
                             <b-form-radio-group name="group_by" v-model="group_by">
-                                <b-form-radio value="none">None</b-form-radio>
+                                <b-form-radio value="none">Date</b-form-radio>
                                 <b-form-radio value="client">Client</b-form-radio>
                                 <b-form-radio value="caregiver">Caregiver</b-form-radio>
                             </b-form-radio-group>

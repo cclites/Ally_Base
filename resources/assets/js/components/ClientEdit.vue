@@ -42,17 +42,31 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Case Manager" label-for="case_manager">
+                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
                                 v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
                         >
-                            <option :value="null">-- Case Manager --</option>
+                            <option :value="null">-- Client Services Coordinator --</option>
                             <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select case manager for the client."></input-help>
+                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
@@ -114,12 +128,6 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
-                    <b-form-group label="Client Status">
-                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
-                    </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
                             id="hic"
@@ -164,8 +172,6 @@
                         </b-form-checkbox>
                     </b-form-group>
 
-
-
                     <b-form-group v-if="businessSendsSummaryEmails">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
@@ -181,6 +187,14 @@
                             </label>
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
+                    </b-form-group>
+
+                    <b-form-group label="Send 1099" v-if="authRole == 'admin'">
+                        <b-form-select v-model="form.caregiver_1099">
+                            <option value="">No</option>
+                            <option value="client">On Client's Behalf</option>
+                            <option value="ally">On Ally’s Behalf</option>
+                        </b-form-select>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -260,7 +274,7 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <p class="h6">Preferences</p>
+                    <p class="h6">CareMatch Preferences</p>
                     <hr>
                 </b-col>
             </b-row>
@@ -284,6 +298,8 @@
                             <option :value="null">No Preference</option>
                             <option value="CNA">CNA</option>
                             <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
                         </b-form-select>
                         <input-help :form="preferences" field="license" text="" />
                     </b-form-group>
@@ -309,17 +325,19 @@
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
                     </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Salesperson">
-                        <b-form-select v-model="form.sales_person_id">
-                            <option :value="null">None</option>
-                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
-                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
-                            </option>
+                    <b-form-group label="Does the client smoke?" label-for="smokes">
+                        <b-form-select id="smokes"
+                                       v-model="preferences.smokes"
+                        >
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
                         </b-form-select>
+                        <input-help :form="preferences" field="smokes" text="" />
+                    </b-form-group>
+                    <b-form-group label="Does this client have pets?">
+                        <b-form-checkbox v-model="preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -355,7 +373,7 @@
                             <b-form-group v-if="client.onboarding_step < 6">
                                 <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
                                 <br>
-                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
+                                <b-button @click="startOnboarding" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -364,18 +382,6 @@
                     <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && form.agreement_status=='needs_agreement'">
                         <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
                         <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <b-form-group>
-                        <b-form-checkbox id="caregiver_1099"
-                                         v-model="form.caregiver_1099"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Send 1099 to caregivers on the client’s behalf
-                        </b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -421,7 +427,13 @@
             :source="{}"
             source-type="client"
         ></business-referral-source-modal>
+
         <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
+
+        <b-modal v-model="onboardingWarning" title="Not Available">
+            Contact Ally support to configure this feature.
+        </b-modal>
+
     </b-card>
 </template>
 
@@ -429,10 +441,11 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
-    import BusinessLocationSelect from './business/BusinessLocationSelect'
+    import BusinessLocationSelect from './business/BusinessLocationSelect';
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import DeactivateClientModal from './modals/DeactivateClientModal';
-    import DischargeSummaryModal from './modals/DischargeSummaryModal'
+    import DischargeSummaryModal from './modals/DischargeSummaryModal';
+    import AuthUser from '../mixins/AuthUser';
 
     window.croppie = require('croppie');
     import ConfirmationModal from "./modals/ConfirmationModal";
@@ -449,7 +462,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates],
+        mixins: [ClientForm, FormatsDates, AuthUser],
 
         components: {
             BusinessLocationFormGroup,
@@ -485,7 +498,7 @@
                     case_manager_id: this.client.case_manager_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
-                    caregiver_1099: !!this.client.caregiver_1099,
+                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
@@ -500,6 +513,10 @@
                     gender: this.client.preferences ? this.client.preferences.gender : null,
                     license: this.client.preferences ? this.client.preferences.license : null,
                     language: this.client.preferences ? this.client.preferences.language : null,
+                    smokes: this.client.preferences ? this.client.preferences.smokes : 0,
+                    pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : 0,
+                    pets_cats: this.client.preferences ? this.client.preferences.pets_cats : 0,
+                    pets_birds: this.client.preferences ? this.client.preferences.pets_birds : 0,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -510,6 +527,7 @@
                 sendEmailModal: false,
                 statusAliases: [],
                 localLastStatusDate: null,
+                onboardingWarning: false
             }
         },
 
@@ -571,6 +589,14 @@
                             this.localLastStatusDate = moment.utc().format();
                         });
                 })
+            },
+
+            startOnboarding() {
+                if (this.business.enable_client_onboarding) {
+                    window.location = `/business/clients/${this.client.id}/onboarding`
+                } else {
+                    this.onboardingWarning = true;
+                }
             },
 
             fetchStatusAliases() {

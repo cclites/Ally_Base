@@ -220,6 +220,13 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 
     function getPaymentMethod(): ChargeableInterface
     {
+        if ($this->getPayer()->isPrivatePay()) {
+            if (!$paymentMethod = $this->client->getPaymentMethod()) {
+                throw new PaymentMethodError("No payment method is assigned to the private payer.");
+            }
+            return $paymentMethod;
+        }
+
         if ($method = $this->getPayer()->getPaymentMethod()) {
             if ($method instanceof Business) {
                 $method = $this->client->business;
@@ -231,11 +238,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
             return $method;
         }
 
-        if ($this->getPayer()->isPrivatePay()) {
-            return $this->client->getPaymentMethod();
-        }
-
-        throw new PaymentMethodError("No payment method is available.");
+        throw new PaymentMethodError("No payment method is available for the payer.");
     }
 
 
@@ -350,11 +353,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     public function getAllyPercentage()
     {
-        if ($this->payer->isPrivatePay()) {
-            return $this->client->getAllyPercentage();
+        try {
+            return $this->getPaymentMethod()->getAllyPercentage();
         }
-        else {
-            return (float) config('ally.bank_account_fee');
-        }
+        catch (\Exception $e) {}
+
+        return (float) config('ally.credit_card_fee');
     }
 }

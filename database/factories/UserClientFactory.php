@@ -21,6 +21,7 @@ $factory->define(Client::class, function(Faker $faker) {
         'dr_last_name' => $faker->lastName,
         'dr_phone' => $faker->phoneNumber,
         'dr_fax' => $faker->phoneNumber,
+        'onboard_status' => $faker->randomElement([null, 'needs_agreement', 'reconfirmed_checkbox']),
         'hospital_name' => $faker->company,
         'hospital_number' => $faker->phoneNumber,
         'inquiry_date' => null,

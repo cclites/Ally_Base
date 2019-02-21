@@ -1,12 +1,12 @@
 <template>
-    <b-card header="Edit Provider"
+    <b-card header="Edit Business Location"
             header-bg-variant="info"
             header-text-variant="white"
     >
         <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Provider Name" label-for="name" label-class="required">
+                    <b-form-group label="Full Name" label-for="name" label-class="required">
                         <b-form-input
                                 id="name"
                                 name="name"
@@ -15,17 +15,27 @@
                                 required
                         >
                         </b-form-input>
-                        <input-help :form="form" field="name" text="Enter the provider name."></input-help>
+                        <input-help :form="form" field="name" text="Enter the full name. (Shows on statements)"></input-help>
                     </b-form-group>
-                    <b-form-group label="Phone Number" label-for="phone1" label-class="required">
+                    <b-form-group label="Short Name" label-for="short_name" label-class="required">
                         <b-form-input
-                                id="phone1"
-                                name="phone1"
+                                id="short_name"
+                                name="short_name"
                                 type="text"
-                                v-model="form.phone1"
+                                v-model="form.short_name"
                                 required
                         >
                         </b-form-input>
+                        <input-help :form="form" field="name" text="Enter the short name (Shows in location dropdowns)."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Phone Number" label-for="phone1" label-class="required">
+                        <mask-input type="phone"
+                                id="phone1"
+                                name="phone1"
+                                v-model="form.phone1"
+                                required
+                        >
+                        </mask-input>
                         <input-help :form="form" field="phone1" text="Enter their phone number."></input-help>
                     </b-form-group>
                     <b-form-group label="Time Zone" label-for="timezone">
@@ -37,17 +47,6 @@
                         >
                         </b-form-select>
                         <input-help :form="form" field="timezone" text="Select the city that matches their timezone."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Multi Location Registry" label-for="multi_location_registry">
-                        <b-form-select
-                                id="multi_location_registry"
-                                name="multi_location_registry"
-                                v-model="form.multi_location_registry">
-
-                            <option value="no">No</option>
-                            <option value="yes">Yes</option>
-                        </b-form-select>
-                        <input-help :form="form" field="multi_location_registry" text="Select multi location registry "></input-help>
                     </b-form-group>
                     <b-form-group label="Type" label-for="type">
                         <b-form-select
@@ -126,13 +125,13 @@
             return {
                 form: new Form({
                     name: this.business.name,
+                    short_name: this.business.short_name,
                     phone1: this.business.phone1,
                     timezone: this.business.timezone,
                     address1: this.business.address1,
                     city: this.business.city,
                     state: this.business.state,
                     zip: this.business.zip,
-                    multi_location_registry: this.business.multi_location_registry,
                     type: this.business.type
                 })
             }

@@ -233,10 +233,31 @@
                     // For office users only
 
                     {
+                        name: 'Client Birthdays',
+                        url: 'reports/birthdays?type=clients',
+                        description: 'Shows the list of clients\'s birthdays',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Client Directory',
-                        url: 'reports/client-directory',
+                        url: 'reports/reports/client-directory',
                         description: 'Shows the full list of clients',
                         category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Birthdays',
+                        url: 'reports/birthdays?type=caregivers',
+                        description: 'Shows the list of caregivers\'s birthdays',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Anniversary',
+                        url: 'reports/anniversary',
+                        description: 'Shows the caregivers\'s and their work anniversaries',
+                        category: 3,
                         allowed: ['office_user'],
                     },
                     {
@@ -398,6 +419,20 @@
                         url: 'reports/payments',
                         description: 'See client charges and caregiver payments over time',
                         category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Client Statistics',
+                        url: 'reports/client-stats',
+                        description: 'See client stats',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Statistics',
+                        url: 'reports/caregiver-stats',
+                        description: 'See caregiver stats',
+                        category: 2,
                         allowed: ['office_user'],
                     },
                     {

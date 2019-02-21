@@ -4,6 +4,7 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
+use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
+use App\Billing\ClientAuthorization;
 
 /**
  * App\Client
@@ -52,16 +54,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property string|null $referral
  * @property string|null $diagnosis
  * @property int|null $ambulatory
- * @property string|null $poa_first_name
- * @property string|null $poa_last_name
- * @property string|null $poa_phone
- * @property string|null $poa_email
- * @property string|null $poa_relationship
  * @property string|null $import_identifier
- * @property string|null $dr_first_name
- * @property string|null $dr_last_name
- * @property string|null $dr_phone
- * @property string|null $dr_fax
  * @property string|null $ltci_name
  * @property string|null $ltci_address
  * @property string|null $ltci_city
@@ -108,7 +101,6 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \App\PhoneNumber $evvPhone
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
  * @property-read mixed $active
- * @property-read mixed $ally_percentage
  * @property mixed $avatar
  * @property-read mixed $date_of_birth
  * @property-read mixed $email
@@ -155,10 +147,6 @@ use App\Traits\CanHaveEmptyEmail;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDiagnosis($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFax($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereEmail($email = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
@@ -184,10 +172,6 @@ use App\Traits\CanHaveEmptyEmail;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereName($firstname = null, $lastname = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReceiveSummaryEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
@@ -210,6 +194,7 @@ use App\Traits\CanHaveEmptyEmail;
  * @property-read \App\OfficeUser|null $caseManager
  * @property-read mixed $masked_name
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
+ * @property-read \App\Billing\ClientPayer $primaryPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
@@ -223,7 +208,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public $timestamps = false;
     public $hidden = ['ssn'];
     public $dates = ['service_start_date', 'inquiry_date'];
-    public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -241,16 +225,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral',
         'diagnosis',
         'ambulatory',
-        'poa_first_name',
-        'poa_last_name',
-        'poa_phone',
-        'poa_email',
-        'poa_relationship',
         'import_identifier',
-        'dr_first_name',
-        'dr_last_name',
-        'dr_phone',
-        'dr_fax',
         'hospital_name',
         'hospital_number',
         'ltci_name',
@@ -479,29 +454,51 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             ->orderBy('priority');
     }
 
+    /** Current primary payer */
+    public function primaryPayer()
+    {
+        $date = Carbon::now();
+
+        return $this->hasOne(ClientPayer::class, 'client_id')
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->orderBy('priority');
+    }
+
     public function rates()
     {
         return $this->hasMany(ClientRate::class, 'client_id');
+    }
+
+    /**
+     * Get the client authorizations relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function serviceAuthorizations()
+    {
+        return $this->hasMany(ClientAuthorization::class);
+    }
+
+    /**
+     * Get the ClientContacts relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
     }
 
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
-    public function getPaymentTypeAttribute()
-    {
-        return $this->getPaymentType();
-    }
-
-    public function getAllyPercentageAttribute()
-    {
-        return $this->getAllyPercentage();
-    }
-
     public function getLastServiceDateAttribute()
     {
         return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
     }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
@@ -579,33 +576,35 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getPaymentType($method = null)
     {
-        if (!$method) {
-            $method = $this->getPaymentMethod();
-        }
+        try {
+            $payer = $this->primaryPayer;
+            if ($payer && $method = $payer->getPaymentMethod()) {
+                if ($method instanceof Business) {
+                    return 'ACH-P';
+                }
 
-        if ($method instanceof Business) {
-            return 'ACH-P';
-        }
+                if ($method instanceof CreditCard) {
+                    if ($method->type == 'amex') {
+                        return 'AMEX';
+                    }
+                    return 'CC';
+                }
 
-        if ($method instanceof CreditCard) {
-            if ($method->type == 'amex') {
-                return 'AMEX';
+                if ($method instanceof BankAccount) {
+                    return 'ACH';
+                }
             }
-            return 'CC';
         }
-
-        if ($method instanceof BankAccount) {
-            return 'ACH';
-        }
+        catch (PaymentMethodError $e) {}
 
         return 'NONE';
     }
 
     /**
      * @param bool $backup
-     * @return \App\Billing\Contracts\ChargeableInterface
+     * @return \App\Billing\Contracts\ChargeableInterface|null
      */
-    public function getPaymentMethod($backup = false)
+    public function getPaymentMethod($backup = false): ?ChargeableInterface
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
         return $method;
@@ -763,12 +762,8 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             return (float) $this->fee_override;
         }
 
-        if ($this->defaultPayment) {
-            return $this->defaultPayment->getAllyPercentage();
-        }
-
-        if ($this->backupPayment) {
-            return $this->backupPayment->getAllyPercentage();
+        if ($payer = $this->primaryPayer) {
+            return $payer->getAllyPercentage();
         }
 
         // Default to CC fee
@@ -797,5 +792,22 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public function syncPayers(?iterable $payers) : bool
     {
         return ClientPayer::sync($this, $payers);
+    }
+
+    /**
+     * Get the client's service authorizations active on the 
+     * specified date.  Defaults to today.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     */
+    public function getActiveServiceAuths($date = null) : Collection
+    {
+        if (empty($date)) {
+            $date = Carbon::now();
+        }
+
+        return $this->serviceAuthorizations()
+            ->effectiveOn($date)
+            ->get();
     }
 }

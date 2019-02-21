@@ -86,6 +86,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'email',
+                        label: 'Email',
+                        sortable: true,
+                    },
+                    {
                         key: 'updated_at',
                         label: 'Last Updated',
                         sortable: true,
@@ -124,6 +129,7 @@
                     item.name = data.name;
                     item.npi_number = data.npi_number;
                     item.week_start = data.week_start;
+                    item.email = data.email;
                     item.address1 = data.address1,
                     item.address2 = data.address2,
                     item.city = data.city,

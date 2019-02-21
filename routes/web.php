@@ -95,7 +95,11 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
-
+    Route::get('contacts', 'Clients\ClientContactController@index');
+    Route::post('contacts', 'Clients\ClientContactController@store');
+    Route::patch('contacts/{clientContact}', 'Clients\ClientContactController@update');
+    Route::delete('contacts/{clientContact}', 'Clients\ClientContactController@destroy');
+    Route::patch('contacts/{clientContact}/priority', 'Clients\ClientContactController@raisePriority');
     Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
@@ -120,13 +124,15 @@ Route::group([
     Route::get('caregiver/deposits', 'Caregivers\DepositController@index')->name('caregiver.deposits');
     Route::get('caregiver/deposits/{deposit}/{view?}', 'Caregivers\DepositController@show')->name('caregiver.deposits.show');
 
-    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
-    Route::get('clocked-in', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
-    Route::get('clock-out', 'Caregivers\ShiftController@showClockOut')->name('clock_out');
-    Route::get('clock-out/{client_id}', 'Caregivers\ShiftController@showClockOutForClient')->name('clock_out_by_client');
-    Route::post('clock-out', 'Caregivers\ShiftController@clockOut');
-    Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
+    Route::get('clock-in/{schedule?}', 'Caregivers\ClockInController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ClockInController@clockIn')->name('clock_in');
+    Route::get('clocked-in', 'Caregivers\ClockInController@clockedIn')->name('clocked_in');
+
+    Route::get('clock-out', 'Caregivers\ClockOutController@index')->name('clock_out');
+    Route::get('clock-out/{shift}', 'Caregivers\ClockOutController@show')->name('clock_out.show');
+    Route::post('clock-out/{shift}', 'Caregivers\ClockOutController@clockOut');
+
+    Route::get('shifts/{shift}', 'Caregivers\ShiftController@show')->name('caregivers.shift.show');
 
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
@@ -228,7 +234,11 @@ Route::group([
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
-    Route::patch('clients/{client}/other-contacts', 'Business\ClientController@updateContacts');
+    Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
+    Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
+    Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
+    Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
+    Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
@@ -268,6 +278,8 @@ Route::group([
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
+    Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
+    Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
@@ -315,12 +327,18 @@ Route::group([
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
+    Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/client-stats', 'Business\Report\ClientStatsController@index')->name('reports.client_stats');
+    Route::post('reports/client-stats', 'Business\Report\ClientStatsController@reportData')->name('reports.client_stats.data');
+    Route::get('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@index')->name('reports.caregiver_stats');
+    Route::post('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@reportData')->name('reports.caregiver_stats.data');
+
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
-
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -425,10 +443,14 @@ Route::group([
     Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
     Route::post('businesses/{business}/hold', 'Admin\BusinessController@addHold');
     Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
-    Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::put('businesses/{business}/contact-info', 'Admin\BusinessController@updateContactInfo');
     Route::patch('businesses/{business}/sms-settings', 'Admin\BusinessController@updateSmsSettings');
+    Route::get('chains', "Admin\BusinessChainController@index")->name("businesses.chains");
+    Route::get('chains/{chain}', "Admin\BusinessChainController@show")->name("businesses.chains.show");
+    Route::patch('chains/{chain}', "Admin\BusinessChainController@update")->name("businesses.chains.update");
+    Route::resource('chains/{chain}/users', 'Admin\OfficeUserController');
+
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');

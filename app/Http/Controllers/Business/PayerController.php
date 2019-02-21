@@ -55,6 +55,9 @@ class PayerController extends BaseController
             if (! $payer = Payer::create($data)) {
                 throw new \Exception();
             }
+
+            // Force payers to provider pay for now
+            $payer->setProviderPay();
     
             if (! $payer->syncRates($data['rates'] ?? [])) {
                 throw new \Exception();

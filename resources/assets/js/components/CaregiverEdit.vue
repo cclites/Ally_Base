@@ -38,6 +38,26 @@
                         </b-form-input>
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
+                    <b-form-group label="Certification" label-for="certification" label-class="required">
+                        <b-form-select
+                                id="certification"
+                                name="certification"
+                                v-model="form.certification"
+                        >
+                            <option value="">None</option>
+                            <option value="CNA">CNA</option>
+                            <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
+                        </b-form-select>
+                        <input-help :form="form" field="certification" text="Select the caregiver's certification / license."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Caregiver Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                     </b-form-group>
@@ -55,6 +75,12 @@
                         >
                         </b-form-input>
                         <input-help :form="form" field="medicaid_id" text="The caregiver ID, or license number, for Medicaid"></input-help>
+                    </b-form-group>
+                    <b-form-group label="Orientation Date">
+                        <date-picker id="orientation_date" v-model="form.orientation_date"></date-picker>
+                    </b-form-group>
+                    <b-form-group label="Application Date">
+                        <date-picker id="application_date" v-model="form.application_date"></date-picker>
                     </b-form-group>
                     <b-form-group>
                         <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver"></business-referral-source-select>
@@ -103,11 +129,22 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
-                    <b-form-group label="Caregiver Status">
-                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                    <b-form-group label="Confirmed Service Hours">
+                        <div class="mb-2"><strong>Lifetime: </strong>{{ caregiver.hours_total.toLocaleString() }}</div>
+                        <div class="mb-2"><strong>Last 90 Days: </strong>{{ caregiver.hours_last_90.toLocaleString() }}</div>
+                        <div class="mb-2"><strong>Last 30 Days: </strong>{{ caregiver.hours_last_30.toLocaleString() }}</div>
+                    </b-form-group>
+                    <b-form-group label="Is the caregiver okay with smoking?" label-for="smoking_okay">
+                        <b-form-select id="smoking_okay" v-model="form.smoking_okay">
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
                         </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
+                        <input-help :form="form" field="smoking_okay" text="" />
+                    </b-form-group>
+                    <b-form-group label="Acceptable Pets:">
+                        <b-form-checkbox v-model="form.pets_dogs_okay" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_birds_okay" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -137,6 +174,7 @@
 </template>
 
 <script>
+    import FormatsDates from '../mixins/FormatsDates';
     import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
     import { mapGetters } from 'vuex'
 
@@ -145,6 +183,8 @@
             'caregiver': {},
         },
 
+        mixins: [FormatsDates],
+        
         components: {
           DeactivateCaregiverModal
         },
@@ -157,14 +197,21 @@
                     email: this.caregiver.email,
                     username: this.caregiver.username,
                     title: this.caregiver.title,
+                    certification: this.caregiver.certification ? this.caregiver.certification : '',
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
                     ssn: this.caregiver.masked_ssn,
                     gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
+                    orientation_date: this.caregiver.orientation_date ? this.formatDate(this.caregiver.orientation_date) : '',
+                    application_date: this.caregiver.application_date ? this.formatDate(this.caregiver.application_date) : '',
                     referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
                     status_alias_id: this.caregiver.status_alias_id || '',
+                    smoking_okay: this.caregiver.smoking_okay,
+                    pets_dogs_okay: this.caregiver.pets_dogs_okay,
+                    pets_cats_okay: this.caregiver.pets_cats_okay,
+                    pets_birds_okay: this.caregiver.pets_birds_okay,
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

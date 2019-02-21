@@ -37,6 +37,24 @@ class MigrateExistingShiftsToNewStructure extends Migration
 
 
         ////////////////////////////////////
+        //// Migrate existing schedules
+        ////////////////////////////////////
+
+        $count = 0;
+        \App\Schedule::with(['client', 'client.primaryPayer'])->chunk(1000, function($schedules) {
+            $schedules->each(function (\App\Schedule $schedule) use (&$count) {
+                if ($schedule->caregiver_rate !== null && $schedule->client) {
+                    $rateWithoutFee = add($schedule->caregiver_rate, $schedule->provider_fee);
+                    $rate = add($rateWithoutFee, $schedule->client->getAllyFee($rateWithoutFee));
+                    $count += \DB::table('schedules')->where('id', $schedule->id)->update([
+                        'client_rate' => $rate,
+                    ]);
+                }
+            });
+        });
+
+
+        ////////////////////////////////////
         //// Migrate polymorphic relations
         ////////////////////////////////////
 

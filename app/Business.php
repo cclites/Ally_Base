@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $name
+ * @property string $short_name
  * @property string $type
  * @property int|null $bank_account_id
  * @property int|null $active
@@ -66,7 +67,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $medicaid_npi_number
  * @property string|null $medicaid_npi_taxonomy
  * @property string|null $outgoing_sms_number
- * @property string|null $multi_location_registry
  * @property string $shift_rounding_method
  * @property string|null $pay_cycle
  * @property string|null $last_day_of_cycle

@@ -39,7 +39,7 @@ class ClockInTest extends TestCase
     public function test_a_schedule_can_be_clocked_in_to()
     {
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setManual()->clockIn($this->schedule);
+        $shift = $clockIn->clockIn($this->schedule);
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertEquals(Shift::CLOCKED_IN, $shift->status);
@@ -51,7 +51,7 @@ class ClockInTest extends TestCase
     public function test_checked_in_method_defaults_to_geolocation()
     {
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setManual()->clockIn($this->schedule);
+        $shift = $clockIn->clockIn($this->schedule);
 
         $this->assertEquals(Shift::METHOD_GEOLOCATION, $shift->checked_in_method);
     }
@@ -112,8 +112,7 @@ class ClockInTest extends TestCase
         $this->client->addresses()->save($address);
 
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setManual()
-            ->setGeocode($latitude + 1, $longitude + 1)
+        $shift = $clockIn->setGeocode($latitude + 1, $longitude + 1)
             ->clockIn($this->schedule);
 
         $this->assertEquals(false, $shift->checked_in_verified);
@@ -123,7 +122,7 @@ class ClockInTest extends TestCase
     public function test_a_shift_can_be_clocked_in_to_without_a_schedule()
     {
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setManual()->clockInWithoutSchedule($this->business, $this->client);
+        $shift = $clockIn->clockInWithoutSchedule($this->client);
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertFalse($shift->isVerified());
@@ -136,7 +135,7 @@ class ClockInTest extends TestCase
         $this->client->phoneNumbers()->save($phone);
 
         $clockIn = new ClockIn($this->caregiver);
-        $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->business, $this->client);
+        $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->client);
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertTrue($shift->checked_in_verified);

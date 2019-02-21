@@ -8,6 +8,8 @@ use App\Shifts\CostCalculator;
 
 trait HasAllyFeeTrait
 {
+    private $allyPctCache;
+
     /**
      * Get the ally fee in dollars for a specific payment amount
      *
@@ -17,9 +19,9 @@ trait HasAllyFeeTrait
      */
     public function getAllyFee($paymentAmount, bool $allyFeeIncluded = false)
     {
-        $allyPct = $this->getAllyPercentage();
+        $allyPct = $this->getCachedAllyPercentage();
         $amount = $allyFeeIncluded
-            ? divide($paymentAmount, multiply(add(1, $allyPct), $allyPct))
+            ? multiply(divide($paymentAmount, add(1, $allyPct)), $allyPct)
             : multiply($paymentAmount, $allyPct);
 
         return (float) round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
@@ -36,5 +38,10 @@ trait HasAllyFeeTrait
     {
         $amount = add($caregiverRate, $providerFee, CostCalculator::DECIMAL_PLACES);
         return $this->getAllyFee($amount, false);
+    }
+
+    private function getCachedAllyPercentage()
+    {
+        return $this->allyPctCache ?? $this->allyPctCache = $this->getAllyPercentage();
     }
 }

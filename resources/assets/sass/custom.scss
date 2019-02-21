@@ -123,10 +123,17 @@ label.custom-checkbox {
 }
 
 .table-fit-more {
-  .money-input { width: 85px!important }
-  .date-input { max-width: 120px!important }
+  .money-input {
+    max-width: 85px;
+  }
+  .date-input {
+    min-width: 95px !important;
+    max-width: 120px;
+  }
   th { font-size: 13px; font-weight: 500; }
-  .form-control { min-width: 80px; }
+  .form-control {
+    min-width: 80px;
+  }
   select.form-control { min-width: 120px; }
 }
 
