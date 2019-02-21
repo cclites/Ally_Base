@@ -53,7 +53,7 @@
                 <b-row>
                     <b-col>
                         <div class="h4">Top three activities performed by each Caregiver:</div>
-                        <b-table :items="caregiverTopActivities" :fields="activityFields">
+                        <b-table :items="caregiverTopActivities" :fields="activityFields" sort-by="name">
                         </b-table>
                     </b-col>
                 </b-row>
