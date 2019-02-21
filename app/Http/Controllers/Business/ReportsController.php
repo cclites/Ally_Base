@@ -785,7 +785,9 @@ class ReportsController extends BaseController
      */
     public function caregiverAnniversary()
     {
-        $users = Caregiver::forRequestedBusinesses()->get();
+        $users = Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
+            return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
+        });
         return view('business.reports.caregiver_anniversary', compact('users'));
     }
 

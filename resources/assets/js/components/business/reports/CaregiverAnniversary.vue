@@ -40,6 +40,7 @@
                         label: 'First date referred',
                         sortable: true,
                         shouldShow: true,
+                        formatter: x => { return this.formatDateFromUTC(x) }
                     },
                 ],
             };
