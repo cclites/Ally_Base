@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Business;
 use App\Caregiver;
 use App\Client;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Import;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Data\ScheduledRates;
 use App\Shift;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
+use App\Shifts\ShiftFactory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImportController extends Controller
 {
@@ -62,23 +67,42 @@ class ShiftImportController extends Controller
             'shifts.*.hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
+
+
         /** @var Shift[]|\Illuminate\Support\Collection $shifts */
         $shifts = collect();
         foreach($request->shifts as $data) {
-            $data = array_only($data, [
-               'business_id',
-               'client_id',
-               'caregiver_id',
-               'checked_in_time',
-               'checked_out_time',
-               'caregiver_rate',
-               'provider_fee',
-               'mileage',
-               'other_expenses',
-               'hours_type',
-            ]);
-            $shift = new Shift($data);
-            $shift->status = Shift::WAITING_FOR_AUTHORIZATION;
+
+            $client = Client::find($data['client_id']);
+            $caregiver = Caregiver::find($data['caregiver_id']);
+            $clockIn = new ClockData(Shift::METHOD_IMPORTED, $data['checked_in_time']);
+            $clockOut = new ClockData(Shift::METHOD_IMPORTED, $data['checked_out_time']);
+            $totalRates = add($data['caregiver_rate'], $data['provider_fee']);
+            $allyFee = $client->getAllyFee($totalRates, false);
+            $clientRate = add($totalRates, $allyFee);
+            $rates = new ScheduledRates(
+                $clientRate,
+                $data['caregiver_rate'],
+                false, // fixed rates not yet supported
+                $data['hours_type']
+            );
+
+            $factory = ShiftFactory::withoutSchedule(
+                $client,
+                $caregiver,
+                $clockIn,
+                $clockOut,
+                $rates,
+                Shift::WAITING_FOR_AUTHORIZATION
+            );
+
+            $clockOutData = new CaregiverClockoutData(
+                $clockOut,
+                $data['mileage'] ?? 0.0,
+                $data['other_expenses'] ?? 0.0
+            );
+
+            $shift = $factory->make($clockOutData);
             $shifts->push($shift);
         }
 
@@ -135,6 +159,7 @@ class ShiftImportController extends Controller
             'user_id' => \Auth::id()
         ]);
         foreach($shifts as $shift) {
+            event(new ShiftFlagsCouldChange($shift));
             $import->shifts()->save($shift);
         }
         \DB::commit();

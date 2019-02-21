@@ -18,6 +18,5 @@
             :autoload="{{ (int) request('autoload', 1) }}"
             :activities="{{ $activities }}">
         </business-shift-report>
-        {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}
     @endif
 @endsection

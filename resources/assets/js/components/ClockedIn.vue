@@ -21,6 +21,11 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col md="12" class="mt-3">
+                <adjoining-caregivers-card :client="shift.client_id" :auto-load="true" :shift="shift.id"></adjoining-caregivers-card>
+            </b-col>
+        </b-row>
     </div>
 </template>
 
@@ -33,6 +38,7 @@
             'carePlan': Object,
             'careDetails': Object,
             'schedule': Object,
+            'shift': Object,
         },
     }
 </script>

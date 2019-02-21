@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasPaymentHold;
 use App\Traits\BelongsToBusinesses;
@@ -9,6 +11,7 @@ use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -38,10 +41,10 @@ use Packages\MetaData\HasMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \App\Admin $admin
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Caregiver $caregiver
  * @property-read \App\Client $client
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $dueTasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\EmergencyContact[] $emergencyContacts
@@ -77,6 +80,8 @@ use Packages\MetaData\HasMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUsername($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User withMeta()
  * @mixin \Eloquent
+ * @property-read mixed $masked_name
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface
 {
@@ -110,18 +115,20 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
 
     protected $appends = ['name', 'nameLastFirst'];
 
+    protected $dates = ['reactivation_date'];
+
     ///////////////////////////////////////////
     /// Name Concatenation Methods
     ///////////////////////////////////////////
 
-    public function name()
+    public function name(): string
     {
-        return $this->firstname . ' ' . $this->lastname;
+        return trim($this->firstname . ' ' . $this->lastname);
     }
 
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
-        return $this->lastname . ', ' . $this->firstname;
+        return trim($this->lastname . ', ' . $this->firstname);
     }
 
     ////////////////////////////////////
@@ -217,13 +224,13 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function getMaskedNameAttribute()
     {
         $first = $this->firstname;
-        if (strlen($first) > 1) {
-            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        if (mb_strlen($first) > 1) {
+            $first = mb_substr($first, 0, 2) . str_repeat('*', mb_strlen($first) - 2);
         }
 
         $last = $this->lastname;
-        if (strlen($last) > 1) {
-            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        if (mb_strlen($last) > 1) {
+            $last = mb_substr($last, 0, 2) . str_repeat('*', mb_strlen($last) - 2);
         }
         return "$first $last";
     }
@@ -245,12 +252,25 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             $phone = $this->phoneNumbers->first();
         }
 
-        return empty($phone) ? '' : $phone->number;
+        return empty($phone) ? '' : (string) $phone->number;
     }
 
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Get the age of a user based on the date of birth
+     *
+     * @return int|null
+     */
+    public function getAge()
+    {
+        if (!is_null($this->date_of_birth)) {
+            return now()->diffInYears(Carbon::parse($this->date_of_birth));
+        }
+        return null;
+    }
 
     /**
      * Return the fully-qualified name of the role class

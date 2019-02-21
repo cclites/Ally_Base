@@ -18,7 +18,7 @@ class DurationCalculator
     function getDuration(Shift $shift)
     {
         $method = $this->getRoundingMethod($shift);
-        return $this->$method($shift);
+        return (float) $this->$method($shift);
     }
 
     function getRoundingMethod(Shift $shift)

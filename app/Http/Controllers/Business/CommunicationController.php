@@ -149,17 +149,20 @@ class CommunicationController extends Controller
     /**
      * Get a list of the businesses sms threads.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function threadIndex()
+    public function threadIndex(Request $request)
     {
         $threads = SmsThread::forRequestedBusinesses()
+            ->betweenDates($request->start_date, $request->end_date)
+            ->withReplies($request->reply_only == 1 ? true : false)
             ->withCount(['recipients', 'replies'])
             ->latest()
             ->get();
 
-        if (request()->wantsJson()) {
+        if (request()->filled('json') && request()->wantsJson()) {
             return response()->json($threads);
         }
 
@@ -176,6 +179,8 @@ class CommunicationController extends Controller
     {
         $this->authorize('read', $thread);
         $thread->load(['recipients', 'replies']);
+
+        $thread->unreadReplies()->update(['read_at' => Carbon::now()]);
 
         if (request()->wantsJson()) {
             return response()->json($thread);

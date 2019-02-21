@@ -121,4 +121,26 @@ class ScheduleConverterTest extends TestCase
         $this->assertEquals(Shift::METHOD_CONVERTED, $convertedShifts[0]->checked_out_method);
     }
 
+    /** @test */
+    public function only_schedules_with_ok_status_should_be_converted()
+    {
+        Carbon::setTestNow(Carbon::parse('2019-02-21 12:00:00'));
+
+        $schedule = factory(Schedule::class)->create([
+            'starts_at' => '2019-02-20 12:00:00',
+            'business_id' => $this->business->id,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'status' => Schedule::OPEN_SHIFT,
+        ]);
+
+        $convertedShifts = $this->scheduleConverter->convertAllThisWeek();
+        $this->assertCount(0, $convertedShifts);
+
+        $schedule->update(['status' => Schedule::OK]);
+        $this->assertEquals(Schedule::OK, $schedule->fresh()->status);
+
+        $convertedShifts = $this->scheduleConverter->convertAllThisWeek();
+        $this->assertEquals(1, count($convertedShifts));
+    }
 }

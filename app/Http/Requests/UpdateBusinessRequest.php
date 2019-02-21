@@ -58,6 +58,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'auto_append_hours' => 'required|bool',
             'auto_confirm_unmodified_shifts' => 'required|bool',
             'auto_confirm_verified_shifts' => 'required|bool',
+            'enable_client_onboarding' => 'required|bool',
         ];
     }
 

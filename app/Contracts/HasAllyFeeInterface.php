@@ -17,9 +17,10 @@ interface HasAllyFeeInterface
      * Get the ally fee in dollars for a specific payment amount
      *
      * @param $paymentAmount
+     * @param bool $allyFeeIncluded
      * @return float
      */
-    public function getAllyFee($paymentAmount);
+    public function getAllyFee($paymentAmount, bool $allyFeeIncluded = false);
 
     /**
      * Get the rounded ally hourly rate

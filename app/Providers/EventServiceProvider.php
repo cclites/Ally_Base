@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\BusinessChainCreated;
+use App\Events\ClientCreated;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
 use App\Events\ShiftCreated;
@@ -11,6 +13,8 @@ use App\Events\UnverifiedShiftCreated;
 use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
+use App\Listeners\CreateDefaultClientPayer;
+use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
@@ -22,6 +26,10 @@ use App\Events\TimesheetCreated;
 use App\Listeners\CreateTimesheetException;
 use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
+use App\Events\ShiftFlagsCouldChange;
+use App\Listeners\GenerateShiftFlags;
+use App\Events\ShiftDeleted;
+use App\Listeners\RecalculateDuplicateShiftFlags;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -31,6 +39,12 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        BusinessChainCreated::class => [
+            CreateDefaultService::class,
+        ],
+        ClientCreated::class => [
+            CreateDefaultClientPayer::class,
+        ],
         TaskAssigned::class => [
 //            SendAssignedTaskEmail::class,
         ],
@@ -59,6 +73,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         TimesheetCreated::class => [
             CreateTimesheetException::class,
+        ],
+        ShiftFlagsCouldChange::class => [
+            GenerateShiftFlags::class,
+        ],
+        ShiftDeleted::class => [
+            RecalculateDuplicateShiftFlags::class,
         ],
     ];
 

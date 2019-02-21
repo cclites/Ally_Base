@@ -18,6 +18,9 @@ class ShiftPolicy extends BasePolicy
         if ($this->isClient()) {
             return $shift->client_id == $user->id;
         }
+        if ($this->isCaregiver()) {
+            return $shift->caregiver_id == $user->id;
+        }
 
         return $this->businessCheck($user, $shift);
     }

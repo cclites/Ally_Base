@@ -3,6 +3,7 @@ namespace App\Http\Requests;
 
 use App\Rules\Avatar;
 use App\Rules\ValidSSN;
+use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,13 +16,17 @@ class UpdateCaregiverRequest extends FormRequest
 
     public function rules()
     {
+        /** @var \App\Caregiver $caregiver */
+        $caregiver = $this->route('caregiver');
+        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => [
                 'required',
-                Rule::unique('users')->ignore($this->route('caregiver')->id ?? null, 'id'),
+                Rule::unique('users')->ignore($caregiver->id ?? null, 'id'),
             ],
             'date_of_birth' => 'nullable|date',
             'ssn' => [
@@ -30,12 +35,19 @@ class UpdateCaregiverRequest extends FormRequest
             ],
             'password' => 'nullable|confirmed',
             'title' => 'required|string|max:32',
+            'certification' => 'nullable|in:CNA,HHA,RN,LPN',
             'medicaid_id' => 'nullable|string|max:100',
             'gender' => 'nullable|in:M,F',
             'avatar' => [
                 'nullable',
                 new Avatar()
             ],
+            'referral_source_id' => 'nullable|exists:referral_sources,id',
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
+            'smoking_okay' => 'nullable|boolean',
+            'pets_dogs_okay' => 'nullable|boolean',
+            'pets_cats_okay' => 'nullable|boolean',
+            'pets_birds_okay' => 'nullable|boolean',
         ];
     }
 

@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shifts\ShiftStatusManager;
 use App\Shifts\AllyFeeCalculator;
+use App\Events\ShiftFlagsCouldChange;
 
 class UnconfirmedShiftsController extends Controller
 {
@@ -117,7 +118,7 @@ class UnconfirmedShiftsController extends Controller
 
         if ($shift->update($data)) {
             $shift->activities()->sync($request->input('activities', []));
-
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
 
@@ -150,21 +151,7 @@ class UnconfirmedShiftsController extends Controller
         // Load shift data into array before loading client info
         $data = $shift->toArray();
 
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
-
         $data += [
-            'checked_in_distance' => $checked_in_distance,
-            'checked_out_distance' => $checked_out_distance,
             'client_name' => $shift->client->name(),
             'caregiver_name' => $shift->caregiver->name(),
             'address' => optional($shift->address)->only(['latitude', 'longitude']),

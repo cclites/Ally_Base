@@ -16,6 +16,7 @@ class Form {
         this.handler = new AxiosResponseHandler();
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
+        this.alertOnSucess = true;
         this.errorMods = 0;
         this.hideErrors = [];
     }
@@ -83,9 +84,13 @@ class Form {
     /**
      * Reset the form fields.
      */
-    reset() {
+    reset(keepOriginalData = false) {
         for (let field in this.originalData) {
-            this[field] = '';
+            if (keepOriginalData) {
+                this[field] = this.originalData[field];
+            } else {
+                this[field] = '';
+            }
         }
 
         this.clearError();
@@ -149,7 +154,7 @@ class Form {
                 .then(response => {
                     console.log('Axios success');
                     this.handler = new AxiosResponseHandler();
-                    this.handler.handleResponse(response, this.alertOnResponse);
+                    this.handler.handleResponse(response, this.alertOnResponse && this.alertOnSuccess);
                     if (this.resetOnSuccess) this.reset();
                     resolve(response);
                 })
@@ -214,6 +219,21 @@ class Form {
             this.errorMods++;
         }
     }
+
+    /**
+     * Fill the orignal form fields with the data of
+     * the same name from the given object.
+     */
+    fill(newData, clearErrors = true) {
+        for (let field in this.originalData) {
+            this[field] = newData[field];
+        }
+
+        if (clearErrors) {
+            this.clearError();
+        }
+    }
+
 }
 
 export default Form;

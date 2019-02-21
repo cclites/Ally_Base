@@ -26,6 +26,8 @@ class UpdateClientCareDetailsRequest extends FormRequest
     public function rules()
     {
         return [
+            'height' => 'nullable|string',
+            'weight' => 'nullable|string',
             'lives_alone' => 'nullable|boolean',
             'pets' => ['present', 'array', Rule::in(CareDetails::PETS)],
             'smoker' => 'nullable|boolean',
@@ -35,6 +37,9 @@ class UpdateClientCareDetailsRequest extends FormRequest
             'can_provide_direction' => 'nullable|boolean',
             'assist_medications' => 'nullable|boolean',
             'medication_overseer' => 'nullable|string',
+            'allergies' => 'nullable|string',
+            'pharmacy_name' => 'nullable|string',
+            'pharmacy_number' => 'nullable|string',
             'safety_measures' => ['present', 'array', Rule::in(CareDetails::SAFETY)],
             'safety_instructions' => 'nullable|string',
             'mobility' => ['present', 'array', Rule::in(CareDetails::MOBILITY)],
