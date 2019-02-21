@@ -4,19 +4,19 @@
             <b-form-input type="text" v-model="form.nickname" :readonly="readonly" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this card."></input-help>
         </b-form-group>
-        <b-form-group label="Name on Card" label-for="name_on_card">
+        <b-form-group label="Name on Card" label-for="name_on_card" label-class="required">
             <b-form-input type="text" v-model="form.name_on_card" :readonly="readonly" />
             <input-help :form="form" field="name_on_card" text="Please enter your name, as it appears on the card."></input-help>
         </b-form-group>
         <b-row>
             <b-col lg="6">
-                <b-form-group label="Card Number" label-for="number">
+                <b-form-group label="Card Number" label-for="number" label-class="required">
                     <b-form-input type="text" autocomplete="off" v-model="form.number" :readonly="readonly" />
                     <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
                 </b-form-group>
             </b-col>
             <b-col lg="6" >
-                <b-form-group label="Confirm Card Number" label-for="number_confirmation">
+                <b-form-group label="Confirm Card Number" label-for="number_confirmation" label-class="required">
                     <b-form-input type="text" autocomplete="off" v-model="form.number_confirmation" :readonly="readonly" />
                     <input-help :form="form" field="number_confirmation" text="Re-enter your credit card number"></input-help>
                 </b-form-group>
@@ -24,13 +24,13 @@
         </b-row>
         <b-row>
             <b-col lg="5">
-                <b-form-group label="CVV" label-for="cvv">
+                <b-form-group label="CVV" label-for="cvv" label-class="required">
                     <b-form-input type="text" autocomplete="off" v-model="form.cvv" :readonly="readonly" />
                     <input-help :form="form" field="cvv" text="The code on the back of the card"></input-help>
                 </b-form-group>
             </b-col>
         </b-row>
-        <b-form-group label="Card Expiration" label-for="">
+        <b-form-group label="Card Expiration" label-for="" label-class="required">
             <b-row>
                 <b-col lg="6">
                     <b-form-select v-model="form.expiration_month" :options="months" :disabled="readonly" />

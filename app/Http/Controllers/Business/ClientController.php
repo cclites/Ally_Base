@@ -23,6 +23,7 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Notifications\WelcomeEmail;
 
 class ClientController extends BaseController
 {
@@ -206,6 +207,7 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
+        $client->setup_url = $client->setup_url;
 
         $lastStatusDate = $client->agreementStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
@@ -444,5 +446,21 @@ class ClientController extends BaseController
 
         $client->update($data);
         return new SuccessResponse('The default rates have been saved.');
+    }
+
+    /**
+     * Send welcome email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeEmail(Client $client)
+    {
+        $client->update(['welcome_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new WelcomeEmail($client));
+
+        // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
+        return new SuccessResponse('A welcome email was dispatched to the Client.', null, '.');
     }
 }

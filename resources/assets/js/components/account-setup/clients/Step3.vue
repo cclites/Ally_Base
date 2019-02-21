@@ -11,7 +11,7 @@
                     >
                         <b-row>
                             <b-col xs="12" lg="6">
-                                <b-form-group label="Payment Method" label-for="type">
+                                <b-form-group label="Payment Method" label-for="type" label-class="required">
                                     <b-form-select
                                         id="type"
                                         name="type"
@@ -85,9 +85,11 @@
 
         methods: {
             submit() {
-                let form = this.$refs.creditCardForm.form;
-                if (this.type === 'bank_account') {
+                let form = {};
+                if (this.type == 'bank_account') {
                     form = this.$refs.bankAccountForm.form;
+                } else {
+                    form = this.$refs.creditCardForm.form;
                 }
 
                 this.busy = true;

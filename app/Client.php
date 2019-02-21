@@ -499,6 +499,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
     }
 
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
+    {
+        return route('setup.clients', ['token' => $this->getEncryptedKey()]);    
+    }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////

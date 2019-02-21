@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Send Welcome Email" v-model="showModal" size="lg">
+    <b-modal title="Send Welcome Email" v-model="showModal">
         <b-container fluid>
             <b-row>
                 <b-col sm="12">

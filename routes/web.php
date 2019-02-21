@@ -52,7 +52,6 @@ Route::post('/account-setup/clients/{token}/step2', 'ClientSetupController@step2
 Route::post('/account-setup/clients/{token}/step3', 'ClientSetupController@step3');
 Route::get('/account-setup/clients/{token}/terms', 'ClientSetupController@terms');
 
-
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
 
@@ -239,6 +238,7 @@ Route::group([
     Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
     Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
     Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
+    Route::post('/clients/{client}/welcome-email', 'Business\ClientController@welcomeEmail');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

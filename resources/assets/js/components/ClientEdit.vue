@@ -345,48 +345,62 @@
                 <b-col lg="12">
                     <hr />
                 </b-col>
-                <b-col lg="8">
-                    <b-row>
-                        <b-col lg="6" sm="12">
-                            <b-form-group label="Ally Client Agreement Status" label-for="agreement_status">
-                                <b-form-select
-                                        id="agreement_status"
-                                        name="agreement_status"
-                                        v-model="form.agreement_status"
-                                        :disabled="form.agreement_status == 'electronic'"
-                                >
-                                    <option value="">--Please Select--</option>
-                                    <option v-if="hiddenOnboardStatuses[form.agreement_status]" :value="form.agreement_status">{{ hiddenOnboardStatuses[form.agreement_status] }}</option>
-                                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="agreement_status" :text="onboardStatusText"></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="6" sm="12">
-                            <b-form-group v-if="client.agreement_status == 'needs_agreement'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <br>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboarding_step < 6">
-                                <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
-                                <br>
-                                <b-button @click="startOnboarding" variant="info" size="sm">Start Client Onboarding</b-button>
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && form.agreement_status=='needs_agreement'">
-                        <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
-                        <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
+                <b-col lg="6">
+                    <b-form-group label="Ally Client Agreement Status" label-for="agreement_status">
+                        <b-form-select
+                                id="agreement_status"
+                                name="agreement_status"
+                                v-model="form.agreement_status"
+                                :disabled="form.agreement_status == 'electronic'"
+                        >
+                            <option value="">--Please Select--</option>
+                            <option v-if="hiddenOnboardStatuses[form.agreement_status]" :value="form.agreement_status">{{ hiddenOnboardStatuses[form.agreement_status] }}</option>
+                            <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="agreement_status" :text="onboardStatusText"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <div class="mb-3">
+                        <div>
+                            <label for="agreement_status" class="col-form-label pt-0">Account Setup Status: 
+                                <span v-if="! client.setup_status" class="text-danger">Not Started</span>
+                                <span v-if="['accepted_terms', 'created_account'].includes(client.setup_status)" class="text-warning">In Progress</span>
+                                <span v-if="client.setup_status == 'added_payment'" class="text-success">Complete</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span class="mr-2"><i :class="setupCheckClass('accepted_terms')" aria-hidden="true"></i> Agreed to Terms</span>
+                            <span class="mr-2"><i :class="setupCheckClass('created_account')" aria-hidden="true"></i> Created Login</span>
+                            <span class="mr-2"><i :class="setupCheckClass('added_payment')" aria-hidden="true"></i> Added Payment Method</span>
+                        </div>
+                    </div>
+                    <b-form-group label="Account Setup URL">
+                        <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
+                        <input-help :form="form" text="The URL the client can use to setup their account."></input-help>
+                    </b-form-group>
+
+                    <div>
+                        <label for="agreement_status" class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
+                            <span>{{ client.user.welcome_email_sent_at ? formatDateTimeFromUTC(client.user.welcome_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+                    
+                    <b-button variant="info" @click="welcomeEmailModal = true">
+                        Send Welcome Email
+                    </b-button>
+
+                    <b-button variant="info" @click="sendTrainingEmail()">
+                        Send Training Email
+                    </b-button>
+                    
+                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">
+                        Start Client Onboarding
+                    </b-button>
                 </b-col>
             </b-row>
             <b-row>
-                <b-col lg="12">
+                <b-col lg="12" class="mt-4">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
@@ -411,16 +425,6 @@
 
         <!-- <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal> -->
 
-        <!-- Send client agreement confirmation modal -->
-        <confirm-modal ref="confirmSendAgreement"
-            title="Send Client Agreement"
-            yesButton="Send Agreement"
-        >
-            <div class="mb-3">
-                <strong>Send Client Agreement Email to {{ client.email }}?</strong>
-            </div>
-            <p>When you send this email, the user will be instructed to click on a private link to confirm their information and reset their password.</p>
-        </confirm-modal>
         <business-referral-source-modal
             @saved="savedReferralSource"
             v-model="showReferralModal"
@@ -434,6 +438,10 @@
             Contact Ally support to configure this feature.
         </b-modal>
 
+        <send-welcome-email-modal v-model="welcomeEmailModal"
+            :user='client'
+            :url="`/business/clients/${client.id}/welcome-email`"
+        ></send-welcome-email-modal>
     </b-card>
 </template>
 
@@ -448,13 +456,11 @@
     import AuthUser from '../mixins/AuthUser';
 
     window.croppie = require('croppie');
-    import ConfirmationModal from "./modals/ConfirmationModal";
 
     export default {
         props: {
             'client': {},
             'lastStatusDate' : {},
-            'confirmUrl': {},
             'referralsources': {},
             salesPeople: {
                 type: Array,
@@ -468,7 +474,6 @@
             BusinessLocationFormGroup,
             DatePicker,
             BusinessLocationSelect,
-            ConfirmationModal,
             DeactivateClientModal,
             DischargeSummaryModal
         },
@@ -527,7 +532,8 @@
                 sendEmailModal: false,
                 statusAliases: [],
                 localLastStatusDate: null,
-                onboardingWarning: false
+                onboardingWarning: false,
+                welcomeEmailModal: false,
             }
         },
 
@@ -539,6 +545,23 @@
         },
 
         methods: {
+            setupCheckClass(step) {
+                let check = false;
+                switch (step) {
+                    case 'accepted_terms':
+                        check = ['accepted_terms', 'created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'created_account':
+                        check = ['created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'added_payment':
+                        check = ['added_payment'].includes(this.client.setup_status);
+                        break;
+                }
+
+                return check ? 'fa fa-check-square-o' : 'fa fa-square-o';
+            },
+
             savedReferralSource(data) {
                 if(data) {
                     this.showReferralModal = false;
@@ -579,16 +602,6 @@
                     this.client.agreement_status = this.form.agreement_status;
                     this.localLastStatusDate = moment.utc().format();
                 }
-            },
-
-            sendConfirmation() {
-                this.$refs.confirmSendAgreement.confirm(() => {
-                    let form = new Form();
-                    form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
-                        .then((response) => {
-                            this.localLastStatusDate = moment.utc().format();
-                        });
-                })
             },
 
             startOnboarding() {

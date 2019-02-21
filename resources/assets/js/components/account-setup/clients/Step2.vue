@@ -16,7 +16,7 @@
                         </b-row>
                         <b-row>
                             <b-col>
-                                <b-form-group label="Username" label-for="username">
+                                <b-form-group label="Username" label-for="username" label-class="required">
                                     <b-form-input
                                             id="username"
                                             name="username"

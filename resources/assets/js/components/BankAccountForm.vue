@@ -1,16 +1,21 @@
 <template>
     <form @submit.prevent="submit()" @keydown="formKeyDown($event)">
-        <b-form-group label="Nickname" label-for="nickname">
+        <b-form-group label="Nickname" label-for="nickname" label-class="required">
             <b-form-input type="text" v-model="form.nickname" :readonly="readonly" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this account."></input-help>
         </b-form-group>
-        <b-form-group label="Name on Account" label-for="name_on_account">
-            <b-form-input type="text" v-model="form.name_on_account" :readonly="readonly" />
+        <b-form-group label="Name on Account" label-for="name_on_account" label-class="required">
+            <b-form-input type="text"
+                id="name_on_account"
+                name="name_on_account"
+                v-model="form.name_on_account"
+                :readonly="readonly" 
+            />
             <input-help :form="form" field="name_on_account" text="Please enter your name, as it appears on the account."></input-help>
         </b-form-group>
         <b-row>
             <b-col lg="6">
-                <b-form-group label="Routing Number" label-for="routing_number">
+                <b-form-group label="Routing Number" label-for="routing_number" label-class="required">
                     <b-form-input type="text"
                             autocomplete="off"
                             v-model="form.routing_number"
@@ -23,7 +28,7 @@
                 </b-form-group>
             </b-col>
             <b-col lg="6">
-                <b-form-group label="Confirm Routing Number" label-for="routing_number_confirmation">
+                <b-form-group label="Confirm Routing Number" label-for="routing_number_confirmation" label-class="required">
                     <b-form-input type="text"
                             autocomplete="off"
                             v-model="form.routing_number_confirmation"
@@ -38,7 +43,7 @@
         </b-row>
         <b-row>
             <b-col lg="6">
-                <b-form-group label="Account Number" label-for="account_number">
+                <b-form-group label="Account Number" label-for="account_number" label-class="required">
                     <b-form-input type="text"
                             autocomplete="off"
                             v-model="form.account_number"
@@ -51,7 +56,7 @@
                 </b-form-group>
             </b-col>
             <b-col lg="6">
-                <b-form-group label="Confirm Account Number" label-for="account_number_confirmation">
+                <b-form-group label="Confirm Account Number" label-for="account_number_confirmation" label-class="required">
                     <b-form-input type="text"
                             autocomplete="off"
                             v-model="form.account_number_confirmation"
@@ -66,7 +71,7 @@
         </b-row>
         <b-row>
             <b-col lg="6">
-                <b-form-group label="Account Type" label-for="account_type">
+                <b-form-group label="Account Type" label-for="account_type" label-class="required">
                     <b-form-select v-model="form.account_type" :disabled="readonly">
                         <option value="checking">Checking</option>
                         <option value="savings">Savings</option>
@@ -75,7 +80,7 @@
                 </b-form-group>
             </b-col>
             <b-col lg="6">
-                <b-form-group label="Holder Type" label-for="account_holder_type">
+                <b-form-group label="Holder Type" label-for="account_holder_type" label-class="required">
                     <b-form-select v-model="form.account_holder_type" :disabled="readonly">
                         <option value="personal">Personal</option>
                         <option value="business">Business</option>
@@ -163,8 +168,8 @@
                     routing_number_confirmation: '',
                     account_number: (account.last_four) ? '*****' + account.last_four : '',
                     account_number_confirmation: '',
-                    account_type: account.account_type,
-                    account_holder_type: account.account_holder_type,
+                    account_type: account.account_type ? account.account_type : 'checking',
+                    account_holder_type: account.account_holder_type ? account.account_holder_type : 'personal',
                     ignore_validation: false,
                 })
             },
