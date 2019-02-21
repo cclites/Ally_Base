@@ -6,12 +6,12 @@ interface PaymentAggregatorInterface
 {
 
     /**
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge();
 
     /**
-     * @return \App\Payment
+     * @return \App\Billing\Payment
      */
     public function getPayment();
 

@@ -39,10 +39,6 @@ class EmergencyContactController extends Controller
     {
         $contacts_count = EmergencyContact::where('user_id', $user->id)->count();
 
-        if ($contacts_count >= 3) {
-            return new ErrorResponse('403', 'Only 3 Emergency Contacts Allowed.');
-        }
-
         $data = $request->validate([
             'name' => 'required|string|max:80',
             'phone_number' => 'nullable|max:50',

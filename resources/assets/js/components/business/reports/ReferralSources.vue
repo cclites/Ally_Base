@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                    header="Referral Sources"
+                    :header="title"
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
@@ -11,7 +11,7 @@
                         <b-col md="2" class="float-left">
                             <b-form-select v-model="filter" class="mb-3">
                                 <option :value="null">-- All Referral Sources --</option>
-                                <option :value="report.organization" v-for="report in reports">{{ report.organization }}</option>
+                                <option :value="report.organization" v-for="report in reports" :key="report.id">{{ report.organization }}</option>
                             </b-form-select>
                         </b-col>
                         <b-col md="3" class="float-right">
@@ -45,7 +45,7 @@
                              :fields="fields"
                              :filter="filter">
                         <template slot="revenue"  scope="row">
-                            ${{ row.item.revenue }}
+                            {{ moneyFormat(row.item.revenue) }}
                         </template>
                         <template slot="actions"  scope="row">
                             <b-btn size="sm" :href="'#/' + row.item.id">
@@ -62,52 +62,15 @@
 <script>
     import Chart from 'chart.js';
     import FormatsListData from "../../../mixins/FormatsListData";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
-        mixins: [FormatsListData],
+        mixins: [FormatsListData, FormatsNumbers],
 
-        props: ['reports'],
+        props: ['reports', 'sourceType'],
 
         data() {
             return {
-                fields: [
-                    {
-                        key: 'organization',
-                        label: 'Organization',
-                        sortable: true
-                    },
-                    {
-                        key: 'name',
-                        label: 'Contact Name',
-                        sortable: true
-                    },
-                    {
-                        key: 'phone',
-                        label: 'Phone',
-                        sortable: true
-                    },
-                    {
-                        key: 'business_id',
-                        label: 'Location',
-                        sortable: true,
-                        formatter: this.showBusinessName,
-                    },
-                    {
-                        key: 'prospectscount',
-                        label: 'Number of Prospects',
-                        sortable: true
-                    },
-                    {
-                        key: 'clientscount',
-                        label: 'Number of Clients',
-                        sortable: true
-                    },
-                    {
-                        key: 'revenue',
-                        label: 'Revenue',
-                        sortable: true
-                    },
-                ],
                 show: true,
                 checked: true,
                 selected: null,
@@ -117,16 +80,24 @@
 
         mounted() {
             var  labels = [], datasets=[], revenue=[], graphColors = [], allCount=0, userCount=[];
-            this.items.forEach(function(item){
-                allCount +=(item.clientscount + item.prospectscount);
+            this.items.forEach(item => {
+                if (this.sourceType == 'client') {
+                    allCount +=(item.clients_count + item.prospects_count);
+                } else {
+                    allCount += item.caregivers_count;
+                }
             });
 
-            this.items.forEach(function(item){
+            this.items.forEach(item => {
                 labels.push(item.organization);
                 revenue.push(item.revenue);
-                userCount.push(Math.round(100/allCount*(item.clientscount + item.prospectscount)));
-                datasets.push(item.clientscount + item.prospectscount);
-
+                if (this.sourceType == 'client') {
+                    userCount.push(Math.round(100/allCount*(item.clients_count + item.prospects_count)));
+                    datasets.push(item.clients_count + item.prospects_count);
+                } else {
+                    userCount.push(Math.round(100 / (allCount * (item.caregivers_count))));
+                    datasets.push(item.caregivers_count);
+                }
                 var randomR = Math.floor((Math.random() * 200) + 100);
                 var randomG = Math.floor((Math.random() * 200) + 100);
                 var randomB = Math.floor((Math.random() * 100) + 100);
@@ -237,10 +208,10 @@
                         enabled: true,
                         mode: 'single',
                         callbacks: {
-                            label: function(tooltipItems, data) {
+                            label: (tooltipItems, data) => {
                                 var label = data.labels[tooltipItems.index];
                                 var dataset = data.datasets[0].data[tooltipItems.index];
-                                return  label + ' : $' + dataset;
+                                return  label + ' : ' + this.moneyFormat(dataset);
                             }
                         }
                     }
@@ -256,8 +227,9 @@
                         organization: report.organization,
                         name: report.contact_name,
                         phone: report.phone,
-                        prospectscount: report.prospect_count,
-                        clientscount: report.client_count,
+                        prospects_count: report.prospects_count | 0,
+                        clients_count: report.clients_count | 0,
+                        caregivers_count: report.caregivers_count | 0,
                         revenue: report.shift_total,
                         id: report.id,
                     }
@@ -265,10 +237,66 @@
 
                return  items;
             },
+
+            title() {
+                return _.upperFirst(this.sourceType) + ' Referral Sources'; 
+            },
+
+            fields() {
+                let columns = [
+                    {
+                        key: 'organization',
+                        label: 'Organization',
+                        sortable: true
+                    },
+                    {
+                        key: 'name',
+                        label: 'Contact Name',
+                        sortable: true
+                    },
+                    {
+                        key: 'phone',
+                        label: 'Phone',
+                        sortable: true
+                    },
+                    {
+                        key: 'business_id',
+                        label: 'Location',
+                        sortable: true,
+                        formatter: this.showBusinessName,
+                    },
+                ];
+
+                if (this.sourceType == 'client') {
+                    columns.push({
+                        key: 'prospects_count',
+                        label: 'Number of Prospects',
+                        sortable: true
+                    });
+                    columns.push({
+                        key: 'clients_count',
+                        label: 'Number of Clients',
+                        sortable: true
+                    });
+                } else {
+                    columns.push({
+                        key: 'caregivers_count',
+                        label: 'Number of Caregivers',
+                        sortable: true
+                    });
+                }
+
+                columns.push({
+                    key: 'revenue',
+                    label: 'Revenue',
+                    sortable: true
+                })
+
+                return columns;
+            },
         },
 
         methods: {
-
         }
     }
 </script>

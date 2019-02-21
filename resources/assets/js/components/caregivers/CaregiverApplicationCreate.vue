@@ -6,9 +6,9 @@
             </b-col>
         </b-row>
 
-        <b-card title="Caregiver Application">
+        <b-card title="Caregiver Availability">
 
-            <b-row>
+            <b-row class="mt-3">
 
                 <b-col lg="4">
                     <b-form-group label="First Name*">

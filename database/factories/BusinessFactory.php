@@ -6,7 +6,8 @@ use App\BusinessChain;
 
 $factory->define(Business::class, function(Faker $faker) {
     return [
-        'name' => $faker->unique()->company,
+        'name' => $name = $faker->unique()->company,
+        'short_name' => $name,
         'type' => 'Registry',
         'address1' => $faker->streetAddress,
         'address2' => null,

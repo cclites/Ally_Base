@@ -18,6 +18,10 @@
         </div>
         <div class="row">
             <div class="col-xs-12">
+                @if($schedules->count() === 0)
+                    <b>No scheduled shifts found.</b>
+                @endif
+
                 @php
                     $groups = [];
 
@@ -38,7 +42,7 @@
                         }, SORT_REGULAR, false);
                     @endphp
                     <h4 class="">
-                        @if ($group_by == 'none') 
+                        @if ($group_by == 'none')
                             {{ $scheduleGroup->first()->date }}
                         @elseif ($group_by == 'client')
                             {{ $scheduleGroup->first()->client->nameLastFirst }}
@@ -73,7 +77,7 @@
                         <tbody>
                             @foreach($scheduleGroup as $schedule)
                                 <tr>
-                                    @if ($group_by != 'none') 
+                                    @if ($group_by != 'none')
                                         <td>{{ $schedule->date }}</td>
                                     @endif
                                     @if ($group_by != 'client')

@@ -159,11 +159,14 @@ class ScheduleEvents implements Responsable
             return '#730073';
         }
 
+        if ($status == Schedule::CAREGIVER_NOSHOW) {
+            return '#63cbc7';
+        }
+        
         if (!$schedule->caregiver_id) {
             // Open shift
             return '#d9c01c';
         }
-
         return '#1c81d9';
     }
 

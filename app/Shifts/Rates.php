@@ -9,7 +9,7 @@ class Rates
     public $caregiver_rate;
 
     /**
-     * @var float
+     * @var float|null  Null meaning not yet calculated
      */
     public $provider_fee;
 
@@ -19,7 +19,7 @@ class Rates
     public $client_rate;
 
     /**
-     * @var float
+     * @var float|null  Null meaning not yet calculated
      */
     public $ally_fee;
 
@@ -50,9 +50,9 @@ class Rates
      */
     public function __construct(
         float $caregiver_rate,
-        float $provider_fee,
+        ?float $provider_fee,
         float $client_rate,
-        float $ally_fee,
+        ?float $ally_fee,
         bool $client_rate_includes_fee = false,
         bool $fixed_rates = false
     )

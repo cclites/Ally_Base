@@ -17,6 +17,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Polymorphic Relationship Map (string to Model)
+    | This keeps the database less coupled to the Model structure
+    |
+    | Note:  Invoiceable mappings are puled from the BaseInvoiceGenerator (first line)
+    | Hint:  You can use the maps_to.. and maps_from.. functions defined in functions.php
+    |--------------------------------------------------------------------------
+    */
+
+    'polymorphism' => \App\Billing\Generators\BaseInvoiceGenerator::$invoiceables + [
+        // User Types
+        'admins' => \App\Admin::class,
+        'caregivers' => \App\Caregiver::class,
+        'clients' => \App\Client::class,
+        'office_users' => \App\OfficeUser::class,
+
+        // Invoice Types
+        'business_invoices' => \App\Billing\BusinessInvoice::class,
+        'caregiver_invoices' => \App\Billing\CaregiverInvoice::class,
+        'client_invoices' => \App\Billing\ClientInvoice::class,
+
+        // Payment Methods
+        'businesses' => \App\Business::class,
+        'credit_cards' => \App\Billing\Payments\Methods\CreditCard::class,
+        'bank_accounts' => \App\Billing\Payments\Methods\BankAccount::class,
+
+        // Shifts (for Signatures/Exceptions) haven't been converted yet
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
     |
