@@ -80,6 +80,20 @@ class ScheduleCreatorTest extends TestCase
         $this->assertInstanceOf(Schedule::class, $schedules[0]);
     }
 
+    public function testRecurringSchedulesBelongToTheSameGroup()
+    {
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+            ->duration(60)
+            ->assignments(1, 1)
+            ->interval('weekly', new Carbon('2017-12-31'), ['mo', 'tu']);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertGreaterThan(0, $schedules[0]->group_id);
+        $this->assertCount(8, $schedules->where('group_id', $schedules[0]->group_id));
+    }
+
+
     public function testStartDateNotInRecurringScheduleThrowsException()
     {
         $this->expectException(InvalidScheduleParameters::class);
@@ -133,5 +147,22 @@ class ScheduleCreatorTest extends TestCase
         $this->assertTrue($results->count() > 0);
     }
 
+    /**
+     * @test
+     */
+    function a_schedule_created_in_EST_should_remain_the_same_time_in_EDT()
+    {
+        $timezone = 'America/New_York';
+        $client = factory(Client::class)->create(['max_weekly_hours' => 10]);
+        $client->business->update(['timezone' => $timezone]);
 
+        $results = $this->scheduleCreator->startsAt(new Carbon('2019-03-06 12:00:00', $timezone))
+            ->duration(240)
+            ->assignments($client->business_id, $client->id)
+            ->interval('weekly', new Carbon('2019-03-14 12:00:00', $timezone), ['we'])
+            ->create();
+
+        $this->assertEquals('2019-03-06 12:00:00', $results[0]->starts_at->toDateTimeString());
+        $this->assertEquals('2019-03-13 12:00:00', $results[1]->starts_at->toDateTimeString());
+    }
 }

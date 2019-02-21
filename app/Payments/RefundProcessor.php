@@ -2,18 +2,18 @@
 
 namespace App\Payments;
 
-use App\Gateway\ECSPayment;
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\Gateway\ECSPayment;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 
 class RefundProcessor
 {
     /**
-     * @var \App\GatewayTransaction
+     * @var \App\Billing\GatewayTransaction
      */
     private $transaction;
     /**
-     * @var \App\Gateway\ECSPayment
+     * @var \App\Billing\Gateway\ECSPayment
      */
     private $ECSPayment;
 
@@ -27,7 +27,7 @@ class RefundProcessor
      * Refund the transaction a certain amount
      *
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund($amount, $notes = '')
     {

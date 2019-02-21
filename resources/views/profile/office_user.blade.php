@@ -76,7 +76,7 @@
             {{--@endforeach--}}
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></emergency-contacts-tab>
+            <contact-list-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></contact-list-tab>
         </div>
     </div>
 @endsection

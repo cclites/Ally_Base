@@ -1,11 +1,10 @@
 <template>
     <b-modal title="Edit Shift" v-model="showModal" size="lg" class="modal-fit-more" hide-footer style="overflow-y: auto;">
         <b-container>
+            <loading-card text="Loading Data" v-if="loading"></loading-card>
             <business-shift
-                v-if="shift"
+                v-if="shift && !loading"
                 :shift="shift"
-                :in_distance="shift.checked_in_distance"
-                :out_distance="shift.checked_out_distance"
                 :activities="activities"
                 :admin="1"
                 :caregiver="shift.caregiver"
@@ -23,6 +22,7 @@
             return {
                 shift: {},
                 isMounted: false,
+                loading: false,
             }
         },
 
@@ -65,8 +65,17 @@
         watch: {
             async shift_id(newVal, oldVal) {
                 if (newVal && newVal != oldVal) {
-                    await this.loadData();
-                    this.isMounted = true;
+                    this.loading = true;
+                    try {
+                        await this.loadData();
+                        this.isMounted = true;
+                        this.loading = false;
+                    }
+                    catch (e) {
+                        alert('Error loading shift details.');
+                        console.log(e);
+                        this.showModal = false;
+                    }
                 }
             }
         }

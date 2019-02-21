@@ -12,6 +12,7 @@ use App\Schedule;
 use App\Shift;
 use App\ShiftFlag;
 use App\ShiftIssue;
+use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
@@ -37,15 +38,16 @@ class ShiftController extends BaseController
      */
     public function store(UpdateShiftRequest $request)
     {
-        $data = $request->filtered();
-        $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-        $data['verified'] = false;
+        $defaultStatus = Shift::WAITING_FOR_AUTHORIZATION;
+        $this->authorize('create', [Shift::class, $request->getShiftArray($defaultStatus)]);
 
-        $this->authorize('create', [Shift::class, $data]);
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
 
         \DB::beginTransaction();
 
-        if ($shift = Shift::create($data)) {
+        if ($shift = $request->createShift($defaultStatus)) {
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
 
@@ -72,39 +74,24 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions', 'address']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
-
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
+        $data += [
+            'client_name' => $shift->client->name(),
+            'caregiver_name' => $shift->caregiver->name(),
+            'address' => optional($shift->address)->only(['latitude', 'longitude']),
+        ];
 
         if ($request->expectsJson()) {
-            $data += [
-                'checked_in_distance' => $checked_in_distance,
-                'checked_out_distance' => $checked_out_distance,
-                'client_name' => $shift->client->name(),
-                'caregiver_name' => $shift->caregiver->name(),
-                'address' => optional($shift->address)->only(['latitude', 'longitude']),
-            ];
-
             return response()->json($data);
         }
 
         $activities = $shift->business->allActivities();
 
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+        return view('business.shifts.show', compact('shift', 'activities'));
     }
 
     /**
@@ -123,7 +110,11 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
-        $data = $request->filtered();
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
+        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
@@ -147,11 +138,38 @@ class ShiftController extends BaseController
             $shift->syncIssues($request->getIssues());
             $shift->syncGoals($request->getGoals());
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
+            $shift->syncServices($request->getServices());
 
             event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
+    }
+
+
+    /**
+     * @param \App\Http\Requests\UpdateShiftRequest $request
+     * @return bool
+     */
+    protected function validateAgainstNegativeRates(UpdateShiftRequest $request)
+    {
+        $client = $request->getClient();
+        $services = $request->getServices();
+
+        if (count($services)) {
+            foreach($services as $service) {
+                if ($service['client_rate'] === null) continue;
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
+                    return false;
+                }
+            }
+        } else if ($request->client_rate !== null) {
+            if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function destroy(Shift $shift)
@@ -217,61 +235,25 @@ class ShiftController extends BaseController
         return view('business.shifts.print', compact('shift', 'timezone'));
     }
 
-    public function convertSchedule(Request $request, Schedule $schedule)
-    {
-        $this->authorize('read', $schedule);
-
-        $request->validate([
-            'date' => 'required|date_format:Y-m-d',
-        ]);
-
-        $date = $request->input('date');
-
-        // Make sure schedule has proper assignments
-        if (!$schedule->caregiver_id) return new ErrorResponse(400, 'There is no caregiver assigned to this scheduled shift, cannot convert.');
-        if (!$schedule->client_id) return new ErrorResponse(400, 'There is no client assigned to this scheduled shift, cannot convert.');
-
-        $searchStart = (new Carbon($date, $this->business()->timezone))->setTime(0, 0, 0);
-        $searchEnd = $searchStart->copy()->addDay();
-        $occurrences = $schedule->getOccurrencesStartingBetween($searchStart, $searchEnd);
-
-        // Make sure 1 occurrence was found
-        if (count($occurrences) !== 1) return new ErrorResponse(400, 'Unable to match the schedule for conversion.');
-
-        // Create Shift
-        $start = Carbon::instance(current($occurrences))->setTimezone('UTC');
-        $shift = Shift::create([
-            'business_id' => $this->business()->id,
-            'caregiver_id' => $schedule->caregiver_id,
-            'client_id' => $schedule->client_id,
-            'checked_in_time' => $start,
-            'checked_out_time' => $start->copy()->addMinutes($schedule->duration),
-            'schedule_id' => $schedule->id,
-            'hours_type' => $schedule->hours_type,
-            'caregiver_rate' => $schedule->getCaregiverRate(),
-            'provider_fee' => $schedule->getProviderFee(),
-            'status' => Shift::WAITING_FOR_AUTHORIZATION,
-        ]);
-        return new CreatedResponse('The scheduled shift has been converted to an actual shift.', $shift->toArray());
-    }
-
     public function duplicate(Shift $shift)
     {
         $this->authorize('read', $shift);
 
         // Duplicate an existing shift and advance one day
+        /** @var Shift $shift */
         $shift = $shift->replicate();
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
+        $shift->checked_in_distance = null;
+        $shift->checked_out_distance = null;
+        
         $shift->status = null;
 
-        $checked_in_distance = null;
-        $checked_out_distance = null;
         $activities = $shift->business->allActivities();
 
         event(new ShiftFlagsCouldChange($shift));
 
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+        return view('business.shifts.show', compact('shift', 'activities'));
 
     }
 
@@ -279,7 +261,7 @@ class ShiftController extends BaseController
      * Handles manual clock out of shift for office users.
      *
      * @param Shift $shift
-     * @return void
+     * @return \Illuminate\Http\Response
      */
     public function officeClockOut(Shift $shift)
     {

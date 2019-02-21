@@ -5,6 +5,7 @@
                 :activities="activities"
                 :caregiver="caregiver"
                 :client="client"
+                :shift="{}"
                 ref="businessShift"
                 @shift-created="$emit('shift-created')"
                 is_modal="1"

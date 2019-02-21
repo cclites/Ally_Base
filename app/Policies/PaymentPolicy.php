@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Payment;
+use App\Billing\Payment;
 use App\User;
 
 /**

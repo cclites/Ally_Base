@@ -15,6 +15,10 @@ class BusinessSettingsResource extends Resource
      */
     public function toArray($request)
     {
+        if (is_office_user() || is_admin()) {
+            return $this->resource->toArray();
+        } 
+
         $settings = [
             'id',
             'name',

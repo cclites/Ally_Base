@@ -38,6 +38,26 @@
                         </b-form-input>
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
+                    <b-form-group label="Certification" label-for="certification" label-class="required">
+                        <b-form-select
+                                id="certification"
+                                name="certification"
+                                v-model="form.certification"
+                        >
+                            <option value="">None</option>
+                            <option value="CNA">CNA</option>
+                            <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
+                        </b-form-select>
+                        <input-help :form="form" field="certification" text="Select the caregiver's certification / license."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Caregiver Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                     </b-form-group>
@@ -55,6 +75,10 @@
                         >
                         </b-form-input>
                         <input-help :form="form" field="medicaid_id" text="The caregiver ID, or license number, for Medicaid"></input-help>
+                    </b-form-group>
+                    <b-form-group>
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver"></business-referral-source-select>
+                        <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -99,6 +123,18 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
+                    <b-form-group label="Is the caregiver okay with smoking?" label-for="smoking_okay">
+                        <b-form-select id="smoking_okay" v-model="form.smoking_okay">
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
+                        </b-form-select>
+                        <input-help :form="form" field="smoking_okay" text="" />
+                    </b-form-group>
+                    <b-form-group label="Acceptable Pets:">
+                        <b-form-checkbox v-model="form.pets_dogs_okay" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="form.pets_birds_okay" value="1" unchecked-value="0">Birds</b-form-checkbox>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -106,7 +142,7 @@
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
-                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
+                    <b-button variant="danger" @click="$refs.deactivateCaregiverModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
                     <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                 </b-col>
             </b-row>
@@ -115,36 +151,7 @@
         <reset-password-modal v-model="passwordModal" :url="'/business/caregivers/' + this.caregiver.id + '/password'"></reset-password-modal>
         <send-welcome-email-modal v-model="welcomeEmailModal" :user='caregiver' :url="'/business/caregivers/' + this.caregiver.id + '/send_confirmation_email'"></send-welcome-email-modal>
 
-        <b-modal id="deactivateModal"
-                 title="Are you sure?"
-                 v-model="deactivateModal"
-                 ok-title="OK">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12" class="text-center">
-                        <div class="mb-3">Are you sure you wish to archive {{ this.caregiver.name }}?</div>
-                        <div v-if="caregiver.future_schedules > 0">All <span class="text-danger">{{ this.caregiver.future_schedules }}</span> of their future scheduled shifts will be unassigned.</div>
-                        <div v-else>They have no future scheduled shifts.</div>
-                        
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
-                            <date-picker
-                                class="w-50 mx-auto"
-                                v-model="inactive_at"
-                                id="inactive_at"
-                                placeholder="Inactive Date">
-                            </date-picker>
-                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
-                        </b-form-group>
-                        
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn v-if="caregiver.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveCaregiver">Yes - Unassign Future Schedules</b-btn>
-                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveCaregiver">Yes</b-btn>
-               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <deactivate-caregiver-modal :caregiver="caregiver" ref="deactivateCaregiverModal"></deactivate-caregiver-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -156,9 +163,16 @@
 </template>
 
 <script>
+    import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
+    import { mapGetters } from 'vuex'
+
     export default {
         props: {
             'caregiver': {},
+        },
+
+        components: {
+          DeactivateCaregiverModal
         },
 
         data() {
@@ -169,28 +183,52 @@
                     email: this.caregiver.email,
                     username: this.caregiver.username,
                     title: this.caregiver.title,
+                    certification: this.caregiver.certification ? this.caregiver.certification : '',
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
                     ssn: this.caregiver.masked_ssn,
                     gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
+                    referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
+                    status_alias_id: this.caregiver.status_alias_id || '',
+                    smoking_okay: this.caregiver.smoking_okay,
+                    pets_dogs_okay: this.caregiver.pets_dogs_okay,
+                    pets_cats_okay: this.caregiver.pets_cats_okay,
+                    pets_birds_okay: this.caregiver.pets_birds_okay,
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,
                 active: this.caregiver.active,
-                deactivateModal: false,
                 activateModal: false,
                 inactive_at: '',
+                statusAliases: [],
             }
         },
 
         mounted() {
             this.checkForNoEmailDomain();
+            this.fetchStatusAliases();
+        },
+
+        computed: {
+            statusAliasOptions() {
+                if (! this.statusAliases || !this.statusAliases.caregiver) {
+                    return [];
+                }
+
+                return this.statusAliases.caregiver.filter(item => {
+                    return item.active == this.active;
+                }).map(item => {
+                    return {
+                        value: item.id,
+                        text: item.name,
+                    };
+                });
+            },
         },
 
         methods: {
-
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -199,11 +237,6 @@
                         this.form.email = null;
                     }
                 }
-            },
-
-            archiveCaregiver() {
-                let form = new Form();
-                form.submit('delete', `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}`);
             },
 
             reactivateCaregiver() {
@@ -217,7 +250,20 @@
                     .then(({ data }) => {
                         this.form.avatar = data.data.avatar;
                     })
-            }
+            },
+
+            fetchStatusAliases() {
+                axios.get('/business/status-aliases')
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data;
+                        } else {
+                            this.statusAliases = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         }
     }
 </script>

@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 
 class UpdateBusinessBankRequest extends BusinessRequest
 {
