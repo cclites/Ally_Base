@@ -11,6 +11,7 @@ use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -257,6 +258,19 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Get the age of a user based on the date of birth
+     *
+     * @return int|null
+     */
+    public function getAge()
+    {
+        if (!is_null($this->date_of_birth)) {
+            return now()->diffInYears(Carbon::parse($this->date_of_birth));
+        }
+        return null;
+    }
 
     /**
      * Return the fully-qualified name of the role class

@@ -401,6 +401,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Client Statistics',
+                        url: 'reports/client-stats',
+                        description: 'See client stats',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Projected Billing',
                         url: 'reports/projected-billing',
                         description: 'See forecasting billing amounts based on scheduled and completed visits',

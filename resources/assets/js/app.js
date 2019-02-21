@@ -201,6 +201,7 @@ Vue.component('client-directory', require('./components/business/reports/ClientD
 Vue.component('caregiver-directory', require('./components/business/reports/CaregiverDirectory'));
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 Vue.component('report-column-picker', require('./components/business/reports/ReportColumnPicker'));
+Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('projected-billing-report', require('./components/business/reports/ProjectedBillingReport'));
 
 Vue.component('business-payer-list', require('./components/business/PayerList'));
