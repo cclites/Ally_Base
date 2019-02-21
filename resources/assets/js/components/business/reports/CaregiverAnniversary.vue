@@ -2,7 +2,7 @@
     <b-card title="Caregiver Anniversary">
         <loading-card v-show="loading" />
         <div v-show="! loading" class="table-responsive">
-            <ally-table id="caregiver-anniversary" :columns="fields" :items="items">
+            <ally-table id="caregiver-anniversary" :columns="fields" :items="items" sort-by="nameLastFirst">
                 <template slot="name" scope="data">
                     <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.name }}</a>
                 </template>
@@ -40,6 +40,7 @@
                         label: 'First date referred',
                         sortable: true,
                         shouldShow: true,
+                        formatter: x => { return this.formatDateFromUTC(x) }
                     },
                 ],
             };
