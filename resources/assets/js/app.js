@@ -142,7 +142,6 @@ Vue.component('client-medication', require('./components/business/clients/Medica
 Vue.component('business-client-goals', require('./components/business/clients/ClientGoals'));
 Vue.component('business-client-care-details', require('./components/business/clients/ClientCareDetails'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
-Vue.component('business-client-caregivers', require('./components/business/clients/ClientCaregivers.vue'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
