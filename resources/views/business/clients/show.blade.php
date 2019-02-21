@@ -149,12 +149,6 @@
                               payment-type-message="{{ $defaultPaymentTypeMessage }}"
             />
         </div>
-        {{--<div class="tab-pane" id="caregivers" role="tabpanel">--}}
-            {{--<business-client-caregivers :client="{{ $client }}"--}}
-                                        {{--:ally-rate-original="{{ floatval($client->allyFee) }}"--}}
-                                        {{--payment-type-message="{{ $defaultPaymentTypeMessage }}"--}}
-            {{--></business-client-caregivers>--}}
-        {{--</div>--}}
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>

@@ -59,7 +59,12 @@
                 <tbody>
                     <tr v-for="item in filteredItems" :key="item.id">
                         <!-- Caregiver -->
-                        <td scope="row">{{ item.caregiver_name }}</td>
+                        <td scope="row">
+                            {{ item.caregiver_name }}&nbsp;
+                            <a href="#" v-b-popover.hover="caregiverInfo(item)" title="Caregiver Stats">
+                                <i class="fa fa-info-circle" style="color: #1e88e5" size="sm"></i>
+                            </a>
+                        </td>
                         <!-- Service -->
                         <td>
                             <b-select v-model="item.service_id" size="sm" @change="(e) => onChangeService(e, item)">
@@ -419,6 +424,15 @@
         },
 
         methods: {
+            caregiverInfo(item) {
+                let cg = this.caregivers.find(x => x.id === item.caregiver_id);
+                if (! cg) {
+                    cg = {}
+                }
+                const date = cg.last_service_date ? this.formatDateFromUTC(cg.last_service_date) : 'N/A';
+                const hours = cg.total_hours ? cg.total_hours.toLocaleString() : 0;
+                return `Last Service Date for this Client: ${date}\r\n\r\nTotal Hours Worked for this Client: ${hours}`
+            },
 
             updateProviderRates(item) {
                 item.provider_hourly_rate = RateFactory.getProviderFee(item.client_hourly_rate, item.caregiver_hourly_rate, this.allyRate).toFixed(2);

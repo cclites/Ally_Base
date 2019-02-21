@@ -408,6 +408,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Caregiver Statistics',
+                        url: 'reports/caregiver-stats',
+                        description: 'See caregiver stats',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Projected Billing',
                         url: 'reports/projected-billing',
                         description: 'See forecasting billing amounts based on scheduled and completed visits',

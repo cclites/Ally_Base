@@ -323,6 +323,8 @@ Route::group([
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
     Route::get('reports/client-stats', 'Business\Report\ClientStatsController@index')->name('reports.client_stats');
     Route::post('reports/client-stats', 'Business\Report\ClientStatsController@reportData')->name('reports.client_stats.data');
+    Route::get('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@index')->name('reports.caregiver_stats');
+    Route::post('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@reportData')->name('reports.caregiver_stats.data');
 
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
