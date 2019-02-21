@@ -381,11 +381,16 @@
                     </b-form-group>
 
                     <div>
-                        <label for="agreement_status" class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
+                        <label class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
                             <span>{{ client.user.welcome_email_sent_at ? formatDateTimeFromUTC(client.user.welcome_email_sent_at) : 'Never' }}</span>
                         </label>
                     </div>
-                    
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Training Email Last Sent:</strong> 
+                            <span>{{ client.user.training_email_sent_at ? formatDateTimeFromUTC(client.user.training_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+
                     <b-button variant="info" @click="welcomeEmailModal = true">
                         Send Welcome Email
                     </b-button>
@@ -442,6 +447,11 @@
             :user='client'
             :url="`/business/clients/${client.id}/welcome-email`"
         ></send-welcome-email-modal>
+
+        <confirm-modal title="Send Training Email" ref="confirmTrainingEmail" yesButton="Send Email">
+            <p>Send training email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email linking them to the Knowledge Base.</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -545,6 +555,17 @@
         },
 
         methods: {
+            sendTrainingEmail() {
+                this.$refs.confirmTrainingEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/training-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
             setupCheckClass(step) {
                 let check = false;
                 switch (step) {

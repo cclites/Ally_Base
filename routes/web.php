@@ -239,6 +239,7 @@ Route::group([
     Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
     Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
     Route::post('/clients/{client}/welcome-email', 'Business\ClientController@welcomeEmail');
+    Route::post('/clients/{client}/training-email', 'Business\ClientController@trainingEmail');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

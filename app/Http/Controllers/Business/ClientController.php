@@ -24,6 +24,7 @@ use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\WelcomeEmail;
+use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
 {
@@ -462,5 +463,21 @@ class ClientController extends BaseController
 
         // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
         return new SuccessResponse('A welcome email was dispatched to the Client.', null, '.');
+    }
+
+    /**
+     * Send training email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function trainingEmail(Client $client)
+    {
+        $client->update(['training_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new TrainingEmail($client));
+
+        // Use the reload page redirect to update the timestamp
+        return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
     }
 }

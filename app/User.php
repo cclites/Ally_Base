@@ -36,6 +36,7 @@ use Packages\MetaData\HasMetaData;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $welcome_email_sent_at
+ * @property string|null $training_email_sent_at
  * @property string|null $gender
  * @property string|null $avatar
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
