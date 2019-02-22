@@ -139,7 +139,7 @@
                 <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                 <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
             </b-form-group>
-            <b-form-group label="Ally Onboard Status" label-for="agreement_status" label-class="required">
+            <b-form-group label="Ally Client Agreement Status" label-for="agreement_status" label-class="required">
                 <b-form-select
                         id="agreement_status"
                         name="agreement_status"
