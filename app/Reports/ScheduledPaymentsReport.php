@@ -16,7 +16,7 @@ class ScheduledPaymentsReport extends ShiftsReport
     protected function results()
     {
         $shifts = $this->query
-            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE])
+            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION,  Shift::WAITING_FOR_INVOICE])
             ->get();
         $rows = $shifts->map(function(Shift $shift) {
             return [
