@@ -107,6 +107,30 @@
                 </b-row>
                 <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
             </b-form-group>
+            <b-form-group label="Password" label-for="password">
+                <b-form-input
+                        id="password"
+                        name="password"
+                        type="password"
+                        v-model="form.password"
+                        :disabled="form.no_username"
+                >
+                </b-form-input>
+                <input-help :form="form" field="password"
+                            text="Enter the password they will use to login for the first time."></input-help>
+            </b-form-group>
+            <b-form-group label="Confirm Password" label-for="password_confirmation">
+                <b-form-input
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        v-model="form.password_confirmation"
+                        :disabled="form.no_username"
+                >
+                </b-form-input>
+                <input-help :form="form" field="password_confirmation"
+                            text="Re-enter the above password."></input-help>
+            </b-form-group>
             <b-form-group label="Date of Birth" label-for="date_of_birth">
                 <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                 <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
@@ -158,6 +182,8 @@
                     override: false,
                     provider_pay: 0,
                     business_id: this.value.business_id || "",
+                    password: this.value.password || null,
+                    password_confirmation: this.value.password_confirmation || null,
                 }),
             }
         },
@@ -184,6 +210,8 @@
             toggleNoUsername() {
                 if (this.form.no_username) {
                     this.form.username = '';
+                    this.form.password = '';
+                    this.form.password_confirmation = '';
                 }
             },
         },
