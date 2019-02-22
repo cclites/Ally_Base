@@ -130,7 +130,7 @@
                             <strong>Shift Billing Type</strong>
                             <b-form-group class="pt-2 mb-0">
                                 <b-form-radio-group v-model="billingType">
-                                    <b-form-radio value="hourly">Actual Hours</b-form-radio>
+                                    <b-form-radio value="hourly">Hourly</b-form-radio>
                                     <b-form-radio value="fixed">Fixed Rate</b-form-radio>
                                     <b-form-radio value="services">Service Breakout</b-form-radio>
                                 </b-form-radio-group>
@@ -147,17 +147,17 @@
                                         <th>Service</th>
                                         <th>Hours Type</th>
                                         <th width="10%">Hours</th>
-                                        <th width="12%">Client Rate</th>
                                         <th width="13%">Caregiver Rate</th>
                                         <th>Provider Fee</th>
                                         <th>Ally Fee</th>
+                                        <th width="12%">Total Rate</th>
                                         <th>Payer</th>
                                         <th class="service-actions"></th>
                                     </tr>
                                     </thead>
                                     <tbody>
 
-                                    <!-- Actual Hours / Fixed -->
+                                    <!-- Hourly / Fixed -->
                                     <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                         <td>
                                             <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
@@ -173,19 +173,6 @@
                                         </td>
                                         <td class="text-only">
                                             {{ billingType === 'hourly' ? 'Actual' : 'Fixed' }}
-                                        </td>
-                                        <td class="text-only" v-if="defaultRates">
-                                            {{ numberFormat(form.default_rates.client_rate) }}
-                                        </td>
-                                        <td v-else>
-                                            <b-form-input
-                                                    name="client_rate"
-                                                    type="number"
-                                                    step="0.01"
-                                                    v-model="form.client_rate"
-                                                    @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
-                                                    class="money-input"
-                                            />
                                         </td>
                                         <td class="text-only" v-if="defaultRates">
                                             {{ numberFormat(form.default_rates.caregiver_rate) }}
@@ -207,6 +194,19 @@
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
                                             <span v-else>{{ numberFormat(form.ally_fee) }}</span>
+                                        </td>
+                                        <td class="text-only" v-if="defaultRates">
+                                            {{ numberFormat(form.default_rates.client_rate) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="client_rate"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="form.client_rate"
+                                                    @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td colspan="2">
                                             <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
@@ -238,19 +238,6 @@
                                                     v-model="service.duration" />
                                         </td>
                                         <td class="text-only" v-if="defaultRates">
-                                            {{ numberFormat(service.default_rates.client_rate) }}
-                                        </td>
-                                        <td v-else>
-                                            <b-form-input
-                                                    name="client_rate"
-                                                    type="number"
-                                                    step="0.01"
-                                                    v-model="service.client_rate"
-                                                    @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
-                                                    class="money-input"
-                                            />
-                                        </td>
-                                        <td class="text-only" v-if="defaultRates">
                                             {{ numberFormat(service.default_rates.caregiver_rate) }}
                                         </td>
                                         <td v-else>
@@ -270,6 +257,19 @@
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
                                             <span v-else>{{ numberFormat(service.ally_fee) }}</span>
+                                        </td>
+                                        <td class="text-only" v-if="defaultRates">
+                                            {{ numberFormat(service.default_rates.client_rate) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="client_rate"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="service.client_rate"
+                                                    @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td>
                                             <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">

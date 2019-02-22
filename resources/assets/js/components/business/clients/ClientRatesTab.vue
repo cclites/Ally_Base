@@ -30,138 +30,172 @@
             </b-badge>
         </div>
 
-        <div class="table-responsive mb-2">
-            <b-table bordered striped hover show-empty
-                     :items="filteredItems"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     ref="table"
-                     class="table-fit-more"
-            >
-                <template slot="caregiver_id" scope="row">
-                    {{ row.item.caregiver_name }}
-                    <!-- <b-select v-model="row.item.caregiver_id" size="sm">
-                        <option :value="null">(All)</option>
-                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
-                    </b-select> -->
-                </template>
-                <template slot="service_id" scope="row">
-                    <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
-                        <option :value="null">(All)</option>
-                        <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}
-                        </option>
-                    </b-select>
-                </template>
-                <template slot="payer_id" scope="row">
-                    <b-select v-model="row.item.payer_id" size="sm" @change="(e) => onChangePayer(e, row.item)">
-                        <option :value="null">(All)</option>
-                        <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
-                    </b-select>
-                </template>
-                <template slot="effective_start" scope="row">
-                    <mask-input v-model="row.item.effective_start" type="date"
-                                class="date-input form-control-sm"></mask-input>
-                </template>
-                <template slot="effective_end" scope="row">
-                    <mask-input v-model="row.item.effective_end" type="date"
-                                class="date-input form-control-sm"></mask-input>
-                </template>
-                <template slot="caregiver_hourly_rate" scope="row">
-                    <b-form-input name="caregiver_hourly_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.caregiver_hourly_rate"
-                                  @change="updateProviderRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="caregiver_fixed_rate" scope="row">
-                    <b-form-input name="caregiver_fixed_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.caregiver_fixed_rate"
-                                  @change="updateProviderRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="client_hourly_rate" scope="row">
-                    <b-form-input name="client_hourly_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.client_hourly_rate"
-                                  @change="updateProviderRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="client_fixed_rate" scope="row">
-                    <b-form-input name="client_fixed_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.client_fixed_rate"
-                                  @change="updateProviderRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="actions" scope="data">
-                    <b-btn size="sm" @click="removeRate(data.item)" :disabled="busyRemoving === data.item.id">
-                        <i v-if="busyRemoving === data.item.id" class="fa fa-spinner fa-spin"></i>
-                        <i v-else class="fa fa-trash"></i>
-                    </b-btn>
-                </template>
-                <template slot="provider_hourly_rate" scope="row">
-                    <b-form-input name="provider_hourly_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.provider_hourly_rate"
-                                  @change="updateClientRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="ally_hourly_rate" scope="row">
-                    {{ getAllyFee(row.item.client_hourly_rate) }}
-                </template>
-                <template slot="provider_fixed_rate" scope="row">
-                    <b-form-input name="provider_fixed_rate"
-                                  class="money-input"
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  max="999.99"
-                                  required
-                                  v-model="row.item.provider_fixed_rate"
-                                  @change="updateClientRates(row.item)"
-                                  size="sm"
-                    ></b-form-input>
-                </template>
-                <template slot="ally_fixed_rate" scope="row">
-                    {{ getAllyFee(row.item.client_fixed_rate) }}
-                </template>
-            </b-table>
+        <div class="table-responsive client-rate-table">
+            <table class="table-fit-more table b-table table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col" colspan="5"></th>
+                        <th scope="col" colspan="4" class="bl bt br text-center p-0">Hourly Rate</th>
+                        <th scope="col" colspan="4" class="bt br text-center p-0">Fixed / Daily Rate</th>
+                        <th scope="col" colspan="1"></th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Caregiver</th>
+                        <th scope="col">Service</th>
+                        <th scope="col">Payer</th>
+                        <th scope="col">Effective Start</th>
+                        <th scope="col">Effective End</th>
+                        <th scope="col" class="bl">Total</th>
+                        <th scope="col">Caregiver</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col" class="br">Ally Fee</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Caregiver</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col" class="br">Ally Fee</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in filteredItems" :key="item.id">
+                        <!-- Caregiver -->
+                        <td scope="row">
+                            {{ item.caregiver_name }}&nbsp;
+                            <a href="#" v-b-popover.hover="caregiverInfo(item)" title="Caregiver Stats">
+                                <i class="fa fa-info-circle" style="color: #1e88e5" size="sm"></i>
+                            </a>
+                        </td>
+                        <!-- Service -->
+                        <td>
+                            <b-select v-model="item.service_id" size="sm" @change="(e) => onChangeService(e, item)">
+                                <option :value="null">(All)</option>
+                                <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
+                            </b-select>
+                        </td>
+                        <!-- Payer -->
+                        <td>
+                            <b-select v-model="item.payer_id" size="sm" @change="(e) => onChangePayer(e, item)">
+                                <option :value="null">(All)</option>
+                                <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </b-select>
+                        </td>
+                        <!-- Effective Start -->
+                        <td>
+                            <mask-input type="date"
+                                v-model="item.effective_start"
+                                class="date-input form-control-sm"
+                            ></mask-input>
+                        </td>
+                        <!-- Effective End -->
+                        <td class="br">
+                            <mask-input type="date"
+                                v-model="item.effective_end"
+                                class="date-input form-control-sm"
+                            ></mask-input>
+                        </td>
+                        <!-- Total Hourly Rate -->
+                        <td class="bl">
+                            <b-form-input name="client_hourly_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.client_hourly_rate"
+                                @change="updateProviderRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Caregiver Hourly Rate -->
+                        <td>
+                            <b-form-input name="caregiver_hourly_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.caregiver_hourly_rate"
+                                @change="updateProviderRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Provider Hourly Rate -->
+                        <td>
+                            <b-form-input name="provider_hourly_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.provider_hourly_rate"
+                                @change="updateClientRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Ally Hourly Fee -->
+                        <td class="br">
+                            {{ getAllyFee(item.client_hourly_rate) }}
+                        </td>
+                        <!-- Total Fixed Rate -->
+                        <td>
+                            <b-form-input name="client_fixed_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.client_fixed_rate"
+                                @change="updateProviderRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Caregiver Fixed Rate -->
+                        <td>
+                            <b-form-input name="caregiver_fixed_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.caregiver_fixed_rate"
+                                @change="updateProviderRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Provider Fixed Rate -->
+                        <td>
+                            <b-form-input name="provider_fixed_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.provider_fixed_rate"
+                                @change="updateClientRates(item)"
+                                size="sm"
+                            ></b-form-input>
+                        </td>
+                        <!-- Ally Fixed Fee -->
+                        <td class="br">
+                            {{ getAllyFee(item.client_fixed_rate) }}
+                        </td>
+                        <!-- Actions -->
+                        <td class="hidden-print">
+                            <b-btn size="sm" @click="removeRate(item)" :disabled="busyRemoving === item.id">
+                                <i v-if="busyRemoving === item.id" class="fa fa-spinner fa-spin"></i>
+                                <i v-else class="fa fa-trash"></i>
+                            </b-btn>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-
         <div class="text-right">
             <b-btn id="save-rates" @click="saveRates()" variant="success">Save Rates</b-btn>
         </div>
@@ -322,79 +356,6 @@
                 busyRemoving: null,
 
                 items: [],
-                totalRows: 0,
-                perPage: 30,
-                currentPage: 1,
-                sortBy: 'caregiver_name',
-                sortDesc: false,
-                fields: [
-                    {
-                        key: 'caregiver_name',
-                        label: 'Caregiver',
-                        sortable: true
-                    },
-                    {
-                        key: 'service_id',
-                        label: 'Service',
-                        sortable: true
-                    },
-                    {
-                        key: 'payer_id',
-                        label: 'Payer',
-                        sortable: true
-                    },
-                    {
-                        key: 'effective_start',
-                        label: 'Effective Start',
-                        sortable: true,
-                    },
-                    {
-                        key: 'effective_end',
-                        label: 'Effective End',
-                        sortable: true,
-                    },
-                    {
-                        key: 'client_hourly_rate',
-                        label: 'Client Hourly Rate',
-                        sortable: true,
-                    },
-                    {
-                        key: 'caregiver_hourly_rate',
-                        label: 'CG Hourly Rate',
-                        sortable: true,
-                    },
-                    {
-                        key: 'provider_hourly_rate',
-                        label: 'Provider Hourly Fee*'
-                    },
-                    {
-                        key: 'ally_hourly_rate',
-                        label: 'Ally Hourly Fee*'
-                    },
-                    {
-                        key: 'client_fixed_rate',
-                        label: 'Client Fixed/Daily Rate',
-                        sortable: true,
-                    },
-                    {
-                        key: 'caregiver_fixed_rate',
-                        label: 'CG Fixed/Daily Rate',
-                        sortable: true,
-                    },
-                    {
-                        key: 'provider_fixed_rate',
-                        label: 'Provider Fixed/Daily Fee*'
-                    },
-                    {
-                        key: 'ally_fixed_rate',
-                        label: 'Ally Fixed/Daily Fee*'
-                    },
-                    {
-                        key: 'actions',
-                        label: '',
-                        class: 'hidden-print'
-                    },
-                ],
                 excludedFields: [
                     {key: 'caregiver_name', label: 'Name', sortable: true},
                     {
@@ -463,6 +424,15 @@
         },
 
         methods: {
+            caregiverInfo(item) {
+                let cg = this.caregivers.find(x => x.id === item.caregiver_id);
+                if (! cg) {
+                    cg = {}
+                }
+                const date = cg.last_service_date ? this.formatDateFromUTC(cg.last_service_date) : 'N/A';
+                const hours = cg.total_hours ? cg.total_hours.toLocaleString() : 0;
+                return `Last Service Date for this Client: ${date}\r\n\r\nTotal Hours Worked for this Client: ${hours}`
+            },
 
             updateProviderRates(item) {
                 item.provider_hourly_rate = RateFactory.getProviderFee(item.client_hourly_rate, item.caregiver_hourly_rate, this.allyRate).toFixed(2);
@@ -768,7 +738,12 @@
 </script>
 
 <style scoped>
+    .client-rate-table { font-size: 14px; }
     .caregiver-list-table th, .caregiver-list-table td {
         padding: 0.5rem 0.75rem;
     }
+    .bt { border-top: 1px solid #A9A9A9!important; }
+    .bl { border-left: 1px solid #A9A9A9!important; }
+    .br { border-right: 1px solid #A9A9A9!important; }
+    .bb { border-bottom: 1px solid #A9A9A9!important; }
 </style>

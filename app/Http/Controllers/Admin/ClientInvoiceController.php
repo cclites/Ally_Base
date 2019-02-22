@@ -20,25 +20,36 @@ class ClientInvoiceController extends Controller
 {
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
-        if ($request->has('paid')) {
-            if ($request->paid) {
-                $invoiceQuery->paidInFull();
-            } else {
-                $invoiceQuery->notPaidInFull();
+        if ($request->expectsJson()) {
+            if ($request->filled('paid')) {
+                if ($request->paid) {
+                    $invoiceQuery->paidInFull();
+                } else {
+                    $invoiceQuery->notPaidInFull();
+                }
             }
+
+            if ($businessId = $request->input('business_id')) {
+                $invoiceQuery->forBusiness($businessId);
+            }
+
+            if ($chainId = $request->input('chain_id')) {
+                $invoiceQuery->forBusinessChain(BusinessChain::findOrFail($chainId));
+            }
+
+            if ($request->has('start_date')) {
+                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
+                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
+                $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
+
+            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();
+
+            return ClientInvoiceResponse::collection($invoices);
         }
 
-        if ($businessId = $request->input('business_id')) {
-            $invoiceQuery->forBusiness($businessId);
-        }
-
-        if ($chainId = $request->input('chain_id')) {
-            $invoiceQuery->forBusinessChain(BusinessChain::findOrFail($chainId));
-        }
-
-        $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();
-
-        return ClientInvoiceResponse::collection($invoices);
+        $chains = BusinessChain::ordered()->get();
+        return view_component('admin-client-invoices', 'Client Invoices', compact('chains'));
     }
 
     public function generate(Request $request, ClientInvoiceGenerator $generator)

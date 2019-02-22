@@ -93,6 +93,8 @@ Vue.component('admin-import-report', require('./components/admin/import/AdminImp
 Vue.component('admin-bucket-report', require('./components/admin/AdminBucketReport'));
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
+Vue.component('admin-deposit-invoices', require('./components/admin/AdminDepositInvoices'));
+Vue.component('admin-client-invoices', require('./components/admin/AdminClientInvoices'));
 Vue.component('admin-evv-report', require('./components/admin/AdminEvvReport'));
 Vue.component('admin-emails-report', require('./components/admin/reports/AdminEmailsReport'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
@@ -142,7 +144,6 @@ Vue.component('client-medication', require('./components/business/clients/Medica
 Vue.component('business-client-goals', require('./components/business/clients/ClientGoals'));
 Vue.component('business-client-care-details', require('./components/business/clients/ClientCareDetails'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
-Vue.component('business-client-caregivers', require('./components/business/clients/ClientCaregivers.vue'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
@@ -200,7 +201,11 @@ Vue.component('sales-pipeline-report', require('./components/business/reports/Sa
 Vue.component('client-directory', require('./components/business/reports/ClientDirectory'));
 Vue.component('caregiver-directory', require('./components/business/reports/CaregiverDirectory'));
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
+Vue.component('user-birthday-report', require('./components/business/reports/UserBirthday'));
+Vue.component('caregiver-anniversary-report', require('./components/business/reports/CaregiverAnniversary'));
 Vue.component('report-column-picker', require('./components/business/reports/ReportColumnPicker'));
+Vue.component('client-stats', require('./components/business/reports/ClientStats'));
+Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));
 Vue.component('projected-billing-report', require('./components/business/reports/ProjectedBillingReport'));
 
 Vue.component('business-payer-list', require('./components/business/PayerList'));

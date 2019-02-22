@@ -271,6 +271,8 @@ Route::group([
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
+    Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
+    Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
@@ -318,13 +320,18 @@ Route::group([
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/client-stats', 'Business\Report\ClientStatsController@index')->name('reports.client_stats');
+    Route::post('reports/client-stats', 'Business\Report\ClientStatsController@reportData')->name('reports.client_stats.data');
+    Route::get('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@index')->name('reports.caregiver_stats');
+    Route::post('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@reportData')->name('reports.caregiver_stats.data');
+
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
-
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -530,10 +537,10 @@ Route::group([
     Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 
     /* Invoices */
-    Route::get('invoices/clients', 'Admin\ClientInvoiceController@index');
+    Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
-    Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index');
+    Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');

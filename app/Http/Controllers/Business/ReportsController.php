@@ -779,6 +779,43 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Display a listing of the caregiver's working anniversaries
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function caregiverAnniversary()
+    {
+        $users = Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
+            return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
+        });
+        return view('business.reports.caregiver_anniversary', compact('users'));
+    }
+
+    /**
+     * Display a listing of the users and their birthdays.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userBirthday(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+        $type = ucfirst($type);
+        return view('business.reports.user_birthday', compact('type'));
+    }
+
+    public function userBirthdayData(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+
+        if($type == 'clients') {
+            return Client::forRequestedBusinesses()->get();
+        }
+
+        return Caregiver::forRequestedBusinesses()->get();
+    }
+
+    /**
      * Shows the list of prospective clients
      *
      * @return Response
