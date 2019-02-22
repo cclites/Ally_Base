@@ -85,7 +85,7 @@
                 loading: false,
                 terms: '',
                 form: new Form({
-                    username: this.client.username,
+                    username: null,
                     password: null,
                     password_confirmation: null,
                 })
@@ -93,7 +93,17 @@
         },
 
         async mounted() {
-            this.loading = false;
+            this.loading = true;
+            // check if step should be skipped
+            axios.get(`/account-setup/clients/${this.token}/check`)
+                .then( ({ data }) => {
+                    this.$emit('updated', data);
+                })
+                .catch(e => {
+                })
+                .finally(() => {
+                    this.loading = false;
+                })
         },
 
         methods: {

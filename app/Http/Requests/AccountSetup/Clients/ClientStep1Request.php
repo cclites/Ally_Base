@@ -4,6 +4,7 @@ namespace App\Http\Requests\AccountSetup\Clients;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\PhonePossible;
+use App\Client;
 
 class ClientStep1Request extends FormRequest
 {
@@ -51,14 +52,20 @@ class ClientStep1Request extends FormRequest
     /**
      * Get the filtered request data.
      *
+     * @param \App\Client $client
      * @return array
      */
-    public function filtered()
+    public function filtered(Client $client) : array
     {
         $data = $this->validated();
         $data['date_of_birth'] = filter_date($data['date_of_birth']);
         unset($data['accepted_terms']);
         unset($data['phone_number']);
+        if ($client->agreement_status != Client::SIGNED_PAPER) {
+            // don't update agreement status if use has been set as 'signed paper agreement'
+            $data['agreement_status'] = Client::SIGNED_ELECTRONICALLY;
+        }
+        $data['setup_status'] = Client::SETUP_ACCEPTED_TERMS;
         return $data;
     }
 }

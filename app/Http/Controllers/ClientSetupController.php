@@ -54,15 +54,16 @@ class ClientSetupController extends Controller
             return $response;
         }
 
-        $data = $request->filtered();
-        $data['agreement_status'] = Client::SIGNED_ELECTRONICALLY;
-        $data['setup_status'] = Client::SETUP_ACCEPTED_TERMS;
+        $data = $request->filtered($client);
 
         \DB::beginTransaction();
 
         if ($client->update($data)) {
-            $client->agreementStatusHistory()->create(['status' => Client::SIGNED_ELECTRONICALLY]);
-            $client->setupStatusHistory()->create(['status' => Client::SETUP_ACCEPTED_TERMS]);
+            if (isset($data['agreement_status'])) {
+                // only update the agreement status history if the status has changed
+                $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
+            }
+            $client->setupStatusHistory()->create(['status' => $data['setup_status']]);
 
             if (empty($this->evvPhone)) {
                 $client->phoneNumbers()->create([
@@ -173,5 +174,40 @@ class ClientSetupController extends Controller
         }
 
         return response()->json(['terms' => $terms, 'terms_url' => $termsUrl]);
+    }
+
+    /**
+     * Check for the current setup step and return a fresh client object.
+     *
+     * @param string $token
+     * @return \Illuminate\Http\Response
+     */
+    public function checkStep($token)
+    {
+        $client = Client::findEncryptedOrFail($token);
+        if (empty($client)) {
+            abort(404, 'Not Found');
+        }
+        $client->load(['address', 'phoneNumber']);
+
+        if (empty($client->setup_status)) {
+            return response()->json($client);
+        }
+        
+        $hasUsername = !$client->hasNoUsername();
+        $hasPaymentMethod = !empty($client->getPaymentMethod());
+
+        if (! $hasUsername) {
+            $client->setup_status = Client::SETUP_ACCEPTED_TERMS;
+        } else if ($hasUsername && !$hasPaymentMethod) {
+            $client->setup_status = Client::SETUP_CREATED_ACCOUNT;
+        } else if ($hasUsername && $hasPaymentMethod) {
+            $client->setup_status = Client::SETUP_ADDED_PAYMENT;
+        } else {
+            $client->setup_status = Client::SETUP_NONE;
+        }
+        $client->save();
+
+        return response()->json($client);
     }
 }

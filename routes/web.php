@@ -51,6 +51,7 @@ Route::post('/account-setup/clients/{token}/step1', 'ClientSetupController@step1
 Route::post('/account-setup/clients/{token}/step2', 'ClientSetupController@step2');
 Route::post('/account-setup/clients/{token}/step3', 'ClientSetupController@step3');
 Route::get('/account-setup/clients/{token}/terms', 'ClientSetupController@terms');
+Route::get('/account-setup/clients/{token}/check', 'ClientSetupController@checkStep');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
