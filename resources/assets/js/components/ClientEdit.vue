@@ -417,7 +417,7 @@
                         </label>
                     </div>
 
-                    <b-button variant="info" @click="welcomeEmailModal = true">
+                    <b-button variant="info" @click="sendWelcomeEmail()">
                         Send Welcome Email
                     </b-button>
 
@@ -583,7 +583,26 @@
         },
 
         methods: {
+            canSendEmails() {
+                if (! this.form.email || this.isEmptyEmail(this.form.email)) {
+                    alert('You cannot send any emails to this user because there is no email associated with their account.');
+                    return false;
+                }
+
+                return true;
+            },
+
+            sendWelcomeEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.welcomeEmailModal = true;
+            },
+
             sendTrainingEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
                 this.$refs.confirmTrainingEmail.confirm(() => {
                     let form = new Form({});
                     form.post(`/business/clients/${this.client.id}/training-email`)
@@ -625,13 +644,20 @@
             },
 
             checkForNoEmailDomain() {
-                let domain = 'noemail.allyms.com';
                 if (this.form.email) {
-                    if (this.form.email.substr(domain.length * -1) === domain) {
+                    if (this.isEmptyEmail(this.form.email)) {
                         this.form.no_email = true;
                         this.form.email = null;
                     }
                 }
+            },
+
+            isEmptyEmail(email) {
+                let domain = 'noemail.allyms.com';
+                if (email.substr(domain.length * -1) === domain) {
+                    return true;
+                }
+                return false;
             },
 
             checkForNoUsername() {
