@@ -137,8 +137,6 @@ class ClientController extends BaseController
         }
         $data['created_by'] = auth()->id();
         
-        $client->agreementStatusHistory()->save(['status' => $data['agreement_status']]);
-
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
         if ($client = $action->create($data, $paymentMethod)) {

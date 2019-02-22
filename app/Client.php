@@ -32,6 +32,7 @@ use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
+use App\Traits\CanHaveEmptyUsername;
 
 /**
  * App\Client
@@ -202,7 +203,8 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
-    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
+    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'clients';
     public $timestamps = false;

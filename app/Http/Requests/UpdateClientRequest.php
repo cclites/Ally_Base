@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
+use App\Client;
 
 class UpdateClientRequest extends BusinessRequest
 {
@@ -24,7 +25,8 @@ class UpdateClientRequest extends BusinessRequest
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => ['required', Rule::unique('users')->ignore($client->id)],
+            'email' => 'required_unless:no_email,1|nullable|email',
+            'username' => ['required_unless:no_username,1', 'nullable', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -68,6 +70,14 @@ class UpdateClientRequest extends BusinessRequest
         if ($data['service_start_date']) $data['service_start_date'] = filter_date($data['service_start_date']);
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($this->input('no_email')) $data['email'] = $this->route('client')->getAutoEmail();
+        if ($this->input('no_username')) {
+            // no need to change the username every time the client is saved
+            if ($this->route('client')->hasNoUsername()) {
+                $data['username'] = $this->route('client')->username;
+            } else {
+                $data['username'] = Client::getAutoUsername();
+            }
+        }
 
         return $data;
     }

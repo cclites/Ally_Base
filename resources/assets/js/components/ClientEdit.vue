@@ -91,7 +91,7 @@
                                     id="email"
                                     name="email"
                                     type="email"
-                                    @blur.native="form.username = $event.target.value"
+                                    @blur.native="copyEmailToUsername()"
                                     v-model="form.email"
                                     :disabled="form.no_email"
                                 >
@@ -101,7 +101,7 @@
                                 <div class="form-check">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" name="no_email"
-                                               v-model="form.no_email" value="1">
+                                               v-model="form.no_email" value="1" @input="toggleNoEmail()">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">No Email</span>
                                     </label>
@@ -111,16 +111,42 @@
                         <input-help :form="form" field="email"
                                     text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
-                    <b-form-group label="Username" label-for="username" label-class="required">
+                    <b-form-group label="Username" label-for="username">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        v-model="form.username"
+                                        :disabled="form.no_username"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_username"
+                                            v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Let Client Choose</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                    </b-form-group>
+                    <!-- <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
                                 name="username"
                                 type="text"
                                 v-model="form.username"
+                                :disabled="form.no_username"
                         >
                         </b-form-input>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
-                    </b-form-group>
+                    </b-form-group> -->
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
@@ -496,6 +522,7 @@
                     email: this.client.email,
                     no_email: false,
                     username: this.client.username,
+                    no_username: false,
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
@@ -550,6 +577,7 @@
         mounted() {
             this.localLastStatusDate = this.lastStatusDate;
             this.checkForNoEmailDomain();
+            this.checkForNoUsername();
             this.loadOfficeUsers();
             this.fetchStatusAliases();
         },
@@ -606,6 +634,15 @@
                 }
             },
 
+            checkForNoUsername() {
+                if (this.form.username) {
+                    if (this.form.username.substr(0, 9) == 'no_login_') {
+                        this.form.no_username = true;
+                        this.form.username = null;
+                    }
+                }
+            },
+
             reactivateClient() {
                 let form = new Form();
                 form.post('/business/clients/' + this.client.id + '/reactivate')
@@ -644,6 +681,27 @@
                     })
                     .catch(e => {
                     })
+            },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                }
+            },
+
+            copyEmailToUsername() {
+                if (this.form.no_username) {
+                    return;
+                }
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
             },
         },
 

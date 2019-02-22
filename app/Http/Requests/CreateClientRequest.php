@@ -17,7 +17,7 @@ class CreateClientRequest extends BusinessRequest
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => 'required|unique:users',
+            'username' => 'required_unless:no_username,1|nullable|unique:users',
             'date_of_birth' => 'nullable',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
