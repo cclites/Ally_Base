@@ -129,7 +129,7 @@ class ScheduleController extends BaseController
         }
 
         try {
-            $created = $creator->create();
+            $created = $creator->create($this->userSettings()->enable_schedule_groups());
             if ($count = $created->count()) {
                 if ($count > 1) {
                     return new CreatedResponse('The scheduled shifts have been created.');

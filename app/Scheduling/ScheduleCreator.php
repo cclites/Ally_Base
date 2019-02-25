@@ -262,10 +262,11 @@ class ScheduleCreator
     /**
      * Create the schedules from the provided data and return a collection
      *
+     * @param bool $useScheduleGroup
      * @return \Illuminate\Support\Collection|\App\Schedule[]
      * @throws \App\Exceptions\InvalidScheduleParameters
      */
-    public function create()
+    public function create($useScheduleGroup = true)
     {
         $this->checkRequired(['duration', 'business_id', 'client_id']);
         $this->validateDuration();
@@ -274,7 +275,7 @@ class ScheduleCreator
         $this->validateStartDate($occurrences);
 
         $group = null;
-        if (count($occurrences) > 1 && $this->rrule) {
+        if ($useScheduleGroup && count($occurrences) > 1 && $this->rrule) {
             $group = $this->createGroup();
         }
 
