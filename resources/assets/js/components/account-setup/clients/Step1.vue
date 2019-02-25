@@ -173,7 +173,7 @@
                     lastname: this.client.lastname,
                     email: this.client.email,
                     date_of_birth: moment(this.client.user.date_of_birth).format('L'),
-                    phone_number: this.phoneNumber ? this.phoneNumber.national_number : '',
+                    phone_number: this.client.phone_number ? this.client.phone_number.national_number : '',
                     address1: this.client.address ? this.client.address.address1 : '',
                     address2: this.client.address ? this.client.address.address2 : '',
                     city: this.client.address ? this.client.address.city : '',

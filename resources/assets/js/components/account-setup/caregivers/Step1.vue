@@ -159,7 +159,7 @@
                     lastname: this.caregiver.lastname,
                     email: this.caregiver.email,
                     date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
-                    phone_number: this.phoneNumber ? this.phoneNumber.national_number : '',
+                    phone_number: this.caregiver.phone_number ? this.caregiver.phone_number.national_number : '',
                     address1: this.caregiver.address ? this.caregiver.address.address1 : '',
                     address2: this.caregiver.address ? this.caregiver.address.address2 : '',
                     city: this.caregiver.address ? this.caregiver.address.city : '',
