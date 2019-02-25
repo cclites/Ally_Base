@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Traits\CanHaveEmptyUsername;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * App\Caregiver
@@ -135,7 +136,7 @@ use App\Traits\CanHaveEmptyUsername;
 class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
-    use IsUserRole, BelongsToBusinesses, BelongsToChains;
+    use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'caregivers';
@@ -178,6 +179,15 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
+    ///////////////////////////////////////////
+    /// Caregiver Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_CONFIRMED_PROFILE = 'confirmed_profile'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -295,6 +305,16 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
             $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
         }
         return $businesses ?? collect();
+    }
+
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
+    {
+        return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
     }
 
     ///////////////////////////////////////////

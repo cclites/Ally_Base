@@ -161,13 +161,36 @@
                         <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
                         <b-form-checkbox v-model="form.pets_birds_okay" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
+
+                    <b-form-group label="Account Setup URL">
+                        <a :href="caregiver.setup_url" target="_blank">{{ caregiver.setup_url }}</a>
+                        <input-help :form="form" text="The URL the caregiver can use to setup their account."></input-help>
+                    </b-form-group>
+
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
+                            <span>{{ caregiver.user.welcome_email_sent_at ? formatDateTimeFromUTC(caregiver.user.welcome_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Training Email Last Sent:</strong> 
+                            <span>{{ caregiver.user.training_email_sent_at ? formatDateTimeFromUTC(caregiver.user.training_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+
+                    <b-button variant="info" @click="sendWelcomeEmail()">
+                        Send Welcome Email
+                    </b-button>
+
+                    <b-button variant="info" @click="sendTrainingEmail()">
+                        Send Training Email
+                    </b-button>
                 </b-col>
             </b-row>
-            <b-row>
+            <b-row class="mt-4">
                 <b-col lg="12">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
                     <b-button variant="danger" @click="$refs.deactivateCaregiverModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
                     <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                 </b-col>
@@ -175,9 +198,18 @@
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/caregivers/' + this.caregiver.id + '/password'"></reset-password-modal>
-        <send-welcome-email-modal v-model="welcomeEmailModal" :user='caregiver' :url="'/business/caregivers/' + this.caregiver.id + '/send_confirmation_email'"></send-welcome-email-modal>
 
         <deactivate-caregiver-modal :caregiver="caregiver" ref="deactivateCaregiverModal"></deactivate-caregiver-modal>
+
+        <confirm-modal title="Send Training Email" ref="confirmTrainingEmail" yesButton="Send Email">
+            <p>Send training email to {{ caregiver.email }}?</p><br />
+            <p>This will send {{ caregiver.name }} an email linking them to the Knowledge Base.</p>
+        </confirm-modal>
+        
+        <confirm-modal title="Send Welcome Email" ref="confirmWelcomeEmail" yesButton="Send Email">
+            <p>Send welcome email to {{ caregiver.email }}?</p><br />
+            <p>This will send {{ caregiver.name }} an email instructing them to click on a private link to confirm their information and reset their password.</p>
+        </confirm-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -230,7 +262,6 @@
                     pets_birds_okay: this.caregiver.pets_birds_okay,
                 }),
                 passwordModal: false,
-                welcomeEmailModal: false,
                 active: this.caregiver.active,
                 activateModal: false,
                 inactive_at: '',
@@ -262,14 +293,58 @@
         },
 
         methods: {
+            canSendEmails() {
+                if (! this.form.email || this.isEmptyEmail(this.form.email)) {
+                    alert('You cannot send any emails to this user because there is no email associated with their account.');
+                    return false;
+                }
+
+                return true;
+            },
+
+            sendWelcomeEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmWelcomeEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/caregivers/${this.caregiver.id}/welcome-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
+            sendTrainingEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmTrainingEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/caregivers/${this.caregiver.id}/training-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
             checkForNoEmailDomain() {
-                let domain = 'noemail.allyms.com';
                 if (this.form.email) {
-                    if (this.form.email.substr(domain.length * -1) === domain) {
+                    if (this.isEmptyEmail(this.form.email)) {
                         this.form.no_email = true;
                         this.form.email = null;
                     }
                 }
+            },
+
+            isEmptyEmail(email) {
+                let domain = 'noemail.allyms.com';
+                if (email.substr(domain.length * -1) === domain) {
+                    return true;
+                }
+                return false;
             },
 
             checkForNoUsername() {

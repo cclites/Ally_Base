@@ -53,6 +53,13 @@ Route::post('/account-setup/clients/{token}/step3', 'ClientSetupController@step3
 Route::get('/account-setup/clients/{token}/terms', 'ClientSetupController@terms');
 Route::get('/account-setup/clients/{token}/check', 'ClientSetupController@checkStep');
 
+Route::get('/account-setup/caregivers/{token}', 'CaregiverSetupController@show')->name('setup.caregivers');
+Route::post('/account-setup/caregivers/{token}/step1', 'CaregiverSetupController@step1');
+Route::post('/account-setup/caregivers/{token}/step2', 'CaregiverSetupController@step2');
+Route::post('/account-setup/caregivers/{token}/step3', 'CaregiverSetupController@step3');
+Route::get('/account-setup/caregivers/{token}/terms', 'CaregiverSetupController@terms');
+Route::get('/account-setup/caregivers/{token}/check', 'CaregiverSetupController@checkStep');
+
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
 
@@ -200,7 +207,6 @@ Route::group([
     Route::post('caregivers/{caregiver}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{caregiver}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{caregiver}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
-    Route::post('caregivers/{caregiver}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
     Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
     Route::put('caregivers/{caregiver}/preferences', 'Business\CaregiverController@preferences')->name("caregivers.update_preferences");
@@ -210,6 +216,8 @@ Route::group([
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
+    Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
+    Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
 
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');

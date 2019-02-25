@@ -24,6 +24,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
 use App\Actions\CreateCaregiver;
+use App\Notifications\TrainingEmail;
+use App\Notifications\CaregiverWelcomeEmail;
 
 class CaregiverController extends BaseController
 {
@@ -158,6 +160,7 @@ class CaregiverController extends BaseController
         $caregiver->hours_total = $caregiver->totalServiceHours();
         $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->setup_url = $caregiver->setup_url;
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
@@ -363,5 +366,37 @@ class CaregiverController extends BaseController
 
         $caregiver->update($data);
         return new SuccessResponse('The default rates have been saved.');
+    }
+
+    /**
+     * Send welcome email to the caregiver.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeEmail(Caregiver $caregiver)
+    {
+        $caregiver->update(['welcome_email_sent_at' => Carbon::now()]);
+
+        $caregiver->notify(new CaregiverWelcomeEmail($caregiver, $this->businessChain()));
+
+        // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
+        return new SuccessResponse('A welcome email was dispatched to the Caregiver.', null, '.');
+    }
+
+    /**
+     * Send training email to the caregiver.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
+    public function trainingEmail(Caregiver $caregiver)
+    {
+        $caregiver->update(['training_email_sent_at' => Carbon::now()]);
+
+        $caregiver->notify(new TrainingEmail($caregiver));
+
+        // Use the reload page redirect to update the timestamp
+        return new SuccessResponse('A training email was dispatched to the Caregiver.', null, '.');
     }
 }
