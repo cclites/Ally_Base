@@ -101,7 +101,10 @@
     export default {
         props: {
             'submitUrl': '',
-            'account': {},
+            'account': {
+                type: Object,
+                default: () => { return {} },
+            },
             'source': {},
             'businessId': '',
             'readonly': false,

@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AccountSetup\Caregivers\CaregiverStep1Request;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Traits\Request\PaymentMethodRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Caregiver;
+use App\Http\Requests\AccountSetup\Caregivers\CaregiverStep1Request;
+use App\Traits\Request\BankAccountRequest;
+use App\Rules\ValidSSN;
+use Carbon\Carbon;
 
 class CaregiverSetupController extends Controller
 {
-    use PaymentMethodRequest;
+    use BankAccountRequest;
 
     /**
      * Display the specified resource.
@@ -24,13 +26,14 @@ class CaregiverSetupController extends Controller
     public function show($token)
     {
         $caregiver = Caregiver::findEncryptedOrFail($token);
-        if (empty($caregiver)) {
-            abort(404, 'Not Found');
-        }
         
         $caregiver->load(['address', 'phoneNumber']);
 
-        return view('account-setup.caregiver', compact('token', 'caregiver'));
+        $props = [
+            'caregiver-data' => $caregiver,
+            'token' => $token,
+        ];
+        return view_component('caregiver-setup-wizard', 'Caregiver Account Setup', $props, null, 'guest');
     }
 
     /**
@@ -40,39 +43,32 @@ class CaregiverSetupController extends Controller
      * @param string $token
      * @return \Illuminate\Http\Response
      * @throws \Exception
-     */
+     */ 
     public function step1(CaregiverStep1Request $request, $token)
     {
         $caregiver = Caregiver::findEncryptedOrFail($token);
-        if (empty($caregiver)) {
-            abort(404, 'Not Found');
-        }
 
         // TODO: Refactor how addresses are upserted.
-        $response = (new AddressController())->update(request(), $caregiver->user, 'evv', 'Your address');
+        $response = (new AddressController())->update(request(), $caregiver->user, 'home', 'Your address');
         if ($response instanceof ErrorResponse) {
             return $response;
         }
 
-        $data = $request->filtered($caregiver);
+        $data = $request->filtered();
 
         \DB::beginTransaction();
 
         if ($caregiver->update($data)) {
-            if (isset($data['agreement_status'])) {
-                // only update the agreement status history if the status has changed
-                $caregiver->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
-            }
             $caregiver->setupStatusHistory()->create(['status' => $data['setup_status']]);
 
-            if (empty($this->evvPhone)) {
+            if (empty($this->phoneNumber)) {
                 $caregiver->phoneNumbers()->create([
                     'national_number' => $request->phone_number,
                     'country_code' => '1',
                     'type' => 'primary',
                 ]);
             } else {
-                $caregiver->evvPhone->update([
+                $caregiver->phoneNumber->update([
                     'national_number' => $request->phone_number,
                     'country_code' => '1',
                 ]);
@@ -131,49 +127,27 @@ class CaregiverSetupController extends Controller
 
         \DB::beginTransaction();
 
-        $method = $this->validatePaymentMethod($request, $caregiver->defaultPayment);
-        if (! $caregiver->setPaymentMethod($method)) {
+        $request->validate(['accepted_terms' => 'accepted'], ['accepted_terms.accepted' => 'You must accept the terms of service by checking the box.']);
+
+        $bankAccount = $this->validateBankAccount($request, null);
+        if (! $caregiver->setBankAccount($bankAccount)) {
             \DB::rollBack();
             return new ErrorResponse(500, 'There was an error saving your payment details.  Please try again.');
         }
 
-        $caregiver->update([
-            'setup_status' => Caregiver::SETUP_ADDED_PAYMENT
-        ]);
+        $data = $this->validateW9Data();
+        $data = $data->merge([
+            'onboarded' => Carbon::now(),
+            'setup_status' => Caregiver::SETUP_ADDED_PAYMENT,
+        ])->toArray();
+        
+        $caregiver->update($data);
         $caregiver->setupStatusHistory()->create(['status' => Caregiver::SETUP_ADDED_PAYMENT]);
 
         \DB::commit();
 
         $caregiver = $caregiver->fresh()->load(['address', 'phoneNumber']);
         return new SuccessResponse('Your account has been set up!', $caregiver);
-    }
-
-    /**
-     * Get the terms and conditions text for the current Caregiver.
-     *
-     * @param string $token
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function terms($token)
-    {
-        $caregiver = Caregiver::findEncryptedOrFail($token);
-        if (empty($caregiver)) {
-            abort(404, 'Not Found');
-        }
-
-        $termsFile = 'terms-inc.html';
-        $termsUrl = url($termsFile);
-        $terms = str_after(file_get_contents($termsFile), '<body>');
-        $terms = str_before($terms, '</body>');
-        if (file_exists(public_path('terms-inc-' . $caregiver->business_id . '.html'))) {
-            $termsFile = 'terms-inc-' . $caregiver->business_id . '.html';
-            $termsUrl = url('terms-inc-' . $caregiver->business_id . '.html');
-            $terms = str_after(file_get_contents($termsFile), '<body>');
-            $terms = str_before($terms, '</body>');
-        }
-
-        return response()->json(['terms' => $terms, 'terms_url' => $termsUrl]);
     }
 
     /**
@@ -185,9 +159,6 @@ class CaregiverSetupController extends Controller
     public function checkStep($token)
     {
         $caregiver = Caregiver::findEncryptedOrFail($token);
-        if (empty($caregiver)) {
-            abort(404, 'Not Found');
-        }
         $caregiver->load(['address', 'phoneNumber']);
 
         if (empty($caregiver->setup_status)) {
@@ -195,10 +166,10 @@ class CaregiverSetupController extends Controller
         }
         
         $hasUsername = !$caregiver->hasNoUsername();
-        $hasPaymentMethod = !empty($caregiver->getPaymentMethod());
+        $hasPaymentMethod = !empty($caregiver->bankAccount);
 
         if (! $hasUsername) {
-            $caregiver->setup_status = Caregiver::SETUP_ACCEPTED_TERMS;
+            $caregiver->setup_status = Caregiver::SETUP_CONFIRMED_PROFILE;
         } else if ($hasUsername && !$hasPaymentMethod) {
             $caregiver->setup_status = Caregiver::SETUP_CREATED_ACCOUNT;
         } else if ($hasUsername && $hasPaymentMethod) {
@@ -209,5 +180,33 @@ class CaregiverSetupController extends Controller
         $caregiver->save();
 
         return response()->json($caregiver);
+    }
+
+    /**
+     * Validate and Transform W9 data
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function validateW9Data()
+    {
+        request()->validate([
+            'w9.name' => 'nullable|string',
+            'w9.business_name' => 'nullable|string',
+            'w9.tax_classification' => 'nullable|string',
+            'w9.llc_type' => 'nullable|string',
+            'w9.exempt_payee_code' => 'nullable|string',
+            'w9.exempt_fatca_reporting_code' => 'nullable|string',
+            'w9.address' => 'nullable|string',
+            'w9.city_state_zip' => 'nullable|string',
+            'w9.account_numbers' => 'nullable|string',
+            'w9.ssn' => ['nullable', new ValidSSN()],
+            'w9.employer_id_number' => 'nullable|string'
+        ]);
+        // Transform the W9 data
+        $w9_data = collect([]);
+        foreach(collect(request()->only('w9')['w9'])->filter() as $key => $value) {
+            $w9_data['w9_'.$key] = $value;
+        }
+        return $w9_data;
     }
 }
