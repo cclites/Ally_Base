@@ -9,10 +9,10 @@ namespace App\Data;
  */
 class ScheduledRates
 {
-    public $clientRate;
-    public $caregiverRate;
-    public $fixedRates = false;
-    public $hoursType;
+    private $clientRate;
+    private $caregiverRate;
+    private $fixedRates;
+    private $hoursType;
 
     public function __construct(?float $clientRate, ?float $caregiverRate, bool $fixedRates = false, string $hoursType = "default")
     {
@@ -20,5 +20,25 @@ class ScheduledRates
         $this->caregiverRate = $caregiverRate;
         $this->fixedRates = $fixedRates;
         $this->hoursType = $hoursType;
+    }
+
+    public function clientRate(): ?float
+    {
+        return $this->clientRate;
+    }
+
+    public function caregiverRate(): ?float
+    {
+        return $this->caregiverRate;
+    }
+
+    public function fixedRates(): bool
+    {
+        return $this->fixedRates;
+    }
+
+    public function hoursType(): string
+    {
+        return $this->hoursType;
     }
 }

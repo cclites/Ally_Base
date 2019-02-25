@@ -24,7 +24,7 @@ class SettingsRepository
             (bool) $firstBusiness->calendar_remember_filters,
             $firstBusiness->calendar_default_view ? new CalendarView($firstBusiness->calendar_default_view) : null,
             $firstBusiness->calendar_caregiver_filter ? new CalendarCaregiverFilter($firstBusiness->calendar_caregiver_filter) : null,
-            $firstBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($firstBusiness->calendar_next_day_threshold) : null,
+            $firstBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($firstBusiness->calendar_next_day_threshold) : null
         );
     }
 }

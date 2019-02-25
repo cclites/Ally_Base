@@ -63,10 +63,10 @@ class ShiftFactory implements Arrayable
             'checked_in_time'   => $clockIn->time,
             'checked_out_method'=> $clockOut ? $clockOut->method : Shift::METHOD_UNKNOWN,
             'checked_out_time'  => $clockOut ? $clockOut->time : null,
-            'hours_type'        => $rates->hoursType,
-            'fixed_rates'       => $rates->fixedRates,
-            'client_rate'       => $rates->clientRate,
-            'caregiver_rate'    => $rates->caregiverRate,
+            'hours_type'        => $rates->hoursType(),
+            'fixed_rates'       => $rates->fixedRates(),
+            'client_rate'       => $rates->clientRate(),
+            'caregiver_rate'    => $rates->caregiverRate(),
             'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
         ]);
     }
@@ -99,10 +99,10 @@ class ShiftFactory implements Arrayable
             'checked_in_time'   => $clockIn->time,
             'checked_out_method'=> $clockOut ? $clockOut->method : Shift::METHOD_UNKNOWN,
             'checked_out_time'  => $clockOut ? $clockOut->time : null,
-            'hours_type'        => $rates->hoursType,
-            'fixed_rates'       => $rates->fixedRates,
-            'client_rate'       => $rates->clientRate,
-            'caregiver_rate'    => $rates->caregiverRate,
+            'hours_type'        => $rates->hoursType(),
+            'fixed_rates'       => $rates->fixedRates(),
+            'client_rate'       => $rates->clientRate(),
+            'caregiver_rate'    => $rates->caregiverRate(),
             'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
         ]);
 
@@ -111,9 +111,9 @@ class ShiftFactory implements Arrayable
                 $serviceData = array_except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
                 $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
                 $serviceData = array_merge($serviceData, [
-                    'client_rate' => $rates->clientRate,
-                    'caregiver_rate' => $rates->caregiverRate,
-                    'hours_type' => $rates->hoursType,
+                    'client_rate' => $rates->clientRate(),
+                    'caregiver_rate' => $rates->caregiverRate(),
+                    'hours_type' => $rates->hoursType(),
                 ]);
 
                 return $serviceData;
@@ -215,13 +215,13 @@ class ShiftFactory implements Arrayable
     public static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
         ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
-        if (!$rates || $rates->clientRate === null) {
+        if (!$rates || $rates->clientRate() === null) {
             $client = Client::findOrFail($clientId);
             $timezone = $client->getTimezone();
             $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
 
             $rates = app(RateFactory::class)->findMatchingRate($client, $effectiveDate,
-                $rates->fixedRates ?? false, $serviceId, $payerId, $caregiverId);
+                $rates ? $rates->fixedRates() : false, $serviceId, $payerId, $caregiverId);
 
             return new ScheduledRates(
                 $rates->client_rate ?? 0,
