@@ -237,8 +237,6 @@ Vue.component('clock-out', require('./components/ClockOut.vue'));
 Vue.component('clocked-in', require('./components/ClockedIn.vue'));
 Vue.component('adjoining-caregivers-card', require('./components/caregivers/AdjoiningCaregiversCard.vue'));
 
-Vue.component('caregiver-confirmation', require('./components/CaregiverConfirmation.vue'));
-Vue.component('client-confirmation', require('./components/ClientConfirmation.vue'));
 Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
 Vue.component('caregiver-setup-wizard', require('./components/account-setup/CaregiverSetupWizard.vue'));
 
@@ -275,7 +273,6 @@ Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 Vue.component('payment-method-provider', require('./components/PaymentMethodProvider.vue'));
 
 Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
-Vue.component('send-welcome-email-modal', require('./components/SendWelcomeEmailModal.vue'));
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 

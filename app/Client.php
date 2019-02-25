@@ -10,15 +10,12 @@ use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Businesses\Timezone;
-use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Contracts\CanBeConfirmedInterface;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
-use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
@@ -199,7 +196,7 @@ use App\Traits\CanHaveEmptyUsername;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold,
+class Client extends AuditableModel implements UserRole, ReconcilableInterface, HasPaymentHold,
     HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
@@ -712,14 +709,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
         $this->defaultPayment()->associate($backup)->save();
         $this->backupPayment()->associate($default)->save();
-    }
-
-    public function sendConfirmationEmail()
-    {
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-
-        $this->notify(new ClientConfirmation($this, $this->business));
     }
 
     public function agreementStatusHistory()

@@ -36,14 +36,6 @@ Route::view('check-my-time', 'check-my-time');
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
 Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
 Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
-Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
-Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
-Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
-Route::get('/confirm/client/{token}', 'ClientConfirmationController@show')->name('confirm.client');
-Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->name('confirm.client.store');
-Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
-Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
-Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
 Route::redirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
 
 Route::get('/account-setup/clients/{token}', 'ClientSetupController@show')->name('setup.clients');

@@ -11,7 +11,6 @@ use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
-use App\Mail\ClientConfirmation;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -23,7 +22,7 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Notifications\WelcomeEmail;
+use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
@@ -365,18 +364,6 @@ class ClientController extends BaseController
         return new SuccessResponse($message, $data, '.');
     }
 
-    public function sendConfirmationEmail(Client $client)
-    {
-        $this->authorize('update', $client);
-
-        if ($client->hasNoEmail()) {
-            return new ErrorResponse(400, 'Client does not have an email address on file.');
-        }
-
-        $client->sendConfirmationEmail();
-        return new SuccessResponse('Email Sent to Client');
-    }
-
     public function getPaymentType(Client $client)
     {
         return [
@@ -457,7 +444,7 @@ class ClientController extends BaseController
     {
         $client->update(['welcome_email_sent_at' => Carbon::now()]);
 
-        $client->notify(new WelcomeEmail($client));
+        $client->notify(new ClientWelcomeEmail($client));
 
         // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
         return new SuccessResponse('A welcome email was dispatched to the Client.', null, '.');

@@ -285,19 +285,6 @@ class CaregiverController extends BaseController
         return $events;
     }
 
-    public function sendConfirmationEmail($caregiver_id)
-    {
-        $caregiver = Caregiver::findOrFail($caregiver_id);
-        $this->authorize('update', $caregiver);
-
-        if ($caregiver->hasNoEmail()) {
-            return new ErrorResponse(400, 'Caregiver does not have an email address on file.');
-        }
-
-        $caregiver->sendConfirmationEmail($this->businessChain());
-        return new SuccessResponse('Email Sent to Caregiver');
-    }
-
     public function bankAccount(Request $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);

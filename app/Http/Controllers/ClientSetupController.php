@@ -27,7 +27,11 @@ class ClientSetupController extends Controller
 
         $client->load(['address', 'phoneNumber']);
 
-        return view('account-setup.client', compact('token', 'client'));
+        $props = [
+            'client-data' => $client,
+            'token' => $token,
+        ];
+        return view_component('client-setup-wizard', 'Client Account Setup', $props, null, 'guest');
     }
 
     /**

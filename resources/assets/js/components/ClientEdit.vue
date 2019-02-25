@@ -469,10 +469,10 @@
             Contact Ally support to configure this feature.
         </b-modal>
 
-        <send-welcome-email-modal v-model="welcomeEmailModal"
-            :user='client'
-            :url="`/business/clients/${client.id}/welcome-email`"
-        ></send-welcome-email-modal>
+        <confirm-modal title="Send Welcome Email" ref="confirmWelcomeEmail" yesButton="Send Email">
+            <p>Send welcome email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email instructing them to click on a private link to confirm their information and reset their password.</p>
+        </confirm-modal>
 
         <confirm-modal title="Send Training Email" ref="confirmTrainingEmail" yesButton="Send Email">
             <p>Send training email to {{ client.email }}?</p><br />
@@ -570,7 +570,6 @@
                 statusAliases: [],
                 localLastStatusDate: null,
                 onboardingWarning: false,
-                welcomeEmailModal: false,
             }
         },
 
@@ -596,7 +595,14 @@
                 if (! this.canSendEmails()) {
                     return;
                 }
-                this.welcomeEmailModal = true;
+                this.$refs.confirmWelcomeEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/welcome-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
             },
 
             sendTrainingEmail() {

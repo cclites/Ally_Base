@@ -55,7 +55,7 @@ class CaregiverWelcomeEmail extends Notification
     {
         return (new MailMessage)
             ->subject('Welcome to Ally')
-            ->markdown('emails.welcome.caregiver', [
+            ->markdown('emails.caregiver.welcome', [
                 'caregiver' => $this->caregiver,
                 'businessChain' => $this->businessChain,
                 'url' => $this->caregiver->setup_url,

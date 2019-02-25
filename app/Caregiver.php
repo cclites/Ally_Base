@@ -6,15 +6,12 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
-use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
-use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
 use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
-use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToChains;
@@ -133,7 +130,7 @@ use Illuminate\Notifications\Notifiable;
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface,
+class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
@@ -451,14 +448,6 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         }
 
         return $aggregator->events($start, $end);
-    }
-
-    public function sendConfirmationEmail(BusinessChain $businessChain = null)
-    {
-        if (!$businessChain) $businessChain = $this->businessChains()->first();
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $businessChain));
     }
 
     /**
