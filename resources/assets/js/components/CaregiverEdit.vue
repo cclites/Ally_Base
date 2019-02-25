@@ -162,6 +162,21 @@
                         <b-form-checkbox v-model="form.pets_birds_okay" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
 
+                    <div class="mb-3">
+                        <div>
+                            <label for="agreement_status" class="col-form-label pt-0">Account Setup Status: 
+                                <span v-if="! caregiver.setup_status" class="text-danger">Not Started</span>
+                                <span v-if="['confirmed_profile', 'created_account'].includes(caregiver.setup_status)" class="text-warning">In Progress</span>
+                                <span v-if="caregiver.setup_status == 'added_payment'" class="text-success">Complete</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span class="mr-2"><i :class="setupCheckClass('confirmed_profile')" aria-hidden="true"></i> Agreed to Terms</span>
+                            <span class="mr-2"><i :class="setupCheckClass('created_account')" aria-hidden="true"></i> Created Login</span>
+                            <span class="mr-2"><i :class="setupCheckClass('added_payment')" aria-hidden="true"></i> Added Payment Method</span>
+                        </div>
+                    </div>
+
                     <b-form-group label="Account Setup URL">
                         <a :href="caregiver.setup_url" target="_blank">{{ caregiver.setup_url }}</a>
                         <input-help :form="form" text="The URL the caregiver can use to setup their account."></input-help>
@@ -293,6 +308,23 @@
         },
 
         methods: {
+            setupCheckClass(step) {
+                let check = false;
+                switch (step) {
+                    case 'confirmed_profile':
+                        check = ['confirmed_profile', 'created_account', 'added_payment'].includes(this.caregiver.setup_status);
+                        break;
+                    case 'created_account':
+                        check = ['created_account', 'added_payment'].includes(this.caregiver.setup_status);
+                        break;
+                    case 'added_payment':
+                        check = ['added_payment'].includes(this.caregiver.setup_status);
+                        break;
+                }
+
+                return check ? 'fa fa-check-square-o' : 'fa fa-square-o';
+            },
+
             canSendEmails() {
                 if (! this.form.email || this.isEmptyEmail(this.form.email)) {
                     alert('You cannot send any emails to this user because there is no email associated with their account.');
