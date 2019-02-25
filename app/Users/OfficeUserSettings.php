@@ -7,7 +7,7 @@ use App\Scheduling\Data\CalendarNextDayThreshold;
 use App\Scheduling\Data\CalendarView;
 use JsonSerializable;
 
-class UserSettings implements JsonSerializable
+class OfficeUserSettings implements JsonSerializable
 {
     use ReflectsToArray;
 

@@ -5,19 +5,24 @@ use App\OfficeUser;
 use App\Scheduling\Data\CalendarCaregiverFilter;
 use App\Scheduling\Data\CalendarNextDayThreshold;
 use App\Scheduling\Data\CalendarView;
+use App\User;
 
 class SettingsRepository
 {
-    public function find(?OfficeUser $user = null)
+    /**
+     * @param \App\User $user
+     * @return \App\Users\OfficeUserSettings
+     */
+    public function getOfficeUserSettings(User $user)
     {
-        if (!$user) {
-            return new UserSettings();
+        if (!$user || !$officeUser = $user->officeUser) {
+            return new OfficeUserSettings();
         }
 
-        $chain = $user->businessChain;
-        $firstBusiness = $user->businesses()->first();
+        $chain = $officeUser->businessChain;
+        $firstBusiness = $officeUser->businesses()->first();
 
-        return new UserSettings(
+        return new OfficeUserSettings(
             (bool) $chain->scheduling,
             (bool) $chain->enable_schedule_groups,
             (bool) $firstBusiness->ask_on_confirm,
