@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
+use App\Actions\CreateCaregiver;
 
 class CaregiverController extends BaseController
 {
@@ -89,10 +90,11 @@ class CaregiverController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CreateCaregiverRequest $request
+     * @param \App\Actions\CreateCaregiver
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function store(CreateCaregiverRequest $request)
+    public function store(CreateCaregiverRequest $request, CreateCaregiver $action)
     {
         $data = $request->filtered();
         // No authorization needed at this time, the caregiver is saved to the business chain.
@@ -107,12 +109,7 @@ class CaregiverController extends BaseController
             }
         }
 
-        $caregiver = new Caregiver($data);
-        if ($request->input('no_email')) {
-            $caregiver->setAutoEmail();
-        }
-        if ($this->businessChain()->caregivers()->save($caregiver)) {
-            $caregiver->setAvailability([]); // sets default availability
+        if ($caregiver = $action->create($data, $this->businessChain())) {
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id, 'url' => route('business.caregivers.show', [$caregiver->id])]);
         }
 

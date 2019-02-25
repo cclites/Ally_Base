@@ -6,8 +6,8 @@ class CreateCaregiverRequest extends UpdateCaregiverRequest
     public function rules()
     {
         return [
-            'username' => 'required|unique:users',
-            'password' => 'nullable|string',
+            'username' => 'required_unless:no_username,1|nullable|unique:users',
+            'password' => 'required_unless:no_username,1|nullable|confirmed',
         ] + parent::rules();
     }
 

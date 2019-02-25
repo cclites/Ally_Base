@@ -14,7 +14,7 @@
         </b-container>
         <div slot="modal-footer">
             <b-btn variant="default" @click="showModal=false">Close</b-btn>
-            <b-btn variant="info" @click="save()">Send Email</b-btn>
+            <b-btn variant="info" @click="save()" :disabled="busy">Send Email</b-btn>
         </div>
     </b-modal>
 </template>
@@ -29,6 +29,7 @@
 
         data() {
             return {
+                busy: false,
                 form: new Form({
                 }),
             }
@@ -47,10 +48,14 @@
 
         methods: {
             save() {
+                this.busy = true;
                 let method = 'post';
                 this.form.submit(method, this.url)
                     .then(response => {
                         this.showModal = false;
+                    })
+                    .finally(() => {
+                        this.busy = false;
                     });
             }
         },

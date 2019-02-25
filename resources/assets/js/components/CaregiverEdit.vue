@@ -112,14 +112,29 @@
                         </b-row>
                         <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
                     </b-form-group>
-                    <b-form-group label="Username" label-for="username" label-class="required">
-                        <b-form-input
-                            id="username"
-                            name="username"
-                            type="text"
-                            v-model="form.username"
-                            >
-                        </b-form-input>
+                    <b-form-group label="Username" label-for="username">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        v-model="form.username"
+                                        :disabled="form.no_username"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_username"
+                                            v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Let Caregiver Choose</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
@@ -196,6 +211,7 @@
                     lastname: this.caregiver.lastname,
                     email: this.caregiver.email,
                     username: this.caregiver.username,
+                    no_username: false,
                     title: this.caregiver.title,
                     certification: this.caregiver.certification ? this.caregiver.certification : '',
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
@@ -224,6 +240,7 @@
 
         mounted() {
             this.checkForNoEmailDomain();
+            this.checkForNoUsername();
             this.fetchStatusAliases();
         },
 
@@ -255,6 +272,15 @@
                 }
             },
 
+            checkForNoUsername() {
+                if (this.form.username) {
+                    if (this.form.username.substr(0, 9) == 'no_login_') {
+                        this.form.no_username = true;
+                        this.form.username = null;
+                    }
+                }
+            },
+
             reactivateCaregiver() {
                 let form = new Form();
                 form.post('/business/caregivers/' + this.caregiver.id + '/reactivate')
@@ -279,6 +305,18 @@
                     })
                     .catch(e => {
                     })
+            },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                }
             },
         }
     }

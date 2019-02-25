@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
+use App\Traits\CanHaveEmptyUsername;
 
 /**
  * App\Caregiver
@@ -135,7 +136,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains;
-    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
+    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'caregivers';
     public $timestamps = false;
