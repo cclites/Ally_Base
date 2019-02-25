@@ -5,7 +5,6 @@
         <form v-else @submit.prevent="submit()" @keydown="form.clearError($event.target.name)" autocomplete="off">
             <b-row>
                 <b-col cols="12" md="6" lg="8">
-        <b-button @click="dummyData()">Dummy Data</b-button>
                     <b-card
                             header="Direct Deposit Bank Account"
                             header-text-variant="white"
@@ -229,18 +228,6 @@
         },
 
         methods: {
-            dummyData() {
-                this.$refs.bankAccountForm.form.nickname = 'test acocunt';
-                this.$refs.bankAccountForm.form.name_on_account = 'john doe';
-                this.$refs.bankAccountForm.form.routing_number = '123456789';
-                this.$refs.bankAccountForm.form.routing_number_confirmation = '123456789';
-                this.$refs.bankAccountForm.form.account_number = '123456789';
-                this.$refs.bankAccountForm.form.account_number_confirmation = '123456789';
-                this.$refs.bankAccountForm.form.account_type = 'checking';
-                this.$refs.bankAccountForm.form.account_holder_type = 'personal';
-                this.$refs.bankAccountForm.form.ignore_validation = true;
-            },
-
             submit() {
                 this.form.combineForm(this.$refs.bankAccountForm.form);
                 
