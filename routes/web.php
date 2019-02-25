@@ -36,15 +36,21 @@ Route::view('check-my-time', 'check-my-time');
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
 Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
 Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
-Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
-Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
-Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
-Route::get('/confirm/client/{token}', 'ClientConfirmationController@show')->name('confirm.client');
-Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->name('confirm.client.store');
-Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
-Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
-Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
 Route::redirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
+
+Route::get('/account-setup/clients/{token}', 'ClientSetupController@show')->name('setup.clients');
+Route::post('/account-setup/clients/{token}/step1', 'ClientSetupController@step1');
+Route::post('/account-setup/clients/{token}/step2', 'ClientSetupController@step2');
+Route::post('/account-setup/clients/{token}/step3', 'ClientSetupController@step3');
+Route::get('/account-setup/clients/{token}/terms', 'ClientSetupController@terms');
+Route::get('/account-setup/clients/{token}/check', 'ClientSetupController@checkStep');
+
+Route::get('/account-setup/caregivers/{token}', 'CaregiverSetupController@show')->name('setup.caregivers');
+Route::post('/account-setup/caregivers/{token}/step1', 'CaregiverSetupController@step1');
+Route::post('/account-setup/caregivers/{token}/step2', 'CaregiverSetupController@step2');
+Route::post('/account-setup/caregivers/{token}/step3', 'CaregiverSetupController@step3');
+Route::get('/account-setup/caregivers/{token}/terms', 'CaregiverSetupController@terms');
+Route::get('/account-setup/caregivers/{token}/check', 'CaregiverSetupController@checkStep');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
@@ -193,7 +199,6 @@ Route::group([
     Route::post('caregivers/{caregiver}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{caregiver}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{caregiver}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
-    Route::post('caregivers/{caregiver}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
     Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
     Route::put('caregivers/{caregiver}/preferences', 'Business\CaregiverController@preferences')->name("caregivers.update_preferences");
@@ -203,6 +208,8 @@ Route::group([
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
+    Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
+    Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
 
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
@@ -232,6 +239,8 @@ Route::group([
     Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
     Route::delete('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@destroy');
     Route::patch('clients/{client}/contacts/{clientContact}/priority', 'Business\ClientContactController@raisePriority');
+    Route::post('/clients/{client}/welcome-email', 'Business\ClientController@welcomeEmail');
+    Route::post('/clients/{client}/training-email', 'Business\ClientController@trainingEmail');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

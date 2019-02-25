@@ -10,15 +10,12 @@ use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Businesses\Timezone;
-use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Contracts\CanBeConfirmedInterface;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
-use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
@@ -30,7 +27,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
+use App\Traits\CanHaveEmptyUsername;
 
 /**
  * App\Client
@@ -44,7 +43,7 @@ use App\Billing\ClientAuthorization;
  * @property string|null $backup_payment_id
  * @property string $client_type
  * @property mixed|null $ssn
- * @property string|null $onboard_status
+ * @property string|null $agreement_status
  * @property string|null $deleted_at
  * @property float|null $fee_override
  * @property float $max_weekly_hours
@@ -117,7 +116,7 @@ use App\Billing\ClientAuthorization;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientNarrative[] $narrative
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientAgreementStatusHistory[] $agreementStatusHistory
  * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
@@ -197,11 +196,12 @@ use App\Billing\ClientAuthorization;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold,
+class Client extends AuditableModel implements UserRole, ReconcilableInterface, HasPaymentHold,
     HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -264,8 +264,26 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'discharge_disposition',
         'discharge_internal_notes',
         'sales_person_id',
+        'agreement_status',
     ];
 
+    ///////////////////////////////////////////
+    /// Client Agreement Statuses
+    ///////////////////////////////////////////
+
+    const NEEDS_AGREEMENT = 'needs_agreement';
+    const SIGNED_ELECTRONICALLY = 'electronic';
+    const SIGNED_PAPER = 'paper';
+
+    ///////////////////////////////////////////
+    /// Client Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -480,6 +498,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
     }
 
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
+    {
+        return route('setup.clients', ['token' => $this->getEncryptedKey()]);    
+    }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
@@ -592,28 +620,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     }
 
     /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a client that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
-    }
-
-    /**
      * Aggregate schedules for this client and return an array of events
      *
      * @param string|\DateTime $start
@@ -705,22 +711,9 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         $this->backupPayment()->associate($default)->save();
     }
 
-    public function sendConfirmationEmail()
+    public function agreementStatusHistory()
     {
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-
-        $status = 'emailed_reconfirmation';
-        $this->update(['onboard_status' => $status]);
-        $history = new OnboardStatusHistory(compact('status'));
-        $this->onboardStatusHistory()->save($history);
-
-        $this->notify(new ClientConfirmation($this, $this->business));
-    }
-
-    public function onboardStatusHistory()
-    {
-        return $this->hasMany(OnboardStatusHistory::class);
+        return $this->hasMany(ClientAgreementStatusHistory::class);
     }
 
     /**

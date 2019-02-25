@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\StatusAlias;
 use App\Business;
 use App\BusinessChain;
+use App\Client;
 
 class ManageUserStatusTest extends TestCase
 {
@@ -106,7 +107,7 @@ class ManageUserStatusTest extends TestCase
         $data['ssn'] = '123-23-1234';
         $data['status_alias_id'] = $status->id;
         // onboard status must be set for update to succeed
-        $data['onboard_status'] = 'needs_agreement';
+        $data['agreement_status'] = Client::NEEDS_AGREEMENT;
 
         $this->patchJson(route('business.clients.update', ['client' => $this->client]), $data)
             ->assertStatus(200);

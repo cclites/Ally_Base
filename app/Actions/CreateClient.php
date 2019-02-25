@@ -5,6 +5,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Client;
 use App\Events\ClientCreated;
 use App\OnboardStatusHistory;
+use App\ClientAgreementStatusHistory;
 
 class CreateClient
 {
@@ -16,6 +17,10 @@ class CreateClient
             $data['email'] = self::AUTO_EMAIL;
         }
 
+        if (empty($data['username'])) {
+            $data['username'] = Client::getAutoUsername();
+        }
+
         if ($client = Client::create($data)) {
             if ($client->email === self::AUTO_EMAIL) {
                 $client->setAutoEmail()->save();
@@ -25,10 +30,10 @@ class CreateClient
                 $client->setPaymentMethod($paymentMethod);
             }
 
-            $history = new OnboardStatusHistory([
-                'status' => $data['onboard_status'],
+            $history = new ClientAgreementStatusHistory([
+                'status' => $data['agreement_status'],
             ]);
-            $client->onboardStatusHistory()->save($history);
+            $client->agreementStatusHistory()->save($history);
 
             event(new ClientCreated($client));
 

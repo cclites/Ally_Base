@@ -234,6 +234,16 @@ class Form {
         }
     }
 
+    /**
+     * Combine the contents of another form into this
+     * form so the data can be submitted together in one request
+     */
+    combineForm(otherForm) {
+        for (let property in otherForm.originalData) {
+            this.originalData[property] = otherForm.originalData[property];
+            this[property] = otherForm[property];
+        }
+    }
 }
 
 export default Form;

@@ -91,7 +91,7 @@
                                     id="email"
                                     name="email"
                                     type="email"
-                                    @blur.native="form.username = $event.target.value"
+                                    @blur.native="copyEmailToUsername()"
                                     v-model="form.email"
                                     :disabled="form.no_email"
                                 >
@@ -101,7 +101,7 @@
                                 <div class="form-check">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" name="no_email"
-                                               v-model="form.no_email" value="1">
+                                               v-model="form.no_email" value="1" @input="toggleNoEmail()">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">No Email</span>
                                     </label>
@@ -111,16 +111,42 @@
                         <input-help :form="form" field="email"
                                     text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
-                    <b-form-group label="Username" label-for="username" label-class="required">
+                    <b-form-group label="Username" label-for="username">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        v-model="form.username"
+                                        :disabled="form.no_username"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_username"
+                                            v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Let Client Choose</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                    </b-form-group>
+                    <!-- <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
                                 name="username"
                                 type="text"
                                 v-model="form.username"
+                                :disabled="form.no_username"
                         >
                         </b-form-input>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
-                    </b-form-group>
+                    </b-form-group> -->
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
@@ -345,54 +371,67 @@
                 <b-col lg="12">
                     <hr />
                 </b-col>
-                <b-col lg="8">
-                    <b-row>
-                        <b-col lg="6" sm="12">
-                            <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
-                                <b-form-select
-                                        id="onboard_status"
-                                        name="onboard_status"
-                                        v-model="form.onboard_status"
-                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
-                                >
-                                    <option value="">--Please Select--</option>
-                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
-                                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="6" sm="12">
-                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <br>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboarding_step < 6">
-                                <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
-                                <br>
-                                <b-button @click="startOnboarding" variant="info" size="sm">Start Client Onboarding</b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Resend Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
-                        <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
-                        <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
+                <b-col lg="6">
+                    <b-form-group label="Ally Client Agreement Status" label-for="agreement_status">
+                        <b-form-select
+                                id="agreement_status"
+                                name="agreement_status"
+                                v-model="form.agreement_status"
+                                :disabled="form.agreement_status == 'electronic'"
+                        >
+                            <option value="">--Please Select--</option>
+                            <option v-if="hiddenOnboardStatuses[form.agreement_status]" :value="form.agreement_status">{{ hiddenOnboardStatuses[form.agreement_status] }}</option>
+                            <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="agreement_status" :text="onboardStatusText"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <div class="mb-3">
+                        <div>
+                            <label for="agreement_status" class="col-form-label pt-0">Account Setup Status: 
+                                <span v-if="! client.setup_status" class="text-danger">Not Started</span>
+                                <span v-if="['accepted_terms', 'created_account'].includes(client.setup_status)" class="text-warning">In Progress</span>
+                                <span v-if="client.setup_status == 'added_payment'" class="text-success">Complete</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span class="mr-2"><i :class="setupCheckClass('accepted_terms')" aria-hidden="true"></i> Agreed to Terms</span>
+                            <span class="mr-2"><i :class="setupCheckClass('created_account')" aria-hidden="true"></i> Created Login</span>
+                            <span class="mr-2"><i :class="setupCheckClass('added_payment')" aria-hidden="true"></i> Added Payment Method</span>
+                        </div>
+                    </div>
+                    <b-form-group label="Account Setup URL">
+                        <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
+                        <input-help :form="form" text="The URL the client can use to setup their account."></input-help>
+                    </b-form-group>
+
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
+                            <span>{{ client.user.welcome_email_sent_at ? formatDateTimeFromUTC(client.user.welcome_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Training Email Last Sent:</strong> 
+                            <span>{{ client.user.training_email_sent_at ? formatDateTimeFromUTC(client.user.training_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+
+                    <b-button variant="info" @click="sendWelcomeEmail()">
+                        Send Welcome Email
+                    </b-button>
+
+                    <b-button variant="info" @click="sendTrainingEmail()">
+                        Send Training Email
+                    </b-button>
+                    
+                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">
+                        Start Client Onboarding
+                    </b-button>
                 </b-col>
             </b-row>
             <b-row>
-                <b-col lg="12">
+                <b-col lg="12" class="mt-4">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
@@ -415,6 +454,8 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
+        <!-- <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal> -->
+
         <business-referral-source-modal
             @saved="savedReferralSource"
             v-model="showReferralModal"
@@ -428,6 +469,15 @@
             Contact Ally support to configure this feature.
         </b-modal>
 
+        <confirm-modal title="Send Welcome Email" ref="confirmWelcomeEmail" yesButton="Send Email">
+            <p>Send welcome email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email instructing them to click on a private link to confirm their information and reset their password.</p>
+        </confirm-modal>
+
+        <confirm-modal title="Send Training Email" ref="confirmTrainingEmail" yesButton="Send Email">
+            <p>Send training email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email linking them to the Knowledge Base.</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -447,7 +497,6 @@
         props: {
             'client': {},
             'lastStatusDate' : {},
-            'confirmUrl': {},
             'referralsources': {},
             salesPeople: {
                 type: Array,
@@ -473,10 +522,11 @@
                     email: this.client.email,
                     no_email: false,
                     username: this.client.username,
+                    no_username: false,
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
-                    onboard_status: this.client.onboard_status,
+                    agreement_status: this.client.agreement_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
                     referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
@@ -516,18 +566,76 @@
                 activateModal: false,
                 showReferralModal: false,
                 caseManagers: [],
+                sendEmailModal: false,
                 statusAliases: [],
-                onboardingWarning: false
+                localLastStatusDate: null,
+                onboardingWarning: false,
             }
         },
 
         mounted() {
+            this.localLastStatusDate = this.lastStatusDate;
             this.checkForNoEmailDomain();
+            this.checkForNoUsername();
             this.loadOfficeUsers();
             this.fetchStatusAliases();
         },
 
         methods: {
+            canSendEmails() {
+                if (! this.form.email || this.isEmptyEmail(this.form.email)) {
+                    alert('You cannot send any emails to this user because there is no email associated with their account.');
+                    return false;
+                }
+
+                return true;
+            },
+
+            sendWelcomeEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmWelcomeEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/welcome-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
+            sendTrainingEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmTrainingEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/training-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
+            setupCheckClass(step) {
+                let check = false;
+                switch (step) {
+                    case 'accepted_terms':
+                        check = ['accepted_terms', 'created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'created_account':
+                        check = ['created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'added_payment':
+                        check = ['added_payment'].includes(this.client.setup_status);
+                        break;
+                }
+
+                return check ? 'fa fa-check-square-o' : 'fa fa-square-o';
+            },
+
             savedReferralSource(data) {
                 if(data) {
                     this.showReferralModal = false;
@@ -542,11 +650,27 @@
             },
 
             checkForNoEmailDomain() {
-                let domain = 'noemail.allyms.com';
                 if (this.form.email) {
-                    if (this.form.email.substr(domain.length * -1) === domain) {
+                    if (this.isEmptyEmail(this.form.email)) {
                         this.form.no_email = true;
                         this.form.email = null;
+                    }
+                }
+            },
+
+            isEmptyEmail(email) {
+                let domain = 'noemail.allyms.com';
+                if (email.substr(domain.length * -1) === domain) {
+                    return true;
+                }
+                return false;
+            },
+
+            checkForNoUsername() {
+                if (this.form.username) {
+                    if (this.form.username.substr(0, 9) == 'no_login_') {
+                        this.form.no_username = true;
+                        this.form.username = null;
                     }
                 }
             },
@@ -564,19 +688,10 @@
                 this.preferences.alertOnResponse = false;
                 this.preferences.post('/business/clients/' + this.client.id + '/preferences');
                 if (this.form.ssn) this.form.ssn = '***-**-****';
-                if (this.form.wasModified('onboard_status')) {
-                    this.client.onboard_status = this.form.onboard_status;
-                    this.lastStatusDate = moment.utc().format();
+                if (this.form.wasModified('agreement_status')) {
+                    this.client.agreement_status = this.form.agreement_status;
+                    this.localLastStatusDate = moment.utc().format();
                 }
-            },
-
-            sendConfirmation() {
-                let component = this;
-                let form = new Form();
-                form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
-                    .then(function(response) {
-                        component.lastStatusDate = moment.utc().format();
-                    });
             },
 
             startOnboarding() {
@@ -599,6 +714,27 @@
                     .catch(e => {
                     })
             },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                }
+            },
+
+            copyEmailToUsername() {
+                if (this.form.no_username) {
+                    return;
+                }
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
+            },
         },
 
         computed: {
@@ -611,17 +747,15 @@
             },
 
             lastStatusUpdated() {
-                return moment.utc(this.lastStatusDate).local().format('L') + ' at ' + moment.utc(this.lastStatusDate).local().format('LT');
+                return moment.utc(this.localLastStatusDate).local().format('L') + ' at ' + moment.utc(this.localLastStatusDate).local().format('LT');
             },
 
             onboardStatusText() {
-                if (this.lastStatusDate) {
-                    switch (this.form.onboard_status) {
-                        case 'emailed_reconfirmation':
-                            return 'The confirmation email was sent ' + this.lastStatusUpdated;
-                        case 'agreement_signed': // paper signature
+                if (this.localLastStatusDate) {
+                    switch (this.form.agreement_status) {
+                        case 'paper': // paper signature
                             return 'Signed: ' + this.lastStatusUpdated;
-                        case 'reconfirmed_checkbox': // electronic signature
+                        case 'electronic': // electronic signature
                             return 'Signed Electronically: ' + this.lastStatusUpdated;
                     }
                     return 'The status was last updated ' + this.lastStatusUpdated;

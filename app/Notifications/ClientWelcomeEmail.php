@@ -2,33 +2,31 @@
 
 namespace App\Notifications;
 
-use App\Business;
-use App\Client;
-use App\Confirmations\Confirmation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ClientConfirmation extends Notification
+class ClientWelcomeEmail extends Notification
 {
     use Queueable;
 
-    protected $business;
-    protected $token;
-    protected $url;
+    /**
+     * @var \App\Client
+     */
+    public $client;
+
+    public $business;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(Client $client, Business $business)
+    public function __construct($client)
     {
-        $this->business = $business;
-        $confirmation = new Confirmation($client);
-        $this->token = $confirmation->getToken();
-        $this->url = route('confirm.client', [$this->token]);
+        $this->client = $client;
+        $this->business = $this->client->business;
     }
 
     /**
@@ -51,10 +49,24 @@ class ClientConfirmation extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('Please confirm your information for ' . $this->business->name)
-            ->markdown('emails.client.verification', [
+            ->subject('Welcome to Ally')
+            ->markdown('emails.client.welcome', [
+                'client' => $this->client,
                 'business' => $this->business,
-                'url' => $this->url
+                'url' => $this->client->setup_url,
             ]);
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toArray($notifiable)
+    {
+        return [
+            //
+        ];
     }
 }

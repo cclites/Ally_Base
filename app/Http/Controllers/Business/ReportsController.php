@@ -1069,8 +1069,8 @@ class ReportsController extends BaseController
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
-                        'email_sent_at' => $item->user->email_sent_at,
-                        'onboard_status' => $item->onboard_status,
+                        'email_sent_at' => $item->user->welcome_email_sent_at,
+                        'onboard_status' => $item->agreement_status,
                     ];
                 }));
             } else {
@@ -1079,7 +1079,7 @@ class ReportsController extends BaseController
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
-                        'email_sent_at' => $item->user->email_sent_at,
+                        'email_sent_at' => $item->user->welcome_email_sent_at,
                         'onboard_status' => $item->onboarded ? 'Onboarded' : 'Not Onboarded',
                     ];
                 }));
