@@ -554,10 +554,10 @@ Route::group([
     Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 
     /* Invoices */
-    Route::get('invoices/clients', 'Admin\ClientInvoiceController@index');
+    Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
-    Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index');
+    Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');

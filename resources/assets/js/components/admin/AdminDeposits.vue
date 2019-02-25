@@ -139,6 +139,10 @@
                         formatter: (val) => this.numberFormat(val),
                     },
                     {
+                        key: 'amount_due',
+                        formatter: (val) => this.numberFormat(val),
+                    },
+                    {
                         key: 'success',
                     },
                     {
@@ -171,7 +175,7 @@
 
             async loadInvoices() {
                 this.chainLoaded = false;
-                const response = await axios.get(`/admin/invoices/deposits?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/deposits?json=1&paid=0&chain_id=${this.chainId}`);
                 this.invoices = response.data.data;
                 this.chainLoaded = true;
             },
@@ -197,7 +201,7 @@
 
             async updatePaidInvoices()
             {
-                const response = await axios.get(`/admin/invoices/deposits?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/deposits?json=1&paid=0&chain_id=${this.chainId}`);
                 let data = response.data.data;
                 this.invoices = this.invoices.map(invoice => {
                     if (!data.find(item => item.name === invoice.name)) {

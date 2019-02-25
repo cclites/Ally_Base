@@ -94,6 +94,8 @@ Vue.component('admin-import-report', require('./components/admin/import/AdminImp
 Vue.component('admin-bucket-report', require('./components/admin/AdminBucketReport'));
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
+Vue.component('admin-deposit-invoices', require('./components/admin/AdminDepositInvoices'));
+Vue.component('admin-client-invoices', require('./components/admin/AdminClientInvoices'));
 Vue.component('admin-evv-report', require('./components/admin/AdminEvvReport'));
 Vue.component('admin-emails-report', require('./components/admin/reports/AdminEmailsReport'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
@@ -149,6 +151,7 @@ Vue.component('cc-expiration-report', require('./components/business/reports/Cre
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
+//Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-exception', require('./components/BusinessException.vue'));
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));

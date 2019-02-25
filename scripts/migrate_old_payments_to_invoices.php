@@ -122,6 +122,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
         $invoice = \App\Billing\CaregiverInvoice::create([
             'name' => \App\Billing\CaregiverInvoice::getNextName($deposit->caregiver_id),
             'caregiver_id' => $deposit->caregiver_id,
+            'created_at' => $deposit->created_at,
         ]);
 
         foreach($deposit->shifts as $shift) {
@@ -181,6 +182,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, f
         $invoice = \App\Billing\BusinessInvoice::create([
             'name' => \App\Billing\BusinessInvoice::getNextName($deposit->business_id),
             'business_id' => $deposit->business_id,
+            'created_at' => $deposit->created_at,
         ]);
 
         foreach($deposit->shifts as $shift) {
