@@ -1,14 +1,18 @@
 <?php
 namespace App\Data;
 
+use App\Data\Traits\ReflectsToArray;
 use Carbon\Carbon;
+use JsonSerializable;
 
 /**
  * Class DateRange
  * @package App\Data
  */
-class DateRange
+class DateRange implements JsonSerializable
 {
+    use ReflectsToArray;
+
     /** @var \Carbon\Carbon */
     private $start;
 

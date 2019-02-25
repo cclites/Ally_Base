@@ -1,13 +1,16 @@
 <?php
 namespace App\Users;
 
+use App\Data\Traits\ReflectsToArray;
 use App\Scheduling\Data\CalendarCaregiverFilter;
 use App\Scheduling\Data\CalendarNextDayThreshold;
 use App\Scheduling\Data\CalendarView;
-use ReflectionClass;
+use JsonSerializable;
 
-class UserSettings
+class UserSettings implements JsonSerializable
 {
+    use ReflectsToArray;
+
     private $scheduling;
     private $enable_schedule_groups;
     private $calendar_default_view;
@@ -70,12 +73,4 @@ class UserSettings
         return $this->ask_on_confirm;
     }
 
-    function toArray()
-    {
-        $properties = (new ReflectionClass($this))->getProperties();
-        return array_reduce($properties, function(array $carry, \ReflectionProperty $property) {
-             $carry[$property->name] = $this->{$property->name};
-             return $carry;
-        }, []);
-    }
 }

@@ -1,14 +1,19 @@
 <?php
 namespace App\Data;
 
+use App\Data\Traits\ReflectsToArray;
+use JsonSerializable;
+
 /**
  * Class ScheduledRates
  * Rate data used in both shifts and scheduling
  * 
  * @package App\Data
  */
-class ScheduledRates
+class ScheduledRates implements JsonSerializable
 {
+    use ReflectsToArray;
+
     private $clientRate;
     private $caregiverRate;
     private $fixedRates;
