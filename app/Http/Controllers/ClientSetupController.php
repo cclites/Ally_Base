@@ -24,9 +24,6 @@ class ClientSetupController extends Controller
     public function show($token)
     {
         $client = Client::findEncryptedOrFail($token);
-        if (empty($client)) {
-            abort(404, 'Not Found');
-        }
 
         $client->load(['address', 'phoneNumber']);
 
@@ -44,9 +41,6 @@ class ClientSetupController extends Controller
     public function step1(ClientStep1Request $request, $token)
     {
         $client = Client::findEncryptedOrFail($token);
-        if (empty($client)) {
-            abort(404, 'Not Found');
-        }
 
         // TODO: Refactor how addresses are upserted.
         $response = (new AddressController())->update(request(), $client->user, 'evv', 'Your address');
@@ -65,7 +59,7 @@ class ClientSetupController extends Controller
             }
             $client->setupStatusHistory()->create(['status' => $data['setup_status']]);
 
-            if (empty($this->evvPhone)) {
+            if (empty($client->evvPhone)) {
                 $client->phoneNumbers()->create([
                     'national_number' => $request->phone_number,
                     'country_code' => '1',
@@ -158,9 +152,6 @@ class ClientSetupController extends Controller
     public function terms($token)
     {
         $client = Client::findEncryptedOrFail($token);
-        if (empty($client)) {
-            abort(404, 'Not Found');
-        }
 
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
@@ -185,9 +176,6 @@ class ClientSetupController extends Controller
     public function checkStep($token)
     {
         $client = Client::findEncryptedOrFail($token);
-        if (empty($client)) {
-            abort(404, 'Not Found');
-        }
         $client->load(['address', 'phoneNumber']);
 
         if (empty($client->setup_status)) {
