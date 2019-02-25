@@ -57,5 +57,14 @@
                 this.caregiver = data;
             }
         },
+
+        mounted() {
+            axios.get(`/account-setup/caregivers/${this.token}/check`)
+                .then( ({ data }) => {
+                    this.updateCaregiver(data);
+                })
+                .catch(e => {
+                });
+        },
     }
 </script>

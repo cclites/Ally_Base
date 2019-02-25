@@ -57,5 +57,14 @@
                 this.client = data;
             }
         },
+
+        mounted() {
+            axios.get(`/account-setup/clients/${this.token}/check`)
+                .then( ({ data }) => {
+                    this.updateClient(data);
+                })
+                .catch(e => {
+                });
+        },
     }
 </script>
