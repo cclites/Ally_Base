@@ -60,7 +60,7 @@ class ProfileController extends Controller
 
         if(auth()->user()->role_type == 'client') {
             $client_data = request()->validate([
-                'caregiver_1099' => 'boolean',
+                'caregiver_1099' => 'nullable|string|in:ally,client',
             ]);
             auth()->user()->role->update($client_data);
         }

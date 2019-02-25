@@ -215,11 +215,11 @@
                         </div>
                     </b-form-group>
 
-                    <b-form-group label="Send 1099" v-if="authRole == 'admin'">
-                        <b-form-select v-model="form.caregiver_1099">
+                    <b-form-group label="Send 1099">
+                        <b-form-select v-model="form.caregiver_1099" :disabled="authRole != 'admin' && form.caregiver_1099 == 'ally'">
                             <option value="">No</option>
                             <option value="client">On Client's Behalf</option>
-                            <option value="ally">On Ally’s Behalf</option>
+                            <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>
