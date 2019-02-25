@@ -1,0 +1,81 @@
+<?php
+namespace App\Users;
+
+use App\Scheduling\Data\CalendarCaregiverFilter;
+use App\Scheduling\Data\CalendarNextDayThreshold;
+use App\Scheduling\Data\CalendarView;
+use ReflectionClass;
+
+class UserSettings
+{
+    private $scheduling;
+    private $enable_schedule_groups;
+    private $calendar_default_view;
+    private $calendar_caregiver_filter;
+    private $calendar_remember_filters;
+    private $calendar_next_day_threshold;
+    private $ask_on_confirm;
+
+    public function __construct(
+        bool $scheduling = true,
+        bool $enable_schedule_groups = true,
+        bool $ask_on_confirm = true,
+        bool $calendar_remember_filters = true,
+        ?CalendarView $calendar_default_view = null,
+        ?CalendarCaregiverFilter $calendar_caregiver_filter = null,
+        ?CalendarNextDayThreshold $calendar_next_day_threshold = null
+    )
+    {
+        $this->scheduling = $scheduling;
+        $this->enable_schedule_groups = $enable_schedule_groups;
+        $this->ask_on_confirm = $ask_on_confirm;
+        $this->calendar_remember_filters = $calendar_remember_filters;
+        $this->calendar_default_view = $calendar_default_view ?? new CalendarView(CalendarView::TIMELINE_WEEK);
+        $this->calendar_caregiver_filter = $calendar_caregiver_filter ?? new CalendarCaregiverFilter(CalendarCaregiverFilter::UNASSIGNED);
+        $this->calendar_next_day_threshold = $calendar_next_day_threshold ?? new CalendarNextDayThreshold(CalendarNextDayThreshold::DISABLED);
+    }
+
+    function scheduling(): bool
+    {
+        return $this->scheduling;
+    }
+
+    function enable_schedule_groups(): bool
+    {
+        return $this->enable_schedule_groups;
+    }
+
+    function calendar_default_view(): CalendarView
+    {
+        return $this->calendar_default_view;
+    }
+
+    function calendar_caregiver_filter(): CalendarCaregiverFilter
+    {
+        return $this->calendar_caregiver_filter;
+    }
+
+    function calendar_next_day_threshold(): CalendarNextDayThreshold
+    {
+        return $this->calendar_next_day_threshold;
+    }
+
+    function calendar_remember_filters(): bool
+    {
+        return $this->calendar_remember_filters;
+    }
+
+    function ask_on_confirm(): bool
+    {
+        return $this->ask_on_confirm;
+    }
+
+    function toArray()
+    {
+        $properties = (new ReflectionClass($this))->getProperties();
+        return array_reduce($properties, function(array $carry, \ReflectionProperty $property) {
+             $carry[$property->name] = $this->{$property->name};
+             return $carry;
+        }, []);
+    }
+}
