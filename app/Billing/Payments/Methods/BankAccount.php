@@ -4,8 +4,11 @@ namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Contracts\DepositableInterface;
 use App\Billing\GatewayTransaction;
+use App\Billing\Payments\BankAccountDeposit;
 use App\Billing\Payments\BankAccountPayment;
+use App\Billing\Payments\Contracts\DepositMethodStrategy;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Business;
 use App\Billing\Gateway\ACHDepositInterface;
@@ -51,7 +54,7 @@ use Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
  * @mixin \Eloquent
  */
-class BankAccount extends AuditableModel implements ChargeableInterface
+class BankAccount extends AuditableModel implements ChargeableInterface, DepositableInterface
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;
@@ -145,9 +148,15 @@ class BankAccount extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getDefaultStrategy(): PaymentMethodStrategy
+    function getPaymentStrategy(): PaymentMethodStrategy
     {
         return new BankAccountPayment($this);
+    }
+
+
+    function getDepositStrategy(): DepositMethodStrategy
+    {
+        return new BankAccountDeposit($this);
     }
 
     /**
@@ -247,5 +256,23 @@ class BankAccount extends AuditableModel implements ChargeableInterface
     public function getOwnerModel()
     {
         return $this->user ?? $this->business;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'bank_accounts:' . $this->id;
+    }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return 'ACH *' . $this->last_four;
     }
 }

@@ -51,7 +51,7 @@
             <b-row>
                 <b-col lg="12" class="pb-2">
                     <small>
-                        * Ally does not guarantee insurance claim submission in any way.  It is the responsibility of the client to follow up with the insurance company on receipt and payment of claims.
+                        * Ally does not guarantee insurance claim submission in any way.  It is the responsibility of the client to follow up with the insurance company on receipt and payment of claims.  Please complete and return the Ally Request to Submit Insurance Invoices form in order for Ally to submit on the client's behalf.
                     </small>
                 </b-col>
                 <b-col lg="12">

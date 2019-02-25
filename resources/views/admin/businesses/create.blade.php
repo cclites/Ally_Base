@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <business-create></business-create>
+    <business-create :chains="{{ $chains }}"></business-create>
 @endsection

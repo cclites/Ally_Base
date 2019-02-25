@@ -8,6 +8,8 @@ use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Business;
+use App\User;
 
 
 class ProcessPayment
@@ -18,7 +20,6 @@ class ProcessPayment
     protected $allyFee = null;
 
     /**
-     * @param \App\Billing\Payer $payer
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float $amount
      * @param string $currency
@@ -26,21 +27,10 @@ class ProcessPayment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
      */
-    function charge(Payer $payer, ?PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
+    function charge(PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
     {
         if ($amount <= 0)  {
             throw new PaymentAmountError("The payment amount cannot be less than $0");
-        }
-
-        if ($payer->isPrivatePay()) {
-            $client = $payer->getPrivatePayer();
-            if (!$client) {
-                throw new PayerAssignmentError("The private payer does not have a client record attached.");
-            }
-        }
-
-        if (!$strategy) {
-            $strategy = $payer->getPaymentMethod()->getDefaultStrategy();
         }
 
         if ($transaction = $strategy->charge($amount, $currency)) {
@@ -48,14 +38,30 @@ class ProcessPayment
                 throw new PaymentMethodDeclined();
             }
 
-            return Payment::create([
-                'payer_id' => $payer,
+            // Get payment method owner
+            if ($owner = $strategy->getPaymentMethod()->getOwnerModel()) {
+                if ($owner instanceof User) {
+                    $client = $owner->client;
+                }
+                if ($owner instanceof Business) {
+                    $business = $owner;
+                }
+            }
+
+            $payment = new Payment([
                 'client_id' => $client->id ?? null,
+                'business_id' => $business->id ?? $client->business_id ?? null,
                 'amount' => $transaction->amount,
+                'payment_type' => $strategy->getPaymentType(),
                 'system_allotment' => $this->getAllyFee($strategy, $amount),
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
             ]);
+
+            $payment->setPaymentMethod($strategy->getPaymentMethod());
+            $payment->save();
+
+            return $payment;
         }
 
         throw new PaymentMethodError();
@@ -82,8 +88,7 @@ class ProcessPayment
             return $this->allyFee;
         }
 
-        $percentage = $strategy->getPaymentMethod()->getAllyPercentage();
-        $allyFee = subtract($amount, divide($amount, add(1, $percentage)));
+        $allyFee = $strategy->getPaymentMethod()->getAllyFee($amount, true);
         return $allyFee;
     }
 }

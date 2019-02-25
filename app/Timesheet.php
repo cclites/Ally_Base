@@ -2,13 +2,16 @@
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Shifts\Data\ClockOutData;
+use App\Data\ScheduledRates;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use App\Shifts\Data\TimesheetData;
 use App\Traits\BelongsToOneBusiness;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 /**
  * App\Timesheet
@@ -121,7 +124,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * A Timesheet can have many SystemExceptions.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function exceptions()
     {
@@ -135,7 +138,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been confirmed.
      *
-     * @return void
+     * @return bool
      */
     public function getIsApprovedAttribute()
     {
@@ -145,7 +148,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been denied.
      *
-     * @return void
+     * @return bool
      */
     public function getIsDeniedAttribute()
     {
@@ -222,7 +225,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @param array $data
      * @param \App\User $creator
-     * @return \App\Timesheet
+     * @return \App\Timesheet|false
      */
     public static function createWithEntries($data, $creator)
     {
@@ -295,20 +298,16 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             $shiftFactory = ShiftFactory::withoutSchedule(
                 Client::findOrFail($this->client_id),
                 Caregiver::findOrFail($this->caregiver_id),
-                Shift::HOURS_DEFAULT,
-                false,
-                $entry['caregiver_rate'],
-                $entry['client_rate'], // TODO: This needs to be converted from provider_fee structure
-                Shift::METHOD_TIMESHEET,
-                Carbon::parse($entry['checked_in_time']),
-                Shift::METHOD_TIMESHEET,
-                Carbon::parse($entry['checked_out_time']),
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_in_time']),
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_out_time']),
+                new ScheduledRates($entry['client_rate'], $entry['caregiver_rate']),
                 Shift::WAITING_FOR_AUTHORIZATION
             );
 
             $timesheetData = new TimesheetData($this);
 
-            $clockOutData = new ClockOutData(
+            $clockOutData = new CaregiverClockoutData(
+                new ClockData(Shift::METHOD_TIMESHEET, $entry['checked_out_time']),
                 $entry['mileage'] ?? 0.0,
                 $entry['other_expenses'] ?? 0.0,
                 null,
@@ -317,6 +316,8 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 
             if ($shift = $shiftFactory->create($timesheetData, $clockOutData)) {
                 $shift->activities()->sync($entry->activities);
+
+                event(new ShiftFlagsCouldChange($shift));
             } else {
                 return false;
             }

@@ -28,6 +28,12 @@ class ClientExcludedCaregiver extends AuditableModel
 
     protected $with = ['caregiver'];
 
+    const REASON_SERVICE_NOT_NEEDED = 'service_not_needed';
+    const REASON_QUIT = 'quit';
+    const REASON_UNHAPPY_CLIENT = 'unhappy_client';
+    const REASON_NO_SHOWS = 'no_shows';
+    const REASON_RETIRED = 'retired';
+    
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class);
@@ -36,5 +42,21 @@ class ClientExcludedCaregiver extends AuditableModel
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get a list of all the valid exclusion reasons.
+     *
+     * @return array
+     */
+    public static function exclusionReasons() : array
+    {
+        return [
+            self::REASON_SERVICE_NOT_NEEDED,
+            self::REASON_QUIT,
+            self::REASON_UNHAPPY_CLIENT,
+            self::REASON_NO_SHOWS,
+            self::REASON_RETIRED,
+        ];
     }
 }

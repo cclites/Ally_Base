@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $name
+ * @property string $short_name
  * @property string $type
  * @property int|null $bank_account_id
  * @property int|null $active
@@ -66,7 +67,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $medicaid_npi_number
  * @property string|null $medicaid_npi_taxonomy
  * @property string|null $outgoing_sms_number
- * @property string|null $multi_location_registry
  * @property string $shift_rounding_method
  * @property string|null $pay_cycle
  * @property string|null $last_day_of_cycle
@@ -112,7 +112,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\ReferralSource[] $referralSources
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThread[] $smsThreads
@@ -208,6 +207,26 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     protected $casts = [
         'unpaired_pay_rates' => 'json',
     ];
+
+    protected $appends = [];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            // populate settings defaults here because the change() method
+            // on migration columns is not supported due to the business
+            // table having an enum column.
+            $model->shift_confirmation_email = false;
+            $model->allow_client_confirmations = false;
+        });
+    }
 
     ///////////////////////////////////////////
     /// Business type constants
@@ -315,11 +334,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(RateCode::class, 'business_id');
     }
 
-    public function referralSources()
-    {
-        return $this->hasMany(ReferralSource::class, 'business_id');
-    }
-
     public function users()
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');
@@ -403,7 +417,12 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         return $this->hasMany(SmsThread::class);
     }
-    
+
+    public function salesPeople()
+    {
+        return $this->hasMany(SalesPerson::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -751,10 +770,28 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->getPhoneNumber();
     }
 
-    function getDefaultStrategy(): PaymentMethodStrategy
+    function getPaymentStrategy(): PaymentMethodStrategy
     {
         if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
-        return $this->paymentAccount->getDefaultStrategy();
+        return $this->paymentAccount->getPaymentStrategy();
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'businesses:' . $this->id;
+    }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return 'ACH-P *' . $this->paymentAccount->last_four;
     }
 
     ////////////////////////////////////

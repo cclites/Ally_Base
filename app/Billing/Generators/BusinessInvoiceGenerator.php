@@ -1,15 +1,33 @@
 <?php
 namespace App\Billing\Generators;
 
+use App\Billing\BusinessInvoice;
+use App\Billing\BusinessInvoiceItem;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Business;
 
 class BusinessInvoiceGenerator extends BaseInvoiceGenerator
 {
-    public function generate(Business $business) {
-        /**
-         * TODO:  Make sure BankAccount implements the DepositableInterface
-         */
+    public function generate(Business $business): ?BusinessInvoice {
+
+        $invoiceables = $this->getInvoiceables($business);
+        if (!count($invoiceables)) {
+            return null;
+        }
+
+        $invoice = BusinessInvoice::create([
+            'name' => BusinessInvoice::getNextName($business->id),
+            'business_id' => $business->id,
+        ]);
+
+        foreach($invoiceables as $invoiceable) {
+            $itemData = $this->getItemData($invoiceable);
+            $item = new BusinessInvoiceItem($itemData);
+            $item->associateInvoiceable($invoiceable);
+            $invoice->addItem($item);
+        }
+
+        return $invoice;
     }
 
     /**
@@ -33,16 +51,18 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
      */
     public function getItemData(InvoiceableInterface $invoiceable): array
     {
-        $total = round(bcmul($invoiceable->getItemUnits(), $invoiceable->getClientRate(), 4), 2);
+        $total = multiply($invoiceable->getItemUnits(), $invoiceable->getProviderRate());
 
         return [
-            'name' => $invoiceable->getItemName(),
-            'group' => $invoiceable->getItemGroup(),
+            'name' => $invoiceable->getItemName(BusinessInvoice::class),
+            'group' => $invoiceable->getItemGroup(BusinessInvoice::class),
             'units' => $invoiceable->getItemUnits(),
+            'client_rate' => $invoiceable->getClientRate(),
+            'caregiver_rate' => $invoiceable->getCaregiverRate(),
+            'ally_rate' => $invoiceable->getAllyRate(),
             'rate' => $invoiceable->getProviderRate(),
-            'date' => $invoiceable->getItemDate(),
             'total' => $total,
-            'amount_due' => $total,
+            'date' => $invoiceable->getItemDate(),
         ];
     }
 }

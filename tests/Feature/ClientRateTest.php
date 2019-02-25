@@ -4,6 +4,7 @@ namespace Tests\Feature;
 use App\Billing\ClientRate;
 use App\Billing\Service;
 use App\Billing\Validators\ClientRateValidator;
+use App\Business;
 use App\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,7 +23,8 @@ class ClientRateTest extends TestCase
     {
         parent::setUp();
         $this->validator = new ClientRateValidator();
-        $this->client = factory(Client::class)->create();
+        $business = factory(Business::class)->create(['timezone' => 'America/New_York']);
+        $this->client = factory(Client::class)->create(['business_id' => $business->id]);
     }
 
     protected function makeRates(array $data = [], ?int $count = null)

@@ -38,12 +38,19 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Caregiver::forRequestedBusinesses()->ordered();
+            $query = Caregiver::with('clients.business')
+                ->forRequestedBusinesses()
+                ->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
                 $query->where('active', $request->input('active', 1));
             }
+
+            if ($request->input('status') !== null) {
+                $query->where('status_alias_id', $request->input('status', null));
+            }
+
             // Use query string ?address=1&phone_number=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
@@ -52,7 +59,17 @@ class CaregiverController extends BaseController
                 $query->with('phoneNumber');
             }
 
-            return $query->get();
+            if ($request->filled('location')) {
+                $query->whereHas('clients', function($q1) use ($request) {
+                    $q1->whereHas('business', function ($q2) use ($request) {
+                        $q2->where('id', $request->location);
+                    });
+                });
+            }
+
+            $results = $query->get();
+            // dd($results->toArray());
+            return response()->json($results);
         }
 
         return view('business.caregivers.index');
@@ -141,6 +158,9 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->future_schedules = $caregiver->futureSchedules()->count();
+        $caregiver->hours_total = $caregiver->totalServiceHours();
+        $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
@@ -199,8 +219,14 @@ class CaregiverController extends BaseController
         } catch (\Exception $ex) {
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
+        $data = [
+            'active' => false,
+            'inactive_at' => $inactive_at,
+            'deactivation_reason_id' => request('deactivation_reason_id'),
+            'deactivation_note' => request('note')
+        ];
 
-        if ($caregiver->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        if ($caregiver->update($data)) {
             $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
@@ -220,7 +246,7 @@ class CaregiverController extends BaseController
         if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
             return new SuccessResponse('The caregiver has been re-activated.');
         }
-        return new ErrorResponse('Could not re-activate the selected caregiver.');
+        return new ErrorResponse(500, 'Could not re-activate the selected caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)
@@ -298,7 +324,7 @@ class CaregiverController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        $data = $request->validate(['misc' => 'required|string']);
+        $data = $request->validate(['misc' => 'nullable|string']);
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }

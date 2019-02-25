@@ -5,6 +5,7 @@ use App\AuditableModel;
 use App\Business;
 use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Contracts\ContactableInterface;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
@@ -105,4 +106,40 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
             'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
         ];
     }
+
+    public function getRecipient(): ContactableInterface
+    {
+        return $this->caregiver ?? $this->business ?? new Business();
+    }
+
+    /**
+     * Get the total deposit amount
+     *
+     * @return float
+     */
+    public function getAmount(): float
+    {
+        return (float) $this->amount;
+    }
+
+    /**
+     * Return the amount of the deposit that has been applied to invoices
+     *
+     * @return float
+     */
+    function getAmountApplied(): float
+    {
+        return (float) \DB::table('invoice_deposits')->where('deposit_id', $this->id)->sum('amount_applied');
+    }
+
+    /**
+     * Return the amount of the payment that has yet to be applied
+     *
+     * @return float
+     */
+    function getAmountAvailable(): float
+    {
+        return subtract($this->amount, $this->getAmountApplied());
+    }
+
 }

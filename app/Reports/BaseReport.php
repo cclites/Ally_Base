@@ -30,6 +30,11 @@ abstract class BaseReport implements Report
     protected $formatters = [];
 
     /**
+     * @var string
+     */
+    protected $dateField = "checked_in_time";
+
+    /**
      * Add a condition to limit report data
      *
      * @param $field
@@ -60,13 +65,13 @@ abstract class BaseReport implements Report
         }
 
         if ($start && $end) {
-            $this->query()->whereBetween('checked_in_time', [$start, $end]);
+            $this->query()->whereBetween($this->dateField, [$start, $end]);
         }
         elseif ($start) {
-            $this->query()->where('checked_in_time', '>=', $start);
+            $this->query()->where($this->dateField, '>=', $start);
         }
         else {
-            $this->query()->where('checked_in_time', '<=', $end);
+            $this->query()->where($this->dateField, '<=', $end);
         }
 
         return $this;

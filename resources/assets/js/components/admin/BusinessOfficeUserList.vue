@@ -22,14 +22,15 @@
             </tr>
             </tbody>
         </table>
-        <business-office-user-modal :business="business" :selectedItem="selectedItem" v-model="officeUserModal" :items="users"></business-office-user-modal>
+        <business-office-user-modal :chain="chain" :businesses="businesses" :selectedItem="selectedItem" v-model="officeUserModal" :items="users"></business-office-user-modal>
     </b-card>
 </template>
 
 <script>
     export default {
         props: {
-            'business': Object,
+            'chain': Object,
+            'businesses': Array,
         },
 
         data() {
@@ -47,9 +48,9 @@
         methods: {
 
             loadUsers() {
-                axios.get('/admin/businesses/' + this.business.id + '/users')
+                axios.get('/admin/chains/' + this.chain.id + '/users')
                     .then(response => {
-                        this.users = response.data;
+                        this.users = response.data.data;
                     })
             },
 
@@ -66,7 +67,7 @@
             deleteUser(user) {
                 if (confirm('Are you sure you wish to delete ' + user.username + '?')) {
                     let form = new Form();
-                    form.submit('delete', '/admin/businesses/' + this.business.id + '/users/' + user.id)
+                    form.submit('delete', '/admin/chains/' + this.chain.id + '/users/' + user.id)
                         .then(response => {
                             this.users = this.users.filter(item => item.id !== user.id);
                         })

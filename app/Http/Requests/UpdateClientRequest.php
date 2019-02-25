@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
@@ -16,11 +17,14 @@ class UpdateClientRequest extends BusinessRequest
      */
     public function rules()
     {
+        $client = $this->route('client');
+        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => ['required', Rule::unique('users')->ignore($this->route('client')->id)],
+            'username' => ['required', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -32,14 +36,6 @@ class UpdateClientRequest extends BusinessRequest
             'service_start_date' => 'nullable|date',
             'diagnosis' => 'nullable|string|max:100',
             'ambulatory' => 'nullable|boolean',
-            'poa_first_name' => 'nullable|string|max:50',
-            'poa_last_name' => 'nullable|string|max:50',
-            'poa_phone' => 'nullable|string|max:25',
-            'poa_relationship' => 'nullable|string|max:50',
-            'dr_first_name' => 'nullable|string|max:50',
-            'dr_last_name' => 'nullable|string|max:50',
-            'dr_phone' => 'nullable|string|max:25',
-            'dr_fax' => 'nullable|string|max:25',
             'hospital_name' => 'nullable|string|max:100',
             'hospital_number' => 'nullable|string|max:25',
             'avatar' => ['nullable', new Avatar()],
@@ -48,7 +44,10 @@ class UpdateClientRequest extends BusinessRequest
             'travel_directions' => 'nullable|string|max:65535',
             'disaster_code_plan' => 'nullable|string|max:50',
             'disaster_planning' => 'nullable|string|max:65535',
-            'caregiver_1099' => 'nullable|boolean',
+            'caregiver_1099' => 'nullable|string|in:ally,client',
+            'receive_summary_email' => 'boolean',
+            'sales_person_id' => 'nullable|int',
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
         ];
     }
 

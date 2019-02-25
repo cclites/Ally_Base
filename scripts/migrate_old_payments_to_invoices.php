@@ -2,73 +2,26 @@
 require __DIR__ . "/bootstrap.php";
 
 use App\Billing\ClientInvoice;
+use App\Billing\Deposit;
 use App\Billing\Payment;
 
 DB::beginTransaction();
 
 ////////////////////////////////////
-//// Create Client Payers
-////////////////////////////////////
-
-// Create a new provider pay payer for each business location
-$providerPayers = [];
-foreach(\App\Business::all() as $business) {
-    $payer = new \App\Billing\Payer([
-        'name' => $business->name(),
-        'week_start' => 1,
-        'address1' => $business->address1,
-        'address2' => $business->address2,
-        'city' => $business->city,
-        'state' => $business->state,
-        'zip' => $business->zip,
-        'phone_number' => $business->phone1,
-        'chain_id' => $business->chain_id,
-    ]);
-    $payer->paymentMethod()->associate($business);
-    $payer->save();
-    $providerPayers[$business->id] = $payer;
-
-    // Mark all previous provider pay payments as the new payer id
-    Payment::whereNull('client_id')->where('business_id', $business->id)->update(['payer_id' => $payer->id]);
-}
-
-// Mark all non-provider pay payments as private payer
-Payment::whereNotNull('client_id')->update(['payer_id' => \App\Billing\Payer::PRIVATE_PAY_ID]);
-
-
-// Assign a balance payer for all existing clients
-\App\Client::with('defaultPayment')->chunk(200, function($clients) {
-    $clients->each(function(\App\Client $client) {
-        global $providerPayers;
-        if ($client->getPaymentMethod() instanceof \App\Business) {
-            $payer = $providerPayers[$client->business_id];
-        } else {
-            $payer = null;
-        }
-
-        \App\Billing\ClientPayer::create([
-            'client_id' => $client->id,
-            'payer_id' => $payer->id ?? \App\Billing\Payer::PRIVATE_PAY_ID,
-            'effective_start' => '2018-01-01',
-            'effective_end' => '9999-12-31',
-            'payment_allocation' => \App\Billing\ClientPayer::ALLOCATION_BALANCE,
-            'priority' => 1,
-        ]);
-    });
-});
-
-////////////////////////////////////
 //// Client Payments to Invoices
 ////////////////////////////////////
 
-Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($payments) {
+Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('client_id')->chunk(500, function($payments) {
     $payments->each(function(Payment $payment) {
-        $payer = $payment->payer;
+
+        if (!$payment->client->payers->first()) {
+            dd($payment->client->toArray());
+        }
 
         $invoice = ClientInvoice::create([
             'client_id' => $payment->client_id,
-            'payer_id' => $payer->id,
-            'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+            'client_payer_id' => $payment->client->payers->first()->id,
+            'name' => ClientInvoice::getNextName($payment->client_id),
             'created_at' => $payment->created_at,
         ]);
 
@@ -94,6 +47,7 @@ Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($paymen
         $invoice->addPayment($payment, $payment->amount);
     });
 });
+echo("Line 139\n");
 
 ////////////////////////////////////
 //// Provider Pay Payments to Invoices (One per client)
@@ -101,17 +55,17 @@ Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($paymen
 
 $missedAmounts = [];
 
-Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments) {
+Payment::with(['shifts', 'shifts.client', 'shifts.client.payers'])->whereNull('client_id')->chunk(500, function($payments) {
     $payments->each(function(Payment $payment) {
-        $payer = $payment->payer;
         $groupedShifts = $payment->shifts->groupBy('client_id');
 
         $totalInvoiced = 0;
         foreach($groupedShifts as $clientId => $shifts) {
+            $payer = $shifts->first()->client->payers->first();
             $invoice = ClientInvoice::create([
                 'client_id' => $clientId,
-                'payer_id' => $payer->id,
-                'name' => ClientInvoice::getNextName($clientId, $payer->id),
+                'client_payer_id' => $payer->id,
+                'name' => ClientInvoice::getNextName($clientId),
                 'created_at' => $payment->created_at,
             ]);
 
@@ -153,8 +107,160 @@ Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments)
 
     });
 });
+echo("Line 199\n");
 
 file_put_contents(base_path('missed_amounts.serialized'), serialize($missedAmounts));
+echo("Line 202\n");
+
+
+////////////////////////////////////
+//// Caregiver deposits to invoices
+////////////////////////////////////
+
+Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiver_id')->chunk(500, function($deposits) {
+    $deposits->each(function(Deposit $deposit) {
+        $invoice = \App\Billing\CaregiverInvoice::create([
+            'name' => \App\Billing\CaregiverInvoice::getNextName($deposit->caregiver_id),
+            'caregiver_id' => $deposit->caregiver_id,
+            'created_at' => $deposit->created_at,
+        ]);
+
+        foreach($deposit->shifts as $shift) {
+            /** @var \App\Billing\Invoiceable\ShiftExpense $expense */
+            foreach($shift->expenses as $expense) {
+                $item = new \App\Billing\CaregiverInvoiceItem([
+                    'group' => $expense->getItemGroup(\App\Billing\CaregiverInvoice::class),
+                    'name' => $expense->getItemName(\App\Billing\CaregiverInvoice::class),
+                    'units' => $units = $expense->getItemUnits(),
+                    'rate' => $rate = $expense->getCaregiverRate(),
+                    'total' => multiply($rate, $units),
+                    'date' => $shift->getItemDate(),
+                ]);
+                $item->associateInvoiceable($expense);
+                $invoice->addItem($item);
+            }
+
+            $item = new \App\Billing\CaregiverInvoiceItem([
+                'group' => $shift->getItemGroup(\App\Billing\CaregiverInvoice::class),
+                'name' => $shift->getItemName(\App\Billing\CaregiverInvoice::class),
+                'units' => $shift->duration(),
+                'rate' => $shift->caregiver_rate,
+                'total' => $shift->costs()->getCaregiverCost(false),
+                'date' => $shift->getItemDate(),
+            ]);
+            $item->associateInvoiceable($shift);
+            $invoice->addItem($item);
+        }
+
+        if ($invoice->getAmount() != $deposit->amount) {
+            // Add a manual adjustment
+            $diff = subtract($deposit->amount, $invoice->getAmount());
+            $item = new \App\Billing\CaregiverInvoiceItem([
+                'rate' => $diff,
+                'units' => 1,
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'total' => $diff,
+                'notes' => str_limit($deposit->notes, 253, '..'),
+                'date' => $deposit->created_at,
+            ]);
+            $invoice->addItem($item);
+        }
+
+        $invoice->addDeposit($deposit, $deposit->amount);
+    });
+});
+echo("Line 203\n");
+
+
+////////////////////////////////////
+//// Business deposits to invoices
+////////////////////////////////////
+
+Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, function($deposits) {
+    $deposits->each(function(Deposit $deposit) {
+        $invoice = \App\Billing\BusinessInvoice::create([
+            'name' => \App\Billing\BusinessInvoice::getNextName($deposit->business_id),
+            'business_id' => $deposit->business_id,
+            'created_at' => $deposit->created_at,
+        ]);
+
+        foreach($deposit->shifts as $shift) {
+            $item = new \App\Billing\BusinessInvoiceItem([
+                'group' => $shift->getItemGroup(\App\Billing\BusinessInvoice::class),
+                'name' => $shift->getItemName(\App\Billing\BusinessInvoice::class),
+                'units' => $shift->duration(),
+                'client_rate' => $clientRate = $shift->costs()->getTotalHourlyCost(),
+                'caregiver_rate' => $shift->caregiver_rate,
+                'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
+                'rate' => $shift->provider_fee,
+                'total' => $shift->costs()->getProviderFee(),
+                'date' => $shift->getItemDate(),
+            ]);
+            $item->associateInvoiceable($shift);
+            $invoice->addItem($item);
+        }
+
+        if ($invoice->getAmount() != $deposit->amount) {
+            // Add a manual adjustment
+            $diff = subtract($deposit->amount, $invoice->getAmount());
+            $item = new \App\Billing\BusinessInvoiceItem([
+                'rate' => $diff,
+                'client_rate' => 0,
+                'caregiver_rate' => 0,
+                'ally_rate' => 0,
+                'units' => 1,
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'total' => $diff,
+                'notes' => str_limit($deposit->notes, 253, '..'),
+                'date' => $deposit->created_at,
+            ]);
+            $invoice->addItem($item);
+        }
+
+        $invoice->addDeposit($deposit, $deposit->amount);
+    });
+});
+echo("Line 204\n");
+
+////////////////////////////////////
+//// Clear out old $0 provider fee shifts (add them to a new invoice that should just be $0)
+////////////////////////////////////
+
+foreach(\App\Business::all() as $business) {
+    $query = new \App\Billing\Queries\InvoiceableQuery(new \App\Shift());
+    $shifts = $query->forBusinesses([$business->id])
+        ->hasClientInvoicesPaid()
+        ->where('status', ['PAID', 'PAID_CAREGIVER_ONLY'])
+        ->where('provider_fee', '0')
+        ->get();
+
+    if ($shifts->count()) {
+        $invoice = \App\Billing\BusinessInvoice::create([
+            'name' => \App\Billing\BusinessInvoice::getNextName($business->id),
+            'business_id' => $business->id,
+        ]);
+
+        /** @var \App\Shift $shift */
+        foreach($shifts as $shift) {
+            $item = new \App\Billing\BusinessInvoiceItem([
+                'group' => $shift->getItemGroup(\App\Billing\BusinessInvoice::class),
+                'name' => $shift->getItemName(\App\Billing\BusinessInvoice::class),
+                'units' => $shift->duration(),
+                'client_rate' => $clientRate = $shift->costs()->getTotalHourlyCost(),
+                'caregiver_rate' => $shift->caregiver_rate,
+                'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
+                'rate' => $shift->provider_fee,
+                'total' => $shift->costs()->getProviderFee(),
+                'date' => $shift->getItemDate(),
+            ]);
+            $item->associateInvoiceable($shift);
+            $invoice->addItem($item);
+        }
+    }
+
+}
 
 DB::commit();
 
@@ -169,8 +275,8 @@ function _createMileageExpense(\App\Shift $shift)
         'shift_id' => $shift->id,
         'name' => 'Mileage',
         'units' => $shift->mileage,
-        'rate' => divide($shift->costs()->getMileageCost(), $shift->mileage),
-        'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false))
+        'rate' => divide($shift->costs()->getMileageCost(false), $shift->mileage, 4),
+        'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false)),
     ]);
 }
 
@@ -181,15 +287,15 @@ function _createOtherExpense(\App\Shift $shift)
         'name' => 'Other Expenses',
         'notes' => str_limit($shift->other_expenses_desc, 253, '..'),
         'units' => 1,
-        'rate' => $shift->costs()->getOtherExpenses(),
-        'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false))
+        'rate' => $shift->costs()->getOtherExpenses(false),
+        'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false)),
     ]);
 }
 
 function _assignExpense(ClientInvoice $invoice, \App\Shift $shift, \App\Billing\Invoiceable\ShiftExpense $expense)
 {
     $item = new \App\Billing\ClientInvoiceItem([
-        'rate' => $expense->getClientRate(),
+        'rate' => add($expense->getClientRate(), $expense->getAllyRate()),
         'units' => $expense->getItemUnits(),
         'group' => $shift->getItemGroup(ClientInvoice::class),
         'name' => $expense->getItemName(ClientInvoice::class),

@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Provider List')
+@section('title', 'Location List')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active">Providers</li>
+    <li class="breadcrumb-item active">Business Locations</li>
 @endsection
 
 @section('content')

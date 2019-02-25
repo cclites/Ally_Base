@@ -2,7 +2,6 @@
 namespace App\Billing\View;
 
 use App\Billing\Payment;
-use App\Contracts\ContactableInterface;
 use App\Contracts\ViewStrategy;
 
 class PaymentViewGenerator
@@ -33,9 +32,7 @@ class PaymentViewGenerator
             $invoiceObjects[] = $invoiceObject;
         }
 
-        $payer = $payment->payer;
-
-        $view = view($viewName, compact('payment', 'payer', 'invoiceObjects'));
+        $view = view($viewName, compact('payment', 'invoiceObjects'));
         return $this->strategy->generate($view);
     }
 }

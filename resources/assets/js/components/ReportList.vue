@@ -113,7 +113,7 @@
 
             items() {
                 const reports = [
-                    // For admin only 
+                    // For admin only
                     {
                         name: 'Unsettled Report',
                         url: 'reports/unsettled',
@@ -230,18 +230,39 @@
                         allowed: ['admin','office_user'],
                     },
 
-                    // For office users only 
+                    // For office users only
 
                     {
+                        name: 'Client Birthdays',
+                        url: 'reports/birthdays?type=clients',
+                        description: 'Shows the list of clients\'s birthdays',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Client Directory',
-                        url: 'clients',
+                        url: 'reports/reports/client-directory',
                         description: 'Shows the full list of clients',
                         category: 2,
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Caregiver Birthdays',
+                        url: 'reports/birthdays?type=caregivers',
+                        description: 'Shows the list of caregivers\'s birthdays',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Anniversary',
+                        url: 'reports/anniversary',
+                        description: 'Shows the caregivers\'s and their work anniversaries',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Directory',
-                        url: 'caregivers',
+                        url: 'reports/caregiver-directory',
                         description: 'Shows the full list of caregivers',
                         category: 3,
                         allowed: ['office_user'],
@@ -268,7 +289,7 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Caregiver Cert & License Expirations',
+                        name: 'Caregiver Expirations',
                         url: 'reports/certification_expirations',
                         description: 'See a list of caregivers with an expiring certification or license',
                         category: 3,
@@ -310,9 +331,16 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Referral Sources',
-                        url: 'reports/referral-sources',
+                        name: 'Client Referral Sources',
+                        url: 'reports/client-referral-sources',
                         description: 'List of referral sources and how many clients have been referred by each',
+                        category: 1,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Referral Sources',
+                        url: 'reports/caregiver-referral-sources',
+                        description: 'List of referral sources and how many caregivers have been referred by each',
                         category: 1,
                         allowed: ['office_user'],
                     },
@@ -341,6 +369,13 @@
                         name: 'Shifts by Client',
                         url: 'reports/client-shifts',
                         description: 'See how many shifts a client has received',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Case Managers',
+                        url: 'reports/case-manager',
+                        description: 'Shows all clients each case manager is assigned',
                         category: 2,
                         allowed: ['office_user'],
                     },
@@ -386,8 +421,29 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Client Statistics',
+                        url: 'reports/client-stats',
+                        description: 'See client stats',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Statistics',
+                        url: 'reports/caregiver-stats',
+                        description: 'See caregiver stats',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Projected Billing',
+                        url: 'reports/projected-billing',
+                        description: 'See forecasting billing amounts based on scheduled and completed visits',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
 
-                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },                        
+                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },
                     // { name: 'Client Progression Report', url: 'reports/', description: 'See how a client is progressing over time' },

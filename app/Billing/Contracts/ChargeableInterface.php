@@ -22,7 +22,19 @@ interface ChargeableInterface extends HasAllyFeeInterface
     /**
      * @return \App\Billing\Payments\Contracts\PaymentMethodStrategy
      */
-    public function getDefaultStrategy(): PaymentMethodStrategy;
+    public function getPaymentStrategy(): PaymentMethodStrategy;
+
+    /**
+     * @return string
+     */
+    public function getHash(): string;
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string;
 
     /**
      * Determine if the existing record can be updated

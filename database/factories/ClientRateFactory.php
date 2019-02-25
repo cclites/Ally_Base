@@ -19,7 +19,6 @@ $factory->define(\App\Billing\ClientRate::class, function (Faker $faker) {
             return $payer->id;
         },
         'caregiver_id' => function() {
-            if (mt_rand(0,3) === 0) return null; // 25% chance of null
             $caregiver = \App\Caregiver::inRandomOrder()->first() ?? factory(\App\Caregiver::class)->create();
             return $caregiver->id;
         },

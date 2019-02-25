@@ -9,6 +9,7 @@ use App\Billing\Generators\BaseInvoiceGenerator;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
+use Carbon\Carbon;
 use Mockery\Mock;
 use Tests\TestCase;
 
@@ -60,11 +61,12 @@ class ClientInvoiceGeneratorTest extends TestCase
      */
     public function invoiceables_are_collected_from_their_classes()
     {
+        $date = Carbon::now();
         $invoiceable = \Mockery::mock(InvoiceableInterface::class);
-        $invoiceable->shouldReceive('getItemsForPayment')->with($this->client)->andReturn(collect());
+        $invoiceable->shouldReceive('getItemsForPayment')->with($this->client, $date)->andReturn(collect());
         BaseInvoiceGenerator::$invoiceables = ['mock' => $invoiceable];
 
-        $this->invoicer()->getInvoiceables($this->client);
+        $this->invoicer()->getInvoiceables($this->client, $date);
     }
 
     /**

@@ -2,15 +2,18 @@
 namespace App\Billing\Invoiceable;
 
 use App\AuditableModel;
-use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\Contracts\DepositableInterface;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Deposit;
 use App\Billing\Payment;
+use App\Billing\Queries\InvoiceableQuery;
+use App\Business;
+use App\Caregiver;
+use App\Contracts\BelongsToBusinessesInterface;
+use Illuminate\Support\Collection;
 use Packages\MetaData\HasMetaData;
 
-abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface
+abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface, BelongsToBusinessesInterface
 {
     use HasMetaData;
 
@@ -29,6 +32,42 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     }
 
     ////////////////////////////////////
+    //// Collection Query Methods
+    ////////////////////////////////////
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the caregiver deposit
+     *
+     * @param \App\Caregiver $caregiver
+     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
+    {
+        $query = new InvoiceableQuery($this);
+        return $query->forCaregivers([$caregiver->id])
+            ->hasClientInvoicesPaid()
+            ->doesntHaveCaregiverInvoice()
+            ->notBelongingToAnOldFinalizedShift()
+            ->get();
+    }
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the provider deposit
+     *
+     * @param \App\Business $business
+     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForBusinessDeposit(Business $business): Collection
+    {
+        $query = new InvoiceableQuery($this);
+        return $query->forBusinesses([$business->id])
+            ->hasClientInvoicesPaid()
+            ->doesntHaveBusinessInvoice()
+            ->notBelongingToAnOldFinalizedShift()
+            ->get();
+    }
+
+    ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
@@ -41,6 +80,46 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     public function getItemHash(): string
     {
         return $this->getTable() . '_' . $this->getKey();
+    }
+
+    /**
+     * Get the assigned payer ID (payers.id, not client_payers.id)
+     *
+     * @return int|null
+     */
+    public function getPayerId(): ?int
+    {
+        return $this->payer_id ?? null;
+    }
+
+    /**
+     * Return the ally fee per unit for this invoiceable item.
+     * If this returns null, abort deposit invoices.  Return 0.0 for no ally fee.
+     *
+     * @return float|null
+     */
+    public function getAllyRate(): ?float
+    {
+        $allyFeeCharged = $this->getMetaValue("ally_fee_charged");
+        if ($allyFeeCharged !== null) {
+            return divide($allyFeeCharged, $this->getItemUnits(), 4);
+        }
+        return null;
+    }
+
+    /**
+     * Note: This is a calculated field from the other rates
+     * @return float
+     */
+    public function getProviderRate(): float
+    {
+        $allyRate = $this->getAllyRate();
+        if ($allyRate === null)
+        {
+            throw new \InvalidArgumentException("There was a problem with the Ally Fee calculation.");
+        }
+
+        return subtract($this->getClientRate(), add($this->getCaregiverRate(), $allyRate));
     }
 
     /**

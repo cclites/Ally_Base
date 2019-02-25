@@ -77,8 +77,8 @@ class ClientInvoiceTest extends TestCase
         $serviceB = $this->createService(60.0, '2019-01-01');
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = $invoices->where('client_payer_id', $payerB->id)->first();
 
         $this->assertInstanceOf(ClientInvoice::class, $payerAInvoice);
         $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
@@ -105,10 +105,10 @@ class ClientInvoiceTest extends TestCase
         $this->createService(100.0);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
-        $payerCInvoice = $invoices->where('payer_id', $payerC->payer_id)->first();
-        $payerDInvoice = $invoices->where('payer_id', $payerD->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = $invoices->where('client_payer_id', $payerB->id)->first();
+        $payerCInvoice = $invoices->where('client_payer_id', $payerC->id)->first();
+        $payerDInvoice = $invoices->where('client_payer_id', $payerD->id)->first();
 
         $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
         $this->assertEquals(20.0, $payerBInvoice->getAmountDue());
@@ -127,16 +127,16 @@ class ClientInvoiceTest extends TestCase
          * The invoice should be successfully generated for $100.00 due, taking the credit into account before issuing a PayerAllowanceExceeded exception
          */
 
-        $payer = $this->createAllowancePayer(100.0);
+        $clientPayer = $this->createAllowancePayer(100.0);
         $this->createBalancePayer();
 
-        $this->createService(150.00, '2019-01-15', $payer->payer_id);
-        $this->createCreditAdjustment(50.00, '2019-01-15', $payer->payer_id);
+        $this->createService(150.00, '2019-01-15', $clientPayer->payer_id);
+        $this->createCreditAdjustment(50.00, '2019-01-15', $clientPayer->payer_id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerInvoice = $invoices->where('payer_id', $payer->payer_id)->first();
+        $clientPayerInvoice = $invoices->where('client_payer_id', $clientPayer->id)->first();
 
-        $this->assertEquals(100.0, $payerInvoice->getAmountDue());
+        $this->assertEquals(100.0, $clientPayerInvoice->getAmountDue());
         $this->assertCount(1, $invoices, 'Only one invoice should have been generated since the service was assigned to a payer.');
     }
 
@@ -157,7 +157,7 @@ class ClientInvoiceTest extends TestCase
         $serviceB = $this->createService(80.00, '2019-01-17', $payerA->payer_id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
         $itemB = $payerAInvoice->items->where('invoiceable_id', $serviceB->id)->first();
         $itemA = $payerAInvoice->items->where('invoiceable_id', $serviceA->id)->first();
 
@@ -182,7 +182,8 @@ class ClientInvoiceTest extends TestCase
         $serviceA = $this->createService(30.00, '2019-01-15', $payerA->payer_id);
         $serviceB = $this->createService(30.00, '2019-01-17', $payerA->payer_id);
 
-        $this->invoicer->generateAll($this->client);
+        $invoices = $this->invoicer->generateAll($this->client);
+        dump(null);
     }
 
     /**
@@ -199,12 +200,12 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createSplitPayer(0.8);
         $payerB = $this->createSplitPayer(0.2);
         $payerB->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
-        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->client->setPaymentMethod($this->createCreditCard());
         $shift = $this->createShiftWithExpense(100);
 
         $invoices = $this->invoicer->generateAll($this->client);
-        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = collect($invoices)->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = collect($invoices)->where('client_payer_id', $payerB->id)->first();
         $shiftExpense = $payerAInvoice->items[0]->invoiceable;
 
         $this->assertEquals(82.40, $payerAInvoice->getAmount());
@@ -226,17 +227,40 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(80.00);
         $payerB = $this->createBalancePayer();
         $payerB->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
-        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->client->setPaymentMethod($this->createCreditCard());
         $shift = $this->createShiftWithExpense(100);
 
         $invoices = $this->invoicer->generateAll($this->client);
-        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = collect($invoices)->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = collect($invoices)->where('client_payer_id', $payerB->id)->first();
         $shiftExpense = $payerAInvoice->items[0]->invoiceable;
 
         $this->assertEquals(80.00, $payerAInvoice->getAmount());
         $this->assertEquals(23.45, $payerBInvoice->getAmount());
         $this->assertEquals(3.45, $shiftExpense->ally_fee, 'The ally fee was not correctly updated on the invoiceable.');
+    }
+
+    /**
+     * @test
+     */
+    function expenses_with_small_incremental_rates_dont_create_differences_between_due_and_total()
+    {
+        /**
+         * A mileage rate of $0.535 when multiplied by units and rounded to two decimal places does not
+         * end up with differing amounts for the total and the amount due
+         */
+
+        $payerA = $this->createBalancePayer();
+        $payerA->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
+        $this->client->setPaymentMethod($this->createCreditCard());
+        $shift = $this->createShiftWithMileage(0.535, 36);
+
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $item = $invoice->items->first();
+
+        $this->assertEquals(0.5618, $item->rate);
+        $this->assertEquals(20.22, $item->amount_due);
+        $this->assertEquals(20.22, $item->total);
     }
 
 

@@ -5,8 +5,8 @@
             <tr class="bg-info">
                 <th>Service Date</th>
                 <th>Service Name</th>
-                <th>Rate</th>
                 <th>Units</th>
+                <th>Rate</th>
                 <th>Total</th>
                 <th>Amount Due by Payer</th>
             </tr>
@@ -37,8 +37,8 @@
                                 <small>{{ $item->notes }}</small>
                             @endif
                         </td>
-                        <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ $item->units }}</td>
+                        <td>{{ rate_format($item->rate) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
                         <td>{{ number_format($item->amount_due, 2) }}</td>
                     </tr>
@@ -48,8 +48,8 @@
             <tfoot>
             <tr>
                 <th colspan="4">Total</th>
-                <th>{{ $invoice->items->sum('total') }}</th>
-                <th>{{ $invoice->amount }}</th>
+                <th>{{ number_format($invoice->items->sum('total'), 2) }}</th>
+                <th>{{ number_format($invoice->amount, 2) }}</th>
             </tr>
             </tfoot>
         </table>

@@ -11,6 +11,7 @@ use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -113,6 +114,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     ];
 
     protected $appends = ['name', 'nameLastFirst'];
+
+    protected $dates = ['reactivation_date'];
 
     ///////////////////////////////////////////
     /// Name Concatenation Methods
@@ -221,13 +224,13 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function getMaskedNameAttribute()
     {
         $first = $this->firstname;
-        if (strlen($first) > 1) {
-            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        if (mb_strlen($first) > 1) {
+            $first = mb_substr($first, 0, 2) . str_repeat('*', mb_strlen($first) - 2);
         }
 
         $last = $this->lastname;
-        if (strlen($last) > 1) {
-            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        if (mb_strlen($last) > 1) {
+            $last = mb_substr($last, 0, 2) . str_repeat('*', mb_strlen($last) - 2);
         }
         return "$first $last";
     }
@@ -249,12 +252,25 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             $phone = $this->phoneNumbers->first();
         }
 
-        return empty($phone) ? '' : $phone->number;
+        return empty($phone) ? '' : (string) $phone->number;
     }
 
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Get the age of a user based on the date of birth
+     *
+     * @return int|null
+     */
+    public function getAge()
+    {
+        if (!is_null($this->date_of_birth)) {
+            return now()->diffInYears(Carbon::parse($this->date_of_birth));
+        }
+        return null;
+    }
 
     /**
      * Return the fully-qualified name of the role class

@@ -5,8 +5,6 @@
                 role="client"
                 v-if="shift"
                 :shift="shift"
-                :in_distance="shift.checked_in_distance"
-                :out_distance="shift.checked_out_distance"
                 :activities="activities"
                 :admin="0"
                 :caregiver="shift.caregiver"

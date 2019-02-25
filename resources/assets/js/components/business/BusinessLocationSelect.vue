@@ -1,9 +1,9 @@
 <template>
     <b-select :disabled="disabled" v-model="selectedBusiness" v-show="!hidden" :name="name">
         <option v-if="allowAll && businesses.length > 1" value="">All Office Locations</option>
-        <option v-else value="">--Select a Office Location--</option>
+        <option v-else value="">--Select an Office Location--</option>
         <option v-for="business in businesses" :key="business.id" :value="business.id">
-            {{ business.name }}
+            {{ business.short_name }}
         </option>
     </b-select>
 </template>

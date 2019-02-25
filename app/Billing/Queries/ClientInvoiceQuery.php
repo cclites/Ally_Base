@@ -2,6 +2,8 @@
 namespace App\Billing\Queries;
 
 use App\Billing\ClientInvoice;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Payer;
 use App\BusinessChain;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +20,18 @@ class ClientInvoiceQuery extends BaseQuery
     function getModelInstance(): Model
     {
         return new ClientInvoice();
+    }
+
+    function forClient(int $clientId, bool $privatePayOnly = true): self
+    {
+        $this->where('client_id', $clientId);
+        if ($privatePayOnly) {
+            $this->whereHas('clientPayer', function($q) {
+                $q->where('payer_id', Payer::PRIVATE_PAY_ID);
+            });
+        }
+
+        return $this;
     }
 
     function forBusiness(int $businessId): self
@@ -41,7 +55,7 @@ class ClientInvoiceQuery extends BaseQuery
 
     function paidInFull(): self
     {
-        $this->whereColumn('amount_paid', '==', 'amount');
+        $this->whereColumn('amount_paid', '=', 'amount');
 
         return $this;
     }
@@ -49,6 +63,15 @@ class ClientInvoiceQuery extends BaseQuery
     function notPaidInFull(): self
     {
         $this->whereColumn('amount_paid', '!=', 'amount');
+
+        return $this;
+    }
+
+    function notOnHold(): self
+    {
+        $this->whereDoesntHave('client', function($q) {
+            $q->has('paymentHold');
+        });
 
         return $this;
     }

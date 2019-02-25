@@ -17,14 +17,15 @@ export default {
 
         defaultService() {
             return this.services.find(item => item.default === true) || {};
+        },
+
+        serviceHours()
+        {
+            return this.form.services.reduce((carry, service) => carry + parseFloat(service.duration), 0);
         }
 
     },
-
-    mounted() {
-        this.fetchServices();
-    },
-
+    
     methods: {
 
         async fetchServices() {
@@ -38,15 +39,15 @@ export default {
 
         async loadClientRates(clientId) {
             if (clientId) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/rates`);
+                const response = await axios.get(`/business/clients/${clientId}/rates`);
                 this.clientRates = response.data;
                 this.fetchAllRates();
             }
         },
 
         async loadClientPayers(clientId, resetPayers = false) {
-            if (this.form.client_id) {
-                const response = await axios.get(`/business/clients/${this.form.client_id}/payers/unique`);
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
                 this.clientPayers = response.data;
                 if (resetPayers) this.resetServicePayers();
             }
@@ -67,6 +68,7 @@ export default {
         },
 
         addService(service = {}) {
+            console.log('Adding service', service);
             const newService = {
                 id: service.id || null,
                 service_id: service.service_id ? service.service_id : (this.defaultService ? this.defaultService.id : null),
@@ -108,9 +110,28 @@ export default {
             });
         },
 
+        recalculateAllRates(form) {
+            if (form.services.length) {
+                for(let service of this.form.services) {
+                    this.updateProviderRates(service);
+                }
+            } else {
+                this.updateProviderRates(this.form);
+            }
+        },
+
         recalculateRates(rates, clientRate, caregiverRate) {
-            rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate);
-            rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true);
+            rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate).toFixed(2);
+            rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true).toFixed(2);
+        },
+
+        updateProviderRates(item) {
+            this.recalculateRates(item, item.client_rate, item.caregiver_rate);
+        },
+
+        updateClientRates(item) {
+            item.client_rate = RateFactory.getClientRate(item.provider_fee, item.caregiver_rate, this.allyPct).toFixed(2);
+            item.ally_fee = RateFactory.getAllyFee(this.allyPct, item.client_rate).toFixed(2);
         },
 
         fetchDefaultRate(service) {
@@ -130,12 +151,13 @@ export default {
         },
 
         handleChangedBillingType(form, type) {
+            console.log('handleChangedBillingType', form);
             if (type === 'services') {
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
                     console.log('added service from handleChangedBillingType');
-                    this.addService();
+                    this.addService({duration: this.scheduledHours || this.duration || 1 });
                 }
             } else {
                 this.form.service_id = this.defaultService.id;
@@ -145,6 +167,7 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
+            console.log('handleChangedDefaultRates', form);
             // initiated from watcher
             if (value) {
                 form.client_rate = null;
@@ -154,6 +177,9 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
+                if (! form.default_rates) {
+                    return;
+                }
                 form.client_rate = form.default_rates.client_rate || 0;
                 form.caregiver_rate = form.default_rates.caregiver_rate || 0;
                 this.recalculateRates(form, form.client_rate, form.caregiver_rate);

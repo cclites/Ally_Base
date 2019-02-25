@@ -69,7 +69,7 @@ trait HasMetaData
     public function getMetaValue(string $key, $default = null): ?string
     {
         $meta = $this->getMeta($key, 1)->first();
-        return $meta ? (string) $meta->value : $default;
+        return $meta !== null ? (string) $meta->value : $default;
     }
 
     /**

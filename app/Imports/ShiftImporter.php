@@ -6,11 +6,14 @@ use App\Business;
 use App\Businesses\Timezone;
 use App\Caregiver;
 use App\Client;
+use App\Data\ScheduledRates;
 use App\Shift;
-use App\Shifts\Data\ClockOutData;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImporter
 {
@@ -47,7 +50,9 @@ class ShiftImporter
     public function importShiftFromRow(int $row): Shift
     {
         $factory = $this->getShiftFactory($row);
-        return $factory->create();
+        $shift = $factory->create();
+        event(new ShiftFlagsCouldChange($shift));
+        return $shift;
     }
 
     public function validateRow(int $row): void
@@ -98,34 +103,40 @@ class ShiftImporter
         $caregiverComments = null;
 
         if ($checkIn) {
-            $checkIn = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
+            $checkIn = Carbon::parse($checkIn, $timezone)->setTimezone('UTC');
+            $clockIn = new ClockData(Shift::METHOD_IMPORTED, $checkIn->toDateTimeString());
             $checkOut = $checkIn->copy()->addMinutes(round($duration * 60));
+            $clockOut = new ClockData(Shift::METHOD_IMPORTED, $checkOut->toDateTimeString());
         }
         else {
             // Allow for an expense only record, set in/out time equal to midnight, 0 duration
-            $checkIn = (new Carbon('now', $timezone))->setTime(0,0,0)->setTimezone('UTC');
-            $checkOut = $checkIn->copy();
+            $checkIn = (new Carbon('now', $timezone))->setTime(0,0,0)->setTimezone('UTC')->toDateTimeString();
+            $clockIn = new ClockData(Shift::METHOD_IMPORTED, $checkIn);
+            $clockOut = new ClockData(Shift::METHOD_IMPORTED, $checkIn);
             $caregiverComments = 'Individual expense record imported on ' . (new Carbon('now', $timezone))->format('m/d/Y');
         }
 
-        $clockOutData = new ClockOutData(
+        $clockOutData = new CaregiverClockoutData(
+            $clockOut,
             floatval($this->sheet->getValue('mileage', $row)),
             floatval($this->sheet->getValue('other_expenses', $row)),
             null,
             $caregiverComments
         );
 
+        $rates = new ScheduledRates(
+            floatval($this->sheet->getValue('client_rate', $row)),
+            floatval($this->sheet->getValue('caregiver_rate', $row)),
+            false, // Fixed rates not yet supported
+            $this->sheet->getValue('hours_type', $row)
+        );
+
         return ShiftFactory::withoutSchedule(
             $client,
             $caregiver,
-            $this->sheet->getValue('hours_type', $row) ?? Shift::HOURS_DEFAULT,
-            false,
-            floatval($this->sheet->getValue('client_rate', $row)),
-            floatval($this->sheet->getValue('caregiver_rate', $row)),
-            Shift::METHOD_IMPORTED,
-            $checkIn,
-            Shift::METHOD_IMPORTED,
-            $checkOut,
+            $clockIn,
+            $clockOut,
+            $rates,
             $this->sheet->getValue('status', $row) ?? Shift::WAITING_FOR_AUTHORIZATION
         )->withData($clockOutData);
     }

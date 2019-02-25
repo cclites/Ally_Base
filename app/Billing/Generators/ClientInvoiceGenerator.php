@@ -7,6 +7,7 @@ use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\BaseInvoiceItem;
+use App\Billing\Payer;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Billing\ClientPayer;
@@ -41,27 +42,34 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
 
     /**
      * @param \App\Client $client
+     * @param \Carbon\Carbon $endDateUtc
      * @return array
      * @throws \App\Billing\Exceptions\InvalidClientPayers
      * @throws \App\Billing\Exceptions\PayerAllowanceExceeded
      */
-    public function generateAll(Client $client): array
+    public function generateAll(Client $client, Carbon $endDateUtc = null): array
     {
+        if (!$endDateUtc) {
+            $endDateUtc = Carbon::now();
+        }
+
         if (!$this->validatePayers($client)) {
             throw new InvalidClientPayers("Client has invalid payers structure.", $client->id);
         }
 
         $invoiceables = $this->sortInvoiceables(
-            $this->getInvoiceables($client)
+            $this->getInvoiceables($client, $endDateUtc)
         );
 
-        DB::beginTransaction();
+        if (count($invoiceables)) {
+            DB::beginTransaction();
 
-        foreach($invoiceables as $invoiceable) {
-            $this->assignInvoiceable($client, $invoiceable);
+            foreach($invoiceables as $invoiceable) {
+                $this->assignInvoiceable($client, $invoiceable);
+            }
+
+            DB::commit();
         }
-
-        DB::commit();
 
         return array_values($this->invoices);
     }
@@ -73,28 +81,29 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
      */
     public function getInvoice(Client $client, ClientPayer $clientPayer): ClientInvoice
     {
-        $payerId = $clientPayer->payer_id;
+        $clientPayerId = $clientPayer->id;
 
-        if (!isset($this->invoices[$payerId])) {
-            $this->invoices[$payerId] = ClientInvoice::create([
+        if (!isset($this->invoices[$clientPayerId])) {
+            $this->invoices[$clientPayerId] = ClientInvoice::create([
                 'name' => $this->getInvoiceName($client),
                 'client_id' => $clientPayer->client_id,
-                'payer_id' => $payerId,
+                'client_payer_id' => $clientPayerId,
             ]);
         }
 
-        return $this->invoices[$payerId];
+        return $this->invoices[$clientPayerId];
     }
 
     /**
      * @param \App\Client $client
+     * @param \Carbon\Carbon $endDateUtc
      * @return \App\Billing\Contracts\InvoiceableInterface[]
      */
-    public function getInvoiceables(Client $client): array
+    public function getInvoiceables(Client $client, Carbon $endDateUtc): array
     {
         $invoiceables = [];
         foreach($this->getInvoiceableClasses() as $class) {
-            $invoiceables = array_merge($invoiceables, $class->getItemsForPayment($client)->all());
+            $invoiceables = array_merge($invoiceables, $class->getItemsForPayment($client, $endDateUtc)->all());
         }
 
         return $invoiceables;
@@ -187,7 +196,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
      */
     public function getInvoiceName(Client $client)
     {
-        return ClientInvoice::where('client_id', $client->id)->max("name") ?? "1";
+        return ClientInvoice::getNextName($client->id);
     }
 
     /**
@@ -219,6 +228,9 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             if ($invoiceable->getPayerId() !== null && $invoiceable->getPayerId() !== $clientPayer->payer_id) {
                 continue;
             }
+            if ($invoiceable->getPayerId() === null && $clientPayer->isManualType()) {
+                continue;
+            }
             // Get invoiceable item data
             $allowance = $this->getPayerAllowance($clientPayer, $invoiceable->getItemDate());
             $clientRate = $this->getClientRate($clientPayer, $invoiceable);
@@ -243,6 +255,16 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         }
 
         if ($invoiceable->getAmountDue() > 0.0) {
+            if ($invoiceable->getPayerId()) {
+                $identifier = get_class($invoiceable) . ':' . $invoiceable->id ?? '';
+                $assignedPayer = Payer::find($invoiceable->getPayerId());
+                if (!$assignedPayer) {
+                    throw new InvalidClientPayers("Invoiceable $identifier was added to an unknown payer.");
+                }
+                $payerName = $assignedPayer->name();
+                throw new InvalidClientPayers("Invoiceable $identifier was added to $payerName but this payer is not available for this client.");
+            }
+
             throw new InvalidClientPayers('Unable to assign invoiceable due to an invalid client structure for client ' . $client->id . '.');
         }
     }
@@ -250,7 +272,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     protected function getClientRate(ClientPayer $clientPayer, InvoiceableInterface $invoiceable): float
     {
         $clientRate = $invoiceable->getClientRate();
-        return add($clientRate, $this->getAllyFee($clientRate, $invoiceable, $clientPayer));
+        return add($clientRate, $this->getAllyFee($clientRate, $invoiceable, $clientPayer, 4), 4);
     }
 
     /** @return float[] */
@@ -268,7 +290,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             $amountDue = multiply($splitAmount, $split);
         }
 
-        $allyFee = $this->getAllyFee($amountDue, $invoiceable, $clientPayer);
+        $allyFee = $this->getAllyFee($amountDue, $invoiceable, $clientPayer, 2);
 
         if (($amountDue + $allyFee) > $allowance) {
             $amountDue = divide(
@@ -286,11 +308,14 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         ];
     }
 
-    protected function getAllyFee(float $amount, InvoiceableInterface $invoiceable, ClientPayer $clientPayer): float
+    protected function getAllyFee(float $amount, InvoiceableInterface $invoiceable, ClientPayer $clientPayer, $decimalPrecision = 4): float
     {
         if ($invoiceable->hasFeeIncluded()) {
             return 0.0;
         }
-        return $clientPayer->getAllyFee($amount);
+
+        $pct = $clientPayer->getAllyPercentage();
+
+        return multiply($amount, $pct, $decimalPrecision);
     }
 }

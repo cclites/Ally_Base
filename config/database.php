@@ -18,6 +18,10 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Polymorphic Relationship Map (string to Model)
+    | This keeps the database less coupled to the Model structure
+    |
+    | Note:  Invoiceable mappings are puled from the BaseInvoiceGenerator (first line)
+    | Hint:  You can use the maps_to.. and maps_from.. functions defined in functions.php
     |--------------------------------------------------------------------------
     */
 

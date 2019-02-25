@@ -1,12 +1,12 @@
 <template>
-    <b-card>
+    <b-card class="mt-5">
         <b-row>
-            <b-col lg="12">
+            <b-col lg="12" class="mt-3">
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
+                    <b-form inline @submit.prevent="loadItems()" class="mt-2">
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -55,7 +55,8 @@
                             <option value="0">Unverified</option>
                             <option value="1">Verified</option>
                         </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                        <br />
+                        <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -74,10 +75,10 @@
             </b-col>
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
-            <b-table 
+            <b-table
                 bordered
-                striped 
-                hover 
+                striped
+                hover
                 show-empty
                 :items="items"
                 :fields="fields"
@@ -85,25 +86,20 @@
                 :sort-desc.sync="sortDesc"
                 :filter="filter"
             >
-                <template slot="checked_in_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_in_distance) }}
-                </template>
-
-                <template slot="checked_out_distance" scope="row">
-                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_out_distance) }}
-                </template>
             </b-table>
         </div>
     </b-card>
 </template>
 
 <script>
-    import FormatsDistance from "../../../mixins/FormatsDistance";
+    import FormatsDistance from "../../../mixins/FormatsDistance"
+    import FormatsDates from '../../../mixins/FormatsDates'
 
     export default {
-        props: {},
-
-        mixins: [FormatsDistance],
+        mixins: [
+            FormatsDistance,
+            FormatsDates
+        ],
 
         data() {
             return {
@@ -168,7 +164,7 @@
                     {
                         key: 'checked_out_time',
                         label: 'Clock Out',
-                        formatter: (val) => this.formatTimeFromUTC(val),
+                        formatter: (val) => !val ? '-' : this.formatTimeFromUTC(val),
                         sortable: true,
                     },
                     {
@@ -205,12 +201,7 @@
             this.loadFilters();
         },
 
-        computed: {
-
-        },
-
         methods: {
-
             loadFilters() {
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
                 axios.get('/business/clients').then(response => this.clients = response.data);
@@ -263,7 +254,19 @@
             },
 
             distanceFormat(val) {
-                return (val === 0) ? '<1' : val;
+                if (val === 0) {
+                    return '<1';
+                }
+
+                if (! val) {
+                    return 'No EVV Data';
+                }
+
+                if (isNaN(val)) {
+                    return val;
+                }
+
+                return this.convertToMiles(val);
             }
         }
     }

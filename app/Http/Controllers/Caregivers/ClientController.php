@@ -8,10 +8,12 @@ use App\Scheduling\ScheduleAggregator;
 use App\Shifts\ClockIn;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Schedule;
+use App\Shift;
 
 class ClientController extends BaseController
 {
-    protected $includedRelations = ['evvAddress', 'evvPhone', 'careDetails'];
+    protected $includedRelations = ['evvAddress', 'evvPhone', 'careDetails', 'medications'];
 
     /**
      * List all clients the caregiver is assigned to
@@ -77,6 +79,10 @@ class ClientController extends BaseController
             ->where('client_id', $client->id)
             ->getSchedulesBetween($start, $end);
 
+        $schedules = $schedules->filter(function(Schedule $schedule) {
+            return $schedule->canBeClockedIn();
+        });
+
         // Sort schedules by closest starts_at
         if ($schedules->count() > 1) {
             $now = Carbon::now();
@@ -91,5 +97,35 @@ class ClientController extends BaseController
         }
 
         return $schedules;
+    }
+
+    /**
+     * Get Caregiver information from the schedules surrounding
+     * the current time or the current shift.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function adjoiningSchedules(Request $request, Client $client)
+    {
+        $start = Carbon::now()->setTimezone($client->getTimezone());
+        $end = Carbon::now()->setTimezone($client->getTimezone());
+
+        if ($request->filled('shift')) {
+            $shift = Shift::findOrFail($request->shift);
+            
+            if (! empty($shift->checked_in_time)) {
+                $start = $shift->checked_in_time;
+            }
+            if (! empty($shift->schedule)) {
+                $start = Carbon::parse($shift->schedule->starts_at);
+                $end = $start->copy()->addMinutes($shift->schedule->duration);
+            }
+        }
+
+        list($before, $after) = Schedule::getAdjoiningCaregiverSchedules($client, $start, $end);
+
+        return response()->json(compact(['before', 'after']));
     }
 }

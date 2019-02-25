@@ -130,7 +130,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getDefaultStrategy(): PaymentMethodStrategy
+    function getPaymentStrategy(): PaymentMethodStrategy
     {
         return new CreditCardPayment($this);
     }
@@ -219,8 +219,9 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         $fee = config('ally.credit_card_fee');
         if (strtolower($this->type) === 'amex') {
-            return (float) bcadd($fee, '0.01', 4);
+            $fee = config('ally.amex_card_fee');
         }
+
         return (float) $fee;
     }
 
@@ -232,5 +233,23 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     public function getOwnerModel()
     {
         return $this->user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'credit_cards:' . $this->id;
+    }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return strtoupper($this->type) .  ' *' . $this->last_four;
     }
 }

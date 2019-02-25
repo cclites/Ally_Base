@@ -42,6 +42,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         '3',
         '7',
     ];
+    private $processed = false;
 
     function __construct()
     {
@@ -143,6 +144,9 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
     }
 
     function _doPost($query) {
+        if ($this->processed) {
+            throw new \Exception('This transaction has already been processed.  Create a new ECSPayment instance.');
+        }
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://ecspayments.transactiongateway.com/api/transact.php");
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
@@ -158,6 +162,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
             \Log::error('ECSPayments::post error.  Invalid Response. ' . print_r(curl_getinfo($ch)));
             return false;
         }
+        $this->processed = true;
         $this->lastResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         parse_str($data, $this->responses);

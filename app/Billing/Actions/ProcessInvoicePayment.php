@@ -46,8 +46,12 @@ class ProcessInvoicePayment
             $amount = $invoice->getAmountDue();
         }
 
-        $payer = $invoice->getPayer();
-        $payment = $this->paymentProcessor->charge($payer, $strategy, $amount);
+        $clientPayer = $invoice->getClientPayer();
+        if (!$strategy) {
+            $strategy = $clientPayer->getPaymentMethod()->getPaymentStrategy();
+        }
+
+        $payment = $this->paymentProcessor->charge($strategy, $amount);
         if (!$payment) {
             throw new PaymentMethodError("Unable to receive payment for invoice.");
         }
@@ -58,24 +62,24 @@ class ProcessInvoicePayment
 
     /**
      * @param ClientInvoice[] $invoices
-     * @param \App\Billing\Payer $payer
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @return \App\Billing\Payment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
      */
-    function payInvoices(iterable $invoices, Payer $payer, PaymentMethodStrategy $strategy): Payment
+    function payInvoices(iterable $invoices, PaymentMethodStrategy $strategy): Payment
     {
         $amount = $this->sumInvoiceAmounts($invoices);
-        $existingPayments = $this->paymentQuery->forPayer($payer)->hasAmountAvailable()->get();
-        if ($existingPayments->count()) {
-            foreach($existingPayments as $payment) {
-                $this->applyPayment($invoices, $payment);
-                $amount = $this->sumInvoiceAmounts($invoices); // recalculate after allocating existing payments
-            }
-        }
 
-        $payment = $this->paymentProcessor->charge($payer, $strategy, $amount);
+//        $existingPayments = $this->paymentQuery->forPayer($payer)->hasAmountAvailable()->get();
+//        if ($existingPayments->count()) {
+//            foreach($existingPayments as $payment) {
+//                $this->applyPayment($invoices, $payment);
+//                $amount = $this->sumInvoiceAmounts($invoices); // recalculate after allocating existing payments
+//            }
+//        }
+
+        $payment = $this->paymentProcessor->charge($strategy, $amount);
         if (!$payment) {
             throw new PaymentMethodError("Unable to receive payment for invoices.");
         }
@@ -117,5 +121,6 @@ class ProcessInvoicePayment
                 break;
             }
         }
+        $payment->load('invoices');
     }
 }

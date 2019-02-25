@@ -5,13 +5,14 @@ use App\Address;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PayerAssignmentError;
-use App\Billing\Exceptions\PaymentMethodError;
+use App\Business;
 use App\Client;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\ContactableInterface;
 use App\PhoneNumber;
 use App\Traits\BelongsToOneChain;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * \App\Billing\Payer
@@ -129,31 +130,38 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
     }
 
     /**
-     * @param \App\Billing\Contracts\ChargeableInterface|\Illuminate\Database\Eloquent\Model $paymentMethod
+     * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
      * @return bool
      */
     function setPaymentMethod(ChargeableInterface $paymentMethod)
     {
-        return $this->paymentMethod()->associate($paymentMethod)->save();
+        if ($paymentMethod instanceof Model && $paymentMethod->getKey()) {
+            return $this->paymentMethod()->associate($paymentMethod)->save();
+        }
+
+        // Allow for provider pay to be defined from the Payer without linking directly to a business bank account
+        $this->payment_method_type = maps_from_model($paymentMethod);
+        $this->payment_method_id = null;
+        return $this->save();
     }
 
-    function getPaymentMethod(): ChargeableInterface
+    /**
+     * A shortcut to setting provider pay (no business ID since that will be resolved based on which business invoice is being paid)
+     *
+     * @return bool
+     */
+    function setProviderPay()
     {
-        if ($this->isPrivatePay()) {
-            if (!$this->getPrivatePayer()) {
-                throw new PayerAssignmentError("The private payer does not have a client record attached.");
-            }
+        return $this->setPaymentMethod(new Business());
+    }
 
-            $method = $this->getPrivatePayer()->getPaymentMethod();
-        } else {
-            $method = $this->paymentMethod;
+    function getPaymentMethod(): ?ChargeableInterface
+    {
+        if (maps_to_class($this->payment_method_type) === Business::class) {
+            return new Business();
         }
 
-        if (!$method) {
-            throw new PaymentMethodError("This payer has no payment method assigned.");
-        }
-
-        return $method;
+        return null;
     }
 
 

@@ -17,28 +17,17 @@ $appDir = base_path('app');
 $packageDir = base_path('packages');
 $vendorDir = base_path('vendor');
 
-<<<<<<< HEAD
-$cmd = sprintf('find %s %s -type f -name \'*.php\' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )',
-=======
 $cmd = sprintf($vendorDir.'/bin/phplint',
->>>>>>> payers-and-invoices
     escapeshellarg($appDir), escapeshellarg($packageDir));
 
 $recursiveLint = new Process($cmd);
 $recursiveLint->run();
-<<<<<<< HEAD
-if (!$recursiveLint->isSuccessful()) {
-    echo($recursiveLint->getOutput() . "\n");
-=======
 echo($recursiveLint->getOutput() . "\n");
 if (!$recursiveLint->isSuccessful()) {
->>>>>>> payers-and-invoices
     echo($recursiveLint->getErrorOutput() . "\n");
     exit(1);
 }
 
-<<<<<<< HEAD
-=======
 $cmd = sprintf('php %s ide-helper:models -N -F .test_core_models.php',
     escapeshellarg(base_path('artisan')));
 
@@ -50,7 +39,6 @@ if (!$ideHelper->isSuccessful()) {
     exit(4);
 }
 
->>>>>>> payers-and-invoices
 $phpunitConfig = base_path('phpunit.xml');
 $phpunitBin = "$vendorDir/bin/phpunit";
 if (!file_exists($phpunitBin)) {
@@ -62,12 +50,8 @@ $phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConf
 $phpunitCmds = [
     "$phpunit --testsuite Model",
     "$phpunit --testsuite Bugs",
-<<<<<<< HEAD
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData/'",
-=======
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|RateFactory|ScheduleConverter|ScheduleCreator|ScheduleEditor/'", // core feature tests
-    "$phpunit --filter '/Payer|ClientRateTest/'", // new billing tests (add invoice generators once done)
->>>>>>> payers-and-invoices
+    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|ShiftFactory|RateFactory|ScheduleConverter|ScheduleCreator|ScheduleEditor|QueryTest/'", // core feature tests
+    "$phpunit --filter '/Payer|InvoiceTest|ClientRateTest|ApplyPaymentTest|ProcessPaymentTest|AllyPercentageTest/'", // new billing tests (add invoice generators once done)
 ];
 
 foreach($phpunitCmds as $cmdline) {

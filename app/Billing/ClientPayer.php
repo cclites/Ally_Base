@@ -2,6 +2,8 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Business;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -29,22 +31,11 @@ use Carbon\Carbon;
  * @property-read \App\Client $client
  * @property-read string $payer_name
  * @property-read \App\Billing\Payer $payer
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $paymentMethod
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereClientId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereEffectiveEnd($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereEffectiveStart($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePayerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePaymentAllocation($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePaymentAllowance($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePolicyNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePriority($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereSplitPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class ClientPayer extends AuditableModel implements HasAllyFeeInterface
@@ -83,6 +74,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     const ALLOCATION_MONTHLY = 'monthly';
     const ALLOCATION_DAILY = 'daily';
     const ALLOCATION_SPLIT = 'split';
+    const ALLOCATION_MANUAL = 'manual';
 
     /**
      * @var string[]
@@ -93,6 +85,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         self::ALLOCATION_MONTHLY,
         self::ALLOCATION_DAILY,
         self::ALLOCATION_SPLIT,
+        self::ALLOCATION_MANUAL,
     ];
 
 
@@ -175,6 +168,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         return $this->belongsTo(Payer::class);
     }
 
+    public function paymentMethod()
+    {
+        return $this->morphTo('payment_method');
+    }
+
     ////////////////////////////////////
     //// Mutators
     ////////////////////////////////////
@@ -192,6 +190,57 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    function name(): string
+    {
+        return $this->isPrivatePay() ? $this->client->name() : $this->getPayer()->name();
+    }
+
+    /**
+     * @return \App\Billing\Payer
+     */
+    function getPayer(): Payer
+    {
+        return $this->payer;
+    }
+
+    function isPrivatePay(): bool
+    {
+        return $this->getPayer()->isPrivatePay();
+    }
+
+    function getUniqueKey(): string
+    {
+        if ($this->isPrivatePay()) {
+            return (string) $this->payer_id . ':' . $this->getPrivatePayer()->id;
+        }
+
+        return (string) $this->id;
+    }
+
+    function getPaymentMethod(): ChargeableInterface
+    {
+        if ($this->getPayer()->isPrivatePay()) {
+            if (!$paymentMethod = $this->client->getPaymentMethod()) {
+                throw new PaymentMethodError("No payment method is assigned to the private payer.");
+            }
+            return $paymentMethod;
+        }
+
+        if ($method = $this->getPayer()->getPaymentMethod()) {
+            if ($method instanceof Business) {
+                $method = $this->client->business;
+            }
+            return $method;
+        }
+
+        if ($method = $this->paymentMethod) {
+            return $method;
+        }
+
+        throw new PaymentMethodError("No payment method is available for the payer.");
+    }
+
 
     /**
      * @return bool
@@ -218,15 +267,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     }
 
     /**
-     * @return \App\Billing\Payer
+     * @return bool
      */
-    function getPayer(): Payer
+    function isManualType(): bool
     {
-        $payer = $this->payer;
-        if ($payer->isPrivatePay()) {
-            $payer->setPrivatePayer($this->client);
-        }
-        return $payer;
+        return $this->payment_allocation === self::ALLOCATION_MANUAL;
     }
 
     /**
@@ -292,7 +337,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 
         // Calculate data from existing invoice items in database
         $currentSum = ClientInvoiceItem::whereHas('invoice', function ($invoice) {
-            $invoice->where('client_id', $this->client_id)->where('payer_id', $this->payer_id);
+            $invoice->where('client_id', $this->client_id)->where('client_payer_id', $this->id);
         })
             ->whereBetween('date', [$dateRange->start->toDateTimeString(), $dateRange->end->toDateTimeString()])
             ->sum('amount_due') ?? 0;
@@ -308,11 +353,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     public function getAllyPercentage()
     {
-        if ($this->payer->isPrivatePay()) {
-            return $this->client->getAllyPercentage();
+        try {
+            return $this->getPaymentMethod()->getAllyPercentage();
         }
-        else {
-            return (float) config('ally.bank_account_fee');
-        }
+        catch (\Exception $e) {}
+
+        return (float) config('ally.credit_card_fee');
     }
 }

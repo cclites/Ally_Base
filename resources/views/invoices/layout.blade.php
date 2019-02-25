@@ -14,8 +14,11 @@
 @push('head')
     <style>
         body {
-            color: #000;
+            color: #000!important;
+            font-size: 1.4rem;
+            font-weight: 500;
         }
+        small { font-weight: 500 }
 
         .header-left,
         .footer-left {
@@ -61,7 +64,6 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
             padding: 15px;
         }
 
@@ -78,6 +80,7 @@
             padding-top: 4px !important;
             padding-bottom: 4px !important;
         }
+
     </style>
 @endpush
 
@@ -85,13 +88,15 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
-                <div class="h4">{{ $sender->name() }}</div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
+                <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
                 <br>
-                @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
+                <div class="sender-address">
+                    @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
+                </div>
             </div>
             <div class="text-right header-right">
-                <div class="h3">Invoice #{{ $invoice->getName() }}</div>
+                <div class="h1">Invoice #{{ $invoice->getName() }}</div>
                 <br>
                 <table class="header-right-table">
                     <tr>
@@ -144,17 +149,25 @@
                             &dollar;{{ number_format($invoice->getAmountDue(), 2) }}
                         </td>
                     </tr>
+                    @if ($invoice->getAmountDue() <= 0)
+                    <tr>
+                        <td colspan="2">
+                            <div class="h2">NOTHING DUE - THIS INVOICE HAS BEEN PAID</div>
+                        </td>
+                    </tr>
+                    @endif
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row mt-5">
             <div class="col">
+                @if (! empty($sender->getPhoneNumber()))
+                <p class="text-center"><em>For questions regarding hours, rates or shift defaults: {{ $sender->getPhoneNumber()->number() }}</em></p>
+                @endif
                 <p class="text-center">
-                    (800) 930-0587<br>
-                    allyms.com<br>
-                    support@allyms.com
+                    For questions regarding payments: support@allyms.com - (800) 930-0587
                 </p>
                 <p class="text-center"><em>Thank you for your business!</em></p>
             </div>

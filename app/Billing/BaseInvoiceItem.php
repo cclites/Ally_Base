@@ -13,6 +13,7 @@ abstract class BaseInvoiceItem extends AuditableModel
 {
     public $timestamps = false;
     protected $guarded = ['id'];
+    protected $orderedColumn = 'name';
     protected $casts = [
         'invoice_id' => 'int',
         'invoiceable_id' => 'int',
