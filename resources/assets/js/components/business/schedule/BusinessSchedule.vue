@@ -44,7 +44,7 @@
                 <b-row>
                     <b-col class="text-right">
                         <b-btn variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
-                        <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
+                        <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal" v-if="!officeUserSettings.enable_schedule_groups">Update Schedules</b-btn>
                         <b-btn variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
                     </b-col>
                 </b-row>
@@ -318,7 +318,7 @@
             },
 
             rememberFilters() {
-                return this.isFilterable && this.business && this.business.calendar_remember_filters;
+                return this.isFilterable && this.officeUserSettings.calendar_remember_filters;
             },
 
             calendarHeight() {
@@ -331,7 +331,7 @@
                     height: this.calendarHeight,
                     eventBorderColor: '#333',
                     eventOverlap: false,
-                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    nextDayThreshold: this.officeUserSettings.calendar_next_day_threshold || '09:00:00',
                     nowIndicator: true,
                     resourceAreaWidth: '280px',
                     resourceColumns: [
@@ -791,20 +791,18 @@
                 let caregiverIsFilterable = !this.caregiver;
 
                 // Load the default filter values
-                if (this.business) {
-                    if (caregiverIsFilterable && this.business.calendar_caregiver_filter === 'unassigned') {
-                        this.filterCaregiverId = 0;
-                    }
+                if (caregiverIsFilterable && this.officeUserSettings.calendar_caregiver_filter === 'unassigned') {
+                    this.filterCaregiverId = 0;
+                }
 
-                    if (this.rememberFilters) {
-                        if (caregiverIsFilterable) {
-                            let localCaregiverId = this.getLocalStorage('caregiver');
-                            if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
-                        }
-                        if (clientIsFilterable) {
-                            let localClientId = this.getLocalStorage('client');
-                            if (localClientId !== null) this.filterClientId = localClientId;
-                        }
+                if (this.rememberFilters) {
+                    if (caregiverIsFilterable) {
+                        let localCaregiverId = this.getLocalStorage('caregiver');
+                        if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
+                    }
+                    if (clientIsFilterable) {
+                        let localClientId = this.getLocalStorage('client');
+                        if (localClientId !== null) this.filterClientId = localClientId;
                     }
                 }
 

@@ -21,5 +21,9 @@ Vue.mixin({
         isLoggedIn() {
             return window.AuthUser && window.AuthUser.id ? true : false;
         },
+
+        officeUserSettings() {
+            return window.OfficeUserSettings || {};
+        },
     }
 })
