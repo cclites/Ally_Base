@@ -339,7 +339,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         $currentSum = ClientInvoiceItem::whereHas('invoice', function ($invoice) {
             $invoice->where('client_id', $this->client_id)->where('client_payer_id', $this->id);
         })
-            ->whereBetween('date', [$dateRange->start->toDateTimeString(), $dateRange->end->toDateTimeString()])
+            ->whereBetween('date', [$dateRange->start()->toDateTimeString(), $dateRange->end()->toDateTimeString()])
             ->sum('amount_due') ?? 0;
 
         $allowance = bcsub($this->payment_allowance, $currentSum, 4);

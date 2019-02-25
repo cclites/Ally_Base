@@ -200,12 +200,12 @@ class ClientPayerTest extends TestCase
         $dailyPayer = $this->createPayer('daily', ['effective_start' => '2019-01-01']);
         $balancePayer = $this->createPayer('balance', ['effective_start' => '2019-01-01']);
 
-        $this->assertEquals('2019-02-11 00:00:00', $weeklyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
-        $this->assertEquals('2019-02-17 23:59:59', $weeklyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
-        $this->assertEquals('2019-02-01 00:00:00', $monthlyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
-        $this->assertEquals('2019-02-28 23:59:59', $monthlyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
-        $this->assertEquals('2019-02-12 00:00:00', $dailyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
-        $this->assertEquals('2019-02-12 23:59:59', $dailyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
+        $this->assertEquals('2019-02-11 00:00:00', $weeklyPayer->getAllowanceRange('2019-02-12')->start()->toDateTimeString());
+        $this->assertEquals('2019-02-17 23:59:59', $weeklyPayer->getAllowanceRange('2019-02-12')->end()->toDateTimeString());
+        $this->assertEquals('2019-02-01 00:00:00', $monthlyPayer->getAllowanceRange('2019-02-12')->start()->toDateTimeString());
+        $this->assertEquals('2019-02-28 23:59:59', $monthlyPayer->getAllowanceRange('2019-02-12')->end()->toDateTimeString());
+        $this->assertEquals('2019-02-12 00:00:00', $dailyPayer->getAllowanceRange('2019-02-12')->start()->toDateTimeString());
+        $this->assertEquals('2019-02-12 23:59:59', $dailyPayer->getAllowanceRange('2019-02-12')->end()->toDateTimeString());
         $this->assertNull($balancePayer->getAllowanceRange('2019-02-12'));
     }
 

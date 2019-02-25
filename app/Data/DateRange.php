@@ -10,14 +10,24 @@ use Carbon\Carbon;
 class DateRange
 {
     /** @var \Carbon\Carbon */
-    public $start;
+    private $start;
 
     /** @var \Carbon\Carbon */
-    public $end;
+    private $end;
 
     public function __construct(Carbon $start, Carbon $end)
     {
         $this->start = $start;
         $this->end = $end;
+    }
+
+    public function start(): Carbon
+    {
+        return $this->start->copy();
+    }
+
+    public function end(): Carbon
+    {
+        return $this->end->copy();
     }
 }
