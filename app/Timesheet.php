@@ -241,6 +241,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             return $timesheet->fresh()->load('caregiver', 'client');
         }
         catch (\Exception $ex) {
+            throw $ex;
             return false; 
         }
     }
@@ -278,8 +279,8 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             'mileage' => (float) $data['mileage'],
             'other_expenses' =>  (float) $data['other_expenses'],
             'caregiver_comments' => $data['caregiver_comments'],
-            'caregiver_rate' => (float) $data['caregiver_rate'],
-            'provider_fee' => (float) $data['provider_fee'],
+            'caregiver_rate' => $data['caregiver_rate'] ?? null,
+            'client_rate' => $data['client_rate'] ?? null,
         ])) {
             $entry->activities()->sync($data['activities']);
         }

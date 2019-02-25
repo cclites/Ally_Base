@@ -14,7 +14,7 @@ use Carbon\Carbon;
  * @property float $other_expenses
  * @property string|null $caregiver_comments
  * @property float $caregiver_rate
- * @property float $provider_fee
+ * @property float $client_rate
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read void $activities

@@ -20,8 +20,8 @@ class CreateTimesheetRequest extends BusinessClientRequest
             'entries.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
             'entries.*.checked_in_time' => 'required|date_format:Y-m-d H:i:s',
             'entries.*.checked_out_time' => 'required|date_format:Y-m-d H:i:s',
-            'entries.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'entries.*.provider_fee' => 'required|numeric|max:1000|min:0',
+            'entries.*.client_rate' => 'nullable|numeric|max:1000|min:0',
+            'entries.*.caregiver_rate' => 'nullable|numeric|max:1000|min:0',
             'entries.*.activities' => 'required|array|min:1',
             'entries.*.caregiver_comments' => 'nullable',
         ];

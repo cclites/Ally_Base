@@ -63,7 +63,7 @@ class TimesheetController extends BaseController
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      * @throws \Exception
      */
-    public function store(CreateTimesheetRequest $request)
+    public function store(CaregiverTimesheetRequest $request)
     {
         $data = $request->validated();
         $business = $request->getBusiness();
@@ -72,8 +72,6 @@ class TimesheetController extends BaseController
         if (! $business->allows_manual_shifts) {
             return new ErrorResponse(403, 'This business does not allow manual timesheets to be submitted.');
         }
-
-        DB::beginTransaction();
 
         $timesheet = Timesheet::createWithEntries(
             $data,

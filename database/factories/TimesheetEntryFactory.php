@@ -15,7 +15,7 @@ $factory->define(TimesheetEntry::class, function (Faker $faker) {
         'mileage' => $faker->numberBetween(0, 50),
         'other_expenses' => $faker->numberBetween(0, 15),
         'caregiver_comments' => $faker->sentence($faker->numberBetween(0, 5)),
-        'caregiver_rate' => $faker->numberBetween(8, 20),
-        'provider_fee' => $faker->numberBetween(1, 3),
+        'client_rate' => $faker->numberBetween(16,20),
+        'caregiver_rate' => $faker->numberBetween(10, 15),
     ];
 });
