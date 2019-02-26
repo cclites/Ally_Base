@@ -44,33 +44,6 @@
                     </b-col>
 
                     <b-col md="6">
-                        <b-form-group v-show="isOfficeUser" label="Caregiver Hourly Rate" label-for="caregiver_rate">
-                            <b-form-input
-                                    id="caregiver_rate"
-                                    name="caregiver_rate"
-                                    type="number"
-                                    step="any"
-                                    v-model="form.caregiver_rate"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="caregiver_rate" text=""></input-help>
-                        </b-form-group>
-                    </b-col>
-                    <b-col md="6">
-                        <b-form-group v-show="isOfficeUser" label="Provider Hourly Fee" label-for="provider_fee">
-                            <b-form-input
-                                    id="provider_fee"
-                                    name="provider_fee"
-                                    type="number"
-                                    step="any"
-                                    v-model="form.provider_fee"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="provider_fee" text=""></input-help>
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6">
                         <!-- mileage -->
                         <b-form-group label="Mileage" label-for="mileage">
                             <b-form-input
@@ -94,7 +67,7 @@
                                     name="other_expenses"
                                     type="number"
                                     v-model="form.other_expenses"
-                                    step="any"
+                                    step="0.01"
                                     min="0"
                                     max="1000"
                             />
@@ -125,12 +98,18 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import RateFactory from "../../classes/RateFactory";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             value: {},
             entry: { type: Object, default: {} },
             activities: { type: Array, default: [] },
             isOfficeUser: { type: Boolean, default: false },
+            defaultRates: { type: Object, default: () => ({}) },
         },
 
         data: () => ({
@@ -153,14 +132,6 @@
                 }
 
                 return this.dow(this.form.date, true) + ' ' + moment(this.form.date).format('M/D/YYYY');
-            },
-
-            defaultRate() {
-                return this.entry.client.caregiver_hourly_rate || 0;
-            },
-
-            defaultFee() {
-                return this.entry.client.provider_hourly_fee || 0;
             },
 
             leftHalfActivities() {
@@ -225,8 +196,8 @@
                         this.form.addError('caregiver_rate', 'Invalid');
                     }
 
-                    if (isNaN(data.provider_fee)) {
-                        this.form.addError('provider_fee', 'Invalid');
+                    if (isNaN(data.client_rate)) {
+                        this.form.addError('client_rate', 'Invalid');
                     }
                 }
                 
@@ -270,6 +241,8 @@
                         start_time: checkin.format('HH:mm'),
                         end_time: checkout.format('HH:mm'),
                     }
+
+                    this.usingDefaultRates = isNaN(this.entry.client_rate);
 
                     this.form = new Form({
                         ...data,

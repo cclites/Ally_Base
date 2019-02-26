@@ -35,7 +35,8 @@ use Packages\MetaData\HasMetaData;
  * @property string|null $remember_token
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
- * @property string|null $email_sent_at
+ * @property string|null $welcome_email_sent_at
+ * @property string|null $training_email_sent_at
  * @property string|null $gender
  * @property string|null $avatar
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
@@ -207,6 +208,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             ->whereNull('completed_at');
     }
 
+    /**
+     * Get the user's setup status history relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function setupStatusHistory()
+    {
+        return $this->hasMany(SetupStatusHistory::class);
+    }
+    
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

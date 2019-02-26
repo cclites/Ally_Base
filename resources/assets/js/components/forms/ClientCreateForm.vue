@@ -72,7 +72,7 @@
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" name="no_email"
-                                       v-model="form.no_email" value="1">
+                                       v-model="form.no_email" value="1" @input="toggleNoEmail()">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">No Email</span>
                             </label>
@@ -82,15 +82,54 @@
                 <input-help :form="form" field="email"
                             text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
             </b-form-group>
-            <b-form-group label="Username" label-for="username" label-class="required">
+            <b-form-group label="Username" label-for="username">
+                <b-row>
+                    <b-col cols="8">
+                        <b-form-input
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                                :disabled="form.no_username"
+                        >
+                        </b-form-input>
+                    </b-col>
+                    <b-col cols="4">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="no_username"
+                                       v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Let Client Choose</span>
+                            </label>
+                        </div>
+                    </b-col>
+                </b-row>
+                <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+            </b-form-group>
+            <b-form-group label="Password" label-for="password">
                 <b-form-input
-                        id="username"
-                        name="username"
-                        type="text"
-                        v-model="form.username"
+                        id="password"
+                        name="password"
+                        type="password"
+                        v-model="form.password"
+                        :disabled="form.no_username"
                 >
                 </b-form-input>
-                <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                <input-help :form="form" field="password"
+                            text="Enter the password they will use to login for the first time."></input-help>
+            </b-form-group>
+            <b-form-group label="Confirm Password" label-for="password_confirmation">
+                <b-form-input
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        v-model="form.password_confirmation"
+                        :disabled="form.no_username"
+                >
+                </b-form-input>
+                <input-help :form="form" field="password_confirmation"
+                            text="Re-enter the above password."></input-help>
             </b-form-group>
             <b-form-group label="Date of Birth" label-for="date_of_birth">
                 <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
@@ -100,16 +139,16 @@
                 <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                 <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
             </b-form-group>
-            <b-form-group label="Ally Onboard Status" label-for="onboard_status" label-class="required">
+            <b-form-group label="Ally Client Agreement Status" label-for="agreement_status" label-class="required">
                 <b-form-select
-                        id="onboard_status"
-                        name="onboard_status"
-                        v-model="form.onboard_status"
+                        id="agreement_status"
+                        name="agreement_status"
+                        v-model="form.agreement_status"
                 >
                     <option value="">--Select--</option>
                     <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
                 </b-form-select>
-                <input-help :form="form" field="onboard_status" text="Select the Ally Agreement status of the client"></input-help>
+                <input-help :form="form" field="agreement_status" text="Select the Ally Agreement status of the client"></input-help>
             </b-form-group>
         </b-col>
     </b-row>
@@ -135,13 +174,16 @@
                     email: this.value.email || null,
                     no_email: !!this.value.no_email,
                     username: this.value.username || null,
+                    no_username: this.value.no_username == 0 ? false : true, 
                     date_of_birth: this.value.date_of_birth || null,
                     client_type: this.value.client_type || "",
                     ssn: this.value.ssn || null,
-                    onboard_status: this.value.onboard_status || "",
+                    agreement_status: this.value.agreement_status || "",
                     override: false,
                     provider_pay: 0,
                     business_id: this.value.business_id || "",
+                    password: this.value.password || null,
+                    password_confirmation: this.value.password_confirmation || null,
                 }),
             }
         },
@@ -151,8 +193,25 @@
 
         methods: {
             copyEmailToUsername() {
+                if (this.form.no_username) {
+                    return;
+                }
                 if (this.form.email && !this.form.username) {
                     this.form.username = this.form.email;
+                }
+            },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                    this.form.password = '';
+                    this.form.password_confirmation = '';
                 }
             },
         },
@@ -174,7 +233,7 @@
                     }
                 },
                 deep: true
-            }
+            },
         },
 
     }

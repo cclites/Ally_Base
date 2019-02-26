@@ -6,15 +6,12 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
-use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
-use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
 use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
-use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToChains;
@@ -25,6 +22,9 @@ use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
+use App\Traits\CanHaveEmptyUsername;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * App\Caregiver
@@ -130,11 +130,11 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface,
+class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
-    use IsUserRole, BelongsToBusinesses, BelongsToChains;
-    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates;
+    use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
+    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -176,6 +176,15 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
+    ///////////////////////////////////////////
+    /// Caregiver Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_CONFIRMED_PROFILE = 'confirmed_profile'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -295,6 +304,16 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $businesses ?? collect();
     }
 
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
+    {
+        return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
+    }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
@@ -319,28 +338,6 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         $availability = $this->availability()->firstOrNew([]);
         $availability->fill($data);
         return $availability->save() ? $availability : false;
-    }
-
-    /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a caregiver that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
     }
 
     /**
@@ -451,14 +448,6 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         }
 
         return $aggregator->events($start, $end);
-    }
-
-    public function sendConfirmationEmail(BusinessChain $businessChain = null)
-    {
-        if (!$businessChain) $businessChain = $this->businessChains()->first();
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $businessChain));
     }
 
     /**

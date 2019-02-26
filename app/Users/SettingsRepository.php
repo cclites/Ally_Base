@@ -10,10 +10,10 @@ use App\User;
 class SettingsRepository
 {
     /**
-     * @param \App\User $user
+     * @param null|\App\User $user
      * @return \App\Users\OfficeUserSettings
      */
-    public function getOfficeUserSettings(User $user)
+    public function getOfficeUserSettings(?User $user)
     {
         if (!$user || !$officeUser = $user->officeUser) {
             return new OfficeUserSettings();

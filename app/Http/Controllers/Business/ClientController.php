@@ -11,8 +11,6 @@ use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
-use App\Mail\ClientConfirmation;
-use App\OnboardStatusHistory;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -24,6 +22,8 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Notifications\ClientWelcomeEmail;
+use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
 {
@@ -135,6 +135,7 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
+        
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
         if ($client = $action->create($data, $paymentMethod)) {
@@ -204,8 +205,9 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
+        $client->setup_url = $client->setup_url;
 
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $lastStatusDate = $client->agreementStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
@@ -239,16 +241,13 @@ class ClientController extends BaseController
         $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
-        if ($client->onboard_status != $data['onboard_status']) {
+        if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
         if ($client->update($data)) {
             if ($addOnboardRecord) {
-                $history = new OnboardStatusHistory([
-                    'status' => $data['onboard_status']
-                ]);
-                $client->onboardStatusHistory()->save($history);
+                $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
             return new SuccessResponse('The client has been updated.', $client);
@@ -365,14 +364,6 @@ class ClientController extends BaseController
         return new SuccessResponse($message, $data, '.');
     }
 
-    public function sendConfirmationEmail(Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $client->sendConfirmationEmail();
-        return new SuccessResponse('Email Sent to Client');
-    }
-
     public function getPaymentType(Client $client)
     {
         return [
@@ -441,5 +432,37 @@ class ClientController extends BaseController
 
         $client->update($data);
         return new SuccessResponse('The default rates have been saved.');
+    }
+
+    /**
+     * Send welcome email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeEmail(Client $client)
+    {
+        $client->update(['welcome_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new ClientWelcomeEmail($client));
+
+        // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
+        return new SuccessResponse('A welcome email was dispatched to the Client.', null, '.');
+    }
+
+    /**
+     * Send training email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function trainingEmail(Client $client)
+    {
+        $client->update(['training_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new TrainingEmail($client));
+
+        // Use the reload page redirect to update the timestamp
+        return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
     }
 }

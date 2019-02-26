@@ -251,28 +251,19 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
     public function convertToCaregiver()
     {
         return \DB::transaction(function() {
-
-            // Check if username exists
-            $userExists = User::where('username', $this->email)->exists();
-            if ($userExists) {
-                $alternativeUsername = str_slug($this->first_name . ' ' . $this->last_name);
-                if (User::where('username', $alternativeUsername)->exists()) {
-                    $alternativeUsername .= mt_rand(1000,9999);
-                }
-            }
-
             $caregiver = Caregiver::create([
                 'firstname' => $this->first_name,
                 'lastname' => $this->last_name,
                 'ssn' => $this->ssn,
                 'email' => $this->email,
-                'username' => $alternativeUsername ?? $this->email,
+                'username' => Caregiver::getAutoUsername(),
                 'date_of_birth' => $this->date_of_birth,
                 'password' => bcrypt(random_bytes(32)),
                 'application_date' => Carbon::now(),
             ]);
 
             $this->businessChain->caregivers()->attach($caregiver);
+            $caregiver->setAvailability([]); // sets default availability
 
             $address = new Address([
                 'address1' => $this->address,
