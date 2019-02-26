@@ -144,7 +144,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type">
+                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -714,17 +714,6 @@
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
                     this.setDateTimeFromSchedule(schedule);
-                    
-                    if (this.defaultRates) {
-                        if (this.form.services.length === 0) {
-                            console.log('updating ' + this.form.hours_type + ' hours');
-                            this.changeHoursType(this.form.default_rates, this.form.hours_type, 'default');
-                        } else {
-                            this.form.services.forEach(item => {
-                                this.changeHoursType(item.default_rates, item.hours_type, 'default');
-                            });
-                        }
-                    }
                 });
             },
 
@@ -939,12 +928,12 @@
             },
 
             onChangeServiceHoursType(newVal, service) {
-                let oldVal = service.hours_type;
-                let rates = this.defaultRates ? service.default_rates : service;
-                this.handleChangedHoursType(rates, newVal, oldVal);
+                this.fetchAllRates();
             },
 
             handleChangedHoursType(rates, newVal, oldVal) {
+                console.log('handleChangedHoursType old ', oldVal);
+                console.log('handleChangedHoursType new ', newVal);
                 var OT = parseFloat(this.business.ot_multiplier);
                 var HOL = parseFloat(this.business.hol_multiplier);
                 switch(newVal) {
@@ -969,12 +958,23 @@
                         break;
                 }
             },
+
+            onChangeHoursType(newVal, oldVal) {
+                this.handleChangedHoursType(this.form, newVal, oldVal);
+            },
         },
 
         watch: {
             'form.hours_type': function(newVal, oldVal) {
-                let rates = this.defaultRates ? this.form.default_rates : this.form;
-                this.handleChangedHoursType(rates, newVal, oldVal);
+                if (! oldVal || newVal == oldVal) {
+                    return;
+                }
+
+                if (this.defaultRates) {
+                    // re-load the default rates and will automatically
+                    // calculate any OT/HOL hours.
+                    this.handleChangedDefaultRates(this.form, this.defaultRates);
+                }
             },
 
             model(val) {
