@@ -614,7 +614,6 @@
 
             changedCaregiver(caregiverId) {
                 this.fetchAllRates();
-                this.setRatesFromDefault(this.form);
 
                 // Automatically reset the schedule status when it is a
                 // no show or open shift and a new caregiver is set otherwise
