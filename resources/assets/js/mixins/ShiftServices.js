@@ -180,17 +180,21 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
-                if (! form.default_rates) {
-                    return;
-                }
-                form.client_rate = form.default_rates.client_rate || 0;
-                form.caregiver_rate = form.default_rates.caregiver_rate || 0;
-                this.recalculateRates(form, form.client_rate, form.caregiver_rate);
-                for(let service of form.services) {
-                    service.client_rate = service.default_rates.client_rate || 0;
-                    service.caregiver_rate = service.default_rates.caregiver_rate || 0;
-                    this.recalculateRates(service, service.client_rate, service.caregiver_rate);
-                }
+                this.setRatesFromDefault(form);
+            }
+        },
+
+        setRatesFromDefault(form) {
+            if (! form.default_rates) {
+                return;
+            }
+            form.client_rate = form.default_rates.client_rate || 0;
+            form.caregiver_rate = form.default_rates.caregiver_rate || 0;
+            this.recalculateRates(form, form.client_rate, form.caregiver_rate);
+            for(let service of form.services) {
+                service.client_rate = service.default_rates.client_rate || 0;
+                service.caregiver_rate = service.default_rates.caregiver_rate || 0;
+                this.recalculateRates(service, service.client_rate, service.caregiver_rate);
             }
         },
 
