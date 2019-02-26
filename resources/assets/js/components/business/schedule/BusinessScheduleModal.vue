@@ -212,7 +212,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;">
+                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeServiceHoursType(x, service)">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -714,6 +714,17 @@
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
                     this.setDateTimeFromSchedule(schedule);
+                    
+                    if (this.defaultRates) {
+                        if (this.form.services.length === 0) {
+                            console.log('updating ' + this.form.hours_type + ' hours');
+                            this.changeHoursType(this.form.default_rates, this.form.hours_type, 'default');
+                        } else {
+                            this.form.services.forEach(item => {
+                                this.changeHoursType(item.default_rates, item.hours_type, 'default');
+                            });
+                        }
+                    }
                 });
             },
 
@@ -926,9 +937,46 @@
             toggleCaregivers() {
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
+
+            onChangeServiceHoursType(newVal, service) {
+                let oldVal = service.hours_type;
+                let rates = this.defaultRates ? service.default_rates : service;
+                this.handleChangedHoursType(rates, newVal, oldVal);
+            },
+
+            handleChangedHoursType(rates, newVal, oldVal) {
+                var OT = parseFloat(this.business.ot_multiplier);
+                var HOL = parseFloat(this.business.hol_multiplier);
+                switch(newVal) {
+                    case 'overtime':
+                        if (oldVal == 'holiday') {
+                            this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                        }
+                        this.modifyRate(rates, this.business.ot_behavior, OT);
+                        break;
+                    case 'holiday':
+                        if (oldVal == 'overtime') {
+                            this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                        }
+                        this.modifyRate(rates, this.business.hol_behavior, HOL);
+                        break;
+                    case 'default':
+                        if (oldVal == 'holiday') {
+                            this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                        } else if (oldVal == 'overtime') {
+                            this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                        }
+                        break;
+                }
+            },
         },
 
         watch: {
+            'form.hours_type': function(newVal, oldVal) {
+                let rates = this.defaultRates ? this.form.default_rates : this.form;
+                this.handleChangedHoursType(rates, newVal, oldVal);
+            },
+
             model(val) {
                 // Update local modal bool
                 this.scheduleModal = val;

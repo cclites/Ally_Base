@@ -191,6 +191,34 @@ export default {
             }
         },
 
+        modifyRate(rates, action, multiplier, reduce = false) {
+            multiplier = parseFloat(multiplier);
+            let cgRate = (parseFloat(rates.caregiver_rate) * multiplier).toFixed(2);
+            let providerFee = (parseFloat(rates.provider_fee) * multiplier).toFixed(2);
+            if (reduce) {
+                cgRate = (parseFloat(rates.caregiver_rate) / multiplier).toFixed(2);
+                providerFee = (parseFloat(rates.provider_fee) / multiplier).toFixed(2);
+            }
+            switch (action) {
+                case 'caregiver':
+                    rates.caregiver_rate = cgRate;
+                    this.updateClientRates(rates)
+                    break;
+                case 'provider': 
+                    rates.provider_fee = providerFee;
+                    this.updateClientRates(rates);
+                    break;
+                case 'both':
+                    rates.caregiver_rate = cgRate;
+                    rates.provider_fee = providerFee;
+                    this.updateClientRates(rates)
+                    break;
+                case null:
+                default:
+                    return;
+            }
+        },
+
     },
 
     watch: {
