@@ -11,6 +11,7 @@ use App\RateCode;
 use App\Schedule;
 use App\Shift;
 use Illuminate\Support\Collection;
+use App\Data\ScheduledRates;
 
 class RateFactory
 {
@@ -32,6 +33,49 @@ class RateFactory
     ////////////////////////////////////
     //// NEW STRUCTURE (2019-01-13)
     ////////////////////////////////////
+
+    public function applyOvertime(int $businessId, Rates $rates, ?ScheduledRates $scheduledRates) : Rates
+    {
+        $hoursType = $scheduledRates ? $scheduledRates->hoursType() : 'default';
+
+        switch ($hoursType) {
+            case 'overtime':
+                $multiplier = floatval($this->settings->get($businessId, 'ot_multiplier', 1.5));
+                $action = $this->settings->get($businessId, 'ot_behavior', 1.5);
+                return $this->modifyRate($rates, $action, $multiplier);
+            case 'holiday':
+                $multiplier = floatval($this->settings->get($businessId, 'hol_multiplier', 1.5));
+                $action = $this->settings->get($businessId, 'hol_behavior', 1.5);
+                return $this->modifyRate($rates, $action, $multiplier);
+            case 'default':
+            default:
+                break;
+        }
+
+        return $rates;
+    }
+
+    public function modifyRate(Rates $rates, string $action, float $multiplier)
+    {
+        switch ($action) {
+            case 'caregiver':
+                // $rates->client_rate = $rates->client_rate * $multiplier;
+                $rates->caregiver_rate = $rates->caregiver_rate * $multiplier;
+                break;
+            case 'provider': 
+                $rates->client_rate = $rates->client_rate * $multiplier;
+                // $rates->caregiver_rate = $rates->caregiver_rate * $multiplier;
+                break;
+            case 'both':
+                $rates->client_rate = $rates->client_rate * $multiplier;
+                $rates->caregiver_rate = $rates->caregiver_rate * $multiplier;
+                break;
+            default:
+                return $rates;
+        }
+
+        return $rates;
+    }
 
     public function findMatchingRate(Client $client, string $effectiveDateYMD, bool $fixedRates = false, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): Rates
     {

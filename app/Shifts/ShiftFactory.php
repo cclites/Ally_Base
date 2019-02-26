@@ -212,25 +212,38 @@ class ShiftFactory implements Arrayable
      * @param int|null $payerId
      * @return \App\Data\ScheduledRates|null
      */
-    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
-        ?int $serviceId, ?int $payerId): ?ScheduledRates
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
-        if (!$rates || $rates->clientRate() === null) {
+        if (!$scheduledRates || $scheduledRates->clientRate() === null) {
             $client = Client::findOrFail($clientId);
             $timezone = $client->getTimezone();
             $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
 
-            $rates = app(RateFactory::class)->findMatchingRate($client, $effectiveDate,
-                $rates ? $rates->fixedRates() : false, $serviceId, $payerId, $caregiverId);
+            $rates = app(RateFactory::class)->findMatchingRate(
+                $client,
+                $effectiveDate,
+                $scheduledRates ? $scheduledRates->fixedRates() : false,
+                $serviceId,
+                $payerId,
+                $caregiverId
+            );
+
+            app(RateFactory::class)->applyOvertime($client->business_id, $rates, $scheduledRates);
 
             return new ScheduledRates(
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
-                $rates->fixed_rates ?? false
+                $rates->fixed_rates ?? false,
+                $scheduledRates->hoursType()
             );
         }
 
-        return $rates;
+        return $scheduledRates;
+    }
+
+    public function modifyRate()
+    {
+        
     }
 
     /**
