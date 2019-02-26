@@ -13,7 +13,7 @@ class RateFactory {
     {
         clientRate = parseFloat(clientRate);
         allyPct = parseFloat(allyPct);  // Ex: 0.05
-        if (isNaN(clientRate)) {
+        if (! clientRate) {
             return 0;
         }
 
