@@ -293,6 +293,9 @@
                             <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-warning">
                                 Warning: The shift's actual hours ({{ duration }}) do not match the broken out service hours.
                             </div>
+                            <b-alert v-if="isUsingOvertime" variant="warning" show>
+                                Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
+                            </b-alert>
 
                             <label class="mt-1">
                                 <b-form-checkbox v-model="defaultRates">

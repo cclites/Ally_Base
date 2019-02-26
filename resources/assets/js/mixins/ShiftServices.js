@@ -22,7 +22,21 @@ export default {
         serviceHours()
         {
             return this.form.services.reduce((carry, service) => carry + parseFloat(service.duration), 0);
-        }
+        },
+
+        isUsingOvertime() {
+            if (this.billingType == 'services') {
+                let flag = false;
+                this.form.services.forEach(item => {
+                    if (['overtime', 'holiday'].includes(item.hours_type)) {
+                        flag = true;
+                    }
+                })
+                return flag;
+            } else {
+                return ['overtime', 'holiday'].includes(this.form.hours_type);
+            }
+        },
 
     },
     

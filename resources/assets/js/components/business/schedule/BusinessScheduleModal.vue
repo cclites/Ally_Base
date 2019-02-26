@@ -290,6 +290,9 @@
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
                                     Warning: The scheduled hours ({{ scheduledHours }}) do not match the broken out service hours.
                                 </div>
+                                <b-alert v-if="isUsingOvertime" variant="warning" show>
+                                    Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
+                                </b-alert>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -590,7 +593,7 @@
 
             currentWeekdayInt() {
                 return this.startDate ? moment(this.startDate).day() : 0;
-            }
+            },
         },
 
         methods: {
