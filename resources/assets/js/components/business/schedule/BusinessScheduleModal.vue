@@ -212,7 +212,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeServiceHoursType(x, service)">
+                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -927,13 +927,25 @@
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
 
-            onChangeServiceHoursType(newVal, service) {
-                this.fetchAllRates();
+            onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
+                let service = this.form.services[serviceIndex];
+                if (!service) {
+                    return;
+                }
+
+                // Use nextTick here so that you can properly get the oldVal using this
+                // function on the @change event, but utilize the updated service
+                // object that will reflect the new hours_type value.
+                this.$nextTick(() => {
+                    if (this.defaultRates) {
+                        this.fetchDefaultRate(service);
+                    } else {
+                        this.handleChangedHoursType(service, newVal, oldVal);
+                    }
+                });
             },
 
             handleChangedHoursType(rates, newVal, oldVal) {
-                console.log('handleChangedHoursType old ', oldVal);
-                console.log('handleChangedHoursType new ', newVal);
                 var OT = parseFloat(this.business.ot_multiplier);
                 var HOL = parseFloat(this.business.hol_multiplier);
                 switch(newVal) {

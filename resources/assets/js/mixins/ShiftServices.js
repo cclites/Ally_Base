@@ -195,8 +195,6 @@ export default {
         },
 
         modifyRate(rates, multiplierType = null, multiplier = 1.0, reduce = false) {
-            // let multiplier = this.getMultiplier(hoursType);
-            // let action = this.getMultiplierType(hoursType);
             let cgRate = (parseFloat(rates.caregiver_rate) * multiplier).toFixed(2);
             let providerFee = (parseFloat(rates.provider_fee) * multiplier).toFixed(2);
             if (reduce) {
