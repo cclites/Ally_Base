@@ -52,7 +52,7 @@ class ClientInvoiceController extends Controller
         return view_component('admin-client-invoices', 'Client Invoices', compact('chains'));
     }
 
-    public function generate(Request $request, ClientInvoiceGenerator $generator)
+    public function generate(Request $request, ClientInvoiceGenerator $clientInvoiceGenerator)
     {
         $request->validate([
             'chain_id' => 'required|exists:business_chains,id',
@@ -70,6 +70,7 @@ class ClientInvoiceController extends Controller
         $errors = [];
         $clients = Client::active()->whereIn('business_id', $businessIds)->get();
         foreach($clients as $client) {
+            $generator = clone $clientInvoiceGenerator;
             try {
                 $created = $generator->generateAll($client, $endDateUtc);
                 foreach($created as $invoice) {
