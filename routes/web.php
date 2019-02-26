@@ -168,6 +168,7 @@ Route::group([
     Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
+    Route::put('settings/overtime', 'Business\SettingController@updateOvertime')->name('settings.overtime');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
     Route::get('settings/deactivation-reasons', 'Business\DeactivationReasonController@index')->name('deactivation_reasons');
     Route::post('settings/deactivation-reasons', 'Business\DeactivationReasonController@store')->name('deactivation_reasons.store');
