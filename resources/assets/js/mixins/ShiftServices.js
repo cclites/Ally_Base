@@ -194,6 +194,32 @@ export default {
             }
         },
 
+        handleChangedHoursType(rates, newVal, oldVal) {
+            var OT = parseFloat(this.business.ot_multiplier);
+            var HOL = parseFloat(this.business.hol_multiplier);
+            switch(newVal) {
+                case 'overtime':
+                    if (oldVal == 'holiday') {
+                        this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                    }
+                    this.modifyRate(rates, this.business.ot_behavior, OT);
+                    break;
+                case 'holiday':
+                    if (oldVal == 'overtime') {
+                        this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                    }
+                    this.modifyRate(rates, this.business.hol_behavior, HOL);
+                    break;
+                case 'default':
+                    if (oldVal == 'holiday') {
+                        this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                    } else if (oldVal == 'overtime') {
+                        this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                    }
+                    break;
+            }
+        },
+
         modifyRate(rates, multiplierType = null, multiplier = 1.0, reduce = false) {
             let cgRate = (parseFloat(rates.caregiver_rate) * multiplier).toFixed(2);
             let providerFee = (parseFloat(rates.provider_fee) * multiplier).toFixed(2);

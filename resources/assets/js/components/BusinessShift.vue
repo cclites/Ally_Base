@@ -165,7 +165,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;">
+                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -224,7 +224,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type">
+                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -677,7 +677,7 @@
                 // Reset values
                 this.deleted = false;
                 this.billingType = shift.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = shift.client_rate === null;
+                this.defaultRates = false; // always set to false for shifts.
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -968,8 +968,42 @@
                 }
                 return questions;
             },
+
+            onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
+                let service = this.form.services[serviceIndex];
+                if (!service) {
+                    return;
+                }
+
+                // Use nextTick here so that you can properly get the oldVal using this
+                // function on the @change event, but utilize the updated service
+                // object that will reflect the new hours_type value.
+                this.$nextTick(() => {
+                    if (this.defaultRates) {
+                        this.fetchDefaultRate(service);
+                    } else {
+                        this.handleChangedHoursType(service, newVal, oldVal);
+                    }
+                });
+            },
+
+            onChangeHoursType(newVal, oldVal) {
+                this.handleChangedHoursType(this.form, newVal, oldVal);
+            },
         },
         watch: {
+            'form.hours_type': function(newVal, oldVal) {
+                if (! oldVal || newVal == oldVal) {
+                    return;
+                }
+
+                if (this.defaultRates) {
+                    // re-load the default rates and will automatically
+                    // calculate any OT/HOL hours.
+                    this.handleChangedDefaultRates(this.form, this.defaultRates);
+                }
+            },
+
             shift(newVal, oldVal) {
                 if (newVal.id !== oldVal.id) this.changedShift(newVal);
             },
