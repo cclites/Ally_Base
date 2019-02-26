@@ -61,6 +61,8 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             $this->getInvoiceables($client, $endDateUtc)
         );
 
+        $this->clearExistingInvoices();
+
         if (count($invoiceables)) {
             DB::beginTransaction();
 
@@ -72,6 +74,14 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         }
 
         return array_values($this->invoices);
+    }
+
+    /**
+     *  Clear invoices from previous state
+     */
+    public function clearExistingInvoices()
+    {
+        $this->invoices = [];
     }
 
     /**
