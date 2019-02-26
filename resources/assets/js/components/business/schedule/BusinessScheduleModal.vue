@@ -676,7 +676,7 @@
                 if (!schedule) schedule = this.schedule;
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = schedule.client_rate === null;
+                this.defaultRates = schedule.client_rate == null;
 
                 // Initialize form
                 this.$nextTick(() => {
