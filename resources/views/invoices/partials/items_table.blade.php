@@ -29,7 +29,7 @@
                 @foreach($items as $item)
                     <?php /** @var \App\Billing\ClientInvoiceItem $item */ ?>
                     <tr>
-                        <td>{{ local_date($item->date) }}</td>
+                        <td class="text-nowrap">{{ local_date($item->date) }}</td>
                         <td>
                             {{ $item->name }}
                             @if(trim($item->notes))
@@ -37,10 +37,10 @@
                                 <small>{{ $item->notes }}</small>
                             @endif
                         </td>
-                        <td>{{ $item->units }}</td>
-                        <td>{{ rate_format($item->rate) }}</td>
-                        <td>{{ number_format($item->total, 2) }}</td>
-                        <td>{{ number_format($item->amount_due, 2) }}</td>
+                        <td class="text-nowrap">{{ $item->units }}</td>
+                        <td class="text-nowrap">{{ rate_format($item->rate) }}</td>
+                        <td class="text-nowrap">{{ number_format($item->total, 2) }}</td>
+                        <td class="text-nowrap">{{ number_format($item->amount_due, 2) }}</td>
                     </tr>
                 @endforeach
             @endforeach
@@ -48,8 +48,8 @@
             <tfoot>
             <tr>
                 <th colspan="4">Total</th>
-                <th>{{ number_format($invoice->items->sum('total'), 2) }}</th>
-                <th>{{ number_format($invoice->amount, 2) }}</th>
+                <th class="text-nowrap">{{ number_format($invoice->items->sum('total'), 2) }}</th>
+                <th class="text-nowrap">{{ number_format($invoice->amount, 2) }}</th>
             </tr>
             </tfoot>
         </table>
