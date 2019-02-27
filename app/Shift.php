@@ -32,6 +32,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
+use App\Data\ScheduledRates;
 
 /**
  * App\Shift
@@ -519,7 +520,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if ($data['client_rate'] === null) {
                 $rates = ShiftFactory::resolveRates(
                     new ClockData($this->checked_in_method, $this->checked_in_time->toDateTimeString()),
-                    null,
+                    new ScheduledRates(null, null, false, $data['hours_type']),
                     $this->client_id,
                     $this->caregiver_id,
                     $data['service_id'],
