@@ -9,6 +9,9 @@ use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\Gateway\ECSPayment;
+use App\Contracts\GeocodeInterface;
+use App\Services\DummyGeocodeService;
+use App\Services\GeocodeManager;
 use App\Services\Slack;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -80,6 +83,11 @@ class AppServiceProvider extends ServiceProvider
                 \URL::forceScheme('https');
             }
         }
+
+        $this->app->bind(GeocodeInterface::class, DummyGeocodeService::class);
+        $this->app->bind(GeocodeManager::class, function() {
+             return new GeocodeManager(new DummyGeocodeService());
+        });
     }
 
     /**

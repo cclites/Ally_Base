@@ -71,8 +71,9 @@ class DepositInvoiceController extends Controller
         $invoices = [];
         $errors = [];
         foreach($chain->businesses as $business) {
+            $generator = clone $businessInvoiceGenerator;
             try {
-                $invoices[] = $businessInvoiceGenerator->generate($business);
+                $invoices[] = $generator->generate($business);
             }
             catch(\Exception $e) {
                 $errors[] = [
@@ -86,8 +87,9 @@ class DepositInvoiceController extends Controller
         /** @var \App\Caregiver[] $caregivers */
         $caregivers = $chain->caregivers()->active()->get();
         foreach($caregivers as $caregiver) {
+            $generator = clone $caregiverInvoiceGenerator;
             try {
-                $invoices[] = $caregiverInvoiceGenerator->generate($caregiver);
+                $invoices[] = $generator->generate($caregiver);
             }
             catch(\Exception $e) {
                 $errors[] = [
