@@ -52,7 +52,7 @@ class ShiftFactory implements Arrayable
         ?Payer $payer = null
     ): self
     {
-        $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
+        $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null, optional($rates)->hoursType());
         return new self([
             'business_id'       => $client->business_id,
             'caregiver_id'      => $caregiver->id,
@@ -87,7 +87,8 @@ class ShiftFactory implements Arrayable
         ?string $currentStatus = null
     ): self
     {
-        $rates = self::resolveRates(clone $clockIn, $schedule->getRates(), $schedule->client_id, $schedule->caregiver_id, $schedule->service_id, $schedule->payer_id);
+        $scheduleRates = $schedule->getRates();
+        $rates = self::resolveRates(clone $clockIn, $scheduleRates, $schedule->client_id, $schedule->caregiver_id, $schedule->service_id, $schedule->payer_id, $scheduleRates->hoursType());
         $self = new self([
             'schedule_id'       => $schedule->id,
             'business_id'       => $schedule->business_id,
@@ -109,7 +110,7 @@ class ShiftFactory implements Arrayable
         if ($schedule->services->count()) {
             $self->withServices($schedule->services->map(function(ScheduleService $service) use ($schedule, $clockIn) {
                 $serviceData = array_except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
-                $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
+                $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id, optional($service->getRates())->hoursType());
                 $serviceData = array_merge($serviceData, [
                     'client_rate' => $rates->clientRate(),
                     'caregiver_rate' => $rates->caregiverRate(),
@@ -212,8 +213,9 @@ class ShiftFactory implements Arrayable
      * @param int|null $payerId
      * @return \App\Data\ScheduledRates|null
      */
-    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId): ?ScheduledRates
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId, ?string $hoursType = 'default'): ?ScheduledRates
     {
+        $hoursType = $hoursType ?? 'default';
         if (!$scheduledRates || $scheduledRates->clientRate() === null) {
             $rateFactory = app(RateFactory::class);
             $client = Client::findOrFail($clientId);
@@ -229,10 +231,10 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
-            if ($scheduledRates && $scheduledRates->hoursType() == 'overtime') {
+            if ($hoursType == 'overtime') {
                 $payer = Payer::find($payerId);
                 $rates = $rateFactory->getOvertimeRates($rates, $scheduledRates, $client, $payerId);
-            } else if ($scheduledRates && $scheduledRates->hoursType() == 'holiday') {
+            } else if ($hoursType == 'holiday') {
                 $payer = Payer::find($payerId);
                 $rates = $rateFactory->getHolidayRates($rates, $scheduledRates, $client, $payerId);
             }
@@ -241,7 +243,7 @@ class ShiftFactory implements Arrayable
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
                 $rates->fixed_rates ?? false,
-                optional($scheduledRates)->hoursType() ?? 'default'
+                $hoursType
             );
         }
 

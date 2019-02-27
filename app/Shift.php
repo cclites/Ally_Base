@@ -523,7 +523,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                     $this->client_id,
                     $this->caregiver_id,
                     $data['service_id'],
-                    $data['payer_id']
+                    $data['payer_id'],
+                    $data['hours_type']
                 );
                 $data['client_rate'] = $rates->clientRate();
                 $data['caregiver_rate'] = $rates->caregiverRate();
