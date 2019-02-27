@@ -234,7 +234,7 @@ class ShiftFactory implements Arrayable
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
                 $rates->fixed_rates ?? false,
-                $scheduledRates->hoursType()
+                optional($scheduledRates)->hoursType() ?? 'default'
             );
         }
 
