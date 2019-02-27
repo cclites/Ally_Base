@@ -25,5 +25,9 @@ Vue.mixin({
         officeUserSettings() {
             return window.OfficeUserSettings || {};
         },
+
+        isAdmin() {
+            return ['office_user', 'admin'].includes(window.AuthUser.role_type);
+        },
     }
 })

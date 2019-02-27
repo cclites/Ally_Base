@@ -552,9 +552,6 @@
             isClient() {
                 return this.authRole === 'client';
             },
-            isAdmin() {
-                return ['admin', 'office_user'].includes(this.authRole);
-            },
             leftHalfActivities() {
                 return this.getHalfOfActivities(true);
             },

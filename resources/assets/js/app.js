@@ -69,6 +69,7 @@ Vue.component('ally-table', require('./components/AllyTable'));
 Vue.component('confirm-modal', require('./components/modals/ConfirmModal'));
 Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
+Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));

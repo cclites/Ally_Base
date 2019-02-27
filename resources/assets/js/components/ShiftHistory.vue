@@ -61,11 +61,7 @@
         </b-card>
 
         <!-- Details modal -->
-        <shift-details-modal v-model="detailsModal" :selected-item="selectedItem">
-            <template slot="buttons" scope="row">
-                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-            </template>
-        </shift-details-modal>
+        <shift-details-modal v-model="detailsModal" :shift="selectedItem"></shift-details-modal>
     </div>
 </template>
 
