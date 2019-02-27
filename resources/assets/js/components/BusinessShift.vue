@@ -5,9 +5,9 @@
             <div v-if="isAdmin">
                 <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-danger">
                     <p><i class="fa fa-exchange mr-1"></i> The caregiver clocked in but the duration does not match what was scheduled.</p>
-                    <p>Caregiver clocked in duration: {{ duration }} hours
+                    <p>Caregiver clocked in duration: {{ numberFormat(duration) }} hours
                     &nbsp;|&nbsp;
-                    Scheduled services duration: {{ serviceHours }} hours</p>
+                    Scheduled services duration: {{ numberFormat(serviceHours) }} hours</p>
                     Please adjust accordingly.
                 </div>
                 <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
@@ -241,8 +241,9 @@
                                             <b-form-input
                                                     name="duration"
                                                     type="number"
-                                                    step="any"
-                                                    v-model="service.duration" />
+                                                    step="0.01"
+                                                    v-model="service.duration"
+                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                         </td>
                                         <td class="text-only" v-if="defaultRates">
                                             {{ numberFormat(service.default_rates.caregiver_rate) }}
