@@ -167,24 +167,30 @@ class RateFactory
     /**
      * Get the rate structure setting of a given business
      *
+     * @todo The new billing system as of February 2019 makes this obsolete.  All businesses use a client rate structure with the ally fee included due to split payer logic.
      * @param int $businessId
      * @return mixed
      */
     function getRateStructure(int $businessId)
     {
-        return $this->settings->get($businessId, 'rate_structure', 'provider_fee');
+        return 'client_rate';
+//        return $this->settings->get($businessId, 'rate_structure', 'provider_fee');
     }
 
     /**
      * Determine ally fee included setting of a given business
      *
+     * @todo The new billing system as of February 2019 makes this obsolete.  All businesses use a client rate structure with the ally fee included due to split payer logic.
      * @param int $businessId
      * @return bool
      */
     function allyFeeIncluded(int $businessId)
     {
+        return true;
+        /*
         return $this->getRateStructure($businessId) === 'client_rate'
             && $this->settings->get($businessId, 'include_ally_fee', false);
+        */
     }
 
     /**
