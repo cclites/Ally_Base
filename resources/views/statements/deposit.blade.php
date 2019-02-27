@@ -164,8 +164,11 @@
 
             @foreach($invoiceObjects as $invoiceObject)
                 <h5>Invoice #{{ $invoiceObject->invoice->getName() }}</h5>
-
-                @include('invoices.partials.items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @if($invoiceObject->invoice->getRecipient() instanceof \App\Caregiver)
+                    @include('invoices.partials.caregiver_items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @else
+                    @include('invoices.partials.business_items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @endif
             @endforeach
         @endif
 
