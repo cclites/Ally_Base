@@ -228,8 +228,8 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
-            app(RateFactory::class)->applyOvertime($client->business_id, $rates, $scheduledRates);
-
+            $rates = app(RateFactory::class)->applyOvertime($client, $rates, $scheduledRates);
+            
             return new ScheduledRates(
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
@@ -239,11 +239,6 @@ class ShiftFactory implements Arrayable
         }
 
         return $scheduledRates;
-    }
-
-    public function modifyRate()
-    {
-        
     }
 
     /**

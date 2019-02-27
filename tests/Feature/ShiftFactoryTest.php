@@ -203,4 +203,161 @@ class ShiftFactoryTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $shift->checked_out_time->toDateTimeString());
     }
 
+    /** @test */
+    public function it_does_not_calculate_overtime_rates_when_behavior_setting_is_turned_off()
+    {
+        $this->client->business->update([
+            'ot_behavior' => null,
+            'hol_behavior' => null,
+        ]);
+
+        $rate = ClientRate::create([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'client_hourly_rate' => 30.00,
+            'caregiver_hourly_rate' => 15.00,
+            'client_fixed_rate' => 0, // unused
+            'caregiver_fixed_rate' => 0, // unused
+            'service_id' => null,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_end' => '9999-12-31',
+        ]);
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(15.00, $shift->caregiver_rate);
+        $this->assertEquals(30.00, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_caregivers()
+    {
+        $this->client->business->update([
+            'ot_behavior' => 'caregiver',
+            'ot_multiplier' => 1.5,
+            'rate_structure' => 'client_rate',
+        ]);
+
+        $rate = ClientRate::create([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'client_hourly_rate' => 30.00,
+            'caregiver_hourly_rate' => 15.00,
+            'client_fixed_rate' => 0, // unused
+            'caregiver_fixed_rate' => 0, // unused
+            'service_id' => null,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_end' => '9999-12-31',
+        ]);
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(22.50, $shift->caregiver_rate);
+        $this->assertEquals(37.80, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_providers()
+    {
+        $this->client->business->update([
+            'ot_behavior' => 'provider',
+            'ot_multiplier' => 1.5,
+            'rate_structure' => 'client_rate',
+        ]);
+
+        $rate = ClientRate::create([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'client_hourly_rate' => 30.00,
+            'caregiver_hourly_rate' => 15.00,
+            'client_fixed_rate' => 0, // unused
+            'caregiver_fixed_rate' => 0, // unused
+            'service_id' => null,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_end' => '9999-12-31',
+        ]);
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(15.0, $shift->caregiver_rate);
+        // provider rate = 30 - 15 - 1.5 = 13.5
+        // 1.5x provider rate = 20.25
+        // new charge = 15 + 20.25 = 35.25 (+1.7625 ally fee)
+        $this->assertEquals(37.01, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_both_caregivers_and_providers()
+    {
+        $this->client->business->update([
+            'ot_behavior' => 'both',
+            'ot_multiplier' => 1.5,
+            'rate_structure' => 'client_rate',
+        ]);
+
+        $rate = ClientRate::create([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'client_hourly_rate' => 30.00,
+            'caregiver_hourly_rate' => 15.00,
+            'client_fixed_rate' => 0, // unused
+            'caregiver_fixed_rate' => 0, // unused
+            'service_id' => null,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_end' => '9999-12-31',
+        ]);
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(22.5, $shift->caregiver_rate);
+        $this->assertEquals(44.89, $shift->client_rate);
+    }
 }
