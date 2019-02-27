@@ -31,6 +31,11 @@ export default {
                     'text': 'Excessive Length',
                     'icon': 'fa fa-clock-o mr-1',
                     'color': 'red',
+                },
+                'duration_mismatch': {
+                    'text': 'Duration Mismatch',
+                    'icon': 'fa fa-exchange mr-1',
+                    'color': 'red',
                 }
             },
         }

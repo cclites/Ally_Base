@@ -143,6 +143,24 @@ class ShiftFlagManager
     }
 
     /**
+     * Handle 'duration_mismatch' flag check.
+     *
+     * @return bool
+     */
+    public function isDurationMismatch() : bool
+    {
+        if ($this->shift->fixed_rates || ! empty($this->shift->service_id)) {
+            // actual hours shift
+            return false;
+        } else if (! empty($this->shift->services)) {
+            // service breakout shift
+            return $this->shift->duration() != floatval($this->shift->services->sum('duration'));
+        }
+
+        return false;
+    }
+
+    /**
      * Get all duplicates of the shift.
      *
      * @return Shift[]|\Illuminate\Database\Eloquent\Collection
