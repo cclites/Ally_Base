@@ -33,12 +33,19 @@ class ClientInvoice extends Resource
         return $this->resource->attributesToArray() + [
             'client' => $this->whenLoaded('client'),
             'payer' => $this->whenLoaded('clientPayer', function() {
-                return $this->clientPayer->payer;
+                return $this->resource->getClientPayer()->getPayer();
+            }),
+            'payer_payment_type' => $this->whenLoaded('clientPayer', function() {
+                if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
+                    return $method->getPaymentStrategy()->getPaymentType();
+                }
+                return null;
             }),
             'items' => $this->whenLoaded('items', function() {
                 return $this->groupItems($this->resource->items)->toArray();
             }),
             'payments' => $this->whenLoaded('payments'),
+
         ];
     }
 }
