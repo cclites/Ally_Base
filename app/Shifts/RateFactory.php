@@ -2,6 +2,7 @@
 namespace App\Shifts;
 
 use App\Billing\ClientRate;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
@@ -39,12 +40,11 @@ class RateFactory
      * Apply overtime rate calculates to the given Rates object.
      *
      * @param Rates $rates
-     * @param ScheduledRates|null $scheduledRates
      * @param Client $client
      * @param Payer|null $payer
      * @return Rates
      */
-    public function getOvertimeRates(Rates $rates, ?ScheduledRates $scheduledRates, Client $client, ?Payer $payer = null) : Rates
+    public function getOvertimeRates(Rates $rates, Client $client, ?Payer $payer = null) : Rates
     {
         return $this->multiplyRates(
             $rates,
@@ -59,12 +59,11 @@ class RateFactory
      * Apply holiday rate calculates to the given Rates object.
      *
      * @param Rates $rates
-     * @param ScheduledRates|null $scheduledRates
      * @param Client $client
      * @param Payer|null $payer
      * @return Rates
      */
-    public function getHolidayRates(Rates $rates, ?ScheduledRates $scheduledRates, Client $client, ?Payer $payer = null) : Rates
+    public function getHolidayRates(Rates $rates, Client $client, ?Payer $payer = null) : Rates
     {
         return $this->multiplyRates(
             $rates,
@@ -182,6 +181,19 @@ class RateFactory
         return $caregiverRate > $maxCaregiverRate;
     }
 
+    /**
+     * Get the ally fee based on the payment method and effective charged rate
+     *
+     * @param \App\Contracts\HasAllyFeeInterface $paymentMethod
+     * @param float $chargedRate
+     * @param bool $allyFeeIncluded
+     * @return float
+     */
+    function getAllyFee(HasAllyFeeInterface $paymentMethod, float $chargedRate, $allyFeeIncluded = true)
+    {
+        return (float) $paymentMethod->getAllyFee($chargedRate, $allyFeeIncluded);
+    }
+
     ////////////////////////////////////
     //// OLD STRUCTURE
     ////////////////////////////////////
@@ -245,18 +257,6 @@ class RateFactory
         }
 
         return (float) bcadd($providerFee, $caregiverRate, 2);
-    }
-
-    /**
-     * Get the ally fee based on the payment method and effective charged rate
-     *
-     * @param \App\Contracts\HasAllyFeeInterface $paymentMethod
-     * @param float $chargedRate
-     * @return float
-     */
-    function getAllyFee(HasAllyFeeInterface $paymentMethod, float $chargedRate)
-    {
-        return (float) $paymentMethod->getAllyFee($chargedRate);
     }
 
     /**
@@ -340,6 +340,7 @@ class RateFactory
      * @param float $caregiverRate
      * @param float $allyFee
      * @return bool
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     protected function shouldRecalculateClientRate(float $clientRate, float $caregiverRate, float $allyFee)
     {
@@ -349,7 +350,7 @@ class RateFactory
     /**
      * @param \App\Shift $shift
      * @return \App\Shifts\Rates
-     * TODO IMPORTANT:  RATE PERSISTENCE FOR CHARGED SHIFTS
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     public function getRatesForShift(Shift $shift)
     {
@@ -373,6 +374,7 @@ class RateFactory
     /**
      * @param \App\Schedule $schedule
      * @return \App\Shifts\Rates
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     public function getRatesForSchedule(Schedule $schedule)
     {
@@ -400,6 +402,7 @@ class RateFactory
      * @param bool $fixedRates
      * @param array|null $pivot
      * @return \App\Shifts\Rates
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     public function getRatesForClientCaregiver(Client $client, Caregiver $caregiver, bool $fixedRates = false, array $pivot = null)
     {
@@ -431,6 +434,7 @@ class RateFactory
      * @param \App\Client $client
      * @param bool $fixedRates
      * @return float
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     public function getDefaultClientRate(Client $client, $fixedRates = false)
     {
@@ -445,6 +449,7 @@ class RateFactory
      * @param \App\Caregiver $caregiver
      * @param bool $fixedRates
      * @return float
+     * @deprecated @todo Needs to be updated before it can be relied on as of February 2019's rate updates
      */
     public function getDefaultCaregiverRate(Caregiver $caregiver, bool $fixedRates = false)
     {

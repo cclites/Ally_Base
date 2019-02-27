@@ -229,19 +229,20 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
-            if ($scheduledRates && $scheduledRates->hoursType() == 'overtime') {
-                $payer = Payer::find($payerId);
-                $rates = $rateFactory->getOvertimeRates($rates, $scheduledRates, $client, $payerId);
-            } else if ($scheduledRates && $scheduledRates->hoursType() == 'holiday') {
-                $payer = Payer::find($payerId);
-                $rates = $rateFactory->getHolidayRates($rates, $scheduledRates, $client, $payerId);
+            if ($scheduledRates) {
+                $payer = $payerId ? Payer::find($payerId) : null;
+                if ($scheduledRates->hoursType() == 'overtime') {
+                    $rates = $rateFactory->getOvertimeRates($rates, $client, $payer);
+                } else if ($scheduledRates->hoursType() == 'holiday') {
+                    $rates = $rateFactory->getHolidayRates($rates, $client, $payer);
+                }
             }
             
             return new ScheduledRates(
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
                 $rates->fixed_rates ?? false,
-                optional($scheduledRates)->hoursType() ?? 'default'
+                $scheduledRates ? $scheduledRates->hoursType() : 'default'
             );
         }
 
