@@ -215,11 +215,12 @@ class ShiftFactory implements Arrayable
     public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
         if (!$scheduledRates || $scheduledRates->clientRate() === null) {
+            $rateFactory = app(RateFactory::class);
             $client = Client::findOrFail($clientId);
             $timezone = $client->getTimezone();
             $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
-
-            $rates = app(RateFactory::class)->findMatchingRate(
+            
+            $rates = $rateFactory->findMatchingRate(
                 $client,
                 $effectiveDate,
                 $scheduledRates ? $scheduledRates->fixedRates() : false,
@@ -228,7 +229,13 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
-            $rates = app(RateFactory::class)->applyOvertime($client, $rates, $scheduledRates);
+            if ($scheduledRates && $scheduledRates->hoursType() == 'overtime') {
+                $payer = Payer::find($payerId);
+                $rates = $rateFactory->getOvertimeRates($rates, $scheduledRates, $client, $payerId);
+            } else if ($scheduledRates && $scheduledRates->hoursType() == 'holiday') {
+                $payer = Payer::find($payerId);
+                $rates = $rateFactory->getHolidayRates($rates, $scheduledRates, $client, $payerId);
+            }
             
             return new ScheduledRates(
                 $rates->client_rate ?? 0,

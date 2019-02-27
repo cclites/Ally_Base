@@ -12,6 +12,7 @@ use App\Schedule;
 use App\Shift;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
+use App\Billing\Payer;
 
 class RateFactory
 {
@@ -34,59 +35,80 @@ class RateFactory
     //// NEW STRUCTURE (2019-01-13)
     ////////////////////////////////////
 
-    public function applyOvertime(Client $client, Rates $rates, ?ScheduledRates $scheduledRates) : Rates
+    /**
+     * Apply overtime rate calculates to the given Rates object.
+     *
+     * @param Rates $rates
+     * @param ScheduledRates|null $scheduledRates
+     * @param Client $client
+     * @param Payer|null $payer
+     * @return Rates
+     */
+    public function getOvertimeRates(Rates $rates, ?ScheduledRates $scheduledRates, Client $client, ?Payer $payer = null) : Rates
     {
-        $hoursType = $scheduledRates ? $scheduledRates->hoursType() : 'default';
-        switch ($hoursType) {
-            case 'overtime':
-                $multiplier = floatval($this->settings->get($client->business_id, 'ot_multiplier', 1.5));
-                $action = $this->settings->get($client->business_id, 'ot_behavior', 1.5);
-                break;
-            case 'holiday':
-                $multiplier = floatval($this->settings->get($client->business_id, 'hol_multiplier', 1.5));
-                $action = $this->settings->get($client->business_id, 'hol_behavior', 1.5);
-                break;
-            case 'default':
-            default:
-                return $rates;
-        }
-        
-        // TODO: figure out how to handle provider_fee rate structures
-        $chargedRate = $this->getChargedRate($client->business_id, $rates->caregiver_rate, null, $rates->client_rate);
-        
-        $paymentMethod = $this->getPaymentMethod($client);
-        $allyFee = $this->getAllyFee($paymentMethod, $chargedRate);
-        $providerFee = $this->getProviderFee(
-            $rates->client_rate,
-            $rates->caregiver_rate,
-            $allyFee,
-            $rates->client_rate_includes_fee
+        return $this->multiplyRates(
+            $rates,
+            $this->settings->get($client->business_id, 'ot_behavior', null),
+            floatval($this->settings->get($client->business_id, 'ot_multiplier', 1.5)),
+            $client,
+            optional($payer)->getPaymentMethod()
         );
+    }
+
+    /**
+     * Apply holiday rate calculates to the given Rates object.
+     *
+     * @param Rates $rates
+     * @param ScheduledRates|null $scheduledRates
+     * @param Client $client
+     * @param Payer|null $payer
+     * @return Rates
+     */
+    public function getHolidayRates(Rates $rates, ?ScheduledRates $scheduledRates, Client $client, ?Payer $payer = null) : Rates
+    {
+        return $this->multiplyRates(
+            $rates,
+            $this->settings->get($client->business_id, 'hol_behavior', null),
+            floatval($this->settings->get($client->business_id, 'hol_multiplier', 1.5)),
+            $client,
+            optional($payer)->getPaymentMethod()
+        );
+    }
+
+    /**
+     * Multiply rates based on action type and given multiplier and automatically  
+     * recalculate the client_rate (total) including fees.
+     *
+     * @param Rates $rates
+     * @param string|null $action
+     * @param float $multiplier
+     * @param Client $client
+     * @param ChargeableInterface|null $paymentMethod
+     * @return Rates
+     */
+    public function multiplyRates(Rates $rates, ?string $action, float $multiplier, Client $client, ?ChargeableInterface $paymentMethod = null) : Rates
+    {
+        $allyFee = AllyFeeCalculator::getFee($client, $paymentMethod, $rates->client_rate, true);
+        $providerFee = $this->getProviderFee($rates->client_rate, $rates->caregiver_rate, $allyFee, true);
 
         switch ($action) {
             case 'caregiver':
                 $rates->caregiver_rate = $rates->caregiver_rate * $multiplier;
-                $chargedRate = $this->getChargedRate($client->business_id, $rates->caregiver_rate, $providerFee);
-                $allyFee = $this->getAllyFee($paymentMethod, $chargedRate);
-                $rates->client_rate = $this->getClientRate($providerFee, $rates->caregiver_rate, $allyFee, $rates->client_rate_includes_fee);
                 break;
             case 'provider':
                 $providerFee = $providerFee * $multiplier; 
-                $chargedRate = $this->getChargedRate($client->business_id, $rates->caregiver_rate, $providerFee);
-                $allyFee = $this->getAllyFee($paymentMethod, $chargedRate);
-                $rates->client_rate = $this->getClientRate($providerFee, $rates->caregiver_rate, $allyFee, $rates->client_rate_includes_fee);
                 break;
             case 'both':
                 $rates->caregiver_rate = $rates->caregiver_rate * $multiplier;
                 $providerFee = $providerFee * $multiplier; 
-                $chargedRate = $this->getChargedRate($client->business_id, $rates->caregiver_rate, $providerFee);
-                $allyFee = $this->getAllyFee($paymentMethod, $chargedRate);
-                $rates->client_rate = $this->getClientRate($providerFee, $rates->caregiver_rate, $allyFee, $rates->client_rate_includes_fee);
                 break;
             default:
                 return $rates;
         }
 
+        $total = bcadd($providerFee, $rates->caregiver_rate, 2);
+        $allyFee = AllyFeeCalculator::getFee($client, $paymentMethod, $total, false);
+        $rates->client_rate = $this->getClientRate($providerFee, $rates->caregiver_rate, $allyFee, true);
         return $rates;
     }
 
@@ -217,7 +239,7 @@ class RateFactory
     function getChargedRate(int $businessId, float $caregiverRate, float $providerFee = null, float $clientRate = null)
     {
         $rateStructure = $this->getRateStructure($businessId);
-        
+
         if ($rateStructure === 'client_rate' && $clientRate > $caregiverRate) {
             return (float) $clientRate;
         }
