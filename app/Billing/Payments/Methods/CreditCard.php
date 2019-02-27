@@ -110,6 +110,11 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     ///////////////////////////////////////////
 
 
+    function getBillingName(): string
+    {
+        return $this->name_on_card;
+    }
+
     function getBillingAddress(): ?\App\Address
     {
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {

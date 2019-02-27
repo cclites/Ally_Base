@@ -760,6 +760,11 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return null;
     }
 
+    function getBillingName(): string
+    {
+        return $this->name();
+    }
+
     function getBillingAddress(): ?Address
     {
         return $this->getAddress();

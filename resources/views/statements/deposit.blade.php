@@ -12,8 +12,11 @@
 @push('head')
     <style>
         body {
-            color: #000;
+            color: #000!important;
+            font-size: 1.4rem;
+            font-weight: 500;
         }
+        small { font-weight: 500 }
 
         .header-left,
         .footer-left {
@@ -59,7 +62,6 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
             padding: 15px;
         }
 
@@ -83,7 +85,7 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
                 <br>
                 <table>
                     <tr>

@@ -121,6 +121,10 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     /// Instance Methods
     ///////////////////////////////////////////
 
+    function getBillingName(): string
+    {
+        return $this->name_on_account;
+    }
 
     function getBillingAddress(): ?\App\Address
     {

@@ -89,11 +89,13 @@
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
-                <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
-                <br>
-                <div class="sender-address">
-                    @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
-                </div>
+                @if($sender->name())
+                    <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
+                    <br>
+                    <div class="sender-address">
+                        @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
+                    </div>
+                @endif
             </div>
             <div class="text-right header-right">
                 <div class="h1">Invoice #{{ $invoice->getName() }}</div>

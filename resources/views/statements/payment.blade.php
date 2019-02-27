@@ -11,8 +11,11 @@
 @push('head')
     <style>
         body {
-            color: #000;
+            color: #000!important;
+            font-size: 1.4rem;
+            font-weight: 500;
         }
+        small { font-weight: 500 }
 
         .header-left,
         .footer-left {
@@ -58,7 +61,6 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
             padding: 15px;
         }
 
@@ -82,20 +84,20 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
                 <br>
-                {{--<table>--}}
-                    {{--<tr>--}}
-                        {{--<td colspan="2">--}}
-                            {{--<strong>{{ $payer->name() }}</strong>--}}
-                        {{--</td>--}}
-                    {{--</tr>--}}
-                    {{--<tr>--}}
-                        {{--<td colspan="2">--}}
-                            {{--@include('invoices.partials.address', ['address' => $payer->getAddress(), 'phone' => $payer->getPhoneNumber()])--}}
-                        {{--</td>--}}
-                    {{--</tr>--}}
-                {{--</table>--}}
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <strong>{{ $payer->name() }}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @include('invoices.partials.address', ['address' => $payer->getAddress(), 'phone' => $payer->getPhoneNumber()])
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div class="text-right header-right">
                 <div class="h3">Payment #{{ $payment->id }}</div>
