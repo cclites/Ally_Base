@@ -475,7 +475,7 @@
                         'charged_at': item.charged_at,
                         'status': item.status,
                         'business_id': item.business_id,
-                        '_rowVariant': (item.confirmed) ? null : 'warning'
+                        '_rowVariant': this.getRowVariant(item),
                     }
                 });
                 items.push({
@@ -530,6 +530,13 @@
         },
 
         methods: {
+            getRowVariant(item) {
+                if (item.flags && item.flags.includes('duration_mismatch')) {
+                    return 'danger';
+                }
+                return (item.confirmed) ? null : 'warning';
+            },
+            
             fullscreenToggle() {
                 $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
                 $('.left-sidebar').toggle();
