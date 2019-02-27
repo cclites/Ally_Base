@@ -72,6 +72,10 @@ class ScheduleEvents implements Responsable
 
     public function toArray()
     {
+        // Load services relation for all schedules to
+        // prevent n+1 in hasOvertime method.
+        $this->schedules->load('services');
+        
         return $this->schedules->map(function(Schedule $schedule) {
             $additionalOptions = array_merge(
                 $this->additionalOptions['all'],
@@ -99,6 +103,7 @@ class ScheduleEvents implements Responsable
 //                'unassigned' => empty($schedule->caregiver),
                 'status' => $schedule->status,
                 'shift_status' => $schedule->shift_status,
+                'has_overtime' => $schedule->hasOvertime(),
             ], $additionalOptions);
         });
     }
@@ -133,6 +138,10 @@ class ScheduleEvents implements Responsable
 
         if ($status === Schedule::ATTENTION_REQUIRED) {
             return '#C30000';
+        }
+
+        if ($schedule->hasOvertime()) {
+            return '#fc4b6c';
         }
 
         if ($shift === Schedule::CLOCKED_IN) {
