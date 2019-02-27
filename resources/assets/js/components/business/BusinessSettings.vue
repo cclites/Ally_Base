@@ -488,6 +488,9 @@
                 <b-tab title="Status Aliases" href="#status-aliases">
                     <business-status-alias-manager :business="this.business"></business-status-alias-manager>
                 </b-tab>
+                <b-tab title="Overtime" href="#overtime">
+                    <business-overtime-settings :business="this.business"></business-overtime-settings>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -539,9 +542,9 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
                 }
             },
         },
@@ -549,6 +552,9 @@
         mounted() {
             let index = this.tabs.findIndex(tab => tab === window.location.hash);
             if (index >= 0) {
+                if (index > 3 && this.business.type != 'agency') {
+                    index++;
+                }
                 this.tabIndex = index;
             }
         },

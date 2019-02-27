@@ -37,6 +37,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention" v-b-popover.hover="`Filter scheduled shifts that are marked Attention Required. ${statusHelp}`">Attention Required</span>
                         </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="OVERTIME"> <span class="badge badge-primary overtime" v-b-popover.hover="`Filter scheduled shifts that are marked as overtime or holiday pay. ${statusHelp}`">HOL / OT</span>
+                        </label>
                     </b-col>
                 </b-row>
             </b-col>
@@ -418,6 +421,7 @@
                                 || this.statusFilters.includes(event.shift_status)
                                 // Open shifts are calculated from the cg canceled status or a missing cg assignment
                                 || (this.statusFilters.includes('OPEN') && (event.caregiver_id == 0 || event.status === 'CAREGIVER_CANCELED'))
+                                || (this.statusFilters.includes('OVERTIME') && event.has_overtime);
                     });
                 }
 
@@ -1094,6 +1098,7 @@
     .badge.attention { background-color: #C30000; }
     .badge.missed_clock_in { background-color: #E468B2; }
     .badge.no_show { background-color: #63cbc7; }
+    .badge.overtime { background-color: #fc4b6c; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */

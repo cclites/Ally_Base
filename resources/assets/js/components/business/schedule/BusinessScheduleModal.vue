@@ -144,7 +144,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type">
+                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -212,7 +212,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;">
+                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -291,6 +291,9 @@
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
                                     Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
                                 </div>
+                                <b-alert v-if="isUsingOvertime" variant="warning" show>
+                                    Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
+                                </b-alert>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -591,7 +594,7 @@
 
             currentWeekdayInt() {
                 return this.startDate ? moment(this.startDate).day() : 0;
-            }
+            },
         },
 
         methods: {
@@ -677,7 +680,7 @@
                 if (!schedule) schedule = this.schedule;
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = isNaN(schedule.client_rate);
+                this.defaultRates = schedule.client_rate == null;
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -927,9 +930,43 @@
             toggleCaregivers() {
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
+
+            onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
+                let service = this.form.services[serviceIndex];
+                if (!service) {
+                    return;
+                }
+
+                // Use nextTick here so that you can properly get the oldVal using this
+                // function on the @change event, but utilize the updated service
+                // object that will reflect the new hours_type value.
+                this.$nextTick(() => {
+                    if (this.defaultRates) {
+                        this.fetchDefaultRate(service);
+                    } else {
+                        this.handleChangedHoursType(service, newVal, oldVal);
+                    }
+                });
+            },
+
+            onChangeHoursType(newVal, oldVal) {
+                this.handleChangedHoursType(this.form, newVal, oldVal);
+            },
         },
 
         watch: {
+            'form.hours_type': function(newVal, oldVal) {
+                if (! oldVal || newVal == oldVal) {
+                    return;
+                }
+
+                if (this.defaultRates) {
+                    // re-load the default rates and will automatically
+                    // calculate any OT/HOL hours.
+                    this.handleChangedDefaultRates(this.form, this.defaultRates);
+                }
+            },
+
             model(val) {
                 // Update local modal bool
                 this.scheduleModal = val;

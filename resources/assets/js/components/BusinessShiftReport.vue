@@ -467,7 +467,7 @@
                         'Mileage Costs': this.moneyFormat(item.mileage_costs),
                         'Other Expenses': this.moneyFormat(item.other_expenses),
                         'Shift Total': this.moneyFormat(item.shift_total),
-                        'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
+                        'Type': item.hours_type == 'overtime' ? 'OT' : item.hours_type == 'holiday' ? 'HOL' : 'Reg',
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
                         'client_confirmed': item.client_confirmed,
