@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\GeocodeManager;
 use Packages\GMaps\Geocode;
 use Packages\GMaps\GeocodeCoordinates;
 use Packages\GMaps\NoGeocodeFoundException;
@@ -72,21 +73,17 @@ class Address extends AuditableModel
         if ($forceUpdate || (!$this->latitude && !$this->longitude)) {
             $fullAddress = $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
 
-            // Skip if it was already read as an invalid address today
-            $invalidAddressKey = 'invalid_address_' . md5($fullAddress);
-            if (\Cache::has($invalidAddressKey)) return false;
-
             try {
-                $geocode = Geocode::getCoordinates($fullAddress);
-                $this->update([
-                    'latitude' => $geocode->latitude,
-                    'longitude' => $geocode->longitude,
-                ]);
+                $manager = app(GeocodeManager::class);
+                $geocode = $manager->getCoordinates($fullAddress);
+                if ($geocode) {
+                    $this->update([
+                        'latitude' => $geocode->latitude,
+                        'longitude' => $geocode->longitude,
+                    ]);
+                }
             }
-            catch (\Exception $e) {
-                // Save invalid address to cache
-                \Cache::put($invalidAddressKey, 1, 1440);
-
+            catch (\Packages\GMaps\Exceptions\NoGeocodeFoundException $e) {
                 return false;
             }
         }
