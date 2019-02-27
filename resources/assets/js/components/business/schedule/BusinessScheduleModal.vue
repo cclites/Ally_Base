@@ -127,7 +127,7 @@
                                             <th>Hours Type</th>
                                             <th width="10%">Hours</th>
                                             <th width="13%">Caregiver Rate</th>
-                                            <th>Provider Fee</th>
+                                            <th>Registry Fee</th>
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
