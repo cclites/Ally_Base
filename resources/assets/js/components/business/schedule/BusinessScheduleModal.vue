@@ -151,7 +151,7 @@
                                                 </b-form-select>
                                             </td>
                                             <td class="text-only">
-                                                {{ billingType === 'hourly' ? 'Actual' : 'Fixed' }}
+                                                {{ billingType === 'hourly' ? scheduledHours : 'Fixed' }}
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
                                                 {{ numberFormat(form.default_rates.caregiver_rate) }}
