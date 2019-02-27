@@ -222,8 +222,9 @@
                                                 <b-form-input
                                                     name="duration"
                                                     type="number"
-                                                    step="any"
-                                                    v-model="service.duration" />
+                                                    step="0.01"
+                                                    v-model="service.duration"
+                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
                                                 {{ numberFormat(service.default_rates.caregiver_rate) }}
@@ -288,7 +289,7 @@
                                 </div>
 
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
-                                    Warning: The scheduled hours ({{ scheduledHours }}) do not match the broken out service hours.
+                                    Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
                                 </div>
                             </b-col>
                         </b-row>

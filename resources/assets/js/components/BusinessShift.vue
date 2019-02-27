@@ -3,6 +3,13 @@
         <loading-card v-show="loading" text="Loading Data"></loading-card>
         <div v-show="!loading">
             <div v-if="isAdmin">
+                <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-danger">
+                    <p><i class="fa fa-exchange mr-1"></i> The caregiver clocked in but the duration does not match what was scheduled.</p>
+                    <p>Caregiver clocked in duration: {{ numberFormat(duration) }} hours
+                    &nbsp;|&nbsp;
+                    Scheduled services duration: {{ numberFormat(serviceHours) }} hours</p>
+                    Please adjust accordingly.
+                </div>
                 <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
                     <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
                 </div>
@@ -234,8 +241,9 @@
                                             <b-form-input
                                                     name="duration"
                                                     type="number"
-                                                    step="any"
-                                                    v-model="service.duration" />
+                                                    step="0.01"
+                                                    v-model="service.duration"
+                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                         </td>
                                         <td class="text-only" v-if="defaultRates">
                                             {{ numberFormat(service.default_rates.caregiver_rate) }}
@@ -288,10 +296,6 @@
                                     </tr>
                                     </tbody>
                                 </table>
-                            </div>
-
-                            <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-warning">
-                                Warning: The shift's actual hours ({{ duration }}) do not match the broken out service hours.
                             </div>
 
                             <label class="mt-1">
