@@ -14,6 +14,7 @@ use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\CreateDefaultClientPayer;
 use App\Listeners\CreateDefaultService;
+use App\Listeners\NotificationWasSent;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
@@ -33,6 +34,7 @@ use App\Events\ShiftFlagsCouldChange;
 use App\Listeners\GenerateShiftFlags;
 use App\Events\ShiftDeleted;
 use App\Listeners\RecalculateDuplicateShiftFlags;
+use Illuminate\Notifications\Events\NotificationSent;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -42,6 +44,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        NotificationSent::class => [
+            NotificationWasSent::class,
+        ],
         BusinessChainCreated::class => [
             CreateDefaultService::class,
         ],
