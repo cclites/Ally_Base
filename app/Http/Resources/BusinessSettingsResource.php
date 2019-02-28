@@ -68,6 +68,10 @@ class BusinessSettingsResource extends Resource
             // 'include_ally_fee',
             'use_rate_codes',
             'chain_id',
+            'ot_multiplier',
+            'ot_behavior',
+            'hol_multiplier',
+            'hol_behavior',
         ];
 
         return Arr::only($this->resource->toArray(), $settings);

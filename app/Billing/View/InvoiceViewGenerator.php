@@ -5,6 +5,7 @@ use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
+use App\Businesses\NullContact;
 use App\Contracts\ViewStrategy;
 use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
@@ -16,70 +17,54 @@ class InvoiceViewGenerator
      */
     protected $strategy;
 
-    function __construct(ViewStrategy $strategy)
+    function __construct(InvoiceViewStrategy $strategy)
     {
         $this->strategy = $strategy;
     }
 
-    function generate(string $viewName, ContactableInterface $sender, ContactableInterface $recipient, InvoiceInterface $invoice, Collection $items, Collection $payments)
+    function generate(ContactableInterface $sender, ContactableInterface $recipient, InvoiceInterface $invoice, Collection $payments)
     {
-        $itemGroups = $this->getItemGroups($items);
-        $view = view($viewName, compact('sender', 'recipient', 'invoice', 'itemGroups', 'payments'));
-        return $this->strategy->generate($view);
+        return $this->strategy->generate($invoice, $sender, $recipient, $payments);
     }
 
-    function generateClientInvoice(ClientInvoice $clientInvoice, ?string $viewName = null)
+    function generateClientInvoice(ClientInvoice $clientInvoice)
     {
         $client = $clientInvoice->client;
-        $clientPayer = $clientInvoice->getClientPayer();
+//        $clientPayer = $clientInvoice->getClientPayer();
         $business = $client->business;
-        $items = $clientInvoice->items;
         $payments = $clientInvoice->payments;
 
         return $this->generate(
-            $viewName ?? 'invoices.client_invoice',
-            $clientPayer->isPrivatePay() ? $business : $client,
-            $clientPayer->isPrivatePay() ? $client : $clientPayer->payer,
+            $business,
+            $client,
             $clientInvoice,
-            $items,
             $payments
         );
     }
 
-    function generateCaregiverInvoice(CaregiverInvoice $caregiverInvoice, ?string $viewName = null)
+    function generateCaregiverInvoice(CaregiverInvoice $caregiverInvoice)
     {
         $caregiver = $caregiverInvoice->caregiver;
-        $items = $caregiverInvoice->items;
         $payments = $caregiverInvoice->deposits;
 
         return $this->generate(
-            $viewName ?? 'invoices.caregiver_invoice',
-            $caregiver,
+            new NullContact(),
             $caregiver,
             $caregiverInvoice,
-            $items,
             $payments
         );
     }
 
-    function generateBusinessInvoice(BusinessInvoice $businessInvoice, ?string $viewName = null)
+    function generateBusinessInvoice(BusinessInvoice $businessInvoice)
     {
         $business = $businessInvoice->business;
-        $items = $businessInvoice->items;
         $payments = $businessInvoice->deposits;
 
         return $this->generate(
-            $viewName ?? 'invoices.business_invoice',
-            $business,
+            new NullContact(),
             $business,
             $businessInvoice,
-            $items,
             $payments
         );
-    }
-
-    function getItemGroups(Collection $items)
-    {
-        return $items->sortBy('date')->groupBy('group');
     }
 }

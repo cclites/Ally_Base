@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Admin;
 use App\Billing\ClientInvoice;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Queries\ClientInvoiceQuery;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
-use App\Billing\View\PdfViewStrategy;
 use App\BusinessChain;
-use App\Businesses\Timezone;
 use App\Client;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
@@ -94,13 +92,9 @@ class ClientInvoiceController extends Controller
         ]);
     }
 
-    public function show(ClientInvoice $invoice, string $view = "html")
+    public function show(ClientInvoice $invoice, string $view = InvoiceViewFactory::HTML_VIEW)
     {
-        $strategy = new HtmlViewStrategy();
-        if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('invoice-' . str_slug($invoice->getName()) . '.pdf');
-        }
-
+        $strategy = InvoiceViewFactory::create($invoice, $view);
         $viewGenerator = new InvoiceViewGenerator($strategy);
         return $viewGenerator->generateClientInvoice($invoice);
     }

@@ -13,9 +13,7 @@ class MigrateExistingShiftsToNewStructure extends Migration
      */
     public function up()
     {
-        if (app()->environment() === 'testing') {
-            return;
-        }
+        if (!in_array(app()->environment(), ['production', 'staging'])) return;
 
         DB::beginTransaction();
 

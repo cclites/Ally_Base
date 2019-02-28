@@ -42,16 +42,17 @@ class AllyFeeCalculator
      * @param \App\Client $client
      * @param ChargeableInterface|null $paymentMethod
      * @param $paymentAmount
+     * @param bool $allyFeeIncluded
      * @return float
      * @throws \Exception
      */
-    public static function getFee(Client $client, ChargeableInterface $paymentMethod = null, $paymentAmount)
+    public static function getFee(Client $client, ?ChargeableInterface $paymentMethod = null, $paymentAmount, $allyFeeIncluded = false)
     {
         if ($paymentMethod) {
-            return $paymentMethod->getAllyFee($paymentAmount);
+            return $paymentMethod->getAllyFee($paymentAmount, $allyFeeIncluded);
         }
 
-        return $client->getAllyFee($paymentAmount);
+        return $client->getAllyFee($paymentAmount, $allyFeeIncluded);
     }
 
     /**

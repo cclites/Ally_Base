@@ -10,6 +10,13 @@ use App\PhoneNumber;
 interface ChargeableInterface extends HasAllyFeeInterface
 {
     /**
+     * Return the name on the account or card
+     *
+     * @return string
+     */
+    public function getBillingName(): string;
+
+    /**
      * @return \App\Address|null
      */
     public function getBillingAddress(): ?Address;

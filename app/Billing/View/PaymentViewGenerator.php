@@ -2,55 +2,46 @@
 namespace App\Billing\View;
 
 use App\Billing\Payment;
+use App\Billing\View\Data\PaymentInvoiceData;
+use App\Businesses\NullContact;
+use App\Contracts\ContactableInterface;
 use App\Contracts\ViewStrategy;
 
 class PaymentViewGenerator
 {
-    /**
-     * @var \App\Contracts\ViewStrategy
-     */
     protected $strategy;
-    /**
-     * @var \App\Billing\View\InvoiceViewGenerator
-     */
-    protected $invoiceView;
 
-    function __construct(ViewStrategy $strategy, InvoiceViewGenerator $invoiceView = null)
+    function __construct(PaymentViewStrategy $strategy)
     {
         $this->strategy = $strategy;
-        $this->invoiceView = $invoiceView ?: new InvoiceViewGenerator($strategy);
     }
 
     function generate(Payment $payment, string $viewName = "statements.payment")
     {
         $invoiceObjects = [];
         foreach($payment->invoices as $invoice) {
-            $invoiceObject = new PaymentInvoiceObject();
-            $invoiceObject->invoice = $invoice;
-            $invoiceObject->amountApplied = (float) $invoice->pivot->amount_applied;
-            $invoiceObject->itemGroups = $this->invoiceView->getItemGroups($invoice->items);
+            $invoiceObject = new PaymentInvoiceData(
+                $invoice,
+                (float) $invoice->pivot->amount_applied
+            );
             $invoiceObjects[] = $invoiceObject;
         }
 
-        $view = view($viewName, compact('payment', 'invoiceObjects'));
-        return $this->strategy->generate($view);
+        $payer = $this->buildContact($payment);
+
+        return $this->strategy->generate($payer, $payment, $invoiceObjects);
     }
-}
 
-class PaymentInvoiceObject
-{
-    /**
-     * @var \App\Billing\ClientInvoice
-     */
-    public $invoice;
+    protected function buildContact(Payment $payment): ContactableInterface
+    {
+        if ($method = $payment->getPaymentMethod()) {
+            if ($method->getOwnerModel() instanceof ContactableInterface) {
+                return $method->getOwnerModel();
+            }
 
-    /**
-     * @var float
-     */
-    public $amountApplied;
+            return new NullContact($method->getBillingName(), $method->getBillingAddress(), $method->getBillingPhone());
+        }
 
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    public $itemGroups;
+        return new NullContact();
+    }
 }

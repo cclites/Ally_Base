@@ -194,4 +194,9 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         }
     }
 
+    function getPaymentMethod(): ?ChargeableInterface
+    {
+        return $this->paymentMethod;
+    }
+
 }

@@ -115,9 +115,14 @@ class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
         return subtract($this->amount, $this->amount_paid);
     }
 
-    public function getItems(): Collection
+    function getItems(): Collection
     {
         return $this->items;
+    }
+
+    function getItemGroups(): Collection
+    {
+        return $this->getItems()->sortBy('date')->groupBy('group');
     }
 
     function getName(): string

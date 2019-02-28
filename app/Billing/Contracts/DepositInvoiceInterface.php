@@ -13,6 +13,5 @@ use Illuminate\Support\Collection;
 interface DepositInvoiceInterface extends InvoiceInterface
 {
     public function addDeposit(Deposit $deposit, float $amountApplied): bool;
-    public function getItems(): Collection;
     public function getRecipient(): ContactableInterface;
 }

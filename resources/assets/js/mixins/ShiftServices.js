@@ -22,7 +22,21 @@ export default {
         serviceHours()
         {
             return this.form.services.reduce((carry, service) => carry + parseFloat(service.duration), 0);
-        }
+        },
+
+        isUsingOvertime() {
+            if (this.billingType == 'services') {
+                let flag = false;
+                this.form.services.forEach(item => {
+                    if (['overtime', 'holiday'].includes(item.hours_type)) {
+                        flag = true;
+                    }
+                })
+                return flag;
+            } else {
+                return ['overtime', 'holiday'].includes(this.form.hours_type);
+            }
+        },
 
     },
     
@@ -84,7 +98,7 @@ export default {
                     'caregiver_rate': null,
                     'provider_fee': null,
                     'ally_fee': null,
-                }
+                },
             };
             if (!service.id) {
                 this.fetchDefaultRate(newService);
@@ -139,6 +153,7 @@ export default {
             service.default_rates.client_rate = ratesObj.client_rate;
             service.default_rates.caregiver_rate = ratesObj.caregiver_rate;
             this.recalculateRates(service.default_rates, service.default_rates.client_rate, service.default_rates.caregiver_rate);
+            this.modifyRate(service.default_rates, this.getMultiplierType(service.hours_type), this.getMultiplier(service.hours_type));
         },
 
         fetchAllRates(form) {
@@ -170,9 +185,11 @@ export default {
             console.log('handleChangedDefaultRates', form);
             // initiated from watcher
             if (value) {
+                this.fetchDefaultRate(form);
                 form.client_rate = null;
                 form.caregiver_rate = null;
                 for(let service of form.services) {
+                    this.fetchDefaultRate(service);
                     service.client_rate = null;
                     service.caregiver_rate = null;
                 }
@@ -188,6 +205,81 @@ export default {
                     service.caregiver_rate = service.default_rates.caregiver_rate || 0;
                     this.recalculateRates(service, service.client_rate, service.caregiver_rate);
                 }
+            }
+        },
+
+        handleChangedHoursType(rates, newVal, oldVal) {
+            var OT = parseFloat(this.business.ot_multiplier);
+            var HOL = parseFloat(this.business.hol_multiplier);
+            switch(newVal) {
+                case 'overtime':
+                    if (oldVal == 'holiday') {
+                        this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                    }
+                    this.modifyRate(rates, this.business.ot_behavior, OT);
+                    break;
+                case 'holiday':
+                    if (oldVal == 'overtime') {
+                        this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                    }
+                    this.modifyRate(rates, this.business.hol_behavior, HOL);
+                    break;
+                case 'default':
+                    if (oldVal == 'holiday') {
+                        this.modifyRate(rates, this.business.hol_behavior, HOL, true);
+                    } else if (oldVal == 'overtime') {
+                        this.modifyRate(rates, this.business.ot_behavior, OT, true);
+                    }
+                    break;
+            }
+        },
+
+        modifyRate(rates, multiplierType = null, multiplier = 1.0, reduce = false) {
+            let cgRate = (parseFloat(rates.caregiver_rate) * multiplier).toFixed(2);
+            let providerFee = (parseFloat(rates.provider_fee) * multiplier).toFixed(2);
+            if (reduce) {
+                cgRate = (parseFloat(rates.caregiver_rate) / multiplier).toFixed(2);
+                providerFee = (parseFloat(rates.provider_fee) / multiplier).toFixed(2);
+            }
+            switch (multiplierType) {
+                case 'caregiver':
+                    rates.caregiver_rate = cgRate;
+                    this.updateClientRates(rates)
+                    break;
+                case 'provider': 
+                    rates.provider_fee = providerFee;
+                    this.updateClientRates(rates);
+                    break;
+                case 'both':
+                    rates.caregiver_rate = cgRate;
+                    rates.provider_fee = providerFee;
+                    this.updateClientRates(rates)
+                    break;
+                case null:
+                default:
+                    return;
+            }
+        },
+
+        getMultiplier(hoursType) {
+            switch(hoursType) {
+                case 'overtime':
+                    return parseFloat(this.business.ot_multiplier);
+                case 'holiday':
+                    return parseFloat(this.business.hol_multiplier);
+                default:
+                    return parseFloat(1.0);
+            }
+        },
+
+        getMultiplierType(hoursType) {
+            switch(hoursType) {
+                case 'overtime':
+                    return this.business.ot_behavior;
+                case 'holiday':
+                    return this.business.hol_behavior;
+                default:
+                    return null;
             }
         },
 

@@ -552,6 +552,27 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return true;
     }
 
+    /**
+     * Check if the schedule has any services marked as 
+     * overtime or holiday pay.
+     *
+     * @return boolean
+     */
+    public function hasOvertime()
+    {
+        if ($this->services->count()) {
+            foreach ($this->services as $service) {
+                if (in_array($service->hours_type, ['overtime', 'holiday'])) {
+                    return true;
+                }
+            }
+        } else {
+            return in_array($this->hours_type, ['overtime', 'holiday']);
+        }
+
+        return false;
+    }
+
     ///////////////////////////////////////////
     /// Static Methods
     ///////////////////////////////////////////

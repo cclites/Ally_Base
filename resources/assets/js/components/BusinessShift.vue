@@ -3,6 +3,13 @@
         <loading-card v-show="loading" text="Loading Data"></loading-card>
         <div v-show="!loading">
             <div v-if="isOfficeUserOrAdmin">
+                <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-danger">
+                    <p><i class="fa fa-exchange mr-1"></i> The caregiver clocked in but the duration does not match what was scheduled.</p>
+                    <p>Caregiver clocked in duration: {{ numberFormat(duration) }} hours
+                    &nbsp;|&nbsp;
+                    Scheduled services duration: {{ numberFormat(serviceHours) }} hours</p>
+                    Please adjust accordingly.
+                </div>
                 <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
                     <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
                 </div>
@@ -148,7 +155,7 @@
                                         <th>Hours Type</th>
                                         <th width="10%">Hours</th>
                                         <th width="13%">Caregiver Rate</th>
-                                        <th>Provider Fee</th>
+                                        <th>Registry Fee</th>
                                         <th>Ally Fee</th>
                                         <th width="12%">Total Rate</th>
                                         <th>Payer</th>
@@ -165,7 +172,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;">
+                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -224,7 +231,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type">
+                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -234,8 +241,9 @@
                                             <b-form-input
                                                     name="duration"
                                                     type="number"
-                                                    step="any"
-                                                    v-model="service.duration" />
+                                                    step="0.01"
+                                                    v-model="service.duration"
+                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                         </td>
                                         <td class="text-only" v-if="defaultRates">
                                             {{ numberFormat(service.default_rates.caregiver_rate) }}
@@ -293,6 +301,9 @@
                             <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-warning">
                                 Warning: The shift's actual hours ({{ duration }}) do not match the broken out service hours.
                             </div>
+                            <b-alert v-if="isUsingOvertime" variant="warning" show>
+                                Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
+                            </b-alert>
 
                             <label class="mt-1">
                                 <b-form-checkbox v-model="defaultRates">
@@ -674,7 +685,7 @@
                 // Reset values
                 this.deleted = false;
                 this.billingType = shift.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = shift.client_rate === null;
+                this.defaultRates = false; // always set to false for shifts.
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -965,8 +976,42 @@
                 }
                 return questions;
             },
+
+            onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
+                let service = this.form.services[serviceIndex];
+                if (!service) {
+                    return;
+                }
+
+                // Use nextTick here so that you can properly get the oldVal using this
+                // function on the @change event, but utilize the updated service
+                // object that will reflect the new hours_type value.
+                this.$nextTick(() => {
+                    if (this.defaultRates) {
+                        this.fetchDefaultRate(service);
+                    } else {
+                        this.handleChangedHoursType(service, newVal, oldVal);
+                    }
+                });
+            },
+
+            onChangeHoursType(newVal, oldVal) {
+                this.handleChangedHoursType(this.form, newVal, oldVal);
+            },
         },
         watch: {
+            'form.hours_type': function(newVal, oldVal) {
+                if (! oldVal || newVal == oldVal) {
+                    return;
+                }
+
+                if (this.defaultRates) {
+                    // re-load the default rates and will automatically
+                    // calculate any OT/HOL hours.
+                    this.handleChangedDefaultRates(this.form, this.defaultRates);
+                }
+            },
+
             shift(newVal, oldVal) {
                 if (newVal.id !== oldVal.id) this.changedShift(newVal);
             },

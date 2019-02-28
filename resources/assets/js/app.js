@@ -134,6 +134,7 @@ Vue.component('admin-financial-summary', require('./components/admin/reports/Fin
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
 
 // Office User
+Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));
 Vue.component('business-status-alias-manager', require('./components/business/settings/StatusAliasManager'));
 Vue.component('business-bank-accounts', require('./components/business/settings/BusinessBankAccounts'));
 Vue.component('business-care-match', require('./components/business/BusinessCareMatch'));

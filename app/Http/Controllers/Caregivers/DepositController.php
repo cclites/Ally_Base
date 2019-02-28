@@ -3,9 +3,9 @@ namespace App\Http\Controllers\Caregivers;
 
 use App\Billing\Deposit;
 use App\Billing\Queries\DepositQuery;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\Html\HtmlDepositView;
 use App\Billing\View\DepositViewGenerator;
-use App\Billing\View\PdfViewStrategy;
+use App\Billing\View\Pdf\PdfDepositView;
 
 class DepositController extends BaseController
 {
@@ -30,9 +30,9 @@ class DepositController extends BaseController
     {
         $this->authorize('read', $deposit);
 
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlDepositView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('deposit-' . $deposit->id . '.pdf');
+            $strategy = new PdfDepositView('deposit-' . $deposit->id . '.pdf');
         }
 
         $viewGenerator = new DepositViewGenerator($strategy);

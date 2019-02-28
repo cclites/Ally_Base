@@ -18,6 +18,10 @@ use Carbon\Carbon;
 use Packages\GMaps\GeocodeCoordinates;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\ClientPayer;
+use App\Billing\Payer;
 
 class ShiftFactoryTest extends TestCase
 {
@@ -33,7 +37,13 @@ class ShiftFactoryTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->business = factory(Business::class)->create(['timezone' => 'UTC']);
+        $this->business = factory(Business::class)->create([
+            'timezone' => 'UTC',
+            'ot_behavior' => null,
+            'ot_multiplier' => 1.5,
+            'hol_behavior' => null,
+            'hol_multiplier' => 1.5,
+        ]);
         $this->client = factory(Client::class)->create(['business_id' => $this->business->id]);
         $this->caregiver = factory(Caregiver::class)->create();
     }
@@ -203,4 +213,158 @@ class ShiftFactoryTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $shift->checked_out_time->toDateTimeString());
     }
 
+    /** @test */
+    public function it_does_not_calculate_overtime_rates_when_behavior_setting_is_turned_off()
+    {
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(15.00, $shift->caregiver_rate);
+        $this->assertEquals(30.00, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_caregivers()
+    {
+        $this->business->update(['ot_behavior' => 'caregiver']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(22.50, $shift->caregiver_rate);
+        $this->assertEquals(37.87, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_providers()
+    {
+        $this->business->update(['ot_behavior' => 'provider']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(15.0, $shift->caregiver_rate);
+        $this->assertEquals(37.12, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtime_rates_for_both_caregivers_and_providers()
+    {
+        $this->business->update(['ot_behavior' => 'both']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(22.5, $shift->caregiver_rate);
+        $this->assertEquals(44.99, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtimes_rates_for_fixed_rate_shfits()
+    {
+        $this->business->update(['ot_behavior' => 'both']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+            'fixed_rates' => true,
+        ]);
+        $this->assertTrue($schedule->fixed_rates);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('overtime', $shift->hours_type);
+        $this->assertEquals(225.00, $shift->caregiver_rate);
+        $this->assertEquals(449.99, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_holiday_rates()
+    {
+        $this->business->update(['hol_behavior' => 'both']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'holiday',
+        ]);
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+
+        $shift = $factory->create();
+        $this->assertEquals('holiday', $shift->hours_type);
+        $this->assertEquals(22.5, $shift->caregiver_rate);
+        $this->assertEquals(44.99, $shift->client_rate);
+    }
+
+    /** @test */
+    public function it_calculates_overtimes_rates_based_on_the_payer_ally_percentage()
+    {
+        $this->business->update(['ot_behavior' => 'caregiver']);
+        $rate = $this->createDefaultClientRate();
+        $schedule = $this->createDefaultRatesSchedule([
+            'hours_type' => 'overtime',
+        ]);
+
+        // ally percentage defaults to the credit card value
+        $this->assertEquals(0.05, $this->client->getAllyPercentage());
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+        $shift = $factory->create();
+        $this->assertEquals(37.87, $shift->client_rate);
+
+        // test ACH payment method
+        $payer = factory(ClientPayer::class)->create(['client_id' => $this->client->id, 'payer_id' => Payer::PRIVATE_PAY_ID]);
+        $this->client->setPaymentMethod(factory(BankAccount::class)->create());
+        $this->assertEquals(0.03, $this->client->fresh()->getAllyPercentage());
+
+        $factory = ShiftFactory::withSchedule($schedule, new ClockData(Shift::METHOD_GEOLOCATION));
+        $shift = $factory->create();
+        $this->assertEquals(37.73, $shift->client_rate);
+    }
+
+    public function createDefaultRatesSchedule($attributes = [])
+    {
+        return factory(Schedule::class)->create($attributes + [
+            'client_id'  => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'caregiver_rate' => null,
+            'client_rate' => null,
+            'fixed_rates' => false,
+        ]);
+    }
+
+    public function createDefaultClientRate()
+    {
+        return ClientRate::create([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'client_hourly_rate' => 30.00,
+            'caregiver_hourly_rate' => 15.00,
+            'client_fixed_rate' => 300,
+            'caregiver_fixed_rate' => 150,
+            'service_id' => null,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_end' => '9999-12-31',
+        ]);
+    }
 }

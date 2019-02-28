@@ -3,8 +3,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Billing\Actions\ProcessChainDeposits;
 use App\Billing\View\DepositViewGenerator;
-use App\Billing\View\HtmlViewStrategy;
-use App\Billing\View\PdfViewStrategy;
+use App\Billing\View\Html\HtmlDepositView;
+use App\Billing\View\Pdf\PdfDepositView;
 use App\Business;
 use App\BusinessChain;
 use App\Caregiver;
@@ -59,9 +59,9 @@ class DepositsController extends Controller
 
     public function show(Deposit $deposit, string $view = "html")
     {
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlDepositView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('deposit-' . $deposit->id . '.pdf');
+            $strategy = new PdfDepositView('deposit-' . $deposit->id . '.pdf');
         }
 
         $viewGenerator = new DepositViewGenerator($strategy);

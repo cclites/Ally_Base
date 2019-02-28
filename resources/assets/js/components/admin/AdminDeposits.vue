@@ -55,6 +55,10 @@
                 </div>
             </div>
 
+            <p v-if="invoices.length">
+                <strong>There are {{ invoices.length }} invoices listed for a total amount of {{ numberFormat(totalAmountDue) }}.</strong>
+            </p>
+
             <h4>Invoices</h4>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -159,6 +163,12 @@
                         key: 'actions',
                     },
                 ],
+            }
+        },
+
+        computed: {
+            totalAmountDue() {
+                return this.invoices.reduce((carry, invoice) => carry + parseFloat(invoice.amount) - parseFloat(invoice.amount_paid), 0);
             }
         },
 

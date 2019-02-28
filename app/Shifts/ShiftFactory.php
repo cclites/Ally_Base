@@ -212,25 +212,41 @@ class ShiftFactory implements Arrayable
      * @param int|null $payerId
      * @return \App\Data\ScheduledRates|null
      */
-    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $rates, int $clientId, ?int $caregiverId,
-        ?int $serviceId, ?int $payerId): ?ScheduledRates
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId): ?ScheduledRates
     {
-        if (!$rates || $rates->clientRate() === null) {
+        if (!$scheduledRates || $scheduledRates->clientRate() === null) {
+            $rateFactory = app(RateFactory::class);
             $client = Client::findOrFail($clientId);
             $timezone = $client->getTimezone();
             $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
+            
+            $rates = $rateFactory->findMatchingRate(
+                $client,
+                $effectiveDate,
+                $scheduledRates ? $scheduledRates->fixedRates() : false,
+                $serviceId,
+                $payerId,
+                $caregiverId
+            );
 
-            $rates = app(RateFactory::class)->findMatchingRate($client, $effectiveDate,
-                $rates ? $rates->fixedRates() : false, $serviceId, $payerId, $caregiverId);
-
+            if ($scheduledRates) {
+                $payer = $payerId ? Payer::find($payerId) : null;
+                if ($scheduledRates->hoursType() == 'overtime') {
+                    $rates = $rateFactory->getOvertimeRates($rates, $client, $payer);
+                } else if ($scheduledRates->hoursType() == 'holiday') {
+                    $rates = $rateFactory->getHolidayRates($rates, $client, $payer);
+                }
+            }
+            
             return new ScheduledRates(
                 $rates->client_rate ?? 0,
                 $rates->caregiver_rate ?? 0,
-                $rates->fixed_rates ?? false
+                $rates->fixed_rates ?? false,
+                $scheduledRates ? $scheduledRates->hoursType() : 'default'
             );
         }
 
-        return $rates;
+        return $scheduledRates;
     }
 
     /**
