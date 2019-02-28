@@ -11,26 +11,28 @@
         <b-row class="mb-2">
             <b-col sm="12">
                 <div class="mb-2"><strong>Billing ({{ billingDisplay }}):</strong></div>
-                <table class="table table-bordered table-fit-more table-striped table-hover mb-0">
-                    <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>Shift Type</th>
-                        <th>Rate</th>
-                        <th>Duration</th>
-                        <th>Total</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(item, index) in billingDetails" :key="index">
-                        <td>{{ item.service }}</td>
-                        <td>{{ formatHoursType(item.hours_type) }}</td>
-                        <td>{{ moneyFormat(item.client_rate) }}</td>
-                        <td>{{ numberFormat(item.hours) }} hrs</td>
-                        <td>{{ moneyFormat(item.total) }}</td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-fit-more table-striped table-hover mb-0">
+                        <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Shift Type</th>
+                            <th>Rate</th>
+                            <th>Duration</th>
+                            <th>Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item, index) in billingDetails" :key="index">
+                            <td>{{ item.service }}</td>
+                            <td>{{ formatHoursType(item.hours_type) }}</td>
+                            <td>{{ moneyFormat(item.client_rate) }}</td>
+                            <td>{{ numberFormat(item.hours) }} hrs</td>
+                            <td>{{ moneyFormat(item.total) }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </b-col>
         </b-row>
 
