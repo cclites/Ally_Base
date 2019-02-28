@@ -14,6 +14,30 @@ use App\Billing\View\Pdf\PdfPaymentView;
 
 class StatementController extends BaseController
 {
+    public function itemizePayment(Payment $payment)
+    {
+        $invoices = $payment->invoices()->with('items', 'items.invoiceable')->get();
+
+        return view_component(
+            'itemized-payment',
+            'Itemized Payment Details',
+            compact('invoices', 'payment'),
+            ['Reconciliation Report' => route('business.reports.reconciliation')]
+        );
+    }
+
+    public function itemizeDeposit(Deposit $deposit)
+    {
+        $invoices = $deposit->businessInvoices()->with('items', 'items.invoiceable')->get();
+
+        return view_component(
+            'itemized-deposit',
+            'Itemized Deposit Details',
+            compact('invoices', 'deposit'),
+            ['Reconciliation Report' => route('business.reports.reconciliation')]
+        );
+    }
+
     public function payment(Payment $payment, string $view = "html")
     {
         $this->authorize('read', $payment);

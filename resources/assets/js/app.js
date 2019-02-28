@@ -177,6 +177,8 @@ Vue.component('custom-field-form', require('./components/business/custom_fields/
 Vue.component('custom-field-list', require('./components/business/custom_fields/CustomFieldList'));
 Vue.component('custom-field-edit', require('./components/business/custom_fields/CustomFieldEdit.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
+Vue.component('itemized-payment', require('./components/business/reports/ItemizedPayment.vue'));
+Vue.component('itemized-deposit', require('./components/business/reports/ItemizedDeposit.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('business-franchisor-dashboard', require('./components/business/franchise/FranchisorDashboard.vue'));
