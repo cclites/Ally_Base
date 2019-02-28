@@ -1,16 +1,16 @@
 <template>
-    <b-container fluid>
-        <b-row class="mb-2">
-            <b-col sm="6"><strong>Client:</strong> {{ shift.client_name }}</b-col>
-            <b-col sm="6"><strong>Caregiver:</strong> {{ shift.caregiver_name }}</b-col>
+    <div>
+        <b-row>
+            <b-col sm="6" class="mb-2"><strong>Client:</strong> {{ shift.client_name }}</b-col>
+            <b-col sm="6" class="mb-2"><strong>Caregiver:</strong> {{ shift.caregiver_name }}</b-col>
         </b-row>
-        <b-row class="mb-2">
-            <b-col sm="6"><strong>Clocked In Date &amp; Time:</strong> {{ shift.checked_in_time }}</b-col>
-            <b-col sm="6"><strong>Clocked Out Date &amp; Time:</strong> {{ shift.checked_out_time }}</b-col>
+        <b-row>
+            <b-col sm="6" class="mb-2"><strong>Clocked In Date &amp; Time:</strong> {{ shift.checked_in_time }}</b-col>
+            <b-col sm="6" class="mb-2"><strong>Clocked Out Date &amp; Time:</strong> {{ shift.checked_out_time }}</b-col>
         </b-row>
         <b-row class="mb-2">
             <b-col sm="12">
-                <div class="mb-2"><strong>Billing:</strong></div>
+                <div class="mb-2"><strong>Billing ({{ billingDisplay }}):</strong></div>
                 <table class="table table-bordered table-fit-more table-striped table-hover mb-0">
                     <thead>
                     <tr>
@@ -25,9 +25,9 @@
                     <tr v-for="(item, index) in billingDetails" :key="index">
                         <td>{{ item.service }}</td>
                         <td>{{ formatHoursType(item.hours_type) }}</td>
-                        <td>{{ moneyFormat(item.caregiver_rate) }}</td>
-                        <td>{{ numberFormat(item.hours) }} hrs</td>
                         <td>{{ moneyFormat(item.client_rate) }}</td>
+                        <td>{{ numberFormat(item.hours) }} hrs</td>
+                        <td>{{ moneyFormat(item.total) }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -124,7 +124,7 @@
                 <shift-evv-data-table v-if="isAdmin" :shift="shift"></shift-evv-data-table>
             </b-col>
         </b-row>
-    </b-container>
+    </div>
 </template>
 
 <script>
@@ -148,6 +148,10 @@
         },
 
         computed: {
+            business() {
+                return this.shift.business_id ? this.$store.getters.getBusiness(this.shift.business_id) : {};
+            },
+
             evvMethod() {
                 if (this.shift.checked_in_number) {
                     return 'Telephony';
@@ -156,33 +160,37 @@
                 }
                 return 'None';
             },
-            business() {
-                return this.shift.business_id ? this.$store.getters.getBusiness(this.shift.business_id) : {};
+            
+            billingDisplay() {
+                if (this.shift.services && this.shift.services.length) {
+                    return 'Services';
+                }
+
+                return this.shift.fixed_rates ? 'Fixed Rate' : 'Hourly';
             },
+
             billingDetails() {
                 let rows = [];
-
                 if (this.shift.services && this.shift.services.length) {
                     // service breakout
                     return this.shift.services.map(item => {
                         let service = this.services.find(x => x.id === item.service_id);
                         return {
                             service: service ? service.name : 'General',
-                            caregiver_rate: item.caregiver_rate,
                             client_rate: item.client_rate,
                             hours_type: item.hours_type,
                             hours: item.duration,
+                            total: this.calculateTotal(item.client_rate, item.duration),
                         };
                     });
                 } else {
                     // shift rates
-                    // TODO: handle fixed and hourly rates
                     return [{
                         service: this.defaultService ? this.defaultService.name : 'General',
-                        caregiver_rate: this.shift.caregiver_rate,
                         client_rate: this.shift.client_rate,
                         hours_type: this.shift.hours_type,
                         hours: this.shift.hours,
+                        total: this.calculateTotal(this.shift.client_rate, this.shift.hours, this.shift.fixed_rates),
                     }];
                 }
             },
@@ -198,7 +206,14 @@
                     case 'holiday':
                         return 'HOL';
                 }
-            }
+            },
+
+            calculateTotal(clientRate, duration, isFixed = false) {
+                if (isFixed) {
+                    return clientRate;
+                }
+                return (parseFloat(clientRate) * parseFloat(duration));
+            },
         },
 
         mounted() {
