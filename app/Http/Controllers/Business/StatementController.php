@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Business;
 use App\Billing\Deposit;
 use App\Billing\Payment;
 use App\Billing\View\DepositViewGenerator;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\Html\HtmlDepositView;
+use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
-use App\Billing\View\PdfViewStrategy;
+use App\Billing\View\Pdf\PdfDepositView;
+use App\Billing\View\Pdf\PdfPaymentView;
 
 class StatementController extends BaseController
 {
@@ -14,9 +16,9 @@ class StatementController extends BaseController
     {
         $this->authorize('read', $payment);
 
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlPaymentView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('payment-' . $payment->id . '.pdf');
+            $strategy = new PdfPaymentView('payment-' . $payment->id . '.pdf');
         }
 
         $viewGenerator = new PaymentViewGenerator($strategy);
@@ -27,9 +29,9 @@ class StatementController extends BaseController
     {
         $this->authorize('read', $deposit);
 
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlDepositView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('deposit-' . $deposit->id . '.pdf');
+            $strategy = new PdfDepositView('deposit-' . $deposit->id . '.pdf');
         }
 
         $viewGenerator = new DepositViewGenerator($strategy);

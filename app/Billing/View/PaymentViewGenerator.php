@@ -2,42 +2,34 @@
 namespace App\Billing\View;
 
 use App\Billing\Payment;
+use App\Billing\View\Data\PaymentInvoiceData;
 use App\Businesses\NullContact;
 use App\Contracts\ContactableInterface;
 use App\Contracts\ViewStrategy;
 
 class PaymentViewGenerator
 {
-    /**
-     * @var \App\Contracts\ViewStrategy
-     */
     protected $strategy;
-    /**
-     * @var \App\Billing\View\InvoiceViewGenerator
-     */
-    protected $invoiceView;
 
-    function __construct(ViewStrategy $strategy, InvoiceViewGenerator $invoiceView = null)
+    function __construct(PaymentViewStrategy $strategy)
     {
         $this->strategy = $strategy;
-        $this->invoiceView = $invoiceView ?: new InvoiceViewGenerator($strategy);
     }
 
     function generate(Payment $payment, string $viewName = "statements.payment")
     {
         $invoiceObjects = [];
         foreach($payment->invoices as $invoice) {
-            $invoiceObject = new PaymentInvoiceObject();
-            $invoiceObject->invoice = $invoice;
-            $invoiceObject->amountApplied = (float) $invoice->pivot->amount_applied;
-            $invoiceObject->itemGroups = $this->invoiceView->getItemGroups($invoice->items);
+            $invoiceObject = new PaymentInvoiceData(
+                $invoice,
+                (float) $invoice->pivot->amount_applied
+            );
             $invoiceObjects[] = $invoiceObject;
         }
 
         $payer = $this->buildContact($payment);
 
-        $view = view($viewName, compact('payer', 'payment', 'invoiceObjects'));
-        return $this->strategy->generate($view);
+        return $this->strategy->generate($payer, $payment, $invoiceObjects);
     }
 
     protected function buildContact(Payment $payment): ContactableInterface
@@ -52,22 +44,4 @@ class PaymentViewGenerator
 
         return new NullContact();
     }
-}
-
-class PaymentInvoiceObject
-{
-    /**
-     * @var \App\Billing\ClientInvoice
-     */
-    public $invoice;
-
-    /**
-     * @var float
-     */
-    public $amountApplied;
-
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    public $itemGroups;
 }

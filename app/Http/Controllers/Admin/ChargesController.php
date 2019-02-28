@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Billing\Actions\ProcessChainPayments;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
-use App\Billing\View\PdfViewStrategy;
+use App\Billing\View\Pdf\PdfPaymentView;
 use App\Business;
 use App\BusinessChain;
 use App\Client;
@@ -46,9 +46,9 @@ class ChargesController extends Controller
 
     public function show(Payment $payment, string $view = "html")
     {
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlPaymentView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('payment-' . $payment->id . '.pdf');
+            $strategy = new PdfPaymentView('payment-' . $payment->id . '.pdf');
         }
 
         $viewGenerator = new PaymentViewGenerator($strategy);
