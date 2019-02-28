@@ -17,7 +17,6 @@ use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
-use App\Listeners\UnverifiedLocationException;
 use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;

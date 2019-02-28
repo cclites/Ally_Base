@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\CaregiverApplication;
-use App\Exceptions\UnverifiedLocationException;
 use App\PhoneNumber;
 use App\SmsThread;
 use Tests\FakesTwilioWebhooks;
