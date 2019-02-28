@@ -153,7 +153,7 @@ class ClientOnboardingController extends Controller
                 $clientOnboarding->createIntakePdf();
                 break;
             case 6:
-                $confirmUrl = route('reconfirm.encrypted_id', [$clientOnboarding->client->getEncryptedKey()]);
+                $confirmUrl = route('setup.clients', ['token' => $clientOnboarding->client->getEncryptedKey()]);
                 return new SuccessResponse('Success', ['url' => $confirmUrl]);
                 break;
         }

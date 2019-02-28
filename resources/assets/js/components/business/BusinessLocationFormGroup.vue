@@ -7,7 +7,7 @@
                 <a href="javascript:void(0)" @click="manualHide=true">Hide Menu</a> | <a href="javascript:void(0)" @click="hideDebugNotice=true">Hide Notice</a>
             </div>
         </div>
-        <business-location-select v-model="localValue" @locationCount="setLocationCount" :allow-all="allowAll"></business-location-select>
+        <business-location-select v-model="localValue" @locationCount="setLocationCount" :allow-all="allowAll" :name="name"></business-location-select>
         <input-help :form="form" :field="field" :text="helpText" v-if="form && field"></input-help>
     </b-form-group>
 </template>
@@ -18,7 +18,7 @@
     export default {
         name: "BusinessLocationFormGroup",
         components: {BusinessLocationSelect},
-        props: ['label', 'form', 'field', 'value', 'helpText', 'allowAll'],
+        props: ['label', 'name', 'form', 'field', 'value', 'helpText', 'allowAll'],
         computed: {
             localLabel() {
                 return this.label || this.label === null ? this.label : "Office Location";

@@ -6,12 +6,24 @@ use App\Business;
 use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\Traits\ActiveBusiness;
+use App\Users\OfficeUserSettings;
+use App\Users\SettingsRepository;
 
 class BaseController extends Controller
 {
     use ActiveBusiness;
 
-    protected $activeBusinessChain;
+    private $activeBusinessChain;
+    private $settings;
+
+    public function userSettings(): OfficeUserSettings
+    {
+        if (!$this->settings) {
+            return $this->settings = app(SettingsRepository::class)->getOfficeUserSettings(\Auth::user());
+        }
+
+        return $this->settings;
+    }
 
     /**
      * Return the active business chain
@@ -62,4 +74,5 @@ class BaseController extends Controller
     {
         return auth()->user()->belongsToBusiness($business);
     }
+
 }

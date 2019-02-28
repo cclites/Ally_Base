@@ -11,6 +11,7 @@ use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,7 +36,8 @@ use Packages\MetaData\HasMetaData;
  * @property string|null $remember_token
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
- * @property string|null $email_sent_at
+ * @property string|null $welcome_email_sent_at
+ * @property string|null $training_email_sent_at
  * @property string|null $gender
  * @property string|null $avatar
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
@@ -225,6 +227,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasMany(SystemNotification::class);
     }
     
+    /**
+     * Get the user's setup status history relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function setupStatusHistory()
+    {
+        return $this->hasMany(SetupStatusHistory::class);
+    }
+    
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -276,6 +288,19 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Get the age of a user based on the date of birth
+     *
+     * @return int|null
+     */
+    public function getAge()
+    {
+        if (!is_null($this->date_of_birth)) {
+            return now()->diffInYears(Carbon::parse($this->date_of_birth));
+        }
+        return null;
+    }
 
     /**
      * Return the fully-qualified name of the role class

@@ -35,6 +35,12 @@
                         <input-help :form="form" field="week_start"></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Email" label-for="email">
+                        <b-form-input type="email" v-model="form.email" />
+                        <input-help :form="form" field="email" text=""></input-help>
+                    </b-form-group>
+                </b-col>
             </b-row>
             <b-row class="">
                 <b-col lg="6">
@@ -141,6 +147,7 @@
                     zip: defaults.zip,
                     phone_number: defaults.phone_number,
                     fax_number: defaults.fax_number,
+                    email: defaults.email,
                 });
             },
 

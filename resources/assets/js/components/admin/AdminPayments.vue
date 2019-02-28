@@ -55,6 +55,21 @@
                 </div>
             </div>
 
+            <table class="table table-bordered" v-if="invoices.length">
+                <thead>
+                <th>Total Invoices</th>
+                <th>Total Amount</th>
+                <th>CC Amount</th>
+                <th>ACH Amount</th>
+                </thead>
+                <tbody>
+                <td>{{ invoices.length }}</td>
+                <td>{{ numberFormat(totalAmountDue) }}</td>
+                <td>{{ numberFormat(totalCCDue) }}</td>
+                <td>{{ numberFormat(totalACHDue) }}</td>
+                </tbody>
+            </table>
+
             <h4>Invoices</h4>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -113,7 +128,7 @@
                     },
                     {
                         key: 'payer',
-                        formatter: (val) => val.name,
+                        formatter: (val, key, item) => `${val.name} (${item.payer_payment_type})`,
                         sortable: true,
                     },
                     {
@@ -161,6 +176,18 @@
             }
         },
 
+        computed: {
+            totalAmountDue() {
+                return this.invoices.reduce((carry, invoice) => carry + parseFloat(invoice.amount) - parseFloat(invoice.amount_paid), 0);
+            },
+            totalCCDue() {
+                return this.invoices.reduce((carry, invoice) => carry + (['CC', 'AMEX'].includes(invoice.payer_payment_type) ? parseFloat(invoice.amount) - parseFloat(invoice.amount_paid) : 0), 0);
+            },
+            totalACHDue() {
+                return this.invoices.reduce((carry, invoice) => carry + (['ACH', 'ACH-P'].includes(invoice.payer_payment_type) ? parseFloat(invoice.amount) - parseFloat(invoice.amount_paid) : 0), 0);
+            }
+        },
+
         methods: {
             async generateInvoices() {
                 if (this.chainLoaded && this.chainId) {
@@ -174,7 +201,7 @@
 
             async loadInvoices() {
                 this.chainLoaded = false;
-                const response = await axios.get(`/admin/invoices/clients?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/clients?json=1&paid=0&chain_id=${this.chainId}`);
                 this.invoices = response.data.data;
                 this.chainLoaded = true;
             },
@@ -200,7 +227,7 @@
 
             async updatePaidInvoices()
             {
-                const response = await axios.get(`/admin/invoices/clients?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/clients?json=1&paid=0&chain_id=${this.chainId}`);
                 let data = response.data.data;
                 this.invoices = this.invoices.map(invoice => {
                     if (!data.find(item => item.id === invoice.id)) {

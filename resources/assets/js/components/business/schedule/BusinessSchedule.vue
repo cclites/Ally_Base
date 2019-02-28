@@ -37,6 +37,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention" v-b-popover.hover="`Filter scheduled shifts that are marked Attention Required. ${statusHelp}`">Attention Required</span>
                         </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="OVERTIME"> <span class="badge badge-primary overtime" v-b-popover.hover="`Filter scheduled shifts that are marked as overtime or holiday pay. ${statusHelp}`">HOL / OT</span>
+                        </label>
                     </b-col>
                 </b-row>
             </b-col>
@@ -44,7 +47,7 @@
                 <b-row>
                     <b-col class="text-right">
                         <b-btn variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
-                        <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
+                        <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal" v-if="!officeUserSettings.enable_schedule_groups">Update Schedules</b-btn>
                         <b-btn variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
                     </b-col>
                 </b-row>
@@ -318,7 +321,7 @@
             },
 
             rememberFilters() {
-                return this.isFilterable && this.business && this.business.calendar_remember_filters;
+                return this.isFilterable && this.officeUserSettings.calendar_remember_filters;
             },
 
             calendarHeight() {
@@ -331,7 +334,7 @@
                     height: this.calendarHeight,
                     eventBorderColor: '#333',
                     eventOverlap: false,
-                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    nextDayThreshold: this.officeUserSettings.calendar_next_day_threshold || '09:00:00',
                     nowIndicator: true,
                     resourceAreaWidth: '280px',
                     resourceColumns: [
@@ -418,6 +421,7 @@
                                 || this.statusFilters.includes(event.shift_status)
                                 // Open shifts are calculated from the cg canceled status or a missing cg assignment
                                 || (this.statusFilters.includes('OPEN') && (event.caregiver_id == 0 || event.status === 'CAREGIVER_CANCELED'))
+                                || (this.statusFilters.includes('OVERTIME') && event.has_overtime);
                     });
                 }
 
@@ -791,20 +795,18 @@
                 let caregiverIsFilterable = !this.caregiver;
 
                 // Load the default filter values
-                if (this.business) {
-                    if (caregiverIsFilterable && this.business.calendar_caregiver_filter === 'unassigned') {
-                        this.filterCaregiverId = 0;
-                    }
+                if (caregiverIsFilterable && this.officeUserSettings.calendar_caregiver_filter === 'unassigned') {
+                    this.filterCaregiverId = 0;
+                }
 
-                    if (this.rememberFilters) {
-                        if (caregiverIsFilterable) {
-                            let localCaregiverId = this.getLocalStorage('caregiver');
-                            if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
-                        }
-                        if (clientIsFilterable) {
-                            let localClientId = this.getLocalStorage('client');
-                            if (localClientId !== null) this.filterClientId = localClientId;
-                        }
+                if (this.rememberFilters) {
+                    if (caregiverIsFilterable) {
+                        let localCaregiverId = this.getLocalStorage('caregiver');
+                        if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
+                    }
+                    if (clientIsFilterable) {
+                        let localClientId = this.getLocalStorage('client');
+                        if (localClientId !== null) this.filterClientId = localClientId;
                     }
                 }
 
@@ -1096,6 +1098,7 @@
     .badge.attention { background-color: #C30000; }
     .badge.missed_clock_in { background-color: #E468B2; }
     .badge.no_show { background-color: #63cbc7; }
+    .badge.overtime { background-color: #fc4b6c; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */

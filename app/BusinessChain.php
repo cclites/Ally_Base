@@ -96,7 +96,7 @@ class BusinessChain extends AuditableModel
     {
         return $this->hasMany(ReferralSource::class, 'chain_id');
     }
-    
+
     /**
      * Get the Businesses StatusAliases relation.
      *

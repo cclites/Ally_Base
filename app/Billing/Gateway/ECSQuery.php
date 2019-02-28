@@ -33,6 +33,16 @@ class ECSQuery
         return $this;
     }
 
+    function collection()
+    {
+        $collection = collect();
+        foreach($this->query() as $transaction) {
+            $collection->push($transaction);
+        }
+
+        return $collection;
+    }
+
     function get()
     {
         $xml = $this->query();

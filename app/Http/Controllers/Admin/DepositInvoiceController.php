@@ -14,6 +14,7 @@ use App\Billing\View\PdfViewStrategy;
 use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\DepositInvoice as DepositInvoiceResponse;
 
@@ -21,26 +22,41 @@ class DepositInvoiceController extends Controller
 {
     public function index(Request $request, CaregiverInvoiceQuery $caregiverInvoiceQuery, BusinessInvoiceQuery $businessInvoiceQuery)
     {
-        if ($request->has('paid')) {
-            if ($request->paid) {
-                $caregiverInvoiceQuery->paidInFull();
-                $businessInvoiceQuery->paidInFull();
-            } else {
-                $caregiverInvoiceQuery->notPaidInFull();
-                $businessInvoiceQuery->notPaidInFull();
+        if ($request->expectsJson()) {
+
+            if ($request->filled('paid')) {
+                if ($request->paid) {
+                    $caregiverInvoiceQuery->paidInFull();
+                    $businessInvoiceQuery->paidInFull();
+                } else {
+                    $caregiverInvoiceQuery->notPaidInFull();
+                    $businessInvoiceQuery->notPaidInFull();
+                }
             }
+
+            if ($chainId = $request->input('chain_id')) {
+                $chain = BusinessChain::findOrFail($chainId);
+                $caregiverInvoiceQuery->forBusinessChain($chain);
+                $businessInvoiceQuery->forBusinessChain($chain);
+            }
+
+            if ($request->has('start_date')) {
+                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
+                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
+                $caregiverInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+                $businessInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
+
+            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver'])->get();
+            $businessInvoices = $businessInvoiceQuery->with(['business'])->get();
+
+            $invoices = $caregiverInvoices->merge($businessInvoices);
+
+            return DepositInvoiceResponse::collection($invoices);
         }
 
-        if ($chainId = $request->input('chain_id')) {
-            $chain = BusinessChain::findOrFail($chainId);
-            $caregiverInvoiceQuery->forBusinessChain($chain);
-            $caregiverInvoiceQuery->forBusinessChain($chain);
-        }
-
-        $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver'])->get();
-        $businessInvoices = $businessInvoiceQuery->with(['business'])->get();
-
-        return DepositInvoiceResponse::collection($caregiverInvoices->merge($businessInvoices));
+        $chains = BusinessChain::ordered()->get();
+        return view_component('admin-deposit-invoices', 'Deposit Invoices', compact('chains'));
     }
 
     public function generate(Request $request, BusinessInvoiceGenerator $businessInvoiceGenerator, CaregiverInvoiceGenerator $caregiverInvoiceGenerator)
@@ -55,8 +71,9 @@ class DepositInvoiceController extends Controller
         $invoices = [];
         $errors = [];
         foreach($chain->businesses as $business) {
+            $generator = clone $businessInvoiceGenerator;
             try {
-                $invoices[] = $businessInvoiceGenerator->generate($business);
+                $invoices[] = $generator->generate($business);
             }
             catch(\Exception $e) {
                 $errors[] = [
@@ -70,8 +87,9 @@ class DepositInvoiceController extends Controller
         /** @var \App\Caregiver[] $caregivers */
         $caregivers = $chain->caregivers()->active()->get();
         foreach($caregivers as $caregiver) {
+            $generator = clone $caregiverInvoiceGenerator;
             try {
-                $invoices[] = $caregiverInvoiceGenerator->generate($caregiver);
+                $invoices[] = $generator->generate($caregiver);
             }
             catch(\Exception $e) {
                 $errors[] = [

@@ -16,6 +16,7 @@ class Form {
         this.handler = new AxiosResponseHandler();
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
+        this.alertOnSucess = true;
         this.errorMods = 0;
         this.hideErrors = [];
     }
@@ -153,7 +154,7 @@ class Form {
                 .then(response => {
                     console.log('Axios success');
                     this.handler = new AxiosResponseHandler();
-                    this.handler.handleResponse(response, this.alertOnResponse);
+                    this.handler.handleResponse(response, this.alertOnResponse && this.alertOnSuccess);
                     if (this.resetOnSuccess) this.reset();
                     resolve(response);
                 })
@@ -233,6 +234,16 @@ class Form {
         }
     }
 
+    /**
+     * Combine the contents of another form into this
+     * form so the data can be submitted together in one request
+     */
+    combineForm(otherForm) {
+        for (let property in otherForm.originalData) {
+            this.originalData[property] = otherForm.originalData[property];
+            this[property] = otherForm[property];
+        }
+    }
 }
 
 export default Form;

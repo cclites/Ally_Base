@@ -51,6 +51,11 @@ class ClientPayerValidator
             return $this->error("Client has no payers assigned on $date.");
         }
 
+        if ($duplicatePayer = $this->findDuplicate($payers)) {
+            $name = $duplicatePayer->name();
+            return $this->error("There is a duplicate payer assignment for $name on $date.");
+        }
+
         $balanceCount = $this->countType($payers, "balance", $date);
         if ($balanceCount > 1) {
             return $this->error("A client can only have one balance payer, client has $balanceCount balance payers on $date.");
@@ -74,6 +79,26 @@ class ClientPayerValidator
      */
     public function getErrorMessage(): ?string {
         return $this->error;
+    }
+
+    /**
+     *
+     * @param \Illuminate\Support\Collection|\App\Billing\ClientPayer[] $payers
+     * @return \App\Billing\ClientPayer|null
+     */
+    function findDuplicate(Collection $payers): ?ClientPayer
+    {
+        $hashTable = [];
+        foreach($payers as $payer)
+        {
+            $hash = $payer->payer_id;
+            if (isset($hashTable[$hash])) {
+                return $payer;
+            }
+            $hashTable[$hash] = 1;
+        }
+
+        return null;
     }
 
     /**

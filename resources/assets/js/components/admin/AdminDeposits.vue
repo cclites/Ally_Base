@@ -55,6 +55,10 @@
                 </div>
             </div>
 
+            <p v-if="invoices.length">
+                <strong>There are {{ invoices.length }} invoices listed for a total amount of {{ numberFormat(totalAmountDue) }}.</strong>
+            </p>
+
             <h4>Invoices</h4>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -139,6 +143,10 @@
                         formatter: (val) => this.numberFormat(val),
                     },
                     {
+                        key: 'amount_due',
+                        formatter: (val) => this.numberFormat(val),
+                    },
+                    {
                         key: 'success',
                     },
                     {
@@ -158,6 +166,12 @@
             }
         },
 
+        computed: {
+            totalAmountDue() {
+                return this.invoices.reduce((carry, invoice) => carry + parseFloat(invoice.amount) - parseFloat(invoice.amount_paid), 0);
+            }
+        },
+
         methods: {
             async generateInvoices() {
                 if (this.chainLoaded && this.chainId) {
@@ -171,7 +185,7 @@
 
             async loadInvoices() {
                 this.chainLoaded = false;
-                const response = await axios.get(`/admin/invoices/deposits?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/deposits?json=1&paid=0&chain_id=${this.chainId}`);
                 this.invoices = response.data.data;
                 this.chainLoaded = true;
             },
@@ -197,7 +211,7 @@
 
             async updatePaidInvoices()
             {
-                const response = await axios.get(`/admin/invoices/deposits?paid=0&chain_id=${this.chainId}`);
+                const response = await axios.get(`/admin/invoices/deposits?json=1&paid=0&chain_id=${this.chainId}`);
                 let data = response.data.data;
                 this.invoices = this.invoices.map(invoice => {
                     if (!data.find(item => item.name === invoice.name)) {

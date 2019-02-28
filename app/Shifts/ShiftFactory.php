@@ -1,16 +1,16 @@
 <?php
 namespace App\Shifts;
 
-use App\Billing\ClientPayer;
 use App\Billing\Payer;
 use App\Billing\ScheduleService;
 use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Schedule;
+use App\Data\ScheduledRates;
 use App\Shift;
 use App\Shifts\Contracts\ShiftDataInterface;
-use Carbon\Carbon;
+use App\Shifts\Data\ClockData;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -28,80 +28,94 @@ class ShiftFactory implements Arrayable
         $this->attributes = $attributes;
     }
 
+    /**
+     * Instantiate the factory without a related schedule
+     *
+     * @param \App\Client $client
+     * @param \App\Caregiver $caregiver
+     * @param \App\Shifts\Data\ClockData $clockIn
+     * @param \App\Shifts\Data\ClockData|null $clockOut
+     * @param \App\Data\ScheduledRates|null $rates
+     * @param string|null $currentStatus
+     * @param \App\Billing\Service|null $service
+     * @param \App\Billing\Payer|null $payer
+     * @return \App\Shifts\ShiftFactory
+     */
     public static function withoutSchedule(
         Client $client,
         Caregiver $caregiver,
-        string $hoursType,
-        bool $fixedRates,
-        ?float $clientRate,
-        ?float $caregiverRate,
-        string $clockInMethod,
-        Carbon $clockInTime,
-        ?string $clockOutMethod = null,
-        ?Carbon $clockOutTime = null,
+        ClockData $clockIn,
+        ?ClockData $clockOut = null,
+        ?ScheduledRates $rates = null,
         ?string $currentStatus = null,
         ?Service $service = null,
-        ?ClientPayer $clientPayer = null
+        ?Payer $payer = null
     ): self
     {
+        $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
         return new self([
             'business_id'       => $client->business_id,
             'caregiver_id'      => $caregiver->id,
             'client_id'         => $client->id,
             'service_id'        => $service ? $service->id : self::getDefaultServiceId($client),
-            'client_payer_id'   => $clientPayer->id ?? null,
-            'checked_in_method' => $clockInMethod,
-            'checked_in_time'   => $clockInTime->setTimezone('UTC'),
-            'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
-            'checked_out_time'  => $clockOutTime ? $clockOutTime->setTimezone('UTC') : null,
-            'hours_type'        => $hoursType,
-            'fixed_rates'       => $fixedRates,
-            'client_rate'       => $clientRate,
-            'caregiver_rate'    => $caregiverRate,
-            'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOutTime),
+            'payer_id'          => $payer->id ?? null,
+            'checked_in_method' => $clockIn->method,
+            'checked_in_time'   => $clockIn->time,
+            'checked_out_method'=> $clockOut ? $clockOut->method : Shift::METHOD_UNKNOWN,
+            'checked_out_time'  => $clockOut ? $clockOut->time : null,
+            'hours_type'        => $rates->hoursType(),
+            'fixed_rates'       => $rates->fixedRates(),
+            'client_rate'       => $rates->clientRate(),
+            'caregiver_rate'    => $rates->caregiverRate(),
+            'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
         ]);
     }
 
+    /**
+     * Instantiate the factory with a related schedule
+     *
+     * @param \App\Schedule $schedule
+     * @param \App\Shifts\Data\ClockData $clockIn
+     * @param \App\Shifts\Data\ClockData|null $clockOut
+     * @param string|null $currentStatus
+     * @return \App\Shifts\ShiftFactory
+     */
     public static function withSchedule(
         Schedule $schedule,
-        string $clockInMethod,
-        Carbon $clockInTime,
-        ?string $clockOutMethod = null,
-        ?Carbon $clockOutTime = null,
+        ClockData $clockIn,
+        ?ClockData $clockOut = null,
         ?string $currentStatus = null
     ): self
     {
-        if ($schedule->payer_id) {
-            $client = $schedule->client;
-            $date = $clockInTime->setTimezone($client->getTimezone())->toDateString();
-            $clientPayer = $client->getPayers($date)
-                ->where('payer_id', $schedule->payer_id)
-                ->first();
-
-            // TODO: Send notification / system exception if matching client payer isn't found
-        }
-
+        $rates = self::resolveRates(clone $clockIn, $schedule->getRates(), $schedule->client_id, $schedule->caregiver_id, $schedule->service_id, $schedule->payer_id);
         $self = new self([
             'schedule_id'       => $schedule->id,
             'business_id'       => $schedule->business_id,
             'caregiver_id'      => $schedule->caregiver_id,
             'client_id'         => $schedule->client_id,
             'service_id'        => $schedule->service_id,
-            'client_payer_id'   => $clientPayer->id ?? null,
-            'checked_in_method' => $clockInMethod,
-            'checked_in_time'   => $clockInTime->setTimezone('UTC'),
-            'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
-            'checked_out_time'  => $clockOutTime ? $clockOutTime->setTimezone('UTC') : null,
-            'hours_type'        => $schedule->hours_type,
-            'fixed_rates'       => $schedule->fixed_rates,
-            'client_rate'       => $schedule->client_rate ?? 0.0,
-            'caregiver_rate'    => $schedule->caregiver_rate ?? 0.0,
-            'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOutTime),
+            'payer_id'          => $schedule->payer_id,
+            'checked_in_method' => $clockIn->method,
+            'checked_in_time'   => $clockIn->time,
+            'checked_out_method'=> $clockOut ? $clockOut->method : Shift::METHOD_UNKNOWN,
+            'checked_out_time'  => $clockOut ? $clockOut->time : null,
+            'hours_type'        => $rates->hoursType(),
+            'fixed_rates'       => $rates->fixedRates(),
+            'client_rate'       => $rates->clientRate(),
+            'caregiver_rate'    => $rates->caregiverRate(),
+            'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
         ]);
 
         if ($schedule->services->count()) {
-            $self->withServices($schedule->services->map(function(ScheduleService $service) use ($schedule, $clockInTime) {
+            $self->withServices($schedule->services->map(function(ScheduleService $service) use ($schedule, $clockIn) {
                 $serviceData = array_except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
+                $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
+                $serviceData = array_merge($serviceData, [
+                    'client_rate' => $rates->clientRate(),
+                    'caregiver_rate' => $rates->caregiverRate(),
+                    'hours_type' => $rates->hoursType(),
+                ]);
+
                 return $serviceData;
             }));
         }
@@ -109,16 +123,35 @@ class ShiftFactory implements Arrayable
         return $self;
     }
 
+    /**
+     * Return the default shift status
+     *
+     * @param bool $hasBeenClockedOut
+     * @param int|null $businessId
+     * @return string
+     */
     public static function getDefaultStatus(bool $hasBeenClockedOut, ?int $businessId = null): string
     {
         return $hasBeenClockedOut ? Shift::WAITING_FOR_CONFIRMATION : Shift::CLOCKED_IN;
     }
 
+    /**
+     * Get the default service id for the related business chain
+     *
+     * @param \App\Client $client
+     * @return int|null
+     */
     public static function getDefaultServiceId(Client $client): ?int
     {
         return Service::getDefault($client->business->chain_id)->id ?? null;
     }
 
+    /**
+     * Include shift data objects
+     *
+     * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
+     * @return \App\Shifts\ShiftFactory
+     */
     public function withData(ShiftDataInterface ...$dataObjects): self
     {
         foreach($dataObjects as $object) {
@@ -128,6 +161,10 @@ class ShiftFactory implements Arrayable
         return $this;
     }
 
+    /**
+     * @param \App\Billing\Invoiceable\ShiftService[] $services
+     * @return \App\Shifts\ShiftFactory
+     */
     public function withServices(array $services): self
     {
         $this->services = $services;
@@ -135,6 +172,12 @@ class ShiftFactory implements Arrayable
         return $this;
     }
 
+    /**
+     * Create and persist a Shift
+     *
+     * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
+     * @return \App\Shift
+     */
     public function create(ShiftDataInterface ...$dataObjects): Shift
     {
         $shift = Shift::create($this->withData(...$dataObjects)->toArray());
@@ -145,6 +188,65 @@ class ShiftFactory implements Arrayable
         }
 
         return $shift;
+    }
+
+    /**
+     * Create, but do not persist, the shift.  This does not attach any relations, like services.
+     *
+     * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
+     * @return \App\Shift
+     */
+    public function make(ShiftDataInterface ...$dataObjects): Shift
+    {
+        return new Shift($this->withData(...$dataObjects)->toArray());
+    }
+
+    /**
+     * Resolve default rates from the rate factory if none are provided
+     *
+     * @param \App\Shifts\Data\ClockData $clockIn
+     * @param \App\Data\ScheduledRates|null $rates
+     * @param int $clientId
+     * @param int|null $caregiverId
+     * @param int|null $serviceId
+     * @param int|null $payerId
+     * @return \App\Data\ScheduledRates|null
+     */
+    public static function resolveRates(ClockData $clockIn, ?ScheduledRates $scheduledRates, int $clientId, ?int $caregiverId, ?int $serviceId, ?int $payerId): ?ScheduledRates
+    {
+        if (!$scheduledRates || $scheduledRates->clientRate() === null) {
+            $rateFactory = app(RateFactory::class);
+            $client = Client::findOrFail($clientId);
+            $timezone = $client->getTimezone();
+            $effectiveDate = $clockIn->time->copy()->setTimezone($timezone ?? 'UTC')->toDateString();
+            
+            $rates = $rateFactory->findMatchingRate(
+                $client,
+                $effectiveDate,
+                $scheduledRates ? $scheduledRates->fixedRates() : false,
+                $serviceId,
+                $payerId,
+                $caregiverId
+            );
+
+            if ($scheduledRates) {
+                $payer = $payerId ? Payer::find($payerId) : null;
+                if ($scheduledRates->hoursType() == 'overtime') {
+                    $rates = $rateFactory->getOvertimeRates($rates, $client, $payer);
+                } else if ($scheduledRates->hoursType() == 'holiday') {
+                    $rates = $rateFactory->getHolidayRates($rates, $client, $payer);
+                }
+            }
+            
+            return new ScheduledRates(
+                $rates->client_rate ?? 0,
+                $rates->caregiver_rate ?? 0,
+                $rates->fixed_rates ?? false,
+                $scheduledRates ? $scheduledRates->hoursType() : 'default'
+            );
+        }
+
+        return $scheduledRates;
     }
 
     /**

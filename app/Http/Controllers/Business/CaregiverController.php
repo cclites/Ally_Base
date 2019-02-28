@@ -25,6 +25,9 @@ use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
 use App\Http\Requests\UpdateNotificationOptionsRequest;
 use App\Http\Requests\UpdateNotificationPreferencesRequest;
+use App\Actions\CreateCaregiver;
+use App\Notifications\TrainingEmail;
+use App\Notifications\CaregiverWelcomeEmail;
 
 class CaregiverController extends BaseController
 {
@@ -40,7 +43,9 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Caregiver::forRequestedBusinesses()->ordered();
+            $query = Caregiver::with('clients.business')
+                ->forRequestedBusinesses()
+                ->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -59,7 +64,17 @@ class CaregiverController extends BaseController
                 $query->with('phoneNumber');
             }
 
-            return $query->get();
+            if ($request->filled('location')) {
+                $query->whereHas('clients', function($q1) use ($request) {
+                    $q1->whereHas('business', function ($q2) use ($request) {
+                        $q2->where('id', $request->location);
+                    });
+                });
+            }
+
+            $results = $query->get();
+            // dd($results->toArray());
+            return response()->json($results);
         }
 
         return view('business.caregivers.index');
@@ -79,10 +94,11 @@ class CaregiverController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CreateCaregiverRequest $request
+     * @param \App\Actions\CreateCaregiver
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function store(CreateCaregiverRequest $request)
+    public function store(CreateCaregiverRequest $request, CreateCaregiver $action)
     {
         $data = $request->filtered();
         // No authorization needed at this time, the caregiver is saved to the business chain.
@@ -97,12 +113,7 @@ class CaregiverController extends BaseController
             }
         }
 
-        $caregiver = new Caregiver($data);
-        if ($request->input('no_email')) {
-            $caregiver->setAutoEmail();
-        }
-        if ($this->businessChain()->caregivers()->save($caregiver)) {
-            $caregiver->setAvailability([]); // sets default availability
+        if ($caregiver = $action->create($data, $this->businessChain())) {
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id, 'url' => route('business.caregivers.show', [$caregiver->id])]);
         }
 
@@ -149,6 +160,10 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->future_schedules = $caregiver->futureSchedules()->count();
+        $caregiver->hours_total = $caregiver->totalServiceHours();
+        $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->setup_url = $caregiver->setup_url;
 
         $notifications = $caregiver->user->getAvailableNotifications()->map(function ($cls) {
             return [
@@ -282,15 +297,6 @@ class CaregiverController extends BaseController
         return $events;
     }
 
-    public function sendConfirmationEmail($caregiver_id)
-    {
-        $caregiver = Caregiver::findOrFail($caregiver_id);
-        $this->authorize('update', $caregiver);
-
-        $caregiver->sendConfirmationEmail($this->businessChain());
-        return new SuccessResponse('Email Sent to Caregiver');
-    }
-
     public function bankAccount(Request $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);
@@ -321,7 +327,7 @@ class CaregiverController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        $data = $request->validate(['misc' => 'required|string']);
+        $data = $request->validate(['misc' => 'nullable|string']);
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }
@@ -397,5 +403,37 @@ class CaregiverController extends BaseController
         $caregiver->user->syncNotificationPreferences($request->validated());
 
         return new SuccessResponse('Caregiver\'s notification preferences have been saved.');
+    }
+
+    /**
+     * Send welcome email to the caregiver.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeEmail(Caregiver $caregiver)
+    {
+        $caregiver->update(['welcome_email_sent_at' => Carbon::now()]);
+
+        $caregiver->notify(new CaregiverWelcomeEmail($caregiver, $this->businessChain()));
+
+        // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
+        return new SuccessResponse('A welcome email was dispatched to the Caregiver.', null, '.');
+    }
+
+    /**
+     * Send training email to the caregiver.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
+    public function trainingEmail(Caregiver $caregiver)
+    {
+        $caregiver->update(['training_email_sent_at' => Carbon::now()]);
+
+        $caregiver->notify(new TrainingEmail($caregiver));
+
+        // Use the reload page redirect to update the timestamp
+        return new SuccessResponse('A training email was dispatched to the Caregiver.', null, '.');
     }
 }

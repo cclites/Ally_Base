@@ -73,16 +73,30 @@
                 <input-help :form="form" field="email"
                             text="Enter their email address or check the box if caregiver does not have an email."></input-help>
             </b-form-group>
-            <b-form-group label="Username" label-for="username" label-class="required">
-                <b-form-input
-                        id="username"
-                        name="username"
-                        type="text"
-                        v-model="form.username"
-                >
-                </b-form-input>
-                <input-help :form="form" field="username"
-                            text="Enter their username to be used for logins."></input-help>
+            <b-form-group label="Username" label-for="username">
+                <b-row>
+                    <b-col cols="8">
+                        <b-form-input
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                                :disabled="form.no_username"
+                        >
+                        </b-form-input>
+                    </b-col>
+                    <b-col cols="4">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="no_username"
+                                       v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Let Caregiver Choose</span>
+                            </label>
+                        </div>
+                    </b-col>
+                </b-row>
+                <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
             </b-form-group>
             <b-form-group label="Password" label-for="password">
                 <b-form-input
@@ -90,6 +104,7 @@
                         name="password"
                         type="password"
                         v-model="form.password"
+                        :disabled="form.no_username"
                 >
                 </b-form-input>
                 <input-help :form="form" field="password"
@@ -101,6 +116,7 @@
                         name="password_confirmation"
                         type="password"
                         v-model="form.password_confirmation"
+                        :disabled="form.no_username"
                 >
                 </b-form-input>
                 <input-help :form="form" field="password_confirmation"
@@ -125,6 +141,7 @@
                     email: this.value.email || null,
                     no_email: !!this.value.no_email,
                     username: this.value.username || null,
+                    no_username: this.value.no_username == 0 ? false : true, 
                     date_of_birth: this.value.date_of_birth || null,
                     ssn: this.value.ssn || null,
                     password: this.value.password || null,
@@ -140,8 +157,25 @@
 
         methods: {
             copyEmailToUsername() {
+                if (this.form.no_username) {
+                    return;
+                }
                 if (this.form.email && !this.form.username) {
                     this.form.username = this.form.email;
+                }
+            },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                    this.form.password = '';
+                    this.form.password_confirmation = '';
                 }
             },
         },

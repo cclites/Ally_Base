@@ -3,8 +3,9 @@
 </li>
 <li> <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bank"></i><span class="hide-menu">Businesses</span></a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('admin.businesses.index') }}">Provider List</a></li>
-        <li><a href="{{ route('admin.businesses.create') }}">Add Provider</a></li>
+        <li><a href="{{ route('admin.businesses.chains') }}">Chain List</a></li>
+        <li><a href="{{ route('admin.businesses.index') }}">Location List</a></li>
+        <li><a href="{{ route('admin.businesses.create') }}">Add Location</a></li>
         <li class="divider"><hr style="margin:0;"/></li>
         <li><a href="{{ route('business.caregivers.index') }}">Caregiver List</a></li>
         <li><a href="{{ route('business.clients.index') }}">Client List</a></li>
@@ -33,6 +34,12 @@
         <li><a href="{{ route('admin.deposits') }}">Deposit Report</a></li>
         <li><a href="{{ route('admin.deposits.failed') }}">Failed Deposits</a></li>
         <li><a href="{{ route('admin.deposits.adjustment') }}">Manual Adjustment</a></li>
+    </ul>
+</li>
+<li> <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-file-pdf-o"></i><span class="hide-menu">Invoices</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.invoices.clients') }}">Client Invoices</a></li>
+        <li><a href="{{ route('admin.invoices.deposits') }}">Deposit Invoices</a></li>
     </ul>
 </li>
 <li>

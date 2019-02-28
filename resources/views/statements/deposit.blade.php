@@ -12,8 +12,11 @@
 @push('head')
     <style>
         body {
-            color: #000;
+            color: #000!important;
+            font-size: 1.4rem;
+            font-weight: 500;
         }
+        small { font-weight: 500 }
 
         .header-left,
         .footer-left {
@@ -59,7 +62,6 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
             padding: 15px;
         }
 
@@ -83,7 +85,7 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
                 <br>
                 <table>
                     <tr>
@@ -149,10 +151,10 @@
                         <tbody>
                             @foreach($invoiceObjects as $invoiceObject)
                                 <tr>
-                                    <td>{{ $invoiceObject->invoice->getDate() }}</td>
+                                    <td class="text-nowrap">{{ $invoiceObject->invoice->getDate() }}</td>
                                     <td>{{ $invoiceObject->invoice->getName() }}</td>
-                                    <td>{{ number_format($invoiceObject->invoice->getAmount(), 2) }}</td>
-                                    <td>{{ number_format($invoiceObject->amountApplied, 2) }}</td>
+                                    <td class="text-nowrap">{{ number_format($invoiceObject->invoice->getAmount(), 2) }}</td>
+                                    <td class="text-nowrap">{{ number_format($invoiceObject->amountApplied, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -164,16 +166,17 @@
 
             @foreach($invoiceObjects as $invoiceObject)
                 <h5>Invoice #{{ $invoiceObject->invoice->getName() }}</h5>
-
-                @include('invoices.partials.items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @if($invoiceObject->invoice->getRecipient() instanceof \App\Caregiver)
+                    @include('invoices.partials.caregiver_items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @else
+                    @include('invoices.partials.business_items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @endif
             @endforeach
         @endif
 
         <div class="row">
-            <div class="footer-left">
-                <p>This is a statement. Your deposit was processed on {{ $deposit->created_at->format('m/d/Y') }} using your account information on file.</p>
-            </div>
-            <div class="footer-right">
+            <div class="col text-center p-4">
+                <p>This is a statement. Your deposit was processed on {{ $deposit->created_at->format('m/d/Y') }} using your account information on file.</h5>
             </div>
         </div>
 

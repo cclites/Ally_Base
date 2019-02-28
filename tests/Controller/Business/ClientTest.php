@@ -26,28 +26,6 @@ class ClientTest extends TestCase
         $this->officeUser->businesses()->attach($business->id);
     }
 
-    public function testAnOfficeUserCanUpdateClientPhysicianInfo()
-    {
-        $client = factory(Client::class)->create(['business_id' => $this->officeUser->businesses()->first()->id]);
-
-        $this->assertEquals(1, $this->officeUser->businesses()->first()->clients()->count());
-
-        $first_name = 'test first name';
-        $last_name = 'test last name';
-        $client->update([
-            'dr_first_name' => $first_name,
-            'dr_last_name' => $last_name,
-            'dr_phone' => 1,
-            'dr_fax' => 2
-        ]);
-
-        $client = $client->fresh();
-        $this->assertEquals($first_name, $client->dr_first_name);
-        $this->assertEquals($last_name, $client->dr_last_name);
-        $this->assertEquals(1, $client->dr_phone);
-        $this->assertEquals(2, $client->dr_fax);
-    }
-
     /** @test */
     public function an_office_user_can_update_client_hospital_info()
     {

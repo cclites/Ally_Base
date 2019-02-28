@@ -2,6 +2,8 @@
 namespace App\Billing\View;
 
 use App\Billing\Payment;
+use App\Businesses\NullContact;
+use App\Contracts\ContactableInterface;
 use App\Contracts\ViewStrategy;
 
 class PaymentViewGenerator
@@ -32,8 +34,23 @@ class PaymentViewGenerator
             $invoiceObjects[] = $invoiceObject;
         }
 
-        $view = view($viewName, compact('payment', 'invoiceObjects'));
+        $payer = $this->buildContact($payment);
+
+        $view = view($viewName, compact('payer', 'payment', 'invoiceObjects'));
         return $this->strategy->generate($view);
+    }
+
+    protected function buildContact(Payment $payment): ContactableInterface
+    {
+        if ($method = $payment->getPaymentMethod()) {
+            if ($method->getOwnerModel() instanceof ContactableInterface) {
+                return $method->getOwnerModel();
+            }
+
+            return new NullContact($method->getBillingName(), $method->getBillingAddress(), $method->getBillingPhone());
+        }
+
+        return new NullContact();
     }
 }
 

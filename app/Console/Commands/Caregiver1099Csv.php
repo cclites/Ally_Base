@@ -57,6 +57,9 @@ class Caregiver1099Csv extends Command
         // Disable full group by mode
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
 
+        // IMPORTANT NOTE
+        // The 1099 query needs to stay consistent year to year, we need to use the client payment date as the basis for inclusion in the tax year.
+
         // Get rows
         $rows = \DB::select("SELECT c.id as client_id, CONCAT(u1.firstname, ' ', u1.lastname) as client_name, u1.email as client_email, c.client_type, c.default_payment_type, c.ssn as client_ssn, 
 a1.address1 as client_address1, a1.address2 as client_address2, a1.city as client_city, a1.state as client_state, a1.zip as client_zip,

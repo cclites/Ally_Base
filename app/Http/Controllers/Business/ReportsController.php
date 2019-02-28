@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\Service;
 use App\Http\Requests\TimesheetReportRequest;
 use App\ReferralSource;
 use App\Reports\PayrollReport;
@@ -195,7 +196,12 @@ class ReportsController extends BaseController
     public function reconciliation(Request $request, ProviderReconciliationReport $report)
     {
         if ($request->expectsJson() && $request->input('json')) {
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date));
+            }
+
             return $report->forRequestedBusinesses()
+                ->forTypes($request->input('types'))
                 ->orderBy('created_at', 'DESC')
                 ->rows();
         }
@@ -333,6 +339,13 @@ class ReportsController extends BaseController
         }
 
         return $report->rows();
+    }
+
+    public function shift(Request $request, $id)
+    {
+        $report = new ShiftsReport();
+        $report->where('id', $id);
+        return $report->rows()->first();
     }
 
     public function caregiverPayments(Request $request)
@@ -489,6 +502,18 @@ class ReportsController extends BaseController
             $report->where('client_id', $client_id);
         }
 
+        if ($request->filled('client_type')) {
+            $report->query()->whereHas('client', function($query) use ($request) {
+                $query->where('client_type', $request->client_type);
+            });
+        }
+
+        if ($request->filled('service_code')) {
+            $report->query()->whereHas('services', function ($query) use ($request) {
+                $query->where('id', $request->service_code);
+            });
+        }
+
         if ($status = $request->input('status')) {
             if ($status === 'charged') {
                 $report->query()->whereReadOnly();
@@ -515,7 +540,6 @@ class ReportsController extends BaseController
                 $report->query()->whereFlagsIn($flags);
             }
         }
-
     }
 
     public function exportTimesheets()
@@ -767,6 +791,43 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Display a listing of the caregiver's working anniversaries
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function caregiverAnniversary()
+    {
+        $users = Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
+            return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
+        });
+        return view('business.reports.caregiver_anniversary', compact('users'));
+    }
+
+    /**
+     * Display a listing of the users and their birthdays.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userBirthday(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+        $type = ucfirst($type);
+        return view('business.reports.user_birthday', compact('type'));
+    }
+
+    public function userBirthdayData(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+
+        if($type == 'clients') {
+            return Client::forRequestedBusinesses()->get();
+        }
+
+        return Caregiver::forRequestedBusinesses()->get();
+    }
+
+    /**
      * Shows the list of prospective clients
      *
      * @return Response
@@ -1008,8 +1069,8 @@ class ReportsController extends BaseController
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
-                        'email_sent_at' => $item->user->email_sent_at,
-                        'onboard_status' => $item->onboard_status,
+                        'email_sent_at' => $item->user->welcome_email_sent_at,
+                        'onboard_status' => $item->agreement_status,
                     ];
                 }));
             } else {
@@ -1018,7 +1079,7 @@ class ReportsController extends BaseController
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
-                        'email_sent_at' => $item->user->email_sent_at,
+                        'email_sent_at' => $item->user->welcome_email_sent_at,
                         'onboard_status' => $item->onboarded ? 'Onboarded' : 'Not Onboarded',
                     ];
                 }));
@@ -1122,7 +1183,24 @@ class ReportsController extends BaseController
      */
     public function revenuePage()
     {
-        return view('business.reports.revenue');
+        $clients = Client::forRequestedBusinesses()->select('id')->get()
+            ->sortBy('name')->values()->all();
+        $clients = collect($clients);
+        $caregivers = Caregiver::forRequestedBusinesses()->select('id')->get()
+            ->sortBy('name')->values()->all();
+        $caregivers = collect($caregivers);
+        $clientTypes = Client::forRequestedBusinesses()
+            ->select('client_type')
+            ->distinct()
+            ->pluck('client_type')
+            ->map(function($item) {
+                return [
+                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'id' => $item
+                ];
+            });
+        $serviceCodes = $this->businessChain()->services()->get();
+        return view('business.reports.revenue', compact('clients', 'caregivers', 'clientTypes', 'serviceCodes'));
     }
 
     /**
@@ -1224,7 +1302,8 @@ class ReportsController extends BaseController
         $groupedByDate = [];
 
         foreach ($data as $i => $shiftReport) {
-            $date = (new Carbon($shiftReport['checked_in_time']))->format('m/d/Y');
+            // grouped by week
+            $date = (new Carbon($shiftReport['checked_in_time']))->startOfWeek()->format('m/d/Y');
 
             if(isset($groupedByDate[$date])) {
                 $groupedByDate[$date][] = $shiftReport;
@@ -1265,7 +1344,6 @@ class ReportsController extends BaseController
 
             $groupedByDate[$date] = $total;
         }
-
         return $groupedByDate;
     }
 }

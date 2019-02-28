@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Rules\ValidEffectivePayer;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use App\Schedule;
@@ -29,11 +30,17 @@ class CreateScheduleRequest extends BusinessClientRequest
             'bydays' => 'required_if:interval_type,weekly,biweekly|array',
             'care_plan_id' => 'nullable|exists:care_plans,id',
             'service_id' => 'nullable|exists:services,id',
-            'payer_id' => 'nullable|exists:payers,id',
+            'payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('starts_at')))
+            ],
             'services' => 'array|required_without:service_id',
             'services.*.id' => 'nullable|exists:schedule_services,id',
             'services.*.service_id' => 'required_with:services|exists:services,id',
-            'services.*.payer_id' => 'nullable|exists:payers,id',
+            'services.*.payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('starts_at')))
+            ],
             'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',

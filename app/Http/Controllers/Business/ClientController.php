@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Actions\CreateClient;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Http\Controllers\AddressController;
@@ -9,10 +10,7 @@ use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
-use App\Http\Requests\UpdateClientPOAContactRequest;
 use App\Http\Requests\UpdateClientRequest;
-use App\Mail\ClientConfirmation;
-use App\OnboardStatusHistory;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -24,6 +22,8 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Notifications\ClientWelcomeEmail;
+use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
 {
@@ -116,9 +116,11 @@ class ClientController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CreateClientRequest $request
+     * @param \App\Actions\CreateClient $action
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(CreateClientRequest $request)
+    public function store(CreateClientRequest $request, CreateClient $action)
     {
         $data = $request->filtered();
         $this->authorize('create', [Client::class, $data]);
@@ -133,21 +135,10 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
-        if ($client = Client::create($data)) {
-            if ($request->input('no_email')) {
-                $client->setAutoEmail()->save();
-            }
+        
+        $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
-            $history = new OnboardStatusHistory([
-                'status' => $data['onboard_status']
-            ]);
-            $client->onboardStatusHistory()->save($history);
-
-            // Provider pay
-            if ($request->provider_pay) {
-                $client->setPaymentMethod($client->business);
-            }
-
+        if ($client = $action->create($data, $paymentMethod)) {
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
@@ -190,6 +181,7 @@ class ClientController extends BaseController
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
+            'contacts',
         ])
         ->append('last_service_date');
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
@@ -213,13 +205,14 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
+        $client->setup_url = $client->setup_url;
 
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $lastStatusDate = $client->agreementStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id)->get();
+        $invoices = $invoiceQuery->forClient($client->id, false)->get();
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()
@@ -248,16 +241,13 @@ class ClientController extends BaseController
         $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
-        if ($client->onboard_status != $data['onboard_status']) {
+        if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
         if ($client->update($data)) {
             if ($addOnboardRecord) {
-                $history = new OnboardStatusHistory([
-                    'status' => $data['onboard_status']
-                ]);
-                $client->onboardStatusHistory()->save($history);
+                $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
             return new SuccessResponse('The client has been updated.', $client);
@@ -371,22 +361,14 @@ class ClientController extends BaseController
         $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
         $data['payment_text'] = $paymentTypeMessage;
         $data['ally_rate'] = $allyRate;
-        return new SuccessResponse($message, $data);
-    }
-
-    public function sendConfirmationEmail(Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $client->sendConfirmationEmail();
-        return new SuccessResponse('Email Sent to Client');
+        return new SuccessResponse($message, $data, '.');
     }
 
     public function getPaymentType(Client $client)
     {
         return [
             'payment_type' => $client->getPaymentType(),
-            'percentage_fee' => AllyFeeCalculator::getPercentage($client)
+            'percentage_fee' => $client->getAllyPercentage(),
         ];
     }
 
@@ -430,15 +412,6 @@ class ClientController extends BaseController
         }
     }
 
-    public function updateContacts(UpdateClientPOAContactRequest $request, Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $client->update($request->validated());
-
-        return new SuccessResponse('Client contacts updated.');
-    }
-
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
@@ -459,5 +432,37 @@ class ClientController extends BaseController
 
         $client->update($data);
         return new SuccessResponse('The default rates have been saved.');
+    }
+
+    /**
+     * Send welcome email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeEmail(Client $client)
+    {
+        $client->update(['welcome_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new ClientWelcomeEmail($client));
+
+        // Use the reload page redirect to update the welcome_emaiL_sent_at timestamp
+        return new SuccessResponse('A welcome email was dispatched to the Client.', null, '.');
+    }
+
+    /**
+     * Send training email to the client.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     */
+    public function trainingEmail(Client $client)
+    {
+        $client->update(['training_email_sent_at' => Carbon::now()]);
+
+        $client->notify(new TrainingEmail($client));
+
+        // Use the reload page redirect to update the timestamp
+        return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
     }
 }

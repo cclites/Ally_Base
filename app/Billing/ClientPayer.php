@@ -74,6 +74,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     const ALLOCATION_MONTHLY = 'monthly';
     const ALLOCATION_DAILY = 'daily';
     const ALLOCATION_SPLIT = 'split';
+    const ALLOCATION_MANUAL = 'manual';
 
     /**
      * @var string[]
@@ -84,6 +85,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         self::ALLOCATION_MONTHLY,
         self::ALLOCATION_DAILY,
         self::ALLOCATION_SPLIT,
+        self::ALLOCATION_MANUAL,
     ];
 
 
@@ -218,6 +220,13 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 
     function getPaymentMethod(): ChargeableInterface
     {
+        if ($this->getPayer()->isPrivatePay()) {
+            if (!$paymentMethod = $this->client->getPaymentMethod()) {
+                throw new PaymentMethodError("No payment method is assigned to the private payer.");
+            }
+            return $paymentMethod;
+        }
+
         if ($method = $this->getPayer()->getPaymentMethod()) {
             if ($method instanceof Business) {
                 $method = $this->client->business;
@@ -229,11 +238,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
             return $method;
         }
 
-        if ($this->getPayer()->isPrivatePay()) {
-            return $this->client->getPaymentMethod();
-        }
-
-        throw new PaymentMethodError("No payment method is available.");
+        throw new PaymentMethodError("No payment method is available for the payer.");
     }
 
 
@@ -259,6 +264,14 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     function isSplitType(): bool
     {
         return $this->payment_allocation === self::ALLOCATION_SPLIT;
+    }
+
+    /**
+     * @return bool
+     */
+    function isManualType(): bool
+    {
+        return $this->payment_allocation === self::ALLOCATION_MANUAL;
     }
 
     /**
@@ -326,7 +339,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         $currentSum = ClientInvoiceItem::whereHas('invoice', function ($invoice) {
             $invoice->where('client_id', $this->client_id)->where('client_payer_id', $this->id);
         })
-            ->whereBetween('date', [$dateRange->start->toDateTimeString(), $dateRange->end->toDateTimeString()])
+            ->whereBetween('date', [$dateRange->start()->toDateTimeString(), $dateRange->end()->toDateTimeString()])
             ->sum('amount_due') ?? 0;
 
         $allowance = bcsub($this->payment_allowance, $currentSum, 4);
@@ -340,11 +353,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     public function getAllyPercentage()
     {
-        if ($this->payer->isPrivatePay()) {
-            return $this->client->getAllyPercentage();
+        try {
+            return $this->getPaymentMethod()->getAllyPercentage();
         }
-        else {
-            return (float) config('ally.bank_account_fee');
-        }
+        catch (\Exception $e) {}
+
+        return (float) config('ally.credit_card_fee');
     }
 }

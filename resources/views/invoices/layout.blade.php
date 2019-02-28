@@ -89,11 +89,13 @@
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
-                <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
-                <br>
-                <div class="sender-address">
-                    @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
-                </div>
+                @if($sender->name())
+                    <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
+                    <br>
+                    <div class="sender-address">
+                        @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
+                    </div>
+                @endif
             </div>
             <div class="text-right header-right">
                 <div class="h1">Invoice #{{ $invoice->getName() }}</div>
@@ -164,7 +166,7 @@
         <div class="row mt-5">
             <div class="col">
                 @if (! empty($sender->getPhoneNumber()))
-                <p class="text-center"><em>For questions regarding hours, rates or shift defailts: {{ $sender->getPhoneNumber()->number() }}</em></p>
+                <p class="text-center"><em>For questions regarding hours, rates or shift defaults: {{ $sender->getPhoneNumber()->number() }}</em></p>
                 @endif
                 <p class="text-center">
                     For questions regarding payments: support@allyms.com - (800) 930-0587

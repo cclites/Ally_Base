@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DeactivationReason;
 use App\UserNotificationPreferences;
+use App\SetupStatusHistory;
 
 trait IsUserRole
 {
@@ -49,7 +50,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at', 'deactivation_reason_id', 'reactivation_date', 'status_alias_id']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at', 'deactivation_reason_id', 'reactivation_date', 'status_alias_id', 'setup_status']);
     }
 
     ///////////////////////////////////////////
@@ -261,6 +262,11 @@ trait IsUserRole
         return $this->user->status_alias_id;
     }
 
+    public function getSetupStatusAttribute()
+    {
+        return $this->user->setup_status;
+    }
+
     ///////////////////////////////////////////
     /// Attribute Input Handling
     ///////////////////////////////////////////
@@ -352,6 +358,16 @@ trait IsUserRole
         return $this->hasOne(DeactivationReason::class, 'id', 'deactivation_reason_id');
     }
 
+    /**
+     * Get the user's setup status history relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function setupStatusHistory()
+    {
+        return $this->hasMany(SetupStatusHistory::class, 'user_id', 'id');
+    }
+    
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

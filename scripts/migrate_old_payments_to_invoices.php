@@ -7,29 +7,6 @@ use App\Billing\Payment;
 
 DB::beginTransaction();
 
-////////////////////////////////////2
-//// Migrate client caregiver rates
-////////////////////////////////////
-
-$clients = \App\Client::has('caregivers')->with(['caregivers', 'defaultPayment'])->get();
-$clients->each(function(\App\Client $client) {
-    foreach($client->caregivers as $caregiver) {
-        $paymentMethod = $client->getPaymentMethod() ?? new \App\Billing\Payments\Methods\CreditCard();
-        \App\Billing\ClientRate::create([
-            'client_id' => $client->id,
-            'caregiver_id' => $caregiver->id,
-            'client_hourly_rate' => multiply(add($caregiver->pivot->caregiver_hourly_rate, $caregiver->pivot->provider_hourly_fee), add(1, $paymentMethod->getAllyPercentage())),
-            'caregiver_hourly_rate' => $caregiver->pivot->caregiver_hourly_rate ?? 0,
-            'client_fixed_rate' => multiply(add($caregiver->pivot->caregiver_fixed_rate, $caregiver->pivot->provider_fixed_fee), add(1, $paymentMethod->getAllyPercentage())),
-            'caregiver_fixed_rate' => $caregiver->pivot->caregiver_fixed_rate ?? 0,
-            'effective_start' => '2018-01-01',
-            'effective_end' => '9999-12-31',
-        ]);
-    }
-});
-
-echo("Line 31\n");
-
 ////////////////////////////////////
 //// Client Payments to Invoices
 ////////////////////////////////////
@@ -145,6 +122,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
         $invoice = \App\Billing\CaregiverInvoice::create([
             'name' => \App\Billing\CaregiverInvoice::getNextName($deposit->caregiver_id),
             'caregiver_id' => $deposit->caregiver_id,
+            'created_at' => $deposit->created_at,
         ]);
 
         foreach($deposit->shifts as $shift) {
@@ -204,6 +182,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, f
         $invoice = \App\Billing\BusinessInvoice::create([
             'name' => \App\Billing\BusinessInvoice::getNextName($deposit->business_id),
             'business_id' => $deposit->business_id,
+            'created_at' => $deposit->created_at,
         ]);
 
         foreach($deposit->shifts as $shift) {

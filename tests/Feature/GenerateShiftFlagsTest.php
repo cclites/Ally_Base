@@ -16,6 +16,8 @@ use App\Timesheet;
 use App\TimesheetEntry;
 use App\Activity;
 use App\Events\ShiftDeleted;
+use App\Billing\ClientRate;
+use App\Billing\Service;
 
 class GenerateShiftFlagsTest extends TestCase
 {
@@ -26,6 +28,7 @@ class GenerateShiftFlagsTest extends TestCase
     protected $officeUser;
     protected $business;
     protected $admin;
+    protected $service;
 
     protected function setUp()
     {
@@ -41,6 +44,12 @@ class GenerateShiftFlagsTest extends TestCase
         $this->business->chain->caregivers()->save($this->caregiver);
         $this->officeUser = factory('App\OfficeUser')->create();
         $this->officeUser->businesses()->attach($this->business->id);
+
+        $this->service = factory(Service::class)->create(['chain_id' => $this->client->business->businessChain->id, 'default' => true]);
+        factory(ClientRate::class)->create([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+        ]);
     }
 
     /**
@@ -69,12 +78,11 @@ class GenerateShiftFlagsTest extends TestCase
             'business_id' => $this->client->business_id,
             'checked_in_time' => $in,
             'checked_out_time' => $out,
-            'caregiver_rate' => '30.00',
-            'provider_fee' => '1.00',
             'hours_type' => 'default',
             'fixed_rates' => 1,
             'mileage' => 0,
             'other_expenses' => 0,
+            'service_id' => $this->service->id,
         ]);
 
         return $data;
@@ -165,7 +173,8 @@ class GenerateShiftFlagsTest extends TestCase
         $this->actingAs($this->admin->user);
 
         $shift1 = $this->makeShift('01:00:00', '02:00:00');
-        $shift2 = $this->makeShift('10:00:00', '11:00:00');
+        $shift1['caregiver_rate'] = '30.00';
+        $shift1['provider_fee'] = '1.00';
 
         $data = [
             'name' => substr($this->caregiver->name, 0, 15),
@@ -233,7 +242,7 @@ class GenerateShiftFlagsTest extends TestCase
         
         $this->expectsEvents(ShiftFlagsCouldChange::class);
 
-        $this->postJson(route('clock_out'), $shift->toArray())
+        $this->postJson("/clock-out/{$shift->id}", $shift->toArray())
             ->assertStatus(200);
     }
 

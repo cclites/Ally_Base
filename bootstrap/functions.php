@@ -273,3 +273,8 @@ if (! function_exists('faker')) {
         return $faker = Faker\Factory::create();
     }
 }
+
+function view_component(string $component, string $title, array $props = [], ?array $breadcrumbs = [], string $layout = 'app')
+{
+    return view('vue', compact('component', 'title', 'props', 'breadcrumbs', 'layout'));
+}

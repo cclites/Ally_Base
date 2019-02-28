@@ -39,6 +39,7 @@ class ShiftFlag extends Model
         self::MODIFIED,
         self::OUTSIDE_AUTH,
         self::TIME_EXCESSIVE,
+        self::DURATION_MISMATCH,
     ];
 
     const ADDED = 'added';
@@ -47,4 +48,5 @@ class ShiftFlag extends Model
     const MODIFIED = 'modified';
     const OUTSIDE_AUTH = 'outside_auth';
     const TIME_EXCESSIVE = 'time_excessive';
+    const DURATION_MISMATCH = 'duration_mismatch';
 }

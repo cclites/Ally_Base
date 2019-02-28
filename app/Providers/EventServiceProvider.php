@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\BusinessChainCreated;
+use App\Events\ClientCreated;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
 use App\Events\ShiftCreated;
@@ -10,6 +12,8 @@ use App\Events\UnverifiedShiftConfirmed;
 use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
+use App\Listeners\CreateDefaultClientPayer;
+use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
@@ -39,6 +43,12 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        BusinessChainCreated::class => [
+            CreateDefaultService::class,
+        ],
+        ClientCreated::class => [
+            CreateDefaultClientPayer::class,
+        ],
         TaskAssigned::class => [
 //            SendAssignedTaskEmail::class,
         ],

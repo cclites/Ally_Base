@@ -1,19 +1,37 @@
 <?php
 namespace App\Data;
 
+use App\Data\Traits\ReflectsToArray;
 use Carbon\Carbon;
+use JsonSerializable;
 
-class DateRange
+/**
+ * Class DateRange
+ * @package App\Data
+ */
+class DateRange implements JsonSerializable
 {
-    /** @var \Carbon\Carbon */
-    public $start;
+    use ReflectsToArray;
 
     /** @var \Carbon\Carbon */
-    public $end;
+    private $start;
+
+    /** @var \Carbon\Carbon */
+    private $end;
 
     public function __construct(Carbon $start, Carbon $end)
     {
         $this->start = $start;
         $this->end = $end;
+    }
+
+    public function start(): Carbon
+    {
+        return $this->start->copy();
+    }
+
+    public function end(): Carbon
+    {
+        return $this->end->copy();
     }
 }

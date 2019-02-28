@@ -21,6 +21,7 @@ use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Scheduling\ScheduleEditor;
+use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
@@ -91,12 +92,16 @@ class ScheduleController extends BaseController
         $this->authorize('create', [Schedule::class, $data]);
         $business = $request->getBusiness();
 
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         $creator->startsAt(Carbon::parse($request->input('starts_at')))
             ->duration($request->duration)
             ->assignments($business->id, $request->client_id, $request->caregiver_id, $request->service_id, $request->payer_id)
-            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates)
+            ->rates($request->caregiver_rate, $request->client_rate, $request->fixed_rates)
             ->addServices($request->getServices());
 
         if ($request->hours_type == 'overtime') {
@@ -124,7 +129,7 @@ class ScheduleController extends BaseController
         }
 
         try {
-            $created = $creator->create();
+            $created = $creator->create($this->userSettings()->enable_schedule_groups());
             if ($count = $created->count()) {
                 if ($count > 1) {
                     return new CreatedResponse('The scheduled shifts have been created.');
@@ -155,6 +160,10 @@ class ScheduleController extends BaseController
         $business = $request->getBusiness();
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
+
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
 
         if ($request->input('group_update') && !$schedule->group) {
             return new ErrorResponse(400, 'A group update was attempted without a schedule group');
@@ -195,6 +204,29 @@ class ScheduleController extends BaseController
         return new SuccessResponse('The schedule has been updated.');
     }
 
+
+    protected function validateAgainstNegativeRates(CreateScheduleRequest $request)
+    {
+        $client = $request->getClient();
+        $services = $request->getServices();
+
+        if (count($services)) {
+            foreach($services as $service) {
+                if ($service['client_rate'] === null) continue;
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
+                    return false;
+                }
+            }
+        } else if ($request->client_rate !== null) {
+            if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     /**
      * Protected function for making sure a client caregiver relationship exists
      *
@@ -229,10 +261,6 @@ class ScheduleController extends BaseController
     public function updateStatus(Schedule $schedule)
     {
         $this->authorize('update', $schedule);
-
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
-        }
 
         // update notes
         if (request()->has('notes')) {
@@ -437,13 +465,17 @@ class ScheduleController extends BaseController
         $end = Carbon::parse($request->input('end_date', 'First day of next month'));
         $group_by = $request->input('group_by');
         $business = $request->getBusiness();
-        $schedules = $business->schedules()->whereBetween('starts_at', [$start, $end])->get();
+        $schedules = $business->schedules()
+            ->whereBetween('starts_at', [$start, $end])
+            ->orderBy('starts_at')
+            ->get();
 
         $schedules = $schedules->map(function ($schedule) {
             $schedule->date = $schedule->starts_at->format('m/d/Y');
             $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
             return $schedule;
         });
+
         return view('business.schedule_print', compact('schedules', 'group_by'));
     }
 

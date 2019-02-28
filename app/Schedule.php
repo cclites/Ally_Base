@@ -5,10 +5,12 @@ use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
+use App\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
@@ -45,6 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ScheduleException[] $exceptions
+ * @property-read \Illuminate\Database\Eloquent\Collection|ScheduleService[] $services
  * @property-read bool $clocked_in_shift
  * @property-read mixed $notes
  * @property-read mixed $shift_status
@@ -291,6 +294,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * Return a ScheduledRates object
+     *
+     * @return \App\Data\ScheduledRates
+     */
+    public function getRates(): ScheduledRates
+    {
+        return new ScheduledRates(
+            $this->client_rate,
+            $this->caregiver_rate,
+            $this->fixed_rates,
+            $this->hours_type
+        );
+    }
+
+    /**
      * Attach a schedule note to the schedule
      *
      * @param int|\App\ScheduleNote $note
@@ -519,6 +537,82 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             ?? 0;
     }
 
+    /**
+     * Determine if the schedule can still be clocked in to
+     *
+     * @return bool
+     */
+    public function canBeClockedIn()
+    {
+        if ($this->services->count() || $this->fixed_rates) {
+            // Only allow service breakout and fixed rate schedules to be clocked in to once
+            return $this->shifts()->count() === 0;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the schedule has any services marked as 
+     * overtime or holiday pay.
+     *
+     * @return boolean
+     */
+    public function hasOvertime()
+    {
+        if ($this->services->count()) {
+            foreach ($this->services as $service) {
+                if (in_array($service->hours_type, ['overtime', 'holiday'])) {
+                    return true;
+                }
+            }
+        } else {
+            return in_array($this->hours_type, ['overtime', 'holiday']);
+        }
+
+        return false;
+    }
+
+    ///////////////////////////////////////////
+    /// Static Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Get the caregiver information for the schedules surrounding
+     * the given start and end times for the specified client.
+     *
+     * @param \App\Client $client
+     * @param \Carbon\Carbon $startTime
+     * @param \Carbon\Carbon $endTime
+     * @param ?int $windowSize
+     * @return array
+     */
+    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, ?int $windowSize = 4) : array
+    {
+        $beforeWindow = [
+            $startTime->copy()->subHours($windowSize),
+            $startTime->subMinute()
+        ];
+
+        $afterWindow = [
+            $endTime->copy()->addMinute(),
+            $endTime->copy()->addHours($windowSize)
+        ];
+
+        return [
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $beforeWindow)
+                ->get()
+                ->unique('caregiver_id'),
+            $client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $afterWindow)
+                ->get()
+                ->unique('caregiver_id')
+        ];
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -555,6 +649,22 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         $from = Carbon::parse($fromDate, $timezone)->subHour();
 
         $query->where('starts_at', '>=', $from);
+    }
+
+    /**
+     * Only include shifts that can still be clocked in to.
+     *
+     * @see self::canBeClockedIn()   This should be the same logic as canBeClockedIn()
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     */
+    public function scopeCanBeClockedIn(Builder $builder)
+    {
+        // Only allow service breakout and fixed rate shifts to be clocked in to once
+        $builder->where(function($q) {
+            $q->where('fixed_rate', false)
+                ->orWhereDoesntHave('services')
+                ->orWhereDoesntHave('shifts');
+        });
     }
 
 }

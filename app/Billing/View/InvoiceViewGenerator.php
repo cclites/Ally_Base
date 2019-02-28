@@ -5,6 +5,7 @@ use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
+use App\Businesses\NullContact;
 use App\Contracts\ViewStrategy;
 use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
@@ -31,15 +32,15 @@ class InvoiceViewGenerator
     function generateClientInvoice(ClientInvoice $clientInvoice, ?string $viewName = null)
     {
         $client = $clientInvoice->client;
-        $clientPayer = $clientInvoice->getClientPayer();
+//        $clientPayer = $clientInvoice->getClientPayer();
         $business = $client->business;
         $items = $clientInvoice->items;
         $payments = $clientInvoice->payments;
 
         return $this->generate(
             $viewName ?? 'invoices.client_invoice',
-            $clientPayer->isPrivatePay() ? $business : $client,
-            $clientPayer->isPrivatePay() ? $client : $clientPayer->payer,
+            $business,
+            $client,
             $clientInvoice,
             $items,
             $payments
@@ -54,7 +55,7 @@ class InvoiceViewGenerator
 
         return $this->generate(
             $viewName ?? 'invoices.caregiver_invoice',
-            $caregiver,
+            new NullContact(),
             $caregiver,
             $caregiverInvoice,
             $items,
@@ -70,7 +71,7 @@ class InvoiceViewGenerator
 
         return $this->generate(
             $viewName ?? 'invoices.business_invoice',
-            $business,
+            new NullContact(),
             $business,
             $businessInvoice,
             $items,

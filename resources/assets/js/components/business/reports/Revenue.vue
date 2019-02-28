@@ -38,48 +38,100 @@
                         </b-col>
                         <b-col lg="3" class="form-checkbox">
                             <b-form-group>
-                                <b-form-checkbox-group :checked="true" disabled>
                                     <b-form-checkbox
-                                        :checked="true"
-                                        disabled
-                                    >Include CG Wages as COGS</b-form-checkbox>
-                                </b-form-checkbox-group>
+                                        v-model="includeCaregiverWages"
+                                    >Include CG Wages as COGS
+                                    </b-form-checkbox>
                             </b-form-group>
-                            <b-form-group>
+                            <b-form-group v-if="includeCaregiverWages">
                                 <b-form-checkbox-group>
-                                    <b-form-checkbox v-model="form.compare_to_prior">Compare to previous period</b-form-checkbox>
+                                    <b-form-checkbox v-model="form.compare_to_prior">Compare to previous period
+                                    </b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
                         <b-col lg="2">
-                            <b-form-group label="&nbsp;">
-                                <b-button variant="info" @click="fetchData()">Generate</b-button>
+                            <b-button variant="info" @click="fetchData()" class="mb-2">Generate</b-button>
+                            <b-button v-if="dataIsReady && ! loading" @click="print">Print</b-button>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="3">
+                            <b-form-group label="Client">
+                                <b-form-select v-model="form.client_id">
+                                    <option value="">All</option>
+                                    <option v-for="client in clientOptions" :value="client.id">{{ client.name }}
+                                    </option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Caregiver">
+                                <b-form-select v-model="form.caregiver_id">
+                                    <option value="">All</option>
+                                    <option v-for="caregiver in caregiverOptions" :value="caregiver.id">{{
+                                        caregiver.name }}
+                                    </option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Client Type">
+                                <b-form-select v-model="form.client_type">
+                                    <option value="">All</option>
+                                    <option v-for="type in clientTypes" :value="type.id">{{ type.name }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Service Code">
+                                <b-form-select v-model="form.service_code">
+                                    <option value="">All</option>
+                                    <option v-for="service in serviceCodes" :value="service.id">{{ service.code }}
+                                    </option>
+                                </b-form-select>
                             </b-form-group>
                         </b-col>
                     </b-row>
 
                     <loading-card v-show="loading"></loading-card>
-                    <div v-if="dataIsReady && ! loading">
+                    <div v-if="dataIsReady && ! loading" id="revenue_report">
                         <b-row class="space-above">
-                            <b-col lg="6" class="text-section">
-                                <div class="text-container">
-                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</span>
+                            <b-col lg="6">
+                                <div class="d-flex align-items-end justify-content-between">
                                     <span>Total revenue</span>
-                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.current}}</span>
+
+                                    <span class="display-5 text-info mr-2"
+                                          :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</span>
+                                </div>
+                                <div class="d-flex align-items-end justify-content-between" v-if="includeCaregiverWages">
                                     <span>Total CG Wages as contractors</span>
-                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
+
+                                    <span class="display-6 text-danger mr-2"
+                                          :style="`color: ${wagesColor}`">{{this.wages.total.current}}</span>
+                                </div>
+                                <div class="d-flex align-items-end justify-content-between">
                                     <span>Total profit</span>
+
+                                    <span class="display-6 text-success mr-2"
+                                          :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
                                 </div>
                                 <hr/>
-                                <div v-if="priorTableData.length > 0" class="text-container">
+                                <div v-if="priorTableData.length > 0">
                                     <h1>Prior Period</h1>
                                     <div class="space-above"></div>
-                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</span>
-                                    <span>Total revenue</span>
-                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</span>
-                                    <span>Total CG Wages as contractors</span>
-                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
-                                    <span>Total profit</span>
+                                    <div class="d-flex align-items-end justify-content-between">
+                                        <span>Total revenue</span>
+                                        <span class="display-5 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</span>
+                                    </div>
+                                    <div class="d-flex align-items-end justify-content-between" v-if="includeCaregiverWages">
+                                        <span>Total CG Wages as contractors</span>
+                                        <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</span>
+                                    </div>
+                                    <div class="d-flex align-items-end justify-content-between">
+                                        <span>Total profit</span>
+                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
+                                    </div>
                                     <hr/>
                                     <h2>Comparison to prior period</h2>
                                     <b-row class="space-above text-container">
@@ -94,7 +146,7 @@
                                 </div>
                             </b-col>
                             <b-col lg="6">
-                                <line-chart :chart-data="chartData" :options="{}"></line-chart>
+                                <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
                             </b-col>
                         </b-row>
                         <hr/>
@@ -167,217 +219,271 @@
 </template>
 
 <script>
-import LineChart from './analytics/LineChart';
-import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+    import LineChart from './analytics/LineChart';
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
-export default {
-    components: {
-        BusinessLocationFormGroup,
-        LineChart,
-    },
-    data() {
-        return {
-            loading: false,
-            dataIsReady: false,
-            form: new Form({
-                start_date: '09/01/2018',
-                end_date: '11/01/2018',
-                compare_to_prior: 0,
-                wages_as_cogs: 1,
-                business_id: "",
-            }),
-            data: {
-                current: {},
-                prior: {},
+    export default {
+        props: {
+            clientOptions: {
+                type: Array,
+                required: true
             },
-            revenue: {
-                growth: null,
-                total: {
-                    current: null,
-                    prior: null,
-                },
+            caregiverOptions: {
+                type: Array,
+                required: true
             },
-            wages: {
-                growth: null,
-                total: {
-                    current: null,
-                    prior: null,
-                },
+            clientTypes: {
+                type: Array,
+                required: true
             },
-            profit: {
-                growth: null,
-                total: {
-                    current: null,
-                    prior: null,
-                },
-            },
-            tableFields: [
-                {key: 'date', label: 'Date'},
-                'revenue',
-                {key: 'wages', label: 'CG wages'},
-                'profit',
-            ],
-            profitColor: '#00cde3',
-            revenueColor: '#795bcb',
-            wagesColor: '#f07730',
-        };
-    },
-    computed: {
-        chartData() {
-            let date = Object.keys(this.data.current);
-            const currentProfit = [];
-            const currentSales = [];
+            serviceCodes: {
+                type: Array,
+                required: true
+            }
+        },
 
-            date.sort((a, b) => new Date(a) - new Date(b)).forEach(date => {
-                const dayStats = this.data.current[date];
-                currentProfit.push(dayStats.profit)
-                currentSales.push(dayStats.revenue)
-            });
+        components: {
+            BusinessLocationFormGroup,
+            LineChart,
+        },
 
+        data () {
             return {
-                labels: date,
-                datasets: [
-                    {
-                    label: 'Profit',
-                    borderColor: this.profitColor,
-                    backgroundColor: this.profitColor,
-                    data: currentProfit
+                loading: false,
+                dataIsReady: false,
+                form: new Form ({
+                    start_date: '09/01/2018',
+                    end_date: '11/01/2018',
+                    compare_to_prior: 0,
+                    wages_as_cogs: 1,
+                    business_id: '',
+                    client_id: '',
+                    caregiver_id: '',
+                    client_type: '',
+                    service_code: ''
+                }),
+                data: {
+                    current: {},
+                    prior: {},
+                },
+                revenue: {
+                    growth: null,
+                    total: {
+                        current: null,
+                        prior: null,
                     },
-                    {
-                    label: 'Revenue',
-                    borderColor: this.revenueColor,
-                    backgroundColor: this.revenueColor,
-                    data: currentSales,
+                },
+                wages: {
+                    growth: null,
+                    total: {
+                        current: null,
+                        prior: null,
                     },
+                },
+                profit: {
+                    growth: null,
+                    total: {
+                        current: null,
+                        prior: null,
+                    },
+                },
+                tableFields: [
+                    {key: 'date', label: 'Date'},
+                    'revenue',
+                    {key: 'wages', label: 'CG wages'},
+                    'profit',
                 ],
+                profitColor: '#00cde3',
+                revenueColor: '#795bcb',
+                wagesColor: '#f07730',
+                includeCaregiverWages: true,
+                chartOptions: {
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'week'
+                            }
+                        }]
+                    }
+                }
             };
         },
-        currentTableData() {
-            const inArray = [];
-            Object.keys(this.data.current).forEach(date => {
-                const obj = {
-                    ...this.data.current[date],
-                    date,
-                };
 
-                inArray.push(obj);
+        computed: {
+            chartData () {
+                let date = Object.keys (this.data.current);
+                const currentProfit = [];
+                const currentSales = [];
+
+                date.sort ((a, b) => new Date (a) - new Date (b)).forEach (date => {
+                    const dayStats = this.data.current[date];
+                    currentProfit.push (dayStats.profit)
+                    currentSales.push (dayStats.revenue)
                 });
-            inArray.sort((a, b) => new Date(a) - new Date(b));
 
-            return inArray;
-        },
-        priorTableData() {
-            const inArray = [];
-            Object.keys(this.data.prior).forEach(date => {
-                const obj = {
-                    ...this.data.prior[date],
-                    date,
+                return {
+                    labels: date,
+                    datasets: [
+                        {
+                            label: 'Profit',
+                            borderColor: this.profitColor,
+                            backgroundColor: this.profitColor,
+                            data: currentProfit
+                        },
+                        {
+                            label: 'Revenue',
+                            borderColor: this.revenueColor,
+                            backgroundColor: this.revenueColor,
+                            data: currentSales,
+                        },
+                    ],
                 };
+            },
 
-                inArray.push(obj);
+            currentTableData () {
+                const inArray = [];
+                Object.keys (this.data.current).forEach (date => {
+                    const obj = {
+                        ...this.data.current[date],
+                        date,
+                    };
+
+                    inArray.push (obj);
                 });
-            inArray.sort((a, b) => new Date(a) - new Date(b));
+                inArray.sort ((a, b) => new Date (a) - new Date (b));
 
-            return inArray;
-        },
-        growthStats() {
-            return [
-                { label: 'Sales Growth', value: this.revenue.growth, key: 'revenue' },
-                { label: 'CG Wages Growth', value: this.wages.growth, key: 'wages' },
-                { label: 'Profit Growth', value: this.profit.growth, key : 'profit' },
-            ];
-        }
-    },
-    methods: {
-        progressVariant(value) {
-            return (value > 0) ? 'success' : 'danger';
-        },
-        fetchData() {
-            const {start_date, end_date, compare_to_prior, business_id} = this.form;
-            const compare = compare_to_prior[0] ? 1 : 0;
-            this.loading = true;
+                return inArray;
+            },
 
-            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}&compare_to_prior=${compare}&businesses[]=${business_id}`)
-                .then(({data}) => {
-                    this.data = data;
-                    this.loading = false;
-                    this.dataIsReady = true;
+            priorTableData () {
+                const inArray = [];
+                Object.keys (this.data.prior).forEach (date => {
+                    const obj = {
+                        ...this.data.prior[date],
+                        date,
+                    };
 
-                    ['revenue', 'wages', 'profit'].forEach(prop => {
-                        this[prop].total.current = this.calculateTotalOf(prop);
+                    inArray.push (obj);
+                });
+                inArray.sort ((a, b) => new Date (a) - new Date (b));
 
-                        if(compare) {
-                            this[prop].total.prior = this.calculateTotalOf(prop, 'prior');
-                            this[prop].growth = this.calculateGrowth(prop);
-                        }
-                    });
-                })
-                .catch((err) => {
-                    console.error(err);
-                    this.loading = false;
-                })
-        },
-        calculateTotalOf(metric, period = 'current') {
-            const {dataIsReady, data} = this;
+                return inArray;
+            },
 
-            if(dataIsReady) {
-                const total = Object.keys(data[period]).map(date => data[period][date][metric]).reduce((total, value) => total + value, 0);
-                return this.formatPrice(total);
+            growthStats () {
+                return [
+                    {label: 'Sales Growth', value: this.revenue.growth, key: 'revenue'},
+                    {label: 'CG Wages Growth', value: this.wages.growth, key: 'wages'},
+                    {label: 'Profit Growth', value: this.profit.growth, key: 'profit'},
+                ];
             }
-
-            return '$0.00';
         },
-        calculateGrowth(metric) {
-            const fromStringToNumber = (string) => Number(string.replace('$', '').replace(',', ''));
-            const currentTotal = fromStringToNumber(this.calculateTotalOf(metric));
-            const priorTotal = fromStringToNumber(this.calculateTotalOf(metric, 'prior'));
+        methods: {
 
-            return (((currentTotal - priorTotal) / priorTotal)  * 100).toFixed(0);
-        },
-        formatPrice(value) {
-            return new Intl.NumberFormat('us-US', {style: 'currency', currency: 'USD'}).format(value);
+            progressVariant (value) {
+                return (value > 0) ? 'success' : 'danger';
+            },
+
+            fetchData () {
+                const {start_date, end_date, compare_to_prior, business_id} = this.form;
+                const compare = compare_to_prior[0] ? 1 : 0;
+                this.loading = true;
+
+                this.form.post (`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}&compare_to_prior=${compare}&businesses[]=${business_id}`)
+                    .then (({data}) => {
+                        this.data = data;
+                        this.loading = false;
+                        this.dataIsReady = true;
+
+                        ['revenue', 'wages', 'profit'].forEach (prop => {
+                            this[prop].total.current = this.calculateTotalOf (prop);
+
+                            if (compare) {
+                                this[prop].total.prior = this.calculateTotalOf (prop, 'prior');
+                                this[prop].growth = this.calculateGrowth (prop);
+                            }
+                        });
+                    })
+                    .catch ((err) => {
+                        console.error (err);
+                        this.loading = false;
+                    })
+            },
+
+            calculateTotalOf (metric, period = 'current') {
+                const {dataIsReady, data} = this;
+
+                if (dataIsReady) {
+                    const total = Object.keys (data[period]).map (date => data[period][date][metric]).reduce ((total, value) => total + value, 0);
+                    return this.formatPrice (total);
+                }
+
+                return '$0.00';
+            },
+
+            calculateGrowth (metric) {
+                const fromStringToNumber = (string) => Number (string.replace ('$', '').replace (',', ''));
+                const currentTotal = fromStringToNumber (this.calculateTotalOf (metric));
+                const priorTotal = fromStringToNumber (this.calculateTotalOf (metric, 'prior'));
+
+                return (((currentTotal - priorTotal) / priorTotal) * 100).toFixed (0);
+            },
+
+            formatPrice (value) {
+                return new Intl.NumberFormat ('us-US', {style: 'currency', currency: 'USD'}).format (value);
+            },
+
+            print () {
+                $ ('#revenue_report').print ()
+            }
         }
     }
-}
 </script>
 
 <style scoped>
-.space-above {
-    margin-top: 2.5rem;
-}
-.form-checkbox {
-    align-self: flex-end;
-}
-.btn-center {
-    display: block;
-    margin: 0 auto;
-}
-.text-section {
-    padding: 30px 60px;
-}
-.text-container p {    
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-}
-.hidden {
-    opacity: 0;
-}
-
-@media only screen and (min-width: 2000px) {
-    .text-section hr {
-        margin: 3em 0;
-    }
-
-    .text-container  p {
-        margin-bottom: 3.5rem;
-        font-size: 2.3rem;
-    }
     .space-above {
-        margin-top: 6.5rem;
+        margin-top: 2.5rem;
     }
 
-    .text-container h1, .text-container h2 {
-        font-size: 4rem;
+    .form-checkbox {
+        align-self: flex-end;
     }
-}
+
+    .btn-center {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .text-section {
+        padding: 30px 60px;
+    }
+
+    .text-container p {
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .hidden {
+        opacity: 0;
+    }
+
+    @media only screen and (min-width: 2000px) {
+        .text-section hr {
+            margin: 3em 0;
+        }
+
+        .text-container p {
+            margin-bottom: 3.5rem;
+            font-size: 2.3rem;
+        }
+
+        .space-above {
+            margin-top: 6.5rem;
+        }
+
+        .text-container h1, .text-container h2 {
+            font-size: 4rem;
+        }
+    }
 </style>

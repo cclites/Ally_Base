@@ -5,6 +5,9 @@
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
             <b-col lg="3">
+                <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>
+            </b-col>
+            <b-col lg="3">
                 <b-form-select v-model="statusFilter">
                     <option value="">All Caregivers</option>
                     <option value="active">Active Caregivers</option>
@@ -14,7 +17,7 @@
                     </option>
                 </b-form-select>
             </b-col>
-            <b-col lg="6" class="text-right">
+            <b-col lg="3" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
@@ -38,6 +41,11 @@
                             <i class="fa fa-edit"></i>
                         </b-btn>
                     </template>
+                    <template slot="location" scope="data">
+                        <div v-for="(business, index) in getBusinessNames(data.item)" :key="index">
+                            {{ business }}
+                        </div>
+                    </template>
                 </b-table>
             </div>
 
@@ -55,10 +63,12 @@
 </template>
 
 <script>
+    import BusinessLocationSelect from "./business/BusinessLocationSelect";
     import FormatsListData from "../mixins/FormatsListData";
 
     export default {
         mixins: [FormatsListData],
+        components: {BusinessLocationSelect},
 
         props: {},
 
@@ -111,7 +121,7 @@
                         key: 'location',
                         label: 'Location',
                         sortable: true,
-                        class: 'location d-none'
+                        // class: 'location d-none'
                     },
                     {
                         key: 'actions',
@@ -119,8 +129,9 @@
                     }
                 ],
                 loading: false,
+                businessFilter: '',
                 statuses: {caregiver: [], client: []},
-                statusFilter: '',
+                statusFilter: 'active',
             }
         },
 
@@ -148,7 +159,7 @@
                     }
                 }
 
-                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}`;
+                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&location=${this.businessFilter}`;
             },
         },
 
@@ -194,6 +205,18 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            },
+            getBusinessNames(caregiver) {
+                if (! caregiver || ! caregiver.clients ) {
+                    return 'None';
+                }
+
+                let businesses = caregiver.clients.map(x => x.business);
+                businesses = businesses.filter((item, index) => {
+                    return businesses.findIndex(x => x.id == item.id) === index;
+                })
+
+                return businesses.map(x => x.name);
             },
 
             async fetchStatusAliases() {

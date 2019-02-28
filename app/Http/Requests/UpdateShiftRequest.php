@@ -5,8 +5,11 @@ use App\Billing\Payer;
 use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
+use App\Rules\ValidEffectivePayer;
+use App\Data\ScheduledRates;
 use App\Shift;
-use App\Shifts\Data\ClockOutData;
+use App\Shifts\Data\CaregiverClockoutData;
+use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -34,16 +37,22 @@ class UpdateShiftRequest extends BusinessClientRequest
             'caregiver_rate' => 'nullable|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
             'hours_type' => 'required|in:default,overtime,holiday',
             'service_id' => 'nullable|exists:services,id',
-            'payer_id' => 'nullable|exists:payers,id',
+            'payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('checked_in_time')))
+            ],
             'issues.id' => 'nullable|numeric',
             'issues.caregiver_injury' => 'boolean',
             'issues.client_injury' => 'boolean',
             'issues.comments' => 'nullable',
             'activities' => 'array|nullable',
             'services' => 'array|required_without:service_id',
-            'services.*.id' => 'nullable|exists:schedule_services,id',
+            'services.*.id' => 'nullable|exists:shift_services,id',
             'services.*.service_id' => 'required_with:services|exists:services,id',
-            'services.*.payer_id' => 'nullable|exists:payers,id',
+            'services.*.payer_id' => [
+                'nullable',
+                new ValidEffectivePayer($this->client, Carbon::parse($this->input('checked_in_time')))
+            ],
             'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
@@ -100,23 +109,36 @@ class UpdateShiftRequest extends BusinessClientRequest
 
     public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): ShiftFactory
     {
-        $clockOutData = new ClockOutData(
+        $checkedInTime = Carbon::parse($this->input('checked_in_time'), $this->getClient()->getTimezone())
+            ->setTimezone('UTC')
+            ->toDateTimeString();
+        $checkedOutTime = Carbon::parse($this->input('checked_out_time'), $this->getClient()->getTimezone())
+            ->setTimezone('UTC')
+            ->toDateTimeString();
+
+        $clockIn = new ClockData($clockInMethod, $checkedInTime);
+        $clockOut = new ClockData($clockOutMethod ?? $clockInMethod, $checkedOutTime);
+        $rates = new ScheduledRates(
+            $this->input('client_rate'),
+            $this->input('caregiver_rate'),
+            $this->input('fixed_rates') ?? false,
+            $this->input('hours_type') ?? 'default'
+        );
+
+        $clockOutData = new CaregiverClockoutData(
+            $clockOut,
             $this->input('mileage') ?? 0.0,
             $this->input('other_expenses') ?? 0.0,
             $this->input('other_expenses_desc'),
             $this->input('caregiver_comments')
         );
+
         $shiftData = ShiftFactory::withoutSchedule(
             $this->getClient(),
             Caregiver::findOrFail($this->input('caregiver_id')),
-            $this->input('hours_type'),
-            $this->input('fixed_rates'),
-            $this->input('client_rate'),
-            $this->input('caregiver_rate'),
-            $clockInMethod,
-            Carbon::parse($this->input('checked_in_time')),
-            $clockOutMethod ?? $clockInMethod,
-            Carbon::parse($this->input('checked_out_time')),
+            $clockIn,
+            $clockOut,
+            $rates,
             $status,
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
             $this->input('payer') ? Payer::find($this->input('payer')) : null

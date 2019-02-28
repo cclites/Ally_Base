@@ -49,4 +49,13 @@ class BusinessInvoiceQuery extends BaseQuery
 
         return $this;
     }
+
+    function notOnHold(): self
+    {
+        $this->whereDoesntHave('business', function($q) {
+            $q->has('paymentHold');
+        });
+
+        return $this;
+    }
 }

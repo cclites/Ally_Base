@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-card title="Confirm Clock Out Details" :class="{ translucent: !!loadingText }">
+        <b-card :title="`Confirm Clock Out for ${shift.client.name}`" :class="{ translucent: !!loadingText }">
             <form @submit.prevent="clockOut()" @keydown="form.clearError($event.target.name)">
                 <b-row>
                     <b-col lg="12">
@@ -264,7 +264,7 @@
             async submitForm() {
                 this.showLoading('Clocking out..');
                 try {
-                    await this.form.post('/clock-out');
+                    await this.form.post(`/clock-out/${this.shift.id}`);
                     window.location = '/schedule?clocked_out=1'
                 }
                 catch (err) {}

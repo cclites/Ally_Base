@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,7 +30,9 @@ class ScheduleController extends BaseController
             $caregiver->businesses->first()->timezone ?? 'America/New_York'
         );
 
-        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
+        $schedules = $aggregator->getSchedulesBetween($start, $end);
+
+        $events = new ScheduleEventsResponse($schedules);
         return $events;
     }
 }

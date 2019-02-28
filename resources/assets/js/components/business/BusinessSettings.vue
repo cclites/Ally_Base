@@ -73,6 +73,17 @@
                                 <input-help :form="businessSettings" field="shift_rounding_method"
                                             text="Select the methodology used to round the number of hours worked on each shift."></input-help>
                             </b-form-group>
+
+                            <b-form-group label="Enable Client Onboarding" label-for="enable_client_onboarding">
+                                <b-form-select id="enable_client_onboarding"
+                                               v-model="businessSettings.enable_client_onboarding"
+                                >
+                                    <option :value="0">No</option>
+                                    <option :value="1">Yes</option>
+                                </b-form-select>
+                                <input-help :form="businessSettings" field="enable_client_onboarding"
+                                            text="Enable the client onboarding button on the client details page."></input-help>
+                            </b-form-group>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Scheduling" label-for="scheduling" label-class="required">
@@ -333,8 +344,7 @@
                 <b-tab title="Shift Confirmations" href="#shift-confirmations">
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
-                                          label-for="allow_client_confirmations" label-class="required">
+                            <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations" label-class="required">
                                  <b-form-select id="allow_client_confirmations"
                                                :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.allow_client_confirmations"
@@ -478,6 +488,9 @@
                 <b-tab title="Status Aliases" href="#status-aliases">
                     <business-status-alias-manager :business="this.business"></business-status-alias-manager>
                 </b-tab>
+                <b-tab title="Overtime" href="#overtime">
+                    <business-overtime-settings :business="this.business"></business-overtime-settings>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -529,9 +542,9 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
                 }
             },
         },
@@ -539,6 +552,9 @@
         mounted() {
             let index = this.tabs.findIndex(tab => tab === window.location.hash);
             if (index >= 0) {
+                if (index > 3 && this.business.type != 'agency') {
+                    index++;
+                }
                 this.tabIndex = index;
             }
         },
@@ -592,6 +608,7 @@
                     auto_append_hours: business.auto_append_hours,
                     auto_confirm_unmodified_shifts: business.auto_confirm_unmodified_shifts,
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
+                    enable_client_onboarding: business.enable_client_onboarding
                 });
             },
 

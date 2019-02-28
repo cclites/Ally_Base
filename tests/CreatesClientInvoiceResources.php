@@ -40,11 +40,14 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    private function createSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null): ClientPayer
     {
-        $payer = factory(Payer::class)->create();
+        if ($payerId === null) {
+            $payer = factory(Payer::class)->create();
+            $payerId = $payer->id;
+        }
         $clientPayer = new ClientPayer([
-            'payer_id' => $payer->id,
+            'payer_id' => $payerId,
             'effective_start' => $effective_start,
             'effective_end' => $effective_end,
             'payment_allocation' => ClientPayer::ALLOCATION_SPLIT,
@@ -55,11 +58,14 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null): ClientPayer
     {
-        $payer = factory(Payer::class)->create();
+        if ($payerId === null) {
+            $payer = factory(Payer::class)->create();
+            $payerId = $payer->id;
+        }
         $clientPayer = new ClientPayer([
-            'payer_id' => $payer->id,
+            'payer_id' => $payerId,
             'effective_start' => $effective_start,
             'effective_end' => $effective_end,
             'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
@@ -69,11 +75,24 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createService(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createPrivateBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        return $this->createBalancePayer($effective_start, $effective_end, Payer::PRIVATE_PAY_ID);
+    }
+
+
+    private function createPrivateSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        return $this->createSplitPayer($splitPercentage, $effective_start, $effective_end, Payer::PRIVATE_PAY_ID);
+    }
+
+
+
+    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => null,
+            'payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',
             'status' => Shift::WAITING_FOR_INVOICE,
@@ -81,7 +100,7 @@ trait CreatesClientInvoiceResources
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'duration' => 1,
             'client_rate' => $amount,
             'caregiver_rate' => round($amount * .75, 2),
@@ -91,11 +110,11 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
-    private function createServiceHours(float $rate, float $duration, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createServiceHours(float $rate, float $duration, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => null,
+            'payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',
             'status' => Shift::WAITING_FOR_INVOICE,
@@ -103,7 +122,7 @@ trait CreatesClientInvoiceResources
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'duration' => $duration,
             'client_rate' => $rate,
             'caregiver_rate' => round($rate * .75, 2),
@@ -113,11 +132,11 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
-    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'service_id' => null,
             'caregiver_rate' => 0,
             'client_rate' => 0,
@@ -129,11 +148,11 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
-    private function createShiftWithMileage(float $rate, float $miles, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    private function createShiftWithMileage(float $rate, float $miles, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'service_id' => null,
             'caregiver_rate' => 0,
             'client_rate' => 0,
@@ -146,11 +165,11 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
-    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null)
+    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $payerId = null)
     {
         $adjustment = factory(ShiftAdjustment::class)->create([
             'client_id' => $this->client->id,
-            'client_payer_id' => $clientPayerId,
+            'payer_id' => $payerId,
             'client_rate' => -$amount,
             'units' => 1,
             'status' => 'WAITING_FOR_INVOICE',
