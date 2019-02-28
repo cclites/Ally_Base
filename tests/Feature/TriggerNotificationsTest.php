@@ -86,12 +86,7 @@ class TriggerNotificationsTest extends TestCase
     public function clockInToShift(Schedule $schedule) : ?Shift
     {
         $clockIn = new ClockIn($this->caregiver);
-        $clockIn->setManual(true);
-        try {
-            return $clockIn->clockIn($schedule);
-        } catch (\Exception $ex) {
-            return null;
-        }
+        return $clockIn->clockIn($schedule);
     }
 
     /** @test */
@@ -684,7 +679,7 @@ class TriggerNotificationsTest extends TestCase
         $timesheet = [
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
-            'entries' => [factory('App\TimesheetEntry')->raw(['activities' => $this->activities])],
+            'entries' => [factory('App\TimesheetEntry')->raw(['activities' => $this->activities, 'client_rate' => null, 'caregiver_rate' => null])],
         ];
 
         $this->postJson(route('timesheets.store'), $timesheet)
