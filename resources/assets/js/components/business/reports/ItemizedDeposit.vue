@@ -1,5 +1,5 @@
 <template>
-    <b-card :title="`Itemized View of Deposit #${deposit.id}`">
+    <b-card :title="title">
         <b-row>
             <b-col lg="8">
                 <b-form inline>
@@ -74,7 +74,15 @@
                 return this.invoices.reduce((items, invoice) => {
                     return [...items, ...invoice.items.filter(filterFn)];
                 }, [])
-            }
+            },
+
+            title() {
+                let title = `Itemized View of Deposit #${this.deposit.id}. Deposit Amount: $${this.numberFormat(this.deposit.amount)}`;
+                if (this.deposit.amount < 0) {
+                    title += " (Withdrawal)";
+                }
+                return title;
+            },
         },
 
         data() {

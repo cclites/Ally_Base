@@ -1,5 +1,5 @@
 <template>
-    <b-card :title="`Itemized View of Payment #${payment.id}`">
+    <b-card :title="title">
         <b-row>
             <b-col lg="8">
                 <b-form inline>
@@ -74,7 +74,15 @@
                 return this.invoices.reduce((items, invoice) => {
                     return [...items, ...invoice.items.filter(filterFn)];
                 }, [])
-            }
+            },
+
+            title() {
+                let title = `Itemized View of Payment #${this.payment.id}. Payment Amount: $${this.numberFormat(this.payment.amount)}`;
+                if (this.payment.amount < 0) {
+                    title += " (Refund)";
+                }
+                return title;
+            },
         },
 
         data() {
