@@ -2,7 +2,7 @@
     <div>
         <loading-card v-show="loading" text="Loading Data"></loading-card>
         <div v-show="!loading">
-            <div v-if="isAdmin">
+            <div v-if="isOfficeUserOrAdmin">
                 <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-danger">
                     <p><i class="fa fa-exchange mr-1"></i> The caregiver clocked in but the duration does not match what was scheduled.</p>
                     <p>Caregiver clocked in duration: {{ numberFormat(duration) }} hours
@@ -131,7 +131,7 @@
                     </b-col>
                 </b-row>
 
-                <div v-if="isAdmin">
+                <div v-if="isOfficeUserOrAdmin">
                     <b-row class="mt-2">
                         <b-col lg="12">
                             <strong>Shift Billing Type</strong>
@@ -546,7 +546,7 @@
             if (this.shift) {
                 this.changedShift(this.shift);
             }
-            if (this.isAdmin) {
+            if (this.isOfficeUserOrAdmin) {
                 this.loadClientCaregiverData();
                 this.fetchServices(); // from ShiftServices mixin
             }
@@ -562,9 +562,6 @@
             },
             isClient() {
                 return this.authRole === 'client';
-            },
-            isAdmin() {
-                return ['admin', 'office_user'].includes(this.authRole);
             },
             leftHalfActivities() {
                 return this.getHalfOfActivities(true);
@@ -697,7 +694,7 @@
 
                     if (shift) {
                         // Initialize form values from services
-                        if (this.isAdmin) {
+                        if (this.isOfficeUserOrAdmin) {
                             this.initServicesFromObject(shift);
                         }
 
