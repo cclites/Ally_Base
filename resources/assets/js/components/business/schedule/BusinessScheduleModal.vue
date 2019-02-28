@@ -171,7 +171,7 @@
                                             </td>
                                             <td v-else>
                                                 <b-form-input
-                                                        name="caregiver_rate"
+                                                        name="provider_fee"
                                                         type="number"
                                                         step="0.01"
                                                         v-model="form.provider_fee"

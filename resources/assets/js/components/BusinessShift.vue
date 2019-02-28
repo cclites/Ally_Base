@@ -194,9 +194,18 @@
                                                     class="money-input"
                                             />
                                         </td>
-                                        <td class="text-only">
-                                            <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
-                                            <span v-else>{{ numberFormat(form.provider_fee) }}</span>
+                                        <td class="text-only"  v-if="defaultRates">
+                                            {{ numberFormat(form.default_rates.provider_fee) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="provider_fee"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="form.provider_fee"
+                                                    @change="updateClientRates(form)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
@@ -258,9 +267,18 @@
                                                     class="money-input"
                                             />
                                         </td>
-                                        <td class="text-only">
-                                            <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
-                                            <span v-else>{{ numberFormat(service.provider_fee) }}</span>
+                                        <td class="text-only"  v-if="defaultRates">
+                                            {{ numberFormat(service.default_rates.provider_fee) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="provider_fee"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="service.provider_fee"
+                                                    @change="updateClientRates(service)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
