@@ -2,7 +2,7 @@
     <div>
         <loading-card v-show="loading" text="Loading Data"></loading-card>
         <div v-show="!loading">
-            <div v-if="isOfficeUserOrAdmin">
+            <div v-if="isAdmin">
                 <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
                     <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
                 </div>
@@ -124,7 +124,7 @@
                     </b-col>
                 </b-row>
 
-                <div v-if="isOfficeUserOrAdmin">
+                <div v-if="isAdmin">
                     <b-row class="mt-2">
                         <b-col lg="12">
                             <strong>Shift Billing Type</strong>
@@ -535,7 +535,7 @@
             if (this.shift) {
                 this.changedShift(this.shift);
             }
-            if (this.isOfficeUserOrAdmin) {
+            if (this.isAdmin) {
                 this.loadClientCaregiverData();
                 this.fetchServices(); // from ShiftServices mixin
             }
@@ -683,7 +683,7 @@
 
                     if (shift) {
                         // Initialize form values from services
-                        if (this.isOfficeUserOrAdmin) {
+                        if (this.isAdmin) {
                             this.initServicesFromObject(shift);
                         }
 

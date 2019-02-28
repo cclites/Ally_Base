@@ -121,7 +121,7 @@
         </b-row>
         <b-row>
             <b-col sm="12">
-                <shift-evv-data-table v-if="isOfficeUserOrAdmin" :shift="shift"></shift-evv-data-table>
+                <shift-evv-data-table v-if="isAdmin" :shift="shift"></shift-evv-data-table>
             </b-col>
         </b-row>
     </div>
@@ -217,7 +217,7 @@
         },
 
         mounted() {
-            if (this.isOfficeUserOrAdmin) {
+            if (this.isAdmin) {
                 this.fetchServices();
             }
         },
