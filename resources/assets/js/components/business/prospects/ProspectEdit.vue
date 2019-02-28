@@ -28,11 +28,12 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Type" label-for="client_type">
+                    <b-form-group label="Client Type" label-for="client_type" label-class="required">
                         <b-form-select
                                 id="client_type"
                                 name="client_type"
                                 v-model="form.client_type"
+                                required
                         >
                             <option value="">--Select--</option>
                             <option value="private_pay">Private Pay</option>
