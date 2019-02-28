@@ -818,6 +818,28 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
+    public function office_users_should_be_notified_once_per_client_birthday()
+    {
+        Notification::fake();
+
+        $this->client->user->update(['date_of_birth' => Carbon::now()->subYears(20)->format('Y-m-d')]);
+        $otherUser = factory('App\Client')->create(['business_id' => $this->business->id]);
+        $otherUser->user->update(['date_of_birth' => Carbon::now()->subYears(20)->format('Y-m-d')]);
+
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\ClientBirthday::class,
+            2
+        );
+    }
+
+    /** @test */
     public function by_default_office_users_only_receive_system_notifications()
     {
         Notification::fake();
