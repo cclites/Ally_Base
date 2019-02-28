@@ -39,7 +39,7 @@ class DepositInvoice extends Resource
             'amount' => $this->resource->getAmount(),
             'amount_paid' => $this->resource->getAmountPaid(),
             'amount_due' => $this->resource->getAmountDue(),
-            'created_at' => $this->resource->created_at->toDateTimeString() ?? null,
+            'created_at' => optional($this->resource->created_at)->toDateTimeString(),
             'recipient' => $this->resource->getRecipient()->name(),
             'caregiver' => $this->whenLoaded('caregiver'),
             'business' => $this->whenLoaded('business'),
