@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Business;
 use App\Billing\Deposit;
 use App\Billing\Payment;
 use App\Billing\View\DepositViewGenerator;
+use App\Billing\View\Excel\ExcelDepositView;
+use App\Billing\View\Excel\ExcelPaymentView;
 use App\Billing\View\Html\HtmlDepositView;
 use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
@@ -20,6 +22,9 @@ class StatementController extends BaseController
         if (strtolower($view) === 'pdf') {
             $strategy = new PdfPaymentView('payment-' . $payment->id . '.pdf');
         }
+        if (strtolower($view) === 'xls') {
+            $strategy = new ExcelPaymentView('payment-items-' . $payment->id . '.xls');
+        }
 
         $viewGenerator = new PaymentViewGenerator($strategy);
         return $viewGenerator->generate($payment);
@@ -32,6 +37,9 @@ class StatementController extends BaseController
         $strategy = new HtmlDepositView();
         if (strtolower($view) === 'pdf') {
             $strategy = new PdfDepositView('deposit-' . $deposit->id . '.pdf');
+        }
+        if (strtolower($view) === 'xls') {
+            $strategy = new ExcelDepositView('deposit-items-' . $deposit->id . '.xls');
         }
 
         $viewGenerator = new DepositViewGenerator($strategy);
