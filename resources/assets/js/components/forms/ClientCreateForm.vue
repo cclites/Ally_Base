@@ -174,7 +174,7 @@
                     email: this.value.email || null,
                     no_email: !!this.value.no_email,
                     username: this.value.username || null,
-                    no_username: this.value.no_username == 0 ? false : true, 
+                    no_username: !!this.value.no_username,
                     date_of_birth: this.value.date_of_birth || null,
                     client_type: this.value.client_type || "",
                     ssn: this.value.ssn || null,
