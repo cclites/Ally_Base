@@ -193,7 +193,7 @@
 
         methods: {
             copyEmailToUsername() {
-                if (this.form.no_username) {
+                if (this.form.no_username === true) {
                     return;
                 }
                 if (this.form.email && !this.form.username) {
