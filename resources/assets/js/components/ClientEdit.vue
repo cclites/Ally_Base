@@ -418,14 +418,24 @@
                         </label>
                     </div>
 
-                    <b-button variant="info" @click="sendWelcomeEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingWelcomeEmail"
+                        @click.prevent="sendWelcomeEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingWelcomeEmail"></i>
                         Send Welcome Email
                     </b-button>
 
-                    <b-button variant="info" @click="sendTrainingEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingTrainingEmail"
+                        @click.prevent="sendTrainingEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingTrainingEmail"></i>
                         Send Training Email
                     </b-button>
-                    
+
 <!--                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">-->
 <!--                        Start Client Onboarding-->
 <!--                    </b-button>-->
@@ -572,6 +582,8 @@
                 localLastStatusDate: null,
                 onboardingWarning: false,
                 loading: false,
+                sendingTrainingEmail: false,
+                sendingWelcomeEmail: false,
             }
         },
 
@@ -600,12 +612,16 @@
                     return;
                 }
                 this.$refs.confirmWelcomeEmail.confirm(() => {
+                    this.sendingWelcomeEmail = true;
                     let form = new Form({});
                     form.post(`/business/clients/${this.client.id}/welcome-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingWelcomeEmail = false;
+                        });
                 });
             },
 
@@ -614,12 +630,16 @@
                     return;
                 }
                 this.$refs.confirmTrainingEmail.confirm(() => {
+                    this.sendingTrainingEmail = true;
                     let form = new Form({});
                     form.post(`/business/clients/${this.client.id}/training-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingTrainingEmail = true;
+                        });
                 });
             },
 
