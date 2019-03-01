@@ -425,9 +425,9 @@
                         Send Training Email
                     </b-button>
                     
-                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">
-                        Start Client Onboarding
-                    </b-button>
+<!--                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">-->
+<!--                        Start Client Onboarding-->
+<!--                    </b-button>-->
                 </b-col>
             </b-row>
             <b-row>
