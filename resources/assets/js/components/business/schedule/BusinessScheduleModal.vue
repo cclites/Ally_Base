@@ -300,7 +300,7 @@
                             <b-col lg="6">
                                 <label>
                                     <b-form-checkbox v-model="defaultRates">
-                                        Use Default Rates from Client Rates Tab
+                                        Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
                                 </label>
                             </b-col>
