@@ -72,7 +72,13 @@
                 };
 
                 return this.invoices.reduce((items, invoice) => {
-                    return [...items, ...invoice.items.filter(filterFn)];
+                    const invoiceItems = invoice.items.filter(filterFn).map(item => {
+                        item.invoice = invoice;
+                        item.invoice_name = invoice.name;
+                        item.client_name = invoice.client.nameLastFirst;
+                        return item;
+                    });
+                    return [...items, ...invoiceItems];
                 }, [])
             },
 
@@ -95,6 +101,15 @@
                     {
                         key: "date",
                         formatter: val => this.formatDateFromUTC(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "invoice_name",
+                        label: "Invoice #",
+                        sortable: true,
+                    },
+                    {
+                        key: "client_name",
                         sortable: true,
                     },
                     {

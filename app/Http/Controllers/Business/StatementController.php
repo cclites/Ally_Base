@@ -16,7 +16,7 @@ class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
     {
-        $invoices = $payment->invoices()->with('items', 'items.invoiceable')->get();
+        $invoices = $payment->invoices()->with('client', 'items', 'items.invoiceable')->get();
 
         return view_component(
             'itemized-payment',

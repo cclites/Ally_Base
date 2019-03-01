@@ -50,6 +50,8 @@ class ExcelPaymentView implements PaymentViewStrategy
             foreach($invoice->getItems() as $item) {
                 $items[] = [
                     'Date' => $item->date,
+                    'Invoice' => $invoice->getName(),
+                    'Client' => $invoice->client->nameLastFirst(),
                     'Group' => $item->group,
                     'Service Name' => $item->name,
                     'Units' => $item->units,
