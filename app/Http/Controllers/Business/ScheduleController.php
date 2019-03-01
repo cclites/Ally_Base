@@ -36,7 +36,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'carePlan'])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'carePlan'])
             ->ordered();
 
         // Filter by client or caregiver
