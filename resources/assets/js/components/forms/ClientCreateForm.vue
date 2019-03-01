@@ -193,10 +193,7 @@
 
         methods: {
             copyEmailToUsername() {
-                if (this.form.no_username === true) {
-                    return;
-                }
-                if (this.form.email && !this.form.username) {
+                if (this.form.email && (this.form.no_username || !this.form.username)) {
                     this.form.username = this.form.email;
                 }
             },
@@ -209,7 +206,7 @@
 
             toggleNoUsername() {
                 if (this.form.no_username) {
-                    this.form.username = '';
+                    this.form.username = this.form.email;
                     this.form.password = '';
                     this.form.password_confirmation = '';
                 }

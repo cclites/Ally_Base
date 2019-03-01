@@ -25,7 +25,6 @@ class UpdateClientRequest extends BusinessRequest
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'email' => 'required_unless:no_email,1|nullable|email',
             'username' => ['required_unless:no_username,1', 'nullable', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
@@ -60,7 +59,6 @@ class UpdateClientRequest extends BusinessRequest
             'username.unique' => 'This username is taken. Please use a different one.',
         ];
     }
-
 
     public function filtered()
     {
