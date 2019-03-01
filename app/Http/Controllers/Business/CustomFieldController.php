@@ -14,7 +14,7 @@ use App\Http\Requests\UpdateCustomFieldOptionsRequest;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 
-class CustomFieldController extends Controller
+class CustomFieldController extends BaseController
 {
     /**
      * Display a listing of the resource. 
@@ -24,13 +24,13 @@ class CustomFieldController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('update', activeBusiness());
-        
-        if($request->type != 'caregiver' && $request->type != 'client' && $request->type != 'all') {
-            return new ErrorResponse(422, 'An error occured while trying to load custom fields, please try again.');
-        }
+        $this->authorize('update', $this->businessChain());
 
-        $fields = activeBusiness()->chain->fields;
+        $request->validate([
+            'type' => 'required|in:all,caregiver,client',
+        ]);
+
+        $fields = $this->businessChain()->fields;
         if($request->type != 'all') {
             $fields = $fields->where('user_type', $request->type)->values();
         }
@@ -63,8 +63,8 @@ class CustomFieldController extends Controller
     {
         $data = $request->filtered();
         $data['key'] = preg_replace('/[^A-Za-z0-9]/', '', snake_case($request->label));
-        $data['chain_id'] = activeBusiness()->chain_id;
-        $this->authorize('update', $request->getBusiness());
+        $data['chain_id'] = $this->businessChain()->id;
+        $this->authorize('update', $this->businessChain());
         
         $alreadyExist = CustomField::where('chain_id', $data['chain_id'])
             ->where('label', $data['label'])
@@ -91,7 +91,7 @@ class CustomFieldController extends Controller
      */
     public function storeOptions(UpdateCustomFieldOptionsRequest $request, CustomField $field)
     {
-        $this->authorize('update', $request->getBusiness());
+        $this->authorize('update', $field);
 
         if($field->type != 'dropdown') {
             return new ErrorResponse(500, 'Could not create the custom field options for a field that is not a drop down.  Please try again.');
@@ -160,6 +160,8 @@ class CustomFieldController extends Controller
     public function show($id)
     {
         $field = CustomField::findOrFail($id)->load('options');
+        $this->authorize('read', $field);
+
         return view('business.custom_fields.show', compact('field'));
     }
 

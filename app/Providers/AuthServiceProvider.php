@@ -7,6 +7,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\Payer;
 use App\Billing\Service;
 use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\Client;
@@ -16,6 +17,7 @@ use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\PhoneNumber;
 use App\Policies\ActivityPolicy;
+use App\Policies\BusinessChainPolicy;
 use App\Policies\BusinessPolicy;
 use App\Policies\CaregiverApplicationPolicy;
 use App\Policies\CaregiverPolicy;
@@ -73,6 +75,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Activity::class => ActivityPolicy::class,
         Business::class => BusinessPolicy::class,
+        BusinessChain::class => BusinessChainPolicy::class,
         Caregiver::class => CaregiverPolicy::class,
         CaregiverApplication::class => CaregiverApplicationPolicy::class,
         Client::class => ClientPolicy::class,
