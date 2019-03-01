@@ -42,7 +42,13 @@ class DepositInvoice extends Resource
             'created_at' => optional($this->resource->created_at)->toDateTimeString(),
             'recipient' => $this->resource->getRecipient()->name(),
             'caregiver' => $this->whenLoaded('caregiver'),
+            'caregiver_on_hold' => $this->whenLoaded('caregiver', function() {
+                return $this->resource->caregiver->isOnHold();
+            }),
             'business' => $this->whenLoaded('business'),
+            'business_on_hold' => $this->whenLoaded('caregiver', function() {
+                return $this->resource->business->isOnHold();
+            }),
             'items' => $this->whenLoaded('items', function() {
                 return $this->groupItems($this->resource->getItems())->toArray();
             }),

@@ -72,6 +72,8 @@
                     <template slot="status" scope="row">
                         <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
                         <span v-else>Unpaid</span>
+                        <span v-if="row.item.caregiver_on_hold">- On Hold</span>
+                        <span v-if="row.item.business_on_hold">- On Hold</span>
                     </template>
                 </b-table>
             </div>
