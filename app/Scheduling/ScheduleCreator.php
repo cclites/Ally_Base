@@ -6,6 +6,7 @@ use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Schedule;
+use App\ScheduleGroup;
 use App\ScheduleNote;
 use Carbon\Carbon;
 
@@ -34,6 +35,11 @@ class ScheduleCreator
     /**
      * @var string
      */
+    protected $intervalType;
+
+    /**
+     * @var \Carbon\Carbon
+     */
     protected $endingDate;
 
     /**
@@ -50,6 +56,11 @@ class ScheduleCreator
      * @var array
      */
     protected $data = [];
+
+    /**
+     * @var iterable
+     */
+    protected $services = [];
 
     /**
      * @var \App\Scheduling\RuleGenerator
@@ -145,11 +156,13 @@ class ScheduleCreator
      * @param int $business_id
      * @param int $client_id
      * @param int|null $caregiver_id
+     * @param int|null $service_id
+     * @param int|null $payer_id
      * @return $this
      */
-    public function assignments(int $business_id, int $client_id, int $caregiver_id = null)
+    public function assignments(int $business_id, int $client_id, int $caregiver_id = null, int $service_id = null, int $payer_id = null)
     {
-        $this->data = array_merge($this->data, compact('business_id', 'client_id', 'caregiver_id'));
+        $this->data = array_merge($this->data, compact('business_id', 'client_id', 'caregiver_id', 'service_id', 'payer_id'));
         return $this;
     }
 
@@ -157,13 +170,13 @@ class ScheduleCreator
      * Set the rates for the created schedules
      *
      * @param int $caregiver_rate
-     * @param int $provider_fee
+     * @param int $client_rate
      * @param bool $fixed_rates
      * @return $this
      */
-    public function rates($caregiver_rate = 0, $provider_fee = 0, $fixed_rates = false)
+    public function rates($caregiver_rate = 0, $client_rate = 0, $fixed_rates = false)
     {
-        $this->data = array_merge($this->data, compact('caregiver_rate', 'provider_fee', 'fixed_rates'));
+        $this->data = array_merge($this->data, compact('caregiver_rate', 'client_rate', 'fixed_rates'));
         return $this;
     }
 
@@ -177,6 +190,14 @@ class ScheduleCreator
     {
         $this->note = $note;
         return $this;
+    }
+
+    /**
+     * @param iterable $services
+     */
+    public function addServices(iterable $services): void
+    {
+        $this->services = $services;
     }
 
     /**
@@ -203,6 +224,7 @@ class ScheduleCreator
      */
     public function interval($intervalType, Carbon $endingDate, $byDays = [])
     {
+        $this->intervalType = $intervalType;
         $this->endingDate = $endingDate;
 
         if (in_array($intervalType, ['weekly', 'biweekly'])) {
@@ -220,7 +242,7 @@ class ScheduleCreator
         }
         $byMonthDay = $this->startsAt->format('j');
         $this->rrule = $this->ruleGenerator->setIntervalType($intervalType)
-                                           ->bymonthdays($byMonthDay)
+                                           ->bymonthday($byMonthDay)
                                            ->getRule();
         return $this;
     }
@@ -240,10 +262,11 @@ class ScheduleCreator
     /**
      * Create the schedules from the provided data and return a collection
      *
+     * @param bool $useScheduleGroup
      * @return \Illuminate\Support\Collection|\App\Schedule[]
      * @throws \App\Exceptions\InvalidScheduleParameters
      */
-    public function create()
+    public function create($useScheduleGroup = true)
     {
         $this->checkRequired(['duration', 'business_id', 'client_id']);
         $this->validateDuration();
@@ -251,10 +274,25 @@ class ScheduleCreator
         $occurrences = $this->generateOccurrences();
         $this->validateStartDate($occurrences);
 
-        $schedules = $this->createSchedulesFromOccurrences($occurrences);
+        $group = null;
+        if ($useScheduleGroup && count($occurrences) > 1 && $this->rrule) {
+            $group = $this->createGroup();
+        }
+
+        $schedules = $this->createSchedulesFromOccurrences($occurrences, $group);
         $this->attachNoteToSchedules($schedules);
 
         return collect($schedules);
+    }
+
+    protected function createGroup()
+    {
+        return ScheduleGroup::create([
+            'starts_at' => $this->startsAt->toDateTimeString(),
+            'end_date' => $this->endingDate->toDateString(),
+            'rrule' => $this->rrule,
+            'interval_type' => $this->intervalType,
+        ]);
     }
 
     protected function checkRequired($required = [])
@@ -318,22 +356,33 @@ class ScheduleCreator
                                 ->getOccurrencesBetween($this->startsAt, $endsAt, 730);
     }
 
-    protected function createSchedulesFromOccurrences($occurrences)
+    /**
+     * @param \DateTime[] $occurrences
+     * @param \App\ScheduleGroup|null $group
+     * @return array
+     * @throws \Exception
+     */
+    protected function createSchedulesFromOccurrences($occurrences, ?ScheduleGroup $group = null)
     {
         $schedules = [];
         \DB::beginTransaction();
 
         try {
             foreach ($occurrences as $date) {
-                $schedules[] = Schedule::create(
+                 $schedule = Schedule::create(
                     array_merge(
                         $this->data,
                         [
-                            'starts_at' => $date, // keep in business timezone
+                            'starts_at' => $date->format('Y-m-d H:i:s'), // keep in business timezone
                             'weekday'   => $date->format('w'),
+                            'group_id'  => $group->id ?? null,
                         ]
                     )
                 );
+                 if (!$schedule->service_id) {
+                     $schedule->syncServices($this->services);
+                 }
+                $schedules[] = $schedule;
                 $this->validateMaxHours(Carbon::instance($date));
             }
             \DB::commit();

@@ -18,6 +18,7 @@
                                             id="client_id"
                                             name="client_id"
                                             v-model="form.client_id"
+                                            @input="changedClient(form.client_id)"
                                             required
                                     >
                                         <option value="">--Select a Client--</option>
@@ -29,198 +30,283 @@
                             <b-col sm="6">
                                 <b-form-group>
                                     <div class="float-right">
-                                        <b-btn variant="link" size="sm" @click="toggleCaregivers()">
+                                        <b-btn variant="link" size="sm" @click="toggleCaregivers()" class="p-0">
                                             {{ toggleCaregiversLabel }}
                                         </b-btn> |
-                                        <b-btn variant="link" size="sm" @click="openCareMatchTab()">
+                                        <b-btn variant="link" size="sm" @click="openCareMatchTab()" class="p-0">
                                             Find Caregivers
                                         </b-btn>
                                     </div>
-                                    <label for="caregiver_id">Caregiver</label>
+                                    <label class="col-form-label pt-0" for="caregiver_id">Caregiver</label>
                                     <b-form-select
                                             id="caregiver_id"
                                             name="caregiver_id"
                                             v-model="form.caregiver_id"
+                                            @input="changedCaregiver(form.caregiver_id)"
                                     >
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
-                                        <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
+                                        <span class="text-warning">Caregivers that are not currently assigned to the client will be automatically assigned.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
+
+                        <b-row>
+                            <b-col lg="12" class="pb-2">
+                                <strong>Scheduled Time & Service Needs</strong>
+                            </b-col>
+                            <b-col>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 20%;">Start Date</th>
+                                            <th style="width: 20%;">End Date</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Hours</th>
+                                            <th>Service Needs (ADLs)</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
+                                            </td>
+                                            <td>
+                                                <date-picker v-model="firstShiftEndDate" disabled />
+                                            </td>
+                                            <td>
+                                                <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
+                                            </td>
+                                            <td>
+                                                <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
+                                            </td>
+                                            <td class="text-only">
+                                                {{ scheduledHours }}
+                                            </td>
+                                            <td>
+                                                <b-form-select name="care_plan_id" v-model="form.care_plan_id">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <input-help :form="form" field="starts_at" text="" />
+                                <input-help :form="form" field="duration" text="" />
+                            </b-col>
+                        </b-row>
+
+                        <b-row class="mt-2">
+                            <b-col lg="12">
+                                <strong>Scheduled Billing</strong>
+                                <b-form-group class="pt-2 mb-0">
+                                    <b-form-radio-group v-model="billingType">
+                                        <b-form-radio value="hourly">Hourly</b-form-radio>
+                                        <b-form-radio value="fixed">Fixed Rate</b-form-radio>
+                                        <b-form-radio value="services">Service Breakout</b-form-radio>
+                                    </b-form-radio-group>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
+
                         <b-row>
                             <b-col>
-                                <strong>Shift Type: </strong>
-                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
-                                <label for="create_hourly_rates" class="rate-label">Hourly</label>
-                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_fixed_rates" :value="1">
-                                <label for="create_fixed_rates" class="rate-label">Fixed/Daily</label>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-fit-more">
+                                        <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Hours Type</th>
+                                            <th width="10%">Hours</th>
+                                            <th width="13%">Caregiver Rate</th>
+                                            <th>Registry Fee</th>
+                                            <th>Ally Fee</th>
+                                            <th width="12%">Total Rate</th>
+                                            <th>Payer</th>
+                                            <th class="service-actions"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        <!-- Hourly / Fixed -->
+                                        <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
+                                            <td>
+                                                <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
+                                                    <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
+                                                    <option value="default">REG</option>
+                                                    <option value="holiday">HOL</option>
+                                                    <option value="overtime">OT</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td class="text-only">
+                                                {{ billingType === 'hourly' ? scheduledHours : 'Fixed' }}
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.caregiver_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                    name="caregiver_rate"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="form.caregiver_rate"
+                                                    @change="updateProviderRates(form)"
+                                                    class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only"  v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.provider_fee) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="provider_fee"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="form.provider_fee"
+                                                        @change="updateClientRates(form)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
+                                                <span v-else>{{ numberFormat(form.ally_fee) }}</span>
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.client_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="client_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="form.client_rate"
+                                                        @change="updateProviderRates(form)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td colspan="2">
+                                                <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
+                                                    <option :value="null">(Auto)</option>
+                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Service Breakout -->
+                                        <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
+                                            <td>
+                                                <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
+                                                    <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
+                                                    <option value="default">REG</option>
+                                                    <option value="holiday">HOL</option>
+                                                    <option value="overtime">OT</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-input
+                                                    name="duration"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="service.duration"
+                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.caregiver_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="caregiver_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="service.caregiver_rate"
+                                                        @change="updateProviderRates(service)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.provider_fee) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="provider_fee"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="service.provider_fee"
+                                                        @change="updateClientRates(service)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
+                                                <span v-else>{{ numberFormat(service.ally_fee) }}</span>
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.client_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="client_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        v-model="service.client_rate"
+                                                        @change="updateProviderRates(service)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td>
+                                                <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
+                                                    <option :value="null">(Auto)</option>
+                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td class="service-actions text-nowrap">
+                                                <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
+                                                    <i class="fa fa-times"></i>
+                                                </b-btn>
+                                                <b-btn size="xs" variant="success" style="background-color: green;" @click="addService()" v-if="index === form.services.length - 1">
+                                                    <i class="fa fa-plus"></i>
+                                                </b-btn>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
+                                    Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
+                                </div>
+                                <b-alert v-if="isUsingOvertime" variant="warning" show>
+                                    Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
+                                </b-alert>
                             </b-col>
                         </b-row>
-
-                        <!-- FREE-TEXT RATES -->
-
-                        <b-row v-if="form.fixed_rates !== null && !isUsingRateCodes(business)">
-                            <b-col sm="6">
-                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
-                                    <b-form-input
-                                            id="caregiver_rate"
-                                            name="caregiver_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="form.caregiver_rate"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="caregiver_rate" text="Enter the hourly rate paid to the caregiver." />
-                                </b-form-group>
-                            </b-col>
-
-                            <b-col sm="6" v-if="hasClientRateStructure(business)">
-                                <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
-                                    <b-form-input
-                                            id="client_rate"
-                                            name="client_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="form.client_rate"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="client_rate" text="Enter the hourly fee charged to the client." />
-                                </b-form-group>
-                            </b-col>
-                            <b-col sm="6" v-else>
-                                <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
-                                    <b-form-input
-                                            id="provider_fee"
-                                            name="provider_fee"
-                                            type="number"
-                                            step="any"
-                                            v-model="form.provider_fee"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="provider_fee" text="Enter the hourly fee charged by the provider." />
-                                </b-form-group>
-                            </b-col>
-
-                            <b-col sm="6">
-                                <b-form-group label="Ally Fee" label-for="ally_fee">
-                                    <div v-if="allyFee">
-                                        {{ numberFormat(allyFee) }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
-                                    </div>
-                                    <div v-else>
-                                        Enter Amounts Above
-                                    </div>
-                                </b-form-group>
-                            </b-col>
-                            <b-col sm="6">
-                                <b-form-group :label="`Total ${rateType} Rate`" label-for="ally_fee">
-                                    {{ numberFormat(totalRate) }}
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-
-                        <!-- RATE CODES -->
-                        <b-row v-if="form.fixed_rates !== null && isUsingRateCodes(business)">
-                            <b-col sm="6">
-                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate_id">
-                                    <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
-                                        <option value="">--Use Default--</option>
-                                        <option v-for="code in caregiverFixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
-                                    </b-select>
-                                    <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-else>
-                                        <option value="">--Use Default--</option>
-                                        <option v-for="code in caregiverHourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
-                                    </b-select>
-                                    <input-help :form="form" field="caregiver_rate" text="Override the caregiver rate code, or use the defaults." />
-                                </b-form-group>
-                            </b-col>
-                            <!-- No check is needed here because rate codes are only possible under clientRateStructure for now  (|| true) -->
-                            <b-col sm="6" v-if="hasClientRateStructure(business) || true">
-                                <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
-                                    <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
-                                        <option value="">--Use Default--</option>
-                                        <option v-for="code in clientFixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
-                                    </b-select>
-                                    <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-else>
-                                        <option value="">--Use Default--</option>
-                                        <option v-for="code in clientHourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
-                                    </b-select>
-                                    <input-help :form="form" field="client_rate" text="Override the client rate code, or use the defaults." />
-                                </b-form-group>
-                            </b-col>
-
-                        </b-row>
-                        <!-- END RATES -->
-
-
                         <b-row>
                             <b-col lg="6">
-                                <b-form-group label="Start Date" label-for="startDate">
-                                    <date-picker v-model="startDate" />
-                                    <input-help :form="form" field="starts_at" text="Confirm the starting date." />
-                                </b-form-group>
+                                <label>
+                                    <b-form-checkbox v-model="defaultRates">
+                                        Use Default Rates from Client Rates Tab
+                                    </b-form-checkbox>
+                                </label>
                             </b-col>
-                            <b-col lg="6">
-                                <b-form-group label="End Date" label-for="startDate" v-if="firstShiftEndDate !== startDate">
-                                    <date-picker v-model="firstShiftEndDate" disabled />
-                                    <input-help :form="form" field="zzzz" text="The end date is shown when it differs from the start date." />
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col sm="6">
-                                <b-form-group label="Start Time" label-for="startTime">
-                                    <time-picker
-                                            id="startTime"
-                                            name="startTime"
-                                            v-model="startTime"
-                                    />
-                                    <input-help :form="form" field="starts_at" text="Confirm the starting time." />
-                                </b-form-group>
-                            </b-col>
-                            <b-col sm="6">
-                                <b-form-group :label="`End Time - ${scheduledHours} Hours`" label-for="endTime">
-                                    <time-picker
-                                            id="endTime"
-                                            name="endTime"
-                                            v-model="endTime"
-                                    />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." />
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col sm="6">
-                                <b-form-group label="Shift Designation" label-for="hours_type">
-                                    <b-form-radio-group id="hours_type" v-model="form.hours_type" name="hours_type">
-                                        <b-form-radio value="default">Regular</b-form-radio>
-                                        <b-form-radio value="holiday">Holiday</b-form-radio>
-                                        <b-form-radio value="overtime">Overtime</b-form-radio>
-                                    </b-form-radio-group>
-                                    
-                                    <input-help :form="form" field="hours_type" text="" />
-                                    <small class="form-text text-info" v-if="specialHoursChange">
-                                        Be sure to update the caregiver's rates to reflect this designation.
-                                    </small>
-                                </b-form-group>
-                            </b-col>
-                            <b-col sm="6">
-                                <b-form-group label="Service Needs/ADL Groups" label-for="care_plan_id">
-                                    <b-form-select
-                                            id="care_plan_id"
-                                            name="care_plan_id"
-                                            v-model="form.care_plan_id"
-                                    >
-                                        <option value="">--None--</option>
-                                        <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
-                                    </b-form-select>
-                                    <input-help :form="form" field="care_plan_id" text="" />
-                                </b-form-group>
-                            </b-col>
+                            <!--<b-col lg="6" class="text-right">-->
+                                <!--<small>* Provider Fee &amp; Ally Fee are estimated.  (Payment Type: {{ paymentType }} {{ displayAllyPct }}%)</small>-->
+                            <!--</b-col>-->
                         </b-row>
                     </b-tab>
                     <b-tab title="Recurrence" id="schedule-recurrence" v-if="!schedule.id">
@@ -272,9 +358,11 @@
                                         <option value="ATTENTION_REQUIRED">Attention Required</option>
                                         <option value="CLIENT_CANCELED">Client Canceled</option>
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
+                                        <option value="OPEN_SHIFT">Open Shift</option>
                                     </b-form-select>
                                 </b-form-group>
-                                <b-form-group label="Schedule Notes" label-for="notes">
+                                <b-form-group label="Add a note for the Caregiver to see" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
                                             name="notes"
@@ -282,12 +370,12 @@
                                             v-model="form.notes"
                                     >
                                     </b-form-textarea>
-                                    <input-help :form="form" field="notes" text="Enter any notes relating to this scheduled shift." />
+                                    <input-help :form="form" field="notes" text="Note will be visible to Caregiver when clocking in on the Ally mobile app." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Care Match" button-id="care-match-tab">
+                    <b-tab title="Find a Caregiver with CareMatch" button-id="care-match-tab">
                         <business-care-match :clients="clients" :schedule="careMatchSchedule">
                             <template scope="row">
                                 <b-button size="sm" variant="info" @click="selectCaregiver(row.item.id)">Select Caregiver</b-button>
@@ -316,6 +404,13 @@
         >
             <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
         </confirmation-modal>
+        <schedule-group-modal v-if="selectedSchedule.group_data"
+                              :group-data="selectedSchedule.group_data"
+                              :weekday-int="scheduledWeekdayInt"
+                              :day-change="scheduledWeekdayInt !== currentWeekdayInt"
+                              v-model="groupModal"
+                              @submit="submitWithGroup"
+        />
     </div>
 </template>
 
@@ -324,10 +419,12 @@
     import RateCodes from "../../../mixins/RateCodes";
     import RateFactory from "../../../classes/RateFactory";
     import ConfirmationModal from "../../modals/ConfirmationModal";
+    import ShiftServices from "../../../mixins/ShiftServices";
+    import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
 
     export default {
-        components: {ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes],
+        components: {ScheduleGroupModal, ConfirmationModal},
+        mixins: [FormatsNumbers, RateCodes, ShiftServices],
 
         props: {
             model: Boolean,
@@ -346,7 +443,7 @@
                 }
             },
         },
-        
+
         data() {
             return {
                 activeTab: 0,
@@ -375,16 +472,19 @@
                 specialHoursChange: false,
                 maxHoursWarning: false,
                 allCaregivers: this.passCaregivers,
+                groupModal: false,
             }
         },
 
         mounted() {
+            this.fetchServices(); // from ShiftServices mixin
             this.loadClientData();
             this.loadAllCaregivers();
             this.fetchRateCodes();
         },
 
         computed: {
+
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -437,20 +537,8 @@
                 return (parseFloat(this.allyPct) * 100).toFixed(2);
             },
 
-            chargedRate() {
-                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.hasClientRateStructure(this.business));
-            },
-
-            allyFee() {
-                return RateFactory.getAllyFee(this.allyPct, this.chargedRate);
-            },
-
-            totalRate() {
-                return this.chargedRate + this.allyFee;
-            },
-
             caregivers() {
-                if (this.cgMode === 'all') {
+                if (! this.form.client_id || this.cgMode === 'all') {
                     return this.allCaregivers;
                 }
                 return this.clientCaregivers;
@@ -492,9 +580,85 @@
                     client_id: this.form.client_id,
                 }
             },
+
+            isPast() {
+                if (this.selectedSchedule.id) {
+                    return moment(this.selectedSchedule.starts_at).isBefore(moment());
+                } else {
+                    return moment(this.getStartsAt()).isBefore(moment());
+                }
+            },
+            scheduledWeekdayInt() {
+                return this.selectedSchedule ? moment(this.selectedSchedule.starts_at).day() : 0;
+            },
+
+            currentWeekdayInt() {
+                return this.startDate ? moment(this.startDate).day() : 0;
+            },
         },
 
         methods: {
+
+            changedSchedule(schedule) {
+                // initiated from watcher
+                this.makeForm(schedule);
+                this.changedClient(schedule.client_id);
+            },
+
+            changedClient(clientId) {
+                if (!clientId || this.client_id === clientId) {
+                    return;
+                }
+                this.loadCaregivers(clientId);
+                this.loadAllyPctFromClient(clientId);
+                this.loadCarePlans(clientId);
+                this.loadClientRates(clientId);
+                this.loadClientPayers(clientId);
+            },
+
+            changedCaregiver(caregiverId) {
+                this.fetchAllRates();
+
+                // Automatically reset the schedule status when it is a
+                // no show or open shift and a new caregiver is set otherwise
+                // saving the schedule will clear the caregiver_id because of
+                // its status.
+                if (caregiverId && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
+                    this.form.status = 'OK';
+                }
+            },
+
+            changedStartDate(startDate) {
+                this.fetchAllRates();
+            },
+
+            changedStartTime(startTime) {
+                this.form.duration = this.getDuration();
+            },
+
+            changedEndTime(endTime) {
+                this.form.duration = this.getDuration();
+            },
+
+            changedPayer(service, payerId) {
+                this.fetchDefaultRate(service);
+            },
+
+            changedService(service, serviceId) {
+                this.fetchDefaultRate(service);
+            },
+
+            changedBillingType(type) {
+                // initiated from watcher
+                // pass to mixin
+                this.handleChangedBillingType(this.form, type);
+            },
+
+            changedDefaultRates(value) {
+                // initiated from watcher
+                // pass to mixin
+                this.handleChangedDefaultRates(this.form, value);
+            },
 
             selectCaregiver(id) {
                 this.cgMode = 'all';
@@ -505,46 +669,85 @@
             openCareMatchTab() {
                 const tabs = this.$refs.tabs.tabs;
                 for (let i = 0; i < tabs.length; i ++) {
-                    if (tabs[i].title === 'Care Match') {
+                    if (tabs[i].title.toString().match(/CareMatch/)) {
                         this.activeTab = i;
                         break;
                     }
                 }
             },
 
-            makeForm() {
-                this.form = new Form({
-                    'starts_at': this.schedule.starts_at || "",
-                    'duration': this.schedule.duration || 0,
-                    'caregiver_id': this.schedule.caregiver_id || "",
-                    'client_id': this.schedule.client_id || "",
-                    'fixed_rates': this.schedule.fixed_rates ? 1 : 0,
-                    'caregiver_rate': this.schedule.caregiver_rate || "",
-                    'caregiver_rate_id': this.schedule.caregiver_rate_id || "",
-                    'client_rate': this.schedule.client_rate || "",
-                    'client_rate_id': this.schedule.client_rate_id || "",
-                    'provider_fee': this.schedule.provider_fee || "",
-                    'notes': this.schedule.notes || "",
-                    'hours_type': this.schedule.hours_type || "default",
-                    'overtime_duration': this.schedule.overtime_duration || 0,
-                    'care_plan_id': this.schedule.care_plan_id || '',
-                    'status': this.schedule.status || 'OK',
-                    'interval_type': "",
-                    'recurring_end_date': "",
-                    'bydays': [],
+            makeForm(schedule) {
+                if (!schedule) schedule = this.schedule;
+
+                this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
+                this.defaultRates = schedule.client_rate == null;
+
+                // Initialize form
+                this.$nextTick(() => {
+                    this.form = new Form({
+                        'starts_at': schedule.starts_at || "",
+                        'duration': schedule.duration || 0,
+                        'caregiver_id': schedule.caregiver_id || "",
+                        'client_id': schedule.client_id || "",
+                        'fixed_rates': schedule.fixed_rates ? 1 : 0,
+                        'caregiver_rate': schedule.caregiver_rate || null,
+                        'caregiver_rate_id': schedule.caregiver_rate_id || "",
+                        'client_rate': schedule.client_rate || null,
+                        'client_rate_id': schedule.client_rate_id || "",
+                        'notes': schedule.notes || "",
+                        'hours_type': schedule.hours_type || "default",
+                        'overtime_duration': schedule.overtime_duration || 0,
+                        'care_plan_id': schedule.care_plan_id || '',
+                        'status': schedule.status || 'OK',
+                        'service_id': schedule.service_id || this.defaultService.id,
+                        'payer_id': schedule.payer_id || null,
+                        'interval_type': "",
+                        'recurring_end_date': "",
+                        'bydays': [],
+                        'services': [],
+                        'provider_fee': null,
+                        'ally_fee': null,
+                        'group_update': null,
+                        'default_rates': {
+                            'client_rate': null,
+                            'caregiver_rate': null,
+                            'provider_fee': null,
+                            'ally_fee': null,
+                        }
+                    });
+                    this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
+                    this.initServicesFromObject(schedule);
+                    this.setDateTimeFromSchedule(schedule);
                 });
-                this.setDateTimeFromSchedule();
             },
 
-            setDateTimeFromSchedule() {
-                let start = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
+            setDateTimeFromSchedule(schedule) {
+                let start = moment(schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
                 this.startDate = start.format('MM/DD/YYYY');
                 this.startTime = (start._ambigTime) ? '09:00' : start.format('HH:mm');
-                let end = moment(start).add(this.form.duration || 60, 'minutes');
+                let end = moment(start).add(schedule.duration || 60, 'minutes');
                 this.endTime = (end._ambigTime) ? '10:00' : end.format('HH:mm');
             },
 
-            submitForm() {
+            submitWithGroup(groupUpdate)
+            {
+                return this.submitForm(groupUpdate);
+            },
+
+            submitForm(groupUpdate = null) {
+                if (this.isPast) {
+                    if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
+                        return;
+                    }
+                }
+
+                if (this.selectedSchedule.group_id && !groupUpdate) {
+                    this.groupModal = true;
+                    return;
+                } else {
+                    this.form.group_update = groupUpdate;
+                }
+
                 this.submitting = true;
 
                 if (this.form.hours_type !== 'default') {
@@ -560,7 +763,17 @@
                 // Fill/format form values
                 this.form.duration = this.getDuration();
                 this.form.starts_at = this.getStartsAt();
-                this.form.recurring_end_date = moment(this.endDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').add(1, 'minutes').format('X');
+                this.form.recurring_end_date = moment(this.endDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').add(1, 'minutes').format();
+
+                // Finalize form billing type
+                if (this.billingType === 'services') {
+                    this.form.service_id = null;
+                    this.form.payer_id = null;
+                    this.form.fixed_rates = false;
+                } else {
+                    this.form.services = [];
+                    this.form.fixed_rates = (this.billingType === 'fixed');
+                }
 
                 // Submit form
                 let url = '/business/schedule';
@@ -584,7 +797,7 @@
                 if (this.selectedSchedule.id) {
                     this.copiedSchedule = Object.assign({}, this.selectedSchedule);
                     Vue.delete(this.copiedSchedule, 'id');
-                    this.makeForm();
+                    this.changedSchedule(this.copiedSchedule);
                 }
             },
 
@@ -595,8 +808,8 @@
 
             deleteSchedule() {
                 let confirmMessage = 'Are you sure you wish to delete this scheduled shift?';
-                if (moment(this.schedule.starts_at).isBefore(moment())) {
-                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: This will not affect any shift already in the Shift History.";
+                if (this.isPast) {
+                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: Modifying past schedules will NOT change the shift history or billing.";
                 }
                 if (this.schedule.id && confirm(confirmMessage)) {
                     let form = new Form();
@@ -613,19 +826,17 @@
 
             loadAllyPctFromClient(client_id) {
                 if (!client_id) return;
-                let component = this;
-                axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
-                    component.allyPct = response.data.percentage_fee;
-                    component.paymentType = response.data.payment_type;
+                axios.get('/business/clients/' + client_id + '/payment_type').then(response => {
+                    this.allyPct = response.data.percentage_fee;
+                    this.paymentType = response.data.payment_type;
                 });
             },
 
-            loadCaregivers() {
-                if (this.form.client_id) {
-                    axios.get('/business/clients/' + this.form.client_id + '/caregivers')
+            loadCaregivers(clientId) {
+                if (clientId) {
+                    axios.get('/business/clients/' + clientId + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
-                            this.prefillRates();
                         });
                 }
             },
@@ -633,8 +844,10 @@
             loadClientData() {
                 if (this.client_id) {
                     // Load caregivers and ally pct immediately
-                    this.loadCaregivers();
+                    this.loadCaregivers(this.client_id);
                     this.loadAllyPctFromClient(this.client_id);
+                    this.loadClientRates(this.client_id);
+                    this.loadClientPayers(this.client_id);
                 }
             },
 
@@ -667,7 +880,7 @@
 
             getStartsAt() {
                 if (this.startDate && this.startTime) {
-                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format('X');
+                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format();
                 }
                 return null;
             },
@@ -718,23 +931,42 @@
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
 
-            prefillRates()
-            {
-                if (this.schedule.id) {
-                    // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.schedule.caregiver_id == this.selectedCaregiver.id) {
-                        this.form.caregiver_rate = this.schedule.caregiver_rate;
-                        this.form.provider_fee = this.schedule.provider_fee
-                        return;
-                    }
+            onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
+                let service = this.form.services[serviceIndex];
+                if (!service) {
+                    return;
                 }
 
-                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
-                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
-            }
+                // Use nextTick here so that you can properly get the oldVal using this
+                // function on the @change event, but utilize the updated service
+                // object that will reflect the new hours_type value.
+                this.$nextTick(() => {
+                    if (this.defaultRates) {
+                        this.fetchDefaultRate(service);
+                    } else {
+                        this.handleChangedHoursType(service, newVal, oldVal);
+                    }
+                });
+            },
+
+            onChangeHoursType(newVal, oldVal) {
+                this.handleChangedHoursType(this.form, newVal, oldVal);
+            },
         },
 
         watch: {
+            'form.hours_type': function(newVal, oldVal) {
+                if (! oldVal || newVal == oldVal) {
+                    return;
+                }
+
+                if (this.defaultRates) {
+                    // re-load the default rates and will automatically
+                    // calculate any OT/HOL hours.
+                    this.handleChangedDefaultRates(this.form, this.defaultRates);
+                }
+            },
+
             model(val) {
                 // Update local modal bool
                 this.scheduleModal = val;
@@ -748,7 +980,7 @@
                 this.copiedSchedule = {};
 
                 // Re-create the form object
-                this.makeForm();
+                this.changedSchedule(val);
 
                 // Use cg all mode if an caregiver is pre-selected
                 if (this.schedule.caregiver_id) {
@@ -766,37 +998,25 @@
                 }
             },
 
-            startTime(val) {
-                this.form.duration = this.getDuration();
-            },
-
-            endTime() {
-                this.form.duration = this.getDuration();
-            },
-
-            'form.fixed_rates': function(val, old_val) {
-                this.prefillRates();
-            },
-
-            'form.client_id': function(val, old_val) {
-                this.loadCarePlans(val, old_val);
-                this.loadAllyPctFromClient(val);
-                this.loadCaregivers();
-            },
-
-            'form.caregiver_id': function(val, old_val) {
-                this.prefillRates();
-            },
-
-            'form.hours_type': function(val, old_val) {
-                if (old_val) {
-                    if (val === 'holiday' || val === 'overtime') {
-                        this.specialHoursChange = true;
-                        return;
-                    }
-                }
-                this.specialHoursChange = false;
+            allyPct() {
+                this.recalculateAllRates(this.form)
             },
         },
     }
 </script>
+
+<style scoped>
+    .table th, .table td {
+        padding: 0.35rem 0.5rem;
+        min-width: 80px;
+    }
+    .table td.text-only {
+        padding-top: 0.65rem;
+    }
+    select.payers, select.services {
+        min-width: 120px;
+    }
+    .service-actions {
+        min-width: 0px !important;
+    }
+</style>

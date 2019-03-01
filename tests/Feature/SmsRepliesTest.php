@@ -10,10 +10,11 @@ use App\SmsThread;
 use App\SmsThreadReply;
 use App\PhoneNumber;
 use Carbon\Carbon;
+use Tests\FakesTwilioWebhooks;
 
 class SmsRepliesTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, FakesTwilioWebhooks;
 
     public $client;
     public $caregiver;
@@ -48,45 +49,13 @@ class SmsRepliesTest extends TestCase
         ], $overrides));
     }
 
-    public function generateWebhook($to, $from, $message)
-    {
-        return [
-            'MessageSid' => str_random(34),
-            'AccountSid' => config('services.twilio.sid'),
-            'MessagingServiceSid' => str_random(34),
-            'From' => PhoneNumber::formatE164($from),
-            'To' => PhoneNumber::formatE164($to),
-            'Body' => $message,
-            'NumMedia' => 0,
-        ];
-    }
-
-    public function fakeWebook($to = null, $from = null, $message = null)
-    {
-        if (empty($to)) {
-            $to = config('services.twilio.default_number');
-        }
-
-        if (empty($from)) {
-            $from = $this->caregiver->phoneNumbers()->first()->number(false);
-        }
-
-        if (empty($message)) {
-            $message = str_random(100);
-        }
-
-        $data = $this->generateWebhook($to, $from, $message);
-        $this->post(route('twilio.incoming'), $data)
-            ->assertStatus(200);
-    }
-
     /** @test */
     public function twilio_webhook_must_contain_matching_account_sid()
     {
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '12017043960', 'test');
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '12019999999', 'test');
         $data['AccountSid'] = 'INVALID_SID';
 
-        $this->post(route('twilio.incoming'), $data)
+        $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(401);
     }
 
@@ -95,9 +64,9 @@ class SmsRepliesTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12017043960', 'test');
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', 'test');
 
-        $this->post(route('twilio.incoming'), $data)
+        $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);
     }
 
@@ -130,7 +99,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $this->assertCount(1, SmsThreadReply::all());
     }
@@ -153,7 +122,7 @@ class SmsRepliesTest extends TestCase
             'number' => $caregiver2->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number, $this->caregiver->phoneNumbers()->first()->number(false));
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $reply = SmsThreadReply::first();
         $this->assertEquals($this->caregiver->id, $reply->user_id);
@@ -172,7 +141,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook('999999999');
+        $this->fakeWebhook('999999999', $this->caregiver);
 
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertNull(SmsThreadReply::first()->business_id);
@@ -188,8 +157,9 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
+        $this->assertCount(1, $thread->fresh()->replies);
         $this->assertEquals($thread->id, SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
     }
@@ -206,8 +176,9 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
+        $this->assertCount(0, $thread->fresh()->replies);
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
     }
@@ -224,7 +195,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
@@ -243,7 +214,7 @@ class SmsRepliesTest extends TestCase
 
         $this->assertCount(6, SmsThread::all());
 
-        $this->getJson(route('business.communication.sms-threads'))
+        $this->getJson(route('business.communication.sms-threads')."?json=1")
             ->assertStatus(200)
             ->assertJsonCount(5);
     }
@@ -260,9 +231,9 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
-        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
             ->assertStatus(200)
             ->assertJsonFragment([
                 'id' => $thread->id,
@@ -282,7 +253,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
             ->assertStatus(403);
     }
 
@@ -291,7 +262,7 @@ class SmsRepliesTest extends TestCase
     {
         $this->actingAs($this->officeUser->user);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
         $thread = $this->generateThread();
         $thread->recipients()->create([
@@ -299,7 +270,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
         $this->assertCount(2, SmsThreadReply::all());
 
@@ -308,4 +279,129 @@ class SmsRepliesTest extends TestCase
             ->assertJsonCount(1);
     }
 
+    /** @test */
+    public function caregivers_should_only_be_attached_to_threads_they_are_a_part_of()
+    {
+        $otherCaregiver = factory('App\Caregiver')->create();
+        $number = $otherCaregiver->user->addPhoneNumber('primary', '1 (999) 999-8888');
+        $number->update(['receives_sms' => 1]);
+        $this->business->chain->caregivers()->save($otherCaregiver);
+        
+        $thread = $this->generateThread(['sent_at' => Carbon::now()->subMinutes(30)]);
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->fakeWebhook($this->business->outgoing_sms_number, $otherCaregiver);
+
+        $this->assertCount(0, $thread->fresh()->replies);
+        $this->assertNull(SmsThreadReply::first()->sms_thread_id);
+    }
+
+    /** @test */
+    public function office_users_can_search_sms_threads_by_date()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread1 = $this->generateThread(['sent_at' => Carbon::now()->subDays(10)]);
+        $thread2 = $this->generateThread(['sent_at' => Carbon::now()->subDays(5)]);
+        $thread3 = $this->generateThread(['sent_at' => Carbon::now()->subDays(5)]);
+        $thread4 = $this->generateThread(['sent_at' => Carbon::now()->subDays(1)]);
+        $thread5 = $this->generateThread(['sent_at' => Carbon::now()->subDays(1)]);
+
+        $this->assertCount(5, SmsThread::all());
+
+        $start = Carbon::now()->subDays(7)->format('Y-m-d');
+        $end = Carbon::now()->format('Y-m-d');
+        $query = "?json=1&start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(4);
+
+        $start = Carbon::now()->subDays(2)->format('Y-m-d');
+        $end = Carbon::now()->format('Y-m-d');
+        $query = "?json=1&start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(2);
+
+        $start = Carbon::now()->subDays(11)->format('Y-m-d');
+        $end = Carbon::now()->subDays(8)->format('Y-m-d');
+        $query = "?json=1&start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(1);
+
+        $start = Carbon::now()->subDays(30)->format('Y-m-d');
+        $end = Carbon::now()->subDays(15)->format('Y-m-d');
+        $query = "?json=1&start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(0);
+    }
+
+    /** @test */
+    public function office_users_can_filter_sms_threads_by_those_with_replies()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread1 = $this->generateThread();
+        $thread2 = $this->generateThread();
+        $thread3 = $this->generateThread();
+
+        $this->assertCount(3, SmsThread::all());
+
+        factory(SmsThreadReply::class)->create(['sms_thread_id' => $thread1->id]);
+
+        $this->getJson(route('business.communication.sms-threads').'?json=1&reply_only=0')
+            ->assertStatus(200)
+            ->assertJsonCount(3);
+
+        $this->getJson(route('business.communication.sms-threads').'?json=1&reply_only=1')
+            ->assertStatus(200)
+            ->assertJsonCount(1);
+    }
+
+    /** @test */
+    public function when_an_office_user_views_a_thread_it_should_mark_all_replies_as_read()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread = $this->generateThread();
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        factory(SmsThreadReply::class, 3)->create(['sms_thread_id' => $thread->id]);
+        $this->assertEquals(3, $thread->fresh()->unread_replies_count);
+
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
+            ->assertStatus(200)
+            ->assertJsonCount(3, 'replies');
+
+        $this->assertEquals(0, $thread->fresh()->unread_replies_count);
+
+        factory(SmsThreadReply::class)->create(['sms_thread_id' => $thread->id]);
+        $this->assertEquals(1, $thread->fresh()->unread_replies_count);
+
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
+            ->assertStatus(200)
+            ->assertJsonCount(4, 'replies');
+
+        $this->assertEquals(0, $thread->fresh()->unread_replies_count);
+    }
 }

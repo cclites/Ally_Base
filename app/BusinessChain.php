@@ -1,6 +1,10 @@
 <?php
 namespace App;
 
+use App\Billing\Payer;
+use App\Billing\Service;
+
+
 /**
  * App\BusinessChain
  *
@@ -81,6 +85,105 @@ class BusinessChain extends AuditableModel
     public function users()
     {
         return $this->hasMany(OfficeUser::class, 'chain_id');
+    }
+
+    public function fields()
+    {
+        return $this->hasMany(CustomField::class, 'chain_id');
+    }
+
+    public function referralSources()
+    {
+        return $this->hasMany(ReferralSource::class, 'chain_id');
+    }
+
+    /**
+     * Get the Businesses StatusAliases relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function statusAliases()
+    {
+        return $this->hasMany(StatusAlias::class, 'chain_id')->orderBy('name');
+    }
+
+    /**
+     * Get the Payers relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function payers()
+    {
+        return $this->hasMany(Payer::class, 'chain_id');
+    }
+
+    /**
+     * Get the Services relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'chain_id');
+    }
+
+    /**
+     * Get the chain's deactivation reasons relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function deactivationReasons()
+    {
+        return $this->hasMany(DeactivationReason::class, 'chain_id')
+            ->ordered();
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    /**
+     * Get all deactivation reasons including factory defaults.
+     *
+     * @return mixed
+     */
+    public function getAllDeactivationReasonsAttribute()
+    {
+        return $this->deactivationReasons
+            ->merge(DeactivationReason::whereNull('chain_id')->get())
+            ->values();
+    }
+
+    /**
+     * Get the Client deactivation reasons.
+     *
+     * @return mixed
+     */
+    public function getClientDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('chain_id')
+            ->where('type', 'client')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'client')
+                ->get())
+            ->values();
+    }
+
+    /**
+     * Get the Caregiver deactivation reasons.
+     *
+     * @return mixed
+     */
+    public function getCaregiverDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('chain_id')
+            ->where('type', 'caregiver')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'caregiver')
+                ->get())
+            ->values();
     }
 
     ////////////////////////////////////

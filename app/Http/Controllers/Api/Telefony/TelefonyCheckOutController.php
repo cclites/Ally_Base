@@ -273,12 +273,6 @@ class TelefonyCheckOutController extends BaseVoiceController
         try {
             $clockOut = new ClockOut($shift->caregiver);
             $clockOut->setNumber($this->number->national_number);
-
-            // Allow clock out but mark it unverified if clocking out from the wrong number
-            if ($shift->client_id != $this->client->id) {
-                $clockOut->setManual();
-            }
-
             if ($clockOut->clockOut($shift)) {
                 event(new ShiftFlagsCouldChange($shift));
                 $this->telefony->say('You have successfully clocked out.<PAUSE>Thank you. Good bye.');

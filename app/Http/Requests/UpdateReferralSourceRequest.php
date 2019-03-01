@@ -1,8 +1,16 @@
 <?php
 namespace App\Http\Requests;
 
-class UpdateReferralSourceRequest extends BusinessRequest
+use Illuminate\Foundation\Http\FormRequest;
+use App\ReferralSource;
+
+class UpdateReferralSourceRequest extends FormRequest
 {
+    public function authorize()
+    {
+        return true;
+    }
+    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -14,6 +22,7 @@ class UpdateReferralSourceRequest extends BusinessRequest
             'organization' => 'required',
             'contact_name' => 'required',
             'phone' => 'nullable|max:32',
+            'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
         ];
     }
 }

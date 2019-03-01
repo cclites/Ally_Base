@@ -277,7 +277,7 @@
         />
 
         <!-- Details modal -->
-        <shift-details-modal v-model="detailsModal" :selected-item="selectedItem">
+        <shift-details-modal v-model="detailsModal" :shift="selectedItem">
             <template slot="buttons" scope="row">
                 <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
@@ -467,7 +467,7 @@
                         'Mileage Costs': this.moneyFormat(item.mileage_costs),
                         'Other Expenses': this.moneyFormat(item.other_expenses),
                         'Shift Total': this.moneyFormat(item.shift_total),
-                        'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
+                        'Type': item.hours_type == 'overtime' ? 'OT' : item.hours_type == 'holiday' ? 'HOL' : 'Reg',
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
                         'client_confirmed': item.client_confirmed,
@@ -475,7 +475,7 @@
                         'charged_at': item.charged_at,
                         'status': item.status,
                         'business_id': item.business_id,
-                        '_rowVariant': (item.confirmed) ? null : 'warning'
+                        '_rowVariant': this.getRowVariant(item),
                     }
                 });
                 items.push({
@@ -530,6 +530,13 @@
         },
 
         methods: {
+            getRowVariant(item) {
+                if (item.flags && item.flags.includes('duration_mismatch')) {
+                    return 'danger';
+                }
+                return (item.confirmed) ? null : 'warning';
+            },
+            
             fullscreenToggle() {
                 $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
                 $('.left-sidebar').toggle();
@@ -554,19 +561,19 @@
                 }
             },
 
-            async reloadShift(id) {
-                const response = await axios.get(this.urlPrefix + 'shifts' + this.queryString + '&shift_id=' + id);
-
-                let shift = response.data[0];
-                if (!shift) return;
-
-                let index = this.items.shifts.findIndex(item => shift.id === item.id);
-                if (index !== -1) {
-                    this.items.shifts[index] = shift;
-                    this.items.shifts.push(); // needed for Vue to detect change
-                }
-
-                this.loadSummaries();
+            reloadShift(id) {
+                console.log(`Reloading shift #${id}`);
+                axios.get(`${this.urlPrefix}shift/${id}`)
+                    .then( ({ data }) => {
+                        let index = this.items.shifts.findIndex(x => x.id === id);
+                        if (index >= 0) {
+                            this.items.shifts.splice(index, 1, data)
+                        } else {
+                            console.log(`Could not reload shift #${id}`, data);
+                        }
+                        this.loadSummaries();
+                    })
+                    .catch(e => {})
             },
 
             loadSummaries() {
@@ -711,13 +718,7 @@
                 form.post('/business/shifts/' + id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
-                        this.items.shifts.map(shift => {
-                            if (shift.id === id) {
-                                shift.status = response.data.data.status;
-                                shift.confirmed = true;
-                            }
-                            return shift;
-                        });
+                        this.reloadShift(id);
                     });
             },
 
@@ -800,7 +801,6 @@
             },
 
             onShiftCreate() {
-                debugger;
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();

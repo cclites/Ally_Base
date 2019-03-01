@@ -5,25 +5,25 @@ namespace App\Providers;
 use App\ActiveBusiness;
 use App\Businesses\SettingsRepository;
 use App\Contracts\ChatServiceInterface;
-use App\Gateway\ACHDepositInterface;
-use App\Gateway\ACHPaymentInterface;
-use App\Gateway\CreditCardPaymentInterface;
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ACHDepositInterface;
+use App\Billing\Gateway\ACHPaymentInterface;
+use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\Gateway\ECSPayment;
+use App\Contracts\GeocodeInterface;
+use App\Services\DummyGeocodeService;
+use App\Services\GeocodeManager;
 use App\Services\Slack;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap any application services.
-     *
-     * @return void
+     * A place to bind abstractions to concretions for the application
      */
-    public function boot()
+    public function bindInterfaces()
     {
-        \Packages\GMaps\API::setKey(config('services.gmaps.key'));
-
         $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
         $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
         $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
@@ -36,11 +36,29 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('settings', SettingsRepository::class);
         $this->app->singleton(ActiveBusiness::class, ActiveBusiness::class);
+    }
 
-        if ($this->app->environment() == 'local') {
-            Schema::defaultStringLength(191);
-        }
+    /**
+     * A place to map DB polymorphic relationship names to their model classes
+     */
+    public function mapPolymorphicRelations()
+    {
+        Relation::morphMap(config('database.polymorphism'));
+    }
 
+    /**
+     * A place to pass application keys to third party libraries
+     */
+    public function passApplicationKeys()
+    {
+        \Packages\GMaps\API::setKey(config('services.gmaps.key'));
+    }
+
+    /**
+     * A place to add view functions and composers
+     */
+    public function setupViews()
+    {
         // ALLY-271 Escape curly braces to prevent interpolation, double-encode entities
         \Blade::setEchoFormat('interpol_escape(e(%s, true))');
 
@@ -48,6 +66,14 @@ class AppServiceProvider extends ServiceProvider
             $business = $this->app->make(ActiveBusiness::class);
             $view->with('active_business', $business->get());
         });
+    }
+
+    /**
+     * A place to add logic that is only booted for local environments (developers)
+     */
+    public function handleLocalEnvironments()
+    {
+        Schema::defaultStringLength(191);
 
         // force rool url if using ngrok
         $appUrl = config('app.url');
@@ -56,6 +82,28 @@ class AppServiceProvider extends ServiceProvider
             if (str_contains(config('app.url'), 'https://')) {
                 \URL::forceScheme('https');
             }
+        }
+
+        $this->app->bind(GeocodeInterface::class, DummyGeocodeService::class);
+        $this->app->bind(GeocodeManager::class, function() {
+             return new GeocodeManager(new DummyGeocodeService());
+        });
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->bindInterfaces();
+        $this->mapPolymorphicRelations();
+        $this->passApplicationKeys();
+        $this->setupViews();
+
+        if ($this->app->environment() === 'local') {
+            $this->handleLocalEnvironments();
         }
     }
 
@@ -66,7 +114,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->environment() !== 'production') {
+        if ($this->app->environment() === 'local') {
             $this->app->register(\Way\Generators\GeneratorsServiceProvider::class);
             $this->app->register(\Xethron\MigrationsGenerator\MigrationsGeneratorServiceProvider::class);
         }

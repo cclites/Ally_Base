@@ -28,11 +28,12 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Type" label-for="client_type">
+                    <b-form-group label="Client Type" label-for="client_type" label-class="required">
                         <b-form-select
                                 id="client_type"
                                 name="client_type"
                                 v-model="form.client_type"
+                                required
                         >
                             <option value="">--Select--</option>
                             <option value="private_pay">Private Pay</option>
@@ -132,7 +133,7 @@
             <hr />
             <b-row>
                 <b-col lg="6">
-                    <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                    <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                     <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                 </b-col>
                 <b-col lg="6">
@@ -184,11 +185,10 @@
 <script>
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
-    import ReferralSourceSelect from "../referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationFormGroup, ReferralSourceSelect},
+        components: {BusinessLocationFormGroup},
 
         props: ['prospect', 'referralsources'],
 

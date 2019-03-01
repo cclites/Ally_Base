@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\Client;
-use App\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\EmergencyContact;
 use App\Note;
 use App\PhoneNumber;
@@ -108,6 +108,7 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function(BankAccount $account) {
                 $account->name_on_account = $this->faker->name;
+                $account->routing_number = "091000019";
                 $account->account_number = $this->faker->bankAccountNumber;
                 $account->save();
             });
@@ -117,9 +118,11 @@ class ClearSensitiveData extends Command
         // Reset all SMS numbers
         SmsThreadRecipient::select('user_id')->groupBy('user_id')->get()->each(function(SmsThreadRecipient $recipient) {
             $phoneNumber = PhoneNumber::where('user_id', $recipient->user_id)->first();
-            $newNumber = $phoneNumber->national_number;
-            SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $newNumber]);
-            SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $newNumber]);
+            if ($phoneNumber) {
+                $newNumber = $phoneNumber->national_number;
+                SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $newNumber]);
+                SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $newNumber]);
+            }
         });
 
         // Reset all notes

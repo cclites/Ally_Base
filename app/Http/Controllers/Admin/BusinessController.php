@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\CreateBusiness;
+use App\Actions\CreateBusinessChain;
 use App\Business;
 use App\BusinessChain;
 use App\OfficeUser;
@@ -46,15 +48,18 @@ class BusinessController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
+     * @param \App\Actions\CreateBusiness $action
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function store(Request $request)
+    public function store(Request $request, CreateBusiness $action, CreateBusinessChain $chainAction)
     {
         \DB::beginTransaction();
 
         $businessData = $request->validate([
             'name' => 'required|string|max:70',
+            'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
             'state' => 'string|nullable',
@@ -64,6 +69,7 @@ class BusinessController extends Controller
             'timezone' => ['required', new ValidTimezoneOrOffset()],
             'chain_id' => 'nullable|exists:business_chains,id',
         ]);
+        $businessData['country'] = 'US';
 
         $request->validate([
             'chain_id' => 'nullable|exists:business_chains,id',
@@ -71,13 +77,8 @@ class BusinessController extends Controller
 
         ], ['*' => 'You must select, or create, a business chain.']);
 
-
-        $businessData['country'] = 'US';
-        $business = Business::create($businessData);
-        if (!$business) return new ErrorResponse(500, 'Unable to create business');
-
         if (!$request->input('chain_id')) {
-            $chain = BusinessChain::create([
+            $chain = $chainAction->create([
                 'name' => $request->new_chain_name,
                 'slug' => BusinessChain::generateSlug($request->new_chain_name),
                 'address1' => $request->address1,
@@ -86,9 +87,11 @@ class BusinessController extends Controller
                 'zip' => $request->zip,
                 'phone1' => $request->phone1,
             ]);
-
-            $business->chain()->associate($chain)->save();
+            $businessData['chain_id'] = $chain->id;
         }
+
+        $business = $action->create($businessData);
+        if (!$business) return new ErrorResponse(500, 'Unable to create business');
 
         \DB::commit();
         return new CreatedResponse('The business has been created.', [], route('admin.businesses.show', [$business->id]));
@@ -126,7 +129,8 @@ class BusinessController extends Controller
     public function update(Request $request, Business $business)
     {
         $businessData = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:70',
+            'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
             'state' => 'string|nullable',

@@ -2,14 +2,20 @@
 
 namespace App;
 
-use App\Confirmations\Confirmation;
-use App\Contracts\CanBeConfirmedInterface;
-use App\Contracts\ChargeableInterface;
+use App\Billing\ClientPayer;
+use App\Billing\ClientRate;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Businesses\Timezone;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
-use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
@@ -18,8 +24,12 @@ use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
 use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
+use App\Billing\ClientAuthorization;
+use App\Traits\CanHaveEmptyUsername;
 
 /**
  * App\Client
@@ -33,7 +43,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $backup_payment_id
  * @property string $client_type
  * @property mixed|null $ssn
- * @property string|null $onboard_status
+ * @property string|null $agreement_status
  * @property string|null $deleted_at
  * @property float|null $fee_override
  * @property float $max_weekly_hours
@@ -42,15 +52,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $referral
  * @property string|null $diagnosis
  * @property int|null $ambulatory
- * @property string|null $poa_first_name
- * @property string|null $poa_last_name
- * @property string|null $poa_phone
- * @property string|null $poa_relationship
  * @property string|null $import_identifier
- * @property string|null $dr_first_name
- * @property string|null $dr_last_name
- * @property string|null $dr_phone
- * @property string|null $dr_fax
  * @property string|null $ltci_name
  * @property string|null $ltci_address
  * @property string|null $ltci_city
@@ -82,22 +84,21 @@ use Packages\MetaData\HasOwnMetaData;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
  * @property-read \App\CareDetails $careDetails
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $defaultPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \App\Address $evvAddress
  * @property-read \App\PhoneNumber $evvPhone
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
  * @property-read mixed $active
- * @property-read mixed $ally_percentage
  * @property mixed $avatar
  * @property-read mixed $date_of_birth
  * @property-read mixed $email
@@ -115,9 +116,9 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientNarrative[] $narrative
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientAgreementStatusHistory[] $agreementStatusHistory
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\ClientPreferences $preferences
  * @property-read \App\ClientReferralServiceAgreement $referralServiceAgreement
@@ -144,10 +145,6 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDiagnosis($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFax($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereEmail($email = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
@@ -173,10 +170,6 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereName($firstname = null, $lastname = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReceiveSummaryEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
@@ -196,17 +189,24 @@ use Packages\MetaData\HasOwnMetaData;
  * @mixin \Eloquent
  * @property-read string $masked_ssn
  * @property null|string $w9_ssn
+ * @property-read \App\OfficeUser|null $caseManager
+ * @property-read mixed $masked_name
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
+ * @property-read \App\Billing\ClientPayer $primaryPayer
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
+ * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
+class Client extends AuditableModel implements UserRole, ReconcilableInterface, HasPaymentHold,
+    HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
     public $dates = ['service_start_date', 'inquiry_date'];
-    public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -224,15 +224,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral',
         'diagnosis',
         'ambulatory',
-        'poa_first_name',
-        'poa_last_name',
-        'poa_phone',
-        'poa_relationship',
         'import_identifier',
-        'dr_first_name',
-        'dr_last_name',
-        'dr_phone',
-        'dr_fax',
         'hospital_name',
         'hospital_number',
         'ltci_name',
@@ -253,6 +245,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'qb_customer_id',
         'hourly_rate_id',
         'fixed_rate_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
         'hic',
         'travel_directions',
         'created_by',
@@ -261,8 +258,32 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'disaster_planning',
         'caregiver_1099',
         'case_manager_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes',
+        'sales_person_id',
+        'agreement_status',
     ];
 
+    ///////////////////////////////////////////
+    /// Client Agreement Statuses
+    ///////////////////////////////////////////
+
+    const NEEDS_AGREEMENT = 'needs_agreement';
+    const SIGNED_ELECTRONICALLY = 'electronic';
+    const SIGNED_PAPER = 'paper';
+
+    ///////////////////////////////////////////
+    /// Client Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -426,24 +447,125 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             ->latest();
     }
 
+    public function payers()
+    {
+        return $this->hasMany(ClientPayer::class, 'client_id')
+            ->orderBy('priority');
+    }
+
+    /** Current primary payer */
+    public function primaryPayer()
+    {
+        $date = Carbon::now();
+
+        return $this->hasOne(ClientPayer::class, 'client_id')
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->orderBy('priority');
+    }
+
+    public function rates()
+    {
+        return $this->hasMany(ClientRate::class, 'client_id');
+    }
+
+    /**
+     * Get the client authorizations relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function serviceAuthorizations()
+    {
+        return $this->hasMany(ClientAuthorization::class);
+    }
+
+    /**
+     * Get the ClientContacts relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
-    public function getPaymentTypeAttribute()
+    public function getLastServiceDateAttribute()
     {
-        return $this->getPaymentType();
+        return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
     }
 
-    public function getAllyPercentageAttribute()
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
     {
-        return $this->getAllyPercentage();
+        return route('setup.clients', ['token' => $this->getEncryptedKey()]);    
     }
 
+    ///////////////////////////////////////////
+    /// Instance Methods
+    ///////////////////////////////////////////
 
-    ///////////////////////////////////////////
-    /// Other Methods
-    ///////////////////////////////////////////
+    public function getAddress(): ?Address
+    {
+        return $this->evvAddress;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->evvPhone;
+    }
+
+    /**
+     * Get the client timezone (currently retrieved from the business record)
+     *
+     * @return mixed
+     */
+    public function getTimezone()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
+
+    /**
+     * Get effective client payers
+     *
+     * @param string $date
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[]
+     */
+    public function getPayers(string $date = 'now'): Collection
+    {
+        $date = Carbon::parse($date, $this->getTimezone());
+
+        return $query = $this->payers()->ordered()
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->get();
+    }
+
+    /**
+     * Get the default ClientRate for this client
+     *
+     * @param string $date
+     * @return \App\Billing\ClientRate|null
+     */
+    public function getDefaultRate(string $date = 'now'): ?ClientRate
+    {
+        $date = Carbon::parse($date, $this->getTimezone());
+
+        return $this->rates()
+            ->whereNull('caregiver_id')
+            ->whereNull('payer_id')
+            ->whereNull('service_id')
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->first();
+    }
 
     /**
      * Set the client's preference data
@@ -463,58 +585,38 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getPaymentType($method = null)
     {
-        if (!$method) {
-            $method = $this->getPaymentMethod();
-        }
+        try {
+            $payer = $this->primaryPayer;
+            if ($payer && $method = $payer->getPaymentMethod()) {
+                if ($method instanceof Business) {
+                    return 'ACH-P';
+                }
 
-        if ($method instanceof Business) {
-            return 'ACH-P';
-        }
+                if ($method instanceof CreditCard) {
+                    if ($method->type == 'amex') {
+                        return 'AMEX';
+                    }
+                    return 'CC';
+                }
 
-        if ($method instanceof CreditCard) {
-            if ($method->type == 'amex') {
-                return 'AMEX';
+                if ($method instanceof BankAccount) {
+                    return 'ACH';
+                }
             }
-            return 'CC';
         }
-
-        if ($method instanceof BankAccount) {
-            return 'ACH';
-        }
+        catch (PaymentMethodError $e) {}
 
         return 'NONE';
     }
 
     /**
      * @param bool $backup
-     * @return \App\Contracts\ChargeableInterface
+     * @return \App\Billing\Contracts\ChargeableInterface|null
      */
-    public function getPaymentMethod($backup = false)
+    public function getPaymentMethod($backup = false): ?ChargeableInterface
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
         return $method;
-    }
-
-    /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a client that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
     }
 
     /**
@@ -572,7 +674,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     }
 
     /**
-     * @param \App\Contracts\ChargeableInterface $method
+     * @param \App\Billing\Contracts\ChargeableInterface $method
      * @param bool $backup
      * @return ChargeableInterface|false
      */
@@ -609,22 +711,9 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         $this->backupPayment()->associate($default)->save();
     }
 
-    public function sendConfirmationEmail()
+    public function agreementStatusHistory()
     {
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-
-        $status = 'emailed_reconfirmation';
-        $this->update(['onboard_status' => $status]);
-        $history = new OnboardStatusHistory(compact('status'));
-        $this->onboardStatusHistory()->save($history);
-
-        $this->notify(new ClientConfirmation($this, $this->business));
-    }
-
-    public function onboardStatusHistory()
-    {
-        return $this->hasMany(OnboardStatusHistory::class);
+        return $this->hasMany(ClientAgreementStatusHistory::class);
     }
 
     /**
@@ -654,7 +743,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     /**
      * Get all gateway transactions that relate to this client
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {
@@ -674,16 +763,52 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             return (float) $this->fee_override;
         }
 
-        if ($this->defaultPayment) {
-            return $this->defaultPayment->getAllyPercentage();
-        }
-
-        if ($this->backupPayment) {
-            return $this->backupPayment->getAllyPercentage();
+        if ($payer = $this->primaryPayer) {
+            return $payer->getAllyPercentage();
         }
 
         // Default to CC fee
         return (float) config('ally.credit_card_fee');
     }
 
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $rates
+     * @return bool
+     */
+    public function syncRates(?iterable $rates) : bool
+    {
+        return ClientRate::sync($this, $rates);
+    }
+
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $payers
+     * @return bool
+     */
+    public function syncPayers(?iterable $payers) : bool
+    {
+        return ClientPayer::sync($this, $payers);
+    }
+
+    /**
+     * Get the client's service authorizations active on the 
+     * specified date.  Defaults to today.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     */
+    public function getActiveServiceAuths($date = null) : Collection
+    {
+        if (empty($date)) {
+            $date = Carbon::now();
+        }
+
+        return $this->serviceAuthorizations()
+            ->effectiveOn($date)
+            ->get();
+    }
 }

@@ -2,14 +2,16 @@
 
 namespace App;
 
-use App\Confirmations\Confirmation;
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
-use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
-use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToChains;
@@ -20,6 +22,9 @@ use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
+use App\Traits\CanHaveEmptyUsername;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * App\Caregiver
@@ -51,14 +56,14 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\CaregiverAvailability $availability
- * @property-read \App\BankAccount|null $bankAccount
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar
@@ -77,7 +82,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverMeta[] $meta
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \App\PhoneNumber $phoneNumber
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
@@ -120,11 +125,16 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
  * @property-read string $masked_ssn
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
+class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
+    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
-    use IsUserRole, BelongsToBusinesses, BelongsToChains;
-    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates;
+    use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
+    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -133,6 +143,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'ssn',
         'bank_account_id',
         'title',
+        'certification',
         'hire_date',
         'onboarded',
         'misc',
@@ -151,12 +162,29 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'application_date',
+        'orientation_date',
+        'referral_source_id',
+        'deactivation_note',
+        'smoking_okay',
+        'pets_dogs_okay',
+        'pets_cats_okay',
+        'pets_birds_okay',
     ];
     protected $appends = ['masked_ssn'];
 
-    public $dates = ['onboarded', 'hire_date', 'deleted_at'];
+    public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
+    ///////////////////////////////////////////
+    /// Caregiver Setup Statuses
+    ///////////////////////////////////////////
+
+    const SETUP_NONE = null; // step 1
+    const SETUP_CONFIRMED_PROFILE = 'confirmed_profile'; // step 2
+    const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
+    const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+    
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -255,6 +283,10 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->belongsToMany(Activity::class, 'caregiver_skills');
     }
 
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -272,9 +304,29 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $businesses ?? collect();
     }
 
+    /**
+     * Get the account setup URL.
+     *
+     * @return string
+     */
+    public function getSetupUrlAttribute()
+    {
+        return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
+    }
+
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->phoneNumber;
+    }
 
     /**
      * Set the caregiver's availability data
@@ -289,32 +341,10 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a caregiver that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
-    }
-
-    /**
      * Set the caregiver's primary deposit account
      *
-     * @param \App\BankAccount $account
-     * @return \App\BankAccount|bool
+     * @param \App\Billing\Payments\Methods\BankAccount $account
+     * @return \App\Billing\Payments\Methods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount(BankAccount $account)
@@ -345,7 +375,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      */
     public function isClockedIn($client_id = null)
     {
-        return $this->shifts()
+        return (bool) $this->shifts()
             ->whereNull('checked_out_time')
             ->when($client_id, function ($query) use ($client_id) {
                 return $query->where('client_id', $client_id);
@@ -358,9 +388,24 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return \App\Shift|null
      */
-    public function getActiveShift()
+    public function getActiveShift($client_id = null)
     {
-        return $this->shifts()->whereNull('checked_out_time')->first();
+        return $this->shifts()
+            ->whereNull('checked_out_time')
+            ->when($client_id, function ($query) use ($client_id) {
+                return $query->where('client_id', $client_id);
+            })
+            ->first();
+    }
+
+    /**
+     * If clocked in, return the active shift model
+     *
+     * @return \App\Shift|null
+     */
+    public function getActiveShifts()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->get();
     }
 
     /**
@@ -374,7 +419,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     /**
-     * Unassign all Caregiver's schedules from now on. 
+     * Unassign all Caregiver's schedules from now on.
      *
      * @return void
      */
@@ -405,20 +450,12 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $aggregator->events($start, $end);
     }
 
-    public function sendConfirmationEmail(BusinessChain $businessChain = null)
-    {
-        if (!$businessChain) $businessChain = $this->businessChains()->first();
-        $confirmation = new Confirmation($this);
-        $confirmation->touchTimestamp();
-        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $businessChain));
-    }
-
     /**
      * Override name to suffix title
      *
      * @return string
      */
-    public function name()
+    public function name(): string
     {
         return trim($this->user->name() . ' ' . $this->title);
     }
@@ -428,7 +465,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return string
      */
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return trim($this->user->nameLastFirst() . ' ' . $this->title);
     }
@@ -455,7 +492,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Get all gateway transactions that relate to this caregiver
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {
@@ -499,9 +536,71 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->clients()->where('client_id', $client)->exists();
     }
 
+    /**
+     * Check if Caregiver has any scheduled shifts for the
+     * specified Client.
+     *
+     * @param Client $client
+     * @return boolean
+     */
+    public function hasScheduledShifts(Client $client) : bool
+    {
+        return $this->schedules()
+            ->forClient($client)
+            ->future($client->business->timezone)
+            ->exists();
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
+
+    /**
+     * Get the date of the last shift between the Caregiver and
+     * the given Client.
+     *
+     * @param Client $client
+     * @return null|string
+     */
+    public function getLastServiceDate(Client $client) : ?string
+    {
+        $lastShift = Shift::forCaregiver($this->id)
+            ->forClient($client->id)
+            ->latest()
+            ->first();
+        
+        if (empty($lastShift)) {
+            return null;
+        }
+
+        return optional($lastShift->checked_in_time)->format('Y-m-d');
+    }
+
+    /**
+     * Get the total number of hours the Caregiver has worked for
+     * the given Client and between the given date range.
+     *
+     * @param null|integer $client
+     * @param null|string $startDate
+     * @param null|string $endDate
+     * @return integer
+     */
+    public function totalServiceHours(?int $clientId = null, ?string $startDate = null, ?string $endDate = null) : int
+    {
+        $result = Shift::selectRaw('SUM(hours) as total_hours')
+            ->forCaregiver($this->id)
+            ->forClient($clientId)
+            ->betweenDates($startDate, $endDate)
+            ->whereNotNull('checked_out_time')
+            ->whereConfirmed()
+            ->first();
+
+        if (empty($result)) {
+            return 0;
+        }
+
+        return empty($result->total_hours) ? 0 : $result->total_hours;
+    }
 
     /**
      * A query scope for filtering results by related business IDs

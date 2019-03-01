@@ -42,17 +42,31 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Case Manager" label-for="case_manager">
-                        <b-form-select 
-                                v-model="form.case_manager_id" 
+                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
+                        <b-form-select
+                                v-model="form.case_manager_id"
                                 id="case_manager_id"
                                 name="case_manager_id"
                                 class="mr-2 mb-2"
                         >
-                            <option :value="null">-- Case Manager --</option>
+                            <option :value="null">-- Client Services Coordinator --</option>
                             <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select case manager for the client."></input-help>
+                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Salesperson">
+                        <b-form-select v-model="form.sales_person_id">
+                            <option :value="null">None</option>
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
@@ -68,15 +82,18 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
                         <b-row>
                             <b-col cols="8">
                                 <b-form-input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        v-model="form.email"
-                                        :disabled="form.no_email"
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    @blur.native="copyEmailToUsername()"
+                                    v-model="form.email"
+                                    :disabled="form.no_email"
                                 >
                                 </b-form-input>
                             </b-col>
@@ -84,7 +101,7 @@
                                 <div class="form-check">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" name="no_email"
-                                               v-model="form.no_email" value="1">
+                                               v-model="form.no_email" value="1" @input="toggleNoEmail()">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">No Email</span>
                                     </label>
@@ -94,18 +111,42 @@
                         <input-help :form="form" field="email"
                                     text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Username" label-for="username" label-class="required">
+                    <b-form-group label="Username" label-for="username">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        v-model="form.username"
+                                        :disabled="form.no_username"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_username"
+                                            v-model="form.no_username" value="1" @input="toggleNoUsername()">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Let Client Choose</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                    </b-form-group>
+                    <!-- <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
                                 name="username"
                                 type="text"
                                 v-model="form.username"
+                                :disabled="form.no_username"
                         >
                         </b-form-input>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
-                    </b-form-group>
+                    </b-form-group> -->
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
@@ -141,9 +182,11 @@
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
 
-                    <b-form-group>
-                        <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
-                        <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+                    <b-form-group class="mb-2">
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
+                        <div class="d-flex justify-content-end">
+                            <input-help :form="form" field="referred_by" text="Enter how the prospect was referred."/>
+                        </div>
                     </b-form-group>
 
                     <b-form-group>
@@ -152,15 +195,6 @@
                                          :value="true"
                                          :unchecked-value="false">
                             Ambulatory
-                        </b-form-checkbox>
-                    </b-form-group>
-
-                    <b-form-group>
-                        <b-form-checkbox id="caregiver_1099"
-                                         v-model="form.caregiver_1099"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Send 1099 to caregivers on the client’s behalf
                         </b-form-checkbox>
                     </b-form-group>
 
@@ -179,6 +213,14 @@
                             </label>
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
+                    </b-form-group>
+
+                    <b-form-group label="Send 1099">
+                        <b-form-select v-model="form.caregiver_1099" :disabled="authRole != 'admin' && form.caregiver_1099 == 'ally'">
+                            <option value="">No</option>
+                            <option value="client">On Client's Behalf</option>
+                            <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
+                        </b-form-select>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -258,64 +300,7 @@
             </b-row>
             <b-row>
                 <b-col>
-                    <p class="h6">Power of Attorney</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="poa_first_name"
-                                      v-model="form.poa_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="poa_phone"
-                                      v-model="form.poa_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="poa_last_name"
-                                      v-model="form.poa_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Relationship">
-                        <b-form-input id="poa_relationship"
-                                      v-model="form.poa_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <p class="h6">Physician</p>
-                    <hr>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="First Name">
-                        <b-form-input id="dr_first_name"
-                                      v-model="form.dr_first_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Phone">
-                        <b-form-input id="dr_phone"
-                                      v-model="form.dr_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Last Name">
-                        <b-form-input id="dr_last_name"
-                                      v-model="form.dr_last_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Fax">
-                        <b-form-input id="dr_fax"
-                                      v-model="form.dr_fax"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col>
-                    <p class="h6">Preferences</p>
+                    <p class="h6">CareMatch Preferences</p>
                     <hr>
                 </b-col>
             </b-row>
@@ -339,6 +324,8 @@
                             <option :value="null">No Preference</option>
                             <option value="CNA">CNA</option>
                             <option value="HHA">HHA</option>
+                            <option value="RN">RN</option>
+                            <option value="LPN">LPN</option>
                         </b-form-select>
                         <input-help :form="preferences" field="license" text="" />
                     </b-form-group>
@@ -364,102 +351,101 @@
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
                     </b-form-group>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col lg="12">
-                    <hr />
-                </b-col>
-                <b-col lg="8">
-                    <b-row>
-                        <b-col lg="6" sm="12">
-                            <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
-                                <b-form-select
-                                        id="onboard_status"
-                                        name="onboard_status"
-                                        v-model="form.onboard_status"
-                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
-                                >
-                                    <option value="">--Please Select--</option>
-                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
-                                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="6" sm="12">
-                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <br>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboarding_step < 6">
-                                <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
-                                <br>
-                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
-                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button variant="info" @click="sendConfirmation()" size="sm">Resend Client Agreement via
-                                    Email
-                                </b-button>
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
-                        <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
-                        <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
+                    <b-form-group label="Does the client smoke?" label-for="smokes">
+                        <b-form-select id="smokes"
+                                       v-model="preferences.smokes"
+                        >
+                            <option :value="1">Yes</option>
+                            <option :value="0">No</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="smokes" text="" />
+                    </b-form-group>
+                    <b-form-group label="Does this client have pets?">
+                        <b-form-checkbox v-model="preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="12">
+                    <hr />
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Ally Client Agreement Status" label-for="agreement_status">
+                        <b-form-select
+                                id="agreement_status"
+                                name="agreement_status"
+                                v-model="form.agreement_status"
+                                :disabled="form.agreement_status == 'electronic'"
+                        >
+                            <option value="">--Please Select--</option>
+                            <option v-if="hiddenOnboardStatuses[form.agreement_status]" :value="form.agreement_status">{{ hiddenOnboardStatuses[form.agreement_status] }}</option>
+                            <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="agreement_status" :text="onboardStatusText"></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <div class="mb-3">
+                        <div>
+                            <label for="agreement_status" class="col-form-label pt-0">Account Setup Status: 
+                                <span v-if="! client.setup_status" class="text-danger">Not Started</span>
+                                <span v-if="['accepted_terms', 'created_account'].includes(client.setup_status)" class="text-warning">In Progress</span>
+                                <span v-if="client.setup_status == 'added_payment'" class="text-success">Complete</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span class="mr-2"><i :class="setupCheckClass('accepted_terms')" aria-hidden="true"></i> Agreed to Terms</span>
+                            <span class="mr-2"><i :class="setupCheckClass('created_account')" aria-hidden="true"></i> Created Login</span>
+                            <span class="mr-2"><i :class="setupCheckClass('added_payment')" aria-hidden="true"></i> Added Payment Method</span>
+                        </div>
+                    </div>
+                    <b-form-group label="Account Setup URL">
+                        <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
+                        <input-help :form="form" text="The URL the client can use to setup their account."></input-help>
+                    </b-form-group>
+
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Welcome Email Last Sent:</strong> 
+                            <span>{{ client.user.welcome_email_sent_at ? formatDateTimeFromUTC(client.user.welcome_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="col-form-label pt-0"><strong>Training Email Last Sent:</strong> 
+                            <span>{{ client.user.training_email_sent_at ? formatDateTimeFromUTC(client.user.training_email_sent_at) : 'Never' }}</span>
+                        </label>
+                    </div>
+
+                    <b-button variant="info" @click="sendWelcomeEmail()">
+                        Send Welcome Email
+                    </b-button>
+
+                    <b-button variant="info" @click="sendTrainingEmail()">
+                        Send Training Email
+                    </b-button>
+                    
+                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">
+                        Start Client Onboarding
+                    </b-button>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12" class="mt-4">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
-                    <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                    <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
+                    <template v-else>
+                        <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                        <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
+                    </template>
                 </b-col>
             </b-row>
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
 
-        <b-modal id="deactivateModal"
-                 title="Are you sure?"
-                 v-model="deactivateModal"
-                 ok-title="OK">
-
-            <b-container>
-                <b-row>
-                    <b-col lg="12" class="text-center">
-                        <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
-                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
-                        <div v-else>They have no future scheduled shifts.</div>
-
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
-                            <date-picker
-                                class="w-50 mx-auto"
-                                v-model="inactive_at"
-                                id="inactive_at"
-                                placeholder="Inactive Date">
-                            </date-picker>
-                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
-                        </b-form-group>
-
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn v-if="client.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveClient">Yes - Delete Future Schedules</b-btn>
-                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveClient">Yes</b-btn>
-               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <deactivate-client-modal :client="client" ref="deactivateClientModal"></deactivate-client-modal>
 
         <b-modal id="activateModal"
             title="Are you sure?"
@@ -468,7 +454,30 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
+        <!-- <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal> -->
+
+        <business-referral-source-modal
+            @saved="savedReferralSource"
+            v-model="showReferralModal"
+            :source="{}"
+            source-type="client"
+        ></business-referral-source-modal>
+
+        <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
+
+        <b-modal v-model="onboardingWarning" title="Not Available">
+            Contact Ally support to configure this feature.
+        </b-modal>
+
+        <confirm-modal title="Send Welcome Email" ref="confirmWelcomeEmail" yesButton="Send Email">
+            <p>Send welcome email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email instructing them to click on a private link to confirm their information and reset their password.</p>
+        </confirm-modal>
+
+        <confirm-modal title="Send Training Email" ref="confirmTrainingEmail" yesButton="Send Email">
+            <p>Send training email to {{ client.email }}?</p><br />
+            <p>This will send {{ client.name }} an email linking them to the Knowledge Base.</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -476,26 +485,33 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
-    import BusinessLocationSelect from './business/BusinessLocationSelect'
-    import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
+    import BusinessLocationSelect from './business/BusinessLocationSelect';
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import DeactivateClientModal from './modals/DeactivateClientModal';
+    import DischargeSummaryModal from './modals/DischargeSummaryModal';
+    import AuthUser from '../mixins/AuthUser';
+
     window.croppie = require('croppie');
 
     export default {
         props: {
             'client': {},
             'lastStatusDate' : {},
-            'confirmUrl': {},
-            'referralsources': {}
+            'referralsources': {},
+            salesPeople: {
+                type: Array,
+                required: true
+            }
         },
 
-        mixins: [ClientForm, FormatsDates],
+        mixins: [ClientForm, FormatsDates, AuthUser],
 
         components: {
             BusinessLocationFormGroup,
-            ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
+            DeactivateClientModal,
+            DischargeSummaryModal
         },
 
         data() {
@@ -506,24 +522,17 @@
                     email: this.client.email,
                     no_email: false,
                     username: this.client.username,
+                    no_username: false,
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
-                    onboard_status: this.client.onboard_status,
+                    agreement_status: this.client.agreement_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
                     referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
-                    poa_first_name: this.client.poa_first_name,
-                    poa_last_name: this.client.poa_last_name,
-                    poa_phone: this.client.poa_phone,
-                    poa_relationship: this.client.poa_relationship,
-                    dr_first_name: this.client.dr_first_name,
-                    dr_last_name: this.client.dr_last_name,
-                    dr_phone: this.client.dr_phone,
-                    dr_fax: this.client.dr_fax,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
@@ -531,39 +540,105 @@
                     case_manager_id: this.client.case_manager_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
-                    caregiver_1099: !!this.client.caregiver_1099,
+                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
-                    created_at: this.client.created_at,
+                    created_at: this.formatDateTime(this.client.created_at.date),
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
-                    modified_at: this.client.updated_at,
+                    modified_at: this.formatDateTime(this.client.updated_at.date),
                     receive_summary_email: this.client.receive_summary_email,
+                    sales_person_id: this.client.sales_person_id,
+                    status_alias_id: this.client.status_alias_id || '',
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
                     license: this.client.preferences ? this.client.preferences.license : null,
                     language: this.client.preferences ? this.client.preferences.language : null,
+                    smokes: this.client.preferences ? this.client.preferences.smokes : 0,
+                    pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : 0,
+                    pets_cats: this.client.preferences ? this.client.preferences.pets_cats : 0,
+                    pets_birds: this.client.preferences ? this.client.preferences.pets_birds : 0,
                 }),
                 passwordModal: false,
                 active: this.client.active,
                 deactivateModal: false,
                 activateModal: false,
-                inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
+                sendEmailModal: false,
+                statusAliases: [],
+                localLastStatusDate: null,
+                onboardingWarning: false,
             }
         },
 
         mounted() {
+            this.localLastStatusDate = this.lastStatusDate;
             this.checkForNoEmailDomain();
+            this.checkForNoUsername();
             this.loadOfficeUsers();
+            this.fetchStatusAliases();
         },
 
         methods: {
-            newrefsourcedata(data) {
+            canSendEmails() {
+                if (! this.form.email || this.isEmptyEmail(this.form.email)) {
+                    alert('You cannot send any emails to this user because there is no email associated with their account.');
+                    return false;
+                }
+
+                return true;
+            },
+
+            sendWelcomeEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmWelcomeEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/welcome-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
+            sendTrainingEmail() {
+                if (! this.canSendEmails()) {
+                    return;
+                }
+                this.$refs.confirmTrainingEmail.confirm(() => {
+                    let form = new Form({});
+                    form.post(`/business/clients/${this.client.id}/training-email`)
+                        .then(response => {
+                        })
+                        .catch( e => {
+                        })
+                });
+            },
+
+            setupCheckClass(step) {
+                let check = false;
+                switch (step) {
+                    case 'accepted_terms':
+                        check = ['accepted_terms', 'created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'created_account':
+                        check = ['created_account', 'added_payment'].includes(this.client.setup_status);
+                        break;
+                    case 'added_payment':
+                        check = ['added_payment'].includes(this.client.setup_status);
+                        break;
+                }
+
+                return check ? 'fa fa-check-square-o' : 'fa fa-square-o';
+            },
+
+            savedReferralSource(data) {
                 if(data) {
-                    this.show = false;
+                    this.showReferralModal = false;
                     this.referralsources.push(data);
                     this.form.referral_source_id = data.id;
                 }
@@ -574,23 +649,30 @@
                 this.caseManagers = response.data;
             },
 
-            closemodal(status) {
-                this.show = status;
-            },
-
             checkForNoEmailDomain() {
-                let domain = 'noemail.allyms.com';
                 if (this.form.email) {
-                    if (this.form.email.substr(domain.length * -1) === domain) {
+                    if (this.isEmptyEmail(this.form.email)) {
                         this.form.no_email = true;
                         this.form.email = null;
                     }
                 }
             },
 
-            archiveClient() {
-                let form = new Form();
-                form.submit('delete', `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}`);
+            isEmptyEmail(email) {
+                let domain = 'noemail.allyms.com';
+                if (email.substr(domain.length * -1) === domain) {
+                    return true;
+                }
+                return false;
+            },
+
+            checkForNoUsername() {
+                if (this.form.username) {
+                    if (this.form.username.substr(0, 9) == 'no_login_') {
+                        this.form.no_username = true;
+                        this.form.username = null;
+                    }
+                }
             },
 
             reactivateClient() {
@@ -606,21 +688,53 @@
                 this.preferences.alertOnResponse = false;
                 this.preferences.post('/business/clients/' + this.client.id + '/preferences');
                 if (this.form.ssn) this.form.ssn = '***-**-****';
-                if (this.form.wasModified('onboard_status')) {
-                    this.client.onboard_status = this.form.onboard_status;
-                    this.lastStatusDate = moment.utc().format();
+                if (this.form.wasModified('agreement_status')) {
+                    this.client.agreement_status = this.form.agreement_status;
+                    this.localLastStatusDate = moment.utc().format();
                 }
             },
 
-            sendConfirmation() {
-                let component = this;
-                let form = new Form();
-                form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
-                    .then(function(response) {
-                        component.lastStatusDate = moment.utc().format();
-                    });
-            }
+            startOnboarding() {
+                if (this.business.enable_client_onboarding) {
+                    window.location = `/business/clients/${this.client.id}/onboarding`
+                } else {
+                    this.onboardingWarning = true;
+                }
+            },
 
+            fetchStatusAliases() {
+                axios.get(`/business/status-aliases?business_id=${this.client.business_id}`)
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data;
+                        } else {
+                            this.statusAliases = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
+
+            toggleNoEmail() {
+                if (this.form.no_email) {
+                    this.form.email = '';
+                }
+            },
+
+            toggleNoUsername() {
+                if (this.form.no_username) {
+                    this.form.username = '';
+                }
+            },
+
+            copyEmailToUsername() {
+                if (this.form.no_username) {
+                    return;
+                }
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
+            },
         },
 
         computed: {
@@ -633,25 +747,37 @@
             },
 
             lastStatusUpdated() {
-                return moment.utc(this.lastStatusDate).local().format('L') + ' at ' + moment.utc(this.lastStatusDate).local().format('LT');
+                return moment.utc(this.localLastStatusDate).local().format('L') + ' at ' + moment.utc(this.localLastStatusDate).local().format('LT');
             },
 
             onboardStatusText() {
-                if (this.lastStatusDate) {
-                    switch (this.form.onboard_status) {
-                        case 'emailed_reconfirmation':
-                            return 'The confirmation email was sent ' + this.lastStatusUpdated;
-                        case 'agreement_signed': // paper signature
+                if (this.localLastStatusDate) {
+                    switch (this.form.agreement_status) {
+                        case 'paper': // paper signature
                             return 'Signed: ' + this.lastStatusUpdated;
-                        case 'reconfirmed_checkbox': // electronic signature
+                        case 'electronic': // electronic signature
                             return 'Signed Electronically: ' + this.lastStatusUpdated;
                     }
                     return 'The status was last updated ' + this.lastStatusUpdated;
                 }
                 return 'Select the Ally Agreement status of the client.';
-            }
-        }
+            },
 
+            statusAliasOptions() {
+                if (! this.statusAliases || !this.statusAliases.client) {
+                    return [];
+                }
+
+                return this.statusAliases.client.filter(item => {
+                    return item.active == this.active;
+                }).map(item => {
+                    return {
+                        value: item.id,
+                        text: item.name,
+                    };
+                });
+            },
+        },
     }
 </script>
 

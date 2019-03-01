@@ -3,6 +3,7 @@ namespace App\Reports;
 
 use App\Caregiver;
 use App\Traits\IsDirectoryReport;
+use App\CustomField;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
@@ -45,8 +46,9 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     {
         $caregivers = $this->query->get();
         $this->generated = true;
-        $rows = $caregivers->map(function(Caregiver $caregiver) {
-            return [
+        $customFields =CustomField::forAuthorizedChain()->where('user_type', 'caregiver')->get();
+        $rows = $caregivers->map(function(Caregiver $caregiver) use(&$customFields) {
+            $result = [
                 'id' => $caregiver->id,
                 'firstname' => $caregiver->user->firstname,
                 'lastname' => $caregiver->user->lastname,
@@ -55,6 +57,18 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                 'address' => $caregiver->address ? $caregiver->address->full_address : '',
                 'date_added' => $caregiver->user->created_at->format('m-d-Y'),
             ];
+
+            // Add the custom fields to the report row
+            foreach($customFields as $field) {
+                if($meta = $caregiver->meta->where('key', $field->key)->first()) {
+                    $result[$field->key] = $meta->display();
+                    continue;
+                }
+
+                $result[$field->key] = $field->default;
+            }
+
+            return $result;
         });
 
         $rows = $this->filterColumns($rows);

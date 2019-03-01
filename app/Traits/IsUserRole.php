@@ -2,14 +2,16 @@
 namespace App\Traits;
 
 use App\Address;
-use App\BankAccount;
-use App\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
 use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 use App\Document;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\DeactivationReason;
+use App\SetupStatusHistory;
 
 trait IsUserRole
 {
@@ -47,7 +49,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at', 'deactivation_reason_id', 'reactivation_date', 'status_alias_id', 'setup_status']);
     }
 
     ///////////////////////////////////////////
@@ -135,12 +137,12 @@ trait IsUserRole
     /// Name Concatenation Forwarders
     ///////////////////////////////////////////
 
-    public function name()
+    public function name(): string
     {
         return $this->user->name();
     }
 
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return $this->user->nameLastFirst();
     }
@@ -181,7 +183,7 @@ trait IsUserRole
 
     public function getLastNameAttribute()
     {
-        return $this->user->lastname;
+        return optional($this->user)->lastname;
     }
 
     public function getEmailAttribute()
@@ -211,7 +213,7 @@ trait IsUserRole
 
     public function getDateOfBirthAttribute()
     {
-        return $this->user->date_of_birth;
+        return optional($this->user)->date_of_birth;
     }
 
     public function getAvatarAttribute()
@@ -233,15 +235,35 @@ trait IsUserRole
         if (starts_with($value, config('app.url'))) {
             return;
         }
-           
+
         $base64Data = str_replace('data:image/png;base64,', '', $value);
         $base64Data = str_replace(' ', '+', $base64Data);
 
         $filename = 'avatars/' . md5($this->id . uniqid() . microtime()) . '.png';
-        
+
         if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
             $this->attributes['avatar'] = $filename;
         }
+    }
+
+    public function getReactivationDateAttribute()
+    {
+        return optional($this->user->reactivation_date)->toDateTimeString();
+    }
+
+    public function getDeactivationReasonIdAttribute()
+    {
+        return $this->user->deactivation_reason_id;
+    }
+
+    public function getStatusAliasIdAttribute()
+    {
+        return $this->user->status_alias_id;
+    }
+
+    public function getSetupStatusAttribute()
+    {
+        return $this->user->setup_status;
     }
 
     ///////////////////////////////////////////
@@ -320,6 +342,21 @@ trait IsUserRole
         return $this->hasMany(Document::class, 'user_id', 'id');
     }
 
+    public function deactivationReason()
+    {
+        return $this->hasOne(DeactivationReason::class, 'id', 'deactivation_reason_id');
+    }
+
+    /**
+     * Get the user's setup status history relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function setupStatusHistory()
+    {
+        return $this->hasMany(SetupStatusHistory::class, 'user_id', 'id');
+    }
+    
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

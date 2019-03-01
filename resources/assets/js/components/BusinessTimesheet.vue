@@ -70,8 +70,6 @@
                         <th scope="col">Time</th>
                         <th scope="col">Miles</th>
                         <th scope="col">Expenses</th>
-                        <th scope="col">CG Rate</th>
-                        <th scope="col">PV Rate</th>
                         <th scope="col">ADLs</th>
                         <th scope="col">Notes</th>
                         <th scope="col"></th>
@@ -90,12 +88,6 @@
                         </td>
                         <td scope="row"> <!-- other_expenses -->
                             ${{ shifts[index].other_expenses }}
-                        </td>
-                        <td scope="row"> <!-- caregiver_rate -->
-                            ${{ shifts[index].caregiver_rate }}
-                        </td>
-                        <td scope="row"> <!-- provider_fee -->
-                            ${{ shifts[index].provider_fee }}
                         </td>
                         <td scope="row"> <!-- activities -->
                             {{ shifts[index].activities.length }}
@@ -146,6 +138,7 @@
             v-model="showEntryModal"
             @updated="updateEntry"
             :isOfficeUser="true"
+            :default-rates="defaultRates"
         ></timesheet-entry-modal>
 
         <b-modal title="Delete Timesheet Entry" v-model="confirmDeleteModal">
@@ -161,6 +154,7 @@
 <script>
     import ManageTimesheet from '../mixins/ManageTimesheet';
     import TimesheetEntryModal from './modals/TimesheetEntryModal';
+    import RateFactory from "../classes/RateFactory";
 
     export default {
         mixins: [ ManageTimesheet ],
@@ -171,6 +165,8 @@
                 busy: false,
                 deleteIndex: null,
                 confirmDeleteModal: false,
+                services: [],
+                clientRates: [],
             }
         },
 
@@ -195,7 +191,22 @@
 
             isBusy() {
                 return this.busy != false;
-            }
+            },
+
+            defaultService() {
+                return this.services.find(item => item.default === true) || {};
+            },
+
+            defaultRates() {
+                let effectiveDate = this.week.days ? this.week.days[0] : moment().format('YYYY-MM-DD');
+                let serviceId = this.defaultService ? this.defaultService.id : null;
+
+                return RateFactory.findMatchingRate(this.clientRates, effectiveDate, serviceId, null, this.timesheet.caregiver_id, false);
+            },
+        },
+
+        mounted() {
+            this.fetchServices();
         },
 
         methods: {
@@ -248,14 +259,38 @@
 
                 this.form.entries.splice(index, 1, {
                     ...this.emptyShift,
-                    caregiver_rate: this.defaultRate || 0.00,
-                    provider_fee: this.defaultFee || 0.00,
+                    caregiver_rate: this.defaultRates.caregiver_rate || 0.00,
+                    client_rate: this.defaultRates.client_rate || 0.00,
                 });
                 this.shifts = this.form.entries;
                 this.deleteIndex = null;
                 this.confirmDeleteModal = false;
             },
+
+            async fetchServices() {
+                let response = await axios.get('/business/services?json=1');
+                if (Array.isArray(response.data)) {
+                    this.services = response.data;
+                } else {
+                    this.services = [];
+                }
+            },
+
+            async loadClientRates(clientId) {
+                if (clientId) {
+                    const response = await axios.get(`/business/clients/${clientId}/rates`);
+                    this.clientRates = response.data;
+                }
+            },
         },
+
+        watch: {
+            'form.client_id': function(val) {
+                if (val) {
+                    this.loadClientRates(val);
+                }
+            },
+        }
 
     }
 </script>

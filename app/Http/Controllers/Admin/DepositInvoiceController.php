@@ -1,0 +1,130 @@
+<?php
+namespace App\Http\Controllers\Admin;
+
+use App\Billing\BusinessInvoice;
+use App\Billing\CaregiverInvoice;
+use App\Billing\Contracts\DepositInvoiceInterface;
+use App\Billing\Generators\BusinessInvoiceGenerator;
+use App\Billing\Generators\CaregiverInvoiceGenerator;
+use App\Billing\Queries\BusinessInvoiceQuery;
+use App\Billing\Queries\CaregiverInvoiceQuery;
+use App\Billing\View\InvoiceViewFactory;
+use App\Billing\View\InvoiceViewGenerator;
+use App\BusinessChain;
+use App\Http\Controllers\Controller;
+use App\Responses\CreatedResponse;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Responses\Resources\DepositInvoice as DepositInvoiceResponse;
+
+class DepositInvoiceController extends Controller
+{
+    public function index(Request $request, CaregiverInvoiceQuery $caregiverInvoiceQuery, BusinessInvoiceQuery $businessInvoiceQuery)
+    {
+        if ($request->expectsJson()) {
+
+            if ($request->filled('paid')) {
+                if ($request->paid) {
+                    $caregiverInvoiceQuery->paidInFull();
+                    $businessInvoiceQuery->paidInFull();
+                } else {
+                    $caregiverInvoiceQuery->notPaidInFull();
+                    $businessInvoiceQuery->notPaidInFull();
+                }
+            }
+
+            if ($chainId = $request->input('chain_id')) {
+                $chain = BusinessChain::findOrFail($chainId);
+                $caregiverInvoiceQuery->forBusinessChain($chain);
+                $businessInvoiceQuery->forBusinessChain($chain);
+            }
+
+            if ($request->has('start_date')) {
+                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
+                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
+                $caregiverInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+                $businessInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
+
+            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver'])->get();
+            $businessInvoices = $businessInvoiceQuery->with(['business'])->get();
+
+            $invoices = $caregiverInvoices->merge($businessInvoices);
+
+            return DepositInvoiceResponse::collection($invoices);
+        }
+
+        $chains = BusinessChain::ordered()->get();
+        return view_component('admin-deposit-invoices', 'Deposit Invoices', compact('chains'));
+    }
+
+    public function generate(Request $request, BusinessInvoiceGenerator $businessInvoiceGenerator, CaregiverInvoiceGenerator $caregiverInvoiceGenerator)
+    {
+        $request->validate([
+            'chain_id' => 'required|exists:business_chains,id',
+        ]);
+
+        \DB::beginTransaction();
+
+        $chain = BusinessChain::findOrFail($request->input('chain_id'));
+        $invoices = [];
+        $errors = [];
+        foreach($chain->businesses as $business) {
+            $generator = clone $businessInvoiceGenerator;
+            try {
+                $invoices[] = $generator->generate($business);
+            }
+            catch(\Exception $e) {
+                $errors[] = [
+                    'recipient' => $business->name(),
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                ];
+            }
+        }
+
+        /** @var \App\Caregiver[] $caregivers */
+        $caregivers = $chain->caregivers()->active()->get();
+        foreach($caregivers as $caregiver) {
+            $generator = clone $caregiverInvoiceGenerator;
+            try {
+                $invoices[] = $generator->generate($caregiver);
+            }
+            catch(\Exception $e) {
+                $errors[] = [
+                    'recipient' => $caregiver->name(),
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                ];
+            }
+        }
+
+        \DB::commit();
+
+        $invoices = array_filter($invoices); // remove null entries when no invoice was generated
+
+        return new CreatedResponse(count($invoices) . ' invoices were created.', [
+            'invoices' => $invoices,
+            'errors' => $errors,
+        ]);
+    }
+
+    public function showBusinessInvoice(BusinessInvoice $invoice, string $view = InvoiceViewFactory::HTML_VIEW)
+    {
+        $viewGenerator = $this->getViewGenerator($invoice, $view);
+        return $viewGenerator->generateBusinessInvoice($invoice);
+    }
+
+    public function showCaregiverInvoice(CaregiverInvoice $invoice, string $view = InvoiceViewFactory::HTML_VIEW)
+    {
+        $viewGenerator = $this->getViewGenerator($invoice, $view);
+        return $viewGenerator->generateCaregiverInvoice($invoice);
+    }
+
+    private function getViewGenerator(DepositInvoiceInterface $invoice, string $view)
+    {
+        $strategy = InvoiceViewFactory::create($invoice, $view);
+        $viewGenerator = new InvoiceViewGenerator($strategy);
+        return $viewGenerator;
+    }
+}

@@ -6,17 +6,25 @@ use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Http\Request;
 
 class ReferralSourceController extends BaseController
 {
-    public function index($edit = 0, $create = 0)
+    public function index(Request $request)
     {
-        $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
+        $type = $request->type;
+
+        $referralsources = $this->businessChain()
+            ->referralSources()
+            ->forType($type)
+            ->ordered()
+            ->get();
+
         if (request()->expectsJson()) {
-            return $referralsources;
+            return response()->json($referralsources);
         }
 
-        return view('business.referral.list', compact('referralsources', 'edit', 'create'));
+        return view('business.referral.list', compact('referralsources', 'edit', 'create', 'type'));
     }
 
     public function create()
@@ -42,19 +50,16 @@ class ReferralSourceController extends BaseController
             },
         ]);
 
-        $business = $this->business();
-
-        return view('business.referral.show', compact('referralSource', 'business'));
+        return view('business.referral.show', compact('referralSource'));
     }
 
     public function store(UpdateReferralSourceRequest $request)
     {
-        $data = $request->filtered();
+        $data = $request->validated();
         $this->authorize('create', [ReferralSource::class, $data]);
 
-        $referralSource = ReferralSource::create($data);
-        if ($referralSource) {
-            return new CreatedResponse('The referral source has been created!', $referralSource);
+        if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
+        return new CreatedResponse('The referral source has been created!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to create referral source.');
@@ -63,12 +68,27 @@ class ReferralSourceController extends BaseController
     public function update(ReferralSource $referralSource, UpdateReferralSourceRequest $request)
     {
         $this->authorize('update', $referralSource);
-        $data = $request->filtered();
+        $data = $request->validated();
 
         if ($referralSource->update($data)) {
             return new SuccessResponse('The referral source has been saved!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to save referral source.');
+    }
+
+    public function destroy(ReferralSource $referralSource) 
+    {
+        $this->authorize('delete', $referralSource);
+
+        try {
+            if ($referralSource->delete()) {
+                return new SuccessResponse('The referral source was successfully removed.', $referralSource);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            return new ErrorResponse(400, 'Cannot delete that referral source because it is currently in use.');
+        }
+
+        return new ErrorResponse(500, 'An unexpected error occurred.');
     }
 }

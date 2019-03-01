@@ -13,15 +13,25 @@
                                     <b-btn @click="fetchReportData" variant="info">Search</b-btn>
                                 </b-button-toolbar>
                             </b-col>
+                            <b-col lg="6">
+                                <b-form-checkbox 
+                                    v-model="form.show_expired"
+                                    :value="true"
+                                    :unchecked-value="false"
+                                >
+                                    Include credit cards already expired
+                                </b-form-checkbox>
+                            </b-col>
                         </b-row>
 
-                        <loading-card v-show="loading"></loading-card>
+                        <loading-card v-show="loading" />
 
                         <div v-show="! loading">
                             <div class="table-responsive">
-                                <b-table :items="cards"
-                                        show-empty
-                                        :fields="fields">
+                                <b-table :items="cards" show-empty :fields="fields">
+                                    <template slot="user" scope="row">
+                                        <a :href="`/business/clients/${row.item.id}`">{{ row.item.name }}</a>
+                                    </template>
                                 </b-table>
                             </div>
                         </div>
@@ -41,13 +51,14 @@
             return{
                 cards: [],
                 form: new Form({
-                    daysFromNow: this.days
+                    daysFromNow: this.days,
+                    show_expired: true,
                 }),
                 loading: false,
                 fields: [
                     {
                         key: 'user',
-                        formatter: (value) => { return value.name; }
+                        label: 'Client',
                     },
                     'name_on_card',
                     'type',
@@ -56,10 +67,22 @@
                     {
                         key: 'expires_in',
                         label: 'Expires',
-                        formatter: (value) => { return value + ' expiration'; }
+                        formatter: (value) => value + ' expiration',
                     }
-                ]
+                ],
             }
+        },
+
+        computed: {
+            items() {
+                let result = [ ...this.cards ];
+
+                if(!this.form.show_expired) {
+                    result = result.filter(card => card.value.match('before'));
+                }
+
+                return result;
+            },
         },
 
         methods: {
@@ -75,9 +98,5 @@
                     });
             }
         },
-
-        computed: {
-
-        }
     }
 </script>

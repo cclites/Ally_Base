@@ -44,8 +44,8 @@ export default {
                 checked_out_time: '',
                 mileage: '',
                 other_expenses: '',
-                caregiver_rate: 0.00,
-                provider_fee: 0.00, 
+                caregiver_rate: null,
+                client_rate: null,
                 caregiver_comments: '',
                 activities: [],
             };
@@ -79,14 +79,6 @@ export default {
 
         hasClients() {
             return this.caregiver.clients && this.caregiver.clients.length > 0;
-        },
-
-        defaultRate() {
-            return this.client.caregiver_hourly_rate || 0;
-        },
-
-        defaultFee() {
-            return this.client.provider_hourly_fee || 0;
         },
 
         canEdit() {
@@ -149,7 +141,7 @@ export default {
             return moment(date).format(full ? 'dddd' : 'ddd');
         },
 
-        generateEntriesForWeek(week, entriesForDate, rate, fee) {
+        generateEntriesForWeek(week, entriesForDate, caregiverRate, clientRate) {
             let entries = [];
             week.days.forEach( (date) => {
                 var index = entriesForDate.findIndex(item => { return item.date == date });
@@ -158,8 +150,8 @@ export default {
                 } else {
                     entries.push({
                         ...this.emptyShift,
-                        caregiver_rate: rate || 0.00,
-                        provider_fee: fee || 0.00,
+                        caregiver_rate: caregiverRate || null,
+                        client_rate: clientRate || null,
                     });
                 }
             });
@@ -253,7 +245,11 @@ export default {
                     }
                 });
             }
-            this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, this.defaultRate, this.defaultFee);
+
+            const caregiverRate = this.defaultRates ? this.defaultRates.caregiver_rate : null;
+            const clientRate = this.defaultRates ? this.defaultRates.client_rate : null;
+
+            this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, caregiverRate, clientRate);
             this.form.entries = this.shifts;
         },
     },

@@ -20,8 +20,6 @@
                     :shift="{{ $shift }}"
                     :caregiver="{{ $shift->caregiver }}"
                     :client="{{ $shift->client }}"
-                    in_distance="{{ $checked_in_distance }}"
-                    out_distance="{{ $checked_out_distance }}"
                     :activities="{{ $activities OR '[]' }}"
                     :issues="{{ $shift->issues OR '[]' }}"
                     :admin="{{ (int) is_admin() }}"

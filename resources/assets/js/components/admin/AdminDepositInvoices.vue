@@ -1,0 +1,165 @@
+<template>
+    <b-card>
+        <b-row>
+            <b-col lg="12">
+                <b-card header="Select Date Range"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <b-form inline @submit.prevent="loadItems()">
+                        <date-picker
+                                v-model="start_date"
+                                placeholder="Start Date"
+                        >
+                        </date-picker> &nbsp;to&nbsp;
+                        <date-picker
+                                v-model="end_date"
+                                placeholder="End Date"
+                        >
+                        </date-picker>
+                        <b-form-select
+                                id="paid"
+                                name="paid"
+                                v-model="paid"
+                        >
+                            <option value="">All Invoices</option>
+                            <option value="0">Unpaid Invoices</option>
+                            <option value="1">Paid Invoices</option>
+                        </b-form-select>
+                        <b-form-select
+                                id="chain_id"
+                                name="chain_id"
+                                v-model="chain_id"
+                        >
+                            <option value="">All Business Chains</option>
+                            <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
+                        </b-form-select>
+                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                    </b-form>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="12" class="text-right">
+                <b-form-input v-model="filter" placeholder="Type to Search" />
+            </b-col>
+        </b-row>
+        <loading-card v-if="loaded == 0"></loading-card>
+        <b-row v-if="loaded < 0">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+        <div class="table-responsive" v-if="loaded > 0">
+            <b-table bordered striped hover show-empty
+                     :items="items"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :filter="filter"
+            >
+                <template slot="name" scope="row">
+                    <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
+                </template>
+                <template slot="status" scope="row">
+                    <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
+                    <span v-else>Unpaid</span>
+                </template>
+            </b-table>
+        </div>
+    </b-card>
+</template>
+
+<script>
+    import FormatsDates from "../../mixins/FormatsDates";
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+
+    export default {
+
+        mixins: [FormatsDates, FormatsNumbers],
+
+        props: {
+            'chains': {
+                type: Array,
+            }
+        },
+
+        data() {
+            return {
+                sortBy: 'created_at',
+                sortDesc: false,
+                filter: null,
+                loaded: -1,
+                start_date: moment().subtract(1, 'days').format('MM/DD/YYYY'),
+                end_date: moment().format('MM/DD/YYYY'),
+                chain_id: "",
+                paid: "",
+                items: [],
+                fields: [
+                    {
+                        key: 'created_at',
+                        label: 'Date',
+                        formatter: (val) => this.formatDateFromUTC(val),
+                    },
+                    {
+                        key: 'name',
+                        label: 'Invoice #',
+                        sortable: true,
+                    },
+                    {
+                        key: 'recipient',
+                        sortable: true,
+                    },
+                    {
+                        key: 'amount',
+                        formatter: (val) => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'amount_paid',
+                        formatter: (val) => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'status',
+                    }
+                ],
+            }
+        },
+
+        mounted() {
+
+        },
+
+        computed: {
+
+        },
+
+        methods: {
+
+            async loadItems() {
+                this.loaded = 0;
+                let url = '/admin/invoices/deposits?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
+                    '&chain_id=' + this.chain_id + '&paid=' + this.paid;
+                const response = await axios.get(url);
+                this.items = response.data.data;
+                this.loaded = 1;
+            },
+
+            invoiceUrl(invoice, view="") {
+                const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
+                return `/admin/invoices/${type}/${invoice.invoice_id}/${view}`;
+            },
+        }
+    }
+</script>
+
+<style>
+    table:not(.form-check) {
+        font-size: 14px;
+    }
+    .fa-check-square-o { color: green; }
+    .fa-times-rectangle-o { color: darkred; }
+</style>

@@ -20,6 +20,8 @@ use App\Schedule;
 use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
+use App\Scheduling\ScheduleEditor;
+use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
@@ -72,7 +74,7 @@ class ScheduleController extends BaseController
     {
         $this->authorize('read', $schedule);
 
-        return new ScheduleResponse($schedule->load('client'));
+        return new ScheduleResponse($schedule->load('client', 'services'));
     }
 
     /**
@@ -90,13 +92,17 @@ class ScheduleController extends BaseController
         $this->authorize('create', [Schedule::class, $data]);
         $business = $request->getBusiness();
 
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
-        $startsAt = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
-        $creator->startsAt($startsAt)
+        $creator->startsAt(Carbon::parse($request->input('starts_at')))
             ->duration($request->duration)
-            ->assignments($business->id, $request->client_id, $request->caregiver_id)
-            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
+            ->assignments($business->id, $request->client_id, $request->caregiver_id, $request->service_id, $request->payer_id)
+            ->rates($request->caregiver_rate, $request->client_rate, $request->fixed_rates)
+            ->addServices($request->getServices());
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
@@ -108,13 +114,13 @@ class ScheduleController extends BaseController
             $creator->attachCarePlan($request->care_plan_id);
         }
 
-        if ($request->notes) {
-            $note = ScheduleNote::create(['note' => $request->notes]);
+        if ($request->getNotes()) {
+            $note = ScheduleNote::create(['note' => $request->getNotes()]);
             $creator->attachNote($note);
         }
 
         if ($request->interval_type) {
-            $endDate = Carbon::createFromTimestamp($request->recurring_end_date, $business->timezone);
+            $endDate = Carbon::parse($request->recurring_end_date);
             $creator->interval($request->interval_type, $endDate, $request->bydays ?? []);
         }
 
@@ -123,7 +129,7 @@ class ScheduleController extends BaseController
         }
 
         try {
-            $created = $creator->create();
+            $created = $creator->create($this->userSettings()->enable_schedule_groups());
             if ($count = $created->count()) {
                 if ($count > 1) {
                     return new CreatedResponse('The scheduled shifts have been created.');
@@ -140,19 +146,28 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Update a single schedule
+     * Update a schedule, or an entire related schedule group
      *
      * @param \App\Http\Requests\UpdateScheduleRequest $request
      * @param \App\Schedule $schedule
+     * @param \App\Scheduling\ScheduleAggregator $aggregator
+     * @param \App\Scheduling\ScheduleEditor $editor
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
-     * @throws \Exception
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator, ScheduleEditor $editor)
     {
-        $data = $request->filtered();
         $business = $request->getBusiness();
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
+
+        if (!$this->validateAgainstNegativeRates($request)) {
+            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+        }
+
+        if ($request->input('group_update') && !$schedule->group) {
+            return new ErrorResponse(400, 'A group update was attempted without a schedule group');
+        }
 
         $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
         $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
@@ -162,25 +177,55 @@ class ScheduleController extends BaseController
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
         }
 
-        $notes = $request->input('notes');
-
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
-        if ($schedule->notes != $notes) {
-            if (strlen($notes)) {
-                $note = ScheduleNote::create(['note' => $notes]);
-                $schedule->attachNote($note);
-            } else {
-                $schedule->deleteNote();
+        // Weekday mapping
+        $dowMap = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+        $weekdayInt = (int) $schedule->weekday;
+        $weekdayText = $dowMap[$weekdayInt];
+
+        switch($request->input('group_update')) {
+            case 'total_all':
+                $editor->updateGroup($schedule->group, $schedule, $request->getScheduleData(), $request->getNotes(), $request->getServices());
+                return new SuccessResponse('All schedule occurrences have been updated.');
+            case 'total_weekday':
+                $editor->updateGroup($schedule->group, $schedule, $request->getScheduleData(), $request->getNotes(), $request->getServices(), $weekdayInt);
+                return new SuccessResponse("All $weekdayText occurrences have been updated.");
+            case 'future_all':
+                $editor->updateFuture($schedule->group, $schedule, $request->getScheduleData(), $request->getNotes(), $request->getServices());
+                return new SuccessResponse('All future occurrences have been updated.');
+            case 'future_weekday':
+                $editor->updateFuture($schedule->group, $schedule, $request->getScheduleData(), $request->getNotes(), $request->getServices(), $weekdayInt);
+                return new SuccessResponse("All future $weekdayText occurrences have been updated.");
+            default:
+                $editor->updateSingle($schedule, $request->getScheduleData(), $request->getNotes(), $request->getServices());
+        }
+
+        return new SuccessResponse('The schedule has been updated.');
+    }
+
+
+    protected function validateAgainstNegativeRates(CreateScheduleRequest $request)
+    {
+        $client = $request->getClient();
+        $services = $request->getServices();
+
+        if (count($services)) {
+            foreach($services as $service) {
+                if ($service['client_rate'] === null) continue;
+                if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
+                    return false;
+                }
+            }
+        } else if ($request->client_rate !== null) {
+            if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
+                return false;
             }
         }
 
-        $data = $request->validated();
-        $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
-        unset($data['notes']);
-        $schedule->update($data);
-        return new SuccessResponse('The schedule has been updated.');
+        return true;
     }
+
 
     /**
      * Protected function for making sure a client caregiver relationship exists
@@ -217,10 +262,6 @@ class ScheduleController extends BaseController
     {
         $this->authorize('update', $schedule);
 
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
-        }
-
         // update notes
         if (request()->has('notes')) {
             $notes = request()->notes;
@@ -238,6 +279,11 @@ class ScheduleController extends BaseController
 
         // set status
         $schedule->update(['status' => request()->status]);
+
+        // clear caregiver if open shift
+        if (in_array(request()->status, [Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT])) {
+            $schedule->update(['caregiver_id' => null]);
+        }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
@@ -415,8 +461,9 @@ class ScheduleController extends BaseController
      */
     public function print(PrintableScheduleRequest $request)
     {
-        $start = Carbon::parse($request->input('start', 'First day of this month'));
-        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $start = Carbon::parse($request->input('start_date', 'First day of this month'));
+        $end = Carbon::parse($request->input('end_date', 'First day of next month'));
+        $group_by = $request->input('group_by');
         $business = $request->getBusiness();
         $schedules = $business->schedules()
             ->whereBetween('starts_at', [$start, $end])
@@ -429,7 +476,7 @@ class ScheduleController extends BaseController
             return $schedule;
         });
 
-        return view('business.schedule_print', compact('schedules'));
+        return view('business.schedule_print', compact('schedules', 'group_by'));
     }
 
     protected function businessScheduleTitle(Schedule $schedule)

@@ -4,10 +4,10 @@ namespace Tests\Feature;
 
 use App\Business;
 use App\Client;
-use App\Contracts\ChargeableInterface;
-use App\CreditCard;
-use App\Gateway\CreditCardPaymentInterface;
-use App\GatewayTransaction;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\GatewayTransaction;
 use App\Payments\ClientPaymentAggregator;
 use App\Payments\PaymentProcessor;
 use App\Shift;

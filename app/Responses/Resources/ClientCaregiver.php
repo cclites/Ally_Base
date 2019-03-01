@@ -5,6 +5,7 @@ namespace App\Responses\Resources;
 use App\Shifts\AllyFeeCalculator;
 use App\Shifts\RateFactory;
 use Illuminate\Contracts\Support\Responsable;
+use App\Shift;
 
 class ClientCaregiver implements Responsable
 {
@@ -33,12 +34,12 @@ class ClientCaregiver implements Responsable
     }
 
     /**
-     * Create an HTTP response that represents the object.
+     * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
      */
-    public function toResponse($request)
+    public function toArray($request)
     {
         $caregiver = $this->caregiver;
         $client = $this->client;
@@ -78,6 +79,20 @@ class ClientCaregiver implements Responsable
             );
         }
 
+        $caregiver->last_service_date = $caregiver->getLastServiceDate($client);
+        $caregiver->total_hours = $caregiver->totalServiceHours($client->id);
+        
         return $caregiver;
+    }
+
+    /**
+     * Create an HTTP response that represents the object.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function toResponse($request)
+    {
+        return response($this->toArray($request));
     }
 }

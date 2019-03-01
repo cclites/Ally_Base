@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\CustomField;
+
 /**
  * App\ClientMeta
  *
@@ -21,6 +23,37 @@ namespace App;
  */
 class ClientMeta extends BaseModel
 {
+    /**
+    * The database table associated with this model
+    * 
+    * @var string
+    */
     protected $table = 'client_meta';
+
+    /**
+    * The attributes that are mass assignable
+    * 
+    * @var array
+    */
     protected $fillable = ['key', 'value'];
+
+    /**
+     * Get a displayable value for this custom field
+     *
+     * @return string
+     */
+    public function display()
+    {
+        
+        $field = CustomField::forAuthorizedChain()
+            ->where('key', $this->key)
+            ->with('options')
+            ->first();
+
+        if($field->type == 'dropdown') {
+            return $field->options->where('value', $this->value)->first()->label;
+        }
+        
+        return $this->value;
+    }
 }

@@ -286,12 +286,28 @@ class CareMatch
 
     protected function queryPreferences($builder)
     {
-        if ($license = array_get($this->preferences, 'license')) {
-            $builder->where('title', 'LIKE', '%'.$license.'%');
+        if ($certification = array_get($this->preferences, 'certification')) {
+            $builder->where('certification', $certification);
         }
 
         if ($gender = array_get($this->preferences, 'gender')) {
             $this->queryCaregiverUser($builder, 'gender', $gender);
+        }
+
+        if ($smoking = array_get($this->preferences, 'smoking')) {
+            $this->queryCaregiverUser($builder, 'smoking_okay', $smoking);
+        }
+
+        if ($pets_dogs = array_get($this->preferences, 'pets_dogs')) {
+            $this->queryCaregiverUser($builder, 'pets_dogs_okay', $pets_dogs);
+        }
+
+        if ($pets_cats = array_get($this->preferences, 'pets_cats')) {
+            $this->queryCaregiverUser($builder, 'pets_cats_okay', $pets_cats);
+        }
+
+        if ($pets_birds = array_get($this->preferences, 'pets_birds')) {
+            $this->queryCaregiverUser($builder, 'pets_birds_okay', $pets_birds);
         }
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Http\Requests\UpdateBusinessBankRequest;
 use App\Http\Requests\UpdateBusinessRequest;
@@ -13,6 +13,8 @@ use App\Responses\SuccessResponse;
 use App\Traits\Request\BankAccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Requests\BusinessRequest;
+use App\Http\Requests\UpdateBusinessOvertimeRequest;
 
 class SettingController extends BaseController
 {
@@ -97,6 +99,22 @@ class SettingController extends BaseController
         app('settings')->set($business, $data);
 
         return new SuccessResponse('Business settings updated.', $request->getBusiness());
+    }
+
+    /**
+     * Update the business's overtime settings.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateOvertime(UpdateBusinessOvertimeRequest $request)
+    {
+        $business = $request->getBusiness();
+        $this->authorize('update', $business);
+
+        app('settings')->set($business, $request->filtered());
+
+        return new SuccessResponse('Overtime settings updated.', $request->getBusiness());
     }
 
     public function updatePayrollPolicy(Request $request, $id)

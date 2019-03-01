@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <caregiver-directory :caregivers="{{ $caregivers }}"></caregiver-directory>
+            <caregiver-directory :caregivers="{{ $caregivers }}" :custom-fields="{{ $fields }}"></caregiver-directory>
         </div>
     </div>
 @endsection

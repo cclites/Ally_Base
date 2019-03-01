@@ -21,6 +21,7 @@
     try {
         window.gmapsKey = '{{ config('services.gmaps.key') }}';
         window.AuthUser = JSON.parse('@json(optional(auth()->user())->withImpersonationDetails())');
+        window.OfficeUserSettings = JSON.parse('@json((new \App\Users\SettingsRepository)->getOfficeUserSettings(auth()->user()))');
     }
     catch(e) { console.log(e); }
 </script>
