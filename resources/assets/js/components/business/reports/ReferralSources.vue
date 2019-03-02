@@ -195,7 +195,9 @@
             referralSourceData() {
                 return this.items.map(stats => ({
                     organization: stats.organization,
-                    total: stats.clients_count + stats.prospects_count,
+                    total: this.sourceType == 'client' 
+                        ? stats.clients_count + stats.prospects_count
+                        : stats.caregivers_count,
                     revenue: stats.revenue,
                 }));
             },
@@ -206,7 +208,7 @@
                 return {
                     title: {
                         text: 'Referral by Sources',
-                        subtext: 'For clients and prospects',
+                        subtext: this.sourceType == 'client' ? 'For clients and prospects' : 'For caregivers',
                     },
                     tooltip: {
                         trigger: 'axis',
