@@ -8,42 +8,87 @@
                     header-bg-variant="info"
                 >
                     <b-row>
-                        <b-col md="2" class="float-left">
-                            <b-form-select v-model="filter" class="mb-3">
-                                <option :value="null">-- All Referral Sources --</option>
-                                <option :value="report.organization" v-for="report in reports" :key="report.id">{{ report.organization }}</option>
-                            </b-form-select>
+                        <b-col md="3">
+                            <b-form-group label="Start Date">
+                                <date-picker
+                                    class="mb-1"
+                                    name="start_date"
+                                    v-model="filters.start_date"
+                                    placeholder="Start Date"
+                                />
+                            </b-form-group>
                         </b-col>
-                        <b-col md="3" class="float-right">
-                            <b-button>
-                                <b-form-checkbox @change="show=!show" v-model="checked" class="mb-0">
-                                    <span v-if="false">Hide Summary Graphs </span>
-                                    <span v-else>Show Summary Graphs </span>
-                                </b-form-checkbox>
-                            </b-button>
+
+                        <b-col md="3">
+                            <b-form-group label="End Date">
+                                <date-picker
+                                    class="mb-1"
+                                    v-model="filters.end_date"
+                                    name="end_date"
+                                    placeholder="End Date"
+                                />
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col md="3">
+                            <b-form-group label="." label-class="hidden-label">
+                                <b-form-select v-model="filters.referral_source" class="mb-3">
+                                    <option :value="null">-- All Referral Sources --</option>
+                                    <option 
+                                        v-for="report in reports" 
+                                        :value="report.organization" 
+                                        :key="report.id"
+                                    >{{ report.organization }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        
+                        <b-col md="3">
+                            <b-form-group label="." label-class="hidden-label">
+                                <b-button>
+                                    <b-form-checkbox @change="showGraph=!showGraph" v-model="checked" class="mb-0">
+                                        <span v-if="false">Hide Summary Graphs </span>
+                                        <span v-else>Show Summary Graphs </span>
+                                    </b-form-checkbox>
+                                </b-button>
+                            </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-row class="mb-5" v-show="show">
-                        <b-col md="4">
-                            <div id="bar-chart">
-                                <canvas ref="barchart" height="300vh" width="600vw"></canvas>
-                            </div>
-                        </b-col>
-                        <b-col md="4">
-                            <div id="doughnut-chart">
-                                <canvas ref="doughnutchart" height="300vh" width="600vw"></canvas>
-                            </div>
-                        </b-col>
-                        <b-col md="4">
-                            <div id="revenue-chart">
-                                <canvas ref="revenuechart" height="300vh" width="600vw"></canvas>
-                            </div>
+                    <b-row>
+                        <b-col md="2">
+                            <b-form-group label="&nbsp;">
+                                <b-button variant="info" @click="fetchData()">Generate</b-button>
+                            </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-table striped hover
-                             :items="items"
-                             :fields="fields"
-                             :filter="filter">
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="12">
+                <b-card
+                    header="Report"
+                    header-text-variant="white"
+                    header-bg-variant="info"
+                >
+                    <b-row class="mb-5" v-show="showGraph">
+                        <b-col md="4">
+                            <e-charts ref="bar" class="chart" :options="barOptions" auto-resize />
+                        </b-col>
+                        <b-col md="4">
+                            <e-charts ref="referralDonut" class="chart" :options="referralDonutOptions" auto-resize />
+                        </b-col>
+                        <b-col md="4">
+                            <e-charts ref="revenueDonut" class="chart" :options="revenueDonutOptions" auto-resize />
+                        </b-col>
+                    </b-row>
+                    <hr/>
+                    <b-table 
+                        striped hover
+                        :items="items"
+                        :fields="fields"
+                        :filter="filters.referral_source"
+                    >
                         <template slot="revenue"  scope="row">
                             {{ moneyFormat(row.item.revenue) }}
                         </template>
@@ -60,182 +105,187 @@
 </template>
 
 <script>
-    import Chart from 'chart.js';
+    import ECharts from 'vue-echarts';
     import FormatsListData from "../../../mixins/FormatsListData";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
         mixins: [FormatsListData, FormatsNumbers],
 
-        props: ['reports', 'sourceType'],
+        components: {
+            ECharts,
+        },
+
+        props: {
+            reports: {
+                type: Array,
+                required: true,
+            },
+            sourceType: {
+                type: String,
+                required: true,
+            },
+        },
 
         data() {
             return {
-                show: true,
+                showGraph: true,
                 checked: true,
                 selected: null,
-                filter: null
-            }
+                data: [],
+                filters: {
+                    referral_source: null,
+                    start_date: '',
+                    end_date: '',
+                },
+                donutOptions: {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b}: {c} ({d}%)"
+                    },
+                    legend: {
+                        orient: 'horizontal',
+                        x: 'center',
+                        data: [],
+                    },
+                    series: {
+                        name: 'Referrals',
+                        type:'pie',
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                show: true,
+                                textStyle: {
+                                    fontSize: '30',
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        },
+                        labelLine: {
+                            normal: {
+                                show: false
+                            }
+                        },
+                        data: null,
+                    }
+                },
+            };
         },
 
         mounted() {
-            var  labels = [], datasets=[], revenue=[], graphColors = [], allCount=0, userCount=[];
-            this.items.forEach(item => {
-                if (this.sourceType == 'client') {
-                    allCount +=(item.clients_count + item.prospects_count);
-                } else {
-                    allCount += item.caregivers_count;
-                }
-            });
+            if(this.$refs.bar) {
+                this.$refs.bar.resize();
+            }
 
-            this.items.forEach(item => {
-                labels.push(item.organization);
-                revenue.push(item.revenue);
-                if (this.sourceType == 'client') {
-                    userCount.push(Math.round(100/allCount*(item.clients_count + item.prospects_count)));
-                    datasets.push(item.clients_count + item.prospects_count);
-                } else {
-                    userCount.push(Math.round(100 / (allCount * (item.caregivers_count))));
-                    datasets.push(item.caregivers_count);
-                }
-                var randomR = Math.floor((Math.random() * 200) + 100);
-                var randomG = Math.floor((Math.random() * 200) + 100);
-                var randomB = Math.floor((Math.random() * 100) + 100);
-                var graphBackground = "rgb("
-                    + randomR + ", "
-                    + randomG + ", "
-                    + randomB + ")";
-                graphColors.push(graphBackground);
-            });
+            if(this.$refs.referralDonut) {
+                this.$refs.referralDonut.resize();
+            }
 
-            var barchart = this.$refs.barchart;
-            var barctx = barchart.getContext("2d");
-            var myChart = new Chart(barctx, {
-                type: 'bar',
-                data: {
-                    labels:  labels,
-                    datasets: [{
-                        label: 'Referred Count',
-                        data: datasets,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Referrals By Source'
-                    }
-                }
-            });
-
-            var doughnutchart = this.$refs.doughnutchart;
-            var doughnutctx = doughnutchart.getContext("2d");
-            var myChart = new Chart(doughnutctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: userCount,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Referrals By Source'
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'single',
-                        callbacks: {
-                            label: function(tooltipItems, data) {
-                                var label = data.labels[tooltipItems.index];
-                                var dataset = data.datasets[0].data[tooltipItems.index];
-                                return  label + ' : ' + dataset + "%";
-                            }
-                        }
-                    },
-                }
-            });
-
-            var doughnutchart = this.$refs.revenuechart;
-            var doughnutctx = doughnutchart.getContext("2d");
-            var myChart = new Chart(doughnutctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: revenue,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Revenue By Referral Source'
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'single',
-                        callbacks: {
-                            label: (tooltipItems, data) => {
-                                var label = data.labels[tooltipItems.index];
-                                var dataset = data.datasets[0].data[tooltipItems.index];
-                                return  label + ' : ' + this.moneyFormat(dataset);
-                            }
-                        }
-                    }
-                }
-            });
-
+            if(this.$refs.revenueDonut) {
+                this.$refs.revenueDonut.resize();
+            }
         },
 
         computed: {
+            referralSourceData() {
+                return this.items.map(stats => ({
+                    organization: stats.organization,
+                    total: stats.clients_count + stats.prospects_count,
+                    revenue: stats.revenue,
+                }));
+            },
+
+            barOptions() {
+                const data = this.referralSourceData;
+
+                return {
+                    title: {
+                        text: 'Referral by Sources',
+                        subtext: 'For clients and prospects',
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['ref']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: data.map(data => data.organization),
+                    },
+                    series: [
+                        {
+                            name: 'Referrals',
+                            type: 'bar',
+                            data: data.map(data => data.total),
+                        },
+                    ]
+                };
+            },
+
+            referralDonutOptions() {
+                const data = this.referralSourceData;
+
+                return {
+                    ...this.donutOptions,
+                    title: {
+                        text: 'Referral by Sources',
+                    },
+                    series: [
+                        {
+                            ...this.donutOptions.series,
+                            data: data.map(data => ({name: data.organization, value: data.total})),
+                        },
+                    ],
+                };
+            },
+
+            revenueDonutOptions() {
+                const data = this.referralSourceData;
+
+                return {
+                    ...this.donutOptions,
+                    title: {
+                        text: 'Revenue by Sources',
+                    },
+                    series: [
+                        {
+                            ...this.donutOptions.series,
+                            data: data.map(data => ({name: data.organization, value: data.revenue})),
+                        },
+                    ],
+                };
+            },
+
             items() {
-               let items =  this.reports.map(function(report) {
-                    return {
+               return this.reports.map((report) => ({
                         organization: report.organization,
                         name: report.contact_name,
                         phone: report.phone,
-                        prospects_count: report.prospects_count | 0,
-                        clients_count: report.clients_count | 0,
-                        caregivers_count: report.caregivers_count | 0,
+                        prospects_count: report.prospects_count || 0,
+                        clients_count: report.clients_count || 0,
+                        caregivers_count: report.caregivers_count || 0,
                         revenue: report.shift_total,
                         id: report.id,
-                    }
-                });
-
-               return  items;
+                }));
             },
 
             title() {
@@ -268,16 +318,20 @@
                 ];
 
                 if (this.sourceType == 'client') {
-                    columns.push({
-                        key: 'prospects_count',
-                        label: 'Number of Prospects',
-                        sortable: true
-                    });
-                    columns.push({
-                        key: 'clients_count',
-                        label: 'Number of Clients',
-                        sortable: true
-                    });
+                    const newItems = [
+                        {
+                            key: 'prospects_count',
+                            label: 'Number of Prospects',
+                            sortable: true
+                        },
+                        {
+                            key: 'clients_count',
+                            label: 'Number of Clients',
+                            sortable: true
+                        }
+                    ];
+                    
+                    columns.push(...newItems);
                 } else {
                     columns.push({
                         key: 'caregivers_count',
@@ -286,17 +340,35 @@
                     });
                 }
 
+                // Add to last position
                 columns.push({
                     key: 'revenue',
                     label: 'Revenue',
                     sortable: true
-                })
+                });
 
                 return columns;
             },
         },
 
         methods: {
+            async fetchData() {
+                try {
+                    const form = new Form;
+                    const {data} = await form.post('/business/');
+                } catch(e) {
+                    console.error(e);
+                }
+            }
         }
     }
 </script>
+
+<style scoped>
+.chart {
+    width: 100%;
+}
+.hidden-label {
+    opacity: 0;
+}
+</style>
