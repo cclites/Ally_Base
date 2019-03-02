@@ -36,7 +36,7 @@
                                     <option :value="null">-- All Referral Sources --</option>
                                     <option 
                                         v-for="report in reports" 
-                                        :value="report.organization" 
+                                        :value="report.id" 
                                         :key="report.id"
                                     >{{ report.organization }}</option>
                                 </b-form-select>
@@ -87,7 +87,7 @@
                         striped hover
                         :items="items"
                         :fields="fields"
-                        :filter="filters.referral_source"
+                        :filter="tableFilter"
                     >
                         <template slot="revenue"  scope="row">
                             {{ moneyFormat(row.item.revenue) }}
@@ -132,7 +132,7 @@
                 showGraph: true,
                 checked: true,
                 selected: null,
-                data: [],
+                data: null,
                 filters: {
                     referral_source: null,
                     start_date: '',
@@ -278,15 +278,16 @@
             },
 
             items() {
-               return this.reports.map((report) => ({
-                        organization: report.organization,
-                        name: report.contact_name,
-                        phone: report.phone,
-                        prospects_count: report.prospects_count || 0,
-                        clients_count: report.clients_count || 0,
-                        caregivers_count: report.caregivers_count || 0,
-                        revenue: report.shift_total,
-                        id: report.id,
+                const source = this.data ? this.data : this.reports;
+                return source.map((report) => ({
+                    organization: report.organization,
+                    name: report.contact_name,
+                    phone: report.phone,
+                    prospects_count: report.prospects_count || 0,
+                    clients_count: report.clients_count || 0,
+                    caregivers_count: report.caregivers_count || 0,
+                    revenue: report.shift_total,
+                    id: report.id,
                 }));
             },
 
@@ -351,13 +352,19 @@
 
                 return columns;
             },
+
+            tableFilter() {
+                const report = this.reports.find(report => report.id == this.filters.referral_source);
+                return report ? report.organization : null;
+            },
         },
 
         methods: {
             async fetchData() {
                 try {
-                    const form = new Form;
-                    const {data} = await form.post('/business/');
+                    const form = new Form(this.filters);
+                    const {data} = await form.post(`/business/reports/${this.sourceType}-referral-sources`);
+                    this.data = data;
                 } catch(e) {
                     console.error(e);
                 }
