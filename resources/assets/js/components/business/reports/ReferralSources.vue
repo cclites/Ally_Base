@@ -79,9 +79,7 @@
                             <e-charts ref="referralDonut" class="chart" :options="referralDonutOptions" auto-resize />
                         </b-col>
                         <b-col md="4">
-                            <div id="revenue-chart">
-                                <canvas ref="revenuechart" height="300vh" width="600vw"></canvas>
-                            </div>
+                            <e-charts ref="revenueDonut" class="chart" :options="revenueDonutOptions" auto-resize />
                         </b-col>
                     </b-row>
                     <hr/>
@@ -107,7 +105,6 @@
 </template>
 
 <script>
-    import Chart from 'chart.js';
     import ECharts from 'vue-echarts';
     import FormatsListData from "../../../mixins/FormatsListData";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
@@ -189,154 +186,17 @@
                 this.$refs.referralDonut.resize();
             }
 
-            /*
-            var  labels = [], datasets=[], revenue=[], graphColors = [], allCount=0, userCount=[];
-            this.items.forEach(item => {
-                if (this.sourceType == 'client') {
-                    allCount +=(item.clients_count + item.prospects_count);
-                } else {
-                    allCount += item.caregivers_count;
-                }
-            });
-
-            this.items.forEach(item => {
-                labels.push(item.organization);
-                revenue.push(item.revenue);
-                if (this.sourceType == 'client') {
-                    userCount.push(Math.round(100/allCount*(item.clients_count + item.prospects_count)));
-                    datasets.push(item.clients_count + item.prospects_count);
-                } else {
-                    userCount.push(Math.round(100 / (allCount * (item.caregivers_count))));
-                    datasets.push(item.caregivers_count);
-                }
-                var randomR = Math.floor((Math.random() * 200) + 100);
-                var randomG = Math.floor((Math.random() * 200) + 100);
-                var randomB = Math.floor((Math.random() * 100) + 100);
-                var graphBackground = "rgb("
-                    + randomR + ", "
-                    + randomG + ", "
-                    + randomB + ")";
-                graphColors.push(graphBackground);
-            });
-
-            var barchart = this.$refs.barchart;
-            var barctx = barchart.getContext("2d");
-            var myChart = new Chart(barctx, {
-                type: 'bar',
-                data: {
-                    labels:  labels,
-                    datasets: [{
-                        label: 'Referred Count',
-                        data: datasets,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Referrals By Source'
-                    }
-                }
-            });
-
-            var doughnutchart = this.$refs.doughnutchart;
-            var doughnutctx = doughnutchart.getContext("2d");
-            var myChart = new Chart(doughnutctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: userCount,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Referrals By Source'
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'single',
-                        callbacks: {
-                            label: function(tooltipItems, data) {
-                                var label = data.labels[tooltipItems.index];
-                                var dataset = data.datasets[0].data[tooltipItems.index];
-                                return  label + ' : ' + dataset + "%";
-                            }
-                        }
-                    },
-                }
-            });
-
-            var doughnutchart = this.$refs.revenuechart;
-            var doughnutctx = doughnutchart.getContext("2d");
-            var myChart = new Chart(doughnutctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: revenue,
-                        backgroundColor: graphColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                min: 0,
-                                stepSize: 1
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Revenue By Referral Source'
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'single',
-                        callbacks: {
-                            label: (tooltipItems, data) => {
-                                var label = data.labels[tooltipItems.index];
-                                var dataset = data.datasets[0].data[tooltipItems.index];
-                                return  label + ' : ' + this.moneyFormat(dataset);
-                            }
-                        }
-                    }
-                }
-            });
-            */
+            if(this.$refs.revenueDonut) {
+                this.$refs.revenueDonut.resize();
+            }
         },
 
         computed: {
             referralSourceData() {
                 return this.items.map(stats => ({
-                    org: stats.organization,
+                    organization: stats.organization,
                     total: stats.clients_count + stats.prospects_count,
-                    revenue: stats.shift_total,
+                    revenue: stats.revenue,
                 }));
             },
 
@@ -369,7 +229,7 @@
                     },
                     yAxis: {
                         type: 'category',
-                        data: data.map(data => data.org),
+                        data: data.map(data => data.organization),
                     },
                     series: [
                         {
@@ -392,7 +252,7 @@
                     series: [
                         {
                             ...this.donutOptions.series,
-                            data: data.map(data => ({name: data.org, value: data.total})),
+                            data: data.map(data => ({name: data.organization, value: data.total})),
                         },
                     ],
                 };
@@ -409,7 +269,7 @@
                     series: [
                         {
                             ...this.donutOptions.series,
-                            data: data.map(data => ({name: data.org, value: data.revenue})),
+                            data: data.map(data => ({name: data.organization, value: data.revenue})),
                         },
                     ],
                 };
