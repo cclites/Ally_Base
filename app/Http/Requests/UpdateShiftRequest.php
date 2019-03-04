@@ -33,8 +33,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date|after_or_equal:' . $this->input('checked_in_time'),
             'fixed_rates' => 'required|boolean',
-            'client_rate' => 'nullable|numeric|max:1000|min:0',
-            'caregiver_rate' => 'nullable|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
+            'client_rate' => 'nullable|required_with:caregiver_rate|numeric|max:1000|min:0',
+            'caregiver_rate' => 'nullable|required_with:client_rate|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
             'hours_type' => 'required|in:default,overtime,holiday',
             'service_id' => 'nullable|exists:services,id',
             'payer_id' => [

@@ -42,7 +42,7 @@ class ShiftController extends BaseController
         $this->authorize('create', [Shift::class, $request->getShiftArray($defaultStatus)]);
 
         if (!$this->validateAgainstNegativeRates($request)) {
-            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+            return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
         \DB::beginTransaction();
@@ -111,7 +111,7 @@ class ShiftController extends BaseController
         }
 
         if (!$this->validateAgainstNegativeRates($request)) {
-            return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
+            return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
         $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
@@ -159,6 +159,9 @@ class ShiftController extends BaseController
         if (count($services)) {
             foreach($services as $service) {
                 if ($service['client_rate'] === null) continue;
+                if ($service['caregiver_rate'] === null) {
+                    return false;
+                }
                 if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
                     return false;
                 }
