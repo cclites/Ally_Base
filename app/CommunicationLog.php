@@ -4,12 +4,11 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-class CommunicationLog extends Model implements BelongsToBusinessesInterface
+class CommunicationLog extends AuditableModel
 {
-    use BelongsToOneBusiness;
-
     /**
      * The attributes that aren't mass assignable.
      *
@@ -35,26 +34,6 @@ class CommunicationLog extends Model implements BelongsToBusinessesInterface
     // RELATIONSHIPS
     // **********************************************************
 
-    /**
-     * A CommunicationLog belongs to a User.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the Business relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function business()
-    {
-        return $this->belongsTo(\App\Business::class);
-    }
-
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -62,6 +41,42 @@ class CommunicationLog extends Model implements BelongsToBusinessesInterface
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
+
+    /**
+     * Gets logs that are sent in between given start and end dates.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param null|string $start
+     * @param null|string $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereSentBetween($query, $start, $end)
+    {
+        if (empty($start) || empty($end)) {
+            return $query;
+        }
+
+        return $query->whereBetween('sent_at', [
+            (new Carbon($start . ' 00:00:00', 'America/New_York'))->setTimezone('UTC'),
+            (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC')
+        ]);
+    }
+
+    /**
+     * Get the logs with the given channel type.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param null|string $channel
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForChannel($query, $channel)
+    {
+        if (empty($channel)) {
+            return $query;
+        }
+
+        return $query->where('channel', $channel);
+    }
 
     // **********************************************************
     // OTHER FUNCTIONS

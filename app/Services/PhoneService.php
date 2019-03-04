@@ -76,6 +76,7 @@ class PhoneService
                 'from' => $from,
                 'sent_at' => Carbon::now(),
                 'channel' => 'sms',
+                'preview' => substr($message, 0, 100),
             ]);
         }
     }

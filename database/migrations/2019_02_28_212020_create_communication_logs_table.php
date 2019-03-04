@@ -17,9 +17,10 @@ class CreateCommunicationLogsTable extends Migration
             $table->increments('id');
             $table->string('channel')->index();
             $table->string('subject')->nullable();
-            $table->text('body');
             $table->string('to')->nullable();
             $table->string('from')->nullable();
+            $table->text('body');
+            $table->string('preview', 100);
             $table->timestamp('sent_at')->nullable();
             $table->timestamps();
         });
