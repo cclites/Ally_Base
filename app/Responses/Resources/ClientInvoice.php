@@ -1,6 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
+use App\Billing\Exceptions\PaymentMethodError;
 use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Support\Collection;
 
@@ -36,9 +37,12 @@ class ClientInvoice extends Resource
                 return $this->resource->getClientPayer()->getPayer();
             }),
             'payer_payment_type' => $this->whenLoaded('clientPayer', function() {
-                if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
-                    return $method->getPaymentStrategy()->getPaymentType();
+                try {
+                    if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
+                        return $method->getPaymentStrategy()->getPaymentType();
+                    }
                 }
+                catch (PaymentMethodError $e) {}
                 return null;
             }),
             'items' => $this->whenLoaded('items', function() {
