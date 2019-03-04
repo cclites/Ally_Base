@@ -11,4 +11,10 @@ return [
      * is to use it.
      */
     'prevent_dupe_posts' => env('PREVENT_DUPE_POSTS', true),
+
+    /**
+     * Flag to turn on/off logging of all raw outgoing email
+     * and SMS data.
+     */
+    'communication_log' => env('COMMUNICATION_LOG', false),
 ];
