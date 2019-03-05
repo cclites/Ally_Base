@@ -6,39 +6,37 @@
             </b-col>
         </b-row>
         <b-row class="mb-2">
-            <b-col lg="3">
-                <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
-                    <template slot="first">
-                        <!-- this slot appears above the options from 'options' prop -->
-                        <option value="">All Case Managers</option>
-                    </template>
-                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="3">
-                <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
-            </b-col>
-            <b-col lg="3">
-                <b-form-select v-model="filters.status">
-                    <option value="">All Clients</option>
-                    <option value="active">Active Clients</option>
-                    <option value="inactive">Inactive Clients</option>
-                    <option v-for="status in statuses.client" :key="status.id" :value="status.id">
-                        {{ status.name }}
-                    </option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="3">
-                <b-form-select v-model="filters.client_type">
-                    <option value="">All Client Types</option>
-                    <option value="private_pay">Private Pay</option>
-                    <option value="medicaid">Medicaid</option>
-                    <option value="VA">VA</option>
-                    <option value="LTCI">LTC Insurance</option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="3" class="text-right">
-                <b-form-input v-model="filters.search" placeholder="Type to Search" />
+            <b-col lg="12">
+                <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
+                    <b-form-select v-model="filters.caseManager" class="f-1 mr-2">
+                        <template slot="first">
+                            <!-- this slot appears above the options from 'options' prop -->
+                            <option value="">All Client Services Coordinators</option>
+                        </template>
+                        <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
+                    </b-form-select>
+
+                    <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" class="f-1 mr-2" />
+
+                    <b-form-select v-model="filters.status" class="f-1 mr-2">
+                        <option value="">All Clients</option>
+                        <option value="active">Active Clients</option>
+                        <option value="inactive">Inactive Clients</option>
+                        <option v-for="status in statuses.client" :key="status.id" :value="status.id">
+                            {{ status.name }}
+                        </option>
+                    </b-form-select>
+
+                    <b-form-select v-model="filters.client_type" class="f-1 mr-2">
+                        <option value="">All Client Types</option>
+                        <option value="private_pay">Private Pay</option>
+                        <option value="medicaid">Medicaid</option>
+                        <option value="VA">VA</option>
+                        <option value="LTCI">LTC Insurance</option>
+                    </b-form-select>
+
+                    <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
+                </div>
             </b-col>
         </b-row>
 
@@ -138,7 +136,7 @@
                     },
                     {
                         key: 'case_manager_name',
-                        label: 'Case Manager',
+                        label: 'Services Coordinator',
                         sortable: true,
                     },
                     {
