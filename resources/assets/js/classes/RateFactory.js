@@ -19,7 +19,7 @@ class RateFactory {
         allyPct = new Decimal(allyPct);  // Ex: 0.05
 
         return allyFeeIncluded
-            ? clientRate.div((allyPct.add(1))).mul(allyPct)
+            ? clientRate.div(allyPct.add(1)).mul(allyPct)
             : clientRate.mul(allyPct);
     }
 
@@ -38,11 +38,11 @@ class RateFactory {
 
     static getClientRate(providerFee, caregiverRate, allyPct, allyFeeIncluded = true)
     {
-        providerFee = new Decimal(providerFee);
-        caregiverRate = new Decimal(caregiverRate);
-        let allyFee = this.getAllyFee(allyPct, caregiverRate + providerFee, false);
+        providerFee = new Decimal(providerFee || 0);
+        caregiverRate = new Decimal(caregiverRate || 0);
+        let allyFee = this.getAllyFee(allyPct, caregiverRate.add(providerFee), false);
 
-        return providerFee.plus(caregiverRate).plus((allyFeeIncluded ? allyFee : 0));
+        return providerFee.plus(caregiverRate).plus(allyFeeIncluded ? allyFee : 0);
     }
 
     static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
