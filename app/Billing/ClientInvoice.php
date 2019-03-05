@@ -144,6 +144,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return false;
     }
 
+    function removePayment(Payment $payment): bool
+    {
+        if ($payment = $this->payments->where('id', $payment->id)->first()) {
+            $this->payments()->syncWithoutDetaching([$payment->id => ['amount_applied' => 0]]);
+            return (bool) $this->decrement('amount_paid', $payment->pivot->amount_applied);
+        }
+
+        return false;
+    }
+
     function getName(): string
     {
         return $this->name;

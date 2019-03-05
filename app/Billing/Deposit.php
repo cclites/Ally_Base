@@ -6,6 +6,7 @@ use App\Business;
 use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\ContactableInterface;
+use App\Events\DepositFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
@@ -107,6 +108,11 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         ];
     }
 
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
     public function getRecipient(): ContactableInterface
     {
         return $this->caregiver ?? $this->business ?? new Business();
@@ -142,4 +148,16 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         return subtract($this->amount, $this->getAmountApplied());
     }
 
+    /**
+     * Mark the deposit as failed and emit the domain event
+     *
+     * @throws \Exception
+     */
+    function markFailed()
+    {
+        if (!$this->update(['success' => false])) {
+            throw new \Exception('The deposit could not be marked as failed.');
+        }
+        event(new DepositFailed($this));
+    }
 }
