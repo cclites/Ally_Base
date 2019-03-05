@@ -217,9 +217,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_CONFIRMATION = 'WAITING_FOR_CONFIRMATION';  // Unconfirmed shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Confirmed shift that needs to be authorized for payment
+    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_INVOICE = 'WAITING_FOR_INVOICE';  // Authorized shift that is waiting for invoicing
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Invoiced shift that is waiting for payment
-    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_BUSINESS_ONLY = 'PAID_BUSINESS_ONLY'; // Shift that failed payment to the caregiver, but paid successfully to the business
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
