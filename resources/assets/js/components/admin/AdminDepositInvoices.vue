@@ -88,7 +88,7 @@
 
         data() {
             return {
-                sortBy: 'shift_time',
+                sortBy: 'created_at',
                 sortDesc: false,
                 filter: null,
                 loaded: -1,

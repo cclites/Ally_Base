@@ -93,13 +93,7 @@
             />
 
             <!-- Details modal -->
-            <shift-details-modal v-model="detailsModal" :selected-item="selectedItem">
-                <template slot="buttons" scope="row">
-                    <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
-                    <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
-                    <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                </template>
-            </shift-details-modal>
+        <shift-details-modal v-model="detailsModal" :shift="selectedItem"></shift-details-modal>
         </div>
     </div>
 </template>

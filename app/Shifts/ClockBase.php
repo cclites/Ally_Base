@@ -76,7 +76,7 @@ abstract class ClockBase
         );
     }
 
-    protected function getClockInVerificationData(Client $client): ShiftDataInterface
+    public function getClockInVerificationData(Client $client): ShiftDataInterface
     {
         $data = $this->buildVerificationData($client);
         if ($data instanceof TVVData) {
@@ -85,7 +85,7 @@ abstract class ClockBase
         return new EVVClockInData($data);
     }
 
-    protected function getClockOutVerificationData(Client $client): ShiftDataInterface
+    public function getClockOutVerificationData(Client $client): ShiftDataInterface
     {
         $data = $this->buildVerificationData($client);
         if ($data instanceof TVVData) {

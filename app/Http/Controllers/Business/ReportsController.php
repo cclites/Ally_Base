@@ -587,7 +587,9 @@ class ReportsController extends BaseController
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
-        $business = $this->business();
+
+        // TODO: We should not rely on a single business here  (ALLY-431)
+        $business = $caregiver->businesses->first();
 
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
         return $pdf->download($year . '_year_summary.pdf');
@@ -598,8 +600,13 @@ class ReportsController extends BaseController
         $deposit = Deposit::find($id);
         $this->authorize('read', $deposit);
 
+        $caregiver = Caregiver::find($caregiver_id);
+        $this->authorize('read', $caregiver);
+
         $shifts = $this->getPaymentShifts($id, $caregiver_id);
-        $business = $this->business();
+
+        // TODO: We should not rely on a single business here  (ALLY-431)
+        $business = $caregiver->businesses->first();
 
         if (strtolower(request()->type) == 'pdf') {
             $pdf = PDF::loadView('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'))->setOrientation('landscape');

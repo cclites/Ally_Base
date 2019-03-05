@@ -176,7 +176,7 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
         }
 
         return \DB::transaction(function () use ($username) {
-            $client = $this->business->clients()->make([
+            $client = $this->business->clients()->create([
                 'firstname' => $this->firstname,
                 'lastname' => $this->lastname,
                 'username' => $username,

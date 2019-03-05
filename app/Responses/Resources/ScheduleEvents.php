@@ -72,10 +72,6 @@ class ScheduleEvents implements Responsable
 
     public function toArray()
     {
-        // Load services relation for all schedules to
-        // prevent n+1 in hasOvertime method.
-        $this->schedules->load('services');
-        
         return $this->schedules->map(function(Schedule $schedule) {
             $additionalOptions = array_merge(
                 $this->additionalOptions['all'],

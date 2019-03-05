@@ -20,7 +20,7 @@ class ClientCaregiverController extends BaseController
             return (new ClientCaregiver($client, $caregiver))->toArray(null);
         });
 
-        return $caregivers->sortBy('name')->values()->all();
+        return $caregivers->sortBy('nameLastFirst')->values()->all();
     }
 
     public function store(Request $request, Client $client)
@@ -89,6 +89,7 @@ class ClientCaregiverController extends BaseController
                     'name' => $caregiver->nameLastFirst
                 ];
             })
+            ->sortBy('name')
             ->values();
 
         return response()->json($caregivers);

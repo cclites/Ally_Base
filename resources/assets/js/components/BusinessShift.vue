@@ -2,7 +2,7 @@
     <div>
         <loading-card v-show="loading" text="Loading Data"></loading-card>
         <div v-show="!loading">
-            <div v-if="isAdmin">
+            <div v-if="isOfficeUserOrAdmin">
                 <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-danger">
                     <p><i class="fa fa-exchange mr-1"></i> The caregiver clocked in but the duration does not match what was scheduled.</p>
                     <p>Caregiver clocked in duration: {{ numberFormat(duration) }} hours
@@ -131,7 +131,7 @@
                     </b-col>
                 </b-row>
 
-                <div v-if="isAdmin">
+                <div v-if="isOfficeUserOrAdmin">
                     <b-row class="mt-2">
                         <b-col lg="12">
                             <strong>Shift Billing Type</strong>
@@ -155,7 +155,7 @@
                                         <th>Hours Type</th>
                                         <th width="10%">Hours</th>
                                         <th width="13%">Caregiver Rate</th>
-                                        <th>Provider Fee</th>
+                                        <th>Registry Fee</th>
                                         <th>Ally Fee</th>
                                         <th width="12%">Total Rate</th>
                                         <th>Payer</th>
@@ -194,9 +194,18 @@
                                                     class="money-input"
                                             />
                                         </td>
-                                        <td class="text-only">
-                                            <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
-                                            <span v-else>{{ numberFormat(form.provider_fee) }}</span>
+                                        <td class="text-only"  v-if="defaultRates">
+                                            {{ numberFormat(form.default_rates.provider_fee) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="provider_fee"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="form.provider_fee"
+                                                    @change="updateClientRates(form)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
@@ -258,9 +267,18 @@
                                                     class="money-input"
                                             />
                                         </td>
-                                        <td class="text-only">
-                                            <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
-                                            <span v-else>{{ numberFormat(service.provider_fee) }}</span>
+                                        <td class="text-only"  v-if="defaultRates">
+                                            {{ numberFormat(service.default_rates.provider_fee) }}
+                                        </td>
+                                        <td v-else>
+                                            <b-form-input
+                                                    name="provider_fee"
+                                                    type="number"
+                                                    step="0.01"
+                                                    v-model="service.provider_fee"
+                                                    @change="updateClientRates(service)"
+                                                    class="money-input"
+                                            />
                                         </td>
                                         <td class="text-only">
                                             <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
@@ -307,7 +325,7 @@
 
                             <label class="mt-1">
                                 <b-form-checkbox v-model="defaultRates">
-                                    Use Default Rates from Client Rates Tab
+                                    Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                 </b-form-checkbox>
                             </label>
                         </b-col>
@@ -546,7 +564,7 @@
             if (this.shift) {
                 this.changedShift(this.shift);
             }
-            if (this.isAdmin) {
+            if (this.isOfficeUserOrAdmin) {
                 this.loadClientCaregiverData();
                 this.fetchServices(); // from ShiftServices mixin
             }
@@ -562,9 +580,6 @@
             },
             isClient() {
                 return this.authRole === 'client';
-            },
-            isAdmin() {
-                return ['admin', 'office_user'].includes(this.authRole);
             },
             leftHalfActivities() {
                 return this.getHalfOfActivities(true);
@@ -697,7 +712,7 @@
 
                     if (shift) {
                         // Initialize form values from services
-                        if (this.isAdmin) {
+                        if (this.isOfficeUserOrAdmin) {
                             this.initServicesFromObject(shift);
                         }
 

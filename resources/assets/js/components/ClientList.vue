@@ -12,7 +12,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option value="">All Case Managers</option>
                     </template>
-                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
+                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
                 </b-form-select>
             </b-col>
             <b-col lg="3">

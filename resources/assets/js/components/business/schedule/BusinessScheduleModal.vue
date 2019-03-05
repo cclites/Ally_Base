@@ -127,7 +127,7 @@
                                             <th>Hours Type</th>
                                             <th width="10%">Hours</th>
                                             <th width="13%">Caregiver Rate</th>
-                                            <th>Provider Fee</th>
+                                            <th>Registry Fee</th>
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
@@ -171,7 +171,7 @@
                                             </td>
                                             <td v-else>
                                                 <b-form-input
-                                                        name="caregiver_rate"
+                                                        name="provider_fee"
                                                         type="number"
                                                         step="0.01"
                                                         v-model="form.provider_fee"
@@ -300,7 +300,7 @@
                             <b-col lg="6">
                                 <label>
                                     <b-form-checkbox v-model="defaultRates">
-                                        Use Default Rates from Client Rates Tab
+                                        Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
                                 </label>
                             </b-col>

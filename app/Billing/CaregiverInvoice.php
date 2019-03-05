@@ -120,6 +120,11 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
         return $this->items;
     }
 
+    function getItemGroups(): Collection
+    {
+        return $this->getItems()->sortBy('date')->groupBy('group');
+    }
+
     function getName(): string
     {
         return $this->name;

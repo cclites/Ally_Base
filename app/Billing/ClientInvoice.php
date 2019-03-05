@@ -6,6 +6,7 @@ use App\Billing\Contracts\InvoiceInterface;
 use App\BusinessChain;
 use App\Client;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * \App\Billing\ClientInvoice
@@ -122,6 +123,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             return $this->update(['amount' => $this->items()->sum('amount_due')]);
         }
         return false;
+    }
+
+    function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    function getItemGroups(): Collection
+    {
+        return $this->getItems()->sortBy('date')->groupBy('group');
     }
 
     function addPayment(Payment $payment, float $amountApplied): bool

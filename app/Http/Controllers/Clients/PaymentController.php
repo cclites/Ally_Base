@@ -3,9 +3,9 @@ namespace App\Http\Controllers\Clients;
 
 use App\Billing\Payment;
 use App\Billing\Queries\PaymentQuery;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
-use App\Billing\View\PdfViewStrategy;
+use App\Billing\View\Pdf\PdfPaymentView;
 
 class PaymentController extends BaseController
 {
@@ -30,9 +30,9 @@ class PaymentController extends BaseController
     {
         $this->authorize('read', $payment);
 
-        $strategy = new HtmlViewStrategy();
+        $strategy = new HtmlPaymentView();
         if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('payment-' . $payment->id . '.pdf');
+            $strategy = new PdfPaymentView('payment-' . $payment->id . '.pdf');
         }
 
         $viewGenerator = new PaymentViewGenerator($strategy);
