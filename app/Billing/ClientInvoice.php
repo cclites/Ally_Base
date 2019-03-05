@@ -125,6 +125,9 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return false;
     }
 
+    /**
+     * @return \Illuminate\Support\Collection|\App\Billing\ClientInvoiceItem[]
+     */
     function getItems(): Collection
     {
         return $this->items;
@@ -162,5 +165,10 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function getDate(): string
     {
         return $this->created_at->format('m/d/Y');
+    }
+
+    function getEstimates(): ClientInvoiceEstimates
+    {
+        return new ClientInvoiceEstimates($this);
     }
 }

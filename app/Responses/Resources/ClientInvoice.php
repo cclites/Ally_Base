@@ -14,6 +14,8 @@ class ClientInvoice extends Resource
      */
     public $resource;
 
+    private $estimates;
+
     /**
      * @param \Illuminate\Support\Collection $items
      * @return \Illuminate\Support\Collection
@@ -21,6 +23,11 @@ class ClientInvoice extends Resource
     public function groupItems(Collection $items)
     {
         return $items->sort('date')->groupBy('group');
+    }
+
+    public function withEstimates($enable = true)
+    {
+        $this->estimates = $enable;
     }
 
     /**
@@ -49,7 +56,13 @@ class ClientInvoice extends Resource
                 return $this->groupItems($this->resource->items)->toArray();
             }),
             'payments' => $this->whenLoaded('payments'),
-
+            'estimates' => $this->whenLoaded('clientPayer', function() {
+                return [
+                    'caregiver_total' => $this->resource->getEstimates()->getCaregiverTotal(),
+                    'ally_total' => $this->resource->getEstimates()->getAllyTotal(),
+                    'provider_total' => $this->resource->getEstimates()->getProviderTotal(),
+                ];
+            }),
         ];
     }
 }
