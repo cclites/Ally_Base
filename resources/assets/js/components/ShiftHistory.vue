@@ -164,20 +164,24 @@
                 this.loadData();
             },
             
-            loadData() {
+            async loadData() {
                 this.loading = true;
 
-                axios.get('/reports/shifts' + this.queryString)
-                    .then(response => {
-                        if (Array.isArray(response.data)) {
-                            this.items = response.data;
-                        }
-                        else {
-                            this.items = [];
-                        }
-                        this.loading = false;
-                        this.totalRows = this.items.length;
-                    });
+                let form = new Form({});
+                try {
+                    const response = await form.get('/reports/shifts' + this.queryString);
+                    if (Array.isArray(response.data)) {
+                        this.items = response.data;
+                    }
+                    else {
+                        this.items = [];
+                    }
+                }
+                catch (e) {
+                    this.items = [];
+                }
+                this.totalRows = this.items.length;
+                this.loading = false;
             },
 
             details(item) {
