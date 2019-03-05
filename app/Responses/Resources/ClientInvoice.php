@@ -14,8 +14,6 @@ class ClientInvoice extends Resource
      */
     public $resource;
 
-    private $estimates;
-
     /**
      * @param \Illuminate\Support\Collection $items
      * @return \Illuminate\Support\Collection
@@ -23,11 +21,6 @@ class ClientInvoice extends Resource
     public function groupItems(Collection $items)
     {
         return $items->sort('date')->groupBy('group');
-    }
-
-    public function withEstimates($enable = true)
-    {
-        $this->estimates = $enable;
     }
 
     /**
