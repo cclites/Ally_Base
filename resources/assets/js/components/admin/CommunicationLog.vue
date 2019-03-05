@@ -47,8 +47,36 @@
                 <template slot="to" scope="row">
                     {{ row.item.to }}
                 </template>
+                <template slot="actions" scope="row">
+                    <b-btn size="sm" title="view" @click="view(row.item)"><i class="fa fa-eye"></i></b-btn>
+                </template>
             </b-table>
         </div>
+
+        <b-modal :title="`Communication Log #${current.id}`" v-model="showModal" size="lg">
+            <loading-card v-if="loadingCurrent"></loading-card>
+            <b-container fluid v-else>
+                <b-row class="mb-2">
+                    <b-col lg="6"><strong>To: </strong>{{ current.to }}</b-col>
+                    <b-col lg="6"><strong>From: </strong>{{ current.from }}</b-col>
+                </b-row>
+                <b-row class="mb-2">
+                    <b-col lg="6"><strong>Sent At: </strong>{{ formatDateTimeFromUTC(current.sent_at) }}</b-col>
+                    <b-col lg="6"><strong>Type: </strong>{{ formatChannel(current.channel) }}</b-col>
+                </b-row>
+                <b-row v-if="current.subject" class="mb-2">
+                    <b-col lg="12"><strong>Subject: </strong>{{ current.subject }}</b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <div v-html="current.body"></div>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer" scope="row">
+                <b-btn variant="secondary" @click="showModal = false">Close</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
@@ -62,6 +90,9 @@
 
         data() {
             return {
+                current: {},
+                loadingCurrent: false,
+                showModal: false,
                 loading: false,
                 sortBy: 'sent_at',
                 sortDesc: true,
@@ -75,7 +106,7 @@
                         key: 'channel',
                         label: 'Type',
                         sortable: true,
-                        formatter: (x) => x == 'sms' ? 'SMS' : x == 'mail' ? 'Email' : '-',
+                        formatter: (x) => this.formatChannel(x),
                     },
                     {
                         key: 'from',
@@ -104,8 +135,8 @@
                         formatter: (val) => this.formatDateTimeFromUTC(val),
                     },
                     {
-                        key: 'action',
-                        label: '',
+                        key: 'actions',
+                        label: ' ',
                         sortable: false,
                     },
                 ],
@@ -116,6 +147,10 @@
         },
 
         methods: {
+            formatChannel(channel) {
+                return channel == 'sms' ? 'SMS' : channel == 'mail' ? 'Email' : '-';
+            },
+
             async fetch() {
                 this.loading = true;
                 let url = `/admin/communication-log?json=1&channel=${this.channel}&start_date=${this.start_date}&end_date=${this.end_date}`;
@@ -127,6 +162,20 @@
                     })
                     .finally(() => {
                         this.loading = false;
+                    });
+            },
+
+            view(item) {
+                this.showModal = true;
+                this.loadingCurrent = true;
+                axios.get(`/admin/communication-log/${item.id}`)
+                    .then( ({ data }) => {
+                        this.current = data;
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                        this.loadingCurrent = false;
                     });
             },
         },

@@ -27,4 +27,15 @@ class CommunicationLogController extends Controller
 
         return view_component('admin-communication-log', 'Communication Log');
     }
+
+    /**
+     * Get the communication log details.
+     *
+     * @param CommunicationLog $log
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(CommunicationLog $log)
+    {
+        return response()->json($log);
+    }
 }
