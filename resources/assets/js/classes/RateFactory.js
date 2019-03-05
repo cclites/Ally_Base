@@ -1,4 +1,5 @@
 import moment from "moment";
+import {Decimal} from 'decimal.js';
 
 /**
  * RateFactory class for calculating rates
@@ -11,34 +12,37 @@ class RateFactory {
 
     static getAllyFee(allyPct, clientRate, allyFeeIncluded = true)
     {
-        clientRate = parseFloat(clientRate);
-        allyPct = parseFloat(allyPct);  // Ex: 0.05
         if (! clientRate) {
             return 0;
         }
+        clientRate = new Decimal(clientRate);
+        allyPct = new Decimal(allyPct);  // Ex: 0.05
 
         return allyFeeIncluded
-            ? clientRate / (1+allyPct) * allyPct
-            : clientRate * allyPct;
+            ? clientRate.div((allyPct.add(1))).mul(allyPct)
+            : clientRate.mul(allyPct);
     }
 
     static getProviderFee(clientRate, caregiverRate, allyPct, allyFeeIncluded = true)
     {
-        clientRate = parseFloat(clientRate);
-        caregiverRate = parseFloat(caregiverRate);
+        if (! clientRate) {
+            return 0;
+        }
+        clientRate = new Decimal(clientRate);
+        caregiverRate = new Decimal(caregiverRate);
         let allyFee = this.getAllyFee(allyPct, clientRate, allyFeeIncluded);
-        let providerFee = clientRate - caregiverRate - allyFee;
+        let providerFee = clientRate.sub(caregiverRate).sub(allyFee);
 
         return (providerFee.toFixed(2)) === "-0.00" ? 0 : providerFee;
     }
 
     static getClientRate(providerFee, caregiverRate, allyPct, allyFeeIncluded = true)
     {
-        providerFee = parseFloat(providerFee);
-        caregiverRate = parseFloat(caregiverRate);
+        providerFee = new Decimal(providerFee);
+        caregiverRate = new Decimal(caregiverRate);
         let allyFee = this.getAllyFee(allyPct, caregiverRate + providerFee, false);
 
-        return providerFee + caregiverRate + (allyFeeIncluded ? allyFee : 0);
+        return providerFee.plus(caregiverRate).plus((allyFeeIncluded ? allyFee : 0));
     }
 
     static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
