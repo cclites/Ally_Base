@@ -940,7 +940,7 @@ class ReportsController extends BaseController
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
-            $report->with('meta');
+            $report->query()->with('meta');
         }
 
         if($request->has('active')) {
@@ -976,7 +976,7 @@ class ReportsController extends BaseController
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
-            $report->with('meta');
+            $report->query()->with('meta');
         }
 
         if($request->has('active')) {
