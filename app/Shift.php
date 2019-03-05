@@ -892,7 +892,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemUnits(): float
     {
-        return $this->duration();
+        return $this->fixed_rates ? 1 : $this->duration();
     }
 
     /**
