@@ -107,7 +107,7 @@ class Form {
             let value = encodeURIComponent(data[field]);
             url += (url.includes('?')) ? `&${field}=${value}` : `?${field}=${value}`;
         }
-        return axios.get(url);
+        return this.submit('get', url);
     }
 
     /**

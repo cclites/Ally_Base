@@ -35,12 +35,20 @@ class DepositInvoice extends Resource
             'invoice_type' => $this->resource instanceof Model ? maps_from_model($this->resource) : null,
             'invoice_id' => $this->resource->id,
             'name' => $this->resource->getName(),
+            'date' => $this->resource->getDate(),
             'amount' => $this->resource->getAmount(),
             'amount_paid' => $this->resource->getAmountPaid(),
             'amount_due' => $this->resource->getAmountDue(),
+            'created_at' => optional($this->resource->created_at)->toDateTimeString(),
             'recipient' => $this->resource->getRecipient()->name(),
             'caregiver' => $this->whenLoaded('caregiver'),
+            'caregiver_on_hold' => $this->whenLoaded('caregiver', function() {
+                return $this->resource->caregiver->isOnHold();
+            }),
             'business' => $this->whenLoaded('business'),
+            'business_on_hold' => $this->whenLoaded('caregiver', function() {
+                return $this->resource->business->isOnHold();
+            }),
             'items' => $this->whenLoaded('items', function() {
                 return $this->groupItems($this->resource->getItems())->toArray();
             }),

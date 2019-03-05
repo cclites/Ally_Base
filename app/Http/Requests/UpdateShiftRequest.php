@@ -66,6 +66,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
             'fixed_rates.*' => 'Please select a shift type of hourly or daily.',
             'caregiver_rate.max' => 'The caregiver rate cannot be greater than the client rate.',
+            'client_rate.*' => 'The total rate is required and must be a number.',
+            'services.*.client_rate.*' => 'The total rate is required and must be a number.',
         ];
     }
 

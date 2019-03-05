@@ -8,9 +8,8 @@ use App\Billing\Generators\BusinessInvoiceGenerator;
 use App\Billing\Generators\CaregiverInvoiceGenerator;
 use App\Billing\Queries\BusinessInvoiceQuery;
 use App\Billing\Queries\CaregiverInvoiceQuery;
-use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
-use App\Billing\View\PdfViewStrategy;
 use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
@@ -110,13 +109,13 @@ class DepositInvoiceController extends Controller
         ]);
     }
 
-    public function showBusinessInvoice(BusinessInvoice $invoice, string $view = "html")
+    public function showBusinessInvoice(BusinessInvoice $invoice, string $view = InvoiceViewFactory::HTML_VIEW)
     {
         $viewGenerator = $this->getViewGenerator($invoice, $view);
         return $viewGenerator->generateBusinessInvoice($invoice);
     }
 
-    public function showCaregiverInvoice(CaregiverInvoice $invoice, string $view = "html")
+    public function showCaregiverInvoice(CaregiverInvoice $invoice, string $view = InvoiceViewFactory::HTML_VIEW)
     {
         $viewGenerator = $this->getViewGenerator($invoice, $view);
         return $viewGenerator->generateCaregiverInvoice($invoice);
@@ -124,11 +123,7 @@ class DepositInvoiceController extends Controller
 
     private function getViewGenerator(DepositInvoiceInterface $invoice, string $view)
     {
-        $strategy = new HtmlViewStrategy();
-        if (strtolower($view) === 'pdf') {
-            $strategy = new PdfViewStrategy('invoice-' . str_slug($invoice->getName()) . '.pdf');
-        }
-
+        $strategy = InvoiceViewFactory::create($invoice, $view);
         $viewGenerator = new InvoiceViewGenerator($strategy);
         return $viewGenerator;
     }

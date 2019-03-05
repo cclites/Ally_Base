@@ -45,14 +45,14 @@
                         <th scope="col">Payer</th>
                         <th scope="col">Effective Start</th>
                         <th scope="col">Effective End</th>
-                        <th scope="col" class="bl">Total</th>
+                        <th scope="col" class="bl">Caregiver</th>
+                        <th scope="col">Registry</th>
+                        <th scope="col">Ally</th>
+                        <th scope="col" class="br">Total</th>
                         <th scope="col">Caregiver</th>
-                        <th scope="col">Provider</th>
-                        <th scope="col" class="br">Ally Fee</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Caregiver</th>
-                        <th scope="col">Provider</th>
-                        <th scope="col" class="br">Ally Fee</th>
+                        <th scope="col">Registry</th>
+                        <th scope="col">Ally</th>
+                        <th scope="col" class="br">Total</th>
                         <th scope="col"></th>
                     </tr>
                 </thead>
@@ -93,22 +93,8 @@
                                 class="date-input form-control-sm"
                             ></mask-input>
                         </td>
-                        <!-- Total Hourly Rate -->
-                        <td class="bl">
-                            <b-form-input name="client_hourly_rate"
-                                class="money-input"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                max="999.99"
-                                required
-                                v-model="item.client_hourly_rate"
-                                @change="updateProviderRates(item)"
-                                size="sm"
-                            ></b-form-input>
-                        </td>
                         <!-- Caregiver Hourly Rate -->
-                        <td>
+                        <td class="bl">
                             <b-form-input name="caregiver_hourly_rate"
                                 class="money-input"
                                 type="number"
@@ -136,19 +122,19 @@
                             ></b-form-input>
                         </td>
                         <!-- Ally Hourly Fee -->
-                        <td class="br">
+                        <td>
                             {{ getAllyFee(item.client_hourly_rate) }}
                         </td>
-                        <!-- Total Fixed Rate -->
-                        <td>
-                            <b-form-input name="client_fixed_rate"
+                        <!-- Total Hourly Rate -->
+                        <td class="br">
+                            <b-form-input name="client_hourly_rate"
                                 class="money-input"
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 max="999.99"
                                 required
-                                v-model="item.client_fixed_rate"
+                                v-model="item.client_hourly_rate"
                                 @change="updateProviderRates(item)"
                                 size="sm"
                             ></b-form-input>
@@ -182,8 +168,22 @@
                             ></b-form-input>
                         </td>
                         <!-- Ally Fixed Fee -->
-                        <td class="br">
+                        <td>
                             {{ getAllyFee(item.client_fixed_rate) }}
+                        </td>
+                        <!-- Total Fixed Rate -->
+                        <td class="br">
+                            <b-form-input name="client_fixed_rate"
+                                class="money-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999.99"
+                                required
+                                v-model="item.client_fixed_rate"
+                                @change="updateProviderRates(item)"
+                                size="sm"
+                            ></b-form-input>
                         </td>
                         <!-- Actions -->
                         <td class="hidden-print">

@@ -22,7 +22,7 @@
                         </b-form-select>
                         <b-form-select v-else v-model="caregiver_select">
                             <option value="">--Select a Caregiver--</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                         </b-form-select>
                         <p>
                             <small v-if="caregiver_type === 'all'">Note: "All Caregivers" rates will only be used if there isn't a specific caregiver rate available.</small>

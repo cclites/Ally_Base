@@ -135,6 +135,7 @@ export default {
         },
 
         recalculateRates(rates, clientRate, caregiverRate) {
+            if (clientRate === null || caregiverRate === null) return;
             rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate).toFixed(2);
             rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true).toFixed(2);
         },
@@ -197,8 +198,8 @@ export default {
                 if (! form.default_rates) {
                     return;
                 }
-                form.client_rate = form.default_rates.client_rate || 0;
-                form.caregiver_rate = form.default_rates.caregiver_rate || 0;
+                form.client_rate = form.default_rates.client_rate || null;
+                form.caregiver_rate = form.default_rates.caregiver_rate || null;
                 this.recalculateRates(form, form.client_rate, form.caregiver_rate);
                 for(let service of form.services) {
                     service.client_rate = service.default_rates.client_rate || 0;

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ActiveBusiness;
 use App\Users\OfficeUserSettings;
 use App\Users\SettingsRepository;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class BaseController extends Controller
 {
@@ -29,15 +30,20 @@ class BaseController extends Controller
      * Return the active business chain
      *
      * @return \App\BusinessChain
-     * @throws \Exception
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      */
-    protected function businessChain()
+    protected function businessChain(): BusinessChain
     {
         if ($this->activeBusinessChain) {
             return $this->activeBusinessChain;
         }
 
-        return \Auth::user()->officeUser->businessChain;
+        $chain = optional(\Auth::user()->officeUser)->businessChain;
+        if (!$chain) {
+            throw new AccessDeniedHttpException('A business chain was not found.');
+        }
+
+        return $chain;
     }
 
     /**

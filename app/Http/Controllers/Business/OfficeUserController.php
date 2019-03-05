@@ -17,9 +17,9 @@ class OfficeUserController extends BaseController
     {
         $officeUsers = $this->businessChain()
             ->users()
+            ->ordered()
             ->with('businesses')
             ->get()
-            ->sortBy('name')
             ->map(function ($item) {
                 return [
                     'id' => $item->id,

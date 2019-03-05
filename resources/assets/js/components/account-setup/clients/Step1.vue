@@ -92,17 +92,6 @@
                                     </b-form-input>
                                     <input-help :form="form" field="city" text="Confirm your city."></input-help>
                                 </b-col>
-                                <b-col sm="3" xs="2">
-                                    <b-form-input
-                                            id="county"
-                                            name="county"
-                                            type="text"
-                                            v-model="form.county"
-                                            :disabled="busy"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="state" text="Confirm your county."></input-help>
-                                </b-col>
                                 <b-col sm="2" xs="1">
                                     <b-form-input
                                             id="state"

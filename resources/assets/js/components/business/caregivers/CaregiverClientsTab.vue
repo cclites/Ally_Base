@@ -37,7 +37,7 @@
                     <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Caregiver Rate</th>
                     <th :class="getTdClass(1)" v-if="hasClientRateStructure(business)">Client Rate</th>
-                    <th :class="getTdClass(1)" v-else>Provider Fee</th>
+                    <th :class="getTdClass(1)" v-else>Registry Fee</th>
                     <th :class="getTdClass(1)">Ally Fee</th>
                     <th :class="getTdClass(1)">Total</th>
                     <th></th>

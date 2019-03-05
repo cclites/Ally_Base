@@ -52,16 +52,11 @@ class ClientController extends BaseController
     public function verifyLocation(Client $client, Request $request)
     {
         $clockIn = new ClockIn($this->caregiver());
-        try {
-            $clockIn->setGeocode($request->input('latitude'), $request->input('longitude'));
-            $clockIn->verifyGeocode($client);
-            $success = true;
-        }
-        catch (UnverifiedLocationException $e) {
-            $success = false;
-        }
+        $clockIn->setGeocode($request->input('latitude'), $request->input('longitude'));
+        $evvData = $clockIn->getClockInVerificationData($client)->toArray();
+        $verified = $evvData['checked_in_verified'] ?? false;
 
-        return response()->json(['success' => $success]);
+        return response()->json(['success' => $verified]);
     }
 
     /**

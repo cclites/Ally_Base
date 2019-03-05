@@ -64,7 +64,9 @@
                     <span v-else style="color: darkred">Failed</span>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="statementUrl(row.item)">View Statement</b-btn>
+                    <b-btn size="sm" :href="statementUrl(row.item, 'itemized')">View Itemized List</b-btn>
+                    <b-btn size="sm" :href="statementUrl(row.item)"><i class="fa fa-file-pdf-o"></i> PDF Statement</b-btn>
+                    <b-btn size="sm" :href="statementUrl(row.item, 'html')" target="_blank"><i class="fa fa-edge"></i> HTML Statement</b-btn>
                 </template>
             </b-table>
         </div>
@@ -155,12 +157,12 @@
                     });
             },
 
-            statementUrl(item)
+            statementUrl(item, view="pdf")
             {
                 if (item.payment_id) {
-                    return `/business/statements/payments/${item.payment_id}/pdf`
+                    return `/business/statements/payments/${item.payment_id}/${view}`
                 }
-                return `/business/statements/deposits/${item.deposit_id}/pdf`
+                return `/business/statements/deposits/${item.deposit_id}/${view}`
             }
         },
     }

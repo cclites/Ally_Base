@@ -13,20 +13,6 @@
 
 //Auth::loginUsingId(2);
 
-
-Route::get('/test/business/{id}', function($id) {
-    $invoice = \App\Billing\BusinessInvoice::find($id);
-    $view = new \App\Billing\View\InvoiceViewGenerator(new \App\Billing\View\HtmlViewStrategy());
-    return $view->generateBusinessInvoice($invoice);
-});
-
-Route::get('/test/caregiver/{id}', function($id) {
-    $invoice = \App\Billing\CaregiverInvoice::find($id);
-    $view = new \App\Billing\View\InvoiceViewGenerator(new \App\Billing\View\HtmlViewStrategy());
-    return $view->generateCaregiverInvoice($invoice);
-});
-
-
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });
@@ -349,7 +335,9 @@ Route::group([
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
+    Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');
     Route::get('statements/payments/{payment}/{view?}', 'Business\StatementController@payment')->name('statements.payment');
+    Route::get('statements/deposits/{deposit}/itemized', 'Business\StatementController@itemizeDeposit')->name('statements.deposit.itemized');
     Route::get('statements/deposits/{deposit}/{view?}', 'Business\StatementController@deposit')->name('statements.deposit');
 
     Route::get('services', 'Business\ServiceController@index')->name('services.index');

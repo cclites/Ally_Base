@@ -8,7 +8,7 @@ We are now processing transactions on behalf of **{{ $businessChain->name }}**.
 It looks like you need to setup an account.  Follow the link below to setup a username and password for our system. From there you can manage your account details including your payment method.
 
 @component('mail::button', ['url' => $url])
-    Setup my account
+    Create My Ally Account
 @endcomponent
 
 @elseif ($caregiver->setup_status == 'created_account')

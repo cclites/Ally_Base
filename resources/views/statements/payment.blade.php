@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Billing\View\PaymentInvoiceObject[] $invoiceObjects
+ * @var \App\Billing\View\Data\PaymentInvoiceData[] $invoiceObjects
  * @var \App\Billing\Payment $payment
  */
 ?>
@@ -158,12 +158,12 @@
                         <tbody>
                             @foreach($invoiceObjects as $invoiceObject)
                                 <tr>
-                                    <td class="text-nowrap">{{ $invoiceObject->invoice->getDate() }}</td>
-                                    <td>{{ $invoiceObject->invoice->getName() }}</td>
-                                    <td>{{ $invoiceObject->invoice->client->name() }}</td>
-                                    <td>{{ $invoiceObject->invoice->getClientPayer()->name() }}</td>
-                                    <td class="text-nowrap">{{ number_format($invoiceObject->invoice->getAmount(), 2) }}</td>
-                                    <td class="text-nowrap">{{ number_format($invoiceObject->amountApplied, 2) }}</td>
+                                    <td class="text-nowrap">{{ $invoiceObject->invoice()->getDate() }}</td>
+                                    <td>{{ $invoiceObject->invoice()->getName() }}</td>
+                                    <td>{{ $invoiceObject->invoice()->client->name() }}</td>
+                                    <td>{{ $invoiceObject->invoice()->getClientPayer()->name() }}</td>
+                                    <td class="text-nowrap">{{ number_format($invoiceObject->invoice()->getAmount(), 2) }}</td>
+                                    <td class="text-nowrap">{{ number_format($invoiceObject->amountApplied(), 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -174,9 +174,9 @@
             <h4 class="mt-4 mb-1">All Invoices</h4>
 
             @foreach($invoiceObjects as $invoiceObject)
-                <h5>Invoice #{{ $invoiceObject->invoice->getName() }}</h5>
+                <h5>Invoice #{{ $invoiceObject->invoice()->getName() }}</h5>
 
-                @include('invoices.partials.items_table', ['invoice' => $invoiceObject->invoice, 'itemGroups' => $invoiceObject->itemGroups])
+                @include('invoices.partials.items_table', ['invoice' => $invoiceObject->invoice(), 'itemGroups' => $invoiceObject->itemGroups()])
             @endforeach
         @endif
 

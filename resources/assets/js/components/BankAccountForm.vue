@@ -1,6 +1,6 @@
 <template>
     <form @submit.prevent="submit()" @keydown="formKeyDown($event)">
-        <b-form-group label="Nickname" label-for="nickname" label-class="required">
+        <b-form-group label="Nickname" label-for="nickname">
             <b-form-input type="text" v-model="form.nickname" :readonly="readonly" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this account."></input-help>
         </b-form-group>

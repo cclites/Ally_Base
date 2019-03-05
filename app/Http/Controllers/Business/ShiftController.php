@@ -125,7 +125,7 @@ class ShiftController extends BaseController
                 }
             }
 
-            $questionData = $this->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+            $questionData = $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
         }
 
         if ($shift->update($data)) {

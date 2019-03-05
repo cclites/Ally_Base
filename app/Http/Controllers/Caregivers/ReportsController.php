@@ -8,6 +8,7 @@ use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ReportsController extends BaseController
@@ -17,22 +18,28 @@ class ReportsController extends BaseController
         return view('caregivers.reports.deposits');
     }
 
-    public function shifts()
+    public function shifts(Request $request)
     {
-        if (request()->expectsJson()) {
+        if ($request->expectsJson()) {
+            $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
+                'client_id' => 'nullable|exists:clients,id',
+            ]);
+
             $report = new ShiftsReport();
             $report->where('caregiver_id', auth()->user()->id)
                     ->where('checked_out_time', '<>', null)
                     ->orderBy('checked_in_time');
     
-            if (request()->has('start_date') || request()->has('end_date')) {
+            if ($request->has('start_date') || $request->has('end_date')) {
                 $timezone = $this->timezone();
-                $startDate = new Carbon(request()->input('start_date') . ' 00:00:00', $timezone);
-                $endDate = new Carbon(request()->input('end_date') . ' 23:59:59', $timezone);
+                $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $timezone);
+                $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $timezone);
                 $report->between($startDate, $endDate);
             }
 
-            if ($client_id = request()->input('client_id')) {
+            if ($client_id = $request->input('client_id')) {
                 $report->where('client_id', $client_id);
             }
 
