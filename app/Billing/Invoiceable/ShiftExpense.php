@@ -7,6 +7,7 @@ use App\Billing\Invoiceable\Traits\BelongsToThroughShift;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -122,6 +123,11 @@ class ShiftExpense extends InvoiceableModel
     public function hasFeeIncluded(): bool
     {
         return false;
+    }
+
+    public function getShift(): ?Shift
+    {
+        return $this->shift;
     }
 
     public function getClient(): ?Client

@@ -969,6 +969,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this;
+    }
+
     public function getClient(): ?Client
     {
         return $this->client;

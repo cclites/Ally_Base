@@ -182,6 +182,11 @@ class ShiftAdjustment extends InvoiceableModel
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this->shift;
+    }
+
     public function getClient(): ?Client
     {
         return $this->shift->getClient();

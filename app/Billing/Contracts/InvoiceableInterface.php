@@ -8,6 +8,7 @@ use App\Billing\Payment;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -88,6 +89,11 @@ interface InvoiceableInterface
      * @return bool
      */
     public function hasFeeIncluded(): bool;
+
+    /**
+     * @return \App\Shift|null
+     */
+    public function getShift(): ?Shift;
 
     /**
      * @return \App\Client|null
