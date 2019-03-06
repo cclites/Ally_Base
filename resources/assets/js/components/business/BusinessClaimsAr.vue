@@ -89,6 +89,15 @@
                 />
                 <input-help :form="form" field="payment_type" text="" />
             </b-form-group>
+            <b-form-group label="Reference #">
+                <b-form-input
+                    name="reference_no"
+                    type="text"
+                    v-model="form.reference_no"
+                    max="255"
+                />
+                <input-help :form="form" field="payment_type" text="" />
+            </b-form-group>
             <b-form-group label="Invoice Balance">
                 <b-form-input
                     name="balance"
@@ -190,6 +199,7 @@
                     payment_type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
+                    reference_no: '',
                 }),
                 selectedInvoice: {},
             }
