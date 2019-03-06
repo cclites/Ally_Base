@@ -853,7 +853,7 @@
 
             async loadAllCaregivers() {
                 if (!this.allCaregivers || !this.allCaregivers.length) {
-                    const response = await axios.get('/business/caregivers?json=1');
+                    const response = await axios.get(`/business/schedule/caregivers`);
                     this.allCaregivers = response.data;
                 }
             },
