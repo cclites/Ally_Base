@@ -24,15 +24,22 @@ class ClaimsController extends BaseController
                 }
             }
 
-//            if ($businessId = $request->input('business_id')) {
-//                $invoiceQuery->forBusiness($businessId);
-//            }
             $invoiceQuery->forRequestedBusinesses();
 
             if ($request->has('start_date')) {
                 $startDate = Carbon::parse($request->start_date)->toDateTimeString();
                 $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
                 $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
+
+            if ($request->filled('client_id')) {
+                $invoiceQuery->where('client_id', $request->client_id);
+            }
+
+            if ($request->filled('payer_id')) {
+                $invoiceQuery->whereHas('clientPayer', function ($query) use($request) {
+                    $query->where('payer_id', $request->payer_id);
+                });
             }
 
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();

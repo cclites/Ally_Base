@@ -17,6 +17,19 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
+                        <b-form-select v-model="clientFilter" class="mr-1 mb-1">
+                            <option v-if="loadingClients" selected>Loading...</option>
+                            <option v-else value="">-- Select a Client --</option>
+                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
+                            </option>
+                        </b-form-select>
+                        <b-form-select v-model="payerFilter" class="mr-1 mb-1">
+                            <option v-if="loadingPayers" selected>Loading...</option>
+                            <option v-else value="">-- Select a Payer --</option>
+                            <option value="0">(Client)</option>
+                            <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
+                            </option>
+                        </b-form-select>
                         <b-form-select
                                 id="paid"
                                 name="paid"
@@ -127,11 +140,11 @@
                         label: 'Invoice #',
                         sortable: true,
                     },
-                    // {
-                    //     key: 'client',
-                    //     formatter: (val) => val.name,
-                    //     sortable: true,
-                    // },
+                    {
+                        key: 'client',
+                        formatter: (val) => val.name,
+                        sortable: true,
+                    },
                     {
                         key: 'payer',
                         formatter: (val) => val.name,
@@ -158,6 +171,12 @@
                         sortable: false,
                     },
                 ],
+                loadingClients: false,
+                clients: [],
+                clientFilter: '',
+                payers: [],
+                payerFilter: '',
+                loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
                     payment_type: '',
@@ -169,6 +188,8 @@
         },
 
         mounted() {
+            this.loadClients();
+            this.fetchPayers();
         },
 
         computed: {
@@ -183,6 +204,26 @@
         },
 
         methods: {
+            async fetchPayers() {
+                this.payers = [];
+                this.loadingPayers = true;
+                let response = await axios.get('/business/payers?json=1');
+                if (Array.isArray(response.data)) {
+                    this.payers = response.data;
+                } else {
+                    this.payers = [];
+                }
+                this.loadingPayers = false;
+            },
+
+            async loadClients() {
+                this.clients = [];
+                this.loadingClients = true;
+                const response = await axios.get('/business/clients?json=1');
+                this.clients = response.data;
+                this.loadingClients = false;
+            },
+
             showPaymentModal(invoice) {
                 this.selectedInvoice = invoice;
                 this.paymentModal = true;
@@ -199,11 +240,17 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = '/business/claims-ar?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&paid=' + this.paid;
-                const response = await axios.get(url);
-                this.items = response.data.data;
-                this.loaded = 1;
+                let url = `/business/claims-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&paid=${this.paid}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                axios.get(url)
+                    .then( ({ data }) => {
+                        this.items = data.data;
+                    })
+                    .catch(e => {
+                        this.items = [];
+                    })
+                    .finally(() => {
+                        this.loaded = 1;
+                    });
             },
 
             invoiceUrl(invoice, view="") {
