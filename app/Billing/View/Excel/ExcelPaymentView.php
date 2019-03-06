@@ -52,7 +52,7 @@ class ExcelPaymentView implements PaymentViewStrategy
                     'Date' => $item->date,
                     'Invoice' => $invoice->getName(),
                     'Client' => $invoice->client->nameLastFirst(),
-                    'Caregiver' => optional($item->getInvoiceable()->getCaregiver())->nameLastFirst(),
+                    'Caregiver' => $item->getInvoiceable() ? optional($item->getInvoiceable()->getCaregiver())->nameLastFirst() : null,
                     'Group' => $item->group,
                     'Service Name' => $item->name,
                     'Units' => $item->units,

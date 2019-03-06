@@ -63,8 +63,8 @@ class ExcelDepositView implements DepositViewStrategy
         return [
             'Date' => $item->date,
             'Group' => $item->group,
-            'Client' => optional($item->getInvoiceable()->getClient())->nameLastFirst(),
-            'Caregiver' => optional($item->getInvoiceable()->getCaregiver())->nameLastFirst(),
+            'Client' => $item->getInvoiceable() ? optional($item->getInvoiceable()->getClient())->nameLastFirst() : null,
+            'Caregiver' => $item->getInvoiceable() ? optional($item->getInvoiceable()->getCaregiver())->nameLastFirst() : null,
             'Service Name' => $item->name,
             'Units' => $item->units,
             'Client Rate' => $item->client_rate,
@@ -81,7 +81,7 @@ class ExcelDepositView implements DepositViewStrategy
         return [
             'Date' => $item->date,
             'Group' => $item->group,
-            'Client' => optional($item->getInvoiceable()->getClient())->nameLastFirst(),
+            'Client' => $item->getInvoiceable() ? optional($item->getInvoiceable()->getClient())->nameLastFirst() : null,
             'Service Name' => $item->name,
             'Units' => $item->units,
             'Rate' => $item->rate,

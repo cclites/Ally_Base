@@ -122,10 +122,13 @@ class DepositItemData {
 
     public static function fromBusinessItem(BusinessInvoiceItem $item): self
     {
+        /** @var \App\Billing\Contracts\InvoiceableInterface $invoiceable */
+        $invoiceable = optional($item->getInvoiceable());
+
         $data = new self();
-        $data->client = $item->getInvoiceable()->getClient();
-        $data->caregiver = $item->getInvoiceable()->getCaregiver();
-        $data->shift = $item->getInvoiceable()->getShift();
+        $data->client = $invoiceable->getClient();
+        $data->caregiver = $invoiceable->getCaregiver();
+        $data->shift = $invoiceable->getShift();
         $data->client_rate = $item->client_rate;
         $data->caregiver_rate = $item->caregiver_rate;
         $data->ally_rate = $item->ally_rate;
@@ -172,11 +175,14 @@ class PaymentItemData {
 
     public static function fromInvoiceItem(ClientInvoice $invoice, ClientInvoiceItem $item): self
     {
+        /** @var \App\Billing\Contracts\InvoiceableInterface $invoiceable */
+        $invoiceable = optional($item->getInvoiceable());
+
         $data = new self();
         $data->invoice = $invoice->attributesToArray(); // to avoid passing all related data
         $data->client = $invoice->client;
-        $data->caregiver = $item->getInvoiceable()->getCaregiver();
-        $data->shift = $item->getInvoiceable()->getShift();
+        $data->caregiver = $invoiceable->getCaregiver();
+        $data->shift = $invoiceable->getShift();
         $data->rate = $item->rate;
         $data->units = $item->units;
         $data->total = $item->total;
