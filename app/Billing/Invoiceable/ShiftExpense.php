@@ -124,6 +124,11 @@ class ShiftExpense extends InvoiceableModel
         return false;
     }
 
+    public function getClient(): ?Client
+    {
+        return $this->shift->getClient();
+    }
+
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
@@ -132,6 +137,11 @@ class ShiftExpense extends InvoiceableModel
     public function getClientRate(): float
     {
         return $this->rate; // Ally fee not included
+    }
+
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->shift->getCaregiver();
     }
 
     /**
@@ -152,6 +162,11 @@ class ShiftExpense extends InvoiceableModel
     {
         if ($this->ally_fee === null) return null;
         return round(divide($this->ally_fee, $this->getItemUnits(), 5), 4);
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->shift->getBusiness();
     }
 
     /**
