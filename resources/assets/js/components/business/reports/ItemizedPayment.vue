@@ -1,5 +1,47 @@
 <template>
     <b-card :title="title">
+        <div class="text-right">
+            <b-btn variant="primary" @click="showSummary=!showSummary">{{ showSummary ? "Hide" : "Show" }} Summary</b-btn>
+        </div>
+
+        <b-row v-if="showSummary">
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Client Summary</th>
+                        <th>Amount Due</th>
+                    </tr>
+                    <tr v-for="item in clientSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.total) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(clientSummaryTotal) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Caregiver Summary</th>
+                        <th>Amount Due</th>
+                    </tr>
+                    <tr v-for="item in caregiverSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.total) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(caregiverSummaryTotal) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+        </b-row>
+
+        <h4>Items</h4>
+
         <b-row>
             <b-col lg="8">
                 <b-form inline>
@@ -18,7 +60,6 @@
                 <b-btn :href="`/business/statements/payments/${payment.id}/pdf`"><i class="fa fa-file-pdf-o"></i> PDF Statement</b-btn>
             </b-col>
         </b-row>
-
 
         <b-table bordered striped hover show-empty class="table-fit-more"
                  :items="filteredItems"
@@ -80,6 +121,40 @@
                 });
             },
 
+            clientSummary() {
+                this.clientSummaryTotal = 0;
+                const summary = this.items.reduce((summary, item) => {
+                    const clientId = item.client ? item.client.id : 0;
+                    if (!summary[clientId]) {
+                        summary[clientId] = {
+                            name: item.client ? item.client.nameLastFirst : "Unknown",
+                            total: 0
+                        }
+                    }
+                    summary[clientId].total += parseFloat(item.amount_due || 0);
+                    this.clientSummaryTotal += parseFloat(item.amount_due || 0);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
+            caregiverSummary() {
+                this.caregiverSummaryTotal = 0;
+                const summary = this.items.reduce((summary, item) => {
+                    const caregiverId = item.caregiver ? item.caregiver.id : 0;
+                    if (!summary[caregiverId]) {
+                        summary[caregiverId] = {
+                            name: item.caregiver ? item.caregiver.nameLastFirst : "Unknown",
+                            total: 0
+                        }
+                    }
+                    summary[caregiverId].total += parseFloat(item.amount_due || 0);
+                    this.caregiverSummaryTotal += parseFloat(item.amount_due || 0);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
             title() {
                 let title = `Itemized View of Payment #${this.payment.id}. Payment Amount: $${this.numberFormat(this.payment.amount)}`;
                 if (this.payment.amount < 0) {
@@ -95,6 +170,9 @@
                 clients: [],
                 clientId: null,
                 caregiverId: null,
+                clientSummaryTotal: 0,
+                caregiverSummaryTotal: 0,
+                showSummary: true,
                 fields: [
                     {
                         key: "date",
@@ -167,5 +245,7 @@
 </script>
 
 <style scoped>
-
+    .table-fit-more td {
+        font-size: 12px;
+    }
 </style>

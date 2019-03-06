@@ -1,5 +1,65 @@
 <template>
     <b-card :title="title">
+        <div class="text-right">
+            <b-btn variant="primary" @click="showSummary=!showSummary">{{ showSummary ? "Hide" : "Show" }} Summary</b-btn>
+        </div>
+
+        <b-row v-if="showSummary">
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Client Summary</th>
+                        <th>Client Total</th>
+                        <th>CG Total</th>
+                        <th>Ally Total</th>
+                        <th>Reg Total</th>
+                    </tr>
+                    <tr v-for="item in clientSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.client) }}</td>
+                        <td>{{ numberFormat(item.caregiver) }}</td>
+                        <td>{{ numberFormat(item.ally) }}</td>
+                        <td>{{ numberFormat(item.provider) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(clientSummaryTotal.client) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.caregiver) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.ally) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.provider) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Caregiver Summary</th>
+                        <th>Client Total</th>
+                        <th>CG Total</th>
+                        <th>Ally Total</th>
+                        <th>Reg Total</th>
+                    </tr>
+                    <tr v-for="item in caregiverSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.client) }}</td>
+                        <td>{{ numberFormat(item.caregiver) }}</td>
+                        <td>{{ numberFormat(item.ally) }}</td>
+                        <td>{{ numberFormat(item.provider) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(caregiverSummaryTotal.client) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.caregiver) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.ally) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.provider) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+        </b-row>
+
+        <h4>Items</h4>
+
         <b-row>
             <b-col lg="8">
                 <b-form inline>
@@ -36,6 +96,7 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import {Decimal} from 'decimal.js';
 
     export default {
         name: "ItemizedPayment",
@@ -79,6 +140,68 @@
                 })
             },
 
+            clientSummary() {
+                this.clientSummaryTotal = {
+                    ally: 0,
+                    client: 0,
+                    caregiver: 0,
+                    provider: 0,
+                };
+                const summary = this.items.reduce((summary, item) => {
+                    const clientId = item.client ? item.client.id : 0;
+                    if (!summary[clientId]) {
+                        summary[clientId] = {
+                            name: item.client ? item.client.nameLastFirst : "Unknown",
+                            ally: 0,
+                            client: 0,
+                            caregiver: 0,
+                            provider: 0,
+                        }
+                    }
+                    summary[clientId].ally += this.calcTotal(item.ally_rate, item.units);
+                    this.clientSummaryTotal.ally += this.calcTotal(item.ally_rate, item.units);
+                    summary[clientId].client += this.calcTotal(item.client_rate, item.units);
+                    this.clientSummaryTotal.client += this.calcTotal(item.client_rate, item.units);
+                    summary[clientId].caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    this.clientSummaryTotal.caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    summary[clientId].provider += this.calcTotal(item.rate, item.units);
+                    this.clientSummaryTotal.provider += this.calcTotal(item.rate, item.units);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
+            caregiverSummary() {
+                this.caregiverSummaryTotal = {
+                    ally: 0,
+                    client: 0,
+                    caregiver: 0,
+                    provider: 0,
+                };
+                const summary = this.items.reduce((summary, item) => {
+                    const caregiverId = item.caregiver ? item.caregiver.id : 0;
+                    if (!summary[caregiverId]) {
+                        summary[caregiverId] = {
+                            name: item.caregiver ? item.caregiver.nameLastFirst : "Unknown",
+                            ally: 0,
+                            client: 0,
+                            caregiver: 0,
+                            provider: 0,
+                        }
+                    }
+                    summary[caregiverId].ally += this.calcTotal(item.ally_rate, item.units);
+                    this.caregiverSummaryTotal.ally += this.calcTotal(item.ally_rate, item.units);
+                    summary[caregiverId].client += this.calcTotal(item.client_rate, item.units);
+                    this.caregiverSummaryTotal.client += this.calcTotal(item.client_rate, item.units);
+                    summary[caregiverId].caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    this.caregiverSummaryTotal.caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    summary[caregiverId].provider += this.calcTotal(item.rate, item.units);
+                    this.caregiverSummaryTotal.provider += this.calcTotal(item.rate, item.units);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
             title() {
                 let title = `Itemized View of Deposit #${this.deposit.id}. Deposit Amount: $${this.numberFormat(this.deposit.amount)}`;
                 if (this.deposit.amount < 0) {
@@ -94,6 +217,9 @@
                 clients: [],
                 clientId: null,
                 caregiverId: null,
+                clientSummaryTotal: {},
+                caregiverSummaryTotal: {},
+                showSummary: true,
                 fields: [
                     {
                         key: "date",
@@ -162,6 +288,9 @@
                 const response = await axios.get("/business/caregivers?json=1");
                 this.caregivers = response.data;
             },
+            calcTotal(rate, units) {
+                return new Decimal(rate || 0).mul(parseFloat(units || 0)).toDecimalPlaces(2).toNumber();
+            }
         },
 
         mounted() {
@@ -172,5 +301,7 @@
 </script>
 
 <style scoped>
-
+    .table-fit-more td {
+        font-size: 12px;
+    }
 </style>
