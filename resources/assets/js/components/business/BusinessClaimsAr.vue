@@ -89,7 +89,15 @@
                 />
                 <input-help :form="form" field="payment_type" text="" />
             </b-form-group>
-            <b-form-group label="Amount">
+            <b-form-group label="Invoice Balance">
+                <b-form-input
+                    name="balance"
+                    v-model="selectedInvoice.balance"
+                    :disabled="true"
+                />
+                <input-help :form="form" field="amount" text="" />
+            </b-form-group>
+            <b-form-group label="Payment Amount">
                 <b-form-input
                     name="amount"
                     type="number"
