@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Controllers\Business;
 
+use App\Billing\BusinessInvoice;
+use App\Billing\BusinessInvoiceItem;
+use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Deposit;
 use App\Billing\Payment;
 use App\Billing\View\DepositViewGenerator;
@@ -11,29 +15,48 @@ use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
 use App\Billing\View\Pdf\PdfDepositView;
 use App\Billing\View\Pdf\PdfPaymentView;
+use Illuminate\Support\Collection;
 
 class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
     {
-        $invoices = $payment->invoices()->with('client', 'items', 'items.invoiceable')->get();
+        $invoices = $payment->invoices()->with([
+            'client',
+            'items',
+            'items.invoiceable',
+        ])->get();
+        $items = $invoices->reduce(function(Collection $collection, ClientInvoice $invoice) {
+            return $invoice->items->reduce(function(Collection $collection, ClientInvoiceItem $item) use ($invoice) {
+                return $collection->push(PaymentItemData::fromInvoiceItem($invoice, $item));
+            }, $collection);
+        }, new Collection());
+
 
         return view_component(
             'itemized-payment',
             'Itemized Payment Details',
-            compact('invoices', 'payment'),
+            compact('invoices', 'payment', 'items'),
             ['Reconciliation Report' => route('business.reports.reconciliation')]
         );
     }
 
     public function itemizeDeposit(Deposit $deposit)
     {
-        $invoices = $deposit->businessInvoices()->with('items', 'items.invoiceable')->get();
+        $invoices = $deposit->businessInvoices()->with([
+            'items',
+            'items.invoiceable',
+        ])->get();
+        $items = $invoices->reduce(function(Collection $collection, BusinessInvoice $invoice) {
+            return $invoice->items->reduce(function(Collection $collection, BusinessInvoiceItem $item) {
+                return $collection->push(DepositItemData::fromBusinessItem($item));
+            }, $collection);
+        }, new Collection());
 
         return view_component(
             'itemized-deposit',
             'Itemized Deposit Details',
-            compact('invoices', 'deposit'),
+            compact('invoices', 'deposit', 'items'),
             ['Reconciliation Report' => route('business.reports.reconciliation')]
         );
     }
@@ -68,5 +91,99 @@ class StatementController extends BaseController
 
         $viewGenerator = new DepositViewGenerator($strategy);
         return $viewGenerator->generate($deposit);
+    }
+}
+
+class DepositItemData {
+    /** @var \App\Client|null */
+    public $client;
+    /** @var \App\Caregiver|null */
+    public $caregiver;
+    /** @var \App\Shift|null */
+    public $shift;
+    /** @var float */
+    public $client_rate;
+    /** @var float */
+    public $caregiver_rate;
+    /** @var float */
+    public $ally_rate;
+    /** @var float */
+    public $provider_rate;
+    /** @var float */
+    public $rate;
+    /** @var float */
+    public $units;
+    /** @var float */
+    public $total;
+    /** @var string */
+    public $group;
+    /** @var string */
+    public $name;
+
+    public static function fromBusinessItem(BusinessInvoiceItem $item): self
+    {
+        $data = new self();
+        $data->client = $item->getInvoiceable()->getClient();
+        $data->caregiver = $item->getInvoiceable()->getCaregiver();
+        $data->shift = $item->getInvoiceable()->getShift();
+        $data->client_rate = $item->client_rate;
+        $data->caregiver_rate = $item->caregiver_rate;
+        $data->ally_rate = $item->ally_rate;
+        $data->provider_rate = $item->rate;
+        $data->rate = $item->rate;
+        $data->units = $item->units;
+        $data->total = $item->total;
+        $data->group = $item->group;
+        $data->name = $item->name;
+
+        return $data;
+    }
+}
+
+class PaymentItemData {
+    /** @var array */
+    public $invoice;
+    /** @var \App\Client|null */
+    public $client;
+    /** @var \App\Caregiver|null */
+    public $caregiver;
+    /** @var \App\Shift|null */
+    public $shift;
+    /** @var float */
+    public $client_rate;
+    /** @var float */
+    public $caregiver_rate;
+    /** @var float */
+    public $ally_rate;
+    /** @var float */
+    public $provider_rate;
+    /** @var float */
+    public $rate;
+    /** @var float */
+    public $units;
+    /** @var float */
+    public $total;
+    /** @var float */
+    public $amount_due;
+    /** @var string */
+    public $group;
+    /** @var string */
+    public $name;
+
+    public static function fromInvoiceItem(ClientInvoice $invoice, ClientInvoiceItem $item): self
+    {
+        $data = new self();
+        $data->invoice = $invoice->attributesToArray(); // to avoid passing all related data
+        $data->client = $invoice->client;
+        $data->caregiver = $item->getInvoiceable()->getCaregiver();
+        $data->shift = $item->getInvoiceable()->getShift();
+        $data->rate = $item->rate;
+        $data->units = $item->units;
+        $data->total = $item->total;
+        $data->group = $item->group;
+        $data->name = $item->name;
+        $data->amount_due = $item->amount_due;
+
+        return $data;
     }
 }

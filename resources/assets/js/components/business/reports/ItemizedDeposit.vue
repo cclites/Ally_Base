@@ -3,13 +3,13 @@
         <b-row>
             <b-col lg="8">
                 <b-form inline>
-                    <b-form-select v-model="caregiverId">
-                        <option :value="null">All Caregivers</option>
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </b-form-select>
                     <b-form-select v-model="clientId">
                         <option :value="null">All Clients</option>
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                    </b-form-select>
+                    <b-form-select v-model="caregiverId">
+                        <option :value="null">All Caregivers</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                 </b-form>
             </b-col>
@@ -20,8 +20,8 @@
         </b-row>
 
 
-        <b-table bordered striped hover show-empty
-                 :items="items"
+        <b-table bordered striped hover show-empty class="table-fit-more"
+                 :items="filteredItems"
                  :fields="fields"
                  :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"
@@ -50,30 +50,33 @@
             invoices: {
                 type: Array,
                 required: true,
+            },
+            items: {
+                type: Array,
+                required: true,
             }
         },
 
         computed: {
-            items() {
+            filteredItems() {
                 let filterFn = (item) => {
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
-                    if (!item.invoiceable) {
+                    if (this.caregiverId && parseInt(item.caregiver.id) !== parseInt(this.caregiverId)) {
                         return false;
                     }
-                    if (this.caregiverId && parseInt(item.invoiceable.caregiver_id) !== parseInt(this.caregiverId)) {
-                        return false;
-                    }
-                    if (this.clientId && parseInt(item.invoiceable.client_id) !== parseInt(this.clientId)) {
+                    if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
                     return true;
                 };
 
-                return this.invoices.reduce((items, invoice) => {
-                    return [...items, ...invoice.items.filter(filterFn)];
-                }, [])
+                return this.items.filter(filterFn).map(item => {
+                    item.client_name = item.client ? item.client.nameLastFirst : "";
+                    item.caregiver_name = item.caregiver ? item.caregiver.nameLastFirst : "";
+                    return item;
+                })
             },
 
             title() {
@@ -94,11 +97,17 @@
                 fields: [
                     {
                         key: "date",
-                        formatter: val => this.formatDateFromUTC(val),
+                        formatter: val => this.formatDateTimeFromUTC(val),
                         sortable: true,
                     },
                     {
-                        key: "group",
+                        key: "client_name",
+                        label: "Client",
+                        sortable: true,
+                    },
+                    {
+                        key: "caregiver_name",
+                        label: "Caregiver",
                         sortable: true,
                     },
                     {
@@ -128,11 +137,13 @@
                     },
                     {
                         key: "rate",
+                        label: "Reg Rate",
                         formatter: val => this.numberFormat(val),
                         sortable: true,
                     },
                     {
                         key: "total",
+                        label: "Reg Total",
                         formatter: val => this.numberFormat(val),
                         sortable: true,
                     },

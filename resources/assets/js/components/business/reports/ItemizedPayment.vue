@@ -3,13 +3,13 @@
         <b-row>
             <b-col lg="8">
                 <b-form inline>
-                    <b-form-select v-model="caregiverId">
-                        <option :value="null">All Caregivers</option>
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </b-form-select>
                     <b-form-select v-model="clientId">
                         <option :value="null">All Clients</option>
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                    </b-form-select>
+                    <b-form-select v-model="caregiverId">
+                        <option :value="null">All Caregivers</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                 </b-form>
             </b-col>
@@ -20,8 +20,8 @@
         </b-row>
 
 
-        <b-table bordered striped hover show-empty
-                 :items="items"
+        <b-table bordered striped hover show-empty class="table-fit-more"
+                 :items="filteredItems"
                  :fields="fields"
                  :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"
@@ -50,36 +50,34 @@
             invoices: {
                 type: Array,
                 required: true,
+            },
+            items: {
+                type: Array,
+                required: true,
             }
         },
 
         computed: {
-            items() {
+            filteredItems() {
                 let filterFn = (item) => {
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
-                    if (!item.invoiceable) {
+                    if (this.caregiverId && parseInt(item.caregiver.id) !== parseInt(this.caregiverId)) {
                         return false;
                     }
-                    if (this.caregiverId && parseInt(item.invoiceable.caregiver_id) !== parseInt(this.caregiverId)) {
-                        return false;
-                    }
-                    if (this.clientId && parseInt(item.invoiceable.client_id) !== parseInt(this.clientId)) {
+                    if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
                     return true;
                 };
 
-                return this.invoices.reduce((items, invoice) => {
-                    const invoiceItems = invoice.items.filter(filterFn).map(item => {
-                        item.invoice = invoice;
-                        item.invoice_name = invoice.name;
-                        item.client_name = invoice.client.nameLastFirst;
-                        return item;
-                    });
-                    return [...items, ...invoiceItems];
-                }, [])
+                return this.items.filter(filterFn).map(item => {
+                    item.invoice_name = item.invoice.name;
+                    item.client_name = item.client.nameLastFirst;
+                    item.caregiver_name = item.caregiver ? item.caregiver.nameLastFirst : "";
+                    return item;
+                });
             },
 
             title() {
@@ -110,10 +108,12 @@
                     },
                     {
                         key: "client_name",
+                        label: "Client",
                         sortable: true,
                     },
                     {
-                        key: "group",
+                        key: "caregiver_name",
+                        label: "Caregiver",
                         sortable: true,
                     },
                     {
