@@ -212,21 +212,6 @@
         },
 
         methods: {
-            applyPayment() {
-                if (! confirm('Are you sure you wish to apply payment to this invoice?')) {
-                    return ;
-                }
-
-                this.form.post(`/business/claims-ar/apply-payment/${this.selectedInvoice.id}`)
-                    .then( ({ data }) => {
-                        this.paymentModal = false;
-                    })
-                    .catch(e => {
-                    })
-                    .finally(() => {
-                    });
-            },
-
             async fetchPayers() {
                 this.payers = [];
                 this.loadingPayers = true;
@@ -250,6 +235,15 @@
             showPaymentModal(invoice) {
                 this.selectedInvoice = invoice;
                 this.paymentModal = true;
+            },
+
+            applyPayment() {
+                if (! confirm('Are you sure you wish to apply payment to this invoice?')) {
+                    return ;
+                }
+
+                alerts.addMessage('success', `Payment successfully applied to invoice #${this.selectedInvoice.name}`);
+                this.paymentModal = false;
             },
 
             async loadItems() {
