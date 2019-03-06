@@ -1,22 +1,8 @@
 <?php
 namespace App\Billing\Actions;
 
-use App\Billing\ClientInvoice;
-use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\Contracts\DepositInvoiceInterface;
 use App\Billing\DepositLog;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Gateway\ACHDepositInterface;
-use App\Billing\Gateway\CreditCardPaymentInterface;
-use App\Billing\Payments\BankAccountPayment;
-use App\Billing\Payments\CreditCardPayment;
-use App\Billing\Payments\Methods\BankAccount;
-use App\Billing\Payments\Methods\CreditCard;
-use App\Billing\Payments\Methods\ProviderPayment;
-use App\Billing\Queries\BusinessInvoiceQuery;
-use App\Billing\Queries\CaregiverInvoiceQuery;
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Business;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
 
@@ -33,23 +19,22 @@ class ProcessChainDeposits
     protected $depositProcessor;
 
     /**
-     * @var \App\Billing\Queries\CaregiverInvoiceQuery
+     * @var \App\Billing\Actions\DepositInvoiceAggregator
      */
-    protected $caregiverInvoiceQuery;
-
+    protected $invoiceAggregator;
     /**
-     * @var \App\Billing\Queries\BusinessInvoiceQuery
+     * @var \App\Billing\Actions\ApplyExistingDeposits
      */
-    protected $businessInvoiceQuery;
+    protected $applyExistingDeposits;
 
 
     function __construct(ACHDepositInterface $achGateway = null, ProcessInvoiceDeposit $depositProcessor = null,
-        CaregiverInvoiceQuery $caregiverInvoiceQuery = null, BusinessInvoiceQuery $businessInvoiceQuery = null)
+        DepositInvoiceAggregator $invoiceAggregator = null, ApplyExistingDeposits $applyExistingDeposits = null)
     {
         $this->achGateway = $achGateway ?: app(ACHDepositInterface::class);
         $this->depositProcessor = $depositProcessor ?: app(ProcessInvoiceDeposit::class);
-        $this->caregiverInvoiceQuery = $caregiverInvoiceQuery ?: app(CaregiverInvoiceQuery::class);
-        $this->businessInvoiceQuery = $businessInvoiceQuery ?: app(BusinessInvoiceQuery::class);
+        $this->invoiceAggregator = $invoiceAggregator ?: app(DepositInvoiceAggregator::class);
+        $this->applyExistingDeposits = $applyExistingDeposits ?: app(ApplyExistingDeposits::class);
     }
 
     /**
@@ -64,7 +49,9 @@ class ProcessChainDeposits
         DepositLog::acquireLock();
         $batchId = DepositLog::getNextBatch($chain->id);
 
-        $invoices = $this->getInvoices($chain);
+        $this->applyExistingDeposits->toChain($chain);
+
+        $invoices = $this->invoiceAggregator->dueForChain($chain);
         $results = [];
         foreach($invoices as $invoice) {
             $log = new DepositLog();
@@ -88,24 +75,4 @@ class ProcessChainDeposits
         return collect($results);
     }
 
-    /**
-     * Get all unpaid invoices for a chain
-     *
-     * @param \App\BusinessChain $chain
-     * @return \Illuminate\Support\Collection|DepositInvoiceInterface[]
-     */
-    function getInvoices(BusinessChain $chain): Collection
-    {
-        $caregiverInvoices = $this->caregiverInvoiceQuery
-            ->forBusinessChain($chain)
-            ->notPaidInFull()
-            ->notOnHold()
-            ->get();
-        $businessInvoices = $this->businessInvoiceQuery
-            ->forBusinessChain($chain)
-            ->notPaidInFull()
-            ->notOnHold()
-            ->get();
-        return $caregiverInvoices->merge($businessInvoices);
-    }
 }
