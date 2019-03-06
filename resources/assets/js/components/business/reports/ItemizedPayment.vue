@@ -98,7 +98,7 @@
                 fields: [
                     {
                         key: "date",
-                        formatter: val => this.formatDateFromUTC(val),
+                        formatter: val => this.formatDateTimeFromUTC(val),
                         sortable: true,
                     },
                     {
