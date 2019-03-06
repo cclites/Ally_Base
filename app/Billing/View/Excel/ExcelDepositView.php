@@ -1,6 +1,8 @@
 <?php
 namespace App\Billing\View\Excel;
 
+use App\Billing\BusinessInvoiceItem;
+use App\Billing\CaregiverInvoiceItem;
 use App\Billing\Deposit;
 use App\Billing\View\Data\DepositInvoiceData;
 use App\Billing\View\DepositViewStrategy;
@@ -46,20 +48,45 @@ class ExcelDepositView implements DepositViewStrategy
 
         $items = [];
         foreach($invoices as $invoice) {
-            /** @var \App\Billing\BaseInvoiceItem $item */
             foreach($invoice->getItems() as $item) {
-                $items[] = [
-                    'Date' => $item->date,
-                    'Group' => $item->group,
-                    'Service Name' => $item->name,
-                    'Units' => $item->units,
-                    'Rate' => $item->rate,
-                    'Total' => $item->total,
-                    'Notes' => $item->notes,
-                ];
+                $items[] = ($item instanceof CaregiverInvoiceItem)
+                    ? $this->mapCaregiverItem($item)
+                    : $this->mapBusinessItem($item);
             }
         }
 
-        return $items;
+        return collect($items)->sortBy('Date')->toArray();
+    }
+
+    public function mapBusinessItem(BusinessInvoiceItem $item)
+    {
+        return [
+            'Date' => $item->date,
+            'Group' => $item->group,
+            'Client' => optional($item->getInvoiceable()->getClient())->nameLastFirst(),
+            'Caregiver' => optional($item->getInvoiceable()->getCaregiver())->nameLastFirst(),
+            'Service Name' => $item->name,
+            'Units' => $item->units,
+            'Client Rate' => $item->client_rate,
+            'Caregiver Rate' => $item->caregiver_rate,
+            'Ally Rate' => $item->ally_rate,
+            'Reg Rate' => $item->rate,
+            'Reg Total' => $item->total,
+            'Notes' => $item->notes,
+        ];
+    }
+
+    public function mapCaregiverItem(CaregiverInvoiceItem $item)
+    {
+        return [
+            'Date' => $item->date,
+            'Group' => $item->group,
+            'Client' => optional($item->getInvoiceable()->getClient())->nameLastFirst(),
+            'Service Name' => $item->name,
+            'Units' => $item->units,
+            'Rate' => $item->rate,
+            'Total' => $item->total,
+            'Notes' => $item->notes,
+        ];
     }
 }
