@@ -58,6 +58,7 @@ class ExcelPaymentView implements PaymentViewStrategy
                     'Units' => $item->units,
                     'Rate' => $item->rate,
                     'Total' => $item->total,
+                    'Amount Due by Payer' => $item->amount_due,
                     'Notes' => $item->notes,
                 ];
             }
