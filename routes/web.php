@@ -412,6 +412,7 @@ Route::group([
 
     /* Claims & AR */
     Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
+    Route::post('claims-ar/apply-payment/{invoice}', 'Business\ClaimsController@applyPayment')->name('claims-ar.apply-payment');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
