@@ -1,0 +1,222 @@
+<template>
+    <b-card>
+        <b-row>
+            <b-col lg="12">
+                <b-card header="Select Date Range"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <b-form inline @submit.prevent="loadItems()">
+                        <date-picker
+                                v-model="start_date"
+                                placeholder="Start Date"
+                        >
+                        </date-picker> &nbsp;to&nbsp;
+                        <date-picker
+                                v-model="end_date"
+                                placeholder="End Date"
+                        >
+                        </date-picker>
+                        <b-form-select
+                                id="paid"
+                                name="paid"
+                                v-model="paid"
+                        >
+                            <option value="">All Invoices</option>
+                            <option value="0">Unpaid Invoices</option>
+                            <option value="1">Paid Invoices</option>
+                        </b-form-select>
+                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                    </b-form>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="12" class="text-right">
+                <b-form-input v-model="filter" placeholder="Type to Search" />
+            </b-col>
+        </b-row>
+        <loading-card v-if="loaded == 0"></loading-card>
+        <b-row v-if="loaded < 0">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+        <div class="table-responsive" v-if="loaded > 0">
+            <b-table bordered striped hover show-empty
+                     :items="filteredItems"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :filter="filter"
+            >
+                <template slot="name" scope="row">
+                    <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
+                </template>
+                <template slot="actions" scope="row">
+                    <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
+                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)">View Invoice</b-btn>
+                    <b-btn variant="primary" class="mr-2" :disabled="true">Transmit Claim</b-btn>
+                </template>
+            </b-table>
+        </div>
+        <b-modal id="applyPaymentModal" :title="`Apply Payment to Invoice #${selectedInvoice.name}`" v-model="paymentModal">
+            <b-form-group label="Payment Date">
+                <date-picker v-model="form.payment_date" placeholder="Payment Date"></date-picker>
+                <input-help :form="form" field="payment_date" text="" />
+            </b-form-group>
+            <b-form-group label="Payment Type">
+                <b-form-input
+                    name="payment_type"
+                    type="text"
+                    v-model="form.payment_type"
+                    max="255"
+                />
+                <input-help :form="form" field="payment_type" text="" />
+            </b-form-group>
+            <b-form-group label="Amount">
+                <b-form-input
+                    name="amount"
+                    type="number"
+                    v-model="form.amount"
+                    step="0.01"
+                    required
+                />
+                <input-help :form="form" field="amount" text="" />
+            </b-form-group>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="paymentModal=false">Cancel</b-btn>
+                <b-btn variant="info" @click="applyPayment()">Apply Payment</b-btn>
+            </div>
+        </b-modal>
+    </b-card>
+</template>
+
+<script>
+    import FormatsDates from "../../mixins/FormatsDates";
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import {Decimal} from 'decimal.js';
+
+    export default {
+
+        mixins: [FormatsDates, FormatsNumbers],
+
+        props: {
+        },
+
+        data() {
+            return {
+                sortBy: 'shift_time',
+                sortDesc: false,
+                filter: null,
+                loaded: -1,
+                start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                end_date: moment().format('MM/DD/YYYY'),
+                paid: "",
+                items: [],
+                fields: [
+                    {
+                        key: 'created_at',
+                        label: 'Date',
+                        formatter: (val) => this.formatDateFromUTC(val),
+                    },
+                    {
+                        key: 'name',
+                        label: 'Invoice #',
+                        sortable: true,
+                    },
+                    // {
+                    //     key: 'client',
+                    //     formatter: (val) => val.name,
+                    //     sortable: true,
+                    // },
+                    {
+                        key: 'payer',
+                        formatter: (val) => val.name,
+                        sortable: true,
+                    },
+                    {
+                        key: 'amount',
+                        label: 'Inv Total',
+                        formatter: (val) => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'balance',
+                        label: 'Balance',
+                        formatter: (val) => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'claim_status',
+                        formatter: (x) => 'Not Sent',
+                    },
+                    {
+                        key: 'actions',
+                        sortable: false,
+                    },
+                ],
+                paymentModal: false,
+                form: new Form({
+                    payment_type: '',
+                    payment_date: moment().format('MM/DD/YYYY'),
+                    amount: 0.00,
+                }),
+                selectedInvoice: {},
+            }
+        },
+
+        mounted() {
+        },
+
+        computed: {
+            filteredItems() {
+                return this.items.map(item => {
+                    let amount = new Decimal(item.amount);
+                    let amount_paid = new Decimal(item.amount_paid);
+                    item.balance = amount.minus(amount_paid).toFixed(2);
+                    return item;
+                });
+            },
+        },
+
+        methods: {
+            showPaymentModal(invoice) {
+                this.selectedInvoice = invoice;
+                this.paymentModal = true;
+            },
+
+            applyPayment() {
+                if (! confirm('Are you sure you wish to apply payment to this invoice?')) {
+                    return ;
+                }
+
+                alerts.addMessage('success', `Payment successfully applied to invoice #${this.selectedInvoice.name}`);
+                this.paymentModal = false;
+            },
+
+            async loadItems() {
+                this.loaded = 0;
+                let url = '/business/claims-ar?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
+                    '&paid=' + this.paid;
+                const response = await axios.get(url);
+                this.items = response.data.data;
+                this.loaded = 1;
+            },
+
+            invoiceUrl(invoice, view="") {
+                return `/business/client/invoices/${invoice.id}/${view}`;
+            },
+        }
+    }
+</script>
+
+<style>
+    table:not(.form-check) {
+        font-size: 14px;
+    }
+    .fa-check-square-o { color: green; }
+    .fa-times-rectangle-o { color: darkred; }
+</style>

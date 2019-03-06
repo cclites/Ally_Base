@@ -54,6 +54,7 @@
         @if(activeBusiness()->use_rate_codes)
             <li><a href="{{ route('business.rate-codes.index') }}">Rate Codes</a></li>
         @endif
+        <li><a href="{{ route('business.claims-ar') }}">Claims & AR</a></li>
         {{-- <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li> --}}
         {{-- <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li> --}}
         {{-- @if(app()->environment() === 'demo') --}}
