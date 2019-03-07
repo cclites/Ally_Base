@@ -8,7 +8,7 @@ trait IsDirectoryReport {
      *
      * @var array
      */
-    protected $columns;
+    protected $columns = [];
 
     /**
      * Return the instance of the query builder for additional manipulation

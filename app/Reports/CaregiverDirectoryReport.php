@@ -25,11 +25,6 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     protected $query;
 
     /**
-     * @var array
-     */
-    protected $columns;
-
-    /**
      * CaregiverDirectoryReport constructor.
      */
     public function __construct()
