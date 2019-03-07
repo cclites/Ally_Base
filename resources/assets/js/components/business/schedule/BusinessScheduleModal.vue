@@ -308,6 +308,9 @@
                                 <b-alert v-if="isUsingOvertime" variant="warning" show>
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
+                                <b-alert v-if="expiredLicense" variant="warning" show>
+                                    Warning: {{ expiredLicense.caregiver_name }}'s {{ expiredLicense.name }} certification {{ expiredLicense.verb }} on {{ expiredLicense.date }}.
+                                </b-alert>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -429,6 +432,7 @@
 </template>
 
 <script>
+    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
     import RateFactory from "../../../classes/RateFactory";
@@ -438,7 +442,7 @@
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates],
 
         props: {
             model: Boolean,
@@ -498,6 +502,36 @@
         },
 
         computed: {
+            expiredLicense() {
+                if (! this.form.caregiver_id || ! this.allCaregivers) {
+                    return false;
+                }
+
+                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
+                if (! caregiver || ! caregiver.licenses ) {
+                    return false;
+                }
+                
+                for (let index in caregiver.licenses) {
+                    let license = caregiver.licenses[index];
+                    if (moment(license.expires_at).isBefore(moment())) {
+                        return {
+                            ...license,
+                            verb: 'expired',
+                            date: this.formatDateFromUTC(license.expires_at),
+                            caregiver_name: caregiver.name,
+                        };
+                    } else if (moment(license.expires_at).isBefore(moment().add(7, 'days'))) {
+                        return {
+                            ...license,
+                            verb: 'is expiring',
+                            date: this.formatDateFromUTC(license.expires_at),
+                            caregiver_name: caregiver.name,
+                        };
+                    }
+                }
+                return false;
+            },
 
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
@@ -867,7 +901,7 @@
 
             async loadAllCaregivers() {
                 if (!this.allCaregivers || !this.allCaregivers.length) {
-                    const response = await axios.get('/business/caregivers?json=1');
+                    const response = await axios.get(`/business/schedule/caregivers`);
                     this.allCaregivers = response.data;
                 }
             },
