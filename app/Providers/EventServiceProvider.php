@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Events\BusinessChainCreated;
 use App\Events\ClientCreated;
+use App\Events\DepositFailed;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
+use App\Events\PaymentFailed;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
@@ -17,6 +19,8 @@ use App\Listeners\CreateDefaultClientPayer;
 use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
+use App\Listeners\UnapplyFailedDeposits;
+use App\Listeners\UnapplyFailedPayments;
 use App\Listeners\UnverifiedShiftAcknowledgement;
 use App\Listeners\UnverifiedLocationException;
 use App\Listeners\UpdateDepositOnFailedTransaction;
@@ -45,40 +49,44 @@ class EventServiceProvider extends ServiceProvider
         ClientCreated::class => [
             CreateDefaultClientPayer::class,
         ],
-        TaskAssigned::class => [
-//            SendAssignedTaskEmail::class,
+        DepositFailed::class => [
+            UnapplyFailedDeposits::class,
         ],
-        UnverifiedShiftLocation::class   => [
-            UnverifiedLocationException::class,
-        ],
-        UnverifiedShiftConfirmed::class => [
-            UnverifiedShiftAcknowledgement::class,
-        ],
-        ShiftModified::class            => [
-            ShiftStatusUpdate::class,
-            CheckForClockOut::class,
-        ],
-        ShiftCreated::class             => [
-            ShiftStatusUpdate::class,
-            CheckForClockOut::class,
-        ],
-        FailedTransactionFound::class   => [
+        FailedTransactionFound::class => [
             PostToSlackOnFailedTransaction::class,
             AddPaymentHoldsOnFailedTransaction::class,
         ],
         FailedTransactionRecorded::class => [
-            UpdateDepositOnFailedTransaction::class,
-            UpdatePaymentOnFailedTransaction::class,
             AddPaymentHoldsOnFailedTransaction::class,
         ],
-        TimesheetCreated::class => [
-            CreateTimesheetException::class,
+        PaymentFailed::class => [
+            UnapplyFailedPayments::class,
+        ],
+        ShiftModified::class => [
+            ShiftStatusUpdate::class,
+            CheckForClockOut::class,
+        ],
+        ShiftCreated::class => [
+            ShiftStatusUpdate::class,
+            CheckForClockOut::class,
         ],
         ShiftFlagsCouldChange::class => [
             GenerateShiftFlags::class,
         ],
         ShiftDeleted::class => [
             RecalculateDuplicateShiftFlags::class,
+        ],
+        TaskAssigned::class => [
+//            SendAssignedTaskEmail::class,
+        ],
+        TimesheetCreated::class => [
+            CreateTimesheetException::class,
+        ],
+        UnverifiedShiftLocation::class => [
+            UnverifiedLocationException::class,
+        ],
+        UnverifiedShiftConfirmed::class => [
+            UnverifiedShiftAcknowledgement::class,
         ],
     ];
 

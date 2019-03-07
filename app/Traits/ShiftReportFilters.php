@@ -2,6 +2,8 @@
 namespace App\Traits;
 
 use App\Billing\GatewayTransaction;
+use App\Billing\Payer;
+use App\Business;
 use App\Shift;
 
 trait ShiftReportFilters
@@ -25,10 +27,16 @@ trait ShiftReportFilters
         return $this;
     }
 
-    public function forPaymentMethod($method_type)
+    public function forPaymentMethod($methodClass)
     {
-        $this->query()->whereHas('client', function($q) use ($method_type) {
+        $method_type = maps_from_class($methodClass) ?? $methodClass;
+        $this->query()->whereHas('client', function($q) use ($methodClass, $method_type) {
             $q->where('default_payment_type', $method_type);
+            if ($methodClass === Business::class) {
+                $q->orWhereHas('primaryPayer', function($q) {
+                    $q->where('payer_id', '!=', Payer::PRIVATE_PAY_ID);
+                });
+            }
         });
         return $this;
     }

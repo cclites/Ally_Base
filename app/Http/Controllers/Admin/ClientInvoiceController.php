@@ -56,8 +56,6 @@ class ClientInvoiceController extends Controller
             'chain_id' => 'required|exists:business_chains,id',
         ]);
 
-        \DB::beginTransaction();
-
         $invoices = [];
         $chain = BusinessChain::findOrFail($request->input('chain_id'));
         $businessIds = $chain->businesses()->pluck('id')->toArray();
@@ -83,8 +81,6 @@ class ClientInvoiceController extends Controller
                 ];
             }
         }
-
-        \DB::commit();
 
         return new CreatedResponse(count($invoices) . ' invoices were created.', [
             'invoices' => $invoices,

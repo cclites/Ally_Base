@@ -70,6 +70,25 @@
                 </tbody>
             </table>
 
+            <table class="table table-bordered" v-if="invoices.length">
+                <thead>
+                <th>Estimates</th>
+                <th>Reg Total</th>
+                <th>CG Total</th>
+                <th>Client Pre-Ally</th>
+                <th>Ally Total</th>
+                <th>Client Total</th>
+                </thead>
+                <tbody>
+                <td></td>
+                <td>{{ numberFormat(totalEstimates.provider_total) }}</td>
+                <td>{{ numberFormat(totalEstimates.caregiver_total) }}</td>
+                <td>{{ numberFormat(totalAmountDue - totalEstimates.ally_total) }}</td>
+                <td>{{ numberFormat(totalEstimates.ally_total) }}</td>
+                <td>{{ numberFormat(totalAmountDue) }}</td>
+                </tbody>
+            </table>
+
             <h4>Invoices</h4>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -83,6 +102,7 @@
                     <template slot="status" scope="row">
                         <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
                         <span v-else>Unpaid</span>
+                        <span v-if="row.item.client_on_hold">- On Hold</span>
                     </template>
                 </b-table>
             </div>
@@ -185,7 +205,14 @@
             },
             totalACHDue() {
                 return this.invoices.reduce((carry, invoice) => carry + (['ACH', 'ACH-P'].includes(invoice.payer_payment_type) ? parseFloat(invoice.amount) - parseFloat(invoice.amount_paid) : 0), 0);
-            }
+            },
+            totalEstimates() {
+                return this.invoices.reduce((carry, invoice) => ({
+                    caregiver_total: parseFloat(carry.caregiver_total || 0) + parseFloat(invoice.estimates.caregiver_total),
+                    ally_total: parseFloat(carry.ally_total || 0) + parseFloat(invoice.estimates.ally_total),
+                    provider_total: parseFloat(carry.provider_total || 0) + parseFloat(invoice.estimates.provider_total),
+                }), {});
+            },
         },
 
         methods: {

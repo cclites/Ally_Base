@@ -148,6 +148,15 @@ class GatewayTransaction extends AuditableModel
             if (!$this->update(['success' => 0])) {
                 throw new \Exception();
             }
+
+            if ($deposit = $this->deposit) {
+                $deposit->markFailed();
+            }
+
+            if ($payment = $this->payment) {
+                $payment->markFailed();
+            }
+
             if ($this->failedTransaction) {
                 $this->failedTransaction->delete();
             }

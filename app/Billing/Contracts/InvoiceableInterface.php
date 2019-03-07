@@ -8,6 +8,7 @@ use App\Billing\Payment;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -90,6 +91,16 @@ interface InvoiceableInterface
     public function hasFeeIncluded(): bool;
 
     /**
+     * @return \App\Shift|null
+     */
+    public function getShift(): ?Shift;
+
+    /**
+     * @return \App\Client|null
+     */
+    public function getClient(): ?Client;
+
+    /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
      * @return float
@@ -97,7 +108,11 @@ interface InvoiceableInterface
     public function getClientRate(): float;
 
     /**
-     * TODO Implement caregiver deposit invoicing
+     * @return \App\Caregiver|null
+     */
+    public function getCaregiver(): ?Caregiver;
+
+    /**
      * @return float
      */
     public function getCaregiverRate(): float;
@@ -111,7 +126,12 @@ interface InvoiceableInterface
     public function getAllyRate(): ?float;
 
     /**
-     * Note: This is a calculated field from the other rates
+     * @return \App\Business|null
+     */
+    public function getBusiness(): ?Business;
+
+    /**
+     * Note: This is a calculated field from the other rates, provider is synonymous with business.
      * @return float
      */
     public function getProviderRate(): float;
