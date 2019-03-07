@@ -38,7 +38,7 @@ class DepositQuery extends BaseQuery
     {
         $this->where('success', true)
             ->where('created_at', '>=', '2019-01-01 00:00:00') // Prevent pre-migration missing applications from showing as available payments
-            ->whereRaw('(SELECT COALESCE(SUM(amount_applied), 0) FROM invoice_deposits WHERE deposit = deposits.id) < deposit.amount');
+            ->whereRaw('(SELECT COALESCE(SUM(amount_applied), 0) FROM invoice_deposits WHERE deposit_id = deposits.id) < deposits.amount');
 
         return $this;
     }
