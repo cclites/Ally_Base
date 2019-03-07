@@ -31,8 +31,8 @@ foreach(\App\Business::all() as $business) {
                 'client_rate' => $clientRate = $shift->costs()->getTotalHourlyCost(),
                 'caregiver_rate' => $shift->caregiver_rate,
                 'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
-                'rate' => $shift->provider_fee,
-                'total' => $shift->costs()->getProviderFee(),
+                'rate' => 0,
+                'total' => 0,
                 'date' => $shift->getItemDate(),
             ]);
             $item->associateInvoiceable($shift);
