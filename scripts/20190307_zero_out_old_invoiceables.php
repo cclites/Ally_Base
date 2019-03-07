@@ -6,6 +6,8 @@ require __DIR__ . '/bootstrap.php';
 //// Clear out old $0 provider fee shifts (add them to a new invoice that should just be $0)
 ////////////////////////////////////
 
+DB::beginTransaction();
+
 foreach(\App\Business::all() as $business) {
     $query = new \App\Billing\Queries\InvoiceableQuery(new \App\Shift());
     $shifts = $query->forBusinesses([$business->id])
@@ -41,3 +43,5 @@ foreach(\App\Business::all() as $business) {
     }
 
 }
+
+DB::commit();
