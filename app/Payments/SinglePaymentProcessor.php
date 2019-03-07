@@ -31,7 +31,7 @@ class SinglePaymentProcessor
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
                 'adjustment' => $adjustment,
-                'notes' => $notes,
+                'notes' => str_limit($notes, 250),
                 'success' => $transaction->success,
             ]);
             $payment->setPaymentMethod($method);
@@ -49,7 +49,7 @@ class SinglePaymentProcessor
                 'total' => $amount,
                 'amount_due' => $amount,
                 'date' => new Carbon(),
-                'notes' => $notes,
+                'notes' => str_limit($notes, 250),
             ]));
             $invoice->addPayment($payment, $amount);
         }
