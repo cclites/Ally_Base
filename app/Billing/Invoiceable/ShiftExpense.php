@@ -166,7 +166,12 @@ class ShiftExpense extends InvoiceableModel
      */
     public function getAllyRate(): ?float
     {
-        if ($this->ally_fee === null) return null;
+        if ($this->getItemUnits() == 0) {
+            return 0.0;
+        }
+        if ($this->ally_fee === null) {
+            return null;
+        }
         return round(divide($this->ally_fee, $this->getItemUnits(), 5), 4);
     }
 
