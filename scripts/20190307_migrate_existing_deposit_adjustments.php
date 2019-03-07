@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__ . '/bootstrap.php';
+
 use App\Billing\BusinessInvoice;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\CaregiverInvoice;
@@ -7,7 +9,6 @@ use App\Billing\CaregiverInvoiceItem;
 use App\Billing\Queries\DepositQuery;
 use Carbon\Carbon;
 
-require __DIR__ . '/bootstrap.php';
 
 $query = app(DepositQuery::class);
 $deposits = $query->hasAmountAvailable()->where('notes', 'NOT LIKE', 'BANK ERROR%')->get();
@@ -38,6 +39,7 @@ foreach($deposits as $deposit) {
         ]));
         $invoice->addDeposit($deposit, $amount);
     } else {
+        $caregiver = \App\Caregiver::find($deposit->caregiver_id);
         $invoice = CaregiverInvoice::create([
             'name' => CaregiverInvoice::getNextName($caregiver->id),
             'caregiver_id' => $caregiver->id,
