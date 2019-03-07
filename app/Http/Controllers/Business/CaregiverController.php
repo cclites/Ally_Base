@@ -223,7 +223,8 @@ class CaregiverController extends BaseController
             'active' => false,
             'inactive_at' => $inactive_at,
             'deactivation_reason_id' => request('deactivation_reason_id'),
-            'deactivation_note' => request('note')
+            'deactivation_note' => request('note'),
+            'status_alias_id' => null,
         ];
 
         if ($caregiver->update($data)) {
@@ -243,8 +244,8 @@ class CaregiverController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
-            return new SuccessResponse('The caregiver has been re-activated.');
+        if ($caregiver->update(['active' => true, 'inactive_at' => null, 'status_alias_id' => null])) {
+            return new SuccessResponse('The caregiver has been re-activated.', null, '.');
         }
         return new ErrorResponse(500, 'Could not re-activate the selected caregiver.');
     }
