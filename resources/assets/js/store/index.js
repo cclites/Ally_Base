@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import business from './modules/business'
 import paymentMethod from './modules/paymentMethod'
 import notifications from './modules/notifications';
+import tasks from './modules/tasks';
 
 Vue.use(Vuex);
 
@@ -13,6 +14,7 @@ export default new Vuex.Store({
         business,
         paymentMethod,
         notifications,
+        tasks,
     },
     strict: debug,
 })
