@@ -60,6 +60,7 @@ class InvoiceManualCaregiverDeposit extends Command
 
         if ($this->confirm('Do you wish to continue?')) {
             $deposit = Deposit::create([
+                'deposit_type' => 'caregiver',
                 'caregiver_id' => $invoice->caregiver->id,
                 'amount' => $invoice->amount,
                 'success' => true,
