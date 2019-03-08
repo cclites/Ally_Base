@@ -17,10 +17,10 @@
             </template>
             <template slot="actions" scope="data">
                 <slot name="actions" :item="data.item">
-                    <a :href="'/caregiver/deposits/' + data.item.id" class="btn btn-secondary" target="_blank">
+                    <a :href="depositUrl(data.item)" class="btn btn-secondary" target="_blank">
                         <i class="fa fa-external-link"></i> View
                     </a>
-                    <a :href="'/caregiver/deposits/' + data.item.id + '/pdf'" class="btn btn-secondary">
+                    <a :href="depositUrl(data.item, 'pdf')" class="btn btn-secondary">
                         <i class="fa fa-file-pdf-o"></i> Download
                     </a>
                 </slot>
@@ -34,7 +34,7 @@
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
-        props: ['client', 'deposits'],
+        props: ['deposits', 'urlGenerator'],
 
         mixins: [FormatsDates, FormatsNumbers],
 
@@ -60,6 +60,14 @@
                 sortDesc: true,
             }
         },
+
+        computed: {
+            depositUrl() {
+                if (this.urlGenerator) return this.urlGenerator;
+                return (deposit, view="") =>  `/caregiver/deposits/${deposit.id}/${view}`;
+            }
+        },
+
         methods: {
             start_end(data) {
                 if (data.item.week) {
