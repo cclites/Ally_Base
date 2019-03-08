@@ -194,7 +194,7 @@ class CaregiverController extends BaseController
         }
 
         if ($caregiver->update($data)) {
-            return new SuccessResponse('The caregiver has been updated.', $caregiver);
+            return new SuccessResponse('The caregiver has been updated.', $caregiver, '.');
         }
         return new ErrorResponse(500, 'The caregiver could not be updated.');
     }
