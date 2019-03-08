@@ -363,6 +363,8 @@ class CaregiverController extends BaseController
      */
     public function welcomeEmail(Caregiver $caregiver)
     {
+        $this->authorize('update', $caregiver);
+
         $caregiver->update(['welcome_email_sent_at' => Carbon::now()]);
 
         $caregiver->notify(new CaregiverWelcomeEmail($caregiver, $this->businessChain()));
@@ -379,6 +381,8 @@ class CaregiverController extends BaseController
      */
     public function trainingEmail(Caregiver $caregiver)
     {
+        $this->authorize('update', $caregiver);
+
         $caregiver->update(['training_email_sent_at' => Carbon::now()]);
 
         $caregiver->notify(new TrainingEmail($caregiver));
