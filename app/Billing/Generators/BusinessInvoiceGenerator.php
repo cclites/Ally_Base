@@ -63,6 +63,7 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
             'rate' => $invoiceable->getProviderRate(),
             'total' => $total,
             'date' => $invoiceable->getItemDate(),
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 }
