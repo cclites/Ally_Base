@@ -37,6 +37,8 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     protected $casts = [
         'client_id' => 'int',
         'payer_id' => 'int',
+        'amount' => 'float',
+        'amount_paid' => 'float',
     ];
 
     /**
