@@ -65,8 +65,7 @@ class InvoiceManualPayment extends Command
                 'payment_type' => 'MANUAL',
                 'amount' => $invoice->amount,
                 'success' => true,
-                // Store ally fee based on CC fee for now. TODO: Should we have a new manual type?
-                'system_allocation' => (new CreditCard())->getAllyFee($invoice->amount),
+                'system_allocation' => $invoice->client->getAllyFee($invoice->amount),
             ]);
             if (!$payment) {
                 $this->output->error("Payment could not be recorded.");
