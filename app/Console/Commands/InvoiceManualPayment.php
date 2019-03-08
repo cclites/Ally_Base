@@ -65,7 +65,7 @@ class InvoiceManualPayment extends Command
                 'payment_type' => 'MANUAL',
                 'amount' => $invoice->amount,
                 'success' => true,
-                'system_allotment' => $invoice->client->getAllyFee($invoice->amount),
+                'system_allotment' => $invoice->client->getAllyFee($invoice->amount, true),
             ]);
             if (!$payment) {
                 $this->output->error("Payment could not be recorded.");
