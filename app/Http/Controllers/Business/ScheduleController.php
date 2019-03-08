@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Business;
+use App\Caregiver;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
@@ -535,5 +536,20 @@ class ScheduleController extends BaseController
         $data['client_phone'] = $schedule->client->evvPhone->number ?? null;
 
         return response()->json($data);
+    }
+
+    /**
+     * Get a list of all the current business's caregivers
+     * for use on the BusinessSchedule component.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function caregiverData()
+    {
+        return response()->json(Caregiver::with(['clients.business', 'licenses'])
+            ->forRequestedBusinesses()
+            ->ordered()
+            ->get()
+        );
     }
 }
