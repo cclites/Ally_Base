@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Billing\Actions\ApplyPayment;
 use App\Billing\ClientInvoice;
 use App\Billing\Payment;
+use App\Billing\Payments\Methods\CreditCard;
 use Illuminate\Console\Command;
 
 class InvoiceManualPayment extends Command
@@ -23,13 +25,19 @@ class InvoiceManualPayment extends Command
     protected $description = 'Temporary command to apply a manual payment to invoices.';
 
     /**
+     * @var \App\Billing\Actions\ApplyPayment
+     */
+    protected $paymentApplicator;
+
+    /**
      * Create a new command instance.
      *
-     * @return void
+     * @param \App\Billing\Actions\ApplyPayment $paymentApplicator
      */
-    public function __construct()
+    public function __construct(ApplyPayment $paymentApplicator)
     {
         parent::__construct();
+        $this->paymentApplicator = $paymentApplicator;
     }
 
     /**
@@ -57,12 +65,14 @@ class InvoiceManualPayment extends Command
                 'payment_type' => 'MANUAL',
                 'amount' => $invoice->amount,
                 'success' => true,
+                // Store ally fee based on CC fee for now. TODO: Should we have a new manual type?
+                'system_allocation' => (new CreditCard())->getAllyFee($invoice->amount),
             ]);
             if (!$payment) {
                 $this->output->error("Payment could not be recorded.");
                 return 3;
             }
-            $invoice->addPayment($payment, $invoice->amount);
+            $this->paymentApplicator->apply($invoice, $payment);
             $this->output->writeln("Payment recorded!");
         }
     }
