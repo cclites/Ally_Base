@@ -292,17 +292,16 @@
             v-model="addShiftModal" 
             :caregiver="filters.caregiver_id"
             :client="filters.client_id"
-            :no-close-on-backdrop="true"
             @shift-created="onShiftCreate"
         ></add-shift-modal>
 
         <edit-shift-modal
             v-model="editShiftModal"
             :shift_id="editingShiftId"
-            :no-close-on-backdrop="true"
             :activities="activities"
             @shift-updated="onShiftUpdate"
             @shift-deleted="onShiftDelete"
+            @closed="editingShiftId = null"
         />
     </div>
 </template>
