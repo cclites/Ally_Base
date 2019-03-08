@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge withKeyword($keyword)
  * @mixin \Eloquent
  */
-class Knowledge extends Model
+class Knowledge extends BaseModel
 {
     /**
      * The table associated with the model.
@@ -64,6 +64,11 @@ class Knowledge extends Model
      * @var array
      */
     public $appends = ['assigned_roles'];
+
+    /**
+     * @var string  The column to sort by default when using ordered()
+     */
+    protected $orderedColumn = 'title';
 
     /**
      * The "booting" method of the model.
