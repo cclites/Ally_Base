@@ -23,8 +23,8 @@
                                 v-model="paid"
                         >
                             <option value="">All Invoices</option>
-                            <option value="0">Unpaid Invoices</option>
-                            <option value="1">Paid Invoices</option>
+                            <option :value="0">Unpaid Invoices</option>
+                            <option :value="1">Paid Invoices</option>
                         </b-form-select>
                         <b-form-select
                                 id="chain_id"
@@ -89,13 +89,13 @@
         data() {
             return {
                 sortBy: 'created_at',
-                sortDesc: false,
+                sortDesc: true,
                 filter: null,
                 loaded: -1,
-                start_date: moment().subtract(1, 'days').format('MM/DD/YYYY'),
+                start_date: '01/01/2018',
                 end_date: moment().format('MM/DD/YYYY'),
                 chain_id: "",
-                paid: "",
+                paid: 0,
                 items: [],
                 fields: [
                     {
