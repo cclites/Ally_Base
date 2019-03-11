@@ -130,6 +130,9 @@
                     },
                     {
                         key: 'status',
+                    },
+                    {
+                        key: 'flags',
                     }
                 ]
             }
@@ -150,7 +153,14 @@
                 let url = '/admin/invoices/clients?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
                 const response = await axios.get(url);
-                this.items = response.data.data;
+                this.items = response.data.data.map(item => {
+                    let flags = [];
+                    if (item.client_on_hold) flags.push("On Hold");
+                    if (!item.payer_payment_type) flags.push("No Payment Method");
+
+                    item.flags = flags.join(' | ');
+                    return item;
+                });
                 this.loaded = 1;
             },
 

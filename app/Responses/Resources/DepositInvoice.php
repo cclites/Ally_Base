@@ -53,6 +53,7 @@ class DepositInvoice extends Resource
                 return $this->groupItems($this->resource->getItems())->toArray();
             }),
             'deposits' => $this->whenLoaded('deposits'),
+            'no_bank_account' => optional($this->resource->getRecipient())->bankAccount === null, // TODO: Clean this up
         ];
     }
 }

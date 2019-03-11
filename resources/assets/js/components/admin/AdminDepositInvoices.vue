@@ -124,6 +124,9 @@
                     },
                     {
                         key: 'status',
+                    },
+                    {
+                        key: 'flags',
                     }
                 ],
             }
@@ -144,7 +147,15 @@
                 let url = '/admin/invoices/deposits?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
                 const response = await axios.get(url);
-                this.items = response.data.data;
+                this.items = response.data.data.map(item => {
+                    let flags = [];
+                    if (item.caregiver_on_hold) flags.push("On Hold");
+                    if (item.business_on_hold) flags.push("On Hold");
+                    if (item.no_bank_account) flags.push("No Bank Account");
+
+                    item.flags = flags.join(' | ');
+                    return item;
+                });
                 this.loaded = 1;
             },
 
