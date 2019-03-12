@@ -762,8 +762,8 @@
             initForm(shift = {}) {
                 console.log('initForm', this.form);
                 return {
-                    client_id: shift.client_id || null,
-                    caregiver_id: shift.caregiver_id || null,
+                    client_id: shift.id ? shift.client_id || null : this.client || null,
+                    caregiver_id: shift.id ? shift.caregiver_id || null : this.caregiver || null,
                     caregiver_comments: shift.caregiver_comments || null,
                     checked_in_time: shift.checked_in_time || null,
                     checked_out_time: shift.checked_out_time || null,
