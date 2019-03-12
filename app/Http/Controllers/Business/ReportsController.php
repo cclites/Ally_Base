@@ -979,8 +979,12 @@ class ReportsController extends BaseController
             $report->query()->with('meta');
         }
 
-        if($request->has('active')) {
+        if($request->filled('active')) {
             $report->where('users.active', $request->active);
+        }
+
+        if($request->filled('client_type')) {
+            $report->where('client_type', $request->client_type);
         }
 
         $report->applyColumnFilters($request->except(['start_date','end_date','active']));

@@ -76,6 +76,7 @@
  import moment from 'moment';
  import FormatsListData from '../../../mixins/FormatsListData';
  import UserDirectory from '../../../mixins/UserDirectory';
+ import FormatsDates from "../../../mixins/FormatsDates";
 
  export default {
      props: {
@@ -85,7 +86,7 @@
          },
      },
 
-     mixins: [FormatsListData, UserDirectory],
+     mixins: [FormatsListData, FormatsDates, UserDirectory],
 
     data() {
         return {
@@ -122,6 +123,7 @@
                     key: 'created_at',
                     label: 'Date Added',
                     shouldShow: true,
+                    formatter: val => this.formatDate(val)
                 },
             },
         };
