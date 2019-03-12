@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Billing\Generators\CaregiverInvoiceGenerator;
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use Auth;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
@@ -164,41 +166,21 @@ class ReportsController extends Controller
         return view('admin.reports.shared_shifts');
     }
 
-    public function caregiversDepositsWithoutBankAccount()
+    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
     {
-        $businesses = Business::whereHas('caregivers', function ($query) {
-                $query->doesntHave('bankAccount');
-            })
-            ->orderBy('name')
-            ->get();
+        if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
+            $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
+            $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
+                $array = $caregiver->toArray();
+                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
+                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
+                return $array;
+            });
 
-        $results = collect([]);
-        foreach ($businesses as $business) {
-            $caregivers = $business->caregivers()
-                ->with(['shifts' => function ($query) {
-                    $query->where('status', 'WAITING_FOR_PAYOUT');
-                }])
-                ->doesntHave('bankAccount')
-                ->get();
-
-            if ($caregivers->count()) {
-                $results->push([
-                    'id' => $business->id,
-                    'name' => $business->name,
-                    'caregivers' => $caregivers->map(function ($item) {
-                            return [
-                                'id' => $item->id,
-                                'name' => $item->name,
-                                'email' => $item->email
-                            ];
-                        })
-                        ->sortBy('name')
-                        ->values()
-                ]);
-            }
+            \Cache::put('caregivers_missing_accounts', $caregivers, 60);
         }
 
-        return view('admin.reports.caregivers.deposits_without_bank_account', compact('results'));
+        return view('admin.reports.caregivers.deposits_without_bank_account', compact('caregivers'));
     }
 
     public function finances()
