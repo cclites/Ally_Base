@@ -114,6 +114,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'chain_name',
+                        label: "Business Chain",
+                        sortable: true,
+                    },
+                    {
                         key: 'payer',
                         formatter: (val) => val.name,
                         sortable: true,
@@ -154,6 +159,8 @@
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
                 const response = await axios.get(url);
                 this.items = response.data.data.map(item => {
+                    item.chain_name = (item.client && item.client.business && item.client.business.chain) ? item.client.business.chain.name : "";
+
                     let flags = [];
                     if (item.client_on_hold) flags.push("On Hold");
                     if (!item.payer_payment_type) flags.push("No Payment Method");

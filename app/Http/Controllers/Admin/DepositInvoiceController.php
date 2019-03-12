@@ -46,8 +46,8 @@ class DepositInvoiceController extends Controller
                 $businessInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver'])->get();
-            $businessInvoices = $businessInvoiceQuery->with(['business'])->get();
+            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains'])->get();
+            $businessInvoices = $businessInvoiceQuery->with(['business', 'business.chain'])->get();
 
             $invoices = $caregiverInvoices->merge($businessInvoices);
 

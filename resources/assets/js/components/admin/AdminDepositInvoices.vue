@@ -113,6 +113,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'chain_name',
+                        label: "Business Chain",
+                        sortable: true,
+                    },
+                    {
                         key: 'amount',
                         formatter: (val) => this.numberFormat(val),
                         sortable: true,
@@ -148,6 +153,15 @@
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
                 const response = await axios.get(url);
                 this.items = response.data.data.map(item => {
+                    let chain;
+                    if (item.caregiver) {
+                        chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
+                    }
+                    if (item.business) {
+                        chain = item.business.chain;
+                    }
+                    item.chain_name = chain ? chain.name : "";
+
                     let flags = [];
                     if (item.caregiver_on_hold) flags.push("On Hold");
                     if (item.business_on_hold) flags.push("On Hold");
