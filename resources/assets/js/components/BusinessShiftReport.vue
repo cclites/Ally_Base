@@ -682,7 +682,7 @@
                     .then(function(response) {
                         let shift = response.data;
                         shift.checked_in_time = moment.utc(shift.checked_in_time).local().format('L LT');
-                        shift.checked_out_time = moment.utc(shift.checked_out_time).local().format('L LT');
+                        shift.checked_out_time = shift.checked_out_time ? moment.utc(shift.checked_out_time).local().format('L LT') : '(Still clocked in)';
                         component.selectedItem = shift;
                         component.detailsModal = true;
                         console.log(component.selectedItem);
