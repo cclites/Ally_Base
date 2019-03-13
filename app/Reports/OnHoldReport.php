@@ -2,6 +2,9 @@
 
 namespace App\Reports;
 
+use App\Billing\Queries\BusinessInvoiceQuery;
+use App\Billing\Queries\CaregiverInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -64,6 +67,7 @@ class OnHoldReport extends BaseReport
                                                                  ->orderBy('created_at', 'DESC')
                                                                  ->value('id'),
                                'created_at'          => $business->paymentHold->created_at->toDateTimeString(),
+                               'unpaid_invoices'     => app(BusinessInvoiceQuery::class)->forBusiness($business->id)->notPaidInFull()->count(),
                            ];
                        });
     }
@@ -91,6 +95,7 @@ class OnHoldReport extends BaseReport
                                                                    ->orderBy('created_at', 'DESC')
                                                                    ->value('id'),
                                 'created_at'          => $caregiver->paymentHold->created_at->toDateTimeString(),
+                                'unpaid_invoices'     => app(CaregiverInvoiceQuery::class)->forCaregiver($caregiver->id)->notPaidInFull()->count(),
                             ];
                         });
     }
@@ -118,6 +123,7 @@ class OnHoldReport extends BaseReport
                                                              ->orderBy('created_at', 'DESC')
                                                              ->value('id'),
                              'created_at'          => $client->paymentHold->created_at->toDateTimeString(),
+                             'unpaid_invoices'     => app(ClientInvoiceQuery::class)->forClient($client->id)->notPaidInFull()->count(),
                          ];
                      });
     }
