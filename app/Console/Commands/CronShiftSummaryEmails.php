@@ -27,6 +27,10 @@ class CronShiftSummaryEmails extends Command
      */
     protected $description = 'Send client summary shifts confirmation and pending charge email.';
 
+    protected $errors = [];
+    protected $totalClients = 0;
+    protected $totalSent = 0;
+
     /**
      * Create a new command instance.
      *
@@ -40,53 +44,84 @@ class CronShiftSummaryEmails extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      */
     public function handle()
     {
-        foreach ($this->getIncludedBusinessIds() as $business) {
-            $clients = $this->getIncludedClientIds($business);
-
-            if (empty($clients)) {
-                continue;
+        foreach ($this->getIncludedBusinessIds() as $businessId) {
+            try {
+                $this->processEmailsForBusiness($businessId);
             }
-
-            $report = new UnconfirmedShiftsReport();
-            $shifts = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime())
-                ->includeConfirmed()
-                ->includeClockedIn()
-                ->includeInProgress()
-                ->forBusinesses($business)
-                ->forClients($clients)
-                ->maskNames()
-                ->rows()
-                ->groupBy('client_id');
-
-            foreach ($shifts as $client_id => $shifts) {
-                $client = $shifts->first()->client;
-                $businessName = $shifts->first()->business_name;
-                $total = $shifts->sum('total');
-
-                $confirmation = ShiftConfirmation::create([
-                    'client_id' => $client->id,
-                    'token' => Str::random(64),
-                ]);
-                $confirmation->shifts()->sync($shifts->pluck('id'));
-
-                if ($email = filter_var($client->email, FILTER_VALIDATE_EMAIL)) {
-                    \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
-                        $client,
-                        $shifts,
-                        $total,
-                        $businessName,
-                        $confirmation->token
-                    ));
-                    sleep(1); // sleep 1s after each email
-                }
-                
-                // break; // <----------------- for testing
+            catch (\Exception $ex) {
+                //  failed on business
+                $this->errors[] = "Failed to process emails for business #$businessId";
             }
         }
+
+    protected function processEmailsForBusiness(int $businessId) : void
+    {
+        $clients = $this->getIncludedClientIds($businessId);
+
+        if (empty($clients)) {
+            return;
+        }
+
+        $report = new UnconfirmedShiftsReport();
+        $results = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime())
+            ->includeConfirmed()
+            ->includeClockedIn()
+            ->includeInProgress()
+            ->forBusinesses($businessId)
+            ->forClients($clients)
+            ->maskNames()
+            ->rows()
+            ->groupBy('client_id');
+
+        $this->totalClients += $results->count();
+
+        foreach ($results as $client_id => $shifts) {
+            try {
+                if ($this->sendToClient($shifts)) {
+                    $this->totalSent++;
+                } else {
+                    // invalid email
+                    $this->errors[] = "Client #$client_id does not have valid email";
+                }
+            }
+            catch (\Exception $ex) {
+                // failed on client
+                $this->errors[] = "Failed to process email for client #$client_id";
+            }
+
+//            sleep(1); // sleep 1s after each email
+            // break; // <----------------- for testing
+        }
+    }
+
+    public function sendToClient(iterable $shifts) : bool
+    {
+        $client = $shifts->first()->client;
+        $businessName = $shifts->first()->business_name;
+        $total = $shifts->sum('total');
+
+        $confirmation = ShiftConfirmation::create([
+            'client_id' => $client->id,
+            'token' => Str::random(64),
+        ]);
+        $confirmation->shifts()->sync($shifts->pluck('id'));
+
+        if ($email = filter_var($client->email, FILTER_VALIDATE_EMAIL)) {
+            \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
+                $client,
+                $shifts,
+                $total,
+                $businessName,
+                $confirmation->token
+            ));
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -95,7 +130,7 @@ class CronShiftSummaryEmails extends Command
      *
      * @return array
      */
-    public function getIncludedBusinessIds()
+    protected function getIncludedBusinessIds()
     {
         return Business::where('shift_confirmation_email', true)
             ->get()
@@ -107,9 +142,10 @@ class CronShiftSummaryEmails extends Command
      * Filter the clients to only those that have their 
      * weekly summary emails turned ON.
      *
+     * @param int $business
      * @return array
      */
-    public function getIncludedClientIds($business)
+    protected function getIncludedClientIds($business)
     {
         return Client::where('business_id', $business)
                 ->where('receive_summary_email', 1)
@@ -123,7 +159,7 @@ class CronShiftSummaryEmails extends Command
      *
      * @return \Carbon\Carbon
      */
-    public function cutOffDateTime()
+    protected function cutOffDateTime()
     {
         return Carbon::now('America/New_York')->startOfWeek()->subSecond();
     }
