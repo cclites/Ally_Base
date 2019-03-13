@@ -27,8 +27,25 @@ class CronShiftSummaryEmails extends Command
      */
     protected $description = 'Send client summary shifts confirmation and pending charge email.';
 
+    /**
+     * A list of errors occurred while processing.
+     *
+     * @var array
+     */
     protected $errors = [];
+
+    /**
+     * Total number of clients that should receive summary emails.
+     *
+     * @var int
+     */
     protected $totalClients = 0;
+
+    /**
+     * Total number of clients that were sent summary emails.
+     *
+     * @var int
+     */
     protected $totalSent = 0;
 
     /**
@@ -61,23 +78,15 @@ class CronShiftSummaryEmails extends Command
         $this->dispatchResultsEmail(config('ally.cron_results_to'));
     }
 
-    protected function dispatchResultsEmail(?string $email) : void
-    {
-        if (empty($email)) {
-            return;
-        }
-
-        $message = "Results from Shift Summary Emails CRON\r\n\r\nTotal Clients: {$this->totalClients}\r\nTotal Sent: {$this->totalSent}\r\nErrors: " . count($this->errors) . "\r\n\r\nError Details:\r\n" . join("\r\n", $this->errors);
-        \Mail::raw($message, function($message) use ($email) {
-           $message->subject('Ally CRON Results - Shift Summary Emails')
-               ->to($email);
-        });
-    }
-
+    /**
+     * Process and send summary emails to matching
+     * client's from the specified business.
+     *
+     * @param int $businessId
+     */
     protected function processEmailsForBusiness(int $businessId) : void
     {
         $clients = $this->getIncludedClientIds($businessId);
-
         if (empty($clients)) {
             return;
         }
@@ -97,7 +106,7 @@ class CronShiftSummaryEmails extends Command
 
         foreach ($results as $client_id => $shifts) {
             try {
-                if ($this->sendToClient($shifts)) {
+                if ($this->sendShiftSummary($shifts)) {
                     $this->totalSent++;
                 } else {
                     // invalid email
@@ -108,13 +117,16 @@ class CronShiftSummaryEmails extends Command
                 // failed on client
                 $this->errors[] = "Failed to process email for client #$client_id";
             }
-
-//            sleep(1); // sleep 1s after each email
-            // break; // <----------------- for testing
         }
     }
 
-    public function sendToClient(iterable $shifts) : bool
+    /**
+     * Send ClientShiftSummaryEmail using the specified list of shifts.
+     *
+     * @param iterable $shifts
+     * @return bool
+     */
+    protected function sendShiftSummary(iterable $shifts) : bool
     {
         $client = $shifts->first()->client;
         $businessName = $shifts->first()->business_name;
@@ -138,6 +150,25 @@ class CronShiftSummaryEmails extends Command
         }
 
         return false;
+    }
+
+    /**
+     * Send email with CRON results.
+     *
+     * @param string|null $email
+     */
+    protected function dispatchResultsEmail(?string $email) : void
+    {
+        if (empty($email)) {
+            return;
+        }
+
+        $message = "Results from Shift Summary Emails CRON\r\n\r\nTotal Clients: {$this->totalClients}\r\nTotal Sent: {$this->totalSent}\r\nErrors: " . count($this->errors) . "\r\n\r\nError Details:\r\n" . join("\r\n", $this->errors);
+
+        \Mail::raw($message, function($message) use ($email) {
+           $message->subject('Ally CRON Results - Shift Summary Emails')
+               ->to($email);
+        });
     }
 
     /**
