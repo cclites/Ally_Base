@@ -105,11 +105,8 @@ class ReportsController extends Controller
     {
         if ($request->expectsJson() && $request->input('json')) {
             $report = new OnHoldReport();
-            $rows = $report->rows();
-            if ($business_id = $request->input('business_id')) {
-                return $rows->where('business_id', $business_id)->values();
-            }
-            return $rows;
+            $report->forBusiness($request->input('business_id'));
+            return $report->rows();
         }
         return view('admin.reports.on_hold');
     }

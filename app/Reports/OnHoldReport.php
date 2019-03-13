@@ -16,6 +16,20 @@ use Carbon\Carbon;
 
 class OnHoldReport extends BaseReport
 {
+    protected $businessId;
+
+    /**
+     * Set business ID filter.
+     *
+     * @param $businessId
+     */
+    public function forBusiness(?int $businessId) : void
+    {
+        if (empty($businessId)) {
+            $this->businessId = null;
+        }
+        $this->businessId = $businessId;
+    }
 
     /**
      * Return the instance of the query builder for additional manipulation
@@ -45,8 +59,11 @@ class OnHoldReport extends BaseReport
 
     protected function getBusinesses()
     {
-        return Business::has('paymentHold')->with('paymentHold')
-                       ->get()
+        $query = Business::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->where('id', $this->businessId);
+        }
+        return $query->get()
                        ->map(function (Business $business) {
                            $startDate = new Carbon('2017-01-01');
                            $endDate = Carbon::now($business->timezone)->startOfWeek();
@@ -74,8 +91,11 @@ class OnHoldReport extends BaseReport
 
     protected function getCaregivers()
     {
-        return Caregiver::has('paymentHold')->with('paymentHold')
-                        ->get()
+        $query = Caregiver::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->forBusinesses([$this->businessId]);
+        }
+        return $query->get()
                         ->map(function (Caregiver $caregiver) {
                             $businessChain = $caregiver->businessChains()->first();
                             $startDate = new Carbon('2017-01-01');
@@ -102,8 +122,11 @@ class OnHoldReport extends BaseReport
 
     protected function getClients()
     {
-        return Client::has('paymentHold')->with('paymentHold')
-                     ->get()
+        $query = Client::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->where('business_id', $this->businessId);
+        }
+        return $query->get()
                      ->map(function (Client $client) {
                          $business = $client->business;
                          $startDate = new Carbon('2017-01-01');
