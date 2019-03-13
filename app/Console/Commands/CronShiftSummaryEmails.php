@@ -58,6 +58,22 @@ class CronShiftSummaryEmails extends Command
             }
         }
 
+        $this->dispatchResultsEmail(config('ally.cron_results_to'));
+    }
+
+    protected function dispatchResultsEmail(?string $email) : void
+    {
+        if (empty($email)) {
+            return;
+        }
+
+        $message = "Results from Shift Summary Emails CRON\r\n\r\nTotal Clients: {$this->totalClients}\r\nTotal Sent: {$this->totalSent}\r\nErrors: " . count($this->errors) . "\r\n\r\nError Details:\r\n" . join("\r\n", $this->errors);
+        \Mail::raw($message, function($message) use ($email) {
+           $message->subject('Ally CRON Results - Shift Summary Emails')
+               ->to($email);
+        });
+    }
+
     protected function processEmailsForBusiness(int $businessId) : void
     {
         $clients = $this->getIncludedClientIds($businessId);
