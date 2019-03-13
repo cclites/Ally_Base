@@ -289,6 +289,11 @@ class ReportsController extends Controller
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
         }
+        if ($client_type = $request->input('client_type')) {
+            $report->whereHas('client', function ($query) use ($client_type) {
+                $query->where('client_type', $client_type);
+            });
+        }
     }
 
     /**
