@@ -349,4 +349,26 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             });
         });
     }
+
+    /**
+     * Get the owning business chain for the user based on
+     * their role_type.
+     * Warning: will cause bad n+1 issues if relationships are
+     * not pre-loaded in the query.
+     *
+     * @return \App\BusinessChain|null
+     */
+    public function getChain()
+    {
+        switch ($this->role_type) {
+            case 'caregiver':
+                return optional(optional($this->caregiver)->businessChains)->first();
+            case 'client':
+                return optional(optional($this->client)->business)->businessChain;
+            case 'office_user':
+                return optional($this->officeUser)->businessChain;
+            default:
+                return null;
+        }
+    }
 }
