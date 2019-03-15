@@ -5,25 +5,28 @@
     >
         <b-row class="mb-2">
             <b-col lg="6">
+                <b-select v-model="chainFilter" :disabled="loading">
+                    <option value="">-- All Business Chains --</option>
+                    <option v-for="chain in chains" :key="chain.id" :value="chain.id">{{ chain.name }}</option>
+                </b-select>
             </b-col>
             <b-col lg="6" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
+                <b-form-input v-model="search" placeholder="Type to Search" />
             </b-col>
         </b-row>
 
-<!--        <loading-card v-if="loading" text="Loading users..."></loading-card>-->
         <div>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
-                    :items="items"
+                    :items="itemProvider"
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
                     :filter="filter"
-                    sort-by="firstname"
-                    :sort-desc="false"
-                    @filtered="onFiltered"
+                    :sort-by.sync="sortBy"
+                    :sort-desc.sync="sortDesc"
                     :busy="loading"
+                    ref="table"
                 >
                     <template slot="chain_name" scope="row">
                         <span v-if="! row.item.chain_id">-</span>
@@ -63,11 +66,15 @@
 
         data() {
             return {
+                chains: [],
+                chainFilter: '',
+                sortBy: 'lastname',
+                sortDesc: false,
                 loading: false,
-                items: [],
                 totalRows: 0,
-                perPage: 15,
+                perPage: 20,
                 currentPage: 1,
+                search: '',
                 filter: null,
                 detailsModal: false,
                 fields: [
@@ -99,7 +106,7 @@
                     {
                         key: 'chain_name',
                         label: 'Registry',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'role_type',
@@ -121,32 +128,46 @@
             }
         },
 
-        mounted() {
-            this.totalRows = this.items.length;
-            this.loadItems();
+        async mounted() {
+            await this.fetchChains();
+            this.loadTable();
         },
 
         computed: {
-
         },
 
         methods: {
-            loadItems() {
-                this.loading = true;
-                axios.get('/admin/users?json=1')
-                    .then(response => {
-                        this.items = response.data;
+            loadTable() {
+                this.$refs.table.refresh()
+            },
+
+            async fetchChains() {
+                await axios.get(`/admin/chains`)
+                    .then( ({ data }) => {
+                        this.chains = data;
                     })
-                    .catch(e => {})
+                    .catch(e => {});
+            },
+
+            test() {
+                console.log('test worked');
+            },
+
+            itemProvider(ctx) {
+                this.loading = true;
+                return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.filter}`)
+                    .then( ({ data }) => {
+                        this.totalRows = data.total;
+                        return data.results || [];
+                    })
+                    .catch(e => {
+                        return [];
+                    })
                     .finally(() => {
                         this.loading = false;
                     });
             },
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
-            },
+
             addHold(user) {
                 let form = new Form();
                 form.submit('post', '/admin/users/' + user.id + '/hold')
@@ -154,6 +175,7 @@
                         user.payment_hold = true;
                     });
             },
+
             removeHold(user) {
                 let form = new Form();
                 form.submit('delete', '/admin/users/' + user.id + '/hold')
@@ -161,6 +183,24 @@
                         user.payment_hold = false;
                     });
             },
-        }
+        },
+
+        watch: {
+            chainFilter(newValue, oldValue) {
+                if (newValue != oldValue) {
+                    this.$refs.table.refresh();
+                }
+            },
+
+            search(newValue, oldValue) {
+                // bootstrap-vue tables automatically reload the table
+                // data when the filter is changed, so debounce the setting
+                // of the filter member which will in turn debounce the
+                // ajax call.
+                _.debounce(() => {
+                    this.filter = newValue;
+                }, 350)();
+            },
+        },
     }
 </script>
