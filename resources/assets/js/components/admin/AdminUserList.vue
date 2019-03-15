@@ -22,7 +22,6 @@
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
-                    :filter="filter"
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
                     :busy="loading"
@@ -75,7 +74,6 @@
                 perPage: 20,
                 currentPage: 1,
                 search: '',
-                filter: null,
                 detailsModal: false,
                 fields: [
                     {
@@ -149,13 +147,9 @@
                     .catch(e => {});
             },
 
-            test() {
-                console.log('test worked');
-            },
-
             itemProvider(ctx) {
                 this.loading = true;
-                return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.filter}`)
+                return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.search}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.results || [];
@@ -173,7 +167,8 @@
                 form.submit('post', '/admin/users/' + user.id + '/hold')
                     .then(response => {
                         user.payment_hold = true;
-                    });
+                    })
+                    .catch(e => {});
             },
 
             removeHold(user) {
@@ -181,7 +176,8 @@
                 form.submit('delete', '/admin/users/' + user.id + '/hold')
                     .then(response => {
                         user.payment_hold = false;
-                    });
+                    })
+                    .catch(e => {});
             },
         },
 
@@ -193,12 +189,10 @@
             },
 
             search(newValue, oldValue) {
-                // bootstrap-vue tables automatically reload the table
-                // data when the filter is changed, so debounce the setting
-                // of the filter member which will in turn debounce the
-                // ajax call.
+                // debounce the reloading of the table to prevent
+                // unnecessary calls.
                 _.debounce(() => {
-                    this.filter = newValue;
+                    this.loadTable();
                 }, 350)();
             },
         },

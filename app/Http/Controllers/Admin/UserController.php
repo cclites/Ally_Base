@@ -23,59 +23,32 @@ class UserController extends Controller
             $sortBy = $request->input('sort', 'lastname');
             $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
             $offset = ($page - 1) * $perPage;
-            $chainFilter = $request->input('chain', null);
             $search = $request->input('search', null);
 
-            switch ($sortBy) {
-                case 'id':
-                case 'email':
-                case 'firstname':
-                case 'username':
-                case 'role_type':
-                case 'created_at':
-                    $order = "users.$sortBy $sortOrder";
-                    break;
-                case 'lastname':
-                default:
-                    $order = "users.lastname $sortOrder, users.firstname $sortOrder";
-                    break;
-            }
+            $query = User::with('paymentHold',
+                    'caregiver',
+                    'caregiver.businessChains',
+                    'client',
+                    'client.business.businessChain',
+                    'officeUser',
+                    'officeUser.businessChain'
+                )
+                ->whereIn('role_type', ['client', 'caregiver', 'office_user'])
+                ->search($search);
 
-            $query = User::with('paymentHold', 'caregiver', 'caregiver.businessChains', 'client', 'client.business.businessChain', 'officeUser', 'officeUser.businessChain')
-                ->whereIn('role_type', ['client', 'caregiver', 'office_user']);
-
-            if (! empty($chainFilter)) {
-                $query->where(function ($query) use ($chainFilter) {
-                    $query->whereHas('client', function ($q) use ($chainFilter) {
-                        $q->whereHas('business', function ($q2) use ($chainFilter) {
-                            $q2->where('businesses.chain_id', $chainFilter);
-                        });
-                    })->orWhereHas('caregiver', function ($q) use ($chainFilter) {
-                        $q->whereHas('businessChains', function ($q2) use ($chainFilter) {
-                            $q2->where('business_chains.id', $chainFilter);
-                        });
-                    })->orWhereHas('officeUser', function ($q) use ($chainFilter) {
-                        $q->whereHas('businessChain', function ($q2) use ($chainFilter) {
-                            $q2->where('business_chains.id', $chainFilter);
-                        });
-                    });
-                });
-            }
-
-            if (! empty($search)) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('users.username', 'LIKE', "%$search%")
-                        ->orWhere('users.email', 'LIKE', "%$search%")
-                        ->orWhere('users.id', 'LIKE', "%$search%")
-                        ->orWhere('users.firstname', 'LIKE', "%$search%")
-                        ->orWhere('users.lastname', 'LIKE', "%$search%")
-                        ->orWhere('users.role_type', 'LIKE', "%$search%");
-                });
+            if ($chainFilter = $request->input('chain', null)) {
+                $query->forChain($chainFilter);
             }
 
             $total = $query->count();
-            $users = $query->orderByRaw($order)
-                ->offset($offset)
+
+            if ($sortBy == 'lastname') {
+                $query->orderByRaw("users.lastname $sortOrder, users.firstname $sortOrder");
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+
+            $users = $query->offset($offset)
                 ->limit($perPage)
                 ->get()
                 ->map(function ($user) {
@@ -89,6 +62,7 @@ class UserController extends Controller
                         'created_at' => $user->created_at->toDateTimeString(),
                         'chain_id' => optional($user->getChain())->id,
                         'chain_name' => optional($user->getChain())->name,
+                        'payment_hold' => $user->payment_hold,
                     ];
 
                     return $data;
