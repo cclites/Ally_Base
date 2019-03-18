@@ -161,7 +161,7 @@
                                     <td class="text-nowrap">{{ $invoiceObject->invoice()->getDate() }}</td>
                                     <td>{{ $invoiceObject->invoice()->getName() }}</td>
                                     <td>{{ $invoiceObject->invoice()->client->name() }}</td>
-                                    <td>{{ $invoiceObject->invoice()->getClientPayer()->name() }}</td>
+                                    <td>{{ optional($invoiceObject->invoice()->getClientPayer())->name() }}</td>
                                     <td class="text-nowrap">{{ number_format($invoiceObject->invoice()->getAmount(), 2) }}</td>
                                     <td class="text-nowrap">{{ number_format($invoiceObject->amountApplied(), 2) }}</td>
                                 </tr>

@@ -99,7 +99,7 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     //// Instance Methods
     ////////////////////////////////////
 
-    function getClientPayer(): ClientPayer
+    function getClientPayer(): ?ClientPayer
     {
         return $this->clientPayer;
     }
