@@ -46,7 +46,7 @@ class ProfileController extends Controller
                     "% Processing Fee)"
             ];
         } else if ($type == 'caregiver') {
-            $user->role->load(['availability', 'skills']);
+            $user->role->load(['availability', 'skills', 'daysOff']);
         }
 
         return view('profile.' . $type, compact('user', 'payment_type_message'));
@@ -170,6 +170,8 @@ class ProfileController extends Controller
 
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOff);
         return new SuccessResponse('Your availability preferences have been saved.');
     }
 

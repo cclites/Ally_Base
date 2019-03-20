@@ -146,7 +146,8 @@ class CaregiverController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
+            'daysOff',
         ]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
@@ -327,6 +328,9 @@ class CaregiverController extends BaseController
 
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOff);
+
         return new SuccessResponse('Caregiver availability preferences updated');
     }
 
