@@ -311,6 +311,9 @@
                                 <b-alert v-if="expiredLicense" variant="warning" show>
                                     Warning: {{ expiredLicense.caregiver_name }}'s {{ expiredLicense.name }} certification {{ expiredLicense.verb }} on {{ expiredLicense.date }}.
                                 </b-alert>
+                                <b-alert v-if="caregiverDayOff" variant="warning" show>
+                                    Warning: {{ caregiverDayOff.caregiver_name }} has marked them self unavailable on {{ caregiverDayOff.date }}.
+                                </b-alert>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -502,6 +505,28 @@
         },
 
         computed: {
+            caregiverDayOff() {
+                if (! this.form.caregiver_id || ! this.allCaregivers) {
+                    return false;
+                }
+
+                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
+                if (! caregiver || ! caregiver.days_off || caregiver.days_off.length === 0) {
+                    return false;
+                }
+
+                let startMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.startDate);
+                if (startMatch) {
+                    return { caregiver_name: caregiver.name, date: moment(startMatch.date).format('M/D/YY') };
+                }
+
+                let endMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.firstShiftEndDate);
+                if (endMatch) {
+                    return { caregiver_name: caregiver.name, date: moment(endMatch.date).format('M/D/YY') };
+                }
+                return false;
+            },
+
             expiredLicense() {
                 if (! this.form.caregiver_id || ! this.allCaregivers) {
                     return false;
