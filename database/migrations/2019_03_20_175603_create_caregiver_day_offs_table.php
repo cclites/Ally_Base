@@ -17,7 +17,7 @@ class CreateCaregiverDayOffsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('caregiver_id');
             $table->date('date');
-            $table->string('description');
+            $table->string('description', 156);
 
             $table->timestamps();
 

@@ -40,6 +40,8 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
             'maximum_shift_hours' => 'required|numeric|min:1',
             'maximum_miles' => 'required|numeric|min:1',
             'days_off' => 'nullable|array',
+            'days_off.*.date' => 'required|date',
+            'days_off.*.description' => 'required|string|max:156',
         ];
     }
 
@@ -49,6 +51,7 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
             'minimum_shift_hours.*' => 'Minimum shift hours must be a number less than or equal to maximum shift hours.',
             'maximum_shift_hours.*' => 'Maximum shift hours must be a number greater than 0.',
             'maximum_miles.*' => 'You must select the maximum number of miles.',
+            'days_off.*' => 'There is an error with one of the days off.',
         ];
     }
 }

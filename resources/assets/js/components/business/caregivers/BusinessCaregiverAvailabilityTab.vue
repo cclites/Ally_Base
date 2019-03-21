@@ -64,11 +64,12 @@
                         <date-picker v-model="dayoff_date" id="dayoff_date" class="mb-2 mr-2" placeholder="Choose Day" required></date-picker>
 
                         <label for="dayoff_reason" class="mr-2">Description</label>
-                        <b-select v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" required>
-                            <option value="">-- Select --</option>
-                            <option value="family">Will be away with family</option>
-                            <option value="other">Other</option>
-                        </b-select>
+                        <b-input type="text" v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" maxlength="156" required />
+<!--                        <b-select v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" required>-->
+<!--                            <option value="">&#45;&#45; Select &#45;&#45;</option>-->
+<!--                            <option value="family">Will be away with family</option>-->
+<!--                            <option value="other">Other</option>-->
+<!--                        </b-select>-->
 
                         <b-button variant="info" type="submit">Add</b-button>
                     </b-form>
@@ -112,10 +113,10 @@
 
         data() {
             return {
-                reasons: {
-                    family: 'Will be away with family',
-                    other: 'Other',
-                },
+                // reasons: {
+                //     family: 'Will be away with family',
+                //     other: 'Other',
+                // },
                 daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
                 timesOfDay: ['morning', 'afternoon', 'evening', 'night'],
                 form: new Form({
@@ -141,7 +142,7 @@
                 dayoff_date: '',
                 daysOffFields: [
                     { key: 'date', label: 'Date', sortable: true, formatter: x => moment(x).format('M/D/YY') },
-                    { key: 'description', label: 'Description', sortable: true, formatter: x => this.reasons[x] },
+                    { key: 'description', label: 'Description', sortable: true },
                     { key: 'actions', label: ' ', sortable: false },
                 ],
             }
