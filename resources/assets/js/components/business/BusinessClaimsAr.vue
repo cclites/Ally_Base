@@ -31,13 +31,15 @@
                             </option>
                         </b-form-select>
                         <b-form-select
-                                id="paid"
-                                name="paid"
-                                v-model="paid"
+                            id="paid"
+                            name="paid"
+                            v-model="paid"
                         >
                             <option value="">All Invoices</option>
                             <option value="0">Unpaid Invoices</option>
                             <option value="1">Paid Invoices</option>
+                            <option value="2">Has Claim</option>
+                            <option value="3">Does Not Have Claim</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>

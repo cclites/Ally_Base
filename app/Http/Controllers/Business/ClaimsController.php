@@ -17,11 +17,12 @@ class ClaimsController extends BaseController
     {
         if ($request->expectsJson()) {
             if ($request->filled('paid')) {
-                if ($request->paid) {
+                if ($request->paid == 1) {
                     $invoiceQuery->paidInFull();
-                } else {
+                } else if ($request->paid == 0) {
                     $invoiceQuery->notPaidInFull();
                 }
+                // TODO: handle paid = 2/3 (has/doesn't have claim)
             }
 
             $invoiceQuery->forRequestedBusinesses();
