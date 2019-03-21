@@ -98,7 +98,7 @@
                     v-model="form.reference_no"
                     max="255"
                 />
-                <input-help :form="form" field="payment_type" text="" />
+                <input-help :form="form" field="reference_no" text="" />
             </b-form-group>
             <b-form-group label="Invoice Balance">
                 <b-form-input
@@ -106,9 +106,9 @@
                     v-model="selectedInvoice.balance"
                     :disabled="true"
                 />
-                <input-help :form="form" field="amount" text="" />
+                <input-help :form="form" field="balance" text="" />
             </b-form-group>
-            <b-form-group label="Payment Amount">
+            <b-form-group label="Payment Amount Towards Invoice">
                 <b-form-input
                     name="amount"
                     type="number"
@@ -117,6 +117,24 @@
                     required
                 />
                 <input-help :form="form" field="amount" text="" />
+            </b-form-group>
+            <b-form-group label="Claim Balance">
+                <b-form-input
+                    name="claim_balance"
+                    v-model="selectedInvoice.claim_balance"
+                    :disabled="true"
+                />
+                <input-help :form="form" field="claim_balance" text="" />
+            </b-form-group>
+            <b-form-group label="Payment Amount Towards Claim">
+                <b-form-input
+                    name="claim_amount"
+                    type="number"
+                    v-model="form.claim_amount"
+                    step="0.01"
+                    required
+                />
+                <input-help :form="form" field="claim_amount" text="" />
             </b-form-group>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="paymentModal=false">Cancel</b-btn>
@@ -177,13 +195,19 @@
                     },
                     {
                         key: 'balance',
-                        label: 'Balance',
+                        label: 'Invoice Balance',
                         formatter: (val) => this.numberFormat(val),
                         sortable: true,
                     },
                     {
                         key: 'claim_status',
                         formatter: (x) => 'Not Sent',
+                    },
+                    {
+                        key: 'claim_balance',
+                        label: 'Claim Balance',
+                        formatter: (val) => this.numberFormat(val),
+                        sortable: true,
                     },
                     {
                         key: 'actions',
@@ -201,6 +225,7 @@
                     payment_type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
+                    claim_amount: 0.00,
                     reference_no: '',
                 }),
                 selectedInvoice: {},
@@ -218,6 +243,7 @@
                     let amount = new Decimal(item.amount);
                     let amount_paid = new Decimal(item.amount_paid);
                     item.balance = amount.minus(amount_paid).toFixed(2);
+                    item.claim_balance = (item.claim_balance).toFixed(2);
                     return item;
                 });
             },
