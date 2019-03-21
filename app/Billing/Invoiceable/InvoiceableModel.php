@@ -100,6 +100,9 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      */
     public function getAllyRate(): ?float
     {
+        if ($this->getItemUnits() == 0) {
+            return 0.0;
+        }
         $allyFeeCharged = $this->getMetaValue("ally_fee_charged");
         if ($allyFeeCharged !== null) {
             return divide($allyFeeCharged, $this->getItemUnits(), 4);

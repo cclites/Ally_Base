@@ -66,9 +66,17 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         if (count($invoiceables)) {
             DB::beginTransaction();
 
-            foreach($invoiceables as $invoiceable) {
-                $this->assignInvoiceable($client, $invoiceable);
+            try {
+                foreach($invoiceables as $invoiceable) {
+                    $this->assignInvoiceable($client, $invoiceable);
+                }
             }
+            catch (\Throwable $e) {
+                DB::rollBack();
+                $this->clearExistingInvoices();
+                throw $e;
+            }
+
 
             DB::commit();
         }

@@ -33,6 +33,9 @@ class ClientInvoice extends Resource
     {
         return $this->resource->attributesToArray() + [
             'client' => $this->whenLoaded('client'),
+            'client_on_hold' => $this->whenLoaded('client', function() {
+                return $this->resource->client->isOnHold();
+            }),
             'payer' => $this->whenLoaded('clientPayer', function() {
                 return $this->resource->getClientPayer()->getPayer();
             }),

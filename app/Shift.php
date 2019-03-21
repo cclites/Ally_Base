@@ -969,6 +969,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
@@ -979,13 +989,19 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->client_rate;
     }
 
-    /**
-     * TODO Implement caregiver deposit invoicing
-     * @return float
-     */
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->caregiver;
+    }
+
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->business;
     }
 
     /**

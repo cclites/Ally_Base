@@ -52,16 +52,18 @@ class ExcelPaymentView implements PaymentViewStrategy
                     'Date' => $item->date,
                     'Invoice' => $invoice->getName(),
                     'Client' => $invoice->client->nameLastFirst(),
+                    'Caregiver' => $item->getInvoiceable() ? optional($item->getInvoiceable()->getCaregiver())->nameLastFirst() : null,
                     'Group' => $item->group,
                     'Service Name' => $item->name,
                     'Units' => $item->units,
                     'Rate' => $item->rate,
                     'Total' => $item->total,
+                    'Amount Due by Payer' => $item->amount_due,
                     'Notes' => $item->notes,
                 ];
             }
         }
 
-        return $items;
+        return collect($items)->sortBy('Date')->toArray();
     }
 }
