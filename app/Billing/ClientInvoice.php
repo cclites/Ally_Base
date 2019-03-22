@@ -93,6 +93,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo(ClientPayer::class);
     }
 
+    /**
+     * Get the Claim relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function claim()
+    {
+        return $this->hasOne(Claim::class);
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

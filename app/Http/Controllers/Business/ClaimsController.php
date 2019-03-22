@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
@@ -43,11 +45,32 @@ class ClaimsController extends BaseController
                 });
             }
 
-            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();
+            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claim'])->get();
 
             return ClaimResource::collection($invoices);
         }
 
         return view_component('business-claims-ar', 'Claims & AR');
+    }
+
+    public function transmitInvoice(Request $request, ClientInvoice $invoice)
+    {
+        if (! empty($invoice->claim)) {
+            // claim already exists, re-transmit?
+        }
+
+        $claim = Claim::create([
+            'client_invoice_id' => $invoice->id,
+            'amount' => $invoice->amount,
+            'status' => Claim::CREATED,
+        ]);
+
+        $claim->statuses()->create(['status' => Claim::CREATED]);
+
+        // TODO: transmit code
+
+        $claim->updateStatus(Claim::TRANSMITTED);
+
+        return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
     }
 }

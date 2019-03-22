@@ -72,8 +72,8 @@
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)">View Invoice</b-btn>
-                    <b-btn variant="primary" class="mr-2" :disabled="true">Transmit Claim</b-btn>
+                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
+                    <b-btn variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">Transmit Claim</b-btn>
                 </template>
             </b-table>
         </div>
@@ -190,23 +190,23 @@
                     {
                         key: 'amount',
                         label: 'Inv Total',
-                        formatter: (val) => this.numberFormat(val),
+                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
                         key: 'balance',
                         label: 'Invoice Balance',
-                        formatter: (val) => this.numberFormat(val),
+                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
                         key: 'claim_status',
-                        formatter: (x) => 'Not Sent',
+                        formatter: (x) => _.capitalize(_.startCase(x)),
                     },
                     {
                         key: 'claim_balance',
                         label: 'Claim Balance',
-                        formatter: (val) => this.numberFormat(val),
+                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
@@ -229,6 +229,7 @@
                     reference_no: '',
                 }),
                 selectedInvoice: {},
+                busy: false,
             }
         },
 
@@ -240,16 +241,30 @@
         computed: {
             filteredItems() {
                 return this.items.map(item => {
-                    let amount = new Decimal(item.amount);
-                    let amount_paid = new Decimal(item.amount_paid);
-                    item.balance = amount.minus(amount_paid).toFixed(2);
-                    item.claim_balance = (item.claim_balance).toFixed(2);
                     return item;
                 });
             },
         },
 
         methods: {
+            transmitClaim(invoice) {
+                this.busy = true;
+                let form = new Form({});
+                form.post(`/business/claims-ar/${invoice.id}/transmit`)
+                    .then( ({ data }) => {
+                        console.log('transmit response', data);
+                        // success
+                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data);
+                        }
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.busy = false;
+                    });
+            },
+
             async fetchPayers() {
                 this.payers = [];
                 this.loadingPayers = true;
