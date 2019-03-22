@@ -31,15 +31,15 @@
                             </option>
                         </b-form-select>
                         <b-form-select
-                            id="paid"
-                            name="paid"
-                            v-model="paid"
+                            id="invoiceType"
+                            name="invoiceType"
+                            v-model="invoiceType"
                         >
                             <option value="">All Invoices</option>
-                            <option value="0">Unpaid Invoices</option>
-                            <option value="1">Paid Invoices</option>
-                            <option value="2">Has Claim</option>
-                            <option value="3">Does Not Have Claim</option>
+                            <option value="unpaid">Unpaid Invoices</option>
+                            <option value="paid">Paid Invoices</option>
+                            <option value="has_claim">Has Claim</option>
+                            <option value="no_claim">Does Not Have Claim</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -69,6 +69,9 @@
             >
                 <template slot="name" scope="row">
                     <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
+                </template>
+                <template slot="client" scope="row">
+                    <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
@@ -147,14 +150,9 @@
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
-    import {Decimal} from 'decimal.js';
 
     export default {
-
         mixins: [FormatsDates, FormatsNumbers],
-
-        props: {
-        },
 
         data() {
             return {
@@ -162,15 +160,16 @@
                 sortDesc: false,
                 filter: null,
                 loaded: -1,
-                start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
                 end_date: moment().format('MM/DD/YYYY'),
-                paid: "",
+                invoiceType: "",
                 items: [],
                 fields: [
                     {
                         key: 'created_at',
                         label: 'Date',
                         formatter: (val) => this.formatDateFromUTC(val),
+                        sortable: true,
                     },
                     {
                         key: 'name',
@@ -179,7 +178,6 @@
                     },
                     {
                         key: 'client',
-                        formatter: (val) => val.name,
                         sortable: true,
                     },
                     {
@@ -202,6 +200,7 @@
                     {
                         key: 'claim_status',
                         formatter: (x) => _.capitalize(_.startCase(x)),
+                        sortable: true,
                     },
                     {
                         key: 'claim_balance',
@@ -301,7 +300,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/claims-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&paid=${this.paid}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/claims-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;

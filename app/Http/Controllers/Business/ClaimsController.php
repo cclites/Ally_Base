@@ -18,13 +18,21 @@ class ClaimsController extends BaseController
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
-            if ($request->filled('paid')) {
-                if ($request->paid == 1) {
-                    $invoiceQuery->paidInFull();
-                } else if ($request->paid == 0) {
-                    $invoiceQuery->notPaidInFull();
+            if ($request->filled('invoiceType')) {
+                switch ($request->invoiceType) {
+                    case 'paid':
+                        $invoiceQuery->paidInFull();
+                        break;
+                    case 'unpaid':
+                        $invoiceQuery->notPaidInFull();
+                        break;
+                    case 'has_claim':
+                        $invoiceQuery->whereHasClaim();
+                        break;
+                    case 'no_claim':
+                        $invoiceQuery->whereNoClaim();
+                        break;
                 }
-                // TODO: handle paid = 2/3 (has/doesn't have claim)
             }
 
             $invoiceQuery->forRequestedBusinesses();
