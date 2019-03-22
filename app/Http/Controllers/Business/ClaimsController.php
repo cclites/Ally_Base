@@ -8,10 +8,12 @@ use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
+use App\Services\HhaExchangeManager;
 
 class ClaimsController extends BaseController
 {
@@ -61,24 +63,44 @@ class ClaimsController extends BaseController
         return view_component('business-claims-ar', 'Claims & AR');
     }
 
+    /**
+     * Create a claim from an invoice and transmit to HHAeXchange.
+     *
+     * @param Request $request
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
+     */
     public function transmitInvoice(Request $request, ClientInvoice $invoice)
     {
-        if (! empty($invoice->claim)) {
-            // claim already exists, re-transmit?
+        // TODO: validation
+        if (empty($invoice->client->business->ein) || empty($invoice->client->business->medicaid_id)) {
+            return new ErrorResponse(412, 'Business does not have the required data to submit claims.');
         }
 
-        $claim = Claim::create([
-            'client_invoice_id' => $invoice->id,
-            'amount' => $invoice->amount,
-            'status' => Claim::CREATED,
-        ]);
+        $claim = $invoice->claim;
+        if (empty($claim)) {
+            $claim = Claim::create([
+                'client_invoice_id' => $invoice->id,
+                'amount' => $invoice->amount,
+                'status' => Claim::CREATED,
+            ]);
 
-        $claim->statuses()->create(['status' => Claim::CREATED]);
+            $claim->statuses()->create(['status' => Claim::CREATED]);
+        }
 
-        // TODO: transmit code
+        $shiftData = $claim->getHhaExchangeData();
+        if (empty($shiftData)) {
+            return new ErrorResponse(412, 'You cannot create a claim because there are no shifts attached to this invoice.');
+        }
 
-        $claim->updateStatus(Claim::TRANSMITTED);
+        $hha = new HhaExchangeManager($invoice->client->business->ein);
+        $hha->addItems($shiftData);
+        if ($hha->uploadCsv()) {
+            $claim->updateStatus(Claim::TRANSMITTED);
+            return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
+        }
 
-        return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
     }
 }
