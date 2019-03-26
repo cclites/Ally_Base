@@ -472,7 +472,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getFlagsAttribute()
     {
-        return $this->shiftFlags->pluck('flag')->unique()->toArray();
+        return $this->shiftFlags->pluck('flag')->unique()->values()->toArray();
     }
 
     //////////////////////////////////////
