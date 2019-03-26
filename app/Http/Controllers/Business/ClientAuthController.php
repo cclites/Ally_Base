@@ -50,6 +50,8 @@ class ClientAuthController extends BaseController
         if ($auth = ClientAuthorization::create($request->filtered())) {
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
             $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+            $auth['service_code'] = optional($auth['service'])->code;
+            $auth['service_type'] = optional($auth['service'])->name;
             return new CreatedResponse('New authorization has been created', $auth->load('payer', 'service'));
         }
         
@@ -71,6 +73,8 @@ class ClientAuthController extends BaseController
         if ($auth->update($request->filtered())) {
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
             $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+            $auth['service_code'] = optional($auth['service'])->code;
+            $auth['service_type'] = optional($auth['service'])->name;
             return new SuccessResponse('Authorization has been updated.', $auth->load('payer', 'service'));
         }
 

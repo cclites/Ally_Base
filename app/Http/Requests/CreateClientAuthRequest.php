@@ -27,6 +27,7 @@ class CreateClientAuthRequest extends FormRequest
     {
         return [
             'client_id' => 'required|exists:clients,id',
+            'service_auth_id' => 'nullable|string|max:255',
             'service_id' => 'required|exists:services,id',
             'payer_id' => 'nullable|numeric',
             'effective_start' => 'required|date',

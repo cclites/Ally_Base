@@ -40,18 +40,32 @@
         </div>
 
         <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-            <b-modal id="filterColumnsModal" :title="title" v-model="showAuthModal">
+            <b-modal id="filterColumnsModal" :title="title" v-model="showAuthModal" size="lg">
                 <b-container fluid>
                     <b-row>
-                        <b-col lg="6">
-                            <b-form-group label="Service Code" label-class="required">
-                                <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
-                                    <option :value="null">--Select--</option>
-                                    <option v-for="s in services" :value="s.id" :key="s.id">{{ s.code}} {{ s.name }}</option>
-                                </b-form-select>
+                        <b-col lg="3">
+                            <b-form-group label="Service Auth ID" label-class="required">
+                                <b-input v-model="form.service_auth_id" max="255"></b-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="5">
+                            <b-row>
+                                <b-col lg="6">
+                                    <b-form-group label="Service Code" label-class="required">
+                                        <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
+                                            <option :value="null">--Select--</option>
+                                            <option v-for="s in services" :value="s.id" :key="s.id">{{ s.code}}</option>
+                                        </b-form-select>
+                                    </b-form-group>
+                                </b-col>
+                                <b-col lg="6">
+                                    <b-form-group label="Service Type">
+                                        <b-input :value="selectedServiceName" plaintext />
+                                    </b-form-group>
+                                </b-col>
+                            </b-row>
+                        </b-col>
+                        <b-col lg="4">
                             <b-form-group label="Payer">
                                 <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
                                     <option :value="null">(Any Payer)</option>
@@ -59,6 +73,8 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
+                    </b-row>
+                    <b-row>
                         <b-col lg="6">
                             <b-form-group label="Effective Start" label-class="required">
                                 <mask-input v-model="form.effective_start" type="date" class="date-input"></mask-input>
@@ -69,12 +85,14 @@
                                 <mask-input v-model="form.effective_end" type="date" class="date-input"></mask-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                    </b-row>
+                    <b-row>
+                        <b-col lg="4">
                             <b-form-group label="Units" label-class="required">
                                 <b-form-input v-model="form.units"></b-form-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="4">
                             <b-form-group label="Unit Type" label-class="required">
                                 <b-form-select v-model="form.unit_type" class="mr-1 mb-1">
                                     <option value="15m">15 Minutes</option>
@@ -83,7 +101,7 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="4">
                             <b-form-group label="Period" label-class="required">
                                 <b-form-select v-model="form.period" class="mr-1 mb-1">
                                     <option value="daily">Daily</option>
@@ -209,6 +227,13 @@
             buttonText() {
                 return (this.auth.id) ? 'Save' : 'Create';
             },
+            selectedServiceName() {
+                let service = this.services.find(x => x.id === this.form.service_id);
+                if (service) {
+                    return service.name;
+                }
+                return '';
+            },
         },
 
         methods: {
@@ -246,11 +271,12 @@
             },
             makeForm(defaults = {}) {
                 return new Form({
+                    service_auth_id: defaults.service_auth_id || '',
                     client_id: this.clientId,
                     service_id: defaults.service_id || null,
                     payer_id: defaults.payer_id || null,
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
-                    effective_end: defaults.effective_end || "12/31/9999",
+                    effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
                     units: defaults.units || "",
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
