@@ -645,7 +645,7 @@ class ShiftFlagsTest extends TestCase
     }
 
     /** @test */
-    public function a_shift_should_be_flagged_when_actual_hours_shift_exceeds_full_term_service_auth_limits()
+    public function an_actual_hours_shift_should_be_flagged_when_hours_exceed_full_term_limits()
     {
         $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
 
@@ -658,6 +658,46 @@ class ShiftFlagsTest extends TestCase
             'period' => ClientAuthorization::PERIOD_TERM,
             'effective_start' => Carbon::now()->subDays(5),
             'effective_end' => Carbon::now()->addYears(1),
+        ]);
+
+        // 4 hour shift inside the term dates
+        $data = $this->makeShift(Carbon::yesterday(), '10:00:00', '14:00:00');
+        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift->flagManager()->generate();
+        $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        // shift should exceed the max unit but is outside the term dates
+        $data = $this->makeShift(Carbon::now()->addYears(2), '10:00:00', '12:30:00');
+        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift->flagManager()->generate();
+        $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        // shift exceeds the max units and is inside the term dates - flag
+        $data = $this->makeShift(Carbon::now()->addMonths(2), '10:00:00', '12:30:00');
+        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift2->flagManager()->generate();
+        $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
+
+    /** @test */
+    function an_actual_hours_shift_should_be_flagged_when_hours_exceeds_specific_daily_limits()
+    {
+        $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
+
+        $auth1 = factory(ClientAuthorization::class)->create([
+            'client_id' => $this->client->id,
+            'service_id' => $this->service->id,
+            'payer_id' => null,
+            'units' => 0.0,
+            'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
+            'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
+            'sunday' => 5,
+            'monday' => 0,
+            'tuesday' => 0,
+            'wednesday' => 5,
+            'thursday' => 0,
+            'friday' => 0,
+            'saturday' => 0,
         ]);
 
         // 4 hour shift inside the term dates
