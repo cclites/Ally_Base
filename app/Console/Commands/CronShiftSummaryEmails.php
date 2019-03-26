@@ -117,6 +117,8 @@ class CronShiftSummaryEmails extends Command
                 // failed on client
                 $this->errors[] = "Failed to process email for client #$client_id";
             }
+
+            sleep(1);
         }
     }
 
