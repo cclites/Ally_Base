@@ -131,7 +131,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'lastname',
+                sortBy: 'payer',
                 sortDesc: false,
                 filter: null,
                 fields: [
@@ -139,13 +139,19 @@
                         key: 'payer',
                         label: 'Payer',
                         sortable: true,
-                        formatter: (val) => {if (val) return val.name;}
+                        formatter: (val) => val ? val.name : '-',
                     },
                     {
-                        key: 'service',
-                        label: 'Service',
+                        key: 'service_type',
+                        label: 'Service Type',
                         sortable: true,
-                        formatter: (val) => {if (val) return val.name;}
+                        formatter: x => x ? x : '-',
+                    },
+                    {
+                        key: 'service_code',
+                        label: 'Service Code',
+                        sortable: true,
+                        formatter: x => x ? x : '-',
                     },
                     {
                         key: 'effective_start',
