@@ -209,7 +209,7 @@ class UnconfirmedShiftsReport extends BaseReport
                     'caregiver' => $this->mask_names ? $s->caregiver->user->maskedName : $s->caregiver->user->name,
                     'hours' => $s->hours,
                     'confirmed' => $s->statusManager()->isConfirmed(),
-                    'rate' => $s->fixed_rates ? '(fixed)' : $costs->getTotalHourlyCost(),
+                    'rate' => $s->fixed_rates ? '---' : $costs->getTotalHourlyCost(),
                     'total' => $costs->getTotalCost(),
                 ];
             });
