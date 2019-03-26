@@ -148,7 +148,7 @@ class ClientAuthorization extends AuditableModel
                 return [$date->copy()->startOfMonth()->setTimezone('UTC'), $date->copy()->endOfMonth()->setTimezone('UTC')];
                 break;
             case self::PERIOD_TERM:
-                return [$this->effective_start->copy()->setTimezone('UTC'), $this->effective_end->copy()->setTimezone('UTC')];
+                return [Carbon::parse($this->effective_start)->setTimezone('UTC'), Carbon::parse($this->effective_end)->setTimezone('UTC')];
             case self::PERIOD_SPECIFIC_DAYS:
                 // TODO: return array of dates instead of a range
                 return null;
