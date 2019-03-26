@@ -691,31 +691,26 @@ class ShiftFlagsTest extends TestCase
             'units' => 0.0,
             'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
             'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
-            'sunday' => 5,
-            'monday' => 0,
-            'tuesday' => 0,
-            'wednesday' => 5,
-            'thursday' => 0,
-            'friday' => 0,
-            'saturday' => 0,
+            'monday' => 5,
+            'tuesday' => null,
         ]);
 
-        // 4 hour shift inside the term dates
-        $data = $this->makeShift(Carbon::yesterday(), '10:00:00', '14:00:00');
+        // 4 hours shift on a monday -> no flag yet
+        $data = $this->makeShift(Carbon::parse('last monday'), '10:00:00', '14:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
-        // shift should exceed the max unit but is outside the term dates
-        $data = $this->makeShift(Carbon::now()->addYears(2), '10:00:00', '12:30:00');
+        // 2 hour shift on any other day -> still no flag
+        $data = $this->makeShift(Carbon::parse('last tuesday'), '14:01:00', '16:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
         $shift->flagManager()->generate();
         $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
 
-        // shift exceeds the max units and is inside the term dates - flag
-        $data = $this->makeShift(Carbon::now()->addMonths(2), '10:00:00', '12:30:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $shift2->flagManager()->generate();
-        $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+        // 2 hours shift on the same monday -> should flag
+        $data = $this->makeShift(Carbon::parse('last monday'), '14:01:00', '16:00:00');
+        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
 }

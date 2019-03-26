@@ -37,7 +37,7 @@ class ServiceAuthValidator
         ];
 
         $shifts = Shift::where('client_id', $this->shift->client_id)
-            ->whereBetween('checked_in_time', [$period])
+            ->whereBetween('checked_in_time', $period)
             ->get();
 
         $total = 0;
@@ -64,19 +64,19 @@ class ServiceAuthValidator
         foreach ($this->shift->getActiveServiceAuths() as $auth) {
             if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
                 // If fixed limit then just check the count of the fixed shifts
-                if ($this->getMatchingShifts($auth)->count() > $auth->getUnits()) {
+                if ($this->getMatchingShiftsQuery($auth)->count() > $auth->getUnits($this->getRelativeShiftTime())) {
                     return $auth;
                 }
             } else {
                 // Calculate the duration of the shifts to measure hourly units
-                $shifts = $this->getMatchingShifts($auth)->get();
+                $shifts = $this->getMatchingShiftsQuery($auth)->get();
 
                 $total = 0;
                 foreach ($shifts as $shift) {
                     $total += $shift->getBillableHours($auth->service_id, $auth->payer_id);
                 }
 
-                if ($total > $auth->getUnits()) {
+                if ($total > $auth->getUnits($this->getRelativeShiftTime())) {
                     return $auth;
                 }
             }
@@ -92,7 +92,7 @@ class ServiceAuthValidator
      * @param ClientAuthorization $auth
      * @return Illuminate\Database\Eloquent\Builder
      */
-    protected function getMatchingShifts(ClientAuthorization $auth) : Builder
+    protected function getMatchingShiftsQuery(ClientAuthorization $auth) : Builder
     {
         $query = Shift::where('client_id', $this->shift->client_id)
             ->whereBetween('checked_in_time', $auth->getPeriodDates($this->getRelativeShiftTime()))
@@ -121,7 +121,7 @@ class ServiceAuthValidator
      *
      * @return \Carbon\Carbon
      */
-    public function getRelativeShiftTime()
+    public function getRelativeShiftTime() : Carbon
     {
         return $this->shift->checked_in_time
             ->copy()

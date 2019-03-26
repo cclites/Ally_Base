@@ -97,13 +97,19 @@ class ClientAuthorization extends AuditableModel
     // **********************************************************
 
     /**
-     * Get the number of units this instance authorizes
+     * Get the number of units this instance authorizes and automatically
+     * pull from the proper day of the week for specific days period types.
      * Note: This should be used instead of directly accessing the units property
      *
-     * @return float
+     * @param null|\Carbon\Carbon $date
+     * @return null|float
      */
-    public function getUnits(): float
+    public function getUnits(?Carbon $date = null): ?float
     {
+        if ($this->period == self::PERIOD_SPECIFIC_DAYS) {
+            return $this->unitsForDay(strtolower($date->format('l')));
+        }
+
         if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
             // Convert to hourly units
             return divide($this->units, 4);
@@ -132,7 +138,7 @@ class ClientAuthorization extends AuditableModel
      * Get an array containing the start and end dates of the authorization
      * period.  Returns UTC dates to be accurate when querying shifts.
      *
-     * @param Carbon\Carbon $date
+     * @param \Carbon\Carbon $date
      * @return array|null
      */
     public function getPeriodDates($date) : ?array
@@ -150,11 +156,23 @@ class ClientAuthorization extends AuditableModel
             case self::PERIOD_TERM:
                 return [Carbon::parse($this->effective_start)->setTimezone('UTC'), Carbon::parse($this->effective_end)->setTimezone('UTC')];
             case self::PERIOD_SPECIFIC_DAYS:
-                // TODO: return array of dates instead of a range
-                return null;
+                if ($this->unitsForDay(strtolower($date->format('l'))) === null) {
+                    // service auth does not covert the day of the week this shift is on so skip it
+                    return [null, null];
+                }
+                return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
             default:
-                return null;
+                return [null, null];
         }
+    }
+
+    public function unitsForDay($dayOfTheWeek) : ?int
+    {
+        if ($this->period != self::PERIOD_SPECIFIC_DAYS) {
+            return null;
+        }
+
+        return $this->attributes[$dayOfTheWeek];
     }
 
     // **********************************************************
