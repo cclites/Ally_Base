@@ -17,6 +17,10 @@
                          :sort-desc.sync="sortDesc"
                          @filtered="onFiltered"
                 >
+                    <template slot="units" scope="row">
+                        <span v-if="row.item.period == 'specific_days'">N/A</span>
+                        <span v-else>{{ row.item.units }}</span>
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" @click="editAuth(row.item.id)">
@@ -45,7 +49,7 @@
                     <b-row>
                         <b-col lg="3">
                             <b-form-group label="Service Auth ID" label-class="required">
-                                <b-input v-model="form.service_auth_id" max="255"></b-input>
+                                <b-form-input v-model="form.service_auth_id" type="text" max="255"></b-form-input>
                             </b-form-group>
                         </b-col>
                         <b-col lg="5">
@@ -60,7 +64,7 @@
                                 </b-col>
                                 <b-col lg="6">
                                     <b-form-group label="Service Type">
-                                        <b-input :value="selectedServiceName" plaintext />
+                                        <b-form-input type="text" :value="selectedServiceName" plaintext></b-form-input>
                                     </b-form-group>
                                 </b-col>
                             </b-row>
@@ -89,7 +93,7 @@
                     <b-row>
                         <b-col lg="4">
                             <b-form-group label="Units" label-class="required">
-                                <b-form-input v-model="form.units"></b-form-input>
+                                <b-form-input type="number" step="any" v-model="form.units" :disabled="form.period == 'specific_days'" />
                             </b-form-group>
                         </b-col>
                         <b-col lg="4">
@@ -107,8 +111,56 @@
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="monthly">Monthly</option>
+                                    <option value="term">Term</option>
+                                    <option value="specific_days">Specific Days of Week</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="form.period == 'specific_days'">
+                        <b-col lg="12">
+                            <div class="d-flex days-row">
+                                <div>
+                                    <b-form-group label="Day">
+                                        <b-form-input value="Units" type="text" plaintext></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Sun">
+                                        <b-form-input v-model="form.sunday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Mon">
+                                        <b-form-input v-model="form.monday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Tues">
+                                        <b-form-input v-model="form.tuesday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Wed">
+                                        <b-form-input v-model="form.wednesday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Thurs">
+                                        <b-form-input v-model="form.thursday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Fri">
+                                        <b-form-input v-model="form.friday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Sat">
+                                        <b-form-input v-model="form.saturday" type="number" step="1"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                            </div>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -277,10 +329,17 @@
                     payer_id: defaults.payer_id || null,
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
                     effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
-                    units: defaults.units || "",
+                    units: defaults.units || 0,
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
                     notes: defaults.notes || "",
+                    sunday: defaults.sunday || 0,
+                    monday: defaults.monday || 0,
+                    tuesday: defaults.tuesday || 0,
+                    wednesday: defaults.wednesday || 0,
+                    thursday: defaults.thursday || 0,
+                    friday: defaults.friday || 0,
+                    saturday: defaults.saturday || 0,
                 });
             },
             submitForm() {
@@ -326,4 +385,6 @@
         margin-top: 7px;
         color: red;
     }
+
+    .days-row div { padding-right: 1rem; padding-left: 1rem; }
 </style>
