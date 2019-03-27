@@ -12,7 +12,7 @@ use App\Jobs\SendTextMessage;
 use App\SystemNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class BaseNotification extends Notification implements ShouldQueue
+abstract class BaseNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     
