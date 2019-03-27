@@ -14,13 +14,13 @@ class AlterClientAuthorizationsAddDaysOfTheWeekColumns extends Migration
     public function up()
     {
         Schema::table('client_authorizations', function (Blueprint $table) {
-            $table->decimal('sunday', 5, 2)->nullable()->after('period');
-            $table->decimal('monday', 5, 2)->nullable()->after('sunday');
-            $table->decimal('tuesday', 5, 2)->nullable()->after('monday');
-            $table->decimal('wednesday', 5, 2)->nullable()->after('tuesday');
-            $table->decimal('thursday', 5, 2)->nullable()->after('wednesday');
-            $table->decimal('friday', 5, 2)->nullable()->after('thursday');
-            $table->decimal('saturday', 5, 2)->nullable()->after('friday');
+            $table->decimal('sunday', 5, 2)->default(0.0)->after('period');
+            $table->decimal('monday', 5, 2)->default(0.0)->after('sunday');
+            $table->decimal('tuesday', 5, 2)->default(0.0)->after('monday');
+            $table->decimal('wednesday', 5, 2)->default(0.0)->after('tuesday');
+            $table->decimal('thursday', 5, 2)->default(0.0)->after('wednesday');
+            $table->decimal('friday', 5, 2)->default(0.0)->after('thursday');
+            $table->decimal('saturday', 5, 2)->default(0.0)->after('friday');
         });
     }
 

@@ -127,37 +127,37 @@
                                 </div>
                                 <div>
                                     <b-form-group label="Sun">
-                                        <b-form-input v-model="form.sunday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.sunday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Mon">
-                                        <b-form-input v-model="form.monday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.monday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Tues">
-                                        <b-form-input v-model="form.tuesday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.tuesday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Wed">
-                                        <b-form-input v-model="form.wednesday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.wednesday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Thurs">
-                                        <b-form-input v-model="form.thursday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.thursday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Fri">
-                                        <b-form-input v-model="form.friday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.friday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                                 <div>
                                     <b-form-group label="Sat">
-                                        <b-form-input v-model="form.saturday" type="number" step="1"></b-form-input>
+                                        <b-form-input v-model="form.saturday" type="number" step="any"></b-form-input>
                                     </b-form-group>
                                 </div>
                             </div>

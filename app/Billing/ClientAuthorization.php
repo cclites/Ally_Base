@@ -35,6 +35,13 @@ class ClientAuthorization extends AuditableModel
         'service_id' => 'int',
         'payer_id' => 'int',
         'units' => 'float',
+        'sunday' => 'float',
+        'monday' => 'float',
+        'tuesday' => 'float',
+        'wednesday' => 'float',
+        'thursday' => 'float',
+        'friday' => 'float',
+        'saturday' => 'float',
     ];
 
     // **********************************************************
