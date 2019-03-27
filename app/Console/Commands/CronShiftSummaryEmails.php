@@ -71,6 +71,7 @@ class CronShiftSummaryEmails extends Command
             }
             catch (\Exception $ex) {
                 //  failed on business
+                app('sentry')->captureException($ex);
                 $this->errors[] = "Failed to process emails for business #$businessId";
             }
         }
@@ -115,8 +116,11 @@ class CronShiftSummaryEmails extends Command
             }
             catch (\Exception $ex) {
                 // failed on client
+                app('sentry')->captureException($ex);
                 $this->errors[] = "Failed to process email for client #$client_id";
             }
+
+            sleep(1);
         }
     }
 
