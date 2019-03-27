@@ -50,6 +50,7 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'email' => $client->user->email,
                 'active' => $client->active ? 'Active' : 'Inactive',
                 'address' => $client->address ? $client->address->full_address : '',
+                'client_type' => $client->client_type,
                 'date_added' => $client->user->created_at->format('m-d-Y'),
             ];
 

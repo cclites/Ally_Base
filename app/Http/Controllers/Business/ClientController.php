@@ -250,7 +250,7 @@ class ClientController extends BaseController
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
-            return new SuccessResponse('The client has been updated.', $client);
+            return new SuccessResponse('The client has been updated.', $client, '.');
         }
         return new ErrorResponse(500, 'The client could not be updated.');
     }

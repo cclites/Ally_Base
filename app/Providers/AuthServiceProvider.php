@@ -119,7 +119,6 @@ class AuthServiceProvider extends ServiceProvider
                 || (
                     $user->role_type === 'office_user'
                     && $caregiver->shifts()
-                        ->has('deposits')
                         ->whereNotIn('business_id', $user->getBusinessIds())
                         ->doesntExist()
                 );

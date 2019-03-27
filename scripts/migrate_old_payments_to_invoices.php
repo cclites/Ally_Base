@@ -33,6 +33,7 @@ Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('clien
             // Add a manual adjustment
             $diff = subtract($payment->amount, $invoice->getAmount());
             $item = new \App\Billing\ClientInvoiceItem([
+                'date' => $payment->created_at,
                 'rate' => $diff,
                 'units' => 1,
                 'group' => 'Adjustments',

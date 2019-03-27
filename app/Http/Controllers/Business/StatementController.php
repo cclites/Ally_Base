@@ -138,6 +138,7 @@ class DepositItemData {
         $data->total = $item->total;
         $data->group = $item->group;
         $data->name = $item->name;
+        $data->date = $item->date ?? optional($item->invoice)->created_at->toDateTimeString();
 
         return $data;
     }
@@ -189,6 +190,7 @@ class PaymentItemData {
         $data->group = $item->group;
         $data->name = $item->name;
         $data->amount_due = $item->amount_due;
+        $data->date = $item->date ?? $data->invoice['created_at'];
 
         return $data;
     }

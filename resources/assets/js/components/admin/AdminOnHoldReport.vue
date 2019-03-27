@@ -36,9 +36,10 @@
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDates from "../../mixins/FormatsDates";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDates],
 
         props: {},
 
@@ -57,6 +58,7 @@
                     {
                         key: 'type',
                         sortable: true,
+                        formatter: x => _.startCase(x),
                     },
                     {
                         key: 'id',
@@ -67,22 +69,28 @@
                         label: 'Registry',
                         sortable: true,
                     },
+                    // {
+                    //     key: 'payment_outstanding',
+                    //     label: 'Charges Outstanding',
+                    //     sortable: true,
+                    //     formatter: this.numberFormat
+                    // },
+                    // {
+                    //     key: 'deposit_outstanding',
+                    //     label: 'Deposits Outstanding',
+                    //     sortable: true,
+                    //     formatter: this.numberFormat
+                    // },
                     {
-                        key: 'payment_outstanding',
-                        label: 'Charges Outstanding',
+                        key: 'unpaid_invoices',
                         sortable: true,
-                        formatter: this.numberFormat
-                    },
-                    {
-                        key: 'deposit_outstanding',
-                        label: 'Deposits Outstanding',
-                        sortable: true,
-                        formatter: this.numberFormat
+                        // formatter: this.numberFormat
                     },
                     {
                         key: 'created_at',
                         label: 'Hold Date',
                         sortable: true,
+                        formatter: x => this.formatDateTimeFromUTC(x),
                     },
                     'actions'
                 ],

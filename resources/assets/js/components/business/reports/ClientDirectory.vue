@@ -9,7 +9,7 @@
                     header-bg-variant="info"
                 >
                     <b-row>
-                        <b-col lg="5">
+                        <b-col lg="6">
                             <b-form-group label="Clients added between" class="form-inline">
                                 <date-picker 
                                     v-model="filters.start_date"
@@ -24,11 +24,23 @@
                         </b-col>
 
                         <b-col lg="3">
-                            <b-form-group label="Client status">
+                            <b-form-group label="Client Status">
                                 <b-form-select v-model="filters.active">
                                     <option :value="null">All Clients</option>
                                     <option :value="true">Active Clients</option>
                                     <option :value="false">Inactive Clients</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col lg="3">
+                            <b-form-group label="Client Type">
+                                <b-form-select v-model="filters.client_type">
+                                    <option :value="null">All Clients</option>
+                                    <option value="private_pay">Private Pay</option>
+                                    <option value="LTCI">LTCI</option>
+                                    <option value="medicaid">Medicaid</option>
+                                    <option value="VA">VA</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -76,6 +88,7 @@
  import moment from 'moment';
  import FormatsListData from '../../../mixins/FormatsListData';
  import UserDirectory from '../../../mixins/UserDirectory';
+ import FormatsDates from "../../../mixins/FormatsDates";
 
  export default {
      props: {
@@ -85,7 +98,7 @@
          },
      },
 
-     mixins: [FormatsListData, UserDirectory],
+     mixins: [FormatsListData, FormatsDates, UserDirectory],
 
     data() {
         return {
@@ -118,10 +131,17 @@
                     label: 'Address',
                     shouldShow: true,
                 },
+                client_type: {
+                    key: 'client_type',
+                    label: 'Client Type',
+                    shouldShow: true,
+                    formatter: val => this.uppercaseWords(val)
+                },
                 created_at: {
                     key: 'created_at',
                     label: 'Date Added',
                     shouldShow: true,
+                    formatter: val => this.formatDate(val)
                 },
             },
         };
