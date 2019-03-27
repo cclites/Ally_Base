@@ -18,4 +18,10 @@ return [
      * it will turn off this feature.
      */
     'cron_results_to' => env('CRON_RESULTS_TO', 'jason@allyms.com'),
+
+    /**
+     * Flag to turn on/off logging of all raw outgoing email
+     * and SMS data.
+     */
+    'communication_log' => env('COMMUNICATION_LOG', false),
 ];

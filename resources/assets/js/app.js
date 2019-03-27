@@ -89,6 +89,7 @@ Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/pr
 Vue.component('caregiver-task-list', require('./components/caregivers/TaskList'));
 
 // Admin
+Vue.component('admin-communication-log', require('./components/admin/CommunicationLog'));
 Vue.component('admin-tellus-component', require('./components/admin/AdminTellusComponent'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
