@@ -92,13 +92,17 @@ class ShiftFlagsTest extends TestCase
      * @param \Carbon\Carbon $date
      * @param string $in
      * @param string $out
+     * @param null|\Carbon\Carbon $endDate
      * @return array
      */
-    protected function makeShift(Carbon $date, string $in, string $out) : array
+    protected function makeShift(Carbon $date, string $in, string $out, ?Carbon $endDate = null) : array
     {
+        if (empty($endDate)) {
+            $endDate = $date;
+        }
         if (strlen($in) === 8) $in = $date->format('Y-m-d') . ' ' . $in;
-        if (strlen($out) === 8) $out = $date->format('Y-m-d') . ' ' . $out;
-        
+        if (strlen($out) === 8) $out = $endDate->format('Y-m-d') . ' ' . $out;
+
         $data = factory(Shift::class)->raw([
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
@@ -692,7 +696,7 @@ class ShiftFlagsTest extends TestCase
             'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
             'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
             'monday' => 5,
-            'tuesday' => null,
+            'tuesday' => 500,
         ]);
 
         // 4 hours shift on a monday -> no flag yet
@@ -710,6 +714,53 @@ class ShiftFlagsTest extends TestCase
         // 2 hours shift on the same monday -> should flag
         $data = $this->makeShift(Carbon::parse('last monday'), '14:01:00', '16:00:00');
         $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
+
+    /** @test */
+    function spec_day_client_auth_should_always_flag_on_days_marked_0()
+    {
+        $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
+
+        $auth1 = factory(ClientAuthorization::class)->create([
+            'client_id' => $this->client->id,
+            'service_id' => $this->service->id,
+            'payer_id' => null,
+            'units' => 0.0,
+            'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
+            'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
+            'monday' => 0,
+        ]);
+
+        $data = $this->makeShift(Carbon::parse('last monday'), '10:00:00', '11:00:00');
+        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
+
+    /** @test */
+    function an_actual_hours_shift_should_flag_on_all_days_the_shift_extends_to()
+    {
+        $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
+
+        $auth1 = factory(ClientAuthorization::class)->create([
+            'client_id' => $this->client->id,
+            'service_id' => $this->service->id,
+            'payer_id' => null,
+            'units' => 0.0,
+            'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
+            'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
+            'monday' => 500,
+            'tuesday' => 3,
+        ]);
+
+        // create a shift that is 1 hour on monday and 4 hours on tuesday
+        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
+        $end = $start->copy()->addHours(5)->setTimezone('UTC');
+        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
+        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+
         $shift->flagManager()->generate();
         $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
