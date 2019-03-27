@@ -163,10 +163,6 @@ class ClientAuthorization extends AuditableModel
             case self::PERIOD_TERM:
                 return [Carbon::parse($this->effective_start)->setTimezone('UTC'), Carbon::parse($this->effective_end)->setTimezone('UTC')];
             case self::PERIOD_SPECIFIC_DAYS:
-                if ($this->unitsForDay(strtolower($date->format('l'))) === null) {
-                    // service auth does not covert the day of the week this shift is on so skip it
-                    return [null, null];
-                }
                 return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
             default:
                 return [null, null];
