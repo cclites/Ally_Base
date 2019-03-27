@@ -71,6 +71,9 @@ class ExcelDepositView implements DepositViewStrategy
             'Caregiver Rate' => $item->caregiver_rate,
             'Ally Rate' => $item->ally_rate,
             'Reg Rate' => $item->rate,
+            'Client Total' => multiply($item->client_rate, $item->units),
+            'Caregiver Total' => multiply($item->caregiver_rate, $item->units),
+            'Ally Total' => multiply($item->ally_rate, $item->units),
             'Reg Total' => $item->total,
             'Notes' => $item->notes,
         ];

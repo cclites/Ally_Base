@@ -136,6 +136,9 @@
                 return this.items.filter(filterFn).map(item => {
                     item.client_name = item.client ? item.client.nameLastFirst : "";
                     item.caregiver_name = item.caregiver ? item.caregiver.nameLastFirst : "";
+                    item.caregiver_total = item.caregiver_rate * item.units;
+                    item.client_total = item.client_rate * item.units;
+                    item.ally_total = item.ally_rate * item.units;
                     return item;
                 })
             },
@@ -264,6 +267,24 @@
                     {
                         key: "rate",
                         label: "Reg Rate",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "client_total",
+                        label: "Client Total",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "caregiver_total",
+                        label: "Caregiver Total",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "ally_total",
+                        label: "Ally Total",
                         formatter: val => this.numberFormat(val),
                         sortable: true,
                     },
