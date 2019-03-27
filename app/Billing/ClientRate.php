@@ -100,11 +100,29 @@ class ClientRate extends AuditableModel
             foreach($new as $item) {
                 ClientRate::create(array_merge($item, ['client_id' => $client->id]));
             }
-            
+
             return true;
         } catch (\Exception $ex) {
             \Log::debug($ex->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Add a new rate, attaching the caregiver record
+     *
+     * @param \App\Client $client
+     * @param array $data
+     * @return mixed
+     */
+    public static function add(Client $client, array $data)
+    {
+        $data['client_id'] = $client->id;
+
+        if (isset($data['caregiver_id']) && !$client->hasCaregiver($data['caregiver_id'])) {
+            $client->caregivers()->attach($data['caregiver_id']);
+        }
+
+        return self::create($data);
     }
 }

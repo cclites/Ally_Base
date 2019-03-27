@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-alert show><strong>Note:</strong> When you select OVERTIME or HOLIDAY on the Schedule, the rates will update accordingly based on your settings here.</b-alert>
-        <h3 class="f-1">Overtime &amp; Holidy Shift Calculations</h3>
+        <h3 class="f-1">Overtime &amp; Holiday Shift Calculations</h3>
 
         <b-row>
             <b-col lg="6">

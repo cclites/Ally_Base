@@ -169,7 +169,7 @@ class ShiftAdjustment extends InvoiceableModel
      */
     public function getItemNotes(): ?string
     {
-        return $this->notes;
+        return str_limit($this->notes, 252);
     }
 
     /**
@@ -180,6 +180,16 @@ class ShiftAdjustment extends InvoiceableModel
     public function hasFeeIncluded(): bool
     {
         return true;
+    }
+
+    public function getShift(): ?Shift
+    {
+        return $this->shift;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->shift->getClient();
     }
 
     /**
@@ -193,12 +203,16 @@ class ShiftAdjustment extends InvoiceableModel
     }
 
     /**
-     * TODO Implement caregiver deposit invoicing
      * @return float
      */
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
+    }
+
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->shift->getCaregiver();
     }
 
     /**
@@ -209,6 +223,11 @@ class ShiftAdjustment extends InvoiceableModel
     public function getAllyRate(): ?float
     {
         // TODO: Implement getAllyRate() method.
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->shift->getBusiness();
     }
 
     /**

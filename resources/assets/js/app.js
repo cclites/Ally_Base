@@ -190,7 +190,6 @@ Vue.component('bulk-update-schedule-modal', require('./components/business/sched
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
-Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
 Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
@@ -228,7 +227,6 @@ Vue.component('caregiver-license-list', require('./components/CaregiverLicenseLi
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
-Vue.component('caregiver-payment-history', require('./components/caregivers/CaregiverPaymentHistory'));
 Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
 Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
 Vue.component('caregiver-timesheet', require('./components/caregivers/CaregiverTimesheet'));

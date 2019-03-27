@@ -73,6 +73,7 @@ class ClaimController extends BaseController
             $start_date->copy()->setTimezone('UTC')->toDateTimeString(),
             $end_date->copy()->setTimezone('UTC')->toDateTimeString(),
         ])
+            ->whereNotNull('checked_out_time')
             ->with(['activities', 'issues', 'client', 'client.evvAddress', 'caregiver'])
             ->orderBy('checked_in_time')
             ->get();

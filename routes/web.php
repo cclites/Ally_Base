@@ -125,7 +125,6 @@ Route::group([
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
 
-    Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
     Route::get('reports/payment-history/{id}/print', 'Caregivers\ReportsController@printPaymentDetails')->name('caregivers.reports.print_payment_details');
     Route::get('reports/payment-history/{id}', 'Caregivers\ReportsController@paymentDetails')->name('caregivers.reports.payment_details');
@@ -294,7 +293,6 @@ Route::group([
     Route::get('reports/printable-schedule', 'Business\ReportsController@printableSchedule')->name('reports.printable_schedule');
     Route::get('reports/export-timesheets', 'Business\ReportsController@exportTimesheets')->name('reports.export_timesheets');
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
-    Route::get('reports/caregivers/payment-history/{id}/print/{caregiver_id}', 'Business\ReportsController@printPaymentDetails')->name('reports.caregivers.print_payment_details');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
 
     Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
@@ -349,6 +347,7 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::get('schedule/caregivers', 'Business\ScheduleController@caregiverData')->name('schedule.caregivers');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');

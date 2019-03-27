@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DepositQuery extends BaseQuery
 {
+    use BelongsToBusinessesQueries;
 
     /**
      * Return an empty instance of the Model this class queries
@@ -29,6 +30,15 @@ class DepositQuery extends BaseQuery
     function forBusiness(Business $business)
     {
         $this->where('business_id', $business->id);
+
+        return $this;
+    }
+
+    function hasAmountAvailable(): self
+    {
+        $this->where('success', true)
+            ->where('created_at', '>=', '2019-01-01 00:00:00') // Prevent pre-migration missing applications from showing as available payments
+            ->whereRaw('(SELECT COALESCE(SUM(amount_applied), 0) FROM invoice_deposits WHERE deposit_id = deposits.id) < deposits.amount');
 
         return $this;
     }

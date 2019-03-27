@@ -1,11 +1,16 @@
 <?php
 namespace App\Payments;
+use App\Billing\BusinessInvoice;
+use App\Billing\BusinessInvoiceItem;
+use App\Billing\CaregiverInvoice;
+use App\Billing\CaregiverInvoiceItem;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Billing\Deposit;
 use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\ECSPayment;
+use Carbon\Carbon;
 
 /**
  * Class SingleDepositProcessor
@@ -37,6 +42,21 @@ class SingleDepositProcessor
                 'notes' => $notes,
                 'success' => $transaction->success,
             ]);
+
+            $invoice = CaregiverInvoice::create([
+                'name' => CaregiverInvoice::getNextName($caregiver->id),
+                'caregiver_id' => $caregiver->id,
+            ]);
+            $invoice->addItem(new CaregiverInvoiceItem([
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'units' => 1,
+                'rate' => $amount,
+                'total' => $amount,
+                'date' => new Carbon(),
+                'notes' => str_limit($notes, 250),
+            ]));
+            $invoice->addDeposit($deposit, $amount);
         }
 
         return $transaction;
@@ -55,6 +75,24 @@ class SingleDepositProcessor
                 'notes' => $notes,
                 'success' => $transaction->success,
             ]);
+
+            $invoice = BusinessInvoice::create([
+                'name' => BusinessInvoice::getNextName($business->id),
+                'business_id' => $business->id,
+            ]);
+            $invoice->addItem(new BusinessInvoiceItem([
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'units' => 1,
+                'client_rate' => 0,
+                'caregiver_rate' => 0,
+                'ally_rate' => 0,
+                'rate' => $amount,
+                'total' => $amount,
+                'date' => new Carbon(),
+                'notes' => str_limit($notes, 250),
+            ]));
+            $invoice->addDeposit($deposit, $amount);
         }
 
         return $transaction;

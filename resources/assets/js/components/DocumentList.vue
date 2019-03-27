@@ -5,7 +5,7 @@
         >
         <form @submit.prevent="upload()" enctype="multipart/form-data" class="form-inline">
             <div class="form-group">
-                <input type="file" name="document" @change="setFile($event.target.files[0])">
+                <input type="file" name="document" @change="setFile($event.target.files[0])" required>
             </div>
 
             <b-form-group class="ml-2">

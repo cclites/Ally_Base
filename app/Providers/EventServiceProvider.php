@@ -4,18 +4,21 @@ namespace App\Providers;
 
 use App\Events\BusinessChainCreated;
 use App\Events\ClientCreated;
+use App\Events\DepositFailed;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
+use App\Events\PaymentFailed;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
-use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\CreateDefaultClientPayer;
 use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
+use App\Listeners\UnapplyFailedDeposits;
+use App\Listeners\UnapplyFailedPayments;
 use App\Listeners\UnverifiedShiftAcknowledgement;
 use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
@@ -48,10 +51,41 @@ class EventServiceProvider extends ServiceProvider
         ClientCreated::class => [
             CreateDefaultClientPayer::class,
         ],
+        DepositFailed::class => [
+            UnapplyFailedDeposits::class,
+        ],
+        FailedTransactionFound::class => [
+            PostToSlackOnFailedTransaction::class,
+            AddPaymentHoldsOnFailedTransaction::class,
+        ],
+        FailedTransactionRecorded::class => [
+            AddPaymentHoldsOnFailedTransaction::class,
+        ],
+        PaymentFailed::class => [
+            UnapplyFailedPayments::class,
+        ],
+        ShiftModified::class => [
+            ShiftStatusUpdate::class,
+            CheckForClockOut::class,
+        ],
+        ShiftCreated::class => [
+            ShiftStatusUpdate::class,
+            CheckForClockOut::class,
+        ],
+        ShiftFlagsCouldChange::class => [
+            GenerateShiftFlags::class,
+        ],
+        ShiftDeleted::class => [
+            RecalculateDuplicateShiftFlags::class,
+        ],
+        SmsThreadReplyCreated::class => [
+            SendNewSmsReplyNotification::class,
+        ],
         TaskAssigned::class => [
 //            SendAssignedTaskEmail::class,
         ],
-        UnverifiedShiftLocation::class   => [
+        TimesheetCreated::class => [
+            SendManualTimesheetNotification::class,
         ],
         UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,
@@ -61,35 +95,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         UnverifiedClockOut::class => [
             SendUnverifiedShiftNotification::class,
-        ],
-        ShiftModified::class            => [
-            ShiftStatusUpdate::class,
-            CheckForClockOut::class,
-        ],
-        ShiftCreated::class             => [
-            ShiftStatusUpdate::class,
-            CheckForClockOut::class,
-        ],
-        FailedTransactionFound::class   => [
-            PostToSlackOnFailedTransaction::class,
-            AddPaymentHoldsOnFailedTransaction::class,
-        ],
-        FailedTransactionRecorded::class => [
-            UpdateDepositOnFailedTransaction::class,
-            UpdatePaymentOnFailedTransaction::class,
-            AddPaymentHoldsOnFailedTransaction::class,
-        ],
-        TimesheetCreated::class => [
-            SendManualTimesheetNotification::class,
-        ],
-        SmsThreadReplyCreated::class => [
-            SendNewSmsReplyNotification::class,
-        ],
-        ShiftFlagsCouldChange::class => [
-            GenerateShiftFlags::class,
-        ],
-        ShiftDeleted::class => [
-            RecalculateDuplicateShiftFlags::class,
         ],
     ];
 

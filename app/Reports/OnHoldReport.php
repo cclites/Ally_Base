@@ -2,6 +2,9 @@
 
 namespace App\Reports;
 
+use App\Billing\Queries\BusinessInvoiceQuery;
+use App\Billing\Queries\CaregiverInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -13,6 +16,20 @@ use Carbon\Carbon;
 
 class OnHoldReport extends BaseReport
 {
+    protected $businessId;
+
+    /**
+     * Set business ID filter.
+     *
+     * @param $businessId
+     */
+    public function forBusiness(?int $businessId) : void
+    {
+        if (empty($businessId)) {
+            $this->businessId = null;
+        }
+        $this->businessId = $businessId;
+    }
 
     /**
      * Return the instance of the query builder for additional manipulation
@@ -42,8 +59,11 @@ class OnHoldReport extends BaseReport
 
     protected function getBusinesses()
     {
-        return Business::has('paymentHold')->with('paymentHold')
-                       ->get()
+        $query = Business::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->where('id', $this->businessId);
+        }
+        return $query->get()
                        ->map(function (Business $business) {
                            $startDate = new Carbon('2017-01-01');
                            $endDate = Carbon::now($business->timezone)->startOfWeek();
@@ -64,14 +84,18 @@ class OnHoldReport extends BaseReport
                                                                  ->orderBy('created_at', 'DESC')
                                                                  ->value('id'),
                                'created_at'          => $business->paymentHold->created_at->toDateTimeString(),
+                               'unpaid_invoices'     => app(BusinessInvoiceQuery::class)->forBusiness($business->id)->notPaidInFull()->count(),
                            ];
                        });
     }
 
     protected function getCaregivers()
     {
-        return Caregiver::has('paymentHold')->with('paymentHold')
-                        ->get()
+        $query = Caregiver::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->forBusinesses([$this->businessId]);
+        }
+        return $query->get()
                         ->map(function (Caregiver $caregiver) {
                             $businessChain = $caregiver->businessChains()->first();
                             $startDate = new Carbon('2017-01-01');
@@ -91,14 +115,18 @@ class OnHoldReport extends BaseReport
                                                                    ->orderBy('created_at', 'DESC')
                                                                    ->value('id'),
                                 'created_at'          => $caregiver->paymentHold->created_at->toDateTimeString(),
+                                'unpaid_invoices'     => app(CaregiverInvoiceQuery::class)->forCaregiver($caregiver->id)->notPaidInFull()->count(),
                             ];
                         });
     }
 
     protected function getClients()
     {
-        return Client::has('paymentHold')->with('paymentHold')
-                     ->get()
+        $query = Client::has('paymentHold')->with('paymentHold');
+        if ($this->businessId) {
+            $query->where('business_id', $this->businessId);
+        }
+        return $query->get()
                      ->map(function (Client $client) {
                          $business = $client->business;
                          $startDate = new Carbon('2017-01-01');
@@ -118,6 +146,7 @@ class OnHoldReport extends BaseReport
                                                              ->orderBy('created_at', 'DESC')
                                                              ->value('id'),
                              'created_at'          => $client->paymentHold->created_at->toDateTimeString(),
+                             'unpaid_invoices'     => app(ClientInvoiceQuery::class)->forClient($client->id)->notPaidInFull()->count(),
                          ];
                      });
     }

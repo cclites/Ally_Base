@@ -31,7 +31,7 @@ class CreateDefaultClientPayer
         ClientPayer::create([
             'client_id' => $event->getClient()->id,
             'payer_id' => Payer::PRIVATE_PAY_ID,
-            'effective_start' => date('Y-m-d'),
+            'effective_start' => date('Y-m-d', strtotime('-45 days')),
             'effective_end' => '9999-12-31',
             'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
         ]);

@@ -250,7 +250,7 @@ class ClientController extends BaseController
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
-            return new SuccessResponse('The client has been updated.', $client);
+            return new SuccessResponse('The client has been updated.', $client, '.');
         }
         return new ErrorResponse(500, 'The client could not be updated.');
     }
@@ -281,6 +281,7 @@ class ClientController extends BaseController
             $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
         }
 
+        $data['status_alias_id'] = null;
         if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
@@ -298,9 +299,9 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
 
-        if ($client->update(['active' => true, 'inactive_at' => null])) {
+        if ($client->update(['active' => true, 'inactive_at' => null, 'status_alias_id' => null])) {
             $client->clearFutureSchedules();
-            return new SuccessResponse('The client has been re-activated.');
+            return new SuccessResponse('The client has been re-activated.', null, '.');
         }
         return new ErrorResponse(500, 'Could not re-activate the selected client.');
     }

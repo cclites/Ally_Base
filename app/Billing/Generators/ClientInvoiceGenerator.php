@@ -66,9 +66,17 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         if (count($invoiceables)) {
             DB::beginTransaction();
 
-            foreach($invoiceables as $invoiceable) {
-                $this->assignInvoiceable($client, $invoiceable);
+            try {
+                foreach($invoiceables as $invoiceable) {
+                    $this->assignInvoiceable($client, $invoiceable);
+                }
             }
+            catch (\Throwable $e) {
+                DB::rollBack();
+                $this->clearExistingInvoices();
+                throw $e;
+            }
+
 
             DB::commit();
         }
@@ -188,6 +196,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             'date' => $invoiceable->getItemDate(),
             'total' => round(bcmul($invoiceable->getItemUnits(), $clientRate, 4), 2),
             'amount_due' => $amountDue,
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 

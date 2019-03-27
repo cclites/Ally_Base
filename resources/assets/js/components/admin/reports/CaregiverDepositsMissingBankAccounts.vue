@@ -1,55 +1,69 @@
 <template>
     <b-card>
         <b-row>
-            <b-col lg="12" v-for="business in businesses" :key="business.id">
-                <b-card>
-                    <b-row>
-                        <b-col lg="6">
-                            <span class="h4 ml-2">{{ business.name }}</span>
-                        </b-col>
-                        <b-col lg="6" class="text-md-right">
-                            <div class="ml-2">{{ contactInfo(business) }}</div>
-                        </b-col>
-                    </b-row>
-
-                    <b-table :items="business.caregivers"
-                             :fields="fields">
-                    </b-table>
-                </b-card>
-            </b-col>
+            <b-table :items="items"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :tbody-tr-class="rowClass"
+            >
+            </b-table>
         </b-row>
     </b-card>
 </template>
 
 <script>
+    import FormatsListData from "../../../mixins/FormatsListData";
+
     export default {
-        props: ['businesses'],
-        
+        mixins: [FormatsListData],
+
+        props: ['caregivers'],
+
         data() {
             return {
-                items: this.caregivers,
+                sortBy: 'has_amount_owed',
+                sortDesc: true,
                 fields: [
-                    'name',
-                    'email'
+                    {
+                        key: 'nameLastFirst',
+                        label: 'Name',
+                        sortable: true,
+                        formatter: (val, index, item) => {
+                            return val + (item.has_amount_owed ? '*' : '');
+                        }
+                    },
+                    {
+                        key: 'email',
+                        sortable: true,
+                    },
+                    {
+                        key: 'chain_name',
+                        label: "Business Chain",
+                        sortable: true,
+                    },
+                    {
+                        key: 'has_amount_owed',
+                        sortable: true,
+                        formatter: val => this.formatYesNo(val),
+                    }
                 ]
             }
         },
 
-        methods: {
-            contactInfo(business) {
-                let info = [];
-                if (business.contact_name) {
-                    info.push(business.contact_name);
-                }
-                if (business.contact_email) {
-                    info.push(business.contact_email);
-                }
-                if (business.contact_phone) {
-                    info.push(business.contact_phone);
-                }
-
-                return _.join(info, ', ');
+        computed: {
+            items() {
+                return this.caregivers.map(item => {
+                    let chain = item.business_chains.length ? item.business_chains[0] : null;
+                    item.chain_name = chain ? chain.name : "";
+                    if (item.has_amount_owed) item._rowVariant = "warning";
+                    return item;
+                })
             }
+        },
+
+        methods: {
+
         }
     }
 </script>

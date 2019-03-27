@@ -30,10 +30,12 @@ class CreateClient
                 $client->setPaymentMethod($paymentMethod);
             }
 
-            $history = new ClientAgreementStatusHistory([
-                'status' => $data['agreement_status'],
-            ]);
-            $client->agreementStatusHistory()->save($history);
+            if (isset($data['agreement_status'])) {
+                $history = new ClientAgreementStatusHistory([
+                    'status' => $data['agreement_status'],
+                ]);
+                $client->agreementStatusHistory()->save($history);
+            }
 
             event(new ClientCreated($client));
 

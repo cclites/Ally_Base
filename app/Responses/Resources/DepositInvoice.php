@@ -46,13 +46,14 @@ class DepositInvoice extends Resource
                 return $this->resource->caregiver->isOnHold();
             }),
             'business' => $this->whenLoaded('business'),
-            'business_on_hold' => $this->whenLoaded('caregiver', function() {
+            'business_on_hold' => $this->whenLoaded('business', function() {
                 return $this->resource->business->isOnHold();
             }),
             'items' => $this->whenLoaded('items', function() {
                 return $this->groupItems($this->resource->getItems())->toArray();
             }),
             'deposits' => $this->whenLoaded('deposits'),
+            'no_bank_account' => optional($this->resource->getRecipient())->bankAccount === null, // TODO: Clean this up
         ];
     }
 }

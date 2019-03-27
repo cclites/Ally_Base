@@ -136,6 +136,18 @@ class ScheduleEvents implements Responsable
             return '#C30000';
         }
 
+        if ($status === Schedule::CAREGIVER_CANCELED) {
+            return '#ff8c00';
+        }
+
+        if ($status === Schedule::CLIENT_CANCELED) {
+            return '#730073';
+        }
+
+        if ($status == Schedule::CAREGIVER_NOSHOW) {
+            return '#63cbc7';
+        }
+
         if ($schedule->hasOvertime()) {
             return '#fc4b6c';
         }
@@ -156,18 +168,6 @@ class ScheduleEvents implements Responsable
             return '#ad92b0';
         }
 
-        if ($status === Schedule::CAREGIVER_CANCELED) {
-            return '#ff8c00';
-        }
-
-        if ($status === Schedule::CLIENT_CANCELED) {
-            return '#730073';
-        }
-
-        if ($status == Schedule::CAREGIVER_NOSHOW) {
-            return '#63cbc7';
-        }
-        
         if (!$schedule->caregiver_id) {
             // Open shift
             return '#d9c01c';

@@ -6,6 +6,7 @@ use App\Business;
 use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\ContactableInterface;
+use App\Events\DepositFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
@@ -82,12 +83,14 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
 
     public function businessInvoices()
     {
-        return $this->morphedByMany(BusinessInvoice::class, 'invoice', 'invoice_deposits');
+        return $this->morphedByMany(BusinessInvoice::class, 'invoice', 'invoice_deposits')
+            ->withPivot(['amount_applied']);
     }
 
     public function caregiverInvoices()
     {
-        return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits');
+        return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits')
+            ->withPivot(['amount_applied']);
     }
 
     ///////////////////////////////////////////
@@ -106,6 +109,11 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
             'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
         ];
     }
+
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
 
     public function getRecipient(): ContactableInterface
     {
@@ -142,4 +150,16 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         return subtract($this->amount, $this->getAmountApplied());
     }
 
+    /**
+     * Mark the deposit as failed and emit the domain event
+     *
+     * @throws \Exception
+     */
+    function markFailed()
+    {
+        if (!$this->update(['success' => false])) {
+            throw new \Exception('The deposit could not be marked as failed.');
+        }
+        event(new DepositFailed($this));
+    }
 }
