@@ -548,7 +548,7 @@ class ScheduleController extends BaseController
      */
     public function caregiverData()
     {
-        return response()->json(Caregiver::with(['clients.business', 'licenses'])
+        return response()->json(Caregiver::with(['clients.business', 'licenses', 'daysOff'])
             ->forRequestedBusinesses()
             ->ordered()
             ->get()

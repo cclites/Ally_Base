@@ -141,6 +141,7 @@ class CaregiverController extends BaseController
             'deposits.shifts.activities',
             'phoneNumbers',
             'user.documents',
+            'user.notificationPreferences',
             'bankAccount',
             'availability',
             'meta',
@@ -149,7 +150,7 @@ class CaregiverController extends BaseController
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
-            'user.notificationPreferences',
+            'daysOff',
         ]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
@@ -339,6 +340,9 @@ class CaregiverController extends BaseController
 
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOff);
+
         return new SuccessResponse('Caregiver availability preferences updated');
     }
 

@@ -58,6 +58,35 @@
                     </b-col>
                 </b-row>
                 <hr />
+                <b-form-group label="Specific Days Not Available to be Referred / Vacation Days">
+                    <b-form inline class="mb-2 align-items-baseline" @submit.prevent="addDayOff()">
+                        <label for="dayoff_date" class="mr-2">Date</label>
+                        <date-picker v-model="dayoff_date" id="dayoff_date" class="mb-2 mr-2" placeholder="Choose Day" required></date-picker>
+
+                        <label for="dayoff_reason" class="mr-2">Description</label>
+                        <b-input type="text" v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" maxlength="156" required />
+<!--                        <b-select v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" required>-->
+<!--                            <option value="">&#45;&#45; Select &#45;&#45;</option>-->
+<!--                            <option value="family">Will be away with family</option>-->
+<!--                            <option value="other">Other</option>-->
+<!--                        </b-select>-->
+
+                        <b-button variant="info" type="submit">Add</b-button>
+                    </b-form>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                            :items="form.daysOff"
+                            :fields="daysOffFields"
+                            sort-by="date"
+                            :sort-desc="false"
+                        >
+                            <template slot="actions" scope="row">
+                                <b-btn size="sm" variant="danger" @click="removeDayOff(row.item.date)">Remove</b-btn>
+                            </template>
+                        </b-table>
+                    </div>
+                </b-form-group>
+                <hr />
                 <b-form-group label="Other Preferences">
                     <b-form-textarea v-model="form.preferences" rows="3"></b-form-textarea>
                 </b-form-group>
@@ -83,7 +112,11 @@
         mixins: [FormatsDates],
 
         data() {
-            return{
+            return {
+                // reasons: {
+                //     family: 'Will be away with family',
+                //     other: 'Other',
+                // },
                 daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
                 timesOfDay: ['morning', 'afternoon', 'evening', 'night'],
                 form: new Form({
@@ -102,9 +135,16 @@
                     minimum_shift_hours: this.caregiver.availability ? this.caregiver.availability.minimum_shift_hours : 0,
                     maximum_shift_hours: this.caregiver.availability ? this.caregiver.availability.maximum_shift_hours : 24,
                     maximum_miles: this.caregiver.availability ? this.caregiver.availability.maximum_miles : 20,
-
-                    preferences: this.caregiver.preferences
-                })
+                    preferences: this.caregiver.preferences,
+                    daysOff: this.caregiver.days_off ? this.caregiver.days_off : [],
+                }),
+                dayoff_reason: '',
+                dayoff_date: '',
+                daysOffFields: [
+                    { key: 'date', label: 'Date', sortable: true, formatter: x => moment(x).format('M/D/YY') },
+                    { key: 'description', label: 'Description', sortable: true },
+                    { key: 'actions', label: ' ', sortable: false },
+                ],
             }
         },
 
@@ -115,6 +155,21 @@
         },
 
         methods: {
+            addDayOff() {
+                let formattedDate = moment(this.dayoff_date).format('YYYY-MM-DD');
+
+                if (this.form.daysOff.findIndex(x => x.date == formattedDate) < 0) { // skip duplicates
+                    this.form.daysOff.push(
+                        { date: formattedDate, description: this.dayoff_reason }
+                    );
+                }
+
+                this.dayoff_date = '';
+                this.dayoff_reason = '';
+            },
+            removeDayOff(date) {
+                this.form.daysOff = this.form.daysOff.filter(x => x.date != date);
+            },
             updatePreferences() {
                 var url = '/business/caregivers/' + this.caregiver.id + '/preferences';
 
@@ -123,7 +178,8 @@
                 }
 
                 this.form.put(url);
-            }
+            },
+
         }
     }
 </script>

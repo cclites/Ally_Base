@@ -301,6 +301,17 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         return $this->belongsTo('App\ReferralSource');
     }
 
+    /**
+     * Get the caregiver days off relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function daysOff()
+    {
+        return $this->hasMany(CaregiverDayOff::class)
+            ->where('date', '>', Carbon::today()->subWeek(1));
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
