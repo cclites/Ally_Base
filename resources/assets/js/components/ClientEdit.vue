@@ -3,7 +3,8 @@
         header-bg-variant="info"
         header-text-variant="white"
         >
-        <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
+        <loading-card v-if="loading" text="Loading profile..."></loading-card>
+        <form v-else @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="First Name" label-for="firstname" label-class="required">
@@ -417,14 +418,24 @@
                         </label>
                     </div>
 
-                    <b-button variant="info" @click="sendWelcomeEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingWelcomeEmail"
+                        @click.prevent="sendWelcomeEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingWelcomeEmail"></i>
                         Send Welcome Email
                     </b-button>
 
-                    <b-button variant="info" @click="sendTrainingEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingTrainingEmail"
+                        @click.prevent="sendTrainingEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingTrainingEmail"></i>
                         Send Training Email
                     </b-button>
-                    
+
 <!--                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">-->
 <!--                        Start Client Onboarding-->
 <!--                    </b-button>-->
@@ -570,15 +581,20 @@
                 statusAliases: [],
                 localLastStatusDate: null,
                 onboardingWarning: false,
+                loading: false,
+                sendingTrainingEmail: false,
+                sendingWelcomeEmail: false,
             }
         },
 
-        mounted() {
+        async mounted() {
+            this.loading = true;
             this.localLastStatusDate = this.lastStatusDate;
             this.checkForNoEmailDomain();
             this.checkForNoUsername();
-            this.loadOfficeUsers();
-            this.fetchStatusAliases();
+            await this.loadOfficeUsers();
+            await this.fetchStatusAliases();
+            this.loading = false;
         },
 
         methods: {
@@ -596,12 +612,16 @@
                     return;
                 }
                 this.$refs.confirmWelcomeEmail.confirm(() => {
+                    this.sendingWelcomeEmail = true;
                     let form = new Form({});
                     form.post(`/business/clients/${this.client.id}/welcome-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingWelcomeEmail = false;
+                        });
                 });
             },
 
@@ -610,12 +630,16 @@
                     return;
                 }
                 this.$refs.confirmTrainingEmail.confirm(() => {
+                    this.sendingTrainingEmail = true;
                     let form = new Form({});
                     form.post(`/business/clients/${this.client.id}/training-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingTrainingEmail = true;
+                        });
                 });
             },
 
@@ -702,17 +726,13 @@
                 }
             },
 
-            fetchStatusAliases() {
-                axios.get(`/business/status-aliases?business_id=${this.client.business_id}`)
-                    .then( ({ data }) => {
-                        if (data && data.caregiver) {
-                            this.statusAliases = data;
-                        } else {
-                            this.statusAliases = {caregiver: [], client: []};
-                        }
-                    })
-                    .catch(e => {
-                    })
+            async fetchStatusAliases() {
+                let response = await axios.get(`/business/status-aliases?business_id=${this.client.business_id}`);
+                if (response.data && response.data.caregiver) {
+                    this.statusAliases = response.data;
+                } else {
+                    this.statusAliases = {caregiver: [], client: []};
+                }
             },
 
             toggleNoEmail() {
