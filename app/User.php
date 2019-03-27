@@ -286,6 +286,73 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     }
 
     ///////////////////////////////////////////
+    /// Query Scopes
+    ///////////////////////////////////////////
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->where(function($query) use ($businessIds) {
+            $query->whereHas('caregiver', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('client', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('officeUser', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            });
+        });
+    }
+
+    /**
+     * Get the clients that belong to the specified chains.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $chainId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForChain($query, $chainId)
+    {
+        return $query->where(function ($q) use ($chainId) {
+            $q->whereHas('client', function ($q) use ($chainId) {
+                $q->forChain($chainId);
+            })->orWhereHas('caregiver', function ($q) use ($chainId) {
+                $q->forChains([$chainId]);
+            })->orWhereHas('officeUser', function ($q) use ($chainId) {
+                $q->forChains([$chainId]);
+            });
+        });
+    }
+
+    /**
+     * Get users who's data matches the specified search filter.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string|null $searchFilter
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeSearch($query, $searchFilter)
+    {
+        if (empty($searchFilter)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($searchFilter) {
+            $q->where('users.username', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.email', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.id', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.firstname', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.lastname', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.role_type', 'LIKE', "%$searchFilter%");
+        });
+    }
+
+    ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
 
@@ -350,23 +417,25 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     }
 
     /**
-     * A query scope for filtering results by related business IDs
+     * Get the owning business chain for the user based on
+     * their role_type.
+     * Warning: will cause bad n+1 issues if relationships are
+     * not pre-loaded in the query.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $businessIds
-     * @return void
+     * @return \App\BusinessChain|null
      */
-    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    public function getChain()
     {
-        $builder->where(function($query) use ($businessIds) {
-            $query->whereHas('caregiver', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            })->orWhereHas('client', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            })->orWhereHas('officeUser', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            });
-        });
+        switch ($this->role_type) {
+            case 'caregiver':
+                return optional(optional($this->caregiver)->businessChains)->first();
+            case 'client':
+                return optional(optional($this->client)->business)->businessChain;
+            case 'office_user':
+                return optional($this->officeUser)->businessChain;
+            default:
+                return null;
+        }
     }
 
     /**
