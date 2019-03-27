@@ -6,7 +6,7 @@ use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Events\UnverifiedShiftLocation;
-use App\Events\UnverifiedShiftCreated;
+use App\Events\UnverifiedClockOut;
 use App\PhoneNumber;
 use App\Shift;
 use App\ShiftIssue;
@@ -62,7 +62,7 @@ class ClockOutTest extends TestCase
         $shift = $this->createShift();
         $clockOut = new ClockOut($this->caregiver);
 
-        $this->expectsEvents(UnverifiedShiftCreated::class);
+        $this->expectsEvents(UnverifiedClockOut::class);
         $result = $clockOut->clockOut($shift);
     }
 
@@ -88,7 +88,7 @@ class ClockOutTest extends TestCase
         $this->client->phoneNumbers()->save($phone);
 
         // Event should not go out
-        $this->doesntExpectEvents(UnverifiedShiftCreated::class);
+        $this->doesntExpectEvents(UnverifiedClockOut::class);
 
         $shift = $this->createShift(['checked_in_verified' => true, 'checked_in_number' => $phone->national_number]);
         $clockOut = new ClockOut($this->caregiver);
@@ -215,7 +215,7 @@ class ClockOutTest extends TestCase
         $result = $clockOut->clockOut($shift);
 
         // Exception should not exist
-        $this->assertEquals(0, $shift->exceptions()->count());
+        $this->assertEquals(0, $shift->systemNotifications()->count());
     }
 
     public function test_auto_confirm_creates_verified_shifts_waiting_for_authorization()

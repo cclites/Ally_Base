@@ -4,7 +4,6 @@ namespace App\Shifts;
 use App\Caregiver;
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
-use App\Exceptions\UnverifiedLocationException;
 use App\PhoneNumber;
 use App\Schedule;
 use App\Shift;

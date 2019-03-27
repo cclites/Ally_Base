@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasMetaData;
 
@@ -170,11 +171,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasOne(OfficeUser::class, 'id', 'id');
     }
 
-
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
-
 
     public function bankAccounts()
     {
@@ -208,6 +207,26 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             ->whereNull('completed_at');
     }
 
+    /**
+     * Get the user notification preferences relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function notificationPreferences()
+    {
+        return $this->hasMany(UserNotificationPreferences::class);
+    }
+
+    /**
+     * A user can have many SystemNotifications 
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function systemNotifications()
+    {
+        return $this->hasMany(SystemNotification::class);
+    }
+    
     /**
      * Get the user's setup status history relation.
      *
@@ -348,5 +367,119 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 $q->forBusinesses($businessIds);
             });
         });
+    }
+
+    /**
+     * Get the default notification preferences for the given notification.
+     *
+     * @param string $key
+     * @return UserNotificationPreferences
+     */
+    public function getDefaultNotificationPreferences(string $key) : UserNotificationPreferences
+    {
+        $prefs = new UserNotificationPreferences();
+        $prefs->mail = false;
+        $prefs->sms = false;
+        $prefs->system = false;
+
+        switch ($this->role_type) {
+            case 'office_user':
+                $prefs->system = true;
+                break;
+            case 'caregiver':
+            case 'client':
+            default:
+                break;
+        }
+
+        return $prefs;
+    }
+
+    /**
+     * Determine if the system shound notify the user for the given notification class and
+     * notification method.
+     *
+     * @param string $notification
+     * @param string $via
+     * @return boolean
+     */
+    public function shouldNotify($notification, $via)
+    {
+        $preference = $this->notificationPreferences()->where('key', $notification)->first();
+        if (! $preference) {
+            $preference = $this->getDefaultNotificationPreferences($notification);
+        }
+
+        switch ($via) {
+            case 'mail': 
+                if (! $this->allow_email_notifications || empty($this->notification_email)) {
+                    return false;
+                }
+                if (! $preference->email) {
+                    return false;
+                }
+                break;
+
+            case 'sms': 
+                if (! $this->allow_sms_notifications || empty($this->notification_phone)) {
+                    return false;
+                }
+                if (! $preference->sms) {
+                    return false;
+                }
+                break;
+
+            case 'system':
+                if (! $this->allow_system_notifications || $this->role_type != 'office_user') {
+                    return false;
+                }
+                if (! $preference->system) {
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get a collection of the available notification
+     * types based on the current user role.
+     *
+     * @return Collection
+     */
+    public function getAvailableNotifications()
+    {
+        switch ($this->role_type) {
+            case 'office_user':
+                return collect(OfficeUser::$availableNotifications);
+            case 'caregiver':
+                return collect(Caregiver::$availableNotifications);
+            default:
+                return collect([]);
+        }
+    }
+
+    /**
+     * Sync notification data from request and create new preferences  
+     * or update existing.
+     *
+     * @param array $data
+     * @return void
+     */
+    public function syncNotificationPreferences(array $preferences) : void
+    {
+        foreach ($preferences as $key => $data) {
+            $pref = $this->notificationPreferences()
+                ->where('key', $key)
+                ->first();
+
+            if ($pref) {
+                $pref->update($data);
+            } else {
+                $data['key'] = $key;
+                $this->notificationPreferences()->create($data);
+            }
+        }
     }
 }

@@ -37,7 +37,6 @@ use App\Policies\SchedulePolicy;
 use App\Policies\ServicePolicy;
 use App\Policies\ShiftPolicy;
 use App\Policies\SmsThreadPolicy;
-use App\Policies\SystemExceptionPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimesheetPolicy;
 use App\Policies\UserPolicy;
@@ -51,7 +50,6 @@ use App\ReferralSource;
 use App\Schedule;
 use App\Shift;
 use App\SmsThread;
-use App\SystemException;
 use App\Task;
 use App\Timesheet;
 use App\User;
@@ -64,6 +62,8 @@ use App\DeactivationReason;
 use App\Policies\DeactivationReasonPolicy;
 use App\SalesPerson;
 use App\Policies\SalesPersonPolicy;
+use App\SystemNotification;
+use App\Policies\SystemNotificationPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -99,7 +99,7 @@ class AuthServiceProvider extends ServiceProvider
         Service::class => ServicePolicy::class,
         Shift::class => ShiftPolicy::class,
         SmsThread::class => SmsThreadPolicy::class,
-        SystemException::class => SystemExceptionPolicy::class,
+        SystemNotification::class => SystemNotificationPolicy::class,
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,

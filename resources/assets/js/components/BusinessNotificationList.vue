@@ -16,7 +16,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/business/exceptions/' + row.item.id">Details</b-btn>
+                    <b-btn size="sm" :href="'/business/notifications/' + row.item.id">Details</b-btn>
                 </template>
             </b-table>
         </div>
@@ -40,7 +40,7 @@
         mixins: [FormatsDates],
 
         props: {
-            'exceptions': {
+            'notifications': {
                 default() {
                     return [];
                 }
@@ -66,19 +66,19 @@
                         formatter: (val) => this.formatDateTimeFromUTC(val),
                     },
                     {
-                        key: 'reference_type',
+                        key: 'title',
                         label: "Type",
                         sortable: true,
-                        formatter: this.formatType,
                     },
                     {
-                        key: 'title',
+                        key: 'message',
+                        label: 'Description',
                         sortable: true,
                     },
                     {
                         key: 'acknowledged_at',
                         label: 'Acknowledged',
-                        sortable: true,
+                        sortable: false,
                         formatter: (val) => val ? this.formatDateTimeFromUTC(val) : null,
                     },
                     {
@@ -86,7 +86,7 @@
                         class: 'hidden-print'
                     }
                 ],
-                items: this.exceptions,
+                items: this.notifications,
 
             }
         },

@@ -7,10 +7,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class UnverifiedShiftCreated
+class UnverifiedClockIn
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * @var \App\Shift
+     */
     public $shift;
 
     /**

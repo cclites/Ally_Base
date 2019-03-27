@@ -50,6 +50,8 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::resource('/profile/phone', 'PhoneController');
     Route::patch('/profile/phone/{phone}/sms', 'PhoneController@updateSmsNumber');
+    Route::patch('/profile/notification-options', 'ProfileController@updateNotificationOptions');
+    Route::post('/profile/notification-preferences', 'ProfileController@updateNotificationPreferences');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -194,6 +196,8 @@ Route::group([
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
+    Route::patch('caregivers/{caregiver}/notification-options', 'Business\CaregiverController@updateNotificationOptions');
+    Route::post('caregivers/{caregiver}/notification-preferences', 'Business\CaregiverController@updateNotificationPreferences');
     Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
     Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
 
@@ -362,9 +366,9 @@ Route::group([
 
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
-    Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
-    Route::get('exceptions/{exception}', 'Business\ExceptionController@show')->name('exceptions.show');
-    Route::post('exceptions/{exception}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
+    Route::get('notifications', 'Business\SystemNotificationController@index')->name('notifications.index');
+    Route::get('notifications/{notification}', 'Business\SystemNotificationController@show')->name('notifications.show');
+    Route::post('notifications/{notification}/acknowledge', 'Business\SystemNotificationController@acknowledge')->name('notifications.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

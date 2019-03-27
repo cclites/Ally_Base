@@ -194,4 +194,20 @@ class BusinessChain extends AuditableModel
     {
         return route('business_chain_routes.apply', ['slug' => $this->slug]);
     }
+
+    /**
+     * Get a list of OfficeUser's notifiable User objects
+     * that should be sent notifications.
+     *
+     * @return array|Collection
+     */
+    public function notifiableUsers()
+    {
+        return $this->users()->with(['user', 'user.notificationPreferences'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->get()
+            ->pluck('user');
+    }
 }
