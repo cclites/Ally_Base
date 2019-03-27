@@ -299,7 +299,9 @@ Route::group([
     Route::post('reports/claims-report', 'Business\ClaimController@data');
     Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
     Route::get('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources')->name('reports.client_referral_sources');
+    Route::post('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources');
     Route::get('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources')->name('reports.caregiver_referral_sources');
+    Route::post('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources');
     Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
