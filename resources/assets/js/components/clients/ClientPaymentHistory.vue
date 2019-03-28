@@ -8,9 +8,6 @@
             <template slot="created_at" scope="data">
                 {{ formatDate(data.item.created_at) }}
             </template>
-            <template slot="week" scope="data">
-                {{ start_end(data) }}
-            </template>
             <template slot="success" scope="data">
                 <span style="color: green;" v-if="data.value">Complete</span>
                 <span style="color: darkred;" v-else>Failed</span>
@@ -48,7 +45,6 @@
                 items: this.payments,
                 fields: [
                     { key: 'created_at', label: 'Date Paid', sortable: true },
-                    { key: 'week', label: 'Week' },
                     {
                         key: 'amount',
                         label: 'Amount',

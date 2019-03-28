@@ -472,7 +472,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getFlagsAttribute()
     {
-        return $this->shiftFlags->pluck('flag')->unique()->toArray();
+        return $this->shiftFlags->pluck('flag')->unique()->values()->toArray();
     }
 
     //////////////////////////////////////
@@ -876,7 +876,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if ($mileage) $collection->push($mileage);
 
             if ($shift->services->count()) {
-                $collection->push(...$shift->services->all());
+                $collection = $collection->merge($shift->services);
             } else {
                 $collection->push($shift);
             }
