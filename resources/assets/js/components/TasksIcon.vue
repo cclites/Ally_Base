@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     import FormatsDates from "../mixins/FormatsDates";
     export default {
         mixins: [ FormatsDates ],
@@ -44,14 +45,17 @@
                 default: 'business',
             },
         },
-        
+
         data() {
             return {
-                tasks: [],
-            }
+            };
         },
 
         computed: {
+            ...mapGetters({
+                tasks: 'tasks/tasks',
+            }),
+
             count() {
                 return this.tasks.length;
             },
@@ -59,14 +63,15 @@
             items() {
                 let maxTitle = 36;
                 let maxDescription = 72;
-                return this.tasks.map(function(task) {
-                    if (task.notes.length > maxDescription) {
-                        task.notes = task.notes.substring(0, maxDescription) + '..';
+                return this.tasks.map((task) => {
+                    let data = JSON.parse(JSON.stringify(task));
+                    if (data.notes && data.notes.length > maxDescription) {
+                        data.notes = data.notes.substring(0, maxDescription) + '..';
                     }
-                    if (task.name.length > maxTitle) {
-                        task.name = task.name.substring(0, maxTitle) + '..';
+                    if (data.name.length > maxTitle) {
+                        data.name = data.name.substring(0, maxTitle) + '..';
                     }
-                    return task;
+                    return data;
                 })
             },
 
@@ -77,21 +82,14 @@
 
             url() {
                 return this.role == 'caregiver' ? '/tasks' : '/business/tasks';
-            }
+            },
         },
 
         methods: {
-            load() {
-                axios.get(`${this.url}?pending=1&assigned=1`)
-                    .then( ({ data }) => {
-                        this.tasks = data;
-                    });
-            }
         },
 
-        mounted() {
-            this.load();
-            setInterval(this.load, 30000);
+        async mounted() {
+            await this.$store.dispatch('tasks/start');
         },
     }
 </script>

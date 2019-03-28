@@ -32,44 +32,40 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     export default {
         data() {
             return {
-                'notifications': [],
             }
         },
 
-        mounted() {
-            this.loadNotifications();
-            setInterval(this.loadNotifications, 30000);
+        async mounted() {
+            await this.$store.dispatch('notifications/start');
         },
 
         methods: {
-            loadNotifications() {
-                let component = this;
-                axios.get('/business/notifications?json=1')
-                    .then(function(response) {
-                        component.notifications = response.data;
-                    });
-            }
         },
 
         computed: {
+            ...mapGetters({
+                notifications: 'notifications/notifications',
+            }),
             count() {
                 return this.notifications.length;
             },
             items() {
                 let maxTitle = 36;
                 let maxDescription = 72;
-                return this.notifications.map(function(notification) {
-                    if (notification.message.length > maxDescription) {
-                        notification.message = notification.message.substring(0, maxDescription) + '..';
+                return this.notifications.map((notification) => {
+                    let data = JSON.parse(JSON.stringify(notification));
+                    if (data.message.length > maxDescription) {
+                        data.message = data.message.substring(0, maxDescription) + '..';
                     }
-                    if (notification.title.length > maxTitle) {
-                        notification.title = notification.title.substring(0, maxTitle) + '..';
+                    if (data.title.length > maxTitle) {
+                        data.title = data.title.substring(0, maxTitle) + '..';
                     }
-                    notification.time = moment.utc(notification.created_at).local().format('LT');
-                    return notification;
+                    data.time = moment.utc(data.created_at).local().format('LT');
+                    return data;
                 })
             },
             showTooltip() {
