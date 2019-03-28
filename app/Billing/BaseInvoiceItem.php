@@ -43,4 +43,12 @@ abstract class BaseInvoiceItem extends AuditableModel
         }
         if ($save) $this->save();
     }
+
+    /**
+     * @return \App\Billing\Contracts\InvoiceableInterface|null
+     */
+    public function getInvoiceable(): ?InvoiceableInterface
+    {
+        return $this->invoiceable;
+    }
 }

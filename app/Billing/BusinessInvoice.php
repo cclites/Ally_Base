@@ -105,6 +105,16 @@ class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
         return false;
     }
 
+    function removeDeposit(Deposit $deposit): bool
+    {
+        if ($deposit = $this->deposits->where('id', $deposit->id)->first()) {
+            $this->deposits()->syncWithoutDetaching([$deposit->id => ['amount_applied' => 0]]);
+            return (bool) $this->decrement('amount_paid', $deposit->pivot->amount_applied);
+        }
+
+        return false;
+    }
+
     public function getAmount(): float
     {
         return (float) $this->amount;

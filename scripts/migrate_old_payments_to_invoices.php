@@ -33,6 +33,7 @@ Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('clien
             // Add a manual adjustment
             $diff = subtract($payment->amount, $invoice->getAmount());
             $item = new \App\Billing\ClientInvoiceItem([
+                'date' => $payment->created_at,
                 'rate' => $diff,
                 'units' => 1,
                 'group' => 'Adjustments',
@@ -223,44 +224,6 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, f
     });
 });
 echo("Line 204\n");
-
-////////////////////////////////////
-//// Clear out old $0 provider fee shifts (add them to a new invoice that should just be $0)
-////////////////////////////////////
-
-foreach(\App\Business::all() as $business) {
-    $query = new \App\Billing\Queries\InvoiceableQuery(new \App\Shift());
-    $shifts = $query->forBusinesses([$business->id])
-        ->hasClientInvoicesPaid()
-        ->where('status', ['PAID', 'PAID_CAREGIVER_ONLY'])
-        ->where('provider_fee', '0')
-        ->get();
-
-    if ($shifts->count()) {
-        $invoice = \App\Billing\BusinessInvoice::create([
-            'name' => \App\Billing\BusinessInvoice::getNextName($business->id),
-            'business_id' => $business->id,
-        ]);
-
-        /** @var \App\Shift $shift */
-        foreach($shifts as $shift) {
-            $item = new \App\Billing\BusinessInvoiceItem([
-                'group' => $shift->getItemGroup(\App\Billing\BusinessInvoice::class),
-                'name' => $shift->getItemName(\App\Billing\BusinessInvoice::class),
-                'units' => $shift->duration(),
-                'client_rate' => $clientRate = $shift->costs()->getTotalHourlyCost(),
-                'caregiver_rate' => $shift->caregiver_rate,
-                'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
-                'rate' => $shift->provider_fee,
-                'total' => $shift->costs()->getProviderFee(),
-                'date' => $shift->getItemDate(),
-            ]);
-            $item->associateInvoiceable($shift);
-            $invoice->addItem($item);
-        }
-    }
-
-}
 
 DB::commit();
 

@@ -102,4 +102,24 @@ class CaregiverInvoiceTest extends TestCase
 
         $this->assertEquals(20, $invoice->amount_paid);
     }
+
+    /**
+     * @test
+     */
+    function the_amount_paid_should_be_reduced_when_a_deposit_is_unsuccessful()
+    {
+        $invoice = factory(CaregiverInvoice::class)->create();
+
+        $this->assertEquals(0, $invoice->amount_paid);
+
+        $deposit = factory(Deposit::class)->make(['amount' => 20.00]);
+        $invoice->addDeposit($deposit, 20);
+
+        $this->assertEquals(20, $invoice->amount_paid);
+
+        $deposit->markFailed();
+
+        $this->assertEquals(0, $invoice->fresh()->amount_paid);
+
+    }
 }

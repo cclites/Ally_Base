@@ -80,7 +80,6 @@
                     <template slot="actions" scope="row">
                         <b-btn size="sm" :href="'/admin/transactions/' + row.item.transaction_id" v-if="row.item.transaction_id">View Transaction</b-btn>
                         <b-btn size="sm" @click="markFailed(row.item)" variant="success" v-if="row.item.success">Mark Failed</b-btn>
-                        <b-btn size="sm" @click="markSuccessful(row.item)" variant="danger" v-else>Mark Successful</b-btn>
                     </template>
                 </b-table>
             </div>

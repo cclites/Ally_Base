@@ -147,6 +147,9 @@ export default {
         updateClientRates(item) {
             item.client_rate = RateFactory.getClientRate(item.provider_fee, item.caregiver_rate, this.allyPct).toFixed(2);
             item.ally_fee = RateFactory.getAllyFee(this.allyPct, item.client_rate).toFixed(2);
+            if (!item.caregiver_rate) {
+                item.caregiver_rate = "0.00";
+            }
         },
 
         fetchDefaultRate(service) {

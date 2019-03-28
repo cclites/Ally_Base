@@ -84,6 +84,7 @@ use App\Data\ScheduledRates;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read mixed $ally_pct
@@ -217,9 +218,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_CONFIRMATION = 'WAITING_FOR_CONFIRMATION';  // Unconfirmed shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Confirmed shift that needs to be authorized for payment
+    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_INVOICE = 'WAITING_FOR_INVOICE';  // Authorized shift that is waiting for invoicing
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Invoiced shift that is waiting for payment
-    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_BUSINESS_ONLY = 'PAID_BUSINESS_ONLY'; // Shift that failed payment to the caregiver, but paid successfully to the business
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
@@ -316,9 +317,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftIssue::class);
     }
 
-    public function exceptions()
+    public function systemNotifications()
     {
-        return $this->morphMany(SystemException::class, 'reference');
+        return $this->morphMany(SystemNotification::class, 'reference');
     }
 
     public function costHistory()
@@ -472,7 +473,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getFlagsAttribute()
     {
-        return $this->shiftFlags->pluck('flag')->unique()->toArray();
+        return $this->shiftFlags->pluck('flag')->unique()->values()->toArray();
     }
 
     //////////////////////////////////////
@@ -892,7 +893,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemUnits(): float
     {
-        return $this->duration();
+        return $this->fixed_rates ? 1 : $this->duration();
     }
 
     /**
@@ -956,7 +957,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return null;
         }
 
-        return $this->activities->implode('name', ', ');
+        return str_limit($this->activities->implode('name', ', '), 252);
     }
 
     /**
@@ -969,6 +970,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
@@ -979,13 +990,19 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->client_rate;
     }
 
-    /**
-     * TODO Implement caregiver deposit invoicing
-     * @return float
-     */
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->caregiver;
+    }
+
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->business;
     }
 
     /**

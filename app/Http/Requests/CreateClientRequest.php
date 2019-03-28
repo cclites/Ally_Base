@@ -13,11 +13,11 @@ class CreateClientRequest extends BusinessRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => 'required_unless:no_username,1|nullable|unique:users',
+            'username' => 'required|unique:users',
             'password' => 'required_unless:no_username,1|nullable|confirmed',
             'date_of_birth' => 'nullable',
             'business_fee' => 'nullable|numeric',
@@ -26,6 +26,15 @@ class CreateClientRequest extends BusinessRequest
             'agreement_status' => 'required',
             'gender' => 'nullable|in:M,F',
         ];
+
+        if ($this->input('no_username')) {
+            // Clear the username field when let user choose option is selected
+            // so the username can be dummy filled on the UI as the user's email
+            // and not actually update or validate unique when creating the user.
+            unset($rules['username']);
+        }
+
+        return $rules;
     }
 
     public function messages()

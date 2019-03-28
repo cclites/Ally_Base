@@ -1,0 +1,51 @@
+<?php
+
+namespace Tests;
+
+trait CreatesBusinesses
+{
+    /**
+     * @var \App\Business
+     */
+    public $business;
+
+    /**
+     * @var \App\Client
+     */
+    public $client;
+
+    /**
+     * @var \App\Caregiver
+     */
+    public $caregiver;
+    
+    /**
+     * @var \App\OfficeUser
+     */
+    public $officeUser;
+
+    /**
+     * @var \App\BusinessChain
+     */
+    public $chain;
+
+    /**
+     * Set up a business with an assigned office user that
+     * has one client with an assigned caregiver.
+     *
+     * @return void
+     */
+    public function createBusinessWithUsers()
+    {
+        $this->client = factory('App\Client')->create();
+        $this->business = $this->client->business;
+        $this->chain = $this->business->chain;
+
+        $this->caregiver = factory('App\Caregiver')->create();
+        $this->caregiver->clients()->save($this->client);
+        $this->chain->caregivers()->save($this->caregiver);
+
+        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
+        $this->officeUser->businesses()->attach($this->business->id);
+    }
+}

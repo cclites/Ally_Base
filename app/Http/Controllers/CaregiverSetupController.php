@@ -155,6 +155,7 @@ class CaregiverSetupController extends Controller
      *
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function checkStep($token)
     {

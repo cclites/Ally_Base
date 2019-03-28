@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Responses\ErrorResponse;
 use App\User;
 use App\Document;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\Responses\SuccessResponse;
 
@@ -22,12 +23,17 @@ class DocumentController extends BaseController
 
     /**
      * Upload and save new document.
-     * TODO: add validation and error checking
      * @param Request $request
      * @return SuccessResponse
+     * @throws AuthorizationException
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'file' => 'required|file',
+            'description' => 'nullable',
+        ]);
+
         $user = User::findOrFail($request->input('user_id'));
         $this->authorize('read', $user);
 

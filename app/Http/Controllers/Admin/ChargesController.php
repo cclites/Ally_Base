@@ -101,42 +101,14 @@ class ChargesController extends Controller
         return new ErrorResponse(400, 'Transaction declined for $' . $request->amount);
     }
 
-    public function markSuccessful(Payment $payment)
-    {
-        if ($payment->transaction) {
-            $payment->transaction->update(['success' => true]);
-        }
-        $payment->update(['success' => true]);
-        foreach($payment->shifts as $shift) {
-            $shift->statusManager()->ackPayment($payment->id);
-        }
-        $msg = 'Payment marked as successful.';
-        if ($payment->client && $payment->client->isOnHold()) {
-            $msg .= ' This client is still on hold.';
-        }
-        else if ($payment->business && $payment->business->isOnHold()) {
-            $msg .= ' This business is still on hold.';
-        }
-        return new SuccessResponse($msg);
-    }
-
     public function markFailed(Payment $payment)
     {
         if ($payment->transaction) {
-            $payment->transaction->update(['success' => false]);
+            $payment->transaction->recordFailure();
+        } else {
+            $payment->markFailed();
         }
-        $payment->update(['success' => false]);
-        foreach($payment->shifts as $shift) {
-            $shift->statusManager()->ackReturnedPayment();
-        }
-        if ($payment->client) {
-            $payment->client->addHold();
-            $entity = 'client';
-        }
-        else if ($payment->business) {
-            $payment->business->addHold();
-            $entity = 'registry';
-        }
-        return new SuccessResponse('Payment marked as failed.  This ' . $entity . ' has been placed on hold.');
+
+        return new SuccessResponse('Payment marked as failed.  This entity has been placed on hold.');
     }
 }
