@@ -82,7 +82,11 @@
                 </template>
             </b-table>
         </div>
-        <b-modal id="applyPaymentModal" :title="`Apply Payment to Claim #${selectedInvoice.name}`" v-model="paymentModal">
+        <b-modal id="applyPaymentModal"
+                 :title="`Apply Payment to Claim #${selectedInvoice.name}`"
+                 v-model="paymentModal"
+                 no-close-on-backdrop
+        >
             <b-form-group label="Payment Date">
                 <date-picker v-model="form.payed_at" placeholder="Payment Date" :disabled="form.busy"></date-picker>
                 <input-help :form="form" field="payed_at" text="" />
@@ -276,7 +280,7 @@
 
             cancelPayment() {
                 this.paymentModal = false;
-                this.form.reset();
+                this.form.reset(true);
             },
 
             applyPayment() {
@@ -293,7 +297,7 @@
                             this.items.splice(index, 1, data.data);
                         }
                         this.paymentModal = false;
-                        this.form.reset();
+                        this.form.reset(true);
                     })
                     .catch(e => {})
                     .finally(() => {
