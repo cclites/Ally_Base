@@ -241,7 +241,7 @@
                     },
                     {
                         name: 'Client Directory',
-                        url: 'reports/reports/client-directory',
+                        url: 'reports/client-directory',
                         description: 'Shows the full list of clients',
                         category: 2,
                         allowed: ['office_user'],

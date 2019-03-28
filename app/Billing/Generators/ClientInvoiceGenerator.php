@@ -196,6 +196,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             'date' => $invoiceable->getItemDate(),
             'total' => round(bcmul($invoiceable->getItemUnits(), $clientRate, 4), 2),
             'amount_due' => $amountDue,
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 

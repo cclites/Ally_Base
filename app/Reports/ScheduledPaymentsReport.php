@@ -1,12 +1,21 @@
 <?php
 namespace App\Reports;
 
+use App\Billing\Queries\InvoiceableQuery;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
 
-class ScheduledPaymentsReport extends ShiftsReport
+class ScheduledPaymentsReport extends BaseReport
 {
+    protected $query;
+
+    public function __construct()
+    {
+        $this->query = (new InvoiceableQuery(new Shift()))
+            ->doesntHaveClientInvoice()
+            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION,  Shift::WAITING_FOR_INVOICE]);
+    }
 
     /**
      * Return the collection of rows matching report criteria
@@ -15,9 +24,7 @@ class ScheduledPaymentsReport extends ShiftsReport
      */
     protected function results()
     {
-        $shifts = $this->query
-            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION,  Shift::WAITING_FOR_INVOICE])
-            ->get();
+        $shifts = $this->query->get();
         $rows = $shifts->map(function(Shift $shift) {
             return [
                 'shift_id' => $shift->id,
@@ -47,4 +54,13 @@ class ScheduledPaymentsReport extends ShiftsReport
         return $rows;
     }
 
+    /**
+     * Return the instance of the query builder for additional manipulation
+     *
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     */
+    public function query()
+    {
+        return $this->query;
+    }
 }

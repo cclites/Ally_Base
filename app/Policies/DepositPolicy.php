@@ -21,7 +21,7 @@ class DepositPolicy extends BasePolicy
     {
         return $deposit->caregiver_id == $user->id
             || ($deposit->business_id && $this->businessCheck($user, $deposit)) // For business deposits
-            || $deposit->shifts()->count() === $deposit->shifts()->forRequestedBusinesses([], $user)->count(); // For caregiver deposits
+            || ($deposit->caregiver && $user->can('view-caregiver-statements', $deposit->caregiver));
     }
 
     public function update(User $user, Deposit $deposit)

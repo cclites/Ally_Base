@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Notifications\Business;
+
+use Illuminate\Notifications\Messages\MailMessage;
+use App\Notifications\BaseNotification;
+use App\Jobs\SendTextMessage;
+use App\PhoneNumber;
+use App\Schedule;
+
+class DeclinedVisit extends BaseNotification
+{
+    public static $disabled = true;
+
+    /**
+     * The label of the notification (used for preferences).
+     *
+     * @var string
+     */
+    protected static $title = 'Caregiver Declines a Visit';
+
+    /**
+     * The template for the message to transmit.
+     *
+     * @var string
+     */
+    protected static $message = 'Caregiver #CAREGIVER# has declined to work for Client #CLIENT# #TIMESTAMP#.';
+
+    /**
+     * The related schedule.
+     *
+     * @var \App\Schedule
+     */
+    protected $schedule;
+
+    /**
+     * The action text.
+     *
+     * @var string
+     */
+    protected $action = 'View Client Schedule';
+
+    /**
+     * Create a new notification instance.
+     *
+     * @var \App\Schedule $schedule
+     * @return void
+     */
+    public function __construct($schedule)
+    {
+        $this->schedule = $schedule;
+
+        $this->url = route('business.clients.schedule', ['client' => $this->schedule->client]);
+    }
+
+    /**
+     * Get the notification's message.
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        $timestamp = local_date($this->schedule->starts_at, 'm/d/Y g:iA', $this->schedule->business->timezone);
+
+        $message = str_replace('#CAREGIVER#', $this->schedule->caregiver->name, static::$message);
+        $message = str_replace('#CLIENT#', $this->schedule->client->name, $message);
+        return str_replace('#TIMESTAMP#', $timestamp, $message);
+    }
+
+    /**
+     * Get the SMS representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SendTextMessage
+     * @throws \Exception
+     */
+    public function toSms($notifiable)
+    {
+        return $this->toSmsFromBusiness($notifiable, $this->client->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->schedule->id,
+            'reference_type' => Schedule::class
+        ]);
+    }
+}

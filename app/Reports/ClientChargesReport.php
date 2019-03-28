@@ -12,7 +12,7 @@ use App\Traits\ShiftReportFilters;
  *
  * @package App\Reports
  */
-class ClientChargesReport extends ScheduledPaymentsReport
+class ClientChargesReport extends ShiftsReport
 {
     use ShiftReportFilters;
 

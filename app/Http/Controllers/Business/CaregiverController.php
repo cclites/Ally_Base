@@ -23,6 +23,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Actions\CreateCaregiver;
 use App\Notifications\TrainingEmail;
 use App\Notifications\CaregiverWelcomeEmail;
@@ -139,6 +141,7 @@ class CaregiverController extends BaseController
             'deposits.shifts.activities',
             'phoneNumbers',
             'user.documents',
+            'user.notificationPreferences',
             'bankAccount',
             'availability',
             'meta',
@@ -146,7 +149,8 @@ class CaregiverController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
+            'daysOff',
         ]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
@@ -162,7 +166,16 @@ class CaregiverController extends BaseController
         $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->setup_url = $caregiver->setup_url;
 
-        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
+        $notifications = $caregiver->user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+                'disabled' => $cls::$disabled,
+            ];
+        });
+
+        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business', 'notifications'));
     }
 
     /**
@@ -194,7 +207,7 @@ class CaregiverController extends BaseController
         }
 
         if ($caregiver->update($data)) {
-            return new SuccessResponse('The caregiver has been updated.', $caregiver);
+            return new SuccessResponse('The caregiver has been updated.', $caregiver, '.');
         }
         return new ErrorResponse(500, 'The caregiver could not be updated.');
     }
@@ -327,6 +340,9 @@ class CaregiverController extends BaseController
 
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOff);
+
         return new SuccessResponse('Caregiver availability preferences updated');
     }
 
@@ -357,6 +373,44 @@ class CaregiverController extends BaseController
     }
 
     /**
+     * Update caregiver's user notification settings.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request, Caregiver $caregiver)
+    {
+        $this->authorize('update', $caregiver);
+
+        $data = $request->validated();
+
+        if ($caregiver->user()->update($data)) {
+            return new SuccessResponse('Caregiver\'s notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating the Caregiver\'s notification options.  Please try again.');
+    }
+
+    /**
+     * Update caregiver's user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request, Caregiver $caregiver)
+    {
+        $this->authorize('update', $caregiver);
+
+        $caregiver->user->syncNotificationPreferences($request->validated());
+
+        return new SuccessResponse('Caregiver\'s notification preferences have been saved.');
+    }
+
+    /**
      * Send welcome email to the caregiver.
      *
      * @param Caregiver $caregiver
@@ -364,6 +418,8 @@ class CaregiverController extends BaseController
      */
     public function welcomeEmail(Caregiver $caregiver)
     {
+        $this->authorize('update', $caregiver);
+
         $caregiver->update(['welcome_email_sent_at' => Carbon::now()]);
 
         $caregiver->notify(new CaregiverWelcomeEmail($caregiver, $this->businessChain()));
@@ -380,6 +436,8 @@ class CaregiverController extends BaseController
      */
     public function trainingEmail(Caregiver $caregiver)
     {
+        $this->authorize('update', $caregiver);
+
         $caregiver->update(['training_email_sent_at' => Carbon::now()]);
 
         $caregiver->notify(new TrainingEmail($caregiver));

@@ -26,7 +26,7 @@
                         <tr v-for="(item, index) in billingDetails" :key="index">
                             <td>{{ item.service }}</td>
                             <td>{{ formatHoursType(item.hours_type) }}</td>
-                            <td>{{ moneyFormat(item.client_rate) }}</td>
+                            <td>{{ moneyFormat(item.rate) }}</td>
                             <td>{{ numberFormat(item.hours) }} hrs</td>
                             <td>{{ moneyFormat(item.total) }}</td>
                         </tr>
@@ -177,22 +177,24 @@
                     // service breakout
                     return this.shift.services.map(item => {
                         let service = this.services.find(x => x.id === item.service_id);
+                        let rate = this.authRole == 'caregiver' ? item.caregiver_rate : item.client_rate;
                         return {
                             service: service ? service.name : 'General',
-                            client_rate: item.client_rate,
+                            rate: rate,
                             hours_type: item.hours_type,
                             hours: item.duration,
-                            total: this.calculateTotal(item.client_rate, item.duration),
+                            total: this.calculateTotal(rate, item.duration),
                         };
                     });
                 } else {
                     // shift rates
+                    let rate = this.authRole == 'caregiver' ? this.shift.caregiver_rate : this.shift.client_rate;
                     return [{
-                        service: this.defaultService ? this.defaultService.name : 'General',
-                        client_rate: this.shift.client_rate,
+                        service: this.defaultService && this.defaultService.name ? this.defaultService.name : 'General',
+                        rate: rate,
                         hours_type: this.shift.hours_type,
                         hours: this.shift.hours,
-                        total: this.calculateTotal(this.shift.client_rate, this.shift.hours, this.shift.fixed_rates),
+                        total: this.calculateTotal(rate, this.shift.hours, this.shift.fixed_rates),
                     }];
                 }
             },

@@ -22,7 +22,9 @@ class KnowledgeBaseController extends Controller
         if (request()->wantsJson()) {
             if (request()->has('q')) {
                 $knowledge = Knowledge::forRoles($roles)
-                    ->withKeyword(request()->q)->get();
+                    ->withKeyword(request()->q)
+                    ->ordered()
+                    ->get();
 
                 return response()->json($knowledge);
             } else {
@@ -30,7 +32,7 @@ class KnowledgeBaseController extends Controller
             }
         }
 
-        $knowledge = Knowledge::forRoles($roles)->get();
+        $knowledge = Knowledge::forRoles($roles)->ordered()->get();
 
         return view('knowledge-base')->with(compact(['knowledge']));
     }

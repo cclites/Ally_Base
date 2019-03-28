@@ -11,4 +11,17 @@ return [
      * is to use it.
      */
     'prevent_dupe_posts' => env('PREVENT_DUPE_POSTS', true),
+
+    /**
+     * This is the email where results from certain CRON operations
+     * will be sent after execution.  If this value is set to blank
+     * it will turn off this feature.
+     */
+    'cron_results_to' => env('CRON_RESULTS_TO', 'jason@allyms.com'),
+
+    /**
+     * Flag to turn on/off logging of all raw outgoing email
+     * and SMS data.
+     */
+    'communication_log' => env('COMMUNICATION_LOG', false),
 ];

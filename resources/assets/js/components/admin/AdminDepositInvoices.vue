@@ -23,8 +23,8 @@
                                 v-model="paid"
                         >
                             <option value="">All Invoices</option>
-                            <option value="0">Unpaid Invoices</option>
-                            <option value="1">Paid Invoices</option>
+                            <option :value="0">Unpaid Invoices</option>
+                            <option :value="1">Paid Invoices</option>
                         </b-form-select>
                         <b-form-select
                                 id="chain_id"
@@ -89,13 +89,13 @@
         data() {
             return {
                 sortBy: 'created_at',
-                sortDesc: false,
+                sortDesc: true,
                 filter: null,
                 loaded: -1,
-                start_date: moment().subtract(1, 'days').format('MM/DD/YYYY'),
+                start_date: '01/01/2018',
                 end_date: moment().format('MM/DD/YYYY'),
                 chain_id: "",
-                paid: "",
+                paid: 0,
                 items: [],
                 fields: [
                     {
@@ -113,6 +113,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'chain_name',
+                        label: "Business Chain",
+                        sortable: true,
+                    },
+                    {
                         key: 'amount',
                         formatter: (val) => this.numberFormat(val),
                         sortable: true,
@@ -124,6 +129,9 @@
                     },
                     {
                         key: 'status',
+                    },
+                    {
+                        key: 'flags',
                     }
                 ],
             }
@@ -144,7 +152,24 @@
                 let url = '/admin/invoices/deposits?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
                 const response = await axios.get(url);
-                this.items = response.data.data;
+                this.items = response.data.data.map(item => {
+                    let chain;
+                    if (item.caregiver) {
+                        chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
+                    }
+                    if (item.business) {
+                        chain = item.business.chain;
+                    }
+                    item.chain_name = chain ? chain.name : "";
+
+                    let flags = [];
+                    if (item.caregiver_on_hold) flags.push("On Hold");
+                    if (item.business_on_hold) flags.push("On Hold");
+                    if (item.no_bank_account) flags.push("No Bank Account");
+
+                    item.flags = flags.join(' | ');
+                    return item;
+                });
                 this.loaded = 1;
             },
 

@@ -4,8 +4,10 @@
             <i v-if="loading" class="fa fa-spinner fa-spin"></i>
             <i v-else :class="`fa ${icon}`"></i>
             <input type="text" autocomplete="off"
+                name="search-term"
+                id="search-term"
                 :placeholder="placeholder"
-                v-model="filter" 
+                v-model="filter"
                 @input="onSearch" 
                 @focus="showResults()" 
                 @blur="hideResults()" 

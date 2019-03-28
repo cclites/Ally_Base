@@ -1,6 +1,8 @@
 <?php
 namespace App\Services;
 
+use App\CommunicationLog;
+use Carbon\Carbon;
 use Log;
 use Twilio\Rest\Client;
 
@@ -46,12 +48,36 @@ class PhoneService
      */
     public function sendTextMessage($to, $message)
     {
+        $this->logCommunication($this->from, $to, $message);
+
         if (empty($this->client)) {
             return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
         }
 
         $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);
-        
+
         return $message->sid;
+    }
+
+    /**
+     * Log the outgoing message to the database.
+     *
+     * @param string $from
+     * @param string $to
+     * @param string $message
+     */
+    public function logCommunication(string $from, string $to, string $message) : void
+    {
+        if (config('ally.communication_log')) {
+            CommunicationLog::create([
+                'body' => $message,
+                'subject' => null,
+                'to' => $to,
+                'from' => $from,
+                'sent_at' => Carbon::now(),
+                'channel' => 'sms',
+                'preview' => substr($message, 0, 100),
+            ]);
+        }
     }
 }

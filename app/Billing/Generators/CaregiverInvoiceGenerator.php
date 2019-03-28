@@ -60,6 +60,7 @@ class CaregiverInvoiceGenerator extends BaseInvoiceGenerator
             'rate' => $invoiceable->getCaregiverRate(),
             'total' => $total,
             'date' => $invoiceable->getItemDate(),
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 }

@@ -61,6 +61,25 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     public $timestamps = false;
     public $fillable = ['chain_id'];
 
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        \App\Notifications\Business\DeclinedVisit::class, // TODO: implement trigger
+        \App\Notifications\Business\CaregiverAvailable::class, // TODO: implement trigger
+        \App\Notifications\Business\UnverifiedShift::class,
+        \App\Notifications\Business\CertificationExpiring::class,
+        \App\Notifications\Business\CertificationExpired::class,
+        \App\Notifications\Business\ApplicationSubmitted::class,
+        \App\Notifications\Business\ManualTimesheet::class,
+        \App\Notifications\Business\NewSmsReply::class,
+        \App\Notifications\Business\FailedCharge::class, // TODO: implement trigger
+        \App\Notifications\Business\ClientBirthday::class,
+        \App\Notifications\Business\NoProspectContact::class, // TODO: implement trigger
+    ];
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////

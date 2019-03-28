@@ -83,12 +83,14 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
 
     public function businessInvoices()
     {
-        return $this->morphedByMany(BusinessInvoice::class, 'invoice', 'invoice_deposits');
+        return $this->morphedByMany(BusinessInvoice::class, 'invoice', 'invoice_deposits')
+            ->withPivot(['amount_applied']);
     }
 
     public function caregiverInvoices()
     {
-        return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits');
+        return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits')
+            ->withPivot(['amount_applied']);
     }
 
     ///////////////////////////////////////////

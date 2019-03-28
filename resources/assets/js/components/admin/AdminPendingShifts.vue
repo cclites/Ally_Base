@@ -185,7 +185,7 @@
                         this.items = response.data.map(function (item) {
                             item.client_name = (item.client) ? item.client.name : '';
                             item.caregiver_name = (item.caregiver) ? item.caregiver.name : '';
-                            item.authorized = (item.status === 'WAITING_FOR_CHARGE');
+                            item.authorized = (item.status === 'WAITING_FOR_INVOICE');
                             return item;
                         });
                         this.loading = false;

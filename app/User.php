@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasMetaData;
 
@@ -170,11 +171,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasOne(OfficeUser::class, 'id', 'id');
     }
 
-
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
-
 
     public function bankAccounts()
     {
@@ -208,6 +207,26 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             ->whereNull('completed_at');
     }
 
+    /**
+     * Get the user notification preferences relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function notificationPreferences()
+    {
+        return $this->hasMany(UserNotificationPreferences::class);
+    }
+
+    /**
+     * A user can have many SystemNotifications 
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function systemNotifications()
+    {
+        return $this->hasMany(SystemNotification::class);
+    }
+    
     /**
      * Get the user's setup status history relation.
      *
@@ -264,6 +283,73 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         }
 
         return empty($phone) ? '' : (string) $phone->number;
+    }
+
+    ///////////////////////////////////////////
+    /// Query Scopes
+    ///////////////////////////////////////////
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->where(function($query) use ($businessIds) {
+            $query->whereHas('caregiver', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('client', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('officeUser', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            });
+        });
+    }
+
+    /**
+     * Get the clients that belong to the specified chains.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $chainId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForChain($query, $chainId)
+    {
+        return $query->where(function ($q) use ($chainId) {
+            $q->whereHas('client', function ($q) use ($chainId) {
+                $q->forChain($chainId);
+            })->orWhereHas('caregiver', function ($q) use ($chainId) {
+                $q->forChains([$chainId]);
+            })->orWhereHas('officeUser', function ($q) use ($chainId) {
+                $q->forChains([$chainId]);
+            });
+        });
+    }
+
+    /**
+     * Get users who's data matches the specified search filter.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string|null $searchFilter
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeSearch($query, $searchFilter)
+    {
+        if (empty($searchFilter)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($searchFilter) {
+            $q->where('users.username', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.email', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.id', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.firstname', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.lastname', 'LIKE', "%$searchFilter%")
+                ->orWhere('users.role_type', 'LIKE', "%$searchFilter%");
+        });
     }
 
     ///////////////////////////////////////////
@@ -331,22 +417,138 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     }
 
     /**
-     * A query scope for filtering results by related business IDs
+     * Get the owning business chain for the user based on
+     * their role_type.
+     * Warning: will cause bad n+1 issues if relationships are
+     * not pre-loaded in the query.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $businessIds
+     * @return \App\BusinessChain|null
+     */
+    public function getChain()
+    {
+        switch ($this->role_type) {
+            case 'caregiver':
+                return optional(optional($this->caregiver)->businessChains)->first();
+            case 'client':
+                return optional(optional($this->client)->business)->businessChain;
+            case 'office_user':
+                return optional($this->officeUser)->businessChain;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Get the default notification preferences for the given notification.
+     *
+     * @param string $key
+     * @return UserNotificationPreferences
+     */
+    public function getDefaultNotificationPreferences(string $key) : UserNotificationPreferences
+    {
+        $prefs = new UserNotificationPreferences();
+        $prefs->mail = false;
+        $prefs->sms = false;
+        $prefs->system = false;
+
+        switch ($this->role_type) {
+            case 'office_user':
+                $prefs->system = true;
+                break;
+            case 'caregiver':
+            case 'client':
+            default:
+                break;
+        }
+
+        return $prefs;
+    }
+
+    /**
+     * Determine if the system shound notify the user for the given notification class and
+     * notification method.
+     *
+     * @param string $notification
+     * @param string $via
+     * @return boolean
+     */
+    public function shouldNotify($notification, $via)
+    {
+        $preference = $this->notificationPreferences()->where('key', $notification)->first();
+        if (! $preference) {
+            $preference = $this->getDefaultNotificationPreferences($notification);
+        }
+
+        switch ($via) {
+            case 'mail': 
+                if (! $this->allow_email_notifications || empty($this->notification_email)) {
+                    return false;
+                }
+                if (! $preference->email) {
+                    return false;
+                }
+                break;
+
+            case 'sms': 
+                if (! $this->allow_sms_notifications || empty($this->notification_phone)) {
+                    return false;
+                }
+                if (! $preference->sms) {
+                    return false;
+                }
+                break;
+
+            case 'system':
+                if (! $this->allow_system_notifications || $this->role_type != 'office_user') {
+                    return false;
+                }
+                if (! $preference->system) {
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get a collection of the available notification
+     * types based on the current user role.
+     *
+     * @return Collection
+     */
+    public function getAvailableNotifications()
+    {
+        switch ($this->role_type) {
+            case 'office_user':
+                return collect(OfficeUser::$availableNotifications);
+            case 'caregiver':
+                return collect(Caregiver::$availableNotifications);
+            default:
+                return collect([]);
+        }
+    }
+
+    /**
+     * Sync notification data from request and create new preferences  
+     * or update existing.
+     *
+     * @param array $data
      * @return void
      */
-    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    public function syncNotificationPreferences(array $preferences) : void
     {
-        $builder->where(function($query) use ($businessIds) {
-            $query->whereHas('caregiver', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            })->orWhereHas('client', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            })->orWhereHas('officeUser', function($q) use ($businessIds) {
-                $q->forBusinesses($businessIds);
-            });
-        });
+        foreach ($preferences as $key => $data) {
+            $pref = $this->notificationPreferences()
+                ->where('key', $key)
+                ->first();
+
+            if ($pref) {
+                $pref->update($data);
+            } else {
+                $data['key'] = $key;
+                $this->notificationPreferences()->create($data);
+            }
+        }
     }
 }

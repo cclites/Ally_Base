@@ -98,6 +98,7 @@
             axios.get(`/account-setup/clients/${this.token}/check`)
                 .then( ({ data }) => {
                     this.$emit('updated', data);
+                    this.form.username = data.email;
                 })
                 .catch(e => {
                 })

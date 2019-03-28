@@ -2,35 +2,35 @@
 
 namespace App\Listeners;
 
-use App\Events\UnverifiedShiftConfirmed;
-use App\SystemException;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\Business\UnverifiedShift;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use App\Events\UnverifiedShiftConfirmed;
+use App\SystemNotification;
 
 /**
  * Class UnverifiedShiftAcknowledgement
- * Acknowledges a shift's related exception automatically if a shift is approved
  *
  * @package App\Listeners
  */
 class UnverifiedShiftAcknowledgement
 {
     /**
-     * Handle the event.
+     * Acknowledges a shift's related notifications automatically if a shift is approved
      *
      * @param  UnverifiedShiftConfirmed  $event
      * @return void
      */
     public function handle(UnverifiedShiftConfirmed $event)
     {
-        if ($event->shift->exceptions->count())
+        if ($event->shift->systemNotifications()->count())
         {
-            $event->shift->exceptions->each(function(SystemException $exception) {
-                $titleMatch = 'Unverified Shift';
-                if (!$exception->acknowledged_at && substr($exception->title, 0, strlen($titleMatch)) === $titleMatch) {
-                    $exception->acknowledge('Automatic acknowledgement caused by shift confirmation.');
-                }
-            });
+            $event->shift->systemNotifications()->where('key', UnverifiedShift::getKey())
+                ->each(function(SystemNotification $notification) {
+                    if (! $notification->acknowledged_at) {
+                        $notification->acknowledge('Automatic acknowledgement caused by shift confirmation.');
+                    }
+                });
         }
     }
 }

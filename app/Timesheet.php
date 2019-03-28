@@ -31,8 +31,8 @@ use App\Events\ShiftFlagsCouldChange;
  * @property-read \App\Client $client
  * @property-read \App\User $creator
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\TimesheetEntry[] $entries
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
- * @property-read int $exception_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotifications[] $systemNotifications
+ * @property-read int $notification_count
  * @property-read void $is_approved
  * @property-read void $is_denied
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forBusinesses($businessIds)
@@ -59,7 +59,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 
     protected $with = ['entries'];
 
-    protected $appends = ['exception_count'];
+    protected $appends = ['notification_count'];
     
     protected $dispatchesEvents = [
         'created' => TimesheetCreated::class,
@@ -122,13 +122,13 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * A Timesheet can have many SystemExceptions.
+     * A Timesheet can have many SystemNotifications.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function exceptions()
+    public function systemNotifications()
     {
-        return $this->morphMany(SystemException::class, 'reference');
+        return $this->morphMany(SystemNotification::class, 'reference');
     }
 
     ///////////////////////////////////////////
@@ -156,13 +156,13 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * Gets the number of exceptions attached to the Timesheet.
+     * Gets the number of system notifications attached to the Timesheet.
      *
      * @return int
      */
-    public function getExceptionCountAttribute()
+    public function getNotificationCountAttribute()
     {
-        return $this->exceptions()->count();
+        return $this->systemNotifications()->count();
     }
 
     ///////////////////////////////////////////
@@ -170,17 +170,17 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     ///////////////////////////////////////////
 
     /**
-     * Marks all attached exceptions as acknowledged by the current 
+     * Marks all attached notifications as acknowledged by the current 
      * logged in user with the given note.
      *
      * @param string $note
      * @return bool
      */
-    public function acknowledgeExceptions($note = '')
+    public function acknowledgeNotifications($note = '')
     {
         $any = false;
 
-        foreach($this->exceptions as $ex) {
+        foreach($this->systemNotifications as $ex) {
             $ex->acknowledge($note);
             $any = true;
         }
@@ -190,7 +190,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 
     /**
      * Method to mark Timesheet as approved. Also automatically ackowledges
-     * any connected exceptions.
+     * any connected Notifications.
      *
      * @return void
      */
@@ -200,12 +200,12 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             'approved_at' => Carbon::now(),
         ]);
 
-        $this->acknowledgeExceptions('Timesheet Approved');
+        $this->acknowledgeNotifications('Timesheet Approved');
     }
 
     /**
      * Method to mark Timesheet as denied.  Also automatically ackowledges
-     * any connected exceptions.
+     * any connected Notifications.
      *
      * @return void
      */
@@ -215,7 +215,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
             'denied_at' => Carbon::now(),
         ]);
 
-        $this->acknowledgeExceptions('Timesheet Denied');
+        $this->acknowledgeNotifications('Timesheet Denied');
     }
 
     /**

@@ -22,6 +22,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+        </li>
     </ul>
 
     <!-- Mobile nav tabs (drop down) -->
@@ -77,6 +80,13 @@
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <contact-list-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></contact-list-tab>
+        </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
