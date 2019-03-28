@@ -18,6 +18,13 @@ use App\Services\HhaExchangeManager;
 
 class ClaimsController extends BaseController
 {
+    /**
+     * Get claims listing.
+     *
+     * @param Request $request
+     * @param ClientInvoiceQuery $invoiceQuery
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
+     */
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
@@ -132,6 +139,10 @@ class ClaimsController extends BaseController
     {
         if (empty($invoice->claim)) {
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
+        }
+
+        if (floatval($request->amount) > floatval($invoice->claim->balance)) {
+            return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
         }
 
         \DB::beginTransaction();
