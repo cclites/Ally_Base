@@ -58,8 +58,8 @@
                 let maxDescription = 72;
                 return this.notifications.map((notification) => {
                     let data = JSON.parse(JSON.stringify(notification));
-                    if (data.description.length > maxDescription) {
-                        data.description = data.description.substring(0, maxDescription) + '..';
+                    if (data.message.length > maxDescription) {
+                        data.message = data.message.substring(0, maxDescription) + '..';
                     }
                     if (data.title.length > maxTitle) {
                         data.title = data.title.substring(0, maxTitle) + '..';
