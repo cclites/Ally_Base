@@ -81,40 +81,20 @@ class ServiceAuthValidator
             return $hours;
         }
 
-        // TODO: this does not properly handle shifts that expand more than two days
-
-        if ($start->format('Ymd') === $date->format('Ymd')) {
-            $minutes = $start->diffInMinutes($start->copy()->endOfDay());
-            return $minutes === 0 ? 0 : ($minutes / 60);
+        if (! empty($shift->services)) {
+            // service breakout shift
+            return $hours;
         } else {
-            $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
-            return $minutes === 0 ? 0 : ($minutes / 60);
+            // actual hours shift
+            // TODO: this does not properly handle shifts that expand more than two days
+            if ($start->format('Ymd') === $date->format('Ymd')) {
+                $minutes = $start->diffInMinutes($start->copy()->endOfDay());
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            } else {
+                $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            }
         }
-//        for ($i = 0; $i < count($shiftDates); $i++) {
-//            $day = $shiftDates[$i];
-//            if ($day->format('Ymd') == $date->format('Ymd')) {
-//                // this is the day we want hours for
-//                dd($i);
-//                if ($i === 0) {
-//                    // first day of the shift, get the hours from the checked
-//                    // in time up until the end of the first day
-//                    dd($i);
-//                    return $start->diffInHours($start->copy()->endOfDay());
-//                }
-//                else if ($i === count($shiftDates) - 1) {
-//                    // last day of the shift, get hours from start of the last time
-//                    // up until the checked out time
-//                    return $end->copy()->startOfDay()->diffInHours($end);
-//                } else {
-//                    // middle day - no shift should really expand more than two days
-//                    // but if it does this would = 24 hours
-//                    return 24;
-//                }
-//            }
-//        }
-
-        // should not reach here
-        return 0;
     }
 
     /**
@@ -153,20 +133,6 @@ class ServiceAuthValidator
                         return $auth;
                     }
                 }
-
-                // Get all shifts that either start or end inside the auth's effective range
-//                $shifts = $this->getMatchingShiftsQuery($auth)->get();
-
-                // Get the total hours billed in the auth's effective range
-
-//                $total = 0;
-//                foreach ($shifts as $shift) {
-//                    $total += $shift->getBillableHours($auth->service_id, $auth->payer_id);
-//                }
-//
-//                if ($total > $auth->getUnits($this->getRelativeShiftTime())) {
-//                    return $auth;
-//                }
             }
         }
 
@@ -178,7 +144,8 @@ class ServiceAuthValidator
      * specified ClientAuthorization.
      *
      * @param ClientAuthorization $auth
-     * @return Illuminate\Database\Eloquent\Builder
+     * @param \Carbon\Carbon $shiftDate
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function getMatchingShiftsQuery(ClientAuthorization $auth, $shiftDate) : Builder
     {

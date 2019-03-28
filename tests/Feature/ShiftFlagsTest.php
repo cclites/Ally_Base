@@ -764,4 +764,56 @@ class ShiftFlagsTest extends TestCase
         $shift->flagManager()->generate();
         $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
+
+    /** @test */
+    function a_service_breakout_shift_should_count_total_service_hours_for_all_days_of_the_shift()
+    {
+        $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
+
+        $payer = factory(Payer::class)->create();
+        $otherPayer = factory(Payer::class)->create();
+
+        $auth = factory(ClientAuthorization::class)->create([
+            'client_id' => $this->client->id,
+            'service_id' => $this->service->id,
+            'payer_id' => $payer->id,
+            'units' => 0.0,
+            'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
+            'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
+            'monday' => 3,
+            'tuesday' => 500,
+        ]);
+
+        // shift with only 3 hours of specified payer id should not flag yet
+        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
+        $end = $start->copy()->addHours(8)->setTimezone('UTC');
+        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
+        $shift = Shift::create(array_merge($data, ['service_id' => null]));
+        factory(ShiftService::class)->create([
+            'shift_id' => $shift->id,
+            'duration' => 4,
+            'service_id' => $this->service->id,
+            'payer_id' => $payer->id,
+        ]);
+        factory(ShiftService::class)->create([
+            'shift_id' => $shift->id,
+            'duration' => 4,
+            'service_id' => $this->service->id,
+            'payer_id' => $otherPayer->id,
+        ]);
+        $shift = $shift->fresh();
+
+        // shift should flag because 4 > 3 on monday
+        $this->assertEquals(8, $shift->getBillableHours());
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        // auth should flag because same amount of hours on tuesday
+        $auth->update([
+            'monday' => 500,
+            'tuesday' => 3,
+        ]);
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
 }
