@@ -816,4 +816,38 @@ class ShiftFlagsTest extends TestCase
         $shift->flagManager()->generate();
         $this->assertTrue($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
+
+    /** @test */
+    function a_fixed_unit_type_client_auth_should_count_for_all_dates_a_shift_expands_to()
+    {
+        $this->assertEquals(999, $this->client->fresh()->max_weekly_hours);
+
+        factory(ClientAuthorization::class)->create([
+            'client_id' => $this->client->id,
+            'unit_type' => ClientAuthorization::UNIT_TYPE_FIXED,
+            'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
+            'monday' => 2,
+            'tuesday' => 1,
+        ]);
+
+        // create shift that expands from monday - tuesday
+        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
+        $end = $start->copy()->addHours(5)->setTimezone('UTC');
+        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
+        $shift = Shift::create(array_merge($data, ['fixed_rates' => 1]));
+
+        // no flag yet
+        $shift->flagManager()->generate();
+        $this->assertFalse($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        // create another shift on tuesday
+        $start = $end->copy();
+        $end = $start->copy()->addHours(3);
+        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
+        $shift = Shift::create(array_merge($data, ['fixed_rates' => 1]));
+
+        // should flag because tuesday now has 2
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
 }

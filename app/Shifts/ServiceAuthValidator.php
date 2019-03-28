@@ -107,17 +107,17 @@ class ServiceAuthValidator
     public function exceededServiceAuthorization() : ?ClientAuthorization
     {
         foreach ($this->shift->getActiveServiceAuths() as $auth) {
-            if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
-                // If fixed limit then just check the count of the fixed shifts
-                if ($this->getMatchingShiftsQuery($auth, $this->getRelativeShiftTime())->count() > $auth->getUnits($this->getRelativeShiftTime())) {
-                    return $auth;
-                }
-            } else {
-                // Get an array of dates in which the shift exists on
-                $days = $this->getShiftDates($this->shift);
+            // Get an array of dates in which the shift exists on
+            $days = $this->getShiftDates($this->shift);
 
-                // Enumerate the shift dates and check service auths for all of them
-                foreach ($days as $day) {
+            // Enumerate the shift dates and check service auths for all of them
+            foreach ($days as $day) {
+                if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+                    // If fixed limit then just check the count of the fixed shifts
+                    if ($this->getMatchingShiftsQuery($auth, $day)->count() > $auth->getUnits($day)) {
+                        return $auth;
+                    }
+                } else {
                     // Get all shifts that exist on this date
                     $shifts = $this->getMatchingShiftsQuery($auth, $day)->get();
 
