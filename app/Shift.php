@@ -877,7 +877,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if ($mileage) $collection->push($mileage);
 
             if ($shift->services->count()) {
-                $collection->push(...$shift->services->all());
+                $collection = $collection->merge($shift->services);
             } else {
                 $collection->push($shift);
             }
