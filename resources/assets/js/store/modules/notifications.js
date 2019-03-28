@@ -37,7 +37,7 @@ const actions = {
     },
 
     async fetch(context) {
-        await axios.get('/business/exceptions?json=1')
+        await axios.get('/business/notifications?json=1')
             .then( ({ data }) => {
                 context.commit('update', data ? data : []);
             })
