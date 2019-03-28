@@ -1,8 +1,6 @@
 <?php
 namespace App\Http\Requests;
 
-use App\Billing\ClientAuthorization;
-use App\Client;
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -29,22 +27,14 @@ class CreateClientAuthRequest extends FormRequest
     {
         return [
             'client_id' => 'required|exists:clients,id',
-            'service_auth_id' => 'nullable|string|max:255',
             'service_id' => 'required|exists:services,id',
             'payer_id' => 'nullable|numeric',
             'effective_start' => 'required|date',
             'effective_end' => 'required|date',
-            'units' => 'required_unless:period,specific_days|numeric|min:0',
+            'units' => 'required|numeric|min:0',
             'unit_type' => 'required|string',
-            'period' => 'required|string|in:' . implode(',', ClientAuthorization::allPeriods()),
+            'period' => 'required|string',
             'notes' => 'nullable|string|max:255',
-            'sunday' => 'required_if:period,specific_days|numeric|min:0',
-            'monday' => 'required_if:period,specific_days|numeric|min:0',
-            'tuesday' => 'required_if:period,specific_days|numeric|min:0',
-            'wednesday' => 'required_if:period,specific_days|numeric|min:0',
-            'thursday' => 'required_if:period,specific_days|numeric|min:0',
-            'friday' => 'required_if:period,specific_days|numeric|min:0',
-            'saturday' => 'required_if:period,specific_days|numeric|min:0',
         ];
     }
 
@@ -52,17 +42,6 @@ class CreateClientAuthRequest extends FormRequest
         $data = $this->validated();
         $data['effective_start'] = Carbon::parse($data['effective_start']);
         $data['effective_end'] = Carbon::parse($data['effective_end']);
-        if ($data['period'] == ClientAuthorization::PERIOD_SPECIFIC_DAYS) {
-            $data['units'] = 0.0;
-        } else {
-            unset($data['sunday']);
-            unset($data['monday']);
-            unset($data['tuesday']);
-            unset($data['wednesday']);
-            unset($data['thursday']);
-            unset($data['friday']);
-            unset($data['saturday']);
-        }
         return $data;
     }
 
