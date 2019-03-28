@@ -40,6 +40,8 @@
                             <option value="paid">Paid Invoices</option>
                             <option value="has_claim">Has Claim</option>
                             <option value="no_claim">Does Not Have Claim</option>
+                            <option value="has_balance">Has Claim Balance</option>
+                            <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -74,52 +76,36 @@
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
+                    <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
                     <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
-                    <b-btn variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">Transmit Claim</b-btn>
+                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">Transmit Claim</b-btn>
                 </template>
             </b-table>
         </div>
-        <b-modal id="applyPaymentModal" :title="`Apply Payment to Invoice #${selectedInvoice.name}`" v-model="paymentModal">
+        <b-modal id="applyPaymentModal" :title="`Apply Payment to Claim #${selectedInvoice.name}`" v-model="paymentModal">
             <b-form-group label="Payment Date">
-                <date-picker v-model="form.payment_date" placeholder="Payment Date"></date-picker>
-                <input-help :form="form" field="payment_date" text="" />
+                <date-picker v-model="form.payed_at" placeholder="Payment Date" :disabled="form.busy"></date-picker>
+                <input-help :form="form" field="payed_at" text="" />
             </b-form-group>
             <b-form-group label="Payment Type">
                 <b-form-input
-                    name="payment_type"
+                    name="type"
                     type="text"
-                    v-model="form.payment_type"
+                    v-model="form.type"
                     max="255"
+                    :disabled="form.busy"
                 />
-                <input-help :form="form" field="payment_type" text="" />
+                <input-help :form="form" field="type" text="" />
             </b-form-group>
             <b-form-group label="Reference #">
                 <b-form-input
-                    name="reference_no"
+                    name="reference"
                     type="text"
-                    v-model="form.reference_no"
+                    v-model="form.reference"
                     max="255"
+                    :disabled="form.busy"
                 />
-                <input-help :form="form" field="reference_no" text="" />
-            </b-form-group>
-            <b-form-group label="Invoice Balance">
-                <b-form-input
-                    name="balance"
-                    v-model="selectedInvoice.balance"
-                    :disabled="true"
-                />
-                <input-help :form="form" field="balance" text="" />
-            </b-form-group>
-            <b-form-group label="Payment Amount Towards Invoice">
-                <b-form-input
-                    name="amount"
-                    type="number"
-                    v-model="form.amount"
-                    step="0.01"
-                    required
-                />
-                <input-help :form="form" field="amount" text="" />
+                <input-help :form="form" field="reference" text="" />
             </b-form-group>
             <b-form-group label="Claim Balance">
                 <b-form-input
@@ -131,17 +117,18 @@
             </b-form-group>
             <b-form-group label="Payment Amount Towards Claim">
                 <b-form-input
-                    name="claim_amount"
+                    name="amount"
                     type="number"
-                    v-model="form.claim_amount"
+                    v-model="form.amount"
                     step="0.01"
                     required
+                    :disabled="form.busy"
                 />
-                <input-help :form="form" field="claim_amount" text="" />
+                <input-help :form="form" field="amount" text="" />
             </b-form-group>
             <div slot="modal-footer">
-                <b-btn variant="default" @click="paymentModal=false">Cancel</b-btn>
-                <b-btn variant="info" @click="applyPayment()">Apply Payment</b-btn>
+                <b-btn variant="default" @click="cancelPayment()" :disabled="form.busy">Cancel</b-btn>
+                <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
             </div>
         </b-modal>
     </b-card>
@@ -182,7 +169,7 @@
                     },
                     {
                         key: 'payer',
-                        formatter: (val) => val.name,
+                        formatter: (val) => val ? val.name : 'None',
                         sortable: true,
                     },
                     {
@@ -221,11 +208,10 @@
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
-                    payment_type: '',
-                    payment_date: moment().format('MM/DD/YYYY'),
+                    type: '',
+                    payed_at: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
-                    claim_amount: 0.00,
-                    reference_no: '',
+                    reference: '',
                 }),
                 selectedInvoice: {},
                 busy: false,
@@ -251,7 +237,6 @@
                 let form = new Form({});
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
-                        console.log('transmit response', data);
                         // success
                         let index = this.items.findIndex(x => x.id == invoice.id);
                         if (index >= 0) {
@@ -289,13 +274,31 @@
                 this.paymentModal = true;
             },
 
+            cancelPayment() {
+                this.paymentModal = false;
+                this.form.reset();
+            },
+
             applyPayment() {
-                if (! confirm('Are you sure you wish to apply payment to this invoice?')) {
+                if (! confirm('Are you sure you wish to apply payment to this claim?')) {
                     return ;
                 }
 
-                alerts.addMessage('success', `Payment successfully applied to invoice #${this.selectedInvoice.name}`);
-                this.paymentModal = false;
+                this.form.busy = true;
+                this.form.post(`/business/claims-ar/${this.selectedInvoice.id}/pay`)
+                    .then( ({ data }) => {
+                        console.log('payment response', data);
+                        let index = this.items.findIndex(x => x.id == this.selectedInvoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data);
+                        }
+                        this.paymentModal = false;
+                        this.form.reset();
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.form.busy = false;
+                    });
             },
 
             async loadItems() {

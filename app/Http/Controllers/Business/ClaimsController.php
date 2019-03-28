@@ -8,6 +8,7 @@ use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
+use App\Http\Requests\PayClaimRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
@@ -29,10 +30,20 @@ class ClaimsController extends BaseController
                         $invoiceQuery->notPaidInFull();
                         break;
                     case 'has_claim':
-                        $invoiceQuery->whereHasClaim();
+                        $invoiceQuery->whereHas('claim');
                         break;
                     case 'no_claim':
-                        $invoiceQuery->whereNoClaim();
+                        $invoiceQuery->whereDoesntHave('claim');
+                        break;
+                    case 'has_balance':
+                        $invoiceQuery->whereHas('claim', function ($q) {
+                            $q->where('balance', '<>', 0.0);
+                        });
+                        break;
+                    case 'no_balance':
+                        $invoiceQuery->whereHas('claim', function ($q) {
+                            $q->where('balance', '=', 0.0);
+                        });
                         break;
                 }
             }
@@ -73,9 +84,13 @@ class ClaimsController extends BaseController
      */
     public function transmitInvoice(Request $request, ClientInvoice $invoice)
     {
-        // TODO: validation
-        if (empty($invoice->client->business->ein) || empty($invoice->client->business->medicaid_id)) {
-            return new ErrorResponse(412, 'Business does not have the required data to submit claims.');
+        $this->authorize('read', $invoice);
+
+        if (empty($invoice->client->business->ein)) {
+            return new ErrorResponse(412, 'You cannot submit a claim because you do not have an EIN set.  Please visit Settings > General > Medicaid and to this value.');
+        }
+        if (empty($invoice->client->medicaid_id)) {
+            return new ErrorResponse(412, 'You cannot submit a claim because the client does not have a Medicaid ID set.  Please visit the client profile and set this value under the Insurance & Service Auths section.');
         }
 
         $claim = $invoice->claim;
@@ -83,6 +98,7 @@ class ClaimsController extends BaseController
             $claim = Claim::create([
                 'client_invoice_id' => $invoice->id,
                 'amount' => $invoice->amount,
+                'balance' => $invoice->amount,
                 'status' => Claim::CREATED,
             ]);
 
@@ -102,5 +118,30 @@ class ClaimsController extends BaseController
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
+    }
+
+    /**
+     * Apply payment to a the Invoice's claim.
+     *
+     * @param PayClaimRequest $request
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
+     */
+    public function pay(PayClaimRequest $request, ClientInvoice $invoice)
+    {
+        if (empty($invoice->claim)) {
+            return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
+        }
+
+        \DB::beginTransaction();
+
+        $invoice->claim->payments()->create($request->filtered());
+
+        $invoice->claim->recalculateBalance();
+
+        \DB::commit();
+
+        return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
     }
 }

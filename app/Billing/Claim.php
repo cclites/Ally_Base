@@ -3,6 +3,7 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\ClaimPayment;
 use Carbon\Carbon;
 use App\Shift;
 
@@ -63,20 +64,19 @@ class Claim extends AuditableModel
         return $this->hasMany(ClaimStatus::class);
     }
 
+    /**
+     * Get the claim payments relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function payments()
+    {
+        return $this->hasMany(ClaimPayment::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
-
-    /**
-     * Get the current balance of the Claim.
-     *
-     * @return float
-     */
-    public function getBalanceAttribute()
-    {
-        // TODO: calculate based on payments
-        return $this->amount;
-    }
 
     // **********************************************************
     // QUERY SCOPES
@@ -85,6 +85,22 @@ class Claim extends AuditableModel
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
+
+    /**
+     * Recalculate the balance of the claim and update the stored value.
+     *
+     * @return Claim
+     */
+    public function recalculateBalance() : self
+    {
+        $payments = $this->payments->sum('amount');
+
+        $this->balance = floatval($this->amount) - floatval($payments);
+
+        $this->save();
+
+        return $this;
+    }
 
     /**
      * Set the status of the claim, and add to it's status history.
@@ -114,7 +130,7 @@ class Claim extends AuditableModel
             $data[] = [
                 $this->invoice->client->business->ein ? str_replace('-', '', $this->invoice->client->business->ein) : '', //    "Agency Tax ID",
                 $this->invoice->clientPayer->payer_id, //    "Payer ID",
-                $this->invoice->client->business->medicaid_id, //    "Medicaid Number",
+                $this->invoice->client->medicaid_id, //    "Medicaid Number",
                 $shift->caregiver_id, //    "Caregiver Code",
                 $shift->caregiver->firstname, //    "Caregiver First Name",
                 $shift->caregiver->lastname, //    "Caregiver Last Name",

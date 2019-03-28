@@ -86,20 +86,6 @@ class ClientInvoiceQuery extends BaseQuery
         return $this;
     }
 
-    function whereHasClaim(): self
-    {
-        $this->whereHas('claim');
-
-        return $this;
-    }
-
-    function whereNoClaim(): self
-    {
-        $this->whereDoesntHave('claim');
-
-        return $this;
-    }
-
     public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null)
     {
         if ($businessIds === null) $businessIds = array_filter((array) request()->input('businesses', []));

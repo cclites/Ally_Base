@@ -68,7 +68,7 @@ class HhaExchangeManager
     public function uploadCsv() : bool
     {
         return $this->sftp->put(
-            config('services.hha-exchange.sftp_directory') . '//Inbox//' . $this->getFilename(),
+            config('services.hha-exchange.sftp_directory') . "//Inbox//" . $this->getFilename(),
             $this->getCsv()
         );
     }

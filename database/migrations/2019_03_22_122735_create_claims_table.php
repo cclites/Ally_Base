@@ -17,6 +17,7 @@ class CreateClaimsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('client_invoice_id');
             $table->decimal('amount', 9, 2)->default(0.0);
+            $table->decimal('balance', 9, 2)->default(0.0);
             $table->string('status', 35)->index();
             $table->timestamps();
 
@@ -31,15 +32,6 @@ class CreateClaimsTable extends Migration
 
             $table->foreign('claim_id')->references('id')->on('claims')->onDelete('restrict')->onUpdate('cascade');
         });
-
-//        Schema::create('claim_payments', function (Blueprint $table) {
-//            $table->increments('id');
-//            $table->unsignedInteger('claim_id');
-//            $table->decimal('amount', 9, 2);
-//            $table->timestamps();
-//
-//            $table->foreign('claim_id')->references('id')->on('claims')->onDelete('restrict')->onUpdate('cascade');
-//        });
     }
 
     /**
