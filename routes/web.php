@@ -414,6 +414,11 @@ Route::group([
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
 
     Route::resource('payers', 'Business\PayerController');
+
+    /* Claims & AR */
+    Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
+    Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
+    Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

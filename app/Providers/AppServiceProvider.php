@@ -16,6 +16,9 @@ use App\Services\Slack;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use App\Services\SFTPWriter;
+use App\Services\DummySFTPWriter;
+use App\Contracts\SFTPWriterInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('settings', SettingsRepository::class);
         $this->app->singleton(ActiveBusiness::class, ActiveBusiness::class);
+
+        // SFTP
+        if (config('services.sftp.driver') == 'sftp') {
+            $this->app->bind(SFTPWriterInterface::class, SFTPWriter::class);
+        } else {
+            $this->app->bind(SFTPWriterInterface::class, DummySFTPWriter::class);
+        }
     }
 
     /**
