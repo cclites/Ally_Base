@@ -21,7 +21,6 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('caregivers.reports.shifts') }}">Shift History</a></li>
         <li><a href="{{ route('caregiver.deposits') }}">Payment History</a></li>
-{{--        <li><a href="{{ route('caregivers.reports.payment_history') }}">Payment History</a></li>--}}
     </ul>
 </li>
 <li>
