@@ -38,7 +38,7 @@ trait BankAccountRequest
             // Validate the bank account with Microbilt
             $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
             $result = $mb->verifyBankAccount($request->name_on_account, $request->account_number, $request->routing_number);
-            if (! $result['valid']) {
+            if (isset($result['valid']) && $result['valid'] === false) {
                 (new ValidationErrorResponse('account_number', 'The routing number and account number you entered did not pass our verification check.'))
                    ->toResponse($request)
                    ->send();
