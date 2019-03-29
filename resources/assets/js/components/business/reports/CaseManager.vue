@@ -9,9 +9,9 @@
                 >
                     <b-row>
                         <b-col lg="2">
-                            <b-form-group label="Case Manager">
+                            <b-form-group label="Service Coordinator">
                                 <b-form-select v-model="filters.case_manager_id" class="mr-1 mb-1" name="case_manager_id">
-                                    <option value="">All Case Manager</option>
+                                    <option value="">All Service Coordinators</option>
                                     <option v-for="item in caseManagers" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
                                 </b-form-select>
                             </b-form-group>

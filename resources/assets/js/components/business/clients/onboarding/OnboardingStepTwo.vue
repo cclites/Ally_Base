@@ -185,7 +185,7 @@
                     <b-col>{{ onboarding.hospice_office_location }}</b-col>
                 </b-row>
                 <b-row class="mb-2">
-                    <b-col>Case Manager Name</b-col>
+                    <b-col>Client Service Coordinator Name</b-col>
                     <b-col>{{ onboarding.hospice_case_manager }}</b-col>
                 </b-row>
                 <b-row class="mb-2">

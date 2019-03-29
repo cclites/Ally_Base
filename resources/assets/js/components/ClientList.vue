@@ -10,7 +10,7 @@
                 <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option value="">All Case Managers</option>
+                        <option value="">All Service Coordinators</option>
                     </template>
                     <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
                 </b-form-select>
@@ -138,7 +138,7 @@
                     },
                     {
                         key: 'case_manager_name',
-                        label: 'Case Manager',
+                        label: 'Service Coordinator',
                         sortable: true,
                     },
                     {
