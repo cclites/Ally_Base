@@ -93,6 +93,9 @@ class ClaimsController extends BaseController
     {
         $this->authorize('read', $invoice);
 
+        // Disabled for now
+        return new ErrorResponse(412, "Contact Ally to configure your account for claim transmission.");
+
         if (empty($invoice->client->business->ein)) {
             return new ErrorResponse(412, 'You cannot submit a claim because you do not have an EIN set.  Please visit Settings > General > Medicaid and to this value.');
         }
