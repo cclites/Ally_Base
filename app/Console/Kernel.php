@@ -50,19 +50,19 @@ class Kernel extends ConsoleKernel
         $schedule->command('cron:shift_summary_emails')
             ->weeklyOn(1, '20:00'); // 3:00pm EST / 4pm EDT
 
-        $schedule->command('cron:daily_notifications')
-            ->dailyAt('13:59'); // 8:59am EST / 9:59 EDT
+//        $schedule->command('cron:daily_notifications')
+//            ->dailyAt('13:59'); // 8:59am EST / 9:59 EDT
 
         $schedule->command('cron:visit_accuracy')
             ->weeklyOn(1, '18:00'); // Mondays @ 1:00pm EST
 
-        $schedule->command('cron:reminders')
-            ->everyMinute()
-            ->withoutOverlapping();
-            
-        $schedule->command('cron:flush_reminders')
-            ->twiceDaily(8, 20)
-            ->withoutOverlapping();
+//        $schedule->command('cron:reminders')
+//            ->everyMinute()
+//            ->withoutOverlapping();
+//
+//        $schedule->command('cron:flush_reminders')
+//            ->twiceDaily(8, 20)
+//            ->withoutOverlapping();
     }
 
     /**
