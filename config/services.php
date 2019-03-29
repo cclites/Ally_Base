@@ -74,4 +74,14 @@ return [
         'key' => env('FULLCALENDAR_KEY'),
     ],
 
+    'sftp' => [
+        'driver' => env('SFTP_DRIVER', 'dummy'),
+    ],
+
+    'hha-exchange' => [
+        'sftp_host' => env('HHAEXCHANGE_SFTP_HOST', ''),
+        'sftp_username' => env('HHAEXCHANGE_SFTP_USERNAME', ''),
+        'sftp_password' => env('HHAEXCHANGE_SFTP_PASSWORD', ''),
+        'sftp_directory' => env('HHAEXCHANGE_SFTP_DIRECTORY', '/'),
+    ],
 ];

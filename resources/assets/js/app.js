@@ -65,6 +65,7 @@ Vue.component('shift-map', require('./components/ShiftMap'));
 Vue.component('edit-avatar', require('./components/EditAvatar'));
 Vue.component('user-avatar', require('./components/UserAvatar'));
 Vue.component('checkbox-group', require('./components/CheckboxGroup'));
+Vue.component('notification-preferences', require('./components/NotificationPreferences'));
 Vue.component('ally-table', require('./components/AllyTable'));
 Vue.component('confirm-modal', require('./components/modals/ConfirmModal'));
 Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
@@ -88,6 +89,7 @@ Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/pr
 Vue.component('caregiver-task-list', require('./components/caregivers/TaskList'));
 
 // Admin
+Vue.component('admin-communication-log', require('./components/admin/CommunicationLog'));
 Vue.component('admin-tellus-component', require('./components/admin/AdminTellusComponent'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
@@ -155,8 +157,8 @@ Vue.component('business-clients-missing-payment-methods-report', require('./comp
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 //Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
-Vue.component('business-exception', require('./components/BusinessException.vue'));
-Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
+Vue.component('business-notification', require('./components/BusinessNotification.vue'));
+Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
@@ -217,6 +219,7 @@ Vue.component('business-payer-list', require('./components/business/PayerList'))
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
+Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

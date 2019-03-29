@@ -31,7 +31,7 @@
                                 <th scope="row">{{ $shift->date->format('m/d/Y') }}</th>
                                 <td>{{ $shift->caregiver }}</td>
                                 <td>{{ $shift->hours }}</td>
-                                <td>${{ number_format($shift->rate, 2) }}</td>
+                                <td>${{ is_numeric($shift->rate) ? number_format($shift->rate, 2) : '---' }}</td>
                                 <td>${{ number_format($shift->total, 2) }}</td>
                             </tr>
                         @endforeach

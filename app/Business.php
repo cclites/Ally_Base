@@ -310,10 +310,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(Deposit::class);
     }
 
-    public function exceptions() {
-        return $this->hasMany(SystemException::class);
-    }
-
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -373,11 +369,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function noteTemplates()
     {
         return $this->hasMany(NoteTemplate::class);
-    }
-
-    public function caregiverApplications()
-    {
-        return $this->hasMany(CaregiverApplication::class);
     }
 
     public function chargedTransactions()
@@ -716,6 +707,22 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getBusinessIds()
     {
         return [$this->id];
+    }
+
+    /**
+     * Get a list of OfficeUser's notifiable User objects
+     * that should be sent notifications.
+     *
+     * @return array|Collection
+     */
+    public function notifiableUsers()
+    {
+        return $this->users()->with(['user', 'user.notificationPreferences'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->get()
+            ->pluck('user');
     }
 
     /**

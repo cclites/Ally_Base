@@ -19,7 +19,7 @@ class KnowledgeManagerController extends Controller
      */
     public function index()
     {
-        $knowledge = Knowledge::all();
+        $knowledge = Knowledge::ordered()->get();
 
         return view('admin.knowledge-manager.index')->with(compact(['knowledge']));
     }

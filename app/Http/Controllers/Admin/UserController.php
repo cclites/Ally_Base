@@ -12,35 +12,68 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        if ($request->expectsJson() && $request->input('json')) {
-            $users = User::with(['paymentHold'])
-                ->leftJoin($sql = \DB::raw("
-                    (
-                        SELECT 
-                            u.id AS user_id,
-                            b.id AS business_id,
-                            b.name AS registry
-                        FROM users AS u
-                        LEFT JOIN clients AS c ON u.id = c.id
-                        LEFT JOIN business_office_users AS bou ON u.id = bou.office_user_id
-                        LEFT JOIN business_caregivers AS bcg ON u.id = bcg.caregiver_id
-                        LEFT JOIN businesses AS b ON b.id = c.business_id 
-                            OR b.id = bou.business_id 
-                            OR b.id = bcg.business_id
-                    ) AS user_business
-                "), function($join) {
-                    $join->on('user_business.user_id', '=', 'users.id');
-                })
-                ->orderBy('lastname')
-                ->orderBy('firstname')
-                ->get();
-                            
-            return $users;
+        if ($request->expectsJson() && $request->has('json')) {
+            $perPage = $request->input('perpage', 20);
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sort', 'lastname');
+            $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
+            $offset = ($page - 1) * $perPage;
+            $search = $request->input('search', null);
+
+            $query = User::with('paymentHold',
+                    'caregiver',
+                    'caregiver.businessChains',
+                    'client',
+                    'client.business.businessChain',
+                    'officeUser',
+                    'officeUser.businessChain'
+                )
+                ->whereIn('role_type', ['client', 'caregiver', 'office_user'])
+                ->search($search);
+
+            if ($chainFilter = $request->input('chain', null)) {
+                $query->forChain($chainFilter);
+            }
+
+            $total = $query->count();
+
+            if ($sortBy == 'lastname') {
+                $query->orderByRaw("users.lastname $sortOrder, users.firstname $sortOrder");
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+
+            $users = $query->offset($offset)
+                ->limit($perPage)
+                ->get()
+                ->map(function ($user) {
+                    $data = [
+                        'id' => $user->id,
+                        'firstname' => $user->firstname,
+                        'lastname' => $user->lastname,
+                        'username' => $user->username,
+                        'email' => $user->email,
+                        'role_type' => $user->role_type,
+                        'created_at' => $user->created_at->toDateTimeString(),
+                        'chain_id' => optional($user->getChain())->id,
+                        'chain_name' => optional($user->getChain())->name,
+                        'payment_hold' => $user->payment_hold,
+                    ];
+
+                    return $data;
+                });
+
+            return response()->json([
+                'total' => $total,
+                'results' => $users,
+            ]);
         }
+
         return view('admin.users.index');
     }
 

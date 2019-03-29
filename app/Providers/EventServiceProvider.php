@@ -11,8 +11,6 @@ use App\Events\PaymentFailed;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
-use App\Events\UnverifiedShiftCreated;
-use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\CreateDefaultClientPayer;
@@ -22,14 +20,18 @@ use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnapplyFailedDeposits;
 use App\Listeners\UnapplyFailedPayments;
 use App\Listeners\UnverifiedShiftAcknowledgement;
-use App\Listeners\UnverifiedLocationException;
 use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\TimesheetCreated;
-use App\Listeners\CreateTimesheetException;
 use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
+use App\Listeners\SendManualTimesheetNotification;
+use App\Listeners\SendUnverifiedShiftNotification;
+use App\Events\UnverifiedClockOut;
+use App\Events\UnverifiedClockIn;
+use App\Events\SmsThreadReplyCreated;
+use App\Listeners\SendNewSmsReplyNotification;
 use App\Events\ShiftFlagsCouldChange;
 use App\Listeners\GenerateShiftFlags;
 use App\Events\ShiftDeleted;
@@ -76,17 +78,23 @@ class EventServiceProvider extends ServiceProvider
         ShiftDeleted::class => [
             RecalculateDuplicateShiftFlags::class,
         ],
+        SmsThreadReplyCreated::class => [
+            SendNewSmsReplyNotification::class,
+        ],
         TaskAssigned::class => [
 //            SendAssignedTaskEmail::class,
         ],
         TimesheetCreated::class => [
-            CreateTimesheetException::class,
-        ],
-        UnverifiedShiftLocation::class => [
-            UnverifiedLocationException::class,
+            SendManualTimesheetNotification::class,
         ],
         UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,
+        ],
+        UnverifiedClockIn::class => [
+            SendUnverifiedShiftNotification::class,
+        ],
+        UnverifiedClockOut::class => [
+            SendUnverifiedShiftNotification::class,
         ],
     ];
 

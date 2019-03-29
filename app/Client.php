@@ -811,4 +811,18 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
             ->effectiveOn($date)
             ->get();
     }
+
+    /**
+     * Get the clients that belong to the specified chain.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $chainId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForChain($query, $chainId)
+    {
+        return $query->whereHas('business', function ($q) use ($chainId) {
+            $q->where('businesses.chain_id', $chainId);
+        });
+    }
 }

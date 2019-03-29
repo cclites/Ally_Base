@@ -266,7 +266,7 @@
                 <b-form-group label="Office Location (city)">
                     <b-form-input v-model="form.hospice_office_location" />
                 </b-form-group>
-                <b-form-group label="Case Manager Name">
+                <b-form-group label="Client Service Coordinator Name">
                     <b-form-input v-model="form.hospice_case_manager" />
                 </b-form-group>
                 <b-form-group label="Phone">

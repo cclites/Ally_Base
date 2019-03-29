@@ -64,5 +64,6 @@
         <li><a href="{{ route('admin.tellus') }}">Tellus</a></li>
         <li><a href="{{ route('admin.nacha_ach') }}">Nacha Ach</a></li>
         <li><a href="{{ route('admin.quickbooks_api') }}">QuickBooks API</a></li>
+        <li><a href="{{ route('admin.communication-log') }}">Communication Log</a></li>
     </ul>
 </li>

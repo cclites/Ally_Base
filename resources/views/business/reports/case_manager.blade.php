@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Case Managers Report')
+@section('title', 'Client Service Coordinators Report')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="/business/reports">Reports</a></li>
-    <li class="breadcrumb-item active">Case Managers Report</li>
+    <li class="breadcrumb-item active">Client Service Coordinators Report</li>
 @endsection
 
 @section('content')
