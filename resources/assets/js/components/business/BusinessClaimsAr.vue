@@ -10,20 +10,22 @@
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
+                                class="mt-1"
                         >
                         </date-picker> &nbsp;to&nbsp;
                         <date-picker
                                 v-model="end_date"
                                 placeholder="End Date"
+                                class="mr-1 mt-1"
                         >
                         </date-picker>
-                        <b-form-select v-model="clientFilter" class="mr-1 mb-1">
+                        <b-form-select v-model="clientFilter" class="mr-1 mt-1">
                             <option v-if="loadingClients" selected>Loading...</option>
                             <option v-else value="">-- Select a Client --</option>
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
-                        <b-form-select v-model="payerFilter" class="mr-1 mb-1">
+                        <b-form-select v-model="payerFilter" class="mr-1 mt-1">
                             <option v-if="loadingPayers" selected>Loading...</option>
                             <option v-else value="">-- Select a Payer --</option>
                             <option value="0">(Client)</option>
@@ -34,6 +36,7 @@
                             id="invoiceType"
                             name="invoiceType"
                             v-model="invoiceType"
+                            class="mt-1"
                         >
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
@@ -43,7 +46,7 @@
                             <option value="has_balance">Has Claim Balance</option>
                             <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                        &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
