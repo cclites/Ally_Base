@@ -121,8 +121,7 @@ abstract class BaseImport extends Command
             $phoneFields = ['primary' => 'Phone1', 'home' => 'Phone2'];
             foreach ($phoneFields as $type => $phoneField) {
                 $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
-                $phone = new PhoneNumber(['type' => $type]);
-                $phone->input($number);
+                $phone = PhoneNumber::fromInput($type, $number);
                 $phone->notes = $this->resolve("${phoneField}Notes",  $row); // ex. Phone1Notes
                 $model->phoneNumbers()->save($phone);
             }

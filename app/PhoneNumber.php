@@ -54,6 +54,14 @@ class PhoneNumber extends AuditableModel
         parent::__construct($attributes);
     }
 
+    public static function fromInput(string $type, string $number, string $extension = null)
+    {
+        $phoneNumber = new self();
+        $phoneNumber->type = $type;
+        $phoneNumber->input($number, $extension);
+        return $phoneNumber;
+    }
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
