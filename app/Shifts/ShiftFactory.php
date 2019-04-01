@@ -1,6 +1,7 @@
 <?php
 namespace App\Shifts;
 
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\ScheduleService;
 use App\Billing\Service;
@@ -116,8 +117,8 @@ class ShiftFactory implements Arrayable
                     'hours_type' => $rates->hoursType(),
                 ]);
 
-                return $serviceData;
-            }));
+                return new ShiftService($serviceData);
+            })->toArray());
         }
 
         return $self;
