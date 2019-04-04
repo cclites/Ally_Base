@@ -22,6 +22,10 @@ class GeocodeCoordinates
      */
     public function distanceTo($latitude, $longitude, $units='km')
     {
+        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+            return false;
+        }
+
         $theta = $this->longitude - $longitude;
         $dist = sin(deg2rad($this->latitude)) * sin(deg2rad($latitude))
                 +  cos(deg2rad($this->latitude)) * cos(deg2rad($latitude)) * cos(deg2rad($theta));
