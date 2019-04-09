@@ -40,6 +40,15 @@ class Trust extends AuditableModel implements ChargeableInterface
     }
 
     ////////////////////////////////////
+    //// Mutators
+    ////////////////////////////////////
+
+    public function setUserIdAttribute(int $value)
+    {
+        $this->attributes['client_id'] = $value;
+    }
+
+    ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 

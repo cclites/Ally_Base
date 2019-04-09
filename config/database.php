@@ -41,6 +41,7 @@ return [
         'businesses' => \App\Business::class,
         'credit_cards' => \App\Billing\Payments\Methods\CreditCard::class,
         'bank_accounts' => \App\Billing\Payments\Methods\BankAccount::class,
+        'trusts' => \App\Billing\Payments\Methods\Trust::class,
 
         // Shifts (for Signatures/Exceptions) haven't been converted yet
     ],
