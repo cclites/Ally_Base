@@ -588,23 +588,10 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         try {
             $payer = $this->primaryPayer;
             if ($payer && $method = $payer->getPaymentMethod()) {
-                if ($method instanceof Business) {
-                    return 'ACH-P';
-                }
-
-                if ($method instanceof CreditCard) {
-                    if ($method->type == 'amex') {
-                        return 'AMEX';
-                    }
-                    return 'CC';
-                }
-
-                if ($method instanceof BankAccount) {
-                    return 'ACH';
-                }
+                return $method->getPaymentStrategy()->getPaymentType();
             }
         }
-        catch (PaymentMethodError $e) {}
+        catch (\Throwable $e) {}
 
         return 'NONE';
     }

@@ -22,7 +22,7 @@
                             name="type"
                             v-model="type"
                             :options="types"
-                            :disabled="authInactive"
+                            :disabled="authInactive || (type === 'trust' && !isAdmin)"
                     >
                     </b-form-select>
                 </b-form-group>
@@ -45,6 +45,10 @@
                     :submit-url="submitUrl" 
                     :readonly="authInactive"
                 />
+                <payment-method-trust v-if="type == 'trust'"
+                                         :submit-url="submitUrl"
+                                         :readonly="!isAdmin"
+                />
                 <span class="hidden-sm-up">
                     <b-btn @click="deleteMethod()" :disabled="authInactive">Delete This Payment Method</b-btn>
                 </span>
@@ -64,8 +68,10 @@
 <script>
     import FormatsDates from "../mixins/FormatsDates";
     import AuthUser from "../mixins/AuthUser";
+    import PaymentMethodTrust from "./PaymentMethodTrust";
 
     export default {
+        components: {PaymentMethodTrust},
         mixins: [FormatsDates, AuthUser],
 
         props: {
@@ -84,7 +90,7 @@
 
         data() {
             return {
-                types: [
+                allTypes: [
                     {
                         'value': 'credit_card',
                         'text': 'Credit Card'
@@ -92,6 +98,16 @@
                     {
                         'value': 'bank_account',
                         'text': 'Bank Account'
+                    },
+                    {
+                        'value': 'provider',
+                        'text': 'Provider Payment Account',
+                        'hidden': () => !this.business,
+                    },
+                    {
+                        'value': 'trust',
+                        'text': 'Trust Account',
+                        'hidden': () => !this.isAdmin && this.type !== "trust",
                     }
                 ],
                 type: null,
@@ -107,12 +123,6 @@
         },
 
         mounted() {
-            if (this.business) {
-                this.types.push({
-                    'value': 'provider',
-                    'text': 'Provider Payment Account',
-                })
-            }
             if (this.method) {
                 if (this.method.account_type) {
                     this.type = 'bank_account';
@@ -122,11 +132,17 @@
                     this.existing_card = this.method;
                 } else if (this.method.payment_account_id) {
                     this.type = 'provider';
+                } else if (this.method.client_id) {
+                    this.type = 'trust';
                 }
             }
         },
 
         computed: {
+            types() {
+                return this.allTypes.filter(item => item.hidden === undefined || item.hidden() == false);
+            },
+
             submitUrl() {
                 switch (this.role) {
                     case 'client':

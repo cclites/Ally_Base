@@ -130,6 +130,8 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     {
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
             return $address;
+        } elseif ($this->user && $address = $this->user->addresses->where('type', 'evv')->first()) {
+            return $address;
         } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
             return $address;
         } elseif ($this->business) {
