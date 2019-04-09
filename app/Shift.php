@@ -481,6 +481,24 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     //////////////////////////////////////
 
     /**
+     * Get the abbreviation code for the hours type of the current shift.
+     *
+     * @return string
+     */
+    public function getPaycode() : string
+    {
+        switch ($this->hours_type) {
+            case self::HOURS_HOLIDAY:
+                return 'HOL';
+            case self::HOURS_OVERTIME:
+                return 'OVT';
+            case self::HOURS_DEFAULT:
+            default:
+                return 'REG';
+        }
+    }
+
+    /**
      * Add data to the shift from a shift data class
      *
      * @param \App\Shifts\Contracts\ShiftDataInterface ...$dataObjects
