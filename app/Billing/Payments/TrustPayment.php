@@ -20,6 +20,18 @@ class TrustPayment implements PaymentMethodStrategy
 
     public function charge(float $amount, string $currency = "USD"): ?GatewayTransaction
     {
+        $transaction = new GatewayTransaction([
+            'gateway_id' => 'trust_receivable',
+            'transaction_id' => uniqid('trust'),
+            'transaction_type' => 'debit',
+            'amount' => $amount,
+            'success' => true,
+        ]);
+        $transaction->method()->associate($this->trust);
+        if ($transaction->save()) {
+            return $transaction;
+        }
+
         return null;
     }
 
