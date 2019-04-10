@@ -10,6 +10,13 @@
                         Please enter the start and end dates of service.  Only confirmed visits from the Shift History will pull into this payroll report.
                     </b-alert>
                     <div class="form-inline">
+                        <business-location-form-group v-model="form.business_id"
+                            :label="null"
+                            class="mb-2 mr-2"
+                            :allow-all="true"
+                            :form="form"
+                            field="business_id" />
+
                         <date-picker v-model="form.start"
                             placeholder="Start Date"
                             weekStart="1"
@@ -67,10 +74,12 @@
 </template>
 
 <script>
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import FormatsDates from '../../../mixins/FormatsDates';
 
     export default {
+        components: { BusinessLocationFormGroup },
         mixins: [FormatsNumbers, FormatsDates],
 
         computed: {
@@ -82,6 +91,7 @@
         data() {
             return {
                 form: new Form({
+                    business_id: '',
                     start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().format('MM/DD/YYYY'),
                     output_format: '',

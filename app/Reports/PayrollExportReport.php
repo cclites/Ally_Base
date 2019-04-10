@@ -6,7 +6,7 @@ use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class PayrollExportReport extends BusinessResourceReport
+class PayrollExportReport extends BaseReport
 {
     const ADP = 'ADP';
     const PAYCHEX = 'PAYCHEX';
