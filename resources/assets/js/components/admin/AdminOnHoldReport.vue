@@ -27,7 +27,7 @@
             >
                 <template slot="notes" scope="row">
                     <span v-if="row.item.notes">
-                        {{ row.item.notes.substr(0, 40) }} <b-btn variant="link" @click="selectedHold = row.item">[+]</b-btn>
+                        {{ row.item.notes.substr(0, 40) }} <a href="javascript:void(0)" @click="selectedHold = row.item">[+]</a>
                     </span>
                 </template>
                 <template slot="actions" scope="row">
