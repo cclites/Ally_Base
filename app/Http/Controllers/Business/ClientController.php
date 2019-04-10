@@ -27,8 +27,6 @@ use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
 {
-    use PaymentMethodRequest;
-
     /**
      * Display a listing of the resource.
      *
@@ -318,51 +316,6 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
 
         return (new PhoneController())->upsert($request, $client->user, $type, 'The client\'s phone number');
-    }
-
-    public function paymentMethod(Request $request, Client $client, string $type)
-    {
-        $this->authorize('update', $client);
-
-        $backup = ($type === 'backup');
-
-        if ($request->input('use_business')) {
-            if (!$client->business->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
-            if ($client->setPaymentMethod($client->business, $backup)) {
-                return $this->paymentMethodResponse($client, 'The payment method has been set to the provider payment account.');
-            }
-            return new ErrorResponse(500, 'The payment method could not be updated.');
-        }
-
-        $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
-        if ($client->setPaymentMethod($method, $backup)) {
-            return $this->paymentMethodResponse($client, 'The payment method has been updated.');
-        }
-        return new ErrorResponse(500, 'The payment method could not be updated.');
-    }
-
-    public function destroyPaymentMethod(Client $client, string $type)
-    {
-        $this->authorize('update', $client);
-
-        if ($type == 'backup') {
-            $client->backupPayment()->dissociate();
-        }
-        else {
-            $client->defaultPayment()->dissociate();
-        }
-        $client->save();
-
-        return $this->paymentMethodResponse($client, 'The payment method has been removed.');
-    }
-
-    protected function paymentMethodResponse(Client $client, $message)
-    {
-        $allyRate = $client->getAllyPercentage();
-        $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
-        $data['payment_text'] = $paymentTypeMessage;
-        $data['ally_rate'] = $allyRate;
-        return new SuccessResponse($message, $data, '.');
     }
 
     public function getPaymentType(Client $client)

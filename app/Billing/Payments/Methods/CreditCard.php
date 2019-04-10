@@ -119,7 +119,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
             return $address;
-        } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
+        } elseif ($this->user && $address = $this->user->addresses->where('type', 'evv')->first()) {
             return $address;
         }
         return null;
