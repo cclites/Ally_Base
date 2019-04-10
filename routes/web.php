@@ -555,6 +555,8 @@ Route::group([
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
+
+    Route::resource('payment-holds', 'Admin\PaymentHoldController');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
