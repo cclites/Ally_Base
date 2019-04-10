@@ -18,9 +18,8 @@ class BusinessPayrollExportReportController extends Controller
     public function index(Request $request, PayrollExportReport $report)
     {
         if ($request->filled('json') || $request->filled('export')) {
-            $defaultBusiness = optional(auth()->user()->role->businesses)->first();
             $report = $report->forRequestedBusinesses()
-                ->forDates($request->start, $request->end, $defaultBusiness->timezone)
+                ->forDates($request->start, $request->end, auth()->user()->role->getTimezone())
                 ->inFormat($request->input('output_format', PayrollExportReport::ADP));
 
             if ($request->export == 1) {

@@ -124,6 +124,16 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->businesses->pluck('id')->toArray();
     }
 
+    /**
+     * Get the office user's timezone
+     *
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->businesses->first()->timezone ?? 'America/New_York';
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
