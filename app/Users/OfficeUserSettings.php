@@ -33,9 +33,9 @@ class OfficeUserSettings implements JsonSerializable
         $this->enable_schedule_groups = $enable_schedule_groups;
         $this->ask_on_confirm = $ask_on_confirm;
         $this->calendar_remember_filters = $calendar_remember_filters;
-        $this->calendar_default_view = $calendar_default_view ?? new CalendarView(CalendarView::TIMELINE_WEEK);
-        $this->calendar_caregiver_filter = $calendar_caregiver_filter ?? new CalendarCaregiverFilter(CalendarCaregiverFilter::UNASSIGNED);
-        $this->calendar_next_day_threshold = $calendar_next_day_threshold ?? new CalendarNextDayThreshold(CalendarNextDayThreshold::DISABLED);
+        $this->calendar_default_view = $calendar_default_view ?? CalendarView::TIMELINE_WEEK();
+        $this->calendar_caregiver_filter = $calendar_caregiver_filter ?? CalendarCaregiverFilter::UNASSIGNED();
+        $this->calendar_next_day_threshold = $calendar_next_day_threshold ?? CalendarNextDayThreshold::DISABLED();
     }
 
     function scheduling(): bool
