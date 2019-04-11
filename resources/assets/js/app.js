@@ -182,6 +182,7 @@ Vue.component('business-transaction', require('./components/BusinessTransaction.
 Vue.component('itemized-payment', require('./components/business/reports/ItemizedPayment.vue'));
 Vue.component('itemized-deposit', require('./components/business/reports/ItemizedDeposit.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
+Vue.component('business-caregiver-restrictions-tab', require('./components/business/caregivers/BusinessCaregiverRestrictionsTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('business-franchisor-dashboard', require('./components/business/franchise/FranchisorDashboard.vue'));
 Vue.component('business-franchisees', require('./components/business/franchise/Franchisees.vue'));
@@ -214,7 +215,7 @@ Vue.component('report-column-picker', require('./components/business/reports/Rep
 Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));
 Vue.component('projected-billing-report', require('./components/business/reports/ProjectedBillingReport'));
-
+Vue.component('business-payroll-export-report', require('./components/business/reports/BusinessPayrollExportReport'));
 Vue.component('business-payer-list', require('./components/business/PayerList'));
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));

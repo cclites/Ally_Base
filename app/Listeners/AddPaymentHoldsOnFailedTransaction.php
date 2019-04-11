@@ -40,20 +40,20 @@ class AddPaymentHoldsOnFailedTransaction
     protected function handlePayment(Payment $payment)
     {
         if ($payment->client) {
-            $payment->client->addHold();
+            $payment->client->addHold("Payment {$payment->id} failed");
         }
         else if ($payment->business) {
-            $payment->business->addHold();
+            $payment->business->addHold("Payment {$payment->id} failed");
         }
     }
 
     protected function handleDeposit(Deposit $deposit)
     {
         if ($deposit->caregiver) {
-            $deposit->caregiver->addHold();
+            $deposit->caregiver->addHold("Deposit {$deposit->id} failed");
         }
         else if ($deposit->business) {
-            $deposit->business->addHold();
+            $deposit->business->addHold("Deposit {$deposit->id} failed");
         }
     }
 }

@@ -442,6 +442,13 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Payroll Export',
+                        url: 'reports/payroll-export',
+                        description: 'Export Caregiver earnings to ADP/Paychex/BCN',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
 
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },

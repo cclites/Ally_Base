@@ -46,6 +46,7 @@ class UpdateShiftRequest extends BusinessClientRequest
             'issues.client_injury' => 'boolean',
             'issues.comments' => 'nullable',
             'activities' => 'array|nullable',
+            'goals' => 'array|nullable',
             'services' => 'array|required_without:service_id',
             'services.*.id' => 'nullable|exists:shift_services,id',
             'services.*.service_id' => 'required_with:services|exists:services,id',

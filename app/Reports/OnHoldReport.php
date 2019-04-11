@@ -74,10 +74,11 @@ class OnHoldReport extends BaseReport
 
                            return [
                                'type'                => 'business',
-                               'id'                  => $business->id,
+                               'id'                  => $business->paymentHold->id,
+                               'user_id'             => $business->paymentHold->user_id,
+                               'business_id'         => $business->paymentHold->business_id,
                                'name'                => $business->name,
                                'business'            => $business->name,
-                               'business_id'         => $business->id,
                                'payment_outstanding' => $payment->amount ?? 0.00,
                                'deposit_outstanding' => $deposit->amount ?? 0.00,
                                'last_transaction_id' => $business->allTransactionsQuery()
@@ -85,6 +86,8 @@ class OnHoldReport extends BaseReport
                                                                  ->value('id'),
                                'created_at'          => $business->paymentHold->created_at->toDateTimeString(),
                                'unpaid_invoices'     => app(BusinessInvoiceQuery::class)->forBusiness($business->id)->notPaidInFull()->count(),
+                               'notes'               => $business->paymentHold->notes,
+                               'check_back_on'       => $business->paymentHold->check_back_on,
                            ];
                        });
     }
@@ -105,7 +108,9 @@ class OnHoldReport extends BaseReport
 
                             return [
                                 'type'                => 'caregiver',
-                                'id'                  => $caregiver->id,
+                                'id'                  => $caregiver->paymentHold->id,
+                                'user_id'             => $caregiver->paymentHold->user_id,
+                                'business_id'         => $caregiver->paymentHold->business_id,
                                 'name'                => $caregiver->nameLastFirst(),
                                 'business'            => $businessChain->name,
                                 'business_chain_id'   => $businessChain->id,
@@ -116,6 +121,8 @@ class OnHoldReport extends BaseReport
                                                                    ->value('id'),
                                 'created_at'          => $caregiver->paymentHold->created_at->toDateTimeString(),
                                 'unpaid_invoices'     => app(CaregiverInvoiceQuery::class)->forCaregiver($caregiver->id)->notPaidInFull()->count(),
+                                'notes'               => $caregiver->paymentHold->notes,
+                                'check_back_on'       => $caregiver->paymentHold->check_back_on,
                             ];
                         });
     }
@@ -136,10 +143,11 @@ class OnHoldReport extends BaseReport
 
                          return [
                              'type'                => 'client',
-                             'id'                  => $client->id,
+                             'id'                  => $client->paymentHold->id,
+                             'user_id'             => $client->paymentHold->user_id,
+                             'business_id'         => $client->paymentHold->business_id,
                              'name'                => $client->nameLastFirst(),
                              'business'            => $business->name,
-                             'business_id'         => $business->id,
                              'payment_outstanding' => $payment->amount ?? 0.00,
                              'deposit_outstanding' => 0.00,
                              'last_transaction_id' => $client->allTransactionsQuery()
@@ -147,6 +155,8 @@ class OnHoldReport extends BaseReport
                                                              ->value('id'),
                              'created_at'          => $client->paymentHold->created_at->toDateTimeString(),
                              'unpaid_invoices'     => app(ClientInvoiceQuery::class)->forClient($client->id)->notPaidInFull()->count(),
+                             'notes'               => $client->paymentHold->notes,
+                             'check_back_on'       => $client->paymentHold->check_back_on,
                          ];
                      });
     }

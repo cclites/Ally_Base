@@ -17,6 +17,10 @@
                          :sort-desc.sync="sortDesc"
                          @filtered="onFiltered"
                 >
+                    <template slot="units" scope="row">
+                        <span v-if="row.item.period == 'specific_days'">N/A</span>
+                        <span v-else>{{ row.item.units }}</span>
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" @click="editAuth(row.item.id)">
@@ -40,18 +44,32 @@
         </div>
 
         <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-            <b-modal id="filterColumnsModal" :title="title" v-model="showAuthModal">
+            <b-modal id="filterColumnsModal" :title="title" v-model="showAuthModal" size="lg">
                 <b-container fluid>
                     <b-row>
-                        <b-col lg="6">
-                            <b-form-group label="Service Code" label-class="required">
-                                <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
-                                    <option :value="null">--Select--</option>
-                                    <option v-for="s in services" :value="s.id" :key="s.id">{{ s.code}} {{ s.name }}</option>
-                                </b-form-select>
+                        <b-col lg="3">
+                            <b-form-group label="Service Auth ID" label-class="required">
+                                <b-form-input v-model="form.service_auth_id" type="text" max="255"></b-form-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="5">
+                            <b-row>
+                                <b-col lg="6">
+                                    <b-form-group label="Service Code" label-class="required">
+                                        <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
+                                            <option :value="null">--Select--</option>
+                                            <option v-for="s in services" :value="s.id" :key="s.id">{{ s.code}}</option>
+                                        </b-form-select>
+                                    </b-form-group>
+                                </b-col>
+                                <b-col lg="6">
+                                    <b-form-group label="Service Type">
+                                        <b-form-input type="text" :value="selectedServiceName" plaintext></b-form-input>
+                                    </b-form-group>
+                                </b-col>
+                            </b-row>
+                        </b-col>
+                        <b-col lg="4">
                             <b-form-group label="Payer">
                                 <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
                                     <option :value="null">(Any Payer)</option>
@@ -59,6 +77,8 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
+                    </b-row>
+                    <b-row>
                         <b-col lg="6">
                             <b-form-group label="Effective Start" label-class="required">
                                 <mask-input v-model="form.effective_start" type="date" class="date-input"></mask-input>
@@ -69,12 +89,14 @@
                                 <mask-input v-model="form.effective_end" type="date" class="date-input"></mask-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                    </b-row>
+                    <b-row>
+                        <b-col lg="4">
                             <b-form-group label="Units" label-class="required">
-                                <b-form-input v-model="form.units"></b-form-input>
+                                <b-form-input type="number" step="any" v-model="form.units" :disabled="form.period == 'specific_days'" />
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="4">
                             <b-form-group label="Unit Type" label-class="required">
                                 <b-form-select v-model="form.unit_type" class="mr-1 mb-1">
                                     <option value="15m">15 Minutes</option>
@@ -83,14 +105,62 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                        <b-col lg="4">
                             <b-form-group label="Period" label-class="required">
                                 <b-form-select v-model="form.period" class="mr-1 mb-1">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="monthly">Monthly</option>
+                                    <option value="term">Term</option>
+                                    <option value="specific_days">Specific Days of Week</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="form.period == 'specific_days'">
+                        <b-col lg="12">
+                            <div class="d-flex days-row">
+                                <div>
+                                    <b-form-group label="Day">
+                                        <b-form-input value="Units" type="text" plaintext></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Sun">
+                                        <b-form-input v-model="form.sunday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Mon">
+                                        <b-form-input v-model="form.monday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Tues">
+                                        <b-form-input v-model="form.tuesday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Wed">
+                                        <b-form-input v-model="form.wednesday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Thurs">
+                                        <b-form-input v-model="form.thursday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Fri">
+                                        <b-form-input v-model="form.friday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                                <div>
+                                    <b-form-group label="Sat">
+                                        <b-form-input v-model="form.saturday" type="number" step="any"></b-form-input>
+                                    </b-form-group>
+                                </div>
+                            </div>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -131,7 +201,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'lastname',
+                sortBy: 'payer',
                 sortDesc: false,
                 filter: null,
                 fields: [
@@ -139,13 +209,19 @@
                         key: 'payer',
                         label: 'Payer',
                         sortable: true,
-                        formatter: (val) => {if (val) return val.name;}
+                        formatter: (val) => val ? val.name : '-',
                     },
                     {
-                        key: 'service',
-                        label: 'Service',
+                        key: 'service_type',
+                        label: 'Service Type',
                         sortable: true,
-                        formatter: (val) => {if (val) return val.name;}
+                        formatter: x => x ? x : '-',
+                    },
+                    {
+                        key: 'service_code',
+                        label: 'Service Code',
+                        sortable: true,
+                        formatter: x => x ? x : '-',
                     },
                     {
                         key: 'effective_start',
@@ -203,6 +279,13 @@
             buttonText() {
                 return (this.auth.id) ? 'Save' : 'Create';
             },
+            selectedServiceName() {
+                let service = this.services.find(x => x.id === this.form.service_id);
+                if (service) {
+                    return service.name;
+                }
+                return '';
+            },
         },
 
         methods: {
@@ -240,15 +323,23 @@
             },
             makeForm(defaults = {}) {
                 return new Form({
+                    service_auth_id: defaults.service_auth_id || '',
                     client_id: this.clientId,
                     service_id: defaults.service_id || null,
                     payer_id: defaults.payer_id || null,
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
-                    effective_end: defaults.effective_end || "12/31/9999",
-                    units: defaults.units || "",
+                    effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
+                    units: defaults.units || 0,
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
                     notes: defaults.notes || "",
+                    sunday: defaults.sunday || 0,
+                    monday: defaults.monday || 0,
+                    tuesday: defaults.tuesday || 0,
+                    wednesday: defaults.wednesday || 0,
+                    thursday: defaults.thursday || 0,
+                    friday: defaults.friday || 0,
+                    saturday: defaults.saturday || 0,
                 });
             },
             submitForm() {
@@ -294,4 +385,6 @@
         margin-top: 7px;
         color: red;
     }
+
+    .days-row div { padding-right: 1rem; padding-left: 1rem; }
 </style>

@@ -200,7 +200,7 @@ Route::group([
     Route::post('caregivers/{caregiver}/notification-preferences', 'Business\CaregiverController@updateNotificationPreferences');
     Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
     Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
-
+    Route::resource('caregivers/{caregiver}/restrictions', 'Business\BusinessCaregiverRestrictionController');
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
@@ -332,6 +332,7 @@ Route::group([
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
+    Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -349,6 +350,7 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::get('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::get('schedule/caregivers', 'Business\ScheduleController@caregiverData')->name('schedule.caregivers');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
@@ -555,6 +557,8 @@ Route::group([
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
+
+    Route::resource('payment-holds', 'Admin\PaymentHoldController');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

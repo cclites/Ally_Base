@@ -2,6 +2,7 @@
 namespace App\Traits;
 
 use App\PaymentHold;
+use Carbon\Carbon;
 
 trait HasPaymentHold
 {
@@ -21,14 +22,14 @@ trait HasPaymentHold
         return $this->paymentHold()->exists();
     }
 
-    /**
-     * @param bool $hold
-     * @return bool
-     */
-    public function addHold()
+
+    public function addHold(string $notes = null, Carbon $check_back_on = null): bool
     {
         if (!$this->isOnHold()) {
-            $hold = new PaymentHold();
+            $hold = new PaymentHold([
+                'notes' => $notes,
+                'check_back_on' => $check_back_on ? $check_back_on->toDateString() : null,
+            ]);
             return (bool) $this->paymentHold()->save($hold);
         }
         return true;
