@@ -634,7 +634,7 @@
                 this.loadCarePlans(clientId);
                 this.loadClientRates(clientId);
                 this.loadClientPayers(clientId);
-                this.checkForWarnings();
+                this.checkForWarnings(this);
             },
 
             changedCaregiver(caregiverId) {
@@ -648,16 +648,17 @@
                     this.form.status = 'OK';
                 }
 
-                this.checkForWarnings();
+                this.checkForWarnings(this);
             },
 
-            async checkForWarnings() {
+            checkForWarnings: _.debounce((vm) => {
+                console.log('check warnings: ', vm);
                 let form = new Form({
-                    caregiver: this.form.caregiver_id ? this.form.caregiver_id : '',
-                    client: this.form.client_id ? this.form.client_id : '',
-                    duration: this.getDuration(),
-                    starts_at: this.getStartsAt(),
-                    id: this.schedule.id ? this.schedule.id : '',
+                    caregiver: vm.form.caregiver_id ? vm.form.caregiver_id : '',
+                    client: vm.form.client_id ? vm.form.client_id : '',
+                    duration: vm.getDuration(),
+                    starts_at: vm.getStartsAt(),
+                    id: vm.schedule.id ? vm.schedule.id : '',
                 });
 
                 if (! form.caregiver) {
@@ -668,24 +669,27 @@
                 form.alertOnResponse = false;
                 form.get('/business/schedule/warnings')
                     .then( ({ data }) => {
-                        this.warnings = data;
+                        vm.warnings = data;
                     })
                     .catch(e => {})
-            },
+            }, 350),
+
+            // async checkForWarnings() {
+            // },
 
             changedStartDate(startDate) {
                 this.fetchAllRates();
-                this.checkForWarnings();
+                this.checkForWarnings(this);
             },
 
             changedStartTime(startTime) {
                 this.form.duration = this.getDuration();
-                this.checkForWarnings();
+                this.checkForWarnings(this);
             },
 
             changedEndTime(endTime) {
                 this.form.duration = this.getDuration();
-                this.checkForWarnings();
+                this.checkForWarnings(this);
             },
 
             changedPayer(service, payerId) {
@@ -766,7 +770,7 @@
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
                     this.setDateTimeFromSchedule(schedule);
-                    this.checkForWarnings();
+                    this.checkForWarnings(this);
                 });
             },
 
