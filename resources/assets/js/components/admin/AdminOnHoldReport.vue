@@ -159,7 +159,7 @@
                     .then(response => {
                         this.items = response.data.map(item => {
                             item.display_id = item.user_id || item.business_id || null;
-                            item.check_back_on = item.check_back_on || item.created_at;
+                            item.check_back_on = item.check_back_on || item.created_at.split(' ')[0];
                             return item;
                         });
                         this.loading = false;
