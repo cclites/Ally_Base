@@ -14,14 +14,14 @@ class CertificationExpired extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'One of my Certifications Expires';
+    const TITLE = 'One of my Certifications Expires';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Your #CERTNAME# has expired!';
+    const MESSAGE = 'Your #CERTNAME# has expired!';
 
     /**
      * The action text.

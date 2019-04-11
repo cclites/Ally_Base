@@ -13,14 +13,14 @@ class ClientBirthday extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Client Birthday';
+    const TITLE = 'Client Birthday';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Client #NAME# - birthday is today!';
+    const MESSAGE = 'Client #NAME# - birthday is today!';
 
     /**
      * The related client.
