@@ -726,6 +726,12 @@
                     starts_at: this.getStartsAt(),
                     id: this.schedule.id ? this.schedule.id : '',
                 });
+
+                if (! form.caregiver) {
+                    // skip warnings for now because they are all related to the CG
+                    return;
+                }
+
                 form.alertOnResponse = false;
                 form.get('/business/schedule/warnings')
                     .then( ({ data }) => {
@@ -827,6 +833,7 @@
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
                     this.setDateTimeFromSchedule(schedule);
+                    this.checkForWarnings();
                 });
             },
 
