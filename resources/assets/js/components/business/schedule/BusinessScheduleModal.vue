@@ -308,14 +308,6 @@
                                 <b-alert v-if="isUsingOvertime" variant="warning" show>
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
-                                <div v-if="expiredLicenses">
-                                    <b-alert v-for="license in expiredLicenses" :key="license.id" variant="warning" show>
-                                        Warning: {{ license.caregiver_name }}'s {{ license.name }} certification {{ license.verb }} on {{ license.date }}.
-                                    </b-alert>
-                                </div>
-                                <b-alert v-if="caregiverDayOff" variant="warning" show>
-                                    Warning: {{ caregiverDayOff.caregiver_name }} has marked them self unavailable on {{ caregiverDayOff.date }}.
-                                </b-alert>
                                 <div v-if="warnings && warnings.length">
                                     <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
                                         <strong>Warning:</strong> {{ warning }}
@@ -513,65 +505,6 @@
         },
 
         computed: {
-            caregiverDayOff() {
-                if (! this.form.caregiver_id || ! this.allCaregivers) {
-                    return false;
-                }
-
-                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
-                if (! caregiver || ! caregiver.days_off || caregiver.days_off.length === 0) {
-                    return false;
-                }
-
-                let startMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.startDate);
-                if (startMatch) {
-                    return { caregiver_name: caregiver.name, date: moment(startMatch.date).format('M/D/YY') };
-                }
-
-                let endMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.firstShiftEndDate);
-                if (endMatch) {
-                    return { caregiver_name: caregiver.name, date: moment(endMatch.date).format('M/D/YY') };
-                }
-                return false;
-            },
-
-            expiredLicenses() {
-                if (! this.form.caregiver_id || ! this.allCaregivers) {
-                    return false;
-                }
-
-                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
-                if (! caregiver || ! caregiver.licenses ) {
-                    return false;
-                }
-                
-                let licenses = [];
-                for (let index in caregiver.licenses) {
-                    let license = caregiver.licenses[index];
-                    console.log(license);
-                    if (moment(license.expires_at).isBefore(moment())) {
-                        licenses.push({
-                            ...license,
-                            verb: 'expired',
-                            date: this.formatDateFromUTC(license.expires_at),
-                            caregiver_name: caregiver.name,
-                        });
-                    } else if (moment(license.expires_at).isBefore(moment().add(30, 'days'))) {
-                        licenses.push({
-                            ...license,
-                            verb: 'is expiring',
-                            date: this.formatDateFromUTC(license.expires_at),
-                            caregiver_name: caregiver.name,
-                        });
-                    }
-                }
-
-                if (licenses.length === 0) {
-                    return false;
-                }
-                return licenses;
-            },
-
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
