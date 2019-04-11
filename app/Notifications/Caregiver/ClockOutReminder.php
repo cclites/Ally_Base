@@ -56,7 +56,7 @@ class ClockOutReminder extends BaseNotification
     {
         $timestamp = local_date($this->shift->getEndDateTime(), 'm/d/Y g:iA', $this->shift->business->timezone);
 
-        $message = str_replace('#CLIENT#', $this->shift->client->name, static::$message);
+        $message = str_replace('#CLIENT#', $this->shift->client->name, static::MESSAGE);
         return str_replace('#TIMESTAMP#', $timestamp, $message);
     }
 

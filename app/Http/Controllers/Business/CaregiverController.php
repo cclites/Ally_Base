@@ -171,7 +171,7 @@ class CaregiverController extends BaseController
                 'class' => $cls,
                 'key' => $cls::getKey(),
                 'title' => $cls::getTitle(),
-                'disabled' => $cls::$disabled,
+                'disabled' => $cls::DISABLED,
             ];
         });
 

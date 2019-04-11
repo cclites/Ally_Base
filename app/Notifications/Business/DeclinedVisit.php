@@ -62,7 +62,7 @@ class DeclinedVisit extends BaseNotification
     {
         $timestamp = local_date($this->schedule->starts_at, 'm/d/Y g:iA', $this->schedule->business->timezone);
 
-        $message = str_replace('#CAREGIVER#', $this->schedule->caregiver->name, static::$message);
+        $message = str_replace('#CAREGIVER#', $this->schedule->caregiver->name, static::MESSAGE);
         $message = str_replace('#CLIENT#', $this->schedule->client->name, $message);
         return str_replace('#TIMESTAMP#', $timestamp, $message);
     }

@@ -13,14 +13,14 @@ class ManualTimesheet extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'A Caregiver Submits a Manual Timesheet';
+    const TITLE = 'A Caregiver Submits a Manual Timesheet';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# has submitted a system timesheet.';
+    const MESSAGE = 'Caregiver #CAREGIVER# has submitted a system timesheet.';
 
     /**
      * The action text.
@@ -55,7 +55,7 @@ class ManualTimesheet extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#CAREGIVER#', $this->timesheet->caregiver->name, static::$message);
+        return str_replace('#CAREGIVER#', $this->timesheet->caregiver->name, static::MESSAGE);
     }
 
     /**
