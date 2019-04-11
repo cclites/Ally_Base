@@ -312,6 +312,16 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->where('date', '>', Carbon::today()->subWeek(1));
     }
 
+    /**
+     * Get the restrictions relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function restrictions()
+    {
+        return $this->hasMany(CaregiverRestriction::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
