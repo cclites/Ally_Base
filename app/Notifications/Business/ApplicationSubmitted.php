@@ -14,14 +14,14 @@ class ApplicationSubmitted extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'A Caregiver Application is Submitted';
+    const TITLE = 'A Caregiver Application is Submitted';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'A new Caregiver Application was submitted.';
+    const MESSAGE = 'A new Caregiver Application was submitted.';
 
     /**
      * The related caregiver application.

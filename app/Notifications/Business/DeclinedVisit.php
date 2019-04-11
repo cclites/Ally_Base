@@ -10,21 +10,21 @@ use App\Schedule;
 
 class DeclinedVisit extends BaseNotification
 {
-    public static $disabled = true;
+    const DISABLED = true;
 
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    protected static $title = 'Caregiver Declines a Visit';
+    const TITLE = 'Caregiver Declines a Visit';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# has declined to work for Client #CLIENT# #TIMESTAMP#.';
+    const MESSAGE = 'Caregiver #CAREGIVER# has declined to work for Client #CLIENT# #TIMESTAMP#.';
 
     /**
      * The related schedule.

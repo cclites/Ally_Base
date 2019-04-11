@@ -12,14 +12,14 @@ class ClockInReminder extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Clock-In Reminder - Friendly Reminder to clock-in if 20 minutes past start time';
+    const TITLE = 'Clock-In Reminder - Friendly Reminder to clock-in if 20 minutes past start time';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'REMINDER: Your shift with Client #CLIENT# was supposed to start at #TIMESTAMP# but you have not clocked-in yet.  Please clock-in.';
+    const MESSAGE = 'REMINDER: Your shift with Client #CLIENT# was supposed to start at #TIMESTAMP# but you have not clocked-in yet.  Please clock-in.';
 
     /**
      * The action text.

@@ -8,21 +8,21 @@ use App\Prospect;
 
 class NoProspectContact extends BaseNotification
 {
-    public static $disabled = true;
+    const DISABLED = true;
     
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    protected static $title = 'A Prospect has no new prospect contact note for 14 days';
+    const TITLE = 'A Prospect has no new prospect contact note for 14 days';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Prospect #PROSPECT# has not been contacted in over 14 days.';
+    const MESSAGE = 'Prospect #PROSPECT# has not been contacted in over 14 days.';
 
     /**
      * The action text.

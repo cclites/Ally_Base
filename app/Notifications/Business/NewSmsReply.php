@@ -13,14 +13,14 @@ class NewSmsReply extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'A Caregiver replies to a system text message';
+    const TITLE = 'A Caregiver replies to a system text message';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Someone has replied to a system generated text message.';
+    const MESSAGE = 'Someone has replied to a system generated text message.';
 
     /**
      * The action text.

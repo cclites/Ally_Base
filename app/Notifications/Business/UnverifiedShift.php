@@ -13,14 +13,14 @@ class UnverifiedShift extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'An Unverified Clock-In or Clock-Out Occurs';
+    const TITLE = 'An Unverified Clock-In or Clock-Out Occurs';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# an unverified clock-#MODE# for Client #CLIENT# #TIMESTAMP#.';
+    const MESSAGE = 'Caregiver #CAREGIVER# an unverified clock-#MODE# for Client #CLIENT# #TIMESTAMP#.';
 
     /**
      * Clock in or out.
