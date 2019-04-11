@@ -56,7 +56,7 @@ class CertificationExpired extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#CERTNAME#', $this->license->name, static::$message);
+        return str_replace('#CERTNAME#', $this->license->name, static::MESSAGE);
     }
 
     /**

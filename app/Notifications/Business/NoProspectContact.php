@@ -57,7 +57,7 @@ class NoProspectContact extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#PROSPECT#', $this->prospect->name, static::$message);
+        return str_replace('#PROSPECT#', $this->prospect->name, static::MESSAGE);
     }
 
     /**

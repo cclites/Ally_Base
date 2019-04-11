@@ -56,7 +56,7 @@ class FailedCharge extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#CLIENT#', $this->client->name, static::$message);
+        return str_replace('#CLIENT#', $this->client->name, static::MESSAGE);
     }
 
     /**
