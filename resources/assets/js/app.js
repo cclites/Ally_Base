@@ -182,6 +182,7 @@ Vue.component('business-transaction', require('./components/BusinessTransaction.
 Vue.component('itemized-payment', require('./components/business/reports/ItemizedPayment.vue'));
 Vue.component('itemized-deposit', require('./components/business/reports/ItemizedDeposit.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
+Vue.component('business-caregiver-restrictions-tab', require('./components/business/caregivers/BusinessCaregiverRestrictionsTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('business-franchisor-dashboard', require('./components/business/franchise/FranchisorDashboard.vue'));
 Vue.component('business-franchisees', require('./components/business/franchise/Franchisees.vue'));
