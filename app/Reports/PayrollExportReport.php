@@ -82,14 +82,13 @@ class PayrollExportReport extends BaseReport
             ->get()
             ->map(function (Shift $row) {
                 return [
-                    'ssn' => $row->caregiver->ssn,
+                    'caregiver_id' => $row->caregiver_id,
                     'name' => $row->caregiver->name,
                     'paycode' => $row->getPaycode(),
                     'hours' => $row->duration(),
                     'amount' => $row->costs()->getCaregiverCost(),
                     'location' => optional($row->client->evvAddress)->zip,
 
-                    'caregiver_id' => $row->caregiver_id,
                     'caregiver_last_name' => $row->caregiver->lastname,
                     'caregiver_first_name' => $row->caregiver->firstname,
                 ];
@@ -120,7 +119,7 @@ class PayrollExportReport extends BaseReport
             ->each(function ($cgRow) use (&$results) {
                 $cgRow->each(function ($typeRow) use (&$results) {
                     array_push($results, [
-                        'ssn' => $typeRow[0]['ssn'],
+                        'caregiver_id' => $typeRow[0]['caregiver_id'],
                         'name' => $typeRow[0]['name'],
                         'paycode' => $typeRow[0]['paycode'],
                         'hours' => $typeRow->sum('hours'),
@@ -129,7 +128,6 @@ class PayrollExportReport extends BaseReport
                         'division' => '',
                         'location' => $typeRow[0]['location'],
 
-                        'caregiver_id' => $typeRow[0]['caregiver_id'],
                         'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
                         'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
                     ]);
@@ -167,7 +165,7 @@ class PayrollExportReport extends BaseReport
                 $cgGroup->each(function ($zipGroup) use (&$results) {
                     $zipGroup->each(function ($typeRow) use (&$results) {
                         $results[] = [
-                            'ssn' => $typeRow[0]['ssn'],
+                            'caregiver_id' => $typeRow[0]['caregiver_id'],
                             'name' => $typeRow[0]['name'],
                             'paycode' => $typeRow[0]['paycode'],
                             'hours' => $typeRow->sum('hours'),
@@ -176,7 +174,6 @@ class PayrollExportReport extends BaseReport
                             'division' => '',
                             'location' => $typeRow[0]['location'],
 
-                            'caregiver_id' => $typeRow[0]['caregiver_id'],
                             'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
                             'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
                         ];
@@ -196,7 +193,6 @@ class PayrollExportReport extends BaseReport
     {
         $rows = $this->rows()->map(function ($item) {
             return array_merge(array_except($item, [
-                'caregiver_id',
                 'caregiver_first_name',
                 'caregiver_last_name'
             ]), [
