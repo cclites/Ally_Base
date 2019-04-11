@@ -316,6 +316,11 @@
                                 <b-alert v-if="caregiverDayOff" variant="warning" show>
                                     Warning: {{ caregiverDayOff.caregiver_name }} has marked them self unavailable on {{ caregiverDayOff.date }}.
                                 </b-alert>
+                                <div v-if="warnings && warnings.length">
+                                    <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
+                                        <strong>Warning:</strong> {{ warning }}
+                                    </b-alert>
+                                </div>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -496,6 +501,7 @@
                 maxHoursWarning: false,
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
+                warnings: [],
             }
         },
 
@@ -695,6 +701,7 @@
                 this.loadCarePlans(clientId);
                 this.loadClientRates(clientId);
                 this.loadClientPayers(clientId);
+                this.checkForWarnings();
             },
 
             changedCaregiver(caregiverId) {
@@ -707,18 +714,39 @@
                 if (caregiverId && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
                     this.form.status = 'OK';
                 }
+
+                this.checkForWarnings();
+            },
+
+            async checkForWarnings() {
+                let form = new Form({
+                    caregiver: this.form.caregiver_id ? this.form.caregiver_id : '',
+                    client: this.form.client_id ? this.form.client_id : '',
+                    duration: this.getDuration(),
+                    starts_at: this.getStartsAt(),
+                    id: this.schedule.id ? this.schedule.id : '',
+                });
+                form.alertOnResponse = false;
+                form.get('/business/schedule/warnings')
+                    .then( ({ data }) => {
+                        this.warnings = data;
+                    })
+                    .catch(e => {})
             },
 
             changedStartDate(startDate) {
                 this.fetchAllRates();
+                this.checkForWarnings();
             },
 
             changedStartTime(startTime) {
                 this.form.duration = this.getDuration();
+                this.checkForWarnings();
             },
 
             changedEndTime(endTime) {
                 this.form.duration = this.getDuration();
+                this.checkForWarnings();
             },
 
             changedPayer(service, payerId) {
