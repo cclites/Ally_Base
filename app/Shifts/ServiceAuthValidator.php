@@ -99,7 +99,6 @@ class ServiceAuthValidator
     public function shiftExceedsServiceAuthorization(Shift $shift) : ?ClientAuthorization
     {
         // Enumerate the shift dates and check service auths for all of them
-        dd($shift->getDateSpan());
         foreach ($shift->getDateSpan() as $day) {
             foreach ($this->client->getActiveServiceAuths($day) as $auth) {
                 $query = $this->getMatchingShiftsQuery($auth, $day);
@@ -185,8 +184,8 @@ class ServiceAuthValidator
     {
         $authPeriodDates = $auth->getPeriodDates($shiftDate, 'UTC');
 
-        print_r($authPeriodDates);
-        print_r(Shift::all()->pluck('checked_in_time', 'checked_out_time'));
+//        print_r($authPeriodDates);
+//        print_r(Shift::all()->pluck('checked_in_time', 'checked_out_time'));
         $query = Shift::where('client_id', $this->client->id)
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
