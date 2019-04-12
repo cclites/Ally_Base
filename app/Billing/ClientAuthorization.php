@@ -148,7 +148,7 @@ class ClientAuthorization extends AuditableModel
      * @param \Carbon\Carbon $date
      * @return array|null
      */
-    public function getPeriodDates($date) : ?array
+    public function getPeriodDates(Carbon $date) : ?array
     {
         switch ($this->period) {
             case self::PERIOD_DAILY:
@@ -169,7 +169,14 @@ class ClientAuthorization extends AuditableModel
         }
     }
 
-    public function unitsForDay($dayOfTheWeek) : ?int
+    /**
+     * Get the units for the day of the week based on
+     * the daily settings on the model.
+     *
+     * @param string $dayOfTheWeek
+     * @return int|null
+     */
+    public function unitsForDay(string $dayOfTheWeek) : ?int
     {
         if ($this->period != self::PERIOD_SPECIFIC_DAYS) {
             return null;
@@ -187,12 +194,12 @@ class ClientAuthorization extends AuditableModel
      * given date.
      *
      * @param \Illuminate\Database\Query\Builder $query
+     * @param \Carbon\Carbon $date
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeEffectiveOn($query, \Carbon\Carbon $date)
+    public function scopeEffectiveOn($query, Carbon $date)
     {
         return $query->where('effective_start', '<=', $date->toDateString())
             ->where('effective_end', '>=', $date->toDateString());
     }
-
 }

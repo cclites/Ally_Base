@@ -1069,16 +1069,59 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the client's service authorizations active during the time
-     * of the shift.  Defaults to today.
+     * Get the total billable hours for a specific day of the shift
+     * based on service and/or payer including service breakouts.
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     * @param \Carbon\Carbon $date
+     * @param int|null $service_id
+     * @param int|null $payer_id
+     * @return float
      */
-    public function getActiveServiceAuths() : iterable
+    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null, ?int $payer_id = null) : float
     {
-        return $this->client->serviceAuthorizations()
-            ->effectiveOn($this->checked_in_time)
-            ->get();
+        $hours = $this->getBillableHours($service_id, $payer_id);
+        if (count($this->getDateSpan()) === 1) { // only spans 1 day
+            return $hours;
+        }
+
+        if (! empty($this->services)) {
+            // service breakout shift
+            return $hours;
+        } else {
+            // actual hours shift
+            // TODO: this does not properly handle shifts that expand more than two days
+            $tz = $this->client->getTimezone();
+            $start = $this->checked_in_time->copy()->setTimezone($tz);
+            $end = $this->checked_out_time->copy()->setTimezone($tz);
+
+            if ($start->format('Ymd') === $date->format('Ymd')) {
+                $minutes = $start->diffInMinutes($start->copy()->endOfDay());
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            } else {
+                $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            }
+        }
+    }
+
+    /**
+     * Get all of the dates that the shift exists on.
+     *
+     * @return array
+     */
+    public function getDateSpan() : array
+    {
+        // Convert shift dates to the client timezone so they are relative to ClientAuthorizations.
+        $tz = $this->client->getTimezone();
+        $start = $this->checked_in_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+        $end = $this->checked_out_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+
+        if ($start->format('Ymd') == $end->format('Ymd')) {  // same day
+            return [$start];
+        }
+
+        // TODO: this does not properly handle shifts that expand more than two days
+        return [$start, $end];
     }
 
     ///////////////////////////////////////////
