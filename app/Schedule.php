@@ -573,6 +573,37 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return false;
     }
 
+    /**
+     * Get the estimated billable hours of the schedule based on
+     * service and/or payer including service breakouts.
+     *
+     * @param int|null $service_id
+     * @param int|null $payer_id
+     * @return float
+     */
+    public function getBillableHours(?int $service_id = null, ?int $payer_id = null) : float
+    {
+        if ($this->fixed_rates || ! empty($this->service_id)) {
+            // actual hours shift
+            return $this->duration;
+        } else if (! empty($this->services)) {
+            // service breakout shift
+            $services = $this->services;
+
+            if (! empty($service_id)) {
+                $services = $services->where('service_id', $service_id);
+            }
+
+            if (! empty($payer_id)) {
+                $services = $services->where('payer_id', $payer_id);
+            }
+
+            return floatval($services->sum('duration'));
+        } else {
+            return floatval(0);
+        }
+    }
+
     ///////////////////////////////////////////
     /// Static Methods
     ///////////////////////////////////////////

@@ -1,6 +1,8 @@
 <?php
 namespace App\Shifts;
 
+use App\Client;
+use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
 use App\Billing\ClientAuthorization;
@@ -9,19 +11,36 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ServiceAuthValidator
 {
-    /**
-     * @var \App\Shift
-     */
-    protected $shift;
+    protected $includeSchedules;
 
     /**
-     * Create a new instance.
-     *
-     * @param \App\Shift $shift
+     * @var \App\Client
      */
-    public function __construct(Shift $shift)
+    protected $client;
+
+    /**
+     * ServiceAuthValidator constructor.
+     * @param \App\Client $client
+     */
+    public function __construct(Client $client)
     {
-        $this->shift = $shift;
+        $this->client = $client;
+    }
+
+    public function shiftExceedsMaxClientHours(Shift $shift)
+    {
+        $date = $shift->checked_in_time->copy()->setTimezone($this->client->getTimezone());
+        $period = [$date->copy()->startOfWeek(), $date->copy()->endOfWeek()];
+
+        return $this->exceedsMaxClientHours($period, false);
+    }
+
+    public function scheduleExceedsMaxClientHours(Schedule $schedule)
+    {
+        $date = $schedule->starts_at->copy()->setTimezone($this->client->getTimezone());
+        $period = [$date->copy()->startOfWeek(), $date->copy()->endOfWeek()];
+
+        return $this->exceedsMaxClientHours($period, true, $schedule);
     }
 
     /**
@@ -29,24 +48,37 @@ class ServiceAuthValidator
      *
      * @return boolean
      */
-    public function exceedsMaxClientHours() : bool
+    public function exceedsMaxClientHours(array $period, bool $includeSchedules = false, Schedule $schedule = null) : bool
     {
-        // Check if shift would exceed clients max hours
-        $period = [
-            $this->getRelativeShiftTime()->startOfWeek(),
-            $this->getRelativeShiftTime()->endOfWeek()
-        ];
-
-        $shifts = Shift::where('client_id', $this->shift->client_id)
+        $total = Shift::where('client_id', $this->client->id)
             ->whereBetween('checked_in_time', $period)
-            ->get();
+            ->get()
+            ->map(function ($shift) {
+                return $shift->getBillableHours();
+            })
+            ->sum();
 
-        $total = 0;
-        foreach ($shifts as $shift) {
-            $total += $shift->getBillableHours();
+        if ($includeSchedules) {
+            $scheduleQuery = Schedule::where('client_id', $this->client->id)
+                ->whereBetween('starts_at', $period);
+
+            if ($schedule && !empty($schedule->id)) {
+                $scheduleQuery->where('id', '<>', $schedule->id);
+            }
+
+            $total += $scheduleQuery
+                ->get()
+                ->map(function ($schedule) {
+                    return $schedule->getBillableHours();
+                })
+                ->sum();
+
+            if ($schedule) {
+                $total += $schedule->getBillableHours();
+            }
         }
 
-        if ($total > $this->shift->client->max_weekly_hours) {
+        if ($total > $this->client->max_weekly_hours) {
             return true;
         }
 
@@ -55,7 +87,7 @@ class ServiceAuthValidator
 
     public function getShiftDates($shift)
     {
-        $tz = $shift->client->getTimezone();
+        $tz = $this->client->getTimezone();
         $start = $shift->checked_in_time->copy()->setTimezone($tz);
         $end = $shift->checked_out_time->copy()->setTimezone($tz);
 
@@ -70,7 +102,7 @@ class ServiceAuthValidator
 
     public function getBilledHoursForDay($shift, $date, $auth) : float
     {
-        $tz = $shift->client->getTimezone();
+        $tz = $this->client->getTimezone();
         $start = $shift->checked_in_time->copy()->setTimezone($tz);
         $end = $shift->checked_out_time->copy()->setTimezone($tz);
 
@@ -102,13 +134,14 @@ class ServiceAuthValidator
      * were active during the time of the shift and return the
      * ClientAuthorization object that is exceeded.
      *
+     * @param \App\Shift $shift
      * @return ClientAuthorization|null
      */
-    public function exceededServiceAuthorization() : ?ClientAuthorization
+    public function exceededServiceAuthorization(Shift $shift) : ?ClientAuthorization
     {
-        foreach ($this->shift->getActiveServiceAuths() as $auth) {
+        foreach ($shift->getActiveServiceAuths() as $auth) {
             // Get an array of dates in which the shift exists on
-            $days = $this->getShiftDates($this->shift);
+            $days = $this->getShiftDates($shift);
 
             // Enumerate the shift dates and check service auths for all of them
             foreach ($days as $day) {
@@ -150,7 +183,7 @@ class ServiceAuthValidator
     protected function getMatchingShiftsQuery(ClientAuthorization $auth, $shiftDate) : Builder
     {
         $authPeriodDates = $auth->getPeriodDates($shiftDate);
-        $query = Shift::where('client_id', $this->shift->client_id)
+        $query = Shift::where('client_id', $this->client->id)
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
                     ->whereBetween('checked_out_time', $authPeriodDates, 'OR');
@@ -173,17 +206,5 @@ class ServiceAuthValidator
         });
 
         return $query;
-    }
-
-    /**
-     * Get the time of the current shift, based on the Client's timezone.
-     *
-     * @return \Carbon\Carbon
-     */
-    public function getRelativeShiftTime() : Carbon
-    {
-        return $this->shift->checked_in_time
-            ->copy()
-            ->setTimezone($this->shift->client->getTimezone());
     }
 }

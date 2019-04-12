@@ -1038,7 +1038,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the total billable hours of the shift, including service breakouts.
+     * Get the total billable hours of the shift based on
+     * service and/or payer including service breakouts.
      *
      * @param int|null $service_id
      * @param int|null $payer_id

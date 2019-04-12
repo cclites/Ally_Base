@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Billing\ScheduleService;
 use App\Caregiver;
 use App\Client;
 use App\Schedule;
@@ -68,6 +69,21 @@ class ServiceAuthValidatorTest extends TestCase
         return $shift->fresh();
     }
 
+    public function createServiceBreakoutSchedule(Carbon $date, string $in, int $services, int $hoursPerService): Schedule
+    {
+        $duration = $services * $hoursPerService;
+        $data = $this->makeSchedule($date, $in, $duration);
+        $data['service_id'] = null;
+
+        $schedule = Schedule::create($data);
+        factory(ScheduleService::class, $services)->create([
+            'schedule_id' => $schedule->id,
+            'duration' => $hoursPerService,
+        ]);
+
+        return $schedule->fresh();
+    }
+
     /**
      * @param \Carbon\Carbon $date
      * @param string $in
@@ -111,6 +127,30 @@ class ServiceAuthValidatorTest extends TestCase
         return $data;
     }
 
+    protected function createSchedule(Carbon $date, string $in, int $duration): Schedule
+    {
+        return Schedule::create($this->makeSchedule($date, $in, $duration));
+    }
+
+    protected function makeSchedule(Carbon $date, string $in, int $duration): array
+    {
+        if (strlen($in) === 8) $in = $date->format('Y-m-d') . ' ' . $in;
+
+        $data = factory(Schedule::class)->raw([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+            'business_id' => $this->client->business_id,
+            'starts_at' => $in,
+            'duration' => $duration,
+            'hours_type' => 'default',
+            'fixed_rates' => 0,
+//            'mileage' => 0,
+//            'other_expenses' => 0,
+            'service_id' => $this->service->id,
+        ]);
+
+        return $data;
+    }
     /**
      * Ensure max client weekly hours limit is set properly
      * in order to prevent false-positives.
@@ -129,10 +169,10 @@ class ServiceAuthValidatorTest extends TestCase
      * @param \App\Shift $shift
      * @return bool
      */
-    public function exceedsMaxClientHours(Shift $shift) : bool
+    public function shiftExceedsMaxClientHours(Shift $shift) : bool
     {
-        $validator = new ServiceAuthValidator($shift);
-        return $validator->exceedsMaxClientHours();
+        $validator = new ServiceAuthValidator($shift->client);
+        return $validator->shiftExceedsMaxClientHours($shift);
     }
 
     /**
@@ -143,8 +183,8 @@ class ServiceAuthValidatorTest extends TestCase
      */
     public function scheduleExceedsMaxClientHours(Schedule $schedule) : bool
     {
-        $validator = new ServiceAuthValidator($shift);
-        return $validator->exceedsMaxClientHours();
+        $validator = new ServiceAuthValidator($schedule->client);
+        return $validator->scheduleExceedsMaxClientHours($schedule);
     }
 
     /**
@@ -155,8 +195,8 @@ class ServiceAuthValidatorTest extends TestCase
      */
     public function exceededServiceAuth(Shift $shift) : ?ClientAuthorization
     {
-        $validator = new ServiceAuthValidator($shift);
-        return $validator->exceededServiceAuthorization();
+        $validator = new ServiceAuthValidator($shift->client);
+        return $validator->exceededServiceAuthorization($shift);
     }
 
     /** @test */
@@ -166,11 +206,11 @@ class ServiceAuthValidatorTest extends TestCase
 
         $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create($data);
-        $this->assertFalse($this->exceedsMaxClientHours($shift));
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
 
         $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
         $shift2 = Shift::create($data);
-        $this->assertTrue($this->exceedsMaxClientHours($shift2));
+        $this->assertTrue($this->shiftExceedsMaxClientHours($shift2));
     }
 
     /** @test */
@@ -180,10 +220,10 @@ class ServiceAuthValidatorTest extends TestCase
 
         $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
         $shift = Shift::create($data);
-        $this->assertFalse($this->exceedsMaxClientHours($shift));
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
 
         $shift2 = $this->createServiceBreakoutShift(Carbon::now(), '12:00:00', 3, 2);
-        $this->assertTrue($this->exceedsMaxClientHours($shift2));
+        $this->assertTrue($this->shiftExceedsMaxClientHours($shift2));
     }
 
     /** @test */
@@ -194,11 +234,11 @@ class ServiceAuthValidatorTest extends TestCase
         $date = Carbon::now()->subMonth(1)->startOfWeek();
         $data = $this->makeShift($date, '11:00:00', '18:00:00');
         $shift = Shift::create($data);
-        $this->assertFalse($this->exceedsMaxClientHours($shift));
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
 
         $data = $this->makeShift($date, '12:00:00', '18:00:00');
         $shift2 = Shift::create($data);
-        $this->assertTrue($this->exceedsMaxClientHours($shift2));
+        $this->assertTrue($this->shiftExceedsMaxClientHours($shift2));
     }
 
     /** @test */
@@ -699,4 +739,48 @@ class ServiceAuthValidatorTest extends TestCase
         $this->assertNotNull($this->exceededServiceAuth($shift));
     }
 
+    /** @test */
+    function it_can_fail_based_on_an_actual_hour_schedule_exceeding_max_client_hours()
+    {
+        $this->assertClientMaxWeeklyHours(10);
+
+        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
+
+        $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
+        $this->assertFalse($this->scheduleExceedsMaxClientHours($schedule));
+
+        $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 5);
+        $this->assertTrue($this->scheduleExceedsMaxClientHours($schedule));
+    }
+
+    /** @test */
+    function it_can_fail_based_on_a_service_breakout_shift_exceeding_max_client_hours()
+    {
+        $this->assertClientMaxWeeklyHours(10);
+
+        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
+
+        $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
+        $this->assertFalse($this->scheduleExceedsMaxClientHours($schedule));
+
+        $schedule2 = $this->createServiceBreakoutSchedule(Carbon::now(), '12:00:00', 3, 2);
+        $this->assertTrue($this->scheduleExceedsMaxClientHours($schedule2));
+    }
+
+    /** @test */
+    function it_can_fail_based_on_a_schedule_that_has_not_yet_persisted()
+    {
+        $this->assertClientMaxWeeklyHours(10);
+
+        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $this->assertFalse($this->shiftExceedsMaxClientHours($shift));
+
+        $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
+        $this->assertFalse($this->scheduleExceedsMaxClientHours($schedule));
+
+        $schedule = Schedule::make($this->makeSchedule(Carbon::today(), '03:00:00', 5));
+        $this->assertTrue($this->scheduleExceedsMaxClientHours($schedule));
+    }
 }
