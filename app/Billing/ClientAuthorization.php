@@ -146,24 +146,25 @@ class ClientAuthorization extends AuditableModel
      * period.  Returns UTC dates to be accurate when querying shifts.
      *
      * @param \Carbon\Carbon $date
+     * @param string $timezone
      * @return array|null
      */
-    public function getPeriodDates(Carbon $date) : ?array
+    public function getPeriodDates(Carbon $date, string $timezone = 'UTC') : ?array
     {
         switch ($this->period) {
             case self::PERIOD_DAILY:
-                return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
+                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
                 break;
             case self::PERIOD_WEEKLY:
-                return [$date->copy()->startOfWeek()->setTimezone('UTC'), $date->copy()->endOfWeek()->setTimezone('UTC')];
+                return [$date->copy()->startOfWeek()->setTimezone($timezone), $date->copy()->endOfWeek()->setTimezone($timezone)];
                 break;
             case self::PERIOD_MONTHLY:
-                return [$date->copy()->startOfMonth()->setTimezone('UTC'), $date->copy()->endOfMonth()->setTimezone('UTC')];
+                return [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
                 break;
             case self::PERIOD_TERM:
-                return [Carbon::parse($this->effective_start)->setTimezone('UTC'), Carbon::parse($this->effective_end)->setTimezone('UTC')];
+                return [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
             case self::PERIOD_SPECIFIC_DAYS:
-                return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
+                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
             default:
                 return [null, null];
         }

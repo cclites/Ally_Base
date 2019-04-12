@@ -33,12 +33,12 @@ trait CreatesSchedules
      *
      * @param Carbon $date
      * @param string $in
-     * @param int $duration
+     * @param int $hours
      * @return Schedule
      */
-    protected function createSchedule(Carbon $date, string $in, int $duration): Schedule
+    protected function createSchedule(Carbon $date, string $in, int $hours): Schedule
     {
-        return Schedule::create($this->makeSchedule($date, $in, $duration));
+        return Schedule::create($this->makeSchedule($date, $in, $hours));
     }
 
     /**
@@ -46,10 +46,10 @@ trait CreatesSchedules
      *
      * @param Carbon $date
      * @param string $in
-     * @param int $duration
+     * @param int $hours
      * @return array
      */
-    protected function makeSchedule(Carbon $date, string $in, int $duration): array
+    protected function makeSchedule(Carbon $date, string $in, int $hours): array
     {
         if (strlen($in) === 8) $in = $date->format('Y-m-d') . ' ' . $in;
 
@@ -57,8 +57,8 @@ trait CreatesSchedules
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'business_id' => $this->client->business_id,
-            'starts_at' => $in,
-            'duration' => $duration,
+            'starts_at' => Carbon::parse($in, $this->client->getTimezone()),
+            'duration' => $hours * 60,
             'hours_type' => 'default',
             'fixed_rates' => 0,
             'service_id' => $this->service->id,
@@ -86,6 +86,8 @@ trait CreatesSchedules
         factory(ScheduleService::class, $services)->create([
             'schedule_id' => $schedule->id,
             'duration' => $hoursPerService,
+            'service_id' => $this->service->id,
+            'payer_id' => null,
         ]);
 
         return $schedule->fresh();

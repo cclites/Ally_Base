@@ -71,7 +71,7 @@ class ServiceAuthValidator
 
             $total += $scheduleQuery
                 ->get()
-                ->map(function ($schedule) {
+                ->map(function (Schedule $schedule) {
                     return $schedule->getBillableHours();
                 })
                 ->sum();
@@ -88,32 +88,6 @@ class ServiceAuthValidator
         return false;
     }
 
-    public function getShiftDates($shift) : array
-    {
-        $tz = $this->client->getTimezone();
-        $start = $shift->checked_in_time->copy()->setTimezone($tz);
-        $end = $shift->checked_out_time->copy()->setTimezone($tz);
-
-        if ($start->format('Ymd') == $end->format('Ymd')) {
-            return [$start];
-        }
-
-        // TODO: this does not properly handle shifts that expand more than two days
-        return [$start, $end];
-//        return CarbonPeriod::create($start->format('Y-m-d'), $end->format('Y-m-d'))->toArray();
-    }
-
-    public function getActiveServiceAuths(Shift $shift) : Collection
-    {
-        $auths = collect([]);
-
-        foreach ($shift->getDateSpan() as $day) {
-            $auths = $auths->push($this->client->getActiveServiceAuths($day));
-        }
-
-        return $auths;
-    }
-
     /**
      * Check if the shift exceeds any client service authorizations that
      * were active during the time of the shift and return the
@@ -122,9 +96,10 @@ class ServiceAuthValidator
      * @param \App\Shift $shift
      * @return ClientAuthorization|null
      */
-    public function exceededServiceAuthorization(Shift $shift) : ?ClientAuthorization
+    public function shiftExceedsServiceAuthorization(Shift $shift) : ?ClientAuthorization
     {
         // Enumerate the shift dates and check service auths for all of them
+        dd($shift->getDateSpan());
         foreach ($shift->getDateSpan() as $day) {
             foreach ($this->client->getActiveServiceAuths($day) as $auth) {
                 $query = $this->getMatchingShiftsQuery($auth, $day);
@@ -153,6 +128,51 @@ class ServiceAuthValidator
         return null;
     }
 
+    public function scheduleExceedsServiceAuthorization(Schedule $schedule) : ?ClientAuthorization
+    {
+        // Enumerate the shift dates and check service auths for all of them
+        foreach ($schedule->getDateSpan() as $day) {
+            foreach ($this->client->getActiveServiceAuths($day) as $auth) {
+                if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+                    // If fixed limit then just check the count of the fixed shifts
+                    $total = 1; // the current schedule
+                    $total += $this->getMatchingShiftsQuery($auth, $day)->count();
+                    $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)->count();
+                    if ($total > $auth->getUnits($day)) {
+                        return $auth;
+                    }
+                } else {
+                    // Get total hours for each shift on this date only
+                    $total = $this->getMatchingShiftsQuery($auth, $day)
+                        ->get()
+                        ->map(function (Shift $item) use ($day, $auth) {
+                            return $item->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                        })
+                        ->sum();
+
+                    // Add total hours for all schedules during this period
+                    $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)
+                        ->get()
+                        ->map(function (Schedule $item) use ($day, $auth) {
+                            return $item->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                        })
+                        ->sum();
+
+                    // Add total of billable hours on the schedule being checked
+                    // since those changes may not be persisted yet.
+                    $total += $schedule->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+
+                    // Check total against service auth units
+                    if ($total > $auth->getUnits($day)) {
+                        return $auth;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Build query to get the shifts that match the attributes of the 
      * specified ClientAuthorization.
@@ -163,13 +183,21 @@ class ServiceAuthValidator
      */
     protected function getMatchingShiftsQuery(ClientAuthorization $auth, Carbon $shiftDate) : Builder
     {
-        $authPeriodDates = $auth->getPeriodDates($shiftDate);
+        $authPeriodDates = $auth->getPeriodDates($shiftDate, 'UTC');
+
+        print_r($authPeriodDates);
+        print_r(Shift::all()->pluck('checked_in_time', 'checked_out_time'));
         $query = Shift::where('client_id', $this->client->id)
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
                     ->whereBetween('checked_out_time', $authPeriodDates, 'OR');
-            })
-            ->where('fixed_rates', $auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED ? 1 : 0);
+            });
+
+        if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+            // Only query for fixed rates when client auth is set to fixed,
+            // otherwise you want to include all shifts and count the hours
+            $query->where('fixed_rates', 1);
+        }
 
         // Must match service and/or payer
         $query->where(function($q) use ($auth) {
@@ -185,6 +213,52 @@ class ServiceAuthValidator
                     }
                 });
         });
+
+        return $query;
+    }
+
+    protected function getMatchingSchedulesQuery(ClientAuthorization $auth, Carbon $date, ?int $ignoreId = null) : Builder
+    {
+        $authPeriodDates = $auth->getPeriodDates($date, $this->client->getTimezone());
+
+        if (config('app.env') === 'testing') {
+            $endsAtQuery = \DB::raw("DATETIME(starts_at, printf('+%s minute', duration)) as ends_at");
+        } else {
+            $endsAtQuery = \DB::raw('ADDTIME(starts_at, INTERVAL duration MINUTE) as ends_at');
+        }
+
+        $query = Schedule::select([\DB::raw('*'), $endsAtQuery])
+            ->where('client_id', $this->client->id)
+            ->whereDoesntHave('shifts')
+            ->where(function ($q) use ($authPeriodDates) {
+                return $q->whereBetween('starts_at', $authPeriodDates)
+                    ->whereBetween('ends_at', $authPeriodDates, 'OR');
+            });
+
+        if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+            // Only query for fixed rates when client auth is set to fixed,
+            // otherwise you want to include all shifts and count the hours
+            $query->where('fixed_rates', 1);
+        }
+
+        // Must match service and/or payer
+        $query->where(function($q) use ($auth) {
+            $q->where(function($q3) use ($auth) {
+                $q3->where('service_id', $auth->service_id);
+                if (! empty($auth->payer_id)) {
+                    $q3->where('payer_id', $auth->payer_id);
+                }
+            })->orWhereHas('services', function ($q2) use ($auth) {
+                    $q2->where('service_id', $auth->service_id);
+                    if (! empty($auth->payer_id)) {
+                        $q2->where('payer_id', $auth->payer_id);
+                    }
+                });
+        });
+
+        if (! empty($ignoreId)) {
+            $query->whereNotIn('id', [$ignoreId]);
+        }
 
         return $query;
     }

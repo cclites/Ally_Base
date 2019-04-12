@@ -121,11 +121,11 @@ class ShiftFlagManager
     {
         $validator = new ServiceAuthValidator($this->shift->client);
 
-        if ($validator->exceedsMaxClientHours($this->shift)) {
+        if ($validator->shiftExceedsMaxClientHours($this->shift)) {
             return true;
         }
 
-        if ($validator->exceededServiceAuthorization($this->shift)) {
+        if ($validator->shiftExceededServiceAuthorization($this->shift)) {
             return true;
         }
 

@@ -1049,8 +1049,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
+            if (! empty($service_id) && $service_id != $this->service_id) {
+                // make sure service id matches the one on the model (or all).
+                return 0;
+            }
+            if ($this->payer_id != $payer_id) {
+                // make sure payer id matches the one on the model.
+                return 0;
+            }
             return $this->duration(true);
-        } else if (! empty($this->services)) {
+        } else if ($this->services->isNotEmpty()) {
             // service breakout shift
             $services = $this->services;
 
@@ -1084,8 +1092,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return $hours;
         }
 
-        if (! empty($this->services)) {
-            // service breakout shift
+        if ($this->services->isNotEmpty()) {
+            // service breakout shift - return total shift hours for all days since this
+            // is a complicated query and we want to protect them more than be 100% accurate
             return $hours;
         } else {
             // actual hours shift

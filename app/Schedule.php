@@ -585,8 +585,17 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
-            return $this->duration;
-        } else if (! empty($this->services)) {
+            if (! empty($service_id) && $service_id != $this->service_id) {
+                // make sure service id matches the one on the model (or all).
+                return 0;
+            }
+            if ($this->payer_id != $payer_id) {
+                // make sure payer id matches the one on the model.
+                return 0;
+            }
+
+            return empty($this->duration) ? floatval(0) : (floatval($this->duration) / floatval(60));
+        } else if ($this->services->isNotEmpty()) {
             // service breakout shift
             $services = $this->services;
 
@@ -598,10 +607,56 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 $services = $services->where('payer_id', $payer_id);
             }
 
-            return floatval($services->sum('duration'));
+            return $services->sum('duration');
         } else {
             return floatval(0);
         }
+    }
+
+    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null, ?int $payer_id = null) : float
+    {
+        $hours = $this->getBillableHours($service_id, $payer_id);
+        if (count($this->getDateSpan()) === 1) { // only spans 1 day
+            return $hours;
+        }
+
+        if ($this->services->isNotEmpty()) {
+            // service breakout shift - return total shift hours for all days since this
+            // is a complicated query and we want to protect them more than be 100% accurate
+            return $hours;
+        } else {
+            // actual hours schedule
+            // TODO: this does not properly handle schedules that expand more than two days
+            $start = $this->starts_at->copy();
+            $end = $start->copy()->addMinutes($this->duration);
+
+            if ($start->format('Ymd') === $date->format('Ymd')) {
+                $minutes = $start->diffInMinutes($start->copy()->endOfDay());
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            } else {
+                $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            }
+        }
+    }
+
+    /**
+     * Get all of the dates that the shift exists on.
+     *
+     * @return array
+     */
+    public function getDateSpan() : array
+    {
+        // Convert shift dates to the client timezone so they are relative to ClientAuthorizations.
+        $start = $this->starts_at->copy()->setTime(0, 0, 0);
+        $end = $this->starts_at->copy()->addMinutes($this->duration)->setTime(0, 0, 0);
+
+        if ($start->format('Ymd') == $end->format('Ymd')) {  // same day
+            return [$start];
+        }
+
+        // TODO: this does not properly handle shifts that expand more than two days
+        return [$start, $end];
     }
 
     ///////////////////////////////////////////
