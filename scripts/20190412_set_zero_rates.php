@@ -13,7 +13,7 @@ $shifts = \App\Shift::whereIn('client_id', $clientIds)
 DB::beginTransaction();
 
 $store = [];
-$payment = Payment::find(12453);
+$payment = \App\Payment::find(12453);
 foreach($shifts as $shift) {
     $store[$shift->id] = [
         'client_rate' => $shift->client_rate,
