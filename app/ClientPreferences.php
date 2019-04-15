@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 /**
@@ -20,8 +21,64 @@ namespace App;
  */
 class ClientPreferences extends AuditableModel
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'client_preferences';
-    protected $guarded = ['id'];
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
     public $incrementing = false;
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = ['id'];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    public $with = ['ethnicities'];
+
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+
+    /**
+     * Get the ethnicities relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function ethnicities()
+    {
+        return $this->hasMany(ClientEthnicityPreference::class, 'client_id');
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
 }

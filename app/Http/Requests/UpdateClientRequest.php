@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Ethnicity;
+use App\Rules\ValidEnum;
 use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
@@ -49,6 +51,17 @@ class UpdateClientRequest extends BusinessRequest
             'receive_summary_email' => 'boolean',
             'sales_person_id' => 'nullable|int',
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),
+
+            'preferences.gender' => 'nullable|in:M,F',
+            'preferences.license' => 'nullable|in:CNA,HHA,RN,LPN',
+            'preferences.language' => 'nullable|string|size:2',
+            'preferences.minimum_rating' => 'nullable|integer',
+            'preferences.smokes' => 'nullable|boolean',
+            'preferences.pets_dogs' => 'nullable|boolean',
+            'preferences.pets_cats' => 'nullable|boolean',
+            'preferences.pets_birds' => 'nullable|boolean',
+            'preferences.ethnicities' => 'nullable|array',
+            'preferences.ethnicities.*' => ['string', new ValidEnum(Ethnicity::class)],
         ];
     }
 
@@ -57,6 +70,7 @@ class UpdateClientRequest extends BusinessRequest
         return [
             'email.required_unless' => 'The email is required unless you check the "No Email" box.',
             'username.unique' => 'This username is taken. Please use a different one.',
+            'preferences.ethnicities.*' => 'Invalid value specified for ethnicity preferences.',
         ];
     }
 
@@ -76,6 +90,8 @@ class UpdateClientRequest extends BusinessRequest
                 $data['username'] = Client::getAutoUsername();
             }
         }
+        $data['updated_by'] = auth()->id();
+        unset($data['preferences']);
 
         return $data;
     }

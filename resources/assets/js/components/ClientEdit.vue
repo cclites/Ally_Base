@@ -309,30 +309,26 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Caregiver Gender" label-for="gender">
-                        <b-form-select id="gender"
-                                       v-model="preferences.gender"
-                        >
+                        <b-form-select v-model="form.preferences.gender">
                             <option :value="null">No Preference</option>
                             <option value="F">Female</option>
                             <option value="M">Male</option>
                         </b-form-select>
-                        <input-help :form="preferences" field="gender" text="" />
+                        <input-help :form="form" field="preferences.gender" text="" />
                     </b-form-group>
                     <b-form-group label="Caregiver License/Certification" label-for="license">
-                        <b-form-select id="license"
-                                       v-model="preferences.license"
-                        >
+                        <b-form-select id="license" v-model="form.preferences.license">
                             <option :value="null">No Preference</option>
                             <option value="CNA">CNA</option>
                             <option value="HHA">HHA</option>
                             <option value="RN">RN</option>
                             <option value="LPN">LPN</option>
                         </b-form-select>
-                        <input-help :form="preferences" field="license" text="" />
+                        <input-help :form="form" field="preferences.license" text="" />
                     </b-form-group>
                     <b-form-group label="Caregiver's Spoken Language" label-for="language">
                         <b-form-select id="language"
-                                       v-model="preferences.language"
+                                       v-model="form.preferences.language"
                         >
                             <option :value="null">No Preference</option>
                             <option value="en">English</option>
@@ -340,7 +336,18 @@
                             <option value="fr">French</option>
                             <option value="de">German</option>
                         </b-form-select>
-                        <input-help :form="preferences" field="language" text="" />
+                        <input-help :form="form" field="preferences.language" text="" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver Ethnicity">
+                        <b-form-checkbox v-for="item in ethnicityOptions"
+                            :key="item.value"
+                            v-model="form.preferences.ethnicities"
+                            :value="item.value"
+                            unchecked-value="null"
+                        >
+                            {{ item.text }}
+                        </b-form-checkbox>
+                        <input-help :form="form" field="preferences.ethnicities" />
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -354,17 +361,17 @@
                     </b-form-group>
                     <b-form-group label="Does the client smoke?" label-for="smokes">
                         <b-form-select id="smokes"
-                                       v-model="preferences.smokes"
+                                       v-model="form.preferences.smokes"
                         >
                             <option :value="1">Yes</option>
                             <option :value="0">No</option>
                         </b-form-select>
-                        <input-help :form="preferences" field="smokes" text="" />
+                        <input-help :form="form" field="preferences.smokes" text="" />
                     </b-form-group>
                     <b-form-group label="Does this client have pets?">
-                        <b-form-checkbox v-model="preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
-                        <b-form-checkbox v-model="preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
-                        <b-form-checkbox v-model="preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
+                        <b-form-checkbox v-model="form.preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
+                        <b-form-checkbox v-model="form.preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
+                        <b-form-checkbox v-model="form.preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -404,7 +411,7 @@
                     </div>
                     <b-form-group label="Account Setup URL">
                         <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
-                        <input-help :form="form" text="The URL the client can use to setup their account."></input-help>
+                        <input-help text="The URL the client can use to setup their account."></input-help>
                     </b-form-group>
 
                     <div>
@@ -501,6 +508,7 @@
     import DeactivateClientModal from './modals/DeactivateClientModal';
     import DischargeSummaryModal from './modals/DischargeSummaryModal';
     import AuthUser from '../mixins/AuthUser';
+    import Constants from '../mixins/Constants';
 
     window.croppie = require('croppie');
 
@@ -515,7 +523,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates, AuthUser],
+        mixins: [ClientForm, FormatsDates, AuthUser, Constants],
 
         components: {
             BusinessLocationFormGroup,
@@ -561,15 +569,16 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
-                }),
-                preferences: new Form({
-                    gender: this.client.preferences ? this.client.preferences.gender : null,
-                    license: this.client.preferences ? this.client.preferences.license : null,
-                    language: this.client.preferences ? this.client.preferences.language : null,
-                    smokes: this.client.preferences ? this.client.preferences.smokes : 0,
-                    pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : 0,
-                    pets_cats: this.client.preferences ? this.client.preferences.pets_cats : 0,
-                    pets_birds: this.client.preferences ? this.client.preferences.pets_birds : 0,
+                    preferences: {
+                        gender: this.client.preferences ? this.client.preferences.gender : null,
+                        license: this.client.preferences ? this.client.preferences.license : null,
+                        language: this.client.preferences ? this.client.preferences.language : null,
+                        smokes: this.client.preferences ? this.client.preferences.smokes : 0,
+                        pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : 0,
+                        pets_cats: this.client.preferences ? this.client.preferences.pets_cats : 0,
+                        pets_birds: this.client.preferences ? this.client.preferences.pets_birds : 0,
+                        ethnicities: this.client.preferences ? this.client.preferences.ethnicities.map(x => x.ethnicity) : [],
+                    },
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -706,16 +715,18 @@
             },
 
             async saveProfile() {
-                let response = await this.form.patch('/business/clients/' + this.client.id)
-                this.form.avatar = response.data.data.avatar;
-
-                this.preferences.alertOnResponse = false;
-                this.preferences.post('/business/clients/' + this.client.id + '/preferences');
-                if (this.form.ssn) this.form.ssn = '***-**-****';
-                if (this.form.wasModified('agreement_status')) {
-                    this.client.agreement_status = this.form.agreement_status;
-                    this.localLastStatusDate = moment.utc().format();
-                }
+                await this.form.patch('/business/clients/' + this.client.id)
+                    .then( ({ data }) => {
+                        this.form.avatar = data.data.avatar;
+                        if (this.form.ssn) {
+                            this.form.ssn = '***-**-****';
+                        }
+                        if (this.form.wasModified('agreement_status')) {
+                            this.client.agreement_status = this.form.agreement_status;
+                            this.localLastStatusDate = moment.utc().format();
+                        }
+                    })
+                    .catch(e => {});
             },
 
             startOnboarding() {
