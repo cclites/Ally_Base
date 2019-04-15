@@ -6,14 +6,10 @@ use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
 use App\Billing\ClientAuthorization;
-use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 
 class ServiceAuthValidator
 {
-    protected $includeSchedules;
-
     /**
      * @var \App\Client
      */
@@ -28,6 +24,12 @@ class ServiceAuthValidator
         $this->client = $client;
     }
 
+    /**
+     * Check if the given shift would exceed the client weekly hours limit.
+     *
+     * @param Shift $shift
+     * @return bool
+     */
     public function shiftExceedsMaxClientHours(Shift $shift)
     {
         $date = $shift->checked_in_time->copy()->setTimezone($this->client->getTimezone());
@@ -36,6 +38,12 @@ class ServiceAuthValidator
         return $this->exceedsMaxClientHours($period, false);
     }
 
+    /**
+     * Check if the given schedule would exceed the client weekly hours limit.
+     *
+     * @param Schedule $schedule
+     * @return bool
+     */
     public function scheduleExceedsMaxClientHours(Schedule $schedule)
     {
         $period = [$schedule->starts_at->copy()->startOfWeek(), $schedule->starts_at->copy()->endOfWeek()];
@@ -44,7 +52,7 @@ class ServiceAuthValidator
     }
 
     /**
-     * Check if the shift would exceed the client weekly hours limit.
+     * Check if the shift/schedule would exceed the client weekly hours limit.
      *
      * @param array $period
      * @param bool $includeSchedules
@@ -127,6 +135,13 @@ class ServiceAuthValidator
         return null;
     }
 
+    /**
+     * Check if the given schedule exceeds an existing service authorizations and
+     * return the ClientAuthorization object.
+     *
+     * @param Schedule $schedule
+     * @return ClientAuthorization|null
+     */
     public function scheduleExceedsServiceAuthorization(Schedule $schedule) : ?ClientAuthorization
     {
         // Enumerate the shift dates and check service auths for all of them
@@ -184,8 +199,6 @@ class ServiceAuthValidator
     {
         $authPeriodDates = $auth->getPeriodDates($shiftDate, 'UTC');
 
-//        print_r($authPeriodDates);
-//        print_r(Shift::all()->pluck('checked_in_time', 'checked_out_time'));
         $query = Shift::where('client_id', $this->client->id)
             ->whereNotNull('checked_out_time')
             ->where(function ($q) use ($authPeriodDates) {
@@ -217,6 +230,15 @@ class ServiceAuthValidator
         return $query;
     }
 
+    /**
+     * Build query to get the schedules that match the attributes of the
+     * specified ClientAuthorization.
+     *
+     * @param ClientAuthorization $auth
+     * @param Carbon $date
+     * @param int|null $ignoreId
+     * @return Builder
+     */
     protected function getMatchingSchedulesQuery(ClientAuthorization $auth, Carbon $date, ?int $ignoreId = null) : Builder
     {
         $authPeriodDates = $auth->getPeriodDates($date, $this->client->getTimezone());
