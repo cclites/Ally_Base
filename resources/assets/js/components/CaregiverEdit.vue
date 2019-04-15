@@ -157,6 +157,14 @@
                         </b-form-select>
                         <input-help :form="form" field="smoking_okay" text="" />
                     </b-form-group>
+                    <b-form-group label="Ethnicity" label-for="ethnicity">
+                        <b-form-select v-model="form.ethnicity" :options="ethnicityOptions">
+                            <template slot="first">
+                                <option value="">Unknown</option>
+                            </template>
+                        </b-form-select>
+                        <input-help :form="form" field="ethnicity" />
+                    </b-form-group>
                     <b-form-group label="Acceptable Pets:">
                         <b-form-checkbox v-model="form.pets_dogs_okay" value="1" unchecked-value="0">Dogs</b-form-checkbox>
                         <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
@@ -248,6 +256,7 @@
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
+    import Constants from '../mixins/Constants';
     import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
     import { mapGetters } from 'vuex'
 
@@ -256,7 +265,7 @@
             'caregiver': {},
         },
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, Constants],
         
         components: {
           DeactivateCaregiverModal
@@ -283,6 +292,7 @@
                     referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
                     status_alias_id: this.caregiver.status_alias_id || '',
                     smoking_okay: this.caregiver.smoking_okay,
+                    ethnicity: this.caregiver.ethnicity ? this.caregiver.ethnicity : '',
                     pets_dogs_okay: this.caregiver.pets_dogs_okay,
                     pets_cats_okay: this.caregiver.pets_cats_okay,
                     pets_birds_okay: this.caregiver.pets_birds_okay,
