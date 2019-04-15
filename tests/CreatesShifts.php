@@ -32,45 +32,42 @@ trait CreatesShifts
      * Helper to persist a Shift.
      *
      * @param \Carbon\Carbon $date
-     * @param string $in
-     * @param string $out
-     * @param null|\Carbon\Carbon $endDate
+     * @param string $time
+     * @param float $hours
+     * @param array $defaults
      * @return \App\Shift
      */
-    protected function createShift(Carbon $date, string $in, string $out, ?Carbon $endDate = null): Shift
+    protected function createShift(Carbon $date, string $time, float $hours, array $defaults = []): Shift
     {
-        return Shift::create($this->makeShift($date, $in, $out, $endDate));
+        return Shift::create($this->makeShift($date, $time, $hours, $defaults));
     }
 
     /**
-     * Helper to make a Shift model data array.
+     * Helper to make a Shift model data array, automatically converting
+     * the dates to the proper client timezone.
      *
      * @param \Carbon\Carbon $date
-     * @param string $in
-     * @param string $out
-     * @param null|\Carbon\Carbon $endDate
+     * @param string $time
+     * @param float $hours
+     * @param array $defaults
      * @return array
      */
-    protected function makeShift(Carbon $date, string $in, string $out, ?Carbon $endDate = null): array
+    protected function makeShift(Carbon $date, string $time, float $hours, array $defaults = []): array
     {
-        if (empty($endDate)) {
-            $endDate = $date;
-        }
-        if (strlen($in) === 8) $in = $date->format('Y-m-d') . ' ' . $in;
-        if (strlen($out) === 8) $out = $endDate->format('Y-m-d') . ' ' . $out;
-
-        $data = factory(Shift::class)->raw([
+        $in = Carbon::parse($date->format('Y-m-d') . ' ' . $time, $this->client->getTimezone());
+        $out = $in->copy()->addMinutes(($hours * 60));
+        $data = factory(Shift::class)->raw(array_merge([
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'business_id' => $this->client->business_id,
-            'checked_in_time' => $in, //Carbon::parse($in)->setTimezone('UTC'),
-            'checked_out_time' => $out, //Carbon::parse($out)->setTimezone('UTC'),
+            'checked_in_time' => $in->setTimezone('UTC'),
+            'checked_out_time' => $out->setTimezone('UTC'),
             'hours_type' => 'default',
             'fixed_rates' => 0,
             'mileage' => 0,
             'other_expenses' => 0,
             'service_id' => $this->service->id,
-        ]);
+        ], $defaults));
 
         return $data;
     }
@@ -79,23 +76,25 @@ trait CreatesShifts
      * Helper to create a service breakout Shift.
      *
      * @param \Carbon\Carbon $date
-     * @param string $in
-     * @param int $services
-     * @param int $hoursPerService
+     * @param string $time
+     * @param array $serviceIds
+     * @param float $hoursPerService
      * @return Shift
      */
-    public function createServiceBreakoutShift(Carbon $date, string $in, int $services, int $hoursPerService): Shift
+    public function createServiceBreakoutShift(Carbon $date, string $time, array $serviceIds, float $hoursPerService): Shift
     {
-        $out = Carbon::parse($date->format('Y-m-d') . ' ' . $in)->addHours($services * $hoursPerService)->toTimeString();
-        $data = $this->makeShift($date, $in, $out);
-
-        $data['service_id'] = null;
-
-        $shift = Shift::create($data);
-        factory(ShiftService::class, $services)->create([
-            'shift_id' => $shift->id,
-            'duration' => $hoursPerService,
+        $hours = count($serviceIds) * $hoursPerService;
+        $shift = $this->createShift($date, $time, $hours, [
+            'service_id' => null,
         ]);
+
+        foreach ($serviceIds as $id) {
+            factory(ShiftService::class)->create([
+                'shift_id' => $shift->id,
+                'service_id' => $id,
+                'duration' => $hoursPerService,
+            ]);
+        }
 
         return $shift->fresh();
     }

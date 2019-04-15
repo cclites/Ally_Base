@@ -187,6 +187,7 @@ class ServiceAuthValidator
 //        print_r($authPeriodDates);
 //        print_r(Shift::all()->pluck('checked_in_time', 'checked_out_time'));
         $query = Shift::where('client_id', $this->client->id)
+            ->whereNotNull('checked_out_time')
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
                     ->whereBetween('checked_out_time', $authPeriodDates, 'OR');

@@ -66,7 +66,7 @@ class ServiceAuthValidatorTest extends TestCase
             'units' => 0.0,
             'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
             'period' => ClientAuthorization::PERIOD_MONTHLY,
-            'effective_start' => Carbon::now()->setTimezone($this->client->getTimezone())->subYears(1)->toDateString(),
+            'effective_start' => Carbon::now()->subYears(1)->toDateString(),
         ], $data));
     }
 
@@ -94,7 +94,7 @@ class ServiceAuthValidatorTest extends TestCase
 
     /**
      * =============================================================================
-     * SHIFTS                                                                 ======
+     * SHIFTS
      * =============================================================================
      */
 
@@ -103,12 +103,10 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
-        $shift = Shift::create($data);
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 7);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
-        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
-        $shift2 = Shift::create($data);
+        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6);
         $this->assertTrue($this->validator->shiftExceedsMaxClientHours($shift2));
     }
 
@@ -117,11 +115,12 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
-        $shift = Shift::create($data);
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 7);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
-        $shift2 = $this->createServiceBreakoutShift(Carbon::now(), '12:00:00', 3, 2);
+        $shift2 = $this->createServiceBreakoutShift(Carbon::today(), '12:00:00', [
+            $this->service->id, $this->service->id, $this->service->id
+        ], 2);
         $this->assertTrue($this->validator->shiftExceedsMaxClientHours($shift2));
     }
 
@@ -130,13 +129,10 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $date = Carbon::now()->subMonth(1)->startOfWeek();
-        $data = $this->makeShift($date, '11:00:00', '18:00:00');
-        $shift = Shift::create($data);
+        $shift = $this->createShift(Carbon::parse('last monday'), '11:00:00', 7);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
-        $data = $this->makeShift($date, '12:00:00', '18:00:00');
-        $shift2 = Shift::create($data);
+        $shift2 = $this->createShift(Carbon::parse('last monday'), '12:00:00', 6);
         $this->assertTrue($this->validator->shiftExceedsMaxClientHours($shift2));
     }
 
@@ -148,13 +144,15 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 7, [
+            'payer_id' => null,
+        ]);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6, [
+            'payer_id' => null,
+        ]);
+        $this->assertExceedsServiceAuth($shift2);
     }
 
     /** @test */
@@ -165,13 +163,15 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_MONTHLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now()->startOfMonth(), '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::now()->startOfMonth(), '11:00:00', 7, [
+            'payer_id' => null,
+        ]);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6, [
+            'payer_id' => null,
+        ]);
+        $this->assertExceedsServiceAuth($shift2);
     }
 
     /** @test */
@@ -182,13 +182,15 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_DAILY,
         ]);
 
-        $data = $this->makeShift(Carbon::yesterday(), '10:00:00', '14:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::yesterday(), '10:00:00', 4, [
+            'payer_id' => null,
+        ]);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::now(), '10:00:00', '15:30:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift2 = $this->createShift(Carbon::today(), '10:00:00', 5.5, [
+            'payer_id' => null,
+        ]);
+        $this->assertExceedsServiceAuth($shift2);
     }
 
     /** @test */
@@ -199,17 +201,14 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::now()->startOfWeek(), '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::now()->startOfWeek(), '11:00:00', 7);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::now()->startOfWeek()->subDays(3), '12:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::now()->startOfWeek()->subDays(3), '12:00:00', 6);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift = $this->createShift(Carbon::now(), '12:00:00', 6);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -219,43 +218,17 @@ class ServiceAuthValidatorTest extends TestCase
             'units' => 5,
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
+        $otherService = factory(Service::class)->create(['chain_id' => $this->client->business->businessChain->id, 'default' => false]);
 
         // shift with only 3 hours of specified service id should not flag yet
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '17:00:00');
-        $shift = Shift::create(array_merge($data, ['service_id' => null]));
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-        ]);
-        $otherService = factory(Service::class)->create(['chain_id' => $this->client->business->businessChain->id, 'default' => false]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 3,
-            'service_id' => $otherService->id,
-        ]);
-        $shift = $shift->fresh();
-
+        $shift = $this->createServiceBreakoutShift(Carbon::today(), '11:00:00', [$this->service->id, $otherService->id], 3);
         $this->assertEquals(3, $shift->getBillableHours($this->service->id));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // a second shift with 3 more hours of specified service id should flag
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '15:00:00');
-        $shift = Shift::create(array_merge($data, ['service_id' => null]));
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-        ]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 1,
-            'service_id' => $otherService->id,
-        ]);
-        $shift = $shift->fresh();
-
+        $shift = $this->createServiceBreakoutShift(Carbon::today(), '11:00:00', [$this->service->id, $otherService->id], 3);
         $this->assertEquals(3, $shift->getBillableHours($this->service->id));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -270,7 +243,7 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $shift = $this->createShift(Carbon::now(), '11:00:00', '17:00:00');
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 6, ['service_id' => null]);
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
             'duration' => 3,
@@ -285,7 +258,7 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
         $shift = $shift->fresh();
 
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -301,8 +274,7 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // shift with only 3 hours of specified payer id should not flag yet
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '17:00:00');
-        $shift = Shift::create(array_merge($data, ['service_id' => null]));
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 6, ['service_id' => null]);
         factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
             'duration' => 3,
@@ -318,11 +290,10 @@ class ServiceAuthValidatorTest extends TestCase
         $shift = $shift->fresh();
 
         $this->assertEquals(3, $shift->getBillableHours($this->service->id, $payer->id));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // a second shift with 3 more hours of payer service id should flag
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '15:00:00');
-        $shift2 = Shift::create(array_merge($data, ['service_id' => null]));
+        $shift2 = $this->createShift(Carbon::today(), '11:00:00', 6, ['service_id' => null]);
         factory(ShiftService::class)->create([
             'shift_id' => $shift2->id,
             'duration' => 3,
@@ -338,7 +309,7 @@ class ServiceAuthValidatorTest extends TestCase
         $shift2 = $shift2->fresh();
 
         $this->assertEquals(3, $shift2->getBillableHours($this->service->id, $payer->id));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $this->assertExceedsServiceAuth($shift2);
     }
 
     /** @test */
@@ -350,17 +321,20 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $data = $this->makeShift(Carbon::today(), '11:00:00', '13:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null, 'fixed_rates' => 1]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 2, [
+            'fixed_rates' => 1
+        ]);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::today(), '03:01:00', '04:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null, 'fixed_rates' => 1]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::today(), '03:00:00', 1, [
+            'fixed_rates' => 1
+        ]);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::today(), '04:01:00', '05:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null, 'fixed_rates' => 1]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::today(), '04:00:00', 1, [
+            'fixed_rates' => 1
+        ]);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -369,19 +343,17 @@ class ServiceAuthValidatorTest extends TestCase
         $this->createClientAuth([
             'units' => 5,
             'period' => ClientAuthorization::PERIOD_WEEKLY,
-            'effective_start' => Carbon::today()->subYears(1),
-            'effective_end' => Carbon::today()->subDays(1),
+            'effective_start' => Carbon::today()->subYears(1)->toDateString(),
+            'effective_end' => Carbon::today()->subDays(1)->toDateString(),
         ]);
 
-        $data = $this->makeShift(Carbon::now(), '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift = $this->createShift(Carbon::now(), '11:00:00', 7);
         $this->assertCount(0, $this->client->getActiveServiceAuths($shift->checked_in_time));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift(Carbon::today()->subMonths(2), '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
+        $shift = $this->createShift(Carbon::today()->subMonths(2), '11:00:00', 7);
         $this->assertCount(1, $this->client->getActiveServiceAuths($shift->checked_in_time));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -394,13 +366,11 @@ class ServiceAuthValidatorTest extends TestCase
 
         $date = Carbon::now()->subMonth(1)->startOfWeek();
 
-        $data = $this->makeShift($date, '11:00:00', '18:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift($date, '11:00:00', 7);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
-        $data = $this->makeShift($date->addDays(2), '12:00:00', '18:00:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift = $this->createShift($date->copy()->addDays(2), '12:00:00', 6);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -409,24 +379,21 @@ class ServiceAuthValidatorTest extends TestCase
         $this->createClientAuth([
             'units' => 5,
             'period' => ClientAuthorization::PERIOD_TERM,
-            'effective_start' => Carbon::now()->subDays(5),
-            'effective_end' => Carbon::now()->addYears(1),
+            'effective_start' => Carbon::now()->subDays(5)->toDateString(),
+            'effective_end' => Carbon::now()->addYears(1)->toDateString(),
         ]);
 
         // 4 hour shift inside the term dates
-        $data = $this->makeShift(Carbon::yesterday(), '10:00:00', '14:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::yesterday(), '10:00:00', 4);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // shift should exceed the max unit but is outside the term dates
-        $data = $this->makeShift(Carbon::now()->addYears(2), '10:00:00', '12:30:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::now()->addYears(2), '10:00:00', 2.5);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // shift exceeds the max units and is inside the term dates - flag
-        $data = $this->makeShift(Carbon::now()->addMonths(2), '10:00:00', '12:30:00');
-        $shift2 = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2));
+        $shift = $this->createShift(Carbon::now()->addMonths(2), '10:00:00', 2.5);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -440,19 +407,16 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // 4 hours shift on a monday -> no flag yet
-        $data = $this->makeShift(Carbon::parse('last monday'), '10:00:00', '14:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::parse('last monday'), '10:00:00', 4);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // 2 hour shift on any other day -> still no flag
-        $data = $this->makeShift(Carbon::parse('last tuesday'), '14:01:00', '16:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::parse('last tuesday'), '14:01:00', 2);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // 2 hours shift on the same monday -> should flag
-        $data = $this->makeShift(Carbon::parse('last monday'), '14:01:00', '16:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::parse('last monday'), '14:01:00', 2);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -464,9 +428,8 @@ class ServiceAuthValidatorTest extends TestCase
             'monday' => 0,
         ]);
 
-        $data = $this->makeShift(Carbon::parse('last monday'), '10:00:00', '11:00:00');
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::parse('last monday'), '10:00:00', 1);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -480,21 +443,15 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // create a shift that is 1 hour on monday and 4 hours on tuesday
-        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
-        $end = $start->copy()->addHours(5)->setTimezone('UTC');
-        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
-        $shift = Shift::create(array_merge($data, ['payer_id' => null]));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::parse('last monday'), '23:00:00', 5);
+        $this->assertEquals(4, $shift->getBillableHoursForDay(Carbon::parse('last tuesday')));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
     function a_service_breakout_shift_should_count_total_service_hours_for_all_days_of_the_shift()
     {
-        $payer = factory(Payer::class)->create();
-        $otherPayer = factory(Payer::class)->create();
-
         $auth = $this->createClientAuth([
-            'payer_id' => $payer->id,
             'units' => 0.0,
             'period' => ClientAuthorization::PERIOD_SPECIFIC_DAYS,
             'monday' => 3,
@@ -502,34 +459,24 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // shift with only 3 hours of specified payer id should not flag yet
-        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
-        $end = $start->copy()->addHours(8)->setTimezone('UTC');
-        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
-        $shift = Shift::create(array_merge($data, ['service_id' => null]));
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 4,
-            'service_id' => $this->service->id,
-            'payer_id' => $payer->id,
-        ]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 4,
-            'service_id' => $this->service->id,
-            'payer_id' => $otherPayer->id,
-        ]);
-        $shift = $shift->fresh();
+        $shift = $this->createServiceBreakoutShift(
+            Carbon::parse('last monday'),
+            '23:00:00',
+            [$this->service->id, $this->service->id],
+            4
+        );
 
         // shift should flag because 4 > 3 on monday
-        $this->assertEquals(8, $shift->getBillableHours($this->service->id));
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertEquals(8, $shift->getBillableHoursForDay(Carbon::parse('last monday'), $this->service->id));
+        $this->assertEquals(8, $shift->getBillableHoursForDay(Carbon::parse('last tuesday'), $this->service->id));
+        $this->assertExceedsServiceAuth($shift);
 
         // auth should flag because same amount of hours on tuesday
         $auth->update([
             'monday' => 500,
             'tuesday' => 3,
         ]);
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -543,22 +490,20 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // create shift that expands from monday - tuesday
-        $start = Carbon::parse('last monday 23:00:00', $this->client->getTimezone())->setTimezone('UTC');
-        $end = $start->copy()->addHours(5)->setTimezone('UTC');
-        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
-        $shift = Shift::create(array_merge($data, ['fixed_rates' => 1]));
+        $shift = $this->createShift(Carbon::parse('last monday'), '23:00:00', 5, [
+            'fixed_rates' => 1,
+        ]);
 
         // no flag yet
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         // create another shift on tuesday
-        $start = $end->copy();
-        $end = $start->copy()->addHours(3);
-        $data = $this->makeShift(Carbon::now(), $start->toDateTimeString(), $end->toDateTimeString());
-        $shift = Shift::create(array_merge($data, ['fixed_rates' => 1]));
+        $shift = $this->createShift(Carbon::parse('last tuesday'), '06:00:00', 3, [
+            'fixed_rates' => 1,
+        ]);
 
         // should flag because tuesday now has 2
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -573,8 +518,8 @@ class ServiceAuthValidatorTest extends TestCase
         $this->assertCount(0, $this->client->getActiveServiceAuths(Carbon::today()));
         $this->assertCount(1, $this->client->getActiveServiceAuths(Carbon::tomorrow()));
 
-        $shift = $this->createShift(Carbon::today(), '23:00:00', '07:00:01', Carbon::tomorrow());
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift(Carbon::today(), '23:00:00', 8);
+        $this->assertExceedsServiceAuth($shift);
     }
 
     /** @test */
@@ -585,17 +530,17 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $tuesday = Carbon::parse('last tuesday');
-        $shift1 = $this->createShift($tuesday, '01:00:00', '05:00:00');
-        $shift2 = $this->createShift($tuesday->addDays(1), '01:00:00', '05:00:00');
-        $shift2->update(['fixed_rates' => 1]);
+        $shift1 = $this->createShift(Carbon::parse('last tuesday'), '01:00:00', 4);
+        $shift2 = $this->createShift(Carbon::parse('last wednesday'), '01:00:00', 4, [
+            'fixed_rates' => 1,
+        ]);
 
-        $this->assertNotNull($this->validator->shiftExceedsServiceAuthorization($shift2->fresh()));
+        $this->assertExceedsServiceAuth($shift2);
     }
 
     /**
      * =============================================================================
-     * SCHEDULES                                                              ======
+     * SCHEDULES
      * =============================================================================
      */
 
@@ -604,7 +549,7 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $shift = $this->createShift(Carbon::today(), '01:00:00', 2);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
         $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
@@ -619,13 +564,18 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $shift = $this->createShift(Carbon::today(), '01:00:00', 2);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
         $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
         $this->assertFalse($this->validator->scheduleExceedsMaxClientHours($schedule));
 
-        $schedule2 = $this->createServiceBreakoutSchedule(Carbon::now(), '12:00:00', 3, 2);
+        $schedule2 = $this->createServiceBreakoutSchedule(
+            Carbon::now(),
+            '12:00:00',
+            [$this->service->id, $this->service->id, $this->service->id],
+            2
+        );
         $this->assertTrue($this->validator->scheduleExceedsMaxClientHours($schedule2));
     }
 
@@ -634,7 +584,7 @@ class ServiceAuthValidatorTest extends TestCase
     {
         $this->client->update(['max_weekly_hours' => 10]);
 
-        $shift = $this->createShift(Carbon::today(), '01:00:00', '03:00:00');
+        $shift = $this->createShift(Carbon::today(), '01:00:00', 2);
         $this->assertFalse($this->validator->shiftExceedsMaxClientHours($shift));
 
         $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4);
@@ -655,10 +605,10 @@ class ServiceAuthValidatorTest extends TestCase
         $tuesday = Carbon::parse('last tuesday');
 
         $schedule = $this->createSchedule($tuesday, '01:00:00', 3);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule));
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
         $schedule2 = $this->createSchedule($tuesday->addDays(2), '01:00:00', 3);
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -671,14 +621,14 @@ class ServiceAuthValidatorTest extends TestCase
 
         $tuesday = Carbon::parse('last tuesday');
 
-        $shift = $this->createShift($tuesday, '01:00:00', '05:00:00');
-        $this->assertNull($this->validator->shiftExceedsServiceAuthorization($shift));
+        $shift = $this->createShift($tuesday, '01:00:00', 4);
+        $this->assertDoesNotExceedServiceAuth($shift);
 
         $schedule = $this->createSchedule($tuesday->copy()->addDays(1), '01:00:00', 4);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule));
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
         $schedule2 = $this->createSchedule($tuesday->addDays(2), '01:00:00', 5);
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -693,13 +643,13 @@ class ServiceAuthValidatorTest extends TestCase
         $schedule = $this->createSchedule($tuesday, '01:00:00', 6);
 
         // creates shift from schedule that is only 2 hours long
-        $shift = $this->createShift($tuesday, '01:00:00', '03:00:00');
+        $shift = $this->createShift($tuesday, '01:00:00', 2);
         $shift->update(['schedule_id' => $schedule->id]);
 
         $schedule2 = $this->createSchedule($tuesday->addDays(2), '01:00:00', 6);
 
         // should pass because 2 + 6 = 8 (ignores first schedule entry)
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertDoesNotExceedServiceAuth($schedule2);
     }
 
     /** @test */
@@ -711,16 +661,16 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $tuesday = Carbon::parse('last tuesday');
-        $this->createShift($tuesday, '01:00:00', '05:00:00');
+        $this->createShift($tuesday, '01:00:00', 4);
 
         $schedule = $this->createSchedule($tuesday->copy()->addDays(1), '01:00:00', 4);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule));
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
         $data = $this->makeSchedule($tuesday->addDays(2), '01:00:00', 5);
         $schedule2 = Schedule::make($data);
 
         $this->assertCount(1, Schedule::all());
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -733,13 +683,13 @@ class ServiceAuthValidatorTest extends TestCase
 
         $tuesday = Carbon::parse('last tuesday');
         $schedule = $this->createSchedule($tuesday, '01:00:00', 5);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule));
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
         $schedule2 = $this->createSchedule($tuesday->addDays(1), '01:00:00', 3);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertDoesNotExceedServiceAuth($schedule2);
 
         $schedule2->duration = 7 * 60;
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -755,17 +705,14 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $tuesday = Carbon::parse('last tuesday');
-        $schedule = $this->createSchedule($tuesday, '01:00:00', 5);
-        $schedule->update(['payer_id' => $payer->id]);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule->fresh()));
+        $schedule = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $payer->id]);
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
-        $schedule2 = $this->createSchedule($tuesday, '01:00:00', 5);
-        $schedule2->update(['payer_id' => $otherPayer->id]);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule2->fresh()));
+        $schedule2 = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $otherPayer->id]);
+        $this->assertDoesNotExceedServiceAuth($schedule2);
 
-        $schedule3 = $this->createSchedule($tuesday, '01:00:00', 5);
-        $schedule3->update(['payer_id' => $payer->id]);
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule3->fresh()));
+        $schedule3 = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $payer->id]);
+        $this->assertExceedsServiceAuth($schedule3);
     }
 
     /** @test */
@@ -795,7 +742,7 @@ class ServiceAuthValidatorTest extends TestCase
             'service_id' => $this->service->id,
             'payer_id' => $otherPayer->id,
         ]);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule->fresh()));
+        $this->assertDoesNotExceedServiceAuth($schedule->fresh());
 
         $schedule2 = $this->createSchedule($tuesday, '01:00:00', 5);
         $schedule2->update(['service_id' => null]);
@@ -811,7 +758,7 @@ class ServiceAuthValidatorTest extends TestCase
             'service_id' => $this->service->id,
             'payer_id' => $otherPayer->id,
         ]);
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2->fresh()));
+        $this->assertExceedsServiceAuth($schedule2->fresh());
     }
 
     /** @test */
@@ -823,15 +770,15 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $tuesday = Carbon::parse('last tuesday');
-        $schedule = $this->createServiceBreakoutSchedule($tuesday, '01:00:00', 1, 5);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule->fresh()));
+        $schedule = $this->createServiceBreakoutSchedule($tuesday, '01:00:00', [$this->service->id], 5);
+        $this->assertDoesNotExceedServiceAuth($schedule->fresh());
 
-        $schedule2 = $this->createServiceBreakoutSchedule($tuesday->addDays(1), '01:00:00', 1, 1);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule2->fresh()));
+        $schedule2 = $this->createServiceBreakoutSchedule($tuesday->addDays(1), '01:00:00', [$this->service->id], 1);
+        $this->assertDoesNotExceedServiceAuth($schedule2->fresh());
 
         $schedule2 = $schedule2->fresh()->load('services');
         $schedule2->services->first()->duration = 5;
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -844,18 +791,18 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $tuesday = Carbon::parse('last tuesday');
-        $notFixedShift = $this->createShift($tuesday, '06:00:00', '10:00:00');
-        $shift = $this->createShift($tuesday, '01:00:00', '05:00:00');
-        $shift->update(['fixed_rates' => 1]);
+        $notFixedShift = $this->createShift($tuesday, '06:00:00', 4);
+        $shift = $this->createShift($tuesday, '01:00:00', 4, ['fixed_rates' => 1]);
 
-        $schedule = $this->createSchedule($tuesday->copy()->addDays(1), '01:00:00', 4);
-        $schedule->update(['fixed_rates' => 1]);
-        $this->assertNull($this->validator->scheduleExceedsServiceAuthorization($schedule));
+        $schedule = $this->createSchedule($tuesday->copy()->addDays(1), '01:00:00', 4, [
+            'fixed_rates' => 1
+        ]);
+        $this->assertDoesNotExceedServiceAuth($schedule);
 
-        $data = $this->makeSchedule($tuesday->copy()->addDays(1), '01:00:00', 5);
-        $data['fixed_rates'] = 1;
-        $schedule2 = Schedule::make($data);
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2));
+        $schedule2 = $this->createSchedule($tuesday->copy()->addDays(1), '01:00:00', 5, [
+            'fixed_rates' => 1
+        ]);
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -868,10 +815,11 @@ class ServiceAuthValidatorTest extends TestCase
 
         $tuesday = Carbon::parse('last tuesday');
         $schedule1 = $this->createSchedule($tuesday, '01:00:00', 4);
-        $schedule2 = $this->createSchedule($tuesday->addDays(1), '01:00:00', 4);
-        $schedule2->update(['fixed_rates' => 1]);
+        $schedule2 = $this->createSchedule($tuesday->addDays(1), '01:00:00', 4, [
+            'fixed_rates' => 1
+        ]);
 
-        $this->assertNotNull($this->validator->scheduleExceedsServiceAuthorization($schedule2->fresh()));
+        $this->assertExceedsServiceAuth($schedule2);
     }
 
     /** @test */
@@ -906,10 +854,11 @@ class ServiceAuthValidatorTest extends TestCase
             'effective_start' => $month2->toDateString(),
         ]);
 
-        $schedule1 = $this->createServiceBreakoutSchedule($month2->copy()->addDays(1), '01:00:00', 5, 1);
+        $services = [$this->service->id, $this->service->id, $this->service->id, $this->service->id, $this->service->id];
+        $schedule1 = $this->createServiceBreakoutSchedule($month2->copy()->addDays(1), '01:00:00', $services, 1);
         $this->assertDoesNotExceedServiceAuth($schedule1);
 
-        $schedule2 = $this->createServiceBreakoutSchedule($month1->copy()->endOfMonth(), '22:00:00', 5, 1);
+        $schedule2 = $this->createServiceBreakoutSchedule($month1->copy()->endOfMonth(), '22:00:00', $services, 1);
         $this->assertExceedsServiceAuth($schedule2);
     }
 }
