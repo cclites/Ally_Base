@@ -125,7 +125,7 @@ class ShiftFlagManager
             return true;
         }
 
-        if ($validator->shiftExceededServiceAuthorization($this->shift)) {
+        if ($validator->shiftExceedsServiceAuthorization($this->shift)) {
             return true;
         }
 
