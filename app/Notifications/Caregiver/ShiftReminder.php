@@ -12,14 +12,14 @@ class ShiftReminder extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Upcoming Shift Reminder - Friendly reminder that a shift starts in 20 minutes';
+    const TITLE = 'Upcoming Shift Reminder - Friendly reminder that a shift starts in 20 minutes';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'REMINDER: Your shift with Client #CLIENT# starts at #TIMESTAMP#.';
+    const MESSAGE = 'REMINDER: Your shift with Client #CLIENT# starts at #TIMESTAMP#.';
 
     /**
      * The action text.
@@ -56,7 +56,7 @@ class ShiftReminder extends BaseNotification
     {
         $timestamp = local_date($this->schedule->getStartDateTime(), 'm/d/Y g:iA', $this->schedule->business->timezone);
 
-        $message = str_replace('#CLIENT#', $this->schedule->client->name, static::$message);
+        $message = str_replace('#CLIENT#', $this->schedule->client->name, static::MESSAGE);
         return str_replace('#TIMESTAMP#', $timestamp, $message);
     }
 

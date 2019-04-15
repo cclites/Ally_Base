@@ -12,14 +12,14 @@ class VisitAccuracyCheck extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Visit Accuracy Check - Friendly Reminder to check visits for accuracy, sent every Monday at 1pm Eastern';
+    const TITLE = 'Visit Accuracy Check - Friendly Reminder to check visits for accuracy, sent every Monday at 1pm Eastern';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Please check your visits for accuracy.  We are preparing for charges which affect your deposit later this week.';
+    const MESSAGE = 'Please check your visits for accuracy.  We are preparing for charges which affect your deposit later this week.';
 
     /**
      * The action text.

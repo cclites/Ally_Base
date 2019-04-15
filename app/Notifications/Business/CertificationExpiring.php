@@ -12,14 +12,14 @@ class CertificationExpiring extends BaseNotification
      *
      * @var string
      */
-    protected static $title = '30 Days Before a Caregiver Certification Expires';
+    const TITLE = '30 Days Before a Caregiver Certification Expires';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# - #CERTNAME# expires soon.';
+    const MESSAGE = 'Caregiver #CAREGIVER# - #CERTNAME# expires soon.';
 
     /**
      * The action text.
@@ -54,7 +54,7 @@ class CertificationExpiring extends BaseNotification
      */
     public function getMessage()
     {
-        $message = str_replace('#CAREGIVER#', $this->license->caregiver->name, static::$message);
+        $message = str_replace('#CAREGIVER#', $this->license->caregiver->name, static::MESSAGE);
         $message = str_replace('#CERTNAME#', $this->license->name, $message);
         return $message;
     }

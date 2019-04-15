@@ -12,14 +12,14 @@ class ClockOutReminder extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Clock-Out Reminder - Friendly Reminder to clock-out if 20 minutes past end time';
+    const TITLE = 'Clock-Out Reminder - Friendly Reminder to clock-out if 20 minutes past end time';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'REMINDER: Your shift with Client #CLIENT# was supposed to end at #TIMESTAMP# but you have not clocked-out yet.  Please clock-out.';
+    const MESSAGE = 'REMINDER: Your shift with Client #CLIENT# was supposed to end at #TIMESTAMP# but you have not clocked-out yet.  Please clock-out.';
 
     /**
      * The action text.
@@ -56,7 +56,7 @@ class ClockOutReminder extends BaseNotification
     {
         $timestamp = local_date($this->shift->getEndDateTime(), 'm/d/Y g:iA', $this->shift->business->timezone);
 
-        $message = str_replace('#CLIENT#', $this->shift->client->name, static::$message);
+        $message = str_replace('#CLIENT#', $this->shift->client->name, static::MESSAGE);
         return str_replace('#TIMESTAMP#', $timestamp, $message);
     }
 

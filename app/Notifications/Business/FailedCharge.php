@@ -7,21 +7,21 @@ use App\Jobs\SendTextMessage;
 
 class FailedCharge extends BaseNotification
 {
-    public static $disabled = true;
+    const DISABLED = true;
     
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    protected static $title = 'A Charge Fails';
+    const TITLE = 'A Charge Fails';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'A charge has failed for Client #CLIENT#.';
+    const MESSAGE = 'A charge has failed for Client #CLIENT#.';
 
     /**
      * The action text.
@@ -56,7 +56,7 @@ class FailedCharge extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#CLIENT#', $this->client->name, static::$message);
+        return str_replace('#CLIENT#', $this->client->name, static::MESSAGE);
     }
 
     /**

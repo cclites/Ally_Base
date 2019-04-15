@@ -13,14 +13,14 @@ class UnverifiedShift extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'An Unverified Clock-In or Clock-Out Occurs';
+    const TITLE = 'An Unverified Clock-In or Clock-Out Occurs';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# an unverified clock-#MODE# for Client #CLIENT# #TIMESTAMP#.';
+    const MESSAGE = 'Caregiver #CAREGIVER# an unverified clock-#MODE# for Client #CLIENT# #TIMESTAMP#.';
 
     /**
      * Clock in or out.
@@ -67,7 +67,7 @@ class UnverifiedShift extends BaseNotification
         $checked_in_time = local_date($this->shift->checked_in_time, 'm/d/Y g:iA', $this->shift->business->timezone);
         $checked_out_time = local_date($this->shift->checked_out_time, 'm/d/Y g:iA', $this->shift->business->timezone);
         
-        $message = str_replace('#CAREGIVER#', $this->shift->caregiver->name(), static::$message);
+        $message = str_replace('#CAREGIVER#', $this->shift->caregiver->name(), static::MESSAGE);
         $message = str_replace('#CLIENT#', $this->shift->client->name(), $message);
         $message = str_replace('#MODE#', $this->mode, $message);
         return str_replace('#TIMESTAMP#', $checked_in_time, $message);

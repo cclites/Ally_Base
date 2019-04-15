@@ -15,34 +15,34 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 abstract class BaseNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-    
+
     /**
      * Switch to disable notification in the system.
      *
      * @var boolean
      */
-    public static $disabled = false;
+    const DISABLED = false;
 
     /**
      * The unique key to identify the notification type.
      *
      * @var string
      */
-    protected static $key;
+    const KEY = '';
 
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    protected static $title;
+    const TITLE = '';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message;
+    const MESSAGE = '';
 
     /**
      * The action text.
@@ -65,11 +65,11 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      */
     public static function getKey()
     {
-        if (empty(static::$key)) {
+        if (empty(static::KEY)) {
             return snake_case(basename(str_replace('\\', '/', get_called_class())));
         }
 
-        return static::$key;
+        return static::KEY;
     }
 
     /**
@@ -79,7 +79,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      */
     public static function getTitle()
     {
-        return static::$title;
+        return static::TITLE;
     }
 
     /**
@@ -89,7 +89,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      */
     public function getMessage()
     {
-        return static::$message;
+        return static::MESSAGE;
     }
 
     /**

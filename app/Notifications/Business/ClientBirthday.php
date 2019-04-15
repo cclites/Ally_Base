@@ -2,10 +2,8 @@
 
 namespace App\Notifications\Business;
 
-use Illuminate\Notifications\Messages\MailMessage;
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
-use App\PhoneNumber;
 use App\Client;
 
 class ClientBirthday extends BaseNotification
@@ -15,14 +13,14 @@ class ClientBirthday extends BaseNotification
      *
      * @var string
      */
-    protected static $title = 'Client Birthday';
+    const TITLE = 'Client Birthday';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Client #NAME# - birthday is today!';
+    const MESSAGE = 'Client #NAME# - birthday is today!';
 
     /**
      * The related client.
@@ -58,7 +56,7 @@ class ClientBirthday extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#NAME#', $this->client->name, static::$message);
+        return str_replace('#NAME#', $this->client->name, static::MESSAGE);
     }
 
     /**
