@@ -188,7 +188,7 @@
 
                     <b-form-group label="Account Setup URL">
                         <a :href="caregiver.setup_url" target="_blank">{{ caregiver.setup_url }}</a>
-                        <input-help :form="form" text="The URL the caregiver can use to setup their account."></input-help>
+                        <input-help :form="form" field="_none" text="The URL the caregiver can use to setup their account."></input-help>
                     </b-form-group>
 
                     <div>
