@@ -61,8 +61,10 @@ class ServiceAuthValidator
      */
     public function exceedsMaxClientHours(array $period, bool $includeSchedules = false, Schedule $schedule = null) : bool
     {
+        // Need to convert the period timezone to UTC for the shift query
+        $utcPeriod = [$period[0]->copy()->setTimezone('UTC'), $period[1]->copy()->setTimezone('UTC')];
         $total = Shift::where('client_id', $this->client->id)
-            ->whereBetween('checked_in_time', $period)
+            ->whereBetween('checked_in_time', $utcPeriod)
             ->get()
             ->map(function ($shift) {
                 return $shift->getBillableHours();
@@ -243,18 +245,18 @@ class ServiceAuthValidator
     {
         $authPeriodDates = $auth->getPeriodDates($date, $this->client->getTimezone());
 
+        // get the proper "ends_at" SQL syntax depending on the database type (MySQL/SQLite)
         if (config('app.env') === 'testing') {
-            $endsAtQuery = \DB::raw("DATETIME(starts_at, printf('+%s minute', duration)) as ends_at");
+            $endsAt = \DB::raw("DATETIME(starts_at, printf('+%s minute', duration))");
         } else {
-            $endsAtQuery = \DB::raw('ADDTIME(starts_at, INTERVAL duration MINUTE) as ends_at');
+            $endsAt = \DB::raw('DATE_ADD(starts_at, INTERVAL duration MINUTE)');
         }
 
-        $query = Schedule::select([\DB::raw('*'), $endsAtQuery])
-            ->where('client_id', $this->client->id)
+        $query = Schedule::where('client_id', $this->client->id)
             ->whereDoesntHave('shifts')
-            ->where(function ($q) use ($authPeriodDates) {
+            ->where(function ($q) use ($authPeriodDates, $endsAt) {
                 return $q->whereBetween('starts_at', $authPeriodDates)
-                    ->whereBetween('ends_at', $authPeriodDates, 'OR');
+                    ->whereBetween($endsAt, $authPeriodDates, 'OR');
             });
 
         if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {

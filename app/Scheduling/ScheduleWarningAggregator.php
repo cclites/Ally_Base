@@ -3,6 +3,7 @@
 namespace App\Scheduling;
 
 use App\Schedule;
+use App\Shifts\ServiceAuthValidator;
 use Carbon\Carbon;
 
 /**
@@ -45,6 +46,8 @@ class ScheduleWarningAggregator
             $this->checkCaregiverLicenses();
         }
 
+        $this->checkClientServiceAuths();
+
         return $this->warnings->toArray();
     }
 
@@ -67,6 +70,11 @@ class ScheduleWarningAggregator
         return true;
     }
 
+    /**
+     * Check for expired/expiring caregiver licenses.
+     *
+     * @return bool
+     */
     public function checkCaregiverLicenses()
     {
         // check for expired/expiring caregiver licenses
@@ -122,6 +130,32 @@ class ScheduleWarningAggregator
         }
 
         $this->pushWarnings($warnings);
+
+        return true;
+    }
+
+    /**
+     * Check the schedule against any active ClientAuthorizations.
+     *
+     * @return bool
+     */
+    public function checkClientServiceAuths()
+    {
+        if (empty($this->schedule->client_id) ||
+            empty($this->schedule->starts_at) ||
+            empty($this->schedule->duration)) {
+                return false;
+        }
+
+        $validator = new ServiceAuthValidator($this->schedule->client);
+
+        if ($validator->scheduleExceedsMaxClientHours($this->schedule)) {
+            $this->pushWarnings(["If scheduled, this shift would exceed the client's max weekly hours of {$this->schedule->client->max_weekly_hours}"]);
+        }
+
+        if ($auth = $validator->scheduleExceedsServiceAuthorization($this->schedule)) {
+            $this->pushWarnings(["If scheduled, this shift would exceed service authorization code #{$auth->service_auth_id}"]);
+        }
 
         return true;
     }

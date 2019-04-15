@@ -589,7 +589,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 // make sure service id matches the one on the model (or all).
                 return 0;
             }
-            if ($this->payer_id != $payer_id) {
+            if (! empty($payer_id) && $this->payer_id != $payer_id) {
                 // make sure payer id matches the one on the model.
                 return 0;
             }
