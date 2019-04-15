@@ -77,9 +77,8 @@
                 <b-col lg="4">
                     <b-form-group label="State*" label-for="state">
                         <b-form-select name="state" :options="states.getOptions()" v-model="form.state" />
-                        <input-help :form="form" field="form.state" text=""></input-help>
+                        <input-help :form="form" field="state" text=""></input-help>
                     </b-form-group>
-
                 </b-col>
 
                 <b-col lg="4">
