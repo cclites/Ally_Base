@@ -54,7 +54,7 @@ class ShiftReminder extends BaseNotification
      */
     public function getMessage()
     {
-        $timestamp = local_date($this->schedule->getStartDateTime(), 'm/d/Y g:iA', $this->schedule->business->timezone);
+        $timestamp = $this->schedule->getStartDateTime()->format('m/d/Y g:iA');
 
         $message = str_replace('#CLIENT#', $this->schedule->client->name, static::MESSAGE);
         return str_replace('#TIMESTAMP#', $timestamp, $message);
