@@ -3,6 +3,7 @@
 namespace App\Reports;
 
 use App\Shift;
+use App\Shifts\CostCalculator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -72,13 +73,13 @@ class PayrollExportReport extends BaseReport
     }
 
     /**
-     * Return the collection of rows matching report criteria
+     * Get the shift data rows.
      *
      * @return \Illuminate\Support\Collection
      */
-    protected function results() : ?iterable
+    public function getShiftResults() : Collection
     {
-        $data = $this->query()
+        return $this->query()
             ->get()
             ->map(function (Shift $row) {
                 return [
@@ -87,13 +88,77 @@ class PayrollExportReport extends BaseReport
                     'paycode' => $row->getPaycode(),
                     'pay_rate' => (string) $row->getCaregiverRate(),
                     'hours' => $row->duration(),
-                    'amount' => $row->costs()->getCaregiverCost(),
+                    'amount' => $row->costs()->getCaregiverCost(false),
                     'location' => optional($row->client->evvAddress)->zip,
 
                     'caregiver_last_name' => $row->caregiver->lastname,
                     'caregiver_first_name' => $row->caregiver->firstname,
                 ];
             });
+    }
+
+    /**
+     * Get the rows to represent the shift mileage expenses.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getShiftMileageResults() : Collection
+    {
+        return $this->query()
+            ->where('mileage', '>', 0.00)
+            ->get()
+            ->map(function (Shift $row) {
+                return [
+                    'caregiver_id' => $row->caregiver_id,
+                    'name' => $row->caregiver->name,
+                    'paycode' => 'MIL',
+                    'pay_rate' => $row->costs()->mileageCalculator()->getMileageRate(),
+                    'hours' => $row->mileage,
+                    'amount' => $row->costs()->getMileageCost(false),
+                    'location' => optional($row->client->evvAddress)->zip,
+
+                    'caregiver_last_name' => $row->caregiver->lastname,
+                    'caregiver_first_name' => $row->caregiver->firstname,
+                ];
+            });
+    }
+
+    /**
+     * Get the rows to represent the shift mileage expenses.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getShiftExpenseResults() : Collection
+    {
+        return $this->query()
+            ->where('other_expenses', '>', 0.00)
+            ->get()
+            ->map(function (Shift $row) {
+                return [
+                    'caregiver_id' => $row->caregiver_id,
+                    'name' => $row->caregiver->name,
+                    'paycode' => 'EXP',
+                    'pay_rate' => '0',
+                    'hours' => '0',
+                    'amount' => $row->costs()->getCaregiverExpenses(),
+                    'location' => optional($row->client->evvAddress)->zip,
+
+                    'caregiver_last_name' => $row->caregiver->lastname,
+                    'caregiver_first_name' => $row->caregiver->firstname,
+                ];
+            });
+    }
+
+    /**
+     * Return the collection of rows matching report criteria
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function results() : ?iterable
+    {
+        $data = $this->getShiftResults();
+        $data = $data->merge($this->getShiftMileageResults());
+        $data = $data->merge($this->getShiftExpenseResults());
 
         switch ($this->format) {
             case self::BCN:
@@ -107,6 +172,33 @@ class PayrollExportReport extends BaseReport
     }
 
     /**
+     * Map the report data.
+     *
+     * @param Collection $rows
+     * @return array
+     */
+    public function mapReportRecord(Collection $rows) : array
+    {
+        return [
+            'caregiver_id' => $rows[0]['caregiver_id'],
+            'name' => $rows[0]['name'],
+            'paycode' => $rows[0]['paycode'],
+            'pay_rate' => $rows[0]['paycode'] == 'EXP' ? '-' : $rows[0]['pay_rate'],
+            'hours' => $rows[0]['paycode'] == 'EXP' ? '-' : $rows->reduce(function ($carry, $item) {
+                return add($carry, $item['hours'], 2);
+            }, 0),
+            'amount' => $rows->reduce(function ($carry, $item) {
+                return add($carry, $item['amount'], 2);
+            }, 0),
+            'dept' => '',
+            'division' => '',
+            'location' => $rows[0]['location'],
+            'caregiver_last_name' => $rows[0]['caregiver_last_name'],
+            'caregiver_first_name' => $rows[0]['caregiver_first_name'],
+        ];
+    }
+
+    /**
      * Format the report data for ADP.
      *
      * @param \Illuminate\Support\Collection $data
@@ -114,31 +206,18 @@ class PayrollExportReport extends BaseReport
      */
     protected function formatADP(Collection $data) : Collection
     {
-        $results = [];
+        $results = collect([]);
 
-        $data->groupBy(['caregiver_id', 'pay_rate'])
-            ->each(function ($cgRow) use (&$results) {
-                $cgRow->each(function ($typeRow) use (&$results) {
-                    array_push($results, [
-                        'caregiver_id' => $typeRow[0]['caregiver_id'],
-                        'name' => $typeRow[0]['name'],
-                        'paycode' => $typeRow[0]['paycode'],
-                        'pay_rate' => $typeRow[0]['pay_rate'],
-                        'hours' => $typeRow->sum('hours'),
-                        'amount' => $typeRow->sum('amount'),
-                        'dept' => '',
-                        'division' => '',
-                        'location' => $typeRow[0]['location'],
-
-                        'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
-                        'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
-                    ]);
+        $data->groupBy(['caregiver_id', 'paycode', 'pay_rate'])
+            ->each(function ($cgRow) use ($results) {
+                $cgRow->each(function ($payCodeGroup) use ($results) {
+                    $payCodeGroup->each(function ($rows) use ($results) {
+                        $results->push($this->mapReportRecord($rows));
+                    });
                 });
             });
 
-        return collect($results)
-            ->sortBy('caregiver_last_name')
-            ->values();
+        return $results->sortBy('caregiver_last_name')->values();
     }
 
     /**
@@ -160,33 +239,20 @@ class PayrollExportReport extends BaseReport
      */
     protected function formatBCN(Collection $data) : Collection
     {
-        $results = [];
+        $results = collect([]);
 
-        $data->groupBy(['caregiver_id', 'location', 'pay_code', 'pay_rate'])
-            ->each(function ($cgGroup) use (&$results) {
-                $cgGroup->each(function ($zipGroup) use (&$results) {
-                    $zipGroup->each(function ($payCodeGroup) use (&$results) {
-                        $payCodeGroup->each(function ($typeRow) use (&$results) {
-                            $results[] = [
-                                'caregiver_id' => $typeRow[0]['caregiver_id'],
-                                'name' => $typeRow[0]['name'],
-                                'paycode' => $typeRow[0]['paycode'],
-                                'pay_rate' => $typeRow[0]['pay_rate'],
-                                'hours' => $typeRow->sum('hours'),
-                                'amount' => $typeRow->sum('amount'),
-                                'dept' => '',
-                                'division' => '',
-                                'location' => $typeRow[0]['location'],
-
-                                'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
-                                'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
-                            ];
+        $data->groupBy(['caregiver_id', 'location', 'paycode', 'pay_rate'])
+            ->each(function ($cgGroup) use ($results) {
+                $cgGroup->each(function ($zipGroup) use ($results) {
+                    $zipGroup->each(function ($payCodeGroup) use ($results) {
+                        $payCodeGroup->each(function ($rows) use ($results) {
+                            $results->push($this->mapReportRecord($rows));
                         });
                     });
                 });
             });
 
-        return collect($results)->sortBy('caregiver_last_name')->values();
+        return $results->sortBy('caregiver_last_name')->values();
     }
 
     /**
@@ -201,8 +267,9 @@ class PayrollExportReport extends BaseReport
                 'caregiver_first_name',
                 'caregiver_last_name'
             ]), [
-                'hours' => number_format($item['hours'], 1),
-                'amount' => number_format($item['amount'], 2)
+                'hours' => $item['hours'] == '-' ? 'N/A' : number_format($item['hours'], 2),
+                'amount' => $item['amount'] == '-' ? 'N/A' : number_format($item['amount'], 2),
+                'pay_rate' => $item['pay_rate'] == '-' ? 'N/A' : number_format($item['pay_rate'], 2),
             ]);
         });
 
