@@ -11,7 +11,7 @@ use MyCLabs\Enum\Enum;
  * @method static Ethnicity ASIAN()
  * @method static Ethnicity BLACK()
  * @method static Ethnicity HISPANIC()
- * @method static Ethnicity HAWAIIN()
+ * @method static Ethnicity HAWAIIAN()
  * @method static Ethnicity WHITE()
  */
 class Ethnicity extends Enum
@@ -20,6 +20,6 @@ class Ethnicity extends Enum
     private const ASIAN = 'asian';
     private const BLACK = 'black';
     private const HISPANIC = 'hispanic';
-    private const HAWAIIN = 'hawaiian';
+    private const HAWAIIAN = 'hawaiian';
     private const WHITE = 'white';
 }
