@@ -251,14 +251,6 @@ class ClientController extends BaseController
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
-            $client->setPreferences(array_except($request->preferences, 'ethnicities'));
-            $client->preferences->ethnicities()->delete();
-            $client->preferences->ethnicities()->saveMany(
-                collect($request->preferences['ethnicities'])->map(function ($ethnicity) {
-                    return new ClientEthnicityPreference(compact('ethnicity'));
-                })
-            );
-
             \DB::commit();
             return new SuccessResponse('The client has been updated.', $client, '.');
         }
@@ -378,6 +370,29 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    /**
+     * Update the Client's preferences.
+     *
+     * @param UpdateClientPreferencesRequest $request
+     * @param \App\Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function preferences(UpdateClientPreferencesRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->preferences->ethnicities()->delete();
+        $client->preferences->ethnicities()->saveMany(
+            collect($request->ethnicities)->map(function ($ethnicity) {
+                return new ClientEthnicityPreference(compact('ethnicity'));
+            })
+        );
+
+        return new SuccessResponse('Client preferences updated.', $client->preferences->fresh());
     }
 
     public function defaultRates(Request $request, Client $client)
