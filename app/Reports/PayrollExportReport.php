@@ -84,7 +84,7 @@ class PayrollExportReport extends BaseReport
                 return [
                     'caregiver_id' => $row->caregiver_id,
                     'name' => $row->caregiver->name,
-//                    'paycode' => $row->getPaycode(),
+                    'paycode' => $row->getPaycode(),
                     'pay_rate' => (string) $row->getCaregiverRate(),
                     'hours' => $row->duration(),
                     'amount' => $row->costs()->getCaregiverCost(),
@@ -122,6 +122,7 @@ class PayrollExportReport extends BaseReport
                     array_push($results, [
                         'caregiver_id' => $typeRow[0]['caregiver_id'],
                         'name' => $typeRow[0]['name'],
+                        'paycode' => $typeRow[0]['paycode'],
                         'pay_rate' => $typeRow[0]['pay_rate'],
                         'hours' => $typeRow->sum('hours'),
                         'amount' => $typeRow->sum('amount'),
@@ -168,6 +169,7 @@ class PayrollExportReport extends BaseReport
                         $results[] = [
                             'caregiver_id' => $typeRow[0]['caregiver_id'],
                             'name' => $typeRow[0]['name'],
+                            'paycode' => $typeRow[0]['paycode'],
                             'pay_rate' => $typeRow[0]['pay_rate'],
                             'hours' => $typeRow->sum('hours'),
                             'amount' => $typeRow->sum('amount'),
