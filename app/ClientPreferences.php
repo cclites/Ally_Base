@@ -81,4 +81,20 @@ class ClientPreferences extends AuditableModel
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
+
+    /**
+     * Get string array of the client's ethnicity preferences.
+     *
+     * @return array
+     */
+    public function getEthnicities() : array
+    {
+        if (empty($this->ethnicities) || $this->ethnicities->count() === 0) {
+            // There is no reason for a client to have zero ethnicity
+            // preferences so always return all values by default.
+            return array_values(Ethnicity::toArray());
+        }
+
+        return $this->ethnicities->pluck('ethnicity')->toArray();
+    }
 }
