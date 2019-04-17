@@ -62,6 +62,7 @@
                                 {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
                             </option>
                         </b-form-select>
+                        <input-help :form="form" field="sales_person_id"></input-help>
                     </b-form-group>
                     <b-form-group label="Client Status">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
@@ -78,6 +79,7 @@
                             <b-form-radio value="M">Male</b-form-radio>
                             <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
+                        <input-help :form="form" field="gender"></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
@@ -154,6 +156,7 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                        <input-help :form="form" field="avatar"></input-help>
                     </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
@@ -181,12 +184,13 @@
                 <b-col lg="6">
                     <b-form-group label="Date inquired about Service">
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
+                        <input-help :form="form" field="inquiry_date"></input-help>
                     </b-form-group>
 
                     <b-form-group class="mb-2">
                         <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                         <div class="d-flex justify-content-end">
-                            <input-help :form="form" field="referred_by" text="Enter how the prospect was referred."/>
+                            <input-help :form="form" field="referral_source_id" text="Enter how the prospect was referred."/>
                         </div>
                     </b-form-group>
 
@@ -222,14 +226,17 @@
                             <option value="client">On Client's Behalf</option>
                             <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
                         </b-form-select>
+                        <input-help :form="form" field="caregiver_1099"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
+                        <input-help :form="form" field="service_start_date"></input-help>
                     </b-form-group>
                     <b-form-group label="Diagnosis">
                         <b-form-input id="diagnosis" v-model="form.diagnosis"></b-form-input>
+                        <input-help :form="form" field="diagnosis"></input-help>
                     </b-form-group>
                     <b-form-group label="Disaster Code Plan" label-for="disaster_code_plan">
                         <b-form-input
@@ -335,7 +342,7 @@
                     </div>
                     <b-form-group label="Account Setup URL">
                         <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
-                        <input-help text="The URL the client can use to setup their account."></input-help>
+                        <small class="form-text text-muted">The URL the client can use to setup their account.</small>
                     </b-form-group>
 
                     <div>
