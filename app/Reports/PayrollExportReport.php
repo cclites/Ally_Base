@@ -162,24 +162,26 @@ class PayrollExportReport extends BaseReport
     {
         $results = [];
 
-        $data->groupBy(['caregiver_id', 'location', 'pay_rate'])
+        $data->groupBy(['caregiver_id', 'location', 'pay_code', 'pay_rate'])
             ->each(function ($cgGroup) use (&$results) {
                 $cgGroup->each(function ($zipGroup) use (&$results) {
-                    $zipGroup->each(function ($typeRow) use (&$results) {
-                        $results[] = [
-                            'caregiver_id' => $typeRow[0]['caregiver_id'],
-                            'name' => $typeRow[0]['name'],
-                            'paycode' => $typeRow[0]['paycode'],
-                            'pay_rate' => $typeRow[0]['pay_rate'],
-                            'hours' => $typeRow->sum('hours'),
-                            'amount' => $typeRow->sum('amount'),
-                            'dept' => '',
-                            'division' => '',
-                            'location' => $typeRow[0]['location'],
+                    $zipGroup->each(function ($payCodeGroup) use (&$results) {
+                        $payCodeGroup->each(function ($typeRow) use (&$results) {
+                            $results[] = [
+                                'caregiver_id' => $typeRow[0]['caregiver_id'],
+                                'name' => $typeRow[0]['name'],
+                                'paycode' => $typeRow[0]['paycode'],
+                                'pay_rate' => $typeRow[0]['pay_rate'],
+                                'hours' => $typeRow->sum('hours'),
+                                'amount' => $typeRow->sum('amount'),
+                                'dept' => '',
+                                'division' => '',
+                                'location' => $typeRow[0]['location'],
 
-                            'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
-                            'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
-                        ];
+                                'caregiver_last_name' => $typeRow[0]['caregiver_last_name'],
+                                'caregiver_first_name' => $typeRow[0]['caregiver_first_name'],
+                            ];
+                        });
                     });
                 });
             });
