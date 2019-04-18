@@ -93,14 +93,14 @@ class ClaimsController extends BaseController
     {
         $this->authorize('read', $invoice);
 
-        // Disabled for now
-        return new ErrorResponse(412, "Contact Ally to configure your account for claim transmission.");
-
         if (empty($invoice->client->business->ein)) {
-            return new ErrorResponse(412, 'You cannot submit a claim because you do not have an EIN set.  Please visit Settings > General > Medicaid and to this value.');
+            return new ErrorResponse(412, 'You cannot submit a claim because you do not have an EIN set.  You can edit this information under Settings > General > Medicaid.');
         }
         if (empty($invoice->client->medicaid_id)) {
-            return new ErrorResponse(412, 'You cannot submit a claim because the client does not have a Medicaid ID set.  Please visit the client profile and set this value under the Insurance & Service Auths section.');
+            return new ErrorResponse(412, 'You cannot submit a claim because the client does not have a Medicaid ID set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
+        if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {
+            return new ErrorResponse(412, 'You cannot submit a claim because you do not have your HHAeXchange credentials set up.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
         }
 
         $claim = $invoice->claim;
@@ -120,7 +120,16 @@ class ClaimsController extends BaseController
             return new ErrorResponse(412, 'You cannot create a claim because there are no shifts attached to this invoice.');
         }
 
-        $hha = new HhaExchangeManager($invoice->client->business->ein);
+        try {
+            $hha = new HhaExchangeManager(
+                $invoice->client->business->hha_username,
+                $invoice->client->business->getHhaPassword(),
+                $invoice->client->business->ein
+            );
+        } catch (\Exception $ex) {
+            return new ErrorResponse(500, 'Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
+        }
+
         $hha->addItems($shiftData);
         if ($hha->uploadCsv()) {
             $claim->updateStatus(Claim::TRANSMITTED);

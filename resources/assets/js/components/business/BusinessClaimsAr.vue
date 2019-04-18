@@ -81,7 +81,10 @@
                 <template slot="actions" scope="row">
                     <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
                     <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
-                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">Transmit Claim</b-btn>
+                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
+                        <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
+                        <span>Transmit Claim</span>
+                    </b-btn>
                 </template>
             </b-table>
         </div>
@@ -222,6 +225,7 @@
                 }),
                 selectedInvoice: {},
                 busy: false,
+                transmittingId: null,
             }
         },
 
@@ -241,6 +245,7 @@
         methods: {
             transmitClaim(invoice) {
                 this.busy = true;
+                this.transmittingId = invoice.id;
                 let form = new Form({});
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
@@ -253,6 +258,7 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
+                        this.transmittingId = null;
                     });
             },
 
