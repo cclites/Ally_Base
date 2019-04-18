@@ -141,6 +141,16 @@
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
             </div>
         </b-modal>
+
+        <confirm-modal title="Select Claim Service"
+                       ref="confirmService"
+                       yesButton="Submit to HHAeXchange"
+                       yesVariant="info"
+                       noButton="Submit to Tellus"
+                       noVariant="info"
+        >
+            <p>Which service would you like to submit this claim to?</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -243,10 +253,19 @@
         },
 
         methods: {
-            transmitClaim(invoice) {
+            transmitClaim(invoice, service = '') {
+                if (service == '') {
+                    this.$refs.confirmService.confirm(
+                        () => { this.transmitClaim(invoice, 'HHA') },
+                        null,
+                        () => { this.transmitClaim(invoice, 'TELLUS') },
+                    );
+                    return;
+                }
+
                 this.busy = true;
                 this.transmittingId = invoice.id;
-                let form = new Form({});
+                let form = new Form({service});
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
                         // success
