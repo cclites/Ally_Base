@@ -35,18 +35,6 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="allowDebug">
-                    <b-col lg="12">
-                        <div class="form-check">
-                            <input-help :form="form" field="debugMode" text="Enable debug mode (returns variables but does not clock in)"></input-help>
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="debugMode" v-model="form.debugMode" value="1">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description"></span>
-                            </label>
-                        </div>
-                    </b-col>
-                </b-row>
                 <b-row>
                     <b-col>
                         <div class="alert alert-warning" v-show="!!locationWarning">
@@ -117,11 +105,9 @@
                     schedule_id: null,
                     latitude: null,
                     longitude: null,
-                    debugMode: false,
                 }),
                 clients: [],
                 schedules: [],
-                allowDebug: false,
                 stats: [],
                 time: null,
                 loadingText: null,

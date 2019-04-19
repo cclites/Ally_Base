@@ -88,7 +88,7 @@ class ClientController extends BaseController
                     return 0;
                 }
                 return ($diffA < $diffB) ? -1 : 1;
-            });
+            })->values();
         }
 
         return $schedules;
