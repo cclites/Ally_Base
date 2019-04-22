@@ -10,6 +10,7 @@ use App\Billing\Payments\BankAccountDeposit;
 use App\Billing\Payments\BankAccountPayment;
 use App\Billing\Payments\Contracts\DepositMethodStrategy;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Payments\PaymentMethodType;
 use App\Business;
 use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\ACHPaymentInterface;
@@ -99,31 +100,61 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
 
     public function setRoutingNumberAttribute($value)
     {
-        $this->attributes['routing_number'] = Crypt::encrypt($value);
+        $this->setRoutingNumber($value);
     }
 
     public function getRoutingNumberAttribute()
     {
-        return empty($this->attributes['routing_number']) ? null : Crypt::decrypt($this->attributes['routing_number']);
+        return $this->getRoutingNumber();
     }
 
     public function setAccountNumberAttribute($value)
     {
-        $this->attributes['account_number'] = Crypt::encrypt($value);
+        $this->setAccountNumber($value);
     }
 
     public function getAccountNumberAttribute()
     {
-        return empty($this->attributes['account_number']) ? null : Crypt::decrypt($this->attributes['account_number']);
+        return $this->getAccountNumber();
     }
 
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
 
+    function getRoutingNumber(): ?string
+    {
+        return empty($this->attributes['routing_number']) ? null : Crypt::decrypt($this->attributes['routing_number']);
+    }
+
+    function setRoutingNumber(?string $number)
+    {
+        $this->attributes['routing_number'] = $number ? Crypt::encrypt($number) : null;
+    }
+
+    function getAccountNumber(): ?string
+    {
+        return empty($this->attributes['account_number']) ? null : Crypt::decrypt($this->attributes['account_number']);
+    }
+
+    function setAccountNumber(?string $number)
+    {
+        $this->attributes['account_number'] = $number ? Crypt::encrypt($number) : null;
+    }
+
     function getBillingName(): string
     {
         return $this->name_on_account;
+    }
+
+    function getAccountType(): string
+    {
+        return $this->account_type ?? "checking";
+    }
+
+    function getAccountHolderType(): string
+    {
+        return $this->account_type ?? "personal";
     }
 
     function getBillingAddress(): ?\App\Address
@@ -154,15 +185,9 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
         return null;
     }
 
-    function getPaymentStrategy(): PaymentMethodStrategy
+    function getPaymentType(): PaymentMethodType
     {
-        return new BankAccountPayment($this);
-    }
-
-
-    function getDepositStrategy(): DepositMethodStrategy
-    {
-        return new BankAccountDeposit($this);
+        return PaymentMethodType::ACH();
     }
 
     /**

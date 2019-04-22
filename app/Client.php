@@ -9,6 +9,7 @@ use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payments\PaymentMethodType;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -583,17 +584,17 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
      * @param $method
      * @return mixed|null|string
      */
-    public function getPaymentType($method = null)
+    public function getPaymentType($method = null): PaymentMethodType
     {
         try {
             $payer = $this->primaryPayer;
             if ($payer && $method = $payer->getPaymentMethod()) {
-                return $method->getPaymentStrategy()->getPaymentType();
+                return $method->getPaymentType();
             }
         }
         catch (\Throwable $e) {}
 
-        return 'NONE';
+        return PaymentMethodType::NONE();
     }
 
     /**

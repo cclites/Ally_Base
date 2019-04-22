@@ -3,6 +3,7 @@ namespace App\Billing\Contracts;
 
 use App\Address;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Payments\PaymentMethodType;
 use App\Contracts\HasAllyFeeInterface;
 use App\Billing\GatewayTransaction;
 use App\PhoneNumber;
@@ -26,10 +27,7 @@ interface ChargeableInterface extends HasAllyFeeInterface
      */
     public function getBillingPhone(): ?PhoneNumber;
 
-    /**
-     * @return \App\Billing\Payments\Contracts\PaymentMethodStrategy
-     */
-    public function getPaymentStrategy(): PaymentMethodStrategy;
+    public function getPaymentType(): PaymentMethodType;
 
     /**
      * @return string

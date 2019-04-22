@@ -3,16 +3,12 @@ namespace App\Billing\Actions;
 
 use App\Billing\DepositLog;
 use App\Billing\Gateway\ACHDepositInterface;
+use App\Billing\Payments\DepositMethodFactory;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
 
 class ProcessChainDeposits
 {
-    /**
-     * @var \App\Billing\Gateway\ACHDepositInterface
-     */
-    protected $achGateway;
-
     /**
      * @var \App\Billing\Actions\ProcessInvoiceDeposit
      */
@@ -26,12 +22,16 @@ class ProcessChainDeposits
      * @var \App\Billing\Actions\ApplyExistingDeposits
      */
     protected $applyExistingDeposits;
+    /**
+     * @var \App\Billing\Payments\DepositMethodFactory
+     */
+    protected $methodFactory;
 
 
-    function __construct(ACHDepositInterface $achGateway = null, ProcessInvoiceDeposit $depositProcessor = null,
+    function __construct(DepositMethodFactory $methodFactory = null, ProcessInvoiceDeposit $depositProcessor = null,
         DepositInvoiceAggregator $invoiceAggregator = null, ApplyExistingDeposits $applyExistingDeposits = null)
     {
-        $this->achGateway = $achGateway ?: app(ACHDepositInterface::class);
+        $this->methodFactory = $methodFactory ?: new DepositMethodFactory(app(ACHDepositInterface::class));
         $this->depositProcessor = $depositProcessor ?: app(ProcessInvoiceDeposit::class);
         $this->invoiceAggregator = $invoiceAggregator ?: app(DepositInvoiceAggregator::class);
         $this->applyExistingDeposits = $applyExistingDeposits ?: app(ApplyExistingDeposits::class);
@@ -57,7 +57,7 @@ class ProcessChainDeposits
             $log = new DepositLog();
             $log->batch_id = $batchId;
             try {
-                $deposit = $this->depositProcessor->payInvoice($invoice);
+                $deposit = $this->depositProcessor->payInvoice($invoice, $this->methodFactory);
                 $log->setDeposit($deposit);
                 if ($deposit->transaction && $deposit->transaction->method) {
                     $log->setPaymentMethod($deposit->transaction->method);

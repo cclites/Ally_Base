@@ -7,6 +7,7 @@ use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\Payments\PaymentMethodType;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
 use App\User;
@@ -135,9 +136,9 @@ class CreditCard extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getPaymentStrategy(): PaymentMethodStrategy
+    function getPaymentType(): PaymentMethodType
     {
-        return new CreditCardPayment($this);
+        return $this->type === "amex" ? PaymentMethodType::AMEX() : PaymentMethodType::CC();
     }
 
     /**

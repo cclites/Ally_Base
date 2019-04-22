@@ -10,6 +10,7 @@ use App\Billing\Contracts\DepositInvoiceInterface;
 use App\Billing\Deposit;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payments\Contracts\DepositMethodStrategy;
+use App\Billing\Payments\DepositMethodFactory;
 
 class ProcessInvoiceDeposit
 {
@@ -29,7 +30,7 @@ class ProcessInvoiceDeposit
         $this->depositApplicator = $depositApplicator;
     }
 
-    public function payInvoice(DepositInvoiceInterface $invoice, ?DepositMethodStrategy $strategy = null, ?float $amount = null): Deposit
+    public function payInvoice(DepositInvoiceInterface $invoice, DepositMethodFactory $methodFactory, ?float $amount = null): Deposit
     {
         if ($amount === null) {
             $amount = $invoice->getAmountDue();
@@ -37,10 +38,10 @@ class ProcessInvoiceDeposit
 
         $deposit = null;
         if ($invoice instanceof CaregiverInvoice) {
-            $deposit = $this->depositProcessor->depositToCaregiver($invoice->caregiver, $strategy, $amount);
+            $deposit = $this->depositProcessor->depositToCaregiver($invoice->caregiver, $methodFactory, $amount);
         }
         else if ($invoice instanceof BusinessInvoice) {
-            $deposit = $this->depositProcessor->depositToBusiness($invoice->business, $strategy, $amount);
+            $deposit = $this->depositProcessor->depositToBusiness($invoice->business, $methodFactory, $amount);
         }
 
         if (!$deposit) {

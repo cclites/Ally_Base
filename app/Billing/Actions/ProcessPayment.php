@@ -52,7 +52,7 @@ class ProcessPayment
                 'client_id' => $client->id ?? null,
                 'business_id' => $business->id ?? $client->business_id ?? null,
                 'amount' => $transaction->amount,
-                'payment_type' => $strategy->getPaymentType(),
+                'payment_type' => $strategy->getPaymentMethod()->getPaymentType(),
                 'system_allotment' => $this->getAllyFee($strategy, $amount),
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
