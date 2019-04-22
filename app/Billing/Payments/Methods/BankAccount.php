@@ -6,10 +6,6 @@ use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Contracts\DepositableInterface;
 use App\Billing\GatewayTransaction;
-use App\Billing\Payments\BankAccountDeposit;
-use App\Billing\Payments\BankAccountPayment;
-use App\Billing\Payments\Contracts\DepositMethodStrategy;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\PaymentMethodType;
 use App\Business;
 use App\Billing\Gateway\ACHDepositInterface;
@@ -41,18 +37,6 @@ use Crypt;
  * @property-read mixed $last_four
  * @property-read \App\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountHolderType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNameOnAccount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNickname($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereRoutingNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
  * @mixin \Eloquent
  */
 class BankAccount extends AuditableModel implements ChargeableInterface, DepositableInterface

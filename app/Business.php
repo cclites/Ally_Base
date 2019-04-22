@@ -3,10 +3,8 @@
 namespace App;
 
 use App\Billing\Deposit;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\PaymentMethodType;
 use App\Contracts\BelongsToBusinessesInterface;
@@ -19,7 +17,6 @@ use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
 use Illuminate\Database\Eloquent\Builder;
-use Twilio\TwiML\Voice\Pay;
 
 /**
  * App\Business

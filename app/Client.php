@@ -4,7 +4,6 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
@@ -610,8 +609,8 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     /**
      * Aggregate schedules for this client and return an array of events
      *
-     * @param string|\DateTime $start
-     * @param string|\DateTime $end
+     * @param Carbon $start
+     * @param Carbon $end
      * @param bool $onlyStartTime Only include events matching the start time within the date range, otherwise include events that match start or end time
      *
      * @return array

@@ -4,8 +4,6 @@ namespace App\Billing\Payments\Methods;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\Payments\PaymentMethodType;
 use App\Traits\ChargedTransactionsTrait;
@@ -34,16 +32,6 @@ use Crypt;
  * @property-read mixed $last_four
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationMonth($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationYear($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereNameOnCard($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereNickname($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUserId($value)
  * @mixin \Eloquent
  */
 class CreditCard extends AuditableModel implements ChargeableInterface
@@ -64,7 +52,8 @@ class CreditCard extends AuditableModel implements ChargeableInterface
      */
     public static function getType($number)
     {
-        return \Inacho\CreditCard::validCreditCard($number)['type'] ?: null;
+        $validation = \Inacho\CreditCard::validCreditCard($number);
+        return empty($validation['type']) ? null : (string) $validation['type'];
     }
 
     ///////////////////////////////////////////
