@@ -4,11 +4,11 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payments\PaymentMethodType;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -583,17 +583,17 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
      * @param $method
      * @return mixed|null|string
      */
-    public function getPaymentType($method = null)
+    public function getPaymentType($method = null): PaymentMethodType
     {
         try {
             $payer = $this->primaryPayer;
             if ($payer && $method = $payer->getPaymentMethod()) {
-                return $method->getPaymentStrategy()->getPaymentType();
+                return $method->getPaymentType();
             }
         }
         catch (\Throwable $e) {}
 
-        return 'NONE';
+        return PaymentMethodType::NONE();
     }
 
     /**
@@ -609,8 +609,8 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     /**
      * Aggregate schedules for this client and return an array of events
      *
-     * @param string|\DateTime $start
-     * @param string|\DateTime $end
+     * @param Carbon $start
+     * @param Carbon $end
      * @param bool $onlyStartTime Only include events matching the start time within the date range, otherwise include events that match start or end time
      *
      * @return array

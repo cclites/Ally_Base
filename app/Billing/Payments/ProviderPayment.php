@@ -53,9 +53,4 @@ class ProviderPayment implements PaymentMethodStrategy
     {
         return $this->business;
     }
-
-    public function getPaymentType(): string
-    {
-        return 'ACH-P';
-    }
 }

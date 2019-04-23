@@ -4,8 +4,7 @@ namespace App\Billing\Payments\Methods;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Billing\Payments\TrustPayment;
+use App\Billing\Payments\PaymentMethodType;
 use App\Client;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
@@ -89,9 +88,9 @@ class Trust extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getPaymentStrategy(): PaymentMethodStrategy
+    function getPaymentType(): PaymentMethodType
     {
-        return new TrustPayment($this);
+        return PaymentMethodType::TRUST();
     }
 
 

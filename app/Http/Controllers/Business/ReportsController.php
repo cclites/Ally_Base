@@ -197,7 +197,7 @@ class ReportsController extends BaseController
     {
         if ($request->expectsJson() && $request->input('json')) {
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date));
+                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date . ' 23:59:59'));
             }
 
             return $report->forRequestedBusinesses()

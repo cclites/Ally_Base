@@ -4,6 +4,7 @@ namespace App\Scheduling;
 use App\Schedule;
 use App\ScheduleGroup;
 use App\ScheduleNote;
+use App\Scheduling\Data\Time;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -141,14 +142,18 @@ class ScheduleEditor
         // Prepend group id
         $data = ['group_id' => $group->id] + $data;
 
+        // Time difference
+        $newStartsAt = Carbon::parse($data['starts_at']);
+        $dayDifference = $startingSchedule->starts_at->diffInDays($newStartsAt);
+        $time = Time::fromDateTime($newStartsAt);
+
         \DB::beginTransaction();
         foreach($schedules as $schedule) {
             /** @var Schedule $schedule */
             // Prepend time difference to each schedule instance
-            $data = [
-                'starts_at' => $this->getNewStartsAt($schedule, $startingSchedule, $data['starts_at'] ?? null)
-                ] + $data;
-            $this->updateSingle($schedule, $data, $notes, $services);
+            $singleStartsAt = $this->modifyStartsAt($schedule->starts_at, $dayDifference, $time);
+            $singleData = ['starts_at' => $singleStartsAt] + $data;
+            $this->updateSingle($schedule, $singleData, $notes, $services);
         }
         \DB::commit();
 
@@ -169,14 +174,15 @@ class ScheduleEditor
             ->exists();
     }
 
-    private function getNewStartsAt(Schedule $currentSchedule, Schedule $startingSchedule, ?string $startsAt): Carbon
+    private function modifyStartsAt(Carbon $startsAt, int $dayDifference, Time $time)
     {
-        if (!$startsAt) return $currentSchedule->starts_at;
+        if (abs($dayDifference) > 800) {
+            throw new \InvalidArgumentException("The difference in days is too large. (2 Year Maximum)");
+        }
 
-        $startsAt = Carbon::parse($startsAt, $startingSchedule->starts_at->timezone);
-        $diffInDays = $startingSchedule->starts_at->diffInDays($startsAt, false);
-        $newStartsAt = $currentSchedule->starts_at->copy()->addDays($diffInDays)->setTimeFromTimeString($startsAt->toTimeString());
+        // Prevent mutations
+        $startsAt = $startsAt->copy();
 
-        return $newStartsAt;
+        return $startsAt->addDays($dayDifference)->setTimeFromTimeString($time->value());
     }
 }

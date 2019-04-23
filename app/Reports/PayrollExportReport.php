@@ -84,7 +84,8 @@ class PayrollExportReport extends BaseReport
                 return [
                     'caregiver_id' => $row->caregiver_id,
                     'name' => $row->caregiver->name,
-                    'paycode' => $row->getPaycode(),
+//                    'paycode' => $row->getPaycode(),
+                    'pay_rate' => (string) $row->getCaregiverRate(),
                     'hours' => $row->duration(),
                     'amount' => $row->costs()->getCaregiverCost(),
                     'location' => optional($row->client->evvAddress)->zip,
@@ -115,13 +116,13 @@ class PayrollExportReport extends BaseReport
     {
         $results = [];
 
-        $data->groupBy(['caregiver_id', 'paycode'])
+        $data->groupBy(['caregiver_id', 'pay_rate'])
             ->each(function ($cgRow) use (&$results) {
                 $cgRow->each(function ($typeRow) use (&$results) {
                     array_push($results, [
                         'caregiver_id' => $typeRow[0]['caregiver_id'],
                         'name' => $typeRow[0]['name'],
-                        'paycode' => $typeRow[0]['paycode'],
+                        'pay_rate' => $typeRow[0]['pay_rate'],
                         'hours' => $typeRow->sum('hours'),
                         'amount' => $typeRow->sum('amount'),
                         'dept' => '',
@@ -160,14 +161,14 @@ class PayrollExportReport extends BaseReport
     {
         $results = [];
 
-        $data->groupBy(['caregiver_id', 'location', 'paycode'])
+        $data->groupBy(['caregiver_id', 'location', 'pay_rate'])
             ->each(function ($cgGroup) use (&$results) {
                 $cgGroup->each(function ($zipGroup) use (&$results) {
                     $zipGroup->each(function ($typeRow) use (&$results) {
                         $results[] = [
                             'caregiver_id' => $typeRow[0]['caregiver_id'],
                             'name' => $typeRow[0]['name'],
-                            'paycode' => $typeRow[0]['paycode'],
+                            'pay_rate' => $typeRow[0]['pay_rate'],
                             'hours' => $typeRow->sum('hours'),
                             'amount' => $typeRow->sum('amount'),
                             'dept' => '',
