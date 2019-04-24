@@ -160,6 +160,11 @@ class ShiftFlagManager
         return false;
     }
 
+    public function isAttentionRequired() : bool
+    {
+        return $this->shift->client_rate === 0;
+    }
+
     /**
      * Get all duplicates of the shift.
      *

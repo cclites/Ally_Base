@@ -7,6 +7,11 @@ export default {
                     'icon': 'fa fa-plus-circle mr-1',
                     'color': '#FC4B6C',
                 },
+                'attention_required': {
+                    'text': 'Attention Required',
+                    'icon': 'fa fa-exclamation mr-1',
+                    'color': 'purple',
+                },
                 'converted': {
                     'text': 'Copied from Schedule',
                     'icon': 'fa fa-calendar-plus-o mr-1',
@@ -36,7 +41,7 @@ export default {
                     'text': 'Duration Mismatch',
                     'icon': 'fa fa-exchange mr-1',
                     'color': 'red',
-                }
+                },
             },
         }
     },
