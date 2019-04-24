@@ -27,6 +27,14 @@ class PendingShiftsController extends Controller
 
     public function update(Request $request, Shift $shift = null)
     {
+        $request->validate([
+            'business_id' => 'required|exists:businesses,id',
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ], [
+            'business_id.*' => 'A valid provider is required',
+        ]);
+
         $authorized = $request->input('authorized');
         $validCurrentStatuses = [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_INVOICE];
         if (!$shift && $request->has('start_date')) {
