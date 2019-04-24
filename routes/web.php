@@ -550,10 +550,13 @@ Route::group([
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::delete('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@destroy');
     Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
+    Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
+    Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
