@@ -7,11 +7,6 @@ export default {
                     'icon': 'fa fa-plus-circle mr-1',
                     'color': '#FC4B6C',
                 },
-                'attention_required': {
-                    'text': 'Attention Required',
-                    'icon': 'fa fa-exclamation mr-1',
-                    'color': 'purple',
-                },
                 'converted': {
                     'text': 'Copied from Schedule',
                     'icon': 'fa fa-calendar-plus-o mr-1',
@@ -20,6 +15,16 @@ export default {
                 'duplicate': {
                     'text': 'Potential Duplicate',
                     'icon': 'fa fa-files-o mr-1',
+                    'color': 'red',
+                },
+                'duration_mismatch': {
+                    'text': 'Duration Mismatch',
+                    'icon': 'fa fa-exchange mr-1',
+                    'color': 'red',
+                },
+                'missing_rates': {
+                    'text': 'Missing Rates',
+                    'icon': 'fa fa-usd mr-1',
                     'color': 'red',
                 },
                 'modified': {
@@ -35,11 +40,6 @@ export default {
                 'time_excessive': {
                     'text': 'Excessive Length',
                     'icon': 'fa fa-clock-o mr-1',
-                    'color': 'red',
-                },
-                'duration_mismatch': {
-                    'text': 'Duration Mismatch',
-                    'icon': 'fa fa-exchange mr-1',
                     'color': 'red',
                 },
             },

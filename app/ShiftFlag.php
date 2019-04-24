@@ -34,21 +34,21 @@ class ShiftFlag extends Model
 
     const FLAGS = [
         self::ADDED,
-        self::ATTENTION_REQUIRED,
         self::CONVERTED,
         self::DUPLICATE,
+        self::DURATION_MISMATCH,
+        self::MISSING_RATES,
         self::MODIFIED,
         self::OUTSIDE_AUTH,
         self::TIME_EXCESSIVE,
-        self::DURATION_MISMATCH,
     ];
 
     const ADDED = 'added';
     const CONVERTED = 'converted';
     const DUPLICATE = 'duplicate';
+    const DURATION_MISMATCH = 'duration_mismatch';
+    const MISSING_RATES = 'missing_rates';
     const MODIFIED = 'modified';
     const OUTSIDE_AUTH = 'outside_auth';
     const TIME_EXCESSIVE = 'time_excessive';
-    const DURATION_MISMATCH = 'duration_mismatch';
-    const ATTENTION_REQUIRED = 'attention_required';
 }

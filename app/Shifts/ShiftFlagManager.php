@@ -160,9 +160,9 @@ class ShiftFlagManager
         return false;
     }
 
-    public function isAttentionRequired() : bool
+    public function isMissingRates() : bool
     {
-        return $this->shift->client_rate === 0;
+        return $this->shift->costs()->getClientCost(false) == 0;
     }
 
     /**
