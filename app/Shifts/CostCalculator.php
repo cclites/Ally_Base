@@ -262,7 +262,9 @@ class CostCalculator
     /**
      * Return the total cost of a shift with all expenses included (amount owed by client)
      *
+     * @param bool $expensesIncluded
      * @return float
+     * @throws \Exception
      */
     public function getTotalCost($expensesIncluded = true)
     {
@@ -283,7 +285,7 @@ class CostCalculator
         // Old (Pre-February 2019)
         return round(
             bcadd(
-                bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
+                bcadd($this->getProviderFee(), $this->getCaregiverCost($expensesIncluded), self::DEFAULT_SCALE),
                 $this->getAllyFee(),
                 self::DEFAULT_SCALE
             ),
@@ -405,6 +407,6 @@ class CostCalculator
 
     protected function isUsingClientRate()
     {
-        return $this->shift->client_rate || $this->shift->services->count();
+        return $this->shift->client_rate !== null || $this->shift->services->count();
     }
 }

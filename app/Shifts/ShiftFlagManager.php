@@ -160,6 +160,11 @@ class ShiftFlagManager
         return false;
     }
 
+    public function isMissingRates() : bool
+    {
+        return $this->shift->costs()->getClientCost(false) == 0;
+    }
+
     /**
      * Get all duplicates of the shift.
      *
