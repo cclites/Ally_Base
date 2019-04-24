@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use App\Billing\ClientRate;
+
 trait CreatesBusinesses
 {
     /**
@@ -47,5 +49,10 @@ trait CreatesBusinesses
 
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
+
+        factory(ClientRate::class)->create([
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+        ]);
     }
 }

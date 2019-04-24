@@ -786,9 +786,10 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
      * Get the client's service authorizations active on the 
      * specified date.  Defaults to today.
      *
+     * @param null|\Carbon\Carbon $date
      * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
      */
-    public function getActiveServiceAuths($date = null) : Collection
+    public function getActiveServiceAuths(?Carbon $date = null) : Collection
     {
         if (empty($date)) {
             $date = Carbon::now();
