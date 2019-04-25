@@ -33,11 +33,11 @@
                             <option value="PAYCHEX">Paychex</option>
                             <option value="BCN">BCN</option>
                         </b-select>
-                        <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-2 mb-2">
+                        <b-button @click="fetch()" variant="info" :disabled="busy || form.output_format == ''" class="mr-2 mb-2">
                             <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                             Generate Report
                         </b-button>
-                        <b-button @click="exportReport()" variant="success" :disabled="busy" class="mb-2">
+                        <b-button @click="exportReport()" variant="success" :disabled="busy || form.output_format == ''" class="mb-2">
                             <i class="fa fa-file-excel-o"></i> Export to Excel
                         </b-button>
                     </div>
@@ -84,7 +84,10 @@
 
         computed: {
             emptyText() {
-                return 'No records for ' + this.formatDate(this.start) + ' through ' + this.formatDate(this.end);
+                if (! this.hasRun) {
+                    return 'Select a date range and format and press Generate Report';
+                }
+                return 'No records for ' + this.formatDate(this.form.start) + ' through ' + this.formatDate(this.form.end);
             }
         },
 
@@ -125,6 +128,7 @@
                     { key: 'amount', label: 'Amount', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
                 items: this.shifts,
+                hasRun: false,
             }
         },
 
@@ -144,6 +148,7 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
+                        this.hasRun = true;
                     })
             },
 
