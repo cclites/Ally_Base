@@ -30,16 +30,6 @@ class Claim extends AuditableModel
      */
     protected $appends = [];
 
-    ///////////////////////////////////////
-    /// Claim Statuses
-    ///////////////////////////////////////
-    const NOT_SENT = 'NOT_SENT';
-    const CREATED = 'CREATED';
-    const TRANSMITTED = 'TRANSMITTED';
-    const RETRANSMITTED = 'RETRANSMITTED';
-    const ACCEPTED = 'ACCEPTED';
-    const REJECTED = 'REJECTED';
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -61,7 +51,7 @@ class Claim extends AuditableModel
     */
     public function statuses()
     {
-        return $this->hasMany(ClaimStatus::class);
+        return $this->hasMany(ClaimStatusHistory::class);
     }
 
     /**
@@ -105,76 +95,37 @@ class Claim extends AuditableModel
     /**
      * Set the status of the claim, and add to it's status history.
      *
-     * @param string $status
+     * @param \App\Billing\ClaimStatus $status
+     * @param array $otherUpdates
      */
-    public function updateStatus(string $status) : void
+    public function updateStatus(ClaimStatus $status, array $otherUpdates = []) : void
     {
-        $this->update(['status' => $status]);
+        $this->update(array_merge(['status' => $status], $otherUpdates));
         $this->statuses()->create(['status' => $status]);
     }
 
     /**
-     * Convert claim into hha import row data.
+     * Get the claim from a ClientInvoice or create a
+     * new claim from the invoice data.
      *
-     * @return array
+     * @param \App\Billing\ClientInvoice $invoice
+     * @return \App\Billing\Claim
      */
-    public function getHhaExchangeData() : array
+    public static function getOrCreate(ClientInvoice $invoice) : Claim
     {
-        $timeFormat = 'Y-m-d H:i:s';
-        $data = [];
-        $shifts = Shift::whereIn('id', $this->invoice->items->where('invoiceable_type', 'shifts')->pluck('invoiceable_id'))
-            ->get();
+        $claim = $invoice->claim;
 
-        foreach ($shifts as $shift) {
-            $activities = $shift->activities->pluck('id')->toArray();
-            $data[] = [
-                $this->invoice->client->business->ein ? str_replace('-', '', $this->invoice->client->business->ein) : '', //    "Agency Tax ID",
-                $this->invoice->clientPayer->payer_id, //    "Payer ID",
-                $this->invoice->client->medicaid_id, //    "Medicaid Number",
-                $shift->caregiver_id, //    "Caregiver Code",
-                $shift->caregiver->firstname, //    "Caregiver First Name",
-                $shift->caregiver->lastname, //    "Caregiver Last Name",
-                $shift->caregiver->gender ? strtoupper($shift->caregiver->gender) : '', //    "Caregiver Gender",
-                $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
-                $shift->caregiver->ssn, //    "Caregiver SSN",
-                $shift->id, //    "Schedule ID",
-                // TODO: implement Procedure Code
-                'Respite Care', //    "Procedure Code",
-                $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
-                $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
-                $shift->checked_in_time->format($timeFormat), //    "Visit Start Time",
-                $shift->checked_out_time->format($timeFormat), //    "Visit End Time",
-                $shift->checked_in_time->format($timeFormat), //    "EVV Start Time",
-                $shift->checked_out_time->format($timeFormat), //    "EVV End Time",
-                optional($shift->client->evvAddress)->full_address, //    "Service Location",
-                empty($activities) ? '' : implode('|', $activities), //    "Duties",
-                $shift->checked_in_number, //    "Clock-In Phone Number",
-                $shift->checked_in_latitude, //    "Clock-In Latitude",
-                $shift->checked_in_longitude, //    "Clock-In Longitude",
-                '', //    "Clock-In EVV Other Info",
-                $shift->checked_out_number, //    "Clock-Out Phone Number",
-                $shift->checked_out_latitude, //    "Clock-Out Latitude",
-                $shift->checked_out_longitude, //    "Clock-Out Longitude",
-                '', //    "Clock-Out EVV Other Info",
-                $this->client_invoice_id, //    "Invoice Number",
-                '', //    "Visit Edit Reason Code",
-                '', //    "Visit Edit Action Taken",
-                '', //    "Notes",
-                'N', //    "Is Deletion",
-                '', //    "Invoice Line Item ID",
-                'N', //    "Missed Visit",
-                '', //    "Missed Visit Reason Code",
-                '', //    "Missed Visit Action Taken Code",
-                '', //    "Timesheet Required",
-                '', //    "Timesheet Approved",
-                '', //    "User Field 1",
-                '', //    "User Field 2",
-                '', //    "User Field 3",
-                '', //    "User Field 4",
-                '', //    "User Field 5",
-            ];
+        if (empty($claim)) {
+            $claim = Claim::create([
+                'client_invoice_id' => $invoice->id,
+                'amount' => $invoice->amount,
+                'balance' => $invoice->amount,
+                'status' => ClaimStatus::CREATED(),
+            ]);
+
+            $claim->statuses()->create(['status' => ClaimStatus::CREATED()]);
         }
 
-        return $data;
+        return $claim;
     }
 }

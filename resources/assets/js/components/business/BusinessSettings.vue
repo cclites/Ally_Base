@@ -491,6 +491,42 @@
                 <b-tab title="Overtime" href="#overtime">
                     <business-overtime-settings :business="this.business"></business-overtime-settings>
                 </b-tab>
+                <b-tab title="Claims" href="#cliams">
+                    <b-row>
+                        <b-col lg="6">
+                            <h4>HHAeXchange Credentials</h4>
+                            <hr/>
+                            <b-form-group label="Username" label-for="hha_username">
+                                <b-form-input id="hha_username" v-model="businessSettings.hha_username"></b-form-input>
+                                <input-help :form="businessSettings" field="hha_username" text="Enter your HHAeXchange provided SFTP username."></input-help>
+                            </b-form-group>
+                            <b-form-group label="Password" label-for="hha_password">
+                                <b-form-input id="hha_password" v-model="businessSettings.hha_password"></b-form-input>
+                                <input-help :form="businessSettings" field="hha_password" text="Enter your HHAeXchange provided SFTP password."></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <h4>Tellus Credentials</h4>
+                            <hr/>
+                            <b-form-group label="Username" label-for="tellus_username">
+                                <b-form-input id="tellus_username" v-model="businessSettings.tellus_username"></b-form-input>
+                                <input-help :form="businessSettings" field="tellus_username" text="Enter your Tellus provided API username."></input-help>
+                            </b-form-group>
+                            <b-form-group label="Password" label-for="tellus_password">
+                                <b-form-input id="tellus_password" v-model="businessSettings.tellus_password"></b-form-input>
+                                <input-help :form="businessSettings" field="tellus_password" text="Enter your Tellus provided API password."></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col>
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
+                            </b-btn>
+                        </b-col>
+                    </b-row>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -542,9 +578,9 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
                 }
             },
         },
@@ -608,13 +644,27 @@
                     auto_append_hours: business.auto_append_hours,
                     auto_confirm_unmodified_shifts: business.auto_confirm_unmodified_shifts,
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
-                    enable_client_onboarding: business.enable_client_onboarding
+                    enable_client_onboarding: business.enable_client_onboarding,
+                    hha_username: business.hha_username,
+                    hha_password: business.hha_password ? '********' : '',
+                    tellus_username: business.tellus_username,
+                    tellus_password: business.tellus_password ? '********' : '',
                 });
             },
 
             async update() {
-                const response = await this.businessSettings.put('/business/settings/' + this.business.id);
-                this.$store.commit('updateBusiness', response.data.data);
+                const response = await
+                this.businessSettings.put('/business/settings/' + this.business.id)
+                    .then( ({ data }) => {
+                        if (this.businessSettings.hha_password) {
+                            this.businessSettings.hha_password = '********';
+                        }
+                        if (this.businessSettings.tellus_password) {
+                            this.businessSettings.tellus_password = '********';
+                        }
+                        this.$store.commit('updateBusiness', data.data);
+                    })
+                    .catch(e => {});
             },
 
             getSignatureOption(business) {

@@ -81,7 +81,10 @@
                 <template slot="actions" scope="row">
                     <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
                     <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
-                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">Transmit Claim</b-btn>
+                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
+                        <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
+                        <span>Transmit Claim</span>
+                    </b-btn>
                 </template>
             </b-table>
         </div>
@@ -138,6 +141,16 @@
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
             </div>
         </b-modal>
+
+        <confirm-modal title="Select Claim Service"
+                       ref="confirmService"
+                       yesButton="Submit to HHAeXchange"
+                       yesVariant="info"
+                       noButton="Submit to Tellus"
+                       noVariant="info"
+        >
+            <p>Which service would you like to submit this claim to?</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -222,6 +235,7 @@
                 }),
                 selectedInvoice: {},
                 busy: false,
+                transmittingId: null,
             }
         },
 
@@ -239,9 +253,19 @@
         },
 
         methods: {
-            transmitClaim(invoice) {
+            transmitClaim(invoice, service = '') {
+                if (service == '') {
+                    this.$refs.confirmService.confirm(
+                        () => { this.transmitClaim(invoice, 'HHA') },
+                        null,
+                        () => { this.transmitClaim(invoice, 'TELLUS') },
+                    );
+                    return;
+                }
+
                 this.busy = true;
-                let form = new Form({});
+                this.transmittingId = invoice.id;
+                let form = new Form({service});
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
                         // success
@@ -253,6 +277,7 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
+                        this.transmittingId = null;
                     });
             },
 
