@@ -34,7 +34,7 @@ class CertificationExpiring extends BaseNotification
      *
      * @var integer
      */
-    public static $threshold = 30;
+    const THRESHOLD = 30;
 
     /**
      * The related license.
