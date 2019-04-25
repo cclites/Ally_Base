@@ -275,7 +275,7 @@
         ally_fixed: "0.00",
         total_fixed: "0.00",
         today: moment().format('MM/DD/YYYY'),
-        start_date: moment().format('MM/DD/YYYY'),
+        start_date: moment().subtract(1, 'week').format('MM/DD/YYYY'),
         end_date: "12/31/9999",
     });
 

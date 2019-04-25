@@ -200,7 +200,7 @@ Route::group([
     Route::post('caregivers/{caregiver}/notification-preferences', 'Business\CaregiverController@updateNotificationPreferences');
     Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
     Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
-
+    Route::resource('caregivers/{caregiver}/restrictions', 'Business\BusinessCaregiverRestrictionController');
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
@@ -350,6 +350,7 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::get('schedule/caregivers', 'Business\ScheduleController@caregiverData')->name('schedule.caregivers');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
@@ -549,10 +550,13 @@ Route::group([
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::delete('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@destroy');
     Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
+    Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
+    Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');

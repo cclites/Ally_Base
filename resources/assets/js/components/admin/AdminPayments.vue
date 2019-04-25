@@ -104,6 +104,9 @@
                         <span v-else>Unpaid</span>
                         <span v-if="row.item.client_on_hold">- On Hold</span>
                     </template>
+                    <template slot="actions" scope="row">
+                        <b-button @click="uninvoice(row.item.id)" variant="danger">Uninvoice</b-button>
+                    </template>
                 </b-table>
             </div>
         </div>
@@ -163,6 +166,9 @@
                     },
                     {
                         key: 'status',
+                    },
+                    {
+                        key: 'actions',
                     }
                 ],
                 sortBy: null,
@@ -271,6 +277,12 @@
 
             paymentUrl(id, view="") {
                 return `/admin/charges/${id}/${view}`;
+            },
+
+            async uninvoice(id) {
+                let form = new Form({});
+                await form.submit("delete", "/admin/invoices/clients/" + id);
+                this.invoices = this.invoices.filter(i => i.id != id);
             }
         },
 

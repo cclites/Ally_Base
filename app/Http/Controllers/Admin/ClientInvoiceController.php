@@ -10,7 +10,9 @@ use App\BusinessChain;
 use App\Client;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
+use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientInvoice as ClientInvoiceResponse;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -93,5 +95,18 @@ class ClientInvoiceController extends Controller
         $strategy = InvoiceViewFactory::create($invoice, $view);
         $viewGenerator = new InvoiceViewGenerator($strategy);
         return $viewGenerator->generateClientInvoice($invoice);
+    }
+
+    public function destroy(ClientInvoice $invoice)
+    {
+        if ($invoice->payments()->exists()) {
+            return new ErrorResponse(400, "This invoice cannot be removed because it has payments assigned.");
+        }
+
+        if ($invoice->delete()) {
+            return new SuccessResponse("The invoice has been removed.");
+        }
+
+        return new ErrorResponse(500, "Unable to remove invoice.");
     }
 }

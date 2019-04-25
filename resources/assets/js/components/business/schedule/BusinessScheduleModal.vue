@@ -308,14 +308,11 @@
                                 <b-alert v-if="isUsingOvertime" variant="warning" show>
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
-                                <div v-if="expiredLicenses">
-                                    <b-alert v-for="license in expiredLicenses" :key="license.id" variant="warning" show>
-                                        Warning: {{ license.caregiver_name }}'s {{ license.name }} certification {{ license.verb }} on {{ license.date }}.
+                                <div v-if="warnings && warnings.length">
+                                    <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
+                                        <strong>Warning:</strong> {{ warning }}
                                     </b-alert>
                                 </div>
-                                <b-alert v-if="caregiverDayOff" variant="warning" show>
-                                    Warning: {{ caregiverDayOff.caregiver_name }} has marked them self unavailable on {{ caregiverDayOff.date }}.
-                                </b-alert>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -496,6 +493,7 @@
                 maxHoursWarning: false,
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
+                warnings: [],
             }
         },
 
@@ -507,65 +505,6 @@
         },
 
         computed: {
-            caregiverDayOff() {
-                if (! this.form.caregiver_id || ! this.allCaregivers) {
-                    return false;
-                }
-
-                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
-                if (! caregiver || ! caregiver.days_off || caregiver.days_off.length === 0) {
-                    return false;
-                }
-
-                let startMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.startDate);
-                if (startMatch) {
-                    return { caregiver_name: caregiver.name, date: moment(startMatch.date).format('M/D/YY') };
-                }
-
-                let endMatch = caregiver.days_off.find(x => moment(x.date).format('MM/DD/YYYY') == this.firstShiftEndDate);
-                if (endMatch) {
-                    return { caregiver_name: caregiver.name, date: moment(endMatch.date).format('M/D/YY') };
-                }
-                return false;
-            },
-
-            expiredLicenses() {
-                if (! this.form.caregiver_id || ! this.allCaregivers) {
-                    return false;
-                }
-
-                let caregiver = this.allCaregivers.find(x => x.id === this.form.caregiver_id);
-                if (! caregiver || ! caregiver.licenses ) {
-                    return false;
-                }
-                
-                let licenses = [];
-                for (let index in caregiver.licenses) {
-                    let license = caregiver.licenses[index];
-                    console.log(license);
-                    if (moment(license.expires_at).isBefore(moment())) {
-                        licenses.push({
-                            ...license,
-                            verb: 'expired',
-                            date: this.formatDateFromUTC(license.expires_at),
-                            caregiver_name: caregiver.name,
-                        });
-                    } else if (moment(license.expires_at).isBefore(moment().add(30, 'days'))) {
-                        licenses.push({
-                            ...license,
-                            verb: 'is expiring',
-                            date: this.formatDateFromUTC(license.expires_at),
-                            caregiver_name: caregiver.name,
-                        });
-                    }
-                }
-
-                if (licenses.length === 0) {
-                    return false;
-                }
-                return licenses;
-            },
-
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -709,6 +648,32 @@
                 }
             },
 
+            checkForWarnings: _.debounce((vm) => {
+                console.log('check warnings: ', vm);
+                let form = new Form({
+                    caregiver: vm.form.caregiver_id ? vm.form.caregiver_id : '',
+                    client: vm.form.client_id ? vm.form.client_id : '',
+                    duration: vm.getDuration(),
+                    starts_at: vm.getStartsAt(),
+                    id: vm.schedule.id ? vm.schedule.id : '',
+                    payer_id: vm.form.payer_id,
+                    service_id: vm.form.service_id,
+                    services: vm.form.services,
+                });
+
+                if (! form.caregiver && ! form.client) {
+                    // skip warnings if client and cg not set
+                    return;
+                }
+
+                form.alertOnResponse = false;
+                form.post('/business/schedule/warnings')
+                    .then( ({ data }) => {
+                        vm.warnings = data;
+                    })
+                    .catch(e => {})
+            }, 350),
+
             changedStartDate(startDate) {
                 this.fetchAllRates();
             },
@@ -762,6 +727,7 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = schedule.client_rate == null;
+                this.warnings = [];
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -1036,6 +1002,13 @@
         },
 
         watch: {
+            form: {
+                handler(obj){
+                    this.checkForWarnings(this);
+                },
+                deep: true
+            },
+
             'form.hours_type': function(newVal, oldVal) {
                 if (! oldVal || newVal == oldVal) {
                     return;

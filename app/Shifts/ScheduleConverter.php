@@ -82,7 +82,7 @@ class ScheduleConverter
                                       ->onlyStatus($this->convertibleStatuses)
                                       ->getSchedulesStartingBetween($start, $end);
 
-        echo "Converting schedules between {$start->toDateTimeString()} and {$end->toDateTimeString()}: ";
+        $this->output("Converting schedules between {$start->toDateTimeString()} and {$end->toDateTimeString()}: ");
 
         foreach ($schedules as $schedule) {
             $expectedClockIn = $schedule->starts_at;
@@ -97,7 +97,7 @@ class ScheduleConverter
             }
         }
 
-        echo count($shifts) . "shifts\n";
+        $this->output(count($shifts) . "shifts\n");
 
         return $shifts;
     }
@@ -187,4 +187,12 @@ class ScheduleConverter
         return $shift;
     }
 
+    public function output($message)
+    {
+        if (config('app.env') == 'testing') {
+            return;
+        }
+
+        echo $message;
+    }
 }

@@ -16,6 +16,7 @@ use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
+use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -802,6 +803,46 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getDisplayValue(): string
     {
         return 'ACH-P *' . $this->paymentAccount->last_four;
+    }
+
+    /**
+     * Setter for hha_password field.
+     *
+     * @param $value
+     */
+    public function setHhaPassword($value) : void
+    {
+        $this->attributes['hha_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for hha_password field.
+     *
+     * @return string
+     */
+    public function getHhaPassword() : string
+    {
+        return empty($this->attributes['hha_password']) ? null : Crypt::decrypt($this->attributes['hha_password']);
+    }
+
+    /**
+     * Setter for tellus_password field.
+     *
+     * @param $value
+     */
+    public function setTellusPassword($value) : void
+    {
+        $this->attributes['tellus_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for tellus_password field.
+     *
+     * @return string
+     */
+    public function getTellusPassword() : string
+    {
+        return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
     }
 
     ////////////////////////////////////

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\ValidTimezoneOrOffset;
+use Crypt;
 
 class UpdateBusinessRequest extends BusinessRequest
 {
@@ -24,7 +25,6 @@ class UpdateBusinessRequest extends BusinessRequest
             'location_exceptions' => 'required|bool',
             'timesheet_exceptions' => 'required|bool',
             'require_signatures' => 'required|bool',
-            'mileage_rate' => 'required|numeric',
             'mileage_rate' => 'required|numeric',
             'shift_rounding_method' => 'required|in:none,shift,individual',
             'calendar_default_view' => 'required',
@@ -59,6 +59,10 @@ class UpdateBusinessRequest extends BusinessRequest
             'auto_confirm_unmodified_shifts' => 'required|bool',
             'auto_confirm_verified_shifts' => 'required|bool',
             'enable_client_onboarding' => 'required|bool',
+            'hha_username' => 'nullable|string|max:255',
+            'hha_password' => 'nullable',
+            'tellus_username' => 'nullable|string|max:255',
+            'tellus_password' => 'nullable',
         ];
     }
 
@@ -66,5 +70,35 @@ class UpdateBusinessRequest extends BusinessRequest
         return [
             'calendar_next_day_threshold.date_format' => 'The next day threshold must be in 24-hour format as HH:MM:SS',
         ];
+    }
+
+    public function filtered()
+    {
+        $data = $this->validated();
+        if ($data['auto_confirm'] == 1) {
+            // turn off related other confirm settings
+            $data['allow_client_confirmations'] = 0;
+            $data['auto_confirm_modified'] = 0;
+            $data['shift_confirmation_email'] = 0;
+            $data['charge_diff_email'] = 0;
+            $data['auto_append_hours'] = 0;
+            $data['auto_confirm_unmodified_shifts'] = 0;
+        }
+
+        if ($data['hha_password'] == '********') {
+            unset($data['hha_password']);
+        }
+        if (isset($data['hha_password'])) {
+            $data['hha_password'] = Crypt::encrypt($data['hha_password']);
+        }
+
+        if ($data['tellus_password'] == '********') {
+            unset($data['tellus_password']);
+        }
+        if (isset($data['tellus_password'])) {
+            $data['tellus_password'] = Crypt::encrypt($data['tellus_password']);
+        }
+
+        return $data;
     }
 }

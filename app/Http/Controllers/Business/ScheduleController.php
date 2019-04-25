@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
+use App\Billing\ScheduleService;
 use App\Business;
 use App\Caregiver;
+use App\CaregiverLicense;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
@@ -12,6 +14,7 @@ use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
+use App\Notifications\Caregiver\CertificationExpiring;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -23,6 +26,7 @@ use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Scheduling\ScheduleEditor;
+use App\Scheduling\ScheduleWarningAggregator;
 use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -548,10 +552,40 @@ class ScheduleController extends BaseController
      */
     public function caregiverData()
     {
-        return response()->json(Caregiver::with(['clients.business', 'licenses', 'daysOff'])
+        return response()->json(Caregiver::with(['clients.business'])
             ->forRequestedBusinesses()
             ->ordered()
             ->get()
         );
+    }
+
+    /**
+     * Create a temp schedule object with the request data and
+     * check if there are any warnings that should be displayed
+     * to the OfficeUser.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function warnings(Request $request)
+    {
+        $schedule = Schedule::make([
+            'caregiver_id' => $request->caregiver,
+            'client_id' => $request->client,
+            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone()),
+            'duration' => $request->duration,
+            'payer_id' => $request->payer_id,
+            'service_id' => $request->service_id,
+        ]);
+        $schedule->id = $request->id ? $request->id : null;
+
+        $services = collect([]);
+        foreach ($request->services as $service) {
+            $services->push(ScheduleService::make($service));
+        }
+        $schedule->setRelation('services', $services);
+
+        $aggregator = new ScheduleWarningAggregator($schedule);
+        return response()->json($aggregator->getAll());
     }
 }

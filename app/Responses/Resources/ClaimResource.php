@@ -1,10 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
-use App\Billing\Claim;
-use App\Billing\Exceptions\PaymentMethodError;
-use Illuminate\Http\Resources\Json\Resource;
-use Illuminate\Support\Collection;
+use App\Billing\ClaimStatus;
 
 class ClaimResource extends ClientInvoice
 {
@@ -23,7 +20,7 @@ class ClaimResource extends ClientInvoice
             'payments' => $this->resource->payments,
             'balance' => $this->resource->amount - $this->resource->amount_paid,
             'claim_balance' => empty($this->resource->claim) ? 0.00 : $this->resource->claim->balance,
-            'claim_status' => empty($this->resource->claim) ? Claim::NOT_SENT : $this->resource->claim->status,
+            'claim_status' => empty($this->resource->claim) ? ClaimStatus::NOT_SENT() : $this->resource->claim->status,
             'claim' => $this->resource->claim,
         ]);
     }

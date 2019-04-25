@@ -13,6 +13,8 @@ use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
+use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\DepositInvoice as DepositInvoiceResponse;
@@ -119,6 +121,32 @@ class DepositInvoiceController extends Controller
     {
         $viewGenerator = $this->getViewGenerator($invoice, $view);
         return $viewGenerator->generateCaregiverInvoice($invoice);
+    }
+
+    public function destroyBusinessInvoice(BusinessInvoice $invoice)
+    {
+        if ($invoice->deposits()->exists()) {
+            return new ErrorResponse(400, 'This invoice cannot be removed because it has deposits assigned.');
+        }
+
+        if ($invoice->delete()) {
+            return new SuccessResponse("The invoice has been removed.");
+        }
+
+        return new ErrorResponse(500, "The invoice could not be removed.");
+    }
+
+    public function destroyCaregiverInvoice(CaregiverInvoice $invoice)
+    {
+        if ($invoice->deposits()->exists()) {
+            return new ErrorResponse(400, 'This invoice cannot be removed because it has deposits assigned.');
+        }
+
+        if ($invoice->delete()) {
+            return new SuccessResponse("The invoice has been removed.");
+        }
+
+        return new ErrorResponse(500, "The invoice could not be removed.");
     }
 
     private function getViewGenerator(DepositInvoiceInterface $invoice, string $view)
