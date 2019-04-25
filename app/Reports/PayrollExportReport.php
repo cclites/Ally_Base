@@ -3,7 +3,6 @@
 namespace App\Reports;
 
 use App\Shift;
-use App\Shifts\CostCalculator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -160,6 +159,11 @@ class PayrollExportReport extends BaseReport
         $data = $data->merge($this->getShiftMileageResults());
         $data = $data->merge($this->getShiftExpenseResults());
 
+        // exclude rows that have a $0 total
+        $data = $data->filter(function ($row) {
+            return floatval($row['amount']) <> 0.00;
+        });
+
         switch ($this->format) {
             case self::BCN:
                 return $this->formatBCN($data);
@@ -267,9 +271,9 @@ class PayrollExportReport extends BaseReport
                 'caregiver_first_name',
                 'caregiver_last_name'
             ]), [
-                'hours' => $item['hours'] == '-' ? 'N/A' : number_format($item['hours'], 2),
-                'amount' => $item['amount'] == '-' ? 'N/A' : number_format($item['amount'], 2),
-                'pay_rate' => $item['pay_rate'] == '-' ? 'N/A' : number_format($item['pay_rate'], 2),
+                'hours' => $item['hours'] === '-' ? 'N/A' : number_format($item['hours'], 2),
+                'amount' => $item['amount'] === '-' ? 'N/A' : number_format($item['amount'], 2),
+                'pay_rate' => $item['pay_rate'] === '-' ? 'N/A' : number_format($item['pay_rate'], 2),
             ]);
         });
 
@@ -287,7 +291,7 @@ class PayrollExportReport extends BaseReport
 
         // Build rows
         $csv[] = '"' . implode('","', $headerRow) . '"';
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             $csv[] = '"' . implode('","', $row) . '"';
         }
 
@@ -302,7 +306,7 @@ class PayrollExportReport extends BaseReport
     public function downloadCsv()
     {
         return \Response::make($this->toCsv(), 200, [
-            'Content-type'        => 'text/csv',
+            'Content-type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="Payroll-Export-Report.csv"',
         ]);
     }
