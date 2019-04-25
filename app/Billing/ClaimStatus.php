@@ -1,17 +1,24 @@
 <?php
-
 namespace App\Billing;
 
-use App\AuditableModel;
+use MyCLabs\Enum\Enum;
 
-class ClaimStatus extends AuditableModel
+/**
+ * ClaimService Enum
+ *
+ * @method static ClaimStatus NOT_SENT()
+ * @method static ClaimStatus CREATED()
+ * @method static ClaimStatus TRANSMITTED()
+ * @method static ClaimStatus RETRANSMITTED()
+ * @method static ClaimStatus ACCEPTED()
+ * @method static ClaimStatus REJECTED()
+ */
+class ClaimStatus extends Enum
 {
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = ['id'];
-
-    protected $table = 'claim_status_history';
+    private const NOT_SENT = 'NOT_SENT';
+    private const CREATED = 'CREATED';
+    private const TRANSMITTED = 'TRANSMITTED';
+    private const RETRANSMITTED = 'RETRANSMITTED';
+    private const ACCEPTED = 'ACCEPTED';
+    private const REJECTED = 'REJECTED';
 }

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Contracts\SFTPWriterInterface;
 use Carbon\Carbon;
-use phpseclib\Net\SFTP;
 
 class HhaExchangeManager
 {
@@ -24,18 +23,46 @@ class HhaExchangeManager
     protected $taxId;
 
     /**
+     * @var string
+     */
+    protected $username;
+
+    /**
+     * @var string
+     */
+    protected $password;
+
+    /**
      * HhaExchangeManager constructor.
+     * @param string $username
+     * @param string $password
      * @param string $taxId
      * @throws \Exception
      */
-    public function __construct(string $taxId)
+    public function __construct(string $username, string $password, string $taxId)
     {
         $this->taxId = str_replace('-', '', $taxId);
+        $this->username = $username;
+        $this->password = $password;
 
         $this->sftp = app(SFTPWriterInterface::class, ['host' => config('services.hha-exchange.sftp_host')]);
-        if (!$this->sftp->login(config('services.hha-exchange.sftp_username'), config('services.hha-exchange.sftp_password'))) {
+        if (! $this->login()) {
             throw new \Exception('Unable to login to HHAeXchange SFTP server.');
         }
+    }
+
+    /**
+     * Log in to the SFTP server.
+     *
+     * @return bool
+     */
+    public function login() : bool
+    {
+        if (! $this->sftp->login($this->username, $this->password)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -16,8 +16,11 @@ class BusinessSettingsResource extends Resource
     public function toArray($request)
     {
         if (is_office_user() || is_admin()) {
-            return $this->resource->toArray();
-        } 
+            return array_merge($this->resource->toArray(), [
+                'hha_password' => $this->hha_password ? '********' : '',
+                'tellus_password' => $this->tellus_password ? '********' : '',
+            ]);
+        }
 
         $settings = [
             'id',
