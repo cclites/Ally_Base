@@ -159,6 +159,11 @@ class PayrollExportReport extends BaseReport
         $data = $data->merge($this->getShiftMileageResults());
         $data = $data->merge($this->getShiftExpenseResults());
 
+        // exclude rows that have a $0 total
+        $data = $data->filter(function ($row) {
+            return floatval($row['amount']) <> 0.00;
+        });
+
         switch ($this->format) {
             case self::BCN:
                 return $this->formatBCN($data);
