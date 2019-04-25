@@ -3,7 +3,6 @@
 namespace App\Reports;
 
 use App\Shift;
-use App\Shifts\CostCalculator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -287,7 +286,7 @@ class PayrollExportReport extends BaseReport
 
         // Build rows
         $csv[] = '"' . implode('","', $headerRow) . '"';
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             $csv[] = '"' . implode('","', $row) . '"';
         }
 
@@ -302,7 +301,7 @@ class PayrollExportReport extends BaseReport
     public function downloadCsv()
     {
         return \Response::make($this->toCsv(), 200, [
-            'Content-type'        => 'text/csv',
+            'Content-type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="Payroll-Export-Report.csv"',
         ]);
     }
