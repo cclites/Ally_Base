@@ -102,6 +102,7 @@ class CronReminders extends Command
         $to = Carbon::now()->subMinutes(20)->tz($business->timezone);
 
         $schedules = Schedule::forBusinesses([$business->id])
+            ->has('caregiver')
             ->with('shifts')
             ->whereBetween('starts_at', [$from, $to])
             ->get();
@@ -113,7 +114,7 @@ class CronReminders extends Command
                 continue;
             }
 
-            if ($schedule->shift_status != Schedule::SCHEDULED) {
+            if ($schedule->getShiftStatus() != Schedule::SCHEDULED) {
                 // schedule has a shift attached, which means it has been clocked in already
                 continue;
             }
