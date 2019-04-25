@@ -29,6 +29,7 @@ class PreventDuplicatePosts
      */
     protected $excludedRoutes = [
         'business.care-match.client-matches',
+        'business.schedule.warnings',
     ];
 
     /**
