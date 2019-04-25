@@ -267,9 +267,9 @@ class PayrollExportReport extends BaseReport
                 'caregiver_first_name',
                 'caregiver_last_name'
             ]), [
-                'hours' => $item['hours'] == '-' ? 'N/A' : number_format($item['hours'], 2),
-                'amount' => $item['amount'] == '-' ? 'N/A' : number_format($item['amount'], 2),
-                'pay_rate' => $item['pay_rate'] == '-' ? 'N/A' : number_format($item['pay_rate'], 2),
+                'hours' => $item['hours'] === '-' ? 'N/A' : number_format($item['hours'], 2),
+                'amount' => $item['amount'] === '-' ? 'N/A' : number_format($item['amount'], 2),
+                'pay_rate' => $item['pay_rate'] === '-' ? 'N/A' : number_format($item['pay_rate'], 2),
             ]);
         });
 
