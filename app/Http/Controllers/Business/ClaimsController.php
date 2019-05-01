@@ -104,6 +104,8 @@ class ClaimsController extends BaseController
         $this->authorize('read', $invoice);
 
         try {
+            \DB::beginTransaction();
+
             $service = strtoupper($request->service);
             $transmitter = new ClaimTransmitter(ClaimService::$service());
             $transmitter->validateInvoice($invoice);
@@ -115,6 +117,7 @@ class ClaimsController extends BaseController
                 'service' => ClaimService::$service(),
             ]);
 
+            \DB::commit();
             return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());

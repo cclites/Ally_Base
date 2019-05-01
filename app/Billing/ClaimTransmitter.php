@@ -50,7 +50,43 @@ class ClaimTransmitter
                 break;
         }
 
-        $shiftCount = Shift::whereIn('id', $invoice->items->where('invoiceable_type', 'shifts')->pluck('invoiceable_id'))->count();
+        $invoiceableShiftIds = $invoice->items->where('invoiceable_type', 'shifts')
+            ->pluck('invoiceable_id');
+
+        $invoiceableServiceIds = $invoice->items->where('invoiceable_type', 'shift_services')
+            ->pluck('invoiceable_id');
+
+        $shiftCount = Shift::whereIn('id', $invoiceableShiftIds)->count();
+
+        // check for split shifts by checking dupe invoiceable id
+        $splitShiftsCount = ClientInvoiceItem::where('invoiceable_type', 'shifts')
+            ->whereIn('invoiceable_id', $invoiceableShiftIds)
+            ->select('invoiceable_id')
+            ->groupBy('invoiceable_id')
+            ->havingRaw('count(invoiceable_id) > 1')
+            ->count();
+
+        if ($splitShiftsCount > 0) {
+            throw new ClaimTransmissionException('You cannot create a claim because of split shifts, you must contact Ally.');
+        }
+
+        if ($invoiceableServiceIds->count() > 0) {
+            // check for split shift_services and shifts by checking for dupe shift relations
+            $splitServicesCount = ShiftService::where('id', $invoiceableServiceIds)
+                ->groupBy('shift_id')
+                ->having('shift_id', '>', 1)
+                ->count();
+
+            if ($splitServicesCount > 0) {
+                throw new ClaimTransmissionException('You cannot create a claim because of split shifts, you must contact Ally.');
+            }
+
+            $shiftCount += ShiftService::whereIn('id', $invoiceableServiceIds) // add shifts via shift_services
+                ->get()
+                ->unique('shift_id')
+                ->count();
+        }
+
         if ($shiftCount === 0) {
             throw new ClaimTransmissionException('You cannot create a claim because there are no shifts attached to this invoice.');
         }
