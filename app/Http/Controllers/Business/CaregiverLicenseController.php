@@ -39,7 +39,7 @@ class CaregiverLicenseController extends BaseController
             'expires_at' => 'required|date',
         ]);
 
-        $data['expires_at'] = filter_date($data['expires_at']) . ' 23:59:59';
+        $data['expires_at'] = filter_date($data['expires_at']);
 
         $license = new CaregiverLicense($data);
         if ($caregiver->licenses()->save($license)) {
@@ -65,7 +65,7 @@ class CaregiverLicenseController extends BaseController
             'expires_at' => 'required|date',
         ]);
 
-        $data['expires_at'] = filter_date($data['expires_at']) . ' 23:59:59';
+        $data['expires_at'] = filter_date($data['expires_at']);
 
         if ($license->update($data)) {
             return new SuccessResponse('The license has been updated.', $license->toArray());
