@@ -334,7 +334,7 @@
                             <h4>Custom Questions</h4>
                         </b-col>
                         <b-col lg="12" class="with-padding-bottom">
-                            <question-list :business_id="business.id"/>
+                            <question-list :business="business"/>
                         </b-col>
                     </b-row>
                 </b-tab>
