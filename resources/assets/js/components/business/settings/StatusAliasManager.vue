@@ -83,8 +83,14 @@
                 this.loading = true;
                 axios.get(`/business/status-aliases`)
                     .then( ({ data }) => {
-                        if (data && data.caregiver) {
-                            this.statuses = data;
+                        if (data) {
+                            this.statuses = {};
+                            if (data.caregiver) {
+                                this.statuses.caregiver = data.caregiver;
+                            }
+                            if (data.client) {
+                                this.statuses.client = data.client;
+                            }
                         } else {
                             this.statuses = {caregiver: [], client: []};
                         }
