@@ -77,22 +77,19 @@ class CostCalculator
             // New (February 2019)
             if ($this->shift->services->count()) {
                 $shiftFee = $this->shift->services->reduce(function($carry, ShiftService $service) {
-                    $amount = multiply($service->client_rate ?? 0, $service->duration);
+                    $amount = multiply($service->getClientRate() ?? 0, $service->duration);
                     $fee = ($this->paymentType)
                         ? $this->paymentType->getAllyFee($amount, true)
                         : $this->client->getAllyFee($amount, true);
                     return add($carry, $fee);
                 }, 0.0);
-            } else if ($this->shift->fixed_rates) {
-                $shiftFee = ($this->paymentType)
-                    ? $this->paymentType->getAllyFee($this->getClientCost(), true)
-                    : $this->client->getAllyFee($this->getClientCost(), true);
-
             } else {
-                $hourlyRate = ($this->paymentType)
-                    ? $this->paymentType->getAllyFee($this->shift->client_rate, true)
-                    : $this->client->getAllyFee($this->shift->client_rate, true);
-                $shiftFee = multiply($hourlyRate, $this->shift->duration());
+                $rate = ($this->paymentType)
+                    ? $this->paymentType->getAllyFee($this->shift->getClientRate(), true)
+                    : $this->client->getAllyFee($this->shift->getClientRate(), true);
+                $shiftFee = ($this->shift->fixed_rates)
+                    ? $rate
+                    : multiply($rate, $this->shift->duration());
             }
         } else {
             // Old (Pre-February 2019)
