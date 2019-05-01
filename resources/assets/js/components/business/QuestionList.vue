@@ -18,7 +18,7 @@
         </b-table>
 
         <b-modal id="formModal" :title="modalTitle" v-model="formModal" size="lg">
-            <question-form :question="question" ref="form" />
+            <question-form :question="question" :business="business" ref="form" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="formModal = false" :disabled="busy">Close</b-btn>
@@ -31,7 +31,12 @@
 
 <script>
     export default {
-        props: ['business_id'],
+        props: {
+            business: {
+                type: Object,
+                default: () => { return {} },
+            },
+        },
 
         data: () => ({
             question: {},
@@ -118,7 +123,7 @@
         },
 
         mounted() {
-            axios.get('/business/questions')
+            axios.get(`/business/questions?business=${this.business.id}`)
                 .then( ({ data }) => {
                     this.items = data;
                 })

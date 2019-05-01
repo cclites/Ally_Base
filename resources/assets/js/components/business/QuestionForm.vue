@@ -47,7 +47,16 @@
 
 <script>
     export default {
-        props: ['question'],
+        props: {
+            question: {
+                type: Object,
+                default: () => { return {} },
+            },
+            business: {
+                type: Object,
+                default: () => { return {} },
+            },
+        },
 
         data() {
             return {
@@ -61,11 +70,11 @@
 
         methods: {
             submit() {
-                let path = '/business/questions';
+                let path = `/business/questions?business=${this.business.id}`;
                 let method = 'post';
 
                 if (this.question.id) {
-                    path = '/business/questions/' + this.question.id;
+                    path = `/business/questions/${this.question.id}`;
                     method = 'patch';
                 }
 
