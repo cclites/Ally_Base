@@ -7,16 +7,16 @@ use App\Shift;
 
 class ClaimTransmitter
 {
-    protected $service;
+    protected $claimService;
 
     /**
      * ClaimTransmitter Constructor.
      *
-     * @param \App\Billing\ClaimService $service
+     * @param \App\Billing\ClaimService $claimService
      */
-    public function __construct(ClaimService $service)
+    public function __construct(ClaimService $claimService)
     {
-        $this->service = $service;
+        $this->claimService = $claimService;
     }
 
     /**
@@ -37,7 +37,7 @@ class ClaimTransmitter
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid ID set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
         }
 
-        switch ($this->service) {
+        switch ($this->claimService) {
             case ClaimService::HHA():
                 if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {
                     throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
@@ -65,7 +65,7 @@ class ClaimTransmitter
      */
     public function transmitClaim(Claim $claim) : bool
     {
-        switch ($this->service) {
+        switch ($this->claimService) {
             case ClaimService::HHA():
                 return $this->sendClaimToHHA($claim);
             case ClaimService::TELLUS():
@@ -114,7 +114,8 @@ class ClaimTransmitter
     {
         $timeFormat = 'Y-m-d H:i:s';
         $data = [];
-        $shifts = Shift::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shifts')->pluck('invoiceable_id'))
+        $shifts = Shift::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shifts')
+            ->pluck('invoiceable_id'))
             ->get();
 
         foreach ($shifts as $shift) {
@@ -130,8 +131,6 @@ class ClaimTransmitter
                 $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
                 $shift->caregiver->ssn, //    "Caregiver SSN",
                 $shift->id, //    "Schedule ID",
-                // TODO: implement Procedure Code
-                'Respite Care', //    "Procedure Code",
                 'S5135U2', //    "Procedure Code",
                 $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
                 $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
