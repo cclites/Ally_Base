@@ -132,6 +132,7 @@ class ClaimTransmitter
                 $shift->id, //    "Schedule ID",
                 // TODO: implement Procedure Code
                 'Respite Care', //    "Procedure Code",
+                'S5135U2', //    "Procedure Code",
                 $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
                 $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
                 $shift->checked_in_time->format($timeFormat), //    "Visit Start Time",
