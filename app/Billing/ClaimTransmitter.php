@@ -2,8 +2,10 @@
 namespace App\Billing;
 
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Invoiceable\ShiftService;
 use App\Services\HhaExchangeManager;
 use App\Shift;
+use Illuminate\Support\Collection;
 
 class ClaimTransmitter
 {
@@ -105,6 +107,69 @@ class ClaimTransmitter
     }
 
     /**
+     * Map collection of activities to their corresponding duties codes.
+     *
+     * @param \Illuminate\Support\Collection $activities
+     * @return string
+     */
+    public function mapActivitiesToDuties(Collection $activities) : string
+    {
+        // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
+        if ($activities->isEmpty()) {
+            return '';
+        }
+
+        // Check here for duties codes: https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_PACHC.pdf
+        $duties = $activities->map(function ($activity) {
+            if (!empty($activity->business_id)) {
+                // return a default code for any custom activity
+                return '201';
+            }
+
+            switch ($activity->code) {
+                case '001': // Bathing - Shower
+                case '002': // Bathing - Bed
+                    return '304';
+                case '003': // Dressing
+                    return '123';
+                case '005': // Hygiene - Hair Care
+                case '006': // Shave
+                case '004': // Hygiene - Mouth Care
+                    return '122';
+                case '007': // Incontinence Care
+                    return '141';
+                case '021': // Medication Reminders
+                    return '118';
+                case '020': // Turning & Repositioning
+                    return '125';
+                case '022': // Safety Supervision
+                    return '140';
+                case '008': // Toileting
+                    return '127';
+                case '009': // Catheter Care
+                    return '142';
+                case '023': // Meal Preparation
+                    return '115';
+                case '025': // Homemaker Services
+                    return '116';
+                case '026': // Transportation
+                    return '120';
+                case '024': // Feeding
+                    return '129';
+                case '010': // Ostomy Care
+                    return '143';
+                case '027': // Ambulation
+                    return '128';
+                case '011': // Companion Care
+                default:
+                    return '201';
+            }
+        });
+
+        return implode('|', $duties->toArray());
+    }
+
+    /**
      * Convert claim into HHA import row data.
      *
      * @param \App\Billing\Claim $claim
@@ -114,12 +179,16 @@ class ClaimTransmitter
     {
         $timeFormat = 'Y-m-d H:i:s';
         $data = [];
-        $shifts = Shift::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shifts')
-            ->pluck('invoiceable_id'))
+        $shifts = Shift::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shifts')->pluck('invoiceable_id'))
             ->get();
 
+        $serviceShiftIds = ShiftService::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shift_services')->pluck('invoiceable_id'))
+            ->get()
+            ->unique('shift_id');
+
+        $shifts = $shifts->merge(Shift::whereIn('id', $serviceShiftIds)->get());
+
         foreach ($shifts as $shift) {
-            $activities = $shift->activities->pluck('id')->toArray();
             $data[] = [
                 $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
                 $claim->invoice->clientPayer->payer_id, //    "Payer ID",
@@ -139,7 +208,7 @@ class ClaimTransmitter
                 $shift->checked_in_time->format($timeFormat), //    "EVV Start Time",
                 $shift->checked_out_time->format($timeFormat), //    "EVV End Time",
                 optional($shift->client->evvAddress)->full_address, //    "Service Location",
-                empty($activities) ? '' : implode('|', $activities), //    "Duties",
+                $this->mapActivitiesToDuties($shift->activities), //    "Duties",
                 $shift->checked_in_number, //    "Clock-In Phone Number",
                 $shift->checked_in_latitude, //    "Clock-In Latitude",
                 $shift->checked_in_longitude, //    "Clock-In Longitude",
