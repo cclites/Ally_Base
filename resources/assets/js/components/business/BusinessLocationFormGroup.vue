@@ -49,6 +49,13 @@
             setLocationCount(count) {
                 this.locationCount = count;
             }
+        },
+        mounted() {
+            // Check for office user default business setting
+            // and override the initial value when empty.
+            if (this.value == '' && this.officeUserSettings && this.officeUserSettings.default_business_id) {
+                this.$emit('input', this.officeUserSettings.default_business_id)
+            }
         }
     }
 </script>
