@@ -249,7 +249,7 @@
                 filtersReady: false,
                 filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
                 filterClientId: (this.client) ? this.client.id : -1,
-                filterBusinessId: (this.client) ? this.client.business_id : "",
+                filterBusinessId: (this.client) ? this.client.business_id : '',
                 header: {
                     left:   'prev,next today',
                     center: 'title',
@@ -292,6 +292,9 @@
 
         mounted() {
             // this.appendColorKey();
+            if (this.officeUserSettings && this.filterBusinessId == '') {
+                this.filterBusinessId = this.officeUserSettings.default_business_id;
+            }
             this.loadFiltersData();
         },
 

@@ -18,6 +18,7 @@ class OfficeUserSettings implements JsonSerializable
     private $calendar_remember_filters;
     private $calendar_next_day_threshold;
     private $ask_on_confirm;
+    private $default_business_id;
 
     public function __construct(
         bool $scheduling = true,
@@ -26,7 +27,8 @@ class OfficeUserSettings implements JsonSerializable
         bool $calendar_remember_filters = true,
         ?CalendarView $calendar_default_view = null,
         ?CalendarCaregiverFilter $calendar_caregiver_filter = null,
-        ?CalendarNextDayThreshold $calendar_next_day_threshold = null
+        ?CalendarNextDayThreshold $calendar_next_day_threshold = null,
+        int $default_business_id = null
     )
     {
         $this->scheduling = $scheduling;
@@ -36,6 +38,7 @@ class OfficeUserSettings implements JsonSerializable
         $this->calendar_default_view = $calendar_default_view ?? new CalendarView(CalendarView::TIMELINE_WEEK);
         $this->calendar_caregiver_filter = $calendar_caregiver_filter ?? new CalendarCaregiverFilter(CalendarCaregiverFilter::UNASSIGNED);
         $this->calendar_next_day_threshold = $calendar_next_day_threshold ?? new CalendarNextDayThreshold(CalendarNextDayThreshold::DISABLED);
+        $this->default_business_id = $default_business_id;
     }
 
     function scheduling(): bool
@@ -73,4 +76,8 @@ class OfficeUserSettings implements JsonSerializable
         return $this->ask_on_confirm;
     }
 
+    function default_business_id(): int
+    {
+        return $this->default_business_id;
+    }
 }
