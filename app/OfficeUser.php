@@ -148,6 +148,10 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      */
     public function getTimezone()
     {
+        if (! empty($this->timezone)) {
+            return $this->timezone;
+        }
+        
         return $this->businesses->first()->timezone ?? 'America/New_York';
     }
 
