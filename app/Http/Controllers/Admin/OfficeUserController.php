@@ -37,12 +37,21 @@ class OfficeUserController extends Controller
         );
         $businessIds = $request->businesses;
 
+        \DB::beginTransaction();
+
         if ($user = $chain->users()->create($data)) {
             $user->businesses()->sync($businessIds);
+            $user->update([
+                'default_business_id' => $user->businesses->first()->id,
+                'timezone' => $user->businesses->first()->timezone,
+            ]);
             $resource = new OfficeUserResource($user);
+
+            \DB::commit();
             return new CreatedResponse('The user has been created.', $resource->toArray($request));
         }
 
+        \DB::rollBack();
         return new ErrorResponse(500, 'Unknown error');
     }
 
