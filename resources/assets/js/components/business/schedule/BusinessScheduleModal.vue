@@ -454,7 +454,6 @@
             },
             passCaregivers: {
                 type: Array,
-                required: true,
             },
             selectedSchedule: {
                 type: Object,
@@ -559,7 +558,7 @@
 
             caregivers() {
                 if (! this.form.client_id || this.cgMode === 'all') {
-                    return this.allCaregivers;
+                    return this.passCaregivers || this.allCaregivers;
                 }
                 return this.clientCaregivers;
             },
@@ -899,8 +898,8 @@
             },
 
             async loadAllCaregivers() {
-                if (!this.allCaregivers || !this.allCaregivers.length) {
-                    const response = await axios.get(`/business/schedule/caregivers`);
+                if (!this.passCaregivers) {
+                    const response = await axios.get(`/business/caregivers?json=1`);
                     this.allCaregivers = response.data;
                 }
             },

@@ -125,7 +125,7 @@ Route::group([
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
 
-    Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
+    Route::get('reports/payment-history/print/{year}/{view?}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
     Route::get('reports/payment-history/{id}/print', 'Caregivers\ReportsController@printPaymentDetails')->name('caregivers.reports.print_payment_details');
     Route::get('reports/payment-history/{id}', 'Caregivers\ReportsController@paymentDetails')->name('caregivers.reports.payment_details');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
@@ -351,7 +351,6 @@ Route::group([
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
-    Route::get('schedule/caregivers', 'Business\ScheduleController@caregiverData')->name('schedule.caregivers');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
