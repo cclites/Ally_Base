@@ -57,9 +57,26 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
 {
     use IsUserRole, BelongsToBusinesses, BelongsToOneChain;
 
-    protected $table = 'office_users';
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
-    public $fillable = ['chain_id'];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'office_users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['chain_id', 'default_business_id', 'timezone'];
 
     /**
      * The notification classes related to this user role.
