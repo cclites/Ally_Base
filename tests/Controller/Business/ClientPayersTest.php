@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Controller\Business;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -9,7 +9,7 @@ use App\Billing\Payer;
 use App\Billing\ClientPayer;
 use Illuminate\Support\Carbon;
 
-class ManageClientPayersTest extends TestCase
+class ClientPayersTest extends TestCase
 {
     use RefreshDatabase;
 

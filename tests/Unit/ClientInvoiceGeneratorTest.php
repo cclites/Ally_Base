@@ -83,6 +83,7 @@ class ClientInvoiceGeneratorTest extends TestCase
         $total = 15.63;
 
         $invoiceable->shouldReceive('getItemName')->andReturn($name);
+        $invoiceable->shouldReceive('getItemNotes')->andReturn('');
         $invoiceable->shouldReceive('getItemGroup')->andReturn($group);
         $invoiceable->shouldReceive('getItemUnits')->andReturn($units);
         $invoiceable->shouldReceive('getItemDate')->andReturn($date);

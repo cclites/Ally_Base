@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Controller\Business;
 
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Billing\Payer;
 use App\Billing\ClientRate;
 
-class ManageClientRatesTest extends TestCase
+class ClientRatesTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -46,7 +46,7 @@ class ManageClientRatesTest extends TestCase
     /** @test */
     public function a_user_can_get_a_list_of_the_client_rates()
     {
-        factory('App\Billing\ClientRate', 5)->create(['client_id' => $this->client->id]);
+        $this->createRates(5);
 
         $this->assertCount(5, $this->client->rates);
 
@@ -75,7 +75,7 @@ class ManageClientRatesTest extends TestCase
     {
         $this->withExceptionHandling();
 
-        $rate = factory('App\Billing\ClientRate')->create(['client_id' => $this->client->id]);
+        $rate = $this->createRate();
 
         $this->assertCount(1, $this->client->rates);
 
@@ -105,7 +105,7 @@ class ManageClientRatesTest extends TestCase
     {
         $this->withExceptionHandling();
 
-        $rate = factory('App\Billing\ClientRate')->create(['client_id' => $this->client->id]);
+        $rate = $this->createRate();
 
         $this->assertCount(1, $this->client->rates);
 
@@ -130,22 +130,14 @@ class ManageClientRatesTest extends TestCase
             ->assertStatus(422);
     
         $data = $rate->toArray();
+        $data['caregiver_hourly_rate'] = 20.00;
         $data['client_hourly_rate'] = 25.00;
         $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
             ->assertStatus(200);
 
         $data = $rate->toArray();
+        $data['caregiver_fixed_rate'] = 20.00;
         $data['client_fixed_rate'] = 25.00;
-        $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
-            ->assertStatus(200);
-
-        $data = $rate->toArray();
-        $data['caregiver_hourly_rate'] = 25.00;
-        $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
-            ->assertStatus(200);
-
-        $data = $rate->toArray();
-        $data['caregiver_fixed_rate'] = 25.00;
         $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
             ->assertStatus(200);
     }
@@ -155,7 +147,7 @@ class ManageClientRatesTest extends TestCase
     {
         $this->withExceptionHandling();
 
-        $rate = factory('App\Billing\ClientRate')->create(['client_id' => $this->client->id]);
+        $rate = $this->createRate();
 
         $otherChain = factory('App\BusinessChain')->create();
         $otherService = factory('App\Billing\Service')->create(['chain_id' => $otherChain->id]);
@@ -186,7 +178,7 @@ class ManageClientRatesTest extends TestCase
     {
         $this->withExceptionHandling();
 
-        $rate = factory('App\Billing\ClientRate')->create(['client_id' => $this->client->id]);
+        $rate = $this->createRate();
 
         $otherChain = factory('App\BusinessChain')->create();
         $otherPayer = factory('App\Billing\Payer')->create(['chain_id' => $otherChain->id]);
@@ -217,18 +209,10 @@ class ManageClientRatesTest extends TestCase
     {
         $this->withExceptionHandling();
 
-        $rate = factory('App\Billing\ClientRate')->create(['client_id' => $this->client->id]);
-
-        $otherChain = factory('App\BusinessChain')->create();
-        $otherCaregiver = factory('App\Caregiver')->create();
+        $rate = $this->createRate();
 
         $data = $rate->toArray();
         $data['caregiver_id'] = 2938523;
-        $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
-            ->assertStatus(422);
-
-        $data = $rate->toArray();
-        $data['caregiver_id'] = $otherCaregiver->id;
         $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
             ->assertStatus(422);
 
@@ -264,5 +248,23 @@ class ManageClientRatesTest extends TestCase
             ->assertStatus(422);;
 
         $this->assertCount(0, $this->client->fresh()->rates);
+    }
+
+    protected function createRate(array $data = []): ClientRate
+    {
+        return factory(ClientRate::class)->create([
+            'client_id' => $this->client->id,
+            'payer_id' => $this->payer->id,
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+    }
+
+    protected function createRates(int $count, array $data = []): Collection
+    {
+        $collection = new Collection();
+        for($i=0; $i<$count; $i++) {
+            $collection->push($this->createRate($data));
+        }
+        return $collection;
     }
 }
