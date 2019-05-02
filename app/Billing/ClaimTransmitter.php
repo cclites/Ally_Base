@@ -71,13 +71,7 @@ class ClaimTransmitter
         }
 
         if ($invoiceableServiceIds->count() > 0) {
-            // check for split shift_services and shifts by checking for dupe shift relations
-            $splitServicesCount = ShiftService::where('id', $invoiceableServiceIds)
-                ->groupBy('shift_id')
-                ->having('shift_id', '>', 1)
-                ->count();
-
-            if ($splitServicesCount > 0) {
+            if ($this->checkForSplitServiceBreakoutShifts($invoice, $invoiceableServiceIds)) {
                 throw new ClaimTransmissionException('You cannot create a claim because of split shifts, you must contact Ally.');
             }
 
@@ -92,6 +86,48 @@ class ClaimTransmitter
         }
 
         return true;
+    }
+
+    /**
+     * Check if the services of a shift are split on to
+     * multiple invoices.
+     *
+     * @param ClientInvoice $invoice
+     * @param Collection $shiftServiceIds
+     * @return bool
+     */
+    public function checkForSplitServiceBreakoutShifts(ClientInvoice $invoice, Collection $shiftServiceIds) : bool
+    {
+        // check if a shift service has been split
+        $count = ClientInvoiceItem::where('invoiceable_type', 'shift_services')
+            ->whereIn('invoiceable_id', $shiftServiceIds)
+            ->select('invoiceable_id')
+            ->groupBy('invoiceable_id')
+            ->havingRaw('count(invoiceable_id) > 1')
+            ->count();
+
+        if ($count > 0) {
+            return true;
+        }
+
+        $relatedIds = collect([]);
+        $services = ShiftService::where('id', $shiftServiceIds)->get();
+        foreach ($services as $service) {
+            $relatedIds = $relatedIds->merge($service->shift->services->pluck('id'));
+        }
+
+        // check for an invoice item that belongs to a different invoice
+        // that contains one of the related service IDs.
+        $count = ClientInvoiceItem::where('invoiceable_type', 'shift_services')
+            ->whereIn('invoiceable_id', $relatedIds->unique())
+            ->where('invoice_id', '<>', $invoice->id)
+            ->count();
+
+        if ($count > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
