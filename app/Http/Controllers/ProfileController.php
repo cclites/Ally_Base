@@ -92,7 +92,11 @@ class ProfileController extends Controller
         $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
         if (auth()->user()->update($data)) {
-            return new SuccessResponse('Your profile has been updated.');
+            return new SuccessResponse(
+                'Your profile has been updated.',
+                [], 
+                auth()->user()->role_type == 'office_user' ? '.' : null
+            );
         }
         return new ErrorResponse(500, 'Unable to update profile.');
     }
