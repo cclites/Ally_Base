@@ -116,10 +116,28 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->hasMany(Task::class, 'creator_id');
     }
 
+    /**
+     * Get the default business relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\
+    */
+    public function defaultBusiness()
+    {
+        return $this->belongsTo(Business::class, 'default_business_id', 'id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
+    public function getDefaultBusiness()
+    {
+        if (empty($this->defaultBusiness)) {
+            return $this->businesses->first();
+        }
+
+        return $this->defaultBusiness;
+    }
 
     function getAddress(): ?Address
     {
