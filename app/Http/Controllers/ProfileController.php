@@ -49,6 +49,8 @@ class ProfileController extends Controller
             ];
         } else if ($type == 'caregiver') {
             $user->role->load(['availability', 'skills', 'daysOff']);
+        } else if ($type == 'office_user') {
+            $user->role->load(['businesses']);
         }
 
         $notifications = $user->getAvailableNotifications()->map(function ($cls) {
