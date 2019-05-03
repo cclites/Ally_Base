@@ -62,15 +62,14 @@
 
                     <hr />
 
-                    <div class="d-flex">
+                    <div class="d-flex mb-2">
                         <div class="ml-auto">
-                            <b-button @click="printReport()" variant="success" :disabled="busy || form.output_format == ''" class="mb-2">
-                                <i class="fa fa-print"></i> Print Report
-                            </b-button>
+                            <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </div>
                     </div>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
+                            class="printable-table"
                             :busy="busy"
                             :items="items"
                             :fields="fields"
@@ -178,10 +177,8 @@
                     })
             },
 
-            printReport() {
-                // this.form.export = 1;
-                // window.location = this.form.toQueryString('/business/reports/payroll-export');
-                // this.form.export = 0;
+            printTable() {
+                $(".printable-table").print();
             },
         },
 
