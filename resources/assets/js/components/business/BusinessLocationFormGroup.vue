@@ -53,9 +53,10 @@
         mounted() {
             // Check for office user default business setting
             // and override the initial value when empty.
-            if (this.value == '' && this.officeUserSettings && this.officeUserSettings.default_business_id) {
-                this.$emit('input', this.officeUserSettings.default_business_id)
-            }
+            // console.log('default business:', this.officeUserSettings.default_business_id);
+            // if (this.value == '' && this.officeUserSettings && this.officeUserSettings.default_business_id) {
+            //     this.$emit('input', this.officeUserSettings.default_business_id)
+            // }
         }
     }
 </script>
