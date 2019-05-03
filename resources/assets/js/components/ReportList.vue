@@ -449,6 +449,13 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Disaster Code Plan Report',
+                        url: 'reports/disaster-plan-report',
+                        description: 'Export Client Disaster Codes and Plans',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
 
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
