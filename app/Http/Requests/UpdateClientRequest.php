@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\DisasterCode;
+use App\Rules\ValidEnum;
 use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
 use App\Client;
+use When\Valid;
 
 class UpdateClientRequest extends BusinessRequest
 {
@@ -43,7 +46,7 @@ class UpdateClientRequest extends BusinessRequest
             'referral_source_id' => 'nullable|exists:referral_sources,id',
             'hic' => 'nullable|string|max:50',
             'travel_directions' => 'nullable|string|max:65535',
-            'disaster_code_plan' => 'nullable|string|max:50',
+            'disaster_code_plan' => ['nullable', new ValidEnum(DisasterCode::class)],
             'disaster_planning' => 'nullable|string|max:65535',
             'caregiver_1099' => 'nullable|string|in:ally,client',
             'receive_summary_email' => 'boolean',
