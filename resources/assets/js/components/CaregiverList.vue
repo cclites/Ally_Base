@@ -5,7 +5,7 @@
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
             <b-col lg="3">
-                <!--<business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>-->
+                <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>
             </b-col>
             <b-col lg="3">
                 <b-form-select v-model="statusFilter">
