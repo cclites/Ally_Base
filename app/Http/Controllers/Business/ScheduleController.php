@@ -545,21 +545,6 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Get a list of all the current business's caregivers
-     * for use on the BusinessSchedule component.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function caregiverData()
-    {
-        return response()->json(Caregiver::with(['clients.business'])
-            ->forRequestedBusinesses()
-            ->ordered()
-            ->get()
-        );
-    }
-
-    /**
      * Create a temp schedule object with the request data and
      * check if there are any warnings that should be displayed
      * to the OfficeUser.

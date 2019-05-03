@@ -6,6 +6,7 @@ namespace App\Billing\Gateway;
 
 use App\Billing\Exceptions\PaymentAmountError;
 use App\Billing\Payments\Methods\BankAccount;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
 class HeritageACHFile
@@ -50,7 +51,7 @@ class HeritageACHFile
             }
         }
 
-        $filename = "heritage_export_" . date("Y_m_d_H_i_s_u");
+        $filename = "heritage_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
         $format = 'xlsx';
         $filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.' . $format;
 

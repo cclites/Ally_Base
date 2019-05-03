@@ -130,7 +130,7 @@
         <business-schedule-modal :model.sync="scheduleModal"
                                    :selected-schedule="selectedSchedule"
                                    :pass-clients="clients"
-                                   :pass-caregivers="caregivers"
+                                   :pass-caregivers="client ? null : caregivers"
                                    @refresh-events="fetchEvents(true)"
                                    @clock-out="showClockOutModal()"
         />

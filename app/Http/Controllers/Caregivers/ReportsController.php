@@ -50,7 +50,7 @@ class ReportsController extends BaseController
         return view('caregivers.reports.shifts', compact('clients'));
     }
 
-    public function printPaymentHistory($year)
+    public function printPaymentHistory($year, $view = "pdf")
     {
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
@@ -69,6 +69,11 @@ class ReportsController extends BaseController
 
         // TODO: We should not rely on a single business here  (ALLY-431)
         $business = $caregiver->businesses->first();
+
+        if ($view !== "pdf") {
+            return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
+        }
+
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
         $filename = $year . '_year_summary.pdf';
         // return $pdf->download($filename);
