@@ -64,6 +64,7 @@
 
                     <div class="d-flex mb-2">
                         <div class="ml-auto">
+                            <b-btn @click="columnsModal = true" variant="secondary">Show or Hide Columns</b-btn>
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </div>
                     </div>
@@ -93,17 +94,24 @@
                 </b-card>
             </b-col>
         </b-row>
+
+        <!-- Filter columns modal -->
+        <filter-columns-modal v-model="columnsModal"
+                              :available-fields="availableFields"
+                              :fields.sync="filteredFields"
+        />
+
     </b-container>
 </template>
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
-    import FormatsNumbers from '../../../mixins/FormatsNumbers';
-    import FormatsDates from '../../../mixins/FormatsDates';
+    import LocalStorage from "../../../mixins/LocalStorage";
+    import FilterColumnsModal from "../../modals/FilterColumnsModal";
 
     export default {
-        components: { BusinessLocationFormGroup },
-        mixins: [FormatsNumbers, FormatsDates],
+        components: { BusinessLocationFormGroup, FilterColumnsModal },
+        mixins: [ LocalStorage ],
 
         props: {
             clients: {
@@ -129,21 +137,10 @@
                 currentPage: 1,
                 sortBy: 'name',
                 sortDesc: false,
-                fields: [
-                    { key: 'business_id', label: 'Office Location', sortable: true },
-                    { key: 'name', label: 'Client', sortable: true },
-                    { key: 'active', label: 'Client Status', sortable: true },
-                    { key: 'disaster_code_plan', sortable: true },
-                    { key: 'disaster_planning', label: 'Disaster Planning Description', sortable: true },
-                    { key: 'address', label: 'Client Address', sortable: true, },
-                    { key: 'city', label: 'City', sortable: true, },
-                    { key: 'zip', label: 'Zipcode', sortable: true, },
-                    { key: 'phone1', label: 'Client Phone 1', sortable: true, },
-                    { key: 'phone2', label: 'Client Phone 2', sortable: true, },
-                    { key: 'emergency_name', label: 'Emergency Contact', sortable: true, },
-                    { key: 'emergency_phone', label: 'Emergency Contact Phone', sortable: true, },
-                ],
                 items: [],
+                filteredFields: [],
+                columnsModal: false,
+                localStoragePrefix: 'disaster_plan_report_',
             }
         },
 
@@ -151,6 +148,7 @@
             disasterCodes() {
                 return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
+
             clientList() {
                 if (this.form.business_id) {
                     return this.clients.filter(x => x.business_id == this.form.business_id);
@@ -158,8 +156,35 @@
 
                 return this.clients;
             },
-            clientStatuses() {
-                return [];
+
+            availableFields() {
+                return [
+                    'Office Location',
+                    'Client',
+                    'Client Status',
+                    'Disaster Code Plan',
+                    'Disaster Planning Description',
+                    'Client Address',
+                    'City',
+                    'Zipcode',
+                    'Client Phone 1',
+                    'Client Phone 2',
+                    'Emergency Contact',
+                    'Emergency Contact Phone',
+                ];
+            },
+
+            fields() {
+                let fields = [];
+                for (let field of this.availableFields) {
+                    if (this.filteredFields.indexOf(field) !== -1) {
+                        fields.push({
+                            'key': field,
+                            'sortable': true,
+                        });
+                    }
+                }
+                return fields;
             },
         },
 
@@ -180,9 +205,27 @@
             printTable() {
                 $(".printable-table").print();
             },
+
+            setInitialFields() {
+                let fields = this.getLocalStorage('fields');
+                if (fields && fields[0] && typeof(fields[0]) !== 'object') {
+                    if (fields[0] && typeof(fields[0]) !== 'object') {
+                        this.filteredFields = fields;
+                        return;
+                    }
+                }
+                this.filteredFields = this.availableFields.slice();
+            },
         },
 
-        async mounted() {
+        mounted() {
+            this.setInitialFields();
+        },
+
+        watch: {
+            filteredFields(newValue) {
+                this.setLocalStorage('fields', newValue);
+            }
         },
     }
 </script>

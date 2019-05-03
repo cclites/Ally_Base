@@ -123,18 +123,18 @@ class DisasterPlanReport extends BaseReport
 
                 return [
                     'id' => $row->id,
-                    'business_id' => $row->business->name,
-                    'name' => $row->name,
-                    'active' => $row->active == 1 ? 'Active' : 'Inactive',
-                    'disaster_code_plan' => $row->disaster_code_plan,
-                    'disaster_planning' => $row->disaster_planning,
-                    'address' => optional($row->address)->address1,
-                    'city' => optional($row->address)->city,
-                    'zip' => optional($row->address)->zip,
-                    'phone1' => $row->getPhoneNumberByType('primary'),
-                    'phone2' => $row->getPhoneNumberByType('billing'),
-                    'emergency_name' => optional($emergencyContact)->name,
-                    'emergency_phone' => optional($emergencyContact)->phone1,
+                    'Office Location' => $row->business->name,
+                    'Client' => $row->name,
+                    'Client Status' => $row->active == 1 ? 'Active' : 'Inactive',
+                    'Disaster Code Plan' => $row->disaster_code_plan,
+                    'Disaster Planning Description' => $row->disaster_planning,
+                    'Client Address' => optional($row->address)->address1,
+                    'City' => optional($row->address)->city,
+                    'Zipcode' => optional($row->address)->zip,
+                    'Client Phone 1' => $row->getPhoneNumberByType('primary'),
+                    'Client Phone 2' => $row->getPhoneNumberByType('billing'),
+                    'Emergency Contact' => optional($emergencyContact)->name,
+                    'Emergency Contact Phone' => optional($emergencyContact)->phone1,
                 ];
             });
     }
