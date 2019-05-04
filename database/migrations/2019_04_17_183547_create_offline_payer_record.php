@@ -16,7 +16,7 @@ class CreateOfflinePayerRecord extends Migration
      */
     public function up()
     {
-        Payer::create([
+        DB::table('payers')->insert([
             'id' => Payer::OFFLINE_PAY_ID,
             'name' => $this->name,
             'week_start' => 1,
