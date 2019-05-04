@@ -3,9 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceInterface;
-use App\BusinessChain;
 use App\Client;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,6 +17,7 @@ use Illuminate\Support\Collection;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
+ * @property bool $offline
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
@@ -39,13 +38,13 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         'payer_id' => 'int',
         'amount' => 'float',
         'amount_paid' => 'float',
+        'offline' => 'bool',
     ];
 
     /**
      * Get the next invoice name for a client
      *
      * @param int $clientId
-     * @param int $payerId
      * @return string
      */
     public static function getNextName(int $clientId)
@@ -85,6 +84,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             ->withPivot(['amount_applied']);
     }
 
+    function offlinePayments()
+    {
+        return $this->hasMany(OfflinePayment::class);
+    }
+
     function client()
     {
         return $this->belongsTo(Client::class);
@@ -95,11 +99,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo(ClientPayer::class);
     }
 
-    /**
-     * Get the Claim relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-    */
     public function claim()
     {
         return $this->hasOne(Claim::class);
@@ -108,6 +107,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    function isOffline(): bool
+    {
+        return (bool) $this->offline;
+    }
 
     function getClientPayer(): ?ClientPayer
     {
@@ -121,6 +125,10 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function getAmountPaid(): float
     {
+        if ($this->isOffline()) {
+            return (float) $this->offlinePayments()->sum('amount');
+        }
+
         return (float) $this->amount_paid;
     }
 
@@ -167,6 +175,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         }
 
         return false;
+    }
+
+    function addOfflinePayment(OfflinePayment $offlinePayment): bool
+    {
+        return $this->offlinePayments()->save($offlinePayment);
+    }
+
+    function removeOfflinePayment(OfflinePayment $offlinePayment): bool
+    {
+        return $offlinePayment->delete();
     }
 
     function getName(): string

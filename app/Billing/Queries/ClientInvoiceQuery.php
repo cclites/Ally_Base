@@ -63,16 +63,25 @@ class ClientInvoiceQuery extends BaseQuery
         return $this;
     }
 
+    function excludesOffline(): self
+    {
+        $this->where('offline', false);
+
+        return $this;
+    }
+
     function paidInFull(): self
     {
-        $this->whereColumn('amount_paid', '=', 'amount');
+        $this->whereColumn('amount_paid', '=', 'amount')
+            ->excludesOffline();
 
         return $this;
     }
 
     function notPaidInFull(): self
     {
-        $this->whereColumn('amount_paid', '!=', 'amount');
+        $this->whereColumn('amount_paid', '!=', 'amount')
+            ->excludesOffline();
 
         return $this;
     }
