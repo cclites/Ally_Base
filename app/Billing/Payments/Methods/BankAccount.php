@@ -4,7 +4,7 @@ namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\Contracts\DepositableInterface;
+use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\PaymentMethodType;
 use App\Business;
@@ -39,7 +39,7 @@ use Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
-class BankAccount extends AuditableModel implements ChargeableInterface, DepositableInterface
+class BankAccount extends AuditableModel implements ChargeableInterface, ClaimTransmitterInterface
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;

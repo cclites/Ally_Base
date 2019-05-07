@@ -2,7 +2,7 @@
 namespace App\Billing\Payments;
 
 
-use App\Billing\Contracts\DepositableInterface;
+use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Payments\Methods\BankAccount;
 
@@ -23,7 +23,7 @@ class DepositMethodFactory
         return clone $this->achGateway;
     }
 
-    public function getStrategy(DepositableInterface $depositMethod)
+    public function getStrategy(ClaimTransmitterInterface $depositMethod)
     {
         if ($depositMethod instanceof BankAccount)
             return new BankAccountDeposit($depositMethod, $this->getACHGateway());

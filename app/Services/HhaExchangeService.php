@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Contracts\SFTPWriterInterface;
 use Carbon\Carbon;
 
-class HhaExchangeManager
+class HhaExchangeService
 {
     /**
      * @var array
@@ -33,7 +33,8 @@ class HhaExchangeManager
     protected $password;
 
     /**
-     * HhaExchangeManager constructor.
+     * HhaExchangeService constructor.
+     *
      * @param string $username
      * @param string $password
      * @param string $taxId

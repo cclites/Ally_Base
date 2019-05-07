@@ -3,6 +3,10 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Claims\HhaClaimTransmitter;
+use App\Billing\Claims\TellusClaimTransmitter;
+use App\Billing\Contracts\ClaimTransmitterInterface;
+use App\Billing\Exceptions\ClaimTransmissionException;
 use App\ClaimPayment;
 use Carbon\Carbon;
 use App\Shift;
@@ -127,5 +131,26 @@ class Claim extends AuditableModel
         }
 
         return $claim;
+    }
+
+    /**
+     * Get the ClaimTransmitter for the given service.
+     *
+     * @param ClaimService $service
+     * @return ClaimTransmitterInterface
+     * @throws ClaimTransmissionException
+     */
+    public static function getTransmitter(ClaimService $service) : ClaimTransmitterInterface
+    {
+        switch ($service) {
+            case ClaimService::HHA():
+                return new HhaClaimTransmitter();
+                break;
+            case ClaimService::TELLUS():
+                return new TellusClaimTransmitter();
+                break;
+            default:
+                throw new ClaimTransmissionException('Claim service not supported.');
+        }
     }
 }
