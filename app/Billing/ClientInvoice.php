@@ -3,6 +3,8 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceInterface;
+use App\Billing\Events\InvoiceablePaymentAdded;
+use App\Billing\Events\InvoiceablePaymentRemoved;
 use App\Client;
 use Illuminate\Support\Collection;
 
@@ -156,8 +158,15 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function addPayment(Payment $payment, float $amountApplied): bool
     {
-        if ($this->payments()->save($payment, ['amount_applied' => $amountApplied])) {
-            return (bool) $this->increment('amount_paid', $amountApplied);
+        if ($this->payments()->save($payment, ['amount_applied' => $amountApplied])
+            && $this->increment('amount_paid', $amountApplied)) {
+            foreach($this->getItems() as $item) {
+                if ($item->invoiceable) {
+                    event(new InvoiceablePaymentAdded($item->invoiceable, $payment));
+                }
+            }
+
+            return true;
         }
 
         return false;
@@ -165,9 +174,15 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function removePayment(Payment $payment): bool
     {
-        if ($payment = $this->payments->where('id', $payment->id)->first()) {
-            $this->payments()->syncWithoutDetaching([$payment->id => ['amount_applied' => 0]]);
-            return (bool) $this->decrement('amount_paid', $payment->pivot->amount_applied);
+        if (($payment = $this->payments->where('id', $payment->id)->first())
+            && $this->payments()->syncWithoutDetaching([$payment->id => ['amount_applied' => 0]])
+            && $this->decrement('amount_paid', $payment->pivot->amount_applied))
+        {
+            foreach($this->getItems() as $item) {
+                if ($item->getInvoiceable()) {
+                    event(new InvoiceablePaymentRemoved($item->getInvoiceable(), $payment));
+                }
+            }
         }
 
         return false;
