@@ -55,6 +55,12 @@
                             :sort-by.sync="sortBy"
                             :sort-desc.sync="sortDesc"
                             :empty-text="emptyText">
+                            <template slot="client_name" scope="row">
+                                <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
+                            </template>
+                            <template slot="caregiver_name" scope="row">
+                                <a :href="`/business/caregivers/${row.item.caregiver_id}`">{{ row.item.caregiver_name }}</a>
+                            </template>
                             <template slot="evv" scope="data">
                                 <span v-if="data.value" style="color: green">
                                     <i class="fa fa-check-square-o"></i>
