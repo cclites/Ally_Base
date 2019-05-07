@@ -98,10 +98,6 @@ class Claim extends AuditableModel
 
     function getAmountPaid(): float
     {
-        if ($this->isOffline()) {
-            return (float) $this->offlinePayments()->sum('amount');
-        }
-
         return (float) $this->amount_paid;
     }
 
