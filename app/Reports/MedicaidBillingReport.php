@@ -2,6 +2,8 @@
 
 namespace App\Reports;
 
+use App\Billing\ClientAuthorization;
+use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -28,7 +30,7 @@ class MedicaidBillingReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = Shift::with(['caregiver', 'client', 'services', 'service', 'services.service'])
+        $this->query = Shift::with(['caregiver', 'client', 'services', 'service', 'services.service', 'client.serviceAuthorizations'])
             ->forRequestedBusinesses()
             ->whereConfirmed();
     }
@@ -127,57 +129,126 @@ class MedicaidBillingReport extends BaseReport
 
         $shifts = $query->get();
         $services = collect([]);
-
         foreach ($shifts as $shift) {
             if ($shift->fixed_rates || filled($shift->service_id)) {
 
-                $services->push([
-                    'caregiver_id' => $shift->caregiver_id,
-                    'caregiver_name' => $shift->caregiver->nameLastFirst,
-                    'client_id' => $shift->client_id,
-                    'client_name' => $shift->client->nameLastFirst,
-                    'service_id' => $shift->service->id,
-                    'service' => trim("{$shift->service->code} {$shift->service->name}"),
-                    'hours' => $shift->duration(),
-                    'rate' => $shift->getClientRate(),
-                    'evv' => $shift->isVerified(),
-                    'billable' => $shift->costs()->getClientCost(false),
-                    'date' => $shift->checked_in_time->toDateTimeString(),
-                    'start' => $shift->checked_in_time->toDateTimeString(),
-                    'end' => $shift->checked_out_time->toDateTimeString(),
-                ]);
+                $services->push($this->mapShiftRecord($shift));
 
             } else if ($shift->services->isNotEmpty()) {
 
                 $start = $shift->checked_in_time;
-
                 foreach ($shift->services as $shiftService) {
-
-                    $end = $shift->checked_in_time->copy()->addHours($shiftService->duration);
-
-                    $services->push([
-                        'caregiver_id' => $shift->caregiver_id,
-                        'caregiver_name' => $shift->caregiver->nameLastFirst,
-                        'client_id' => $shift->client_id,
-                        'client_name' => $shift->client->nameLastFirst,
-                        'service_id' => $shiftService->service->id,
-                        'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-                        'hours' => $shiftService->duration,
-                        'rate' => $shiftService->client_rate,
-                        'evv' => $shift->isVerified(),
-                        'billable' => $shiftService->getAmountDue(),
-                        'date' => $start->toDateTimeString(),
-                        'start' => $start->toDateTimeString(),
-                        'end' => $end->toDateTimeString(),
-                    ]);
-
+                    $end = $start->copy()->addHours($shiftService->duration);
+                    $services->push($this->mapShiftServiceRecord($shift, $shiftService, $start, $end));
                     $start = $end->copy()->addSeconds(1);
                 }
 
             }
         }
 
-        // TODO: enumerate services and add service auth ID, unit type and count
-        return $services;
+        return $services->map(function ($service) {
+            $serviceAuth = $this->findServiceAuth($service['date'], $service['service_id'], $service['client']->serviceAuthorizations);
+            return array_merge($service, [
+                'service_auth' => optional($serviceAuth)->service_auth_id,
+                'unit_type' => optional($serviceAuth)->unit_type,
+                'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $service['hours'])
+            ]);
+        });
+    }
+
+    /**
+     * Map a Shift to a report row.
+     *
+     * @param Shift $shift
+     * @return array
+     */
+    protected function mapShiftRecord(Shift $shift) : array
+    {
+        return [
+            'caregiver_id' => $shift->caregiver_id,
+            'caregiver_name' => $shift->caregiver->nameLastFirst,
+            'client' => $shift->client,
+            'client_id' => $shift->client_id,
+            'client_name' => $shift->client->nameLastFirst,
+            'service_id' => $shift->service->id,
+            'service' => trim("{$shift->service->code} {$shift->service->name}"),
+            'hours' => $shift->duration(),
+            'rate' => $shift->getClientRate(),
+            'evv' => $shift->isVerified(),
+            'billable' => $shift->costs()->getClientCost(false),
+            'date' => $shift->checked_in_time->toDateString(),
+            'start' => $shift->checked_in_time->toDateTimeString(),
+            'end' => $shift->checked_out_time->toDateTimeString(),
+        ];
+    }
+
+    /**
+     * Map a ShiftService to a report row.
+     *
+     * @param Shift $shift
+     * @param ShiftService $shiftService
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return array
+     */
+    protected function mapShiftServiceRecord(Shift $shift, ShiftService $shiftService, Carbon $start, Carbon $end) : array
+    {
+        return [
+            'caregiver_id' => $shift->caregiver_id,
+            'caregiver_name' => $shift->caregiver->nameLastFirst,
+            'client' => $shift->client,
+            'client_id' => $shift->client_id,
+            'client_name' => $shift->client->nameLastFirst,
+            'service_id' => $shiftService->service->id,
+            'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
+            'hours' => $shiftService->duration,
+            'rate' => $shiftService->client_rate,
+            'evv' => $shift->isVerified(),
+            'billable' => $shiftService->getAmountInvoiced(), // TODO: this isn't correct?
+            'date' => $start->toDateString(),
+            'start' => $start->toDateTimeString(),
+            'end' => $end->toDateTimeString(),
+        ];
+    }
+
+    /**
+     * Map service auth units based on duration.
+     *
+     * @param null|string $unitType
+     * @param float $hours
+     * @return string
+     */
+    protected function mapUnits(?string $unitType, float $hours) : string
+    {
+        switch ($unitType) {
+            case '15m':
+                return (string) (floatval($hours) * floatval(60)) / floatval(15);
+            case 'fixed':
+                return 1;
+            case 'hourly':
+                return $hours;
+            default:
+                return '-';
+        }
+    }
+
+    /**
+     * Get the matching service authorization for the given service and date.
+     *
+     * @param string $date
+     * @param int $serviceId,
+     * @param Collection|null $serviceAuths
+     * @return ClientAuthorization|null
+     */
+    protected function findServiceAuth(string $date, int $serviceId, ?Collection $serviceAuths) : ?ClientAuthorization
+    {
+        if (empty($serviceAuths) || $serviceAuths->isEmpty()) {
+            return null;
+        }
+
+        return $serviceAuths->where('service_id', $serviceId)
+            ->where('effective_start', '<=', $date)
+            ->where('effective_end', '>=', $date)
+            ->first();
     }
 }

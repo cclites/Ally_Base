@@ -26,12 +26,12 @@
 
                         <b-select v-model="form.client" class="mb-2 mr-2">
                             <option value="">All Clients</option>
-                            <option v-for="client in clients" :key="client.id" value="client.id">{{ client.nameLastFirst }}</option>
+                            <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
                         </b-select>
 
                         <b-select v-model="form.caregiver" class="mb-2 mr-2">
                             <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :key="caregiver.id" value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                            <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                         </b-select>
 
                         <b-button @click="fetch()" variant="info" :disabled="busy || form.output_format == ''" class="mr-2 mb-2">
@@ -55,6 +55,15 @@
                             :sort-by.sync="sortBy"
                             :sort-desc.sync="sortDesc"
                             :empty-text="emptyText">
+                            <template slot="evv" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                <span v-else-if="data.value === undefined"></span>
+                                <span v-else style="color: darkred">
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
                         </b-table>
                     </div>
                     <b-row>
@@ -118,16 +127,17 @@
                 sortDesc: false,
                 fields: [
                     { key: 'client_name', label: 'Client', sortable: true, },
+                    { key: 'caregiver_name', label: 'Caregiver', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },
-                    { key: 'service_auth', label: 'Authorization Number', sortable: true },
+                    { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
                     { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'units', label: 'Units', sortable: true },
                     { key: 'hours', label: 'Hours', sortable: true },
-                    { key: 'rate', label: 'Cost/Units', sortable: true, formatters: x => this.formatMoney(x) },
-                    { key: 'evv', label: 'EVV', sortable: true, formatter: x => x === true ? 'X' : 'O' },
-                    { key: 'billable', label: 'Total Billable', sortable: true, formatters: x => this.formatMoney(x) },
+                    { key: 'rate', label: 'Cost/Hour', sortable: true, formatter: x => this.moneyFormat(x) },
+                    { key: 'evv', label: 'EVV', sortable: true },
+                    { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
                 items: [],
                 hasRun: false,
