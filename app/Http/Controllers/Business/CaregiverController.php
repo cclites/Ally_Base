@@ -132,6 +132,7 @@ class CaregiverController extends BaseController
         $this->authorize('read', $caregiver);
 
         $caregiver->load([
+            'businesses',
             'deposits' => function ($query) {
                 return $query->orderBy('created_at');
             },
@@ -210,6 +211,34 @@ class CaregiverController extends BaseController
             return new SuccessResponse('The caregiver has been updated.', $caregiver, '.');
         }
         return new ErrorResponse(500, 'The caregiver could not be updated.');
+    }
+
+    public function updateOfficeLocations(Request $request, Caregiver $caregiver)
+    {
+        $data = $request->validate([
+            'businesses' => 'required|array|min:1',
+            'businesses.*' => 'int|exists:businesses,id',
+        ]);
+
+        // Restrict dropping business relation if they have clients:
+        $availableBusinesses = auth()->user()->role->businessChain->businesses;
+        foreach ($availableBusinesses as $business) {
+            if (in_array($business->id, $data['businesses'])) {
+                continue;
+            }
+
+            $hasClients = $caregiver->clients()
+                ->where('business_id', $business->id)
+                ->exists();
+
+            if ($hasClients) {
+                return new ErrorResponse(412, "Cannot remove caregiver from the {$business->name} location because they are currently assigned to clients at that location.");
+            }
+        }
+
+        $caregiver->businesses()->sync($data['businesses']);
+
+        return new SuccessResponse('Successfully updated caregiver\'s locations');
     }
 
     /**
