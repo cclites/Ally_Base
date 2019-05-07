@@ -13,13 +13,21 @@ class CreateOfflinePaymentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('offline_payments', function (Blueprint $table) {
+        Schema::dropIfExists('claim_payments');
+        Schema::create('claim_payments', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('invoice_id');
+            $table->unsignedInteger('claim_id');
+            $table->date('payment_date');
             $table->decimal('amount', 9, 2);
-            $table->string('reference');
-            $table->text('notes');
+            $table->string('type')->nullable();
+            $table->string('reference')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
+        });
+
+        Schema::table('claims', function (Blueprint $table) {
+            $table->decimal('amount_paid', 9, 2)->after('amount')->default(0);
+            $table->dropColumn('balance');
         });
     }
 
@@ -30,6 +38,9 @@ class CreateOfflinePaymentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('offline_payments');
+        Schema::table('claims', function (Blueprint $table) {
+            $table->decimal('balance', 9, 2)->after('amount')->default(0);
+            $table->dropColumn('amount_paid');
+        });
     }
 }

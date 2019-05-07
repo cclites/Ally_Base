@@ -2,18 +2,18 @@
 namespace App\Http\Controllers\Clients;
 
 use App\Billing\ClientInvoice;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 
 class InvoiceController extends BaseController
 {
     /**
-     * @var \App\Billing\Queries\ClientInvoiceQuery
+     * @var \App\Billing\Queries\OnlineClientInvoiceQuery
      */
     protected $invoiceQuery;
 
-    public function __construct(ClientInvoiceQuery $invoiceQuery)
+    public function __construct(OnlineClientInvoiceQuery $invoiceQuery)
     {
         $this->invoiceQuery = $invoiceQuery;
     }

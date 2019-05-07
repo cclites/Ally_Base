@@ -12,16 +12,17 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $name
  * @property int $client_id
- * @property int|null $payer_id
+ * @property int|null $client_payer_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
  * @property bool $offline
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Billing\Claim $claim
  * @property-read \App\Client $client
+ * @property-read \App\Billing\ClientPayer|null $clientPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
- * @property-read \App\Billing\Payer|null $payer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newQuery()
@@ -82,11 +83,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     {
         return $this->belongsToMany(Payment::class, 'invoice_payments', 'invoice_id', 'payment_id')
             ->withPivot(['amount_applied']);
-    }
-
-    function offlinePayments()
-    {
-        return $this->hasMany(OfflinePayment::class);
     }
 
     function client()
@@ -175,16 +171,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         }
 
         return false;
-    }
-
-    function addOfflinePayment(OfflinePayment $offlinePayment): bool
-    {
-        return $this->offlinePayments()->save($offlinePayment);
-    }
-
-    function removeOfflinePayment(OfflinePayment $offlinePayment): bool
-    {
-        return $offlinePayment->delete();
     }
 
     function getName(): string
