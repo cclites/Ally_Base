@@ -90,7 +90,6 @@ Vue.component('caregiver-task-list', require('./components/caregivers/TaskList')
 
 // Admin
 Vue.component('admin-communication-log', require('./components/admin/CommunicationLog'));
-Vue.component('admin-tellus-component', require('./components/admin/AdminTellusComponent'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
 Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
