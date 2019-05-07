@@ -284,15 +284,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     * @deprecated Caregivers are attached to the chain, not the business
      */
     public function caregivers()
     {
-        return $this->belongsToMany(Caregiver::class, 'business_caregivers')
-            ->withPivot([
-                'type',
-                'default_rate'
-            ]);
+        return $this->belongsToMany(Caregiver::class, 'business_caregivers');
     }
 
     public function activeCaregivers()

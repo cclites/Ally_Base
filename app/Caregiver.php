@@ -220,6 +220,16 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->withTimestamps();
     }
 
+    /**
+     * Get the businesses relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    */
+    public function businesses()
+    {
+        return $this->belongsToMany(Business::class, 'business_caregivers');
+    }
+
     public function clients()
     {
         return $this->belongsToMany(Client::class, 'client_caregivers')
@@ -325,19 +335,6 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
-
-    /**
-     * Backwards compatibility with old relationship, return a collection of all businesses through chains
-     * @return \App\Business[]|\Illuminate\Database\Eloquent\Collection
-     */
-    public function getBusinessesAttribute()
-    {
-        foreach($this->businessChains as $chain) {
-            $collection = $chain->businesses;
-            $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
-        }
-        return $businesses ?? collect();
-    }
 
     /**
      * Get the account setup URL.
