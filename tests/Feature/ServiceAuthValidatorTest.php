@@ -425,7 +425,8 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // create shift that expands from monday - tuesday
-        $shift = $this->createShift(Carbon::parse('last monday'), '23:00:00', 5, [
+        $monday = Carbon::parse('last monday');
+        $shift = $this->createShift($monday, '23:00:00', 5, [
             'fixed_rates' => 1,
         ]);
 
@@ -433,7 +434,7 @@ class ServiceAuthValidatorTest extends TestCase
         $this->assertDoesNotExceedServiceAuth($shift);
 
         // create another shift on tuesday
-        $shift = $this->createShift(Carbon::parse('last tuesday'), '06:00:00', 3, [
+        $shift = $this->createShift($monday->copy()->addDays(1), '06:00:00', 3, [
             'fixed_rates' => 1,
         ]);
 
@@ -466,7 +467,7 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $shift1 = $this->createShift(Carbon::parse('last tuesday'), '01:00:00', 4);
-        $shift2 = $this->createShift(Carbon::parse('last wednesday'), '01:00:00', 4, [
+        $shift2 = $this->createShift(Carbon::parse('last tuesday')->addDays(1), '01:00:00', 4, [
             'fixed_rates' => 1,
         ]);
 
