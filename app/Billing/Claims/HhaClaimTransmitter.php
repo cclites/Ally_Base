@@ -44,6 +44,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
                 $claim->invoice->client->business->ein
             );
         } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
         }
 

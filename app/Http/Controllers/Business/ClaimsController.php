@@ -116,6 +116,7 @@ class ClaimsController extends BaseController
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
         }
     }
