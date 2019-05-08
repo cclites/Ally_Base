@@ -10,20 +10,8 @@ use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Illuminate\Support\Collection;
 
-class BaseClaimTransmitter implements ClaimTransmitterInterface
+abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
 {
-    /**
-     * Submit the claim using the service.
-     *
-     * @param Claim $claim
-     * @return bool
-     * @throws \App\Billing\Exceptions\ClaimTransmissionException
-     */
-    public function send(Claim $claim) : bool
-    {
-        throw new ClaimTransmissionException('Claim service not supported.');
-    }
-
     /**
      * Validate an invoice has all the required parameters to
      * be transmitted as a claim.
@@ -130,22 +118,56 @@ class BaseClaimTransmitter implements ClaimTransmitterInterface
      */
     protected function getData(Claim $claim) : array
     {
-        $shifts = Shift::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shifts')->pluck('invoiceable_id'))
-            ->get();
+        return $this->getInvoicedShifts($claim->invoice)
+            ->merge($this->getShiftsFromInvoicedServices($claim->invoice))
+            ->map(function ($shift) use ($claim) {
+                return $this->mapShiftRecord($claim, $shift);
+            })
+            ->toArray();
+    }
 
-        $serviceShiftIds = ShiftService::whereIn('id', $claim->invoice->items->where('invoiceable_type', 'shift_services')->pluck('invoiceable_id'))
+    /**
+     * Get the shifts that are directly attached to a client invoice.
+     *
+     * @param ClientInvoice $invoice
+     * @return Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
+    protected function getInvoicedShifts(ClientInvoice $invoice)
+    {
+        $shiftLineItems = $invoice->items->where('invoiceable_type', 'shifts')
+            ->pluck('invoiceable_id');
+
+        return Shift::whereIn('id', $shiftLineItems)
+            ->get();
+    }
+
+    /**
+     * Get the parent shifts of the services that are directly
+     * attached to a client invoice.
+     *
+     * @param ClientInvoice $invoice
+     * @return Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
+    protected function getShiftsFromInvoicedServices(ClientInvoice $invoice)
+    {
+        $serviceLineItems = $invoice->items->where('invoiceable_type', 'shift_services')
+            ->pluck('invoiceable_id');
+
+        $serviceShiftIds = ShiftService::whereIn('id', $serviceLineItems)
             ->get()
             ->unique('shift_id');
 
-        $shifts = $shifts->merge(Shift::whereIn('id', $serviceShiftIds)->get());
-
-        $data = [];
-        foreach ($shifts as $shift) {
-            $data[] = $this->mapShiftRecord($claim, $shift);
-        }
-
-        return $data;
+        return Shift::whereIn('id', $serviceShiftIds)->get();
     }
+
+    /**
+     * Submit the claim using the service.
+     *
+     * @param Claim $claim
+     * @return bool
+     * @throws \App\Billing\Exceptions\ClaimTransmissionException
+     */
+    abstract public function send(Claim $claim) : bool;
 
     /**
      * Map a claim's shift into importable data for the service.
@@ -154,8 +176,5 @@ class BaseClaimTransmitter implements ClaimTransmitterInterface
      * @param \App\Shift $shift
      * @return array
      */
-    public function mapShiftRecord(Claim $claim, Shift $shift) : array
-    {
-        return [];
-    }
+    abstract public function mapShiftRecord(Claim $claim, Shift $shift) : array;
 }
