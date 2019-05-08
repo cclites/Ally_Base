@@ -1,0 +1,37 @@
+<?php
+namespace App\Billing\Contracts;
+
+use App\Billing\Claim;
+use App\Billing\ClientInvoice;
+use App\Shift;
+
+interface ClaimTransmitterInterface
+{
+    /**
+     * Validate an invoice has all the required parameters to
+     * be transmitted as a claim.
+     *
+     * @param \App\Billing\ClientInvoice $invoice
+     * @return bool
+     * @throws \App\Billing\Exceptions\ClaimTransmissionException
+     */
+    public function validateInvoice(ClientInvoice $invoice) : bool;
+
+    /**
+     * Submit the claim using the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @return bool
+     * @throws \App\Billing\Exceptions\ClaimTransmissionException
+     */
+    public function send(Claim $claim) : bool;
+
+    /**
+     * Map a claim's shift into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param \App\Shift $shift
+     * @return array
+     */
+    public function mapShiftRecord(Claim $claim, Shift $shift) : array;
+}

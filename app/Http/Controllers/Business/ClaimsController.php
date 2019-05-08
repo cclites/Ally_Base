@@ -9,9 +9,9 @@ use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Queries\OfflineClientInvoiceQuery;
 use App\Http\Requests\PayClaimRequest;
+use App\Http\Requests\TransmitClaimRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Billing\ClaimTransmitter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
@@ -84,37 +84,38 @@ class ClaimsController extends BaseController
     /**
      * Create a claim from an invoice and transmit to HHAeXchange.
      *
-     * @param Request $request
+     * @param TransmitClaimRequest $request
      * @param ClientInvoice $invoice
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
      */
-    public function transmitInvoice(Request $request, ClientInvoice $invoice)
+    public function transmitInvoice(TransmitClaimRequest $request, ClientInvoice $invoice)
     {
-        $request->validate([
-            'service' => 'required|in:HHA,TELLUS',
-        ], [
-            'service.*' => 'You must choose a transmission service.'
-        ]);
+        $data = $request->validated();
+        $service = $data['service'];
 
         $this->authorize('read', $invoice);
 
         try {
-            $service = strtoupper($request->service);
-            $transmitter = new ClaimTransmitter(ClaimService::$service());
+            \DB::beginTransaction();
+
+            $transmitter = Claim::getTransmitter(ClaimService::$service());
             $transmitter->validateInvoice($invoice);
 
             $claim = Claim::getOrCreate($invoice);
-            $transmitter->transmitClaim($claim);
+
+            $transmitter->send($claim);
 
             $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
                 'service' => ClaimService::$service(),
             ]);
 
+            \DB::commit();
             return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
         }
     }
