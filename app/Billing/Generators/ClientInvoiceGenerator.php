@@ -4,6 +4,7 @@ namespace App\Billing\Generators;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Events\InvoiceableInvoiced;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\BaseInvoiceItem;
@@ -77,8 +78,11 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
                 throw $e;
             }
 
-
             DB::commit();
+        }
+
+        foreach($invoiceables as $invoiceable) {
+            event(new InvoiceableInvoiced($invoiceable));
         }
 
         return array_values($this->invoices);
