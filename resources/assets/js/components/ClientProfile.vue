@@ -69,6 +69,25 @@
                     </b-col>
                 </b-row>
             </template>
+            <b-row v-if="user.role_type === 'office_user'">
+                <b-col lg="6">
+                    <b-form-group label="Default Location">
+                        <b-form-select v-model="form.default_business_id">
+                            <option value="">-- Select Location --</option>
+                            <option v-for="business in client.businesses" :value="business.id">{{ business.name }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="default_business_id" text="Your default location."></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Timezone">
+                        <b-form-select v-model="form.timezone">
+                            <option v-for="tz in timezones" :value="tz.value">{{ tz.text }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="timezone" text="Your default timezone when viewing dates."></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
                     <b-button variant="success" type="submit" :disabled="authInactive">Save Profile</b-button>
@@ -85,7 +104,12 @@
     export default {
         props: {
             'client': {},
-            'user': {}
+            'user': {},
+            timezones: {
+                required: false,
+                type: [Array, Object],
+                default: () => { return []; },
+            },
         },
 
         mixins: [FormatsDates, AuthUser],
@@ -97,7 +121,9 @@
                     lastname: this.user.lastname,
                     email: this.user.email,
                     date_of_birth: (this.user.date_of_birth) ? this.formatDate(this.user.date_of_birth) : '',
-                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : ''
+                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
+                    timezone: this.client.timezone ? this.client.timezone : 'America/New_York',
+                    default_business_id: this.client.default_business_id ? this.client.default_business_id : '',
                 })
             }
         },

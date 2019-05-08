@@ -20,7 +20,7 @@ class ActiveBusiness
             return $this->business;
         }
         if (Auth::check() && Auth::user()->role_type === 'office_user') {
-            return Auth::user()->role->businesses->first();
+            return Auth::user()->role->getDefaultBusiness();
         }
         // For administrators only: get the last used business_id
         // This can be extended to office users once we allow for business switching.

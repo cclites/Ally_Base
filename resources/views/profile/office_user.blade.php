@@ -45,7 +45,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-profile :user="{{ $user }}" :client="{{ $user->role }}"></client-profile>
+                    <client-profile :user="{{ $user }}" :client="{{ $user->role }}" :timezones="{{ $timezones }}"></client-profile>
                 </div>
             </div>
             <div class="row">
