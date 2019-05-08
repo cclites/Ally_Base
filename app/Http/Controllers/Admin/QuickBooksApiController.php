@@ -131,7 +131,7 @@ class QuickBooksApiController extends Controller
             'auth_mode' => 'oauth2',
             'ClientID' => "Q0mb9dx2UVRhA6DgUFeVH8xfJCRd0FloGxBxZMgCQg8Tc4YlJA",
             'ClientSecret' => "7s5i2I4dm4txjTGQU1elNriVQuAWskIUv8HadQ8r",
-            'RedirectURI' => 'http://krioscare.loc/admin/quickbooks-api/authorization',
+            'RedirectURI' => route('quickbooks_api.authorization'),
             'scope' => "com.intuit.quickbooks.accounting",
             'baseUrl' => "Development"
         );

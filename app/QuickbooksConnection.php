@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\QuickbooksOnlineService;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
@@ -75,4 +76,14 @@ class QuickbooksConnection extends Model
     // OTHER FUNCTIONS
     // **********************************************************
 
+    public function getApiService()
+    {
+        try {
+            return app(QuickbooksOnlineService::class)
+                ->setAccessToken($this->access_token);
+        }
+        catch (\Exception $ex) {
+            return null;
+        }
+    }
 }

@@ -265,6 +265,7 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         'discharge_internal_notes',
         'sales_person_id',
         'agreement_status',
+        'quickbooks_customer_id',
     ];
 
     ///////////////////////////////////////////
@@ -487,6 +488,16 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     public function contacts()
     {
         return $this->hasMany(ClientContact::class);
+    }
+
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function quickbooksCustomer()
+    {
+        return $this->belongsTo(QuickbooksCustomer::class);
     }
 
     ///////////////////////////////////////////

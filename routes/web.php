@@ -412,6 +412,10 @@ Route::group([
     Route::get('quickbooks', 'Business\BusinessQuickbooksSettingsController@index')->name('quickbooks.index');
     Route::get('quickbooks/connect', 'Business\BusinessQuickbooksSettingsController@connect')->name('quickbooks.connect');
     Route::get('quickbooks/authorization', 'Business\BusinessQuickbooksSettingsController@authorization')->name('quickbooks.authorization');
+    Route::get('quickbooks/test', 'Business\BusinessQuickbooksSettingsController@test');
+    Route::get('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersList');
+    Route::patch('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customers/sync', 'Business\BusinessQuickbooksSettingsController@customersSync');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');

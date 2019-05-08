@@ -6,10 +6,40 @@ use QuickBooksOnline\API\DataService\DataService;
 
 class QuickbooksOnlineService
 {
+    /**
+     * @var string
+     */
     protected $clientId;
+
+    /**
+     * @var string
+     */
     protected $clientSecret;
+
+    /**
+     * @var string
+     */
     protected $authRedirect;
+
+    /**
+     * @var string
+     */
     protected $mode;
+
+    /**
+     * @var \QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken
+     */
+    protected $accessToken;
+
+    /**
+     * @var \QuickBooksOnline\API\DataService\DataService
+     */
+    protected $service;
+
+    /**
+     * @var bool
+     */
+    protected $accessTokenUpdated = false;
 
     /**
      * QuickbooksOnlineService Constructor.
@@ -17,6 +47,7 @@ class QuickbooksOnlineService
      * @param string $clientId
      * @param string $clientSecret
      * @param string $mode
+     * @throws \QuickBooksOnline\API\Exception\SdkException
      */
     public function __construct(string $clientId, string $clientSecret, string $mode = 'sandbox')
     {
@@ -24,29 +55,113 @@ class QuickbooksOnlineService
         $this->clientSecret = $clientSecret;
         $this->authRedirect = route('business.quickbooks.authorization');
         $this->mode = $mode;
+        $this->configureDataService();
+    }
+
+    /**
+     * Set the current OAuth access token.
+     *
+     * @param OAuth2AccessToken $tokenObject
+     * @return self
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     */
+    public function setAccessToken(OAuth2AccessToken $tokenObject) : self
+    {
+        $this->accessToken = $tokenObject;
+        $this->configureDataService();
+
+        return $this;
     }
 
     /**
      * Get the auth code URL.
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     * @throws \QuickBooksOnline\API\Exception\SdkException
      */
-    public function getAuthorizationCodeURL()
+    public function getAuthorizationUrl()
     {
-        $dataService = $this->getDataService();
-        $OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
-        return $OAuth2LoginHelper->getAuthorizationCodeURL();
+        return $this->service->getOAuth2LoginHelper()
+            ->getAuthorizationCodeURL();
     }
 
     /**
-     * Get the configured DataService object.
+     * Exchange authorization code for access token.
      *
-     * @param array $data
-     * @return DataService
+     * @param string $code
+     * @param string $realmId
+     * @return \QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken|null
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     * @throws \QuickBooksOnline\API\Exception\ServiceException
+     */
+    public function getAccessToken(string $code, string $realmId) : ?OAuth2AccessToken
+    {
+        return $this->service->getOAuth2LoginHelper()
+            ->exchangeAuthorizationCodeForToken($code, $realmId);
+    }
+
+    /**
+     * Check whether the service has updated the access token.
+     *
+     * @return bool
+     */
+    public function hasUpdatedAccessToken() : bool
+    {
+        return $this->accessTokenUpdated;
+    }
+
+    /**
+     * Get a list of customer from the API.
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getCustomers() : ?array
+    {
+        return $this->authRefreshToken()
+            ->query('SELECT * FROM Customer ORDERBY GivenName');
+    }
+
+    /**
+     * Automatically handle token refreshes.
+     *
+     * @return QuickbooksOnlineService
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     * @throws \QuickBooksOnline\API\Exception\ServiceException
+     */
+    protected function authRefreshToken() : self
+    {
+        $period = $this->accessToken->getAccessTokenValidationPeriodInSeconds();
+        $now = strtotime(date('Y-m-d H:i:s'));
+        $expires = strtotime($this->accessToken->getAccessTokenExpiresAt());
+
+        if ($period + $now > $expires) {
+            $this->accessToken = $this->service->getOAuth2LoginHelper()->refreshToken();
+            $this->service->updateOAuth2Token($this->accessToken);
+            $this->accessTokenUpdated = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Query the data service.
+     *
+     * @param string $query
+     * @return array|null
+     * @throws \Exception
+     */
+    protected function query(string $query) : ?array
+    {
+        return $this->service->Query($query);
+    }
+
+    /**
+     * Set the configured DataService object.
+     *
+     * @return void
      * @throws \QuickBooksOnline\API\Exception\SdkException
      */
-    protected function getDataService($data = [])
+    protected function configureDataService() : void
     {
         $config = array(
             'auth_mode' => 'oauth2',
@@ -57,26 +172,13 @@ class QuickbooksOnlineService
             'baseUrl' => $this->mode == 'production' ? "Production" : "Development"
         );
 
-        if(!empty($data)) {
-            $config = array_merge($config, $data);
+        // Automatically fill authentication field when an access token set.
+        if (filled($this->accessToken)) {
+            $config['accessTokenKey'] = $this->accessToken->getAccessToken();
+            $config['refreshTokenKey'] = $this->accessToken->getRefreshToken();
+            $config['QBORealmID'] = $this->accessToken->getRealmID();
         }
 
-        return DataService::Configure($config);
-    }
-
-    /**
-     * Exchange authorization code for access token.
-     *
-     * @param string $code
-     * @param string $realmId
-     * @return OAuth2AccessToken|null
-     * @throws \QuickBooksOnline\API\Exception\SdkException
-     * @throws \QuickBooksOnline\API\Exception\ServiceException
-     */
-    public function getAccessToken(string $code, string $realmId) : ?OAuth2AccessToken
-    {
-        $dataService = $this->getDataService();
-        $OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
-        return $OAuth2LoginHelper->exchangeAuthorizationCodeForToken($code, $realmId);
+        $this->service = DataService::Configure($config);
     }
 }

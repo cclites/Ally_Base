@@ -75,7 +75,7 @@
                 return this.caregivers.map(function(caregiver) {
                     return {
                         id: caregiver.id,
-                        name: caregiver.user.firstname + ' ' + caregiver.user.lastname,
+                        name: caregiver.nameLastFirst,
                     }
                 });
 

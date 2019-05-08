@@ -1,6 +1,14 @@
 <template>
     <b-card>
         <b-row class="mb-2" align-h="end">
+            <b-col md="6">
+                <b-btn variant="info" @click="save()" :disabled="loading">Save Changes</b-btn>
+            </b-col>
+            <b-col md="6" class="text-right">
+                <b-btn variant="success" @click="refreshCustomers()" :disabled="loading">Sync Quickbooks Customer Data</b-btn>
+            </b-col>
+        </b-row>
+        <b-row class="mb-2" align-h="end">
             <b-col md="4" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
@@ -11,13 +19,15 @@
                      :items="items"
                      :current-page="currentPage"
                      :per-page="perPage"
-                     :filter="filter"
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
-                     :fields="fields">
-                <template slot="quickbooks" scope="row">
-                    <b-form-select v-model="selected">
-                        <option value="Do No Match">Do No Match</option>
+                     :fields="fields"
+                     :filter="filter"
+            >
+                <template slot="quickbooks_customer_id" scope="row">
+                    <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="loading">
+                        <option value="">Do No Match</option>
+                        <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
                     </b-form-select>
                 </template>
             </b-table>
@@ -35,56 +45,115 @@
 </template>
 
 <script>
+    import BusinessLocationFormGroup from "../../BusinessLocationFormGroup";
+
     export default {
+        components: { BusinessLocationFormGroup },
         props: {
-            clients: Array,
+            clients: {
+                type: Array,
+                default: [],
+            },
+            businessId: {
+                type: Number,
+                default: null,
+            },
         },
 
         data() {
             return {
-                active: 'active',
+                items: [],
+                filter: '',
                 totalRows: 0,
-                perPage: 15,
+                perPage: 30,
                 currentPage: 1,
-                sortBy: 'ally',
+                sortBy: 'nameLastFirst',
                 sortDesc: false,
-                filter: null,
-                selected: 'Do No Match',
-                selectedItem: {},
                 fields: [
                     {
-                        key: 'name',
+                        key: 'nameLastFirst',
                         label: 'Ally',
                         sortable: true
                     },
                     {
-                        key: 'quickbooks',
-                        label: 'QuickBooks',
+                        key: 'quickbooks_customer_id',
+                        label: 'QuickBooks Customer',
                         sortable: false
                     },
-                ]
+                ],
+
+                customers: [],
+                loading: false,
             }
         },
 
         mounted() {
+            this.loading = true;
+            this.items = this.clients;
             this.totalRows = this.items.length;
+            this.fetchCustomers();
         },
 
         computed: {
-            items() {
-                return this.clients.map(function(client) {
-                    return {
-                        id: client.id,
-                        name: client.user.firstname + ' ' + client.user.lastname,
-                    }
-                });
-
-            },
         },
 
         methods: {
+            fetchCustomers() {
+                if (! this.businessId) {
+                    return;
+                }
 
-        }
+                this.loading = true;
+                axios.get(`/business/quickbooks/${this.businessId}/customers`)
+                    .then( ({ data }) => {
+                        this.customers = data;
+                        this.loading = false;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+
+            refreshCustomers() {
+                if (! this.businessId) {
+                    return;
+                }
+                this.loading = true;
+
+                let form = new Form({});
+                form.post(`/business/quickbooks/${this.businessId}/customers/sync`)
+                    .then( ({ data }) => {
+                        this.customers = data.data;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+
+            save() {
+                if (! this.businessId) {
+                    return;
+                }
+
+                this.loading = true;
+                let form = new Form({ clients: this.items });
+                form.patch(`/business/quickbooks/${this.businessId}/customers`)
+                    .then( ({ data }) => {
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+        },
+
+        watch: {
+            businessId(newValue, oldValue) {
+                this.fetchCustomers();
+            }
+        },
     }
 </script>
 
