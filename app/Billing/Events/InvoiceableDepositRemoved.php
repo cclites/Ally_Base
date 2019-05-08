@@ -27,7 +27,6 @@ final class InvoiceableDepositRemoved implements InvoiceableEvent, DepositEvent
         $this->deposit = $deposit;
     }
 
-
     public function getInvoiceable(): InvoiceableInterface
     {
         return $this->invoiceable;

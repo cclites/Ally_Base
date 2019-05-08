@@ -2,6 +2,7 @@
 
 namespace App\Billing\Events;
 
+use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Payment;
 use Illuminate\Queue\SerializesModels;
@@ -21,13 +22,19 @@ final class InvoiceablePaymentAdded implements InvoiceableEvent, PaymentEvent
 
     private $invoiceable;
     private $payment;
+    private $invoice;
 
-    public function __construct(InvoiceableInterface $invoiceable, Payment $payment)
+    public function __construct(InvoiceableInterface $invoiceable, ClientInvoice $invoice, Payment $payment)
     {
         $this->invoiceable = $invoiceable;
         $this->payment = $payment;
+        $this->invoice = $invoice;
     }
 
+    public function getInvoice(): ClientInvoice
+    {
+        return $this->invoice;
+    }
 
     public function getInvoiceable(): InvoiceableInterface
     {

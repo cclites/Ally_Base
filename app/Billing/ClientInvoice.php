@@ -162,7 +162,7 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             && $this->increment('amount_paid', $amountApplied)) {
             foreach($this->getItems() as $item) {
                 if ($item->invoiceable) {
-                    event(new InvoiceablePaymentAdded($item->invoiceable, $payment));
+                    event(new InvoiceablePaymentAdded($item->invoiceable, $this, $payment));
                 }
             }
 
@@ -180,7 +180,7 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         {
             foreach($this->getItems() as $item) {
                 if ($item->getInvoiceable()) {
-                    event(new InvoiceablePaymentRemoved($item->getInvoiceable(), $payment));
+                    event(new InvoiceablePaymentRemoved($item->getInvoiceable(), $this, $payment));
                 }
             }
         }
