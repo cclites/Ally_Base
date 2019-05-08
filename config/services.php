@@ -66,8 +66,6 @@ return [
 
     'tellus' => [
         'endpoint' => env('TELLUS_ENDPOINT', 'https://integration.pilot.4tellus.com/v1.0/ALLY'),
-        'username' => env('TELLUS_USERNAME'),
-        'password' => env('TELLUS_PASSWORD'),
     ],
 
     'fullcalendar' => [

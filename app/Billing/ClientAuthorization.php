@@ -11,7 +11,6 @@ use App\Client;
  *
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
- * @property-read \App\Billing\Payer $payer
  * @property-read \App\Billing\Service $service
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
@@ -33,7 +32,6 @@ class ClientAuthorization extends AuditableModel
     protected $casts = [
         'client_id' => 'int',
         'service_id' => 'int',
-        'payer_id' => 'int',
         'units' => 'float',
         'sunday' => 'float',
         'monday' => 'float',
@@ -77,16 +75,6 @@ class ClientAuthorization extends AuditableModel
     public function client()
     {
         return $this->belongsTo(Client::class);
-    }
-
-    /**
-     * Get the payer relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function payer()
-    {
-        return $this->belongsTo(Payer::class);
     }
 
     /**

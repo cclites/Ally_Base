@@ -57,9 +57,26 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
 {
     use IsUserRole, BelongsToBusinesses, BelongsToOneChain;
 
-    protected $table = 'office_users';
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
-    public $fillable = ['chain_id'];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'office_users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['chain_id', 'default_business_id', 'timezone'];
 
     /**
      * The notification classes related to this user role.
@@ -99,10 +116,28 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->hasMany(Task::class, 'creator_id');
     }
 
+    /**
+     * Get the default business relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\
+    */
+    public function defaultBusiness()
+    {
+        return $this->belongsTo(Business::class, 'default_business_id', 'id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
+    public function getDefaultBusiness()
+    {
+        if (empty($this->defaultBusiness)) {
+            return $this->businesses->first();
+        }
+
+        return $this->defaultBusiness;
+    }
 
     function getAddress(): ?Address
     {
@@ -131,6 +166,10 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      */
     public function getTimezone()
     {
+        if (! empty($this->timezone)) {
+            return $this->timezone;
+        }
+        
         return $this->businesses->first()->timezone ?? 'America/New_York';
     }
 

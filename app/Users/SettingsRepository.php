@@ -20,16 +20,17 @@ class SettingsRepository
         }
 
         $chain = $officeUser->businessChain;
-        $firstBusiness = $officeUser->businesses()->first();
+        $defaultBusiness = $officeUser->getDefaultBusiness();
 
         return new OfficeUserSettings(
             (bool) $chain->scheduling,
             (bool) $chain->enable_schedule_groups,
-            (bool) $firstBusiness->ask_on_confirm,
-            (bool) $firstBusiness->calendar_remember_filters,
-            $firstBusiness->calendar_default_view ? new CalendarView($firstBusiness->calendar_default_view) : null,
-            $firstBusiness->calendar_caregiver_filter ? new CalendarCaregiverFilter($firstBusiness->calendar_caregiver_filter) : null,
-            $firstBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($firstBusiness->calendar_next_day_threshold) : null
+            (bool) $defaultBusiness->ask_on_confirm,
+            (bool) $defaultBusiness->calendar_remember_filters,
+            $defaultBusiness->calendar_default_view ? new CalendarView($defaultBusiness->calendar_default_view) : null,
+            $defaultBusiness->calendar_caregiver_filter ? new CalendarCaregiverFilter($defaultBusiness->calendar_caregiver_filter) : null,
+            $defaultBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($defaultBusiness->calendar_next_day_threshold) : null,
+            $defaultBusiness->id
         );
     }
 }
