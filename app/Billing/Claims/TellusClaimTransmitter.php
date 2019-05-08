@@ -5,6 +5,7 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Business;
 use App\Client;
 use App\Services\TellusService;
 use App\Shift;
@@ -13,6 +14,13 @@ use Illuminate\Support\Collection;
 
 class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
+    /**
+     * Timestamp format string.
+     *
+     * @var string
+     */
+    protected $timeFormat = 'm/d/Y H:i:s';
+
     /**
      * Validate an invoice has all the required parameters to
      * be transmitted as a claim.
@@ -28,6 +36,10 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         // TODO: add tellus specific mapping requirements
+
+//        if (empty($business->medicare)) {
+//            throw new ClaimTransmissionException('');
+//        }
 
         return parent::validateInvoice($invoice);
     }
@@ -123,19 +135,19 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $caregiver = $shift->caregiver;
 
         /** @var \App\Address $address */
-        $address = $shift->client->evvAddress();
+        $address = $shift->address ?? $shift->client->evvAddress();
 
         /** @var \Packages\GMaps\GeocodeCoordinates|false */
         $geocode = $address->getGeocode();
 
         $diagnosisCodes = $this->getDiagnosisCodes($client);
 
-        /** @var @var \App\Billing\ClientInvoice $invoice */
+        /** @var \App\Billing\ClientInvoice $invoice */
         $invoice = $claim->invoice;
 
         return [
             'SourceSystem' => 'ALLY',
-            'Jurisdiction' => optional($shift->client->address)->state ?: 'NN',
+            'Jurisdiction' => $address->state ?? 'NN',
             'Payer' => '', // TODO: figure out how to map from data codes
             'Plan' => '', // TODO: figure out how to map from data codes
             'Program' => '', // N/A
@@ -153,151 +165,145 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'RecipientMemberId' => '', // N/A
             'RecipientFirstName' => $client->firstname,
             'RecipientLastName' => $client->lastname,
-            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'),
+            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'), // TODO: add validation
             'ServiceAddress1' => $address->address1,
             'ServiceAddress2' => $address->address2,
             'ServiceCity' => $address->city,
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => $this->mapActivities($shift->activities),
+            'ServiceCode' => $this->mapActivities($shift->activities), // TODO: need to map activities
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0], // TODO: add validation
             'DiagnosisCode2' => $diagnosisCodes[1],
             'DiagnosisCode3' => $diagnosisCodes[2],
             'DiagnosisCode4' => $diagnosisCodes[3],
-            'StartVerificationType' => '',
-            'EndVerificationType' => '',
-            'ScheduledStartDateTime' => '',
-            'ScheduledEndDateTime' => '',
-            'ScheduledLatitude' => '',
-            'ScheduledLongitude' => '',
-            'ActualStartDatetime' => '',
-            'ActualEndDatetime' => '',
-            'ActualStartLatitude' => '',
-            'ActualStartLongitude' => '',
-            'ActualEndLatitude' => '',
-            'ActualEndLongitude' => '',
-            'UserField1' => '',
-            'UserField2' => '',
-            'UserField3' => '',
-            'ReasonCode1' => '',
-            'ReasonCode2' => '',
-            'ReasonCode3' => '',
-            'ReasonCode4' => '',
-            'Time Zone' => '',
-            'visitNote' => '',
-            'EndAddress1' => '',
-            'EndAddress2' => '',
-            'EndCity' => '',
-            'EndState' => '',
-            'EndZip' => '',
-            'VisitStatus' => '',
-            'MissedVisitReason' => '',
-            'MissedVisitActionTaken' => '',
-            'InvoiceUnits' => '',
-            'InvoiceAmount' => $invoice->total,
-            'ScheduledEndLatitude' => '',
-            'ScheduledEndLongitude' => '',
-            'PaidAmount' => '',
-            'CareDirectionType' => '',
-            
-//            'SourceSystem' => 'ALLY',
-//            'Jurisdiction' => $business->state ?: 'FL',
-//            'Payer' => 'AHCA',
-//            'Plan' => 'ALLY',
-//            'Program' => '',
-//            'DeliverySystem' => 'ALLY',
-//            'ProviderName' => $business->name,
-//            'ProviderMedicaidID' => $business->medicaid_id,
-//            'ProviderNpi' => $business->medicaid_npi_number,
-//            'ProviderNpiTaxonomy' => $business->medicaid_npi_taxonomy,
-//            'ProviderEin' => $business->ein,
-//            'CaregiverFirstName' => $caregiver->firstname,
-//            'CaregiverLastName' => $caregiver->lastname,
-//            'CaregiverLicenseNumber' => $caregiver->medicaid_id ?: $business->medicaid_id,
-//            'RecipientMedicaidId' => $client->medicaid_id,
-//            'RecipientMemberId' => '',
-//            'RecipientFirstName' => $client->firstname,
-//            'RecipientLastName' => $client->lastname,
-//            'RecipientDob' => $client->date_of_birth ? Carbon::parse($client->date_of_birth)->format('m/d/Y') : '',
-//            'ServiceAddress1' => $address->address1,
-//            'ServiceAddress2' => $address->address2,
-//            'ServiceCity' => $address->city,
-//            'ServiceState' => $address->state,
-//            'ServiceZip' => $address->zip,
-//            'VisitId' => $shift->id,
-//            'ServiceCode' => 'S9122',
-//            'ServiceCodeMod1' => '',
-//            'ServiceCodeMod2' => '',
-//            'DiagnosisCode1' => $diagnosisCodes[0],
-//            'DiagnosisCode2' => $diagnosisCodes[1],
-//            'DiagnosisCode3' => $diagnosisCodes[2],
-//            'DiagnosisCode4' => $diagnosisCodes[3],
-//            'StartVerificationType' => $this->getVerificationMethod($shift),
-//            'EndVerificationType' => $this->getVerificationMethod($shift),
-//            'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
-//            'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
-//            'ScheduledLatitude' => $geocode->latitude ?? '',
-//            'ScheduledLongitude' => $geocode->longitude ?? '',
-//            'ActualStartDatetime' => $this->formatDateTime($shift->checked_in_time),
-//            'ActualEndDatetime' => $this->formatDateTime($shift->checked_out_time),
-//            'ActualStartLatitude' => $shift->checked_in_latitude,
-//            'ActualStartLongitude' => $shift->checked_in_longitude,
-//            'ActualEndLatitude' => $shift->checked_out_latitude,
-//            'ActualEndLongitude' => $shift->checked_out_longitude,
-//            'UserField1' => '',
-//            'UserField2' => '',
-//            'UserField3' => '',
-//            'ReasonCode1' => '',
-//            'ReasonCode2' => '',
-//            'ReasonCode3' => '',
-//            'ReasonCode4' => '',
-//            'TimeZone' => 'NEWY',
+            'StartVerificationType' => $this->getVerificationType($shift->checked_in_method),
+            'EndVerificationType' => $this->getVerificationType($shift->checked_out_method),
+            'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
+            'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
+            'ScheduledLatitude' => $geocode->latitude ?? '',
+            'ScheduledLongitude' => $geocode->longitude ?? '',
+            'ActualStartDatetime' => $shift->checked_in_time->format($this->timeFormat),
+            'ActualEndDatetime' => $shift->checked_out_time->format($this->timeFormat),
+            'ActualStartLatitude' => $shift->checked_in_latitude ?? '',
+            'ActualStartLongitude' => $shift->checked_in_longitude ?? '',
+            'ActualEndLatitude' => $shift->checked_out_latitude ?? '',
+            'ActualEndLongitude' => $shift->checked_out_longitude ?? '',
+            'UserField1' => '', // N/A
+            'UserField2' => '', // N/A
+            'UserField3' => '', // N/A
+            'ReasonCode1' => '', // N/A
+            'ReasonCode2' => '', // N/A
+            'ReasonCode3' => '', // N/A
+            'ReasonCode4' => '', // N/A
+            'Time Zone' => $this->getBusinessTimezone($business),
+            'visitNote' => $shift->caregiver_comments ?? '',
+            'EndAddress1' => $address->address1,
+            'EndAddress2' => $address->address2,
+            'EndCity' => $address->city,
+            'EndState' => $address->state,
+            'EndZip' => $address->zip,
+            'VisitStatus' => 'COMP',
+            'MissedVisitReason' => '', // N/A
+            'MissedVisitActionTaken' => '', // N/A
+            'InvoiceUnits' => '', // TODO: find out how to fill this
+            'InvoiceAmount' => '', // TODO: find out how to fill this
+            'ScheduledEndLatitude' => '', // N/A
+            'ScheduledEndLongitude' => '', // N/A
+            'PaidAmount' => '', // N/A
+            'CareDirectionType' => '', // N/A
         ];
     }
 
-
-
-
-    protected function getVerificationMethod(Shift $shift)
+    /**
+     * Convert the shifts check in or out method into
+     * a valid VerificationType.
+     *
+     * @param string|null $checkedInOutMethod
+     * @return string
+     */
+    protected function getVerificationType(?string $checkedInOutMethod)
     {
-        return 'GPS';
+        switch ($checkedInOutMethod) {
+            case Shift::METHOD_TELEPHONY:
+                return 'IVR';
+            case Shift::METHOD_GEOLOCATION:
+                return 'GPS';
+            default:
+                return 'NON';
+        }
     }
 
-    protected function getScheduledStartTime(Shift $shift)
+    /**
+     * Get the scheduled start time if a schedule exists, otherwise
+     * just return the shift start time.
+     *
+     * @param \App\Shift $shift
+     * @return string
+     */
+    protected function getScheduledStartTime(Shift $shift) : string
     {
-        if ($this->useSchedule && $schedule = $shift->schedule) {
-            $startsAt = $schedule->starts_at->copy();
-            return $this->formatDateTime($startsAt, $shift->business->timezone);
+        if ($schedule = $shift->schedule) {
+            return $schedule->getStartDateTime()->format($this->timeFormat);
         }
 
-        return $this->formatDateTime($shift->checked_in_time);
+        return $shift->checked_in_time->format($this->timeFormat);
     }
 
+    /**
+     * Get the scheduled end time if a schedule exists, otherwise
+     * just return the shift end time.
+     *
+     * @param \App\Shift $shift
+     * @return string
+     */
     protected function getScheduledEndTime(Shift $shift)
     {
-        if ($this->useSchedule && $schedule = $shift->schedule) {
-            $startsAt = $schedule->starts_at->copy();
-            return $this->formatDateTime($startsAt->addMinutes($schedule->duration), $shift->business->timezone);
+        if ($schedule = $shift->schedule) {
+            return $schedule->getEndDateTime()->format($this->timeFormat);
         }
 
-        return $this->formatDateTime($shift->checked_out_time);
+        return $shift->checked_out_time->format($this->timeFormat);
     }
 
-    protected function formatDateTime($date, $inputTimezone = 'UTC', $outputTimezone = 'UTC')
-    {
-        return Carbon::parse($date, $inputTimezone)->setTimezone($outputTimezone)->format('m/d/Y g:i:s');
-    }
-
-    protected function getDiagnosisCodes(Client $client)
+    /**
+     * Split client diagnosis codes from databased array.
+     *
+     * @param Client $client
+     * @return array
+     */
+    protected function getDiagnosisCodes(Client $client) : array
     {
         return array_pad(
             array_map('trim', explode(',', $client->medicaid_diagnosis_codes)),
             4,
             ''
         );
+    }
+
+    /**
+     * Convert the business timezone into the corresponding code.
+     *
+     * @param Business $business
+     * @return string
+     */
+    protected function getBusinessTimezone(Business $business) : string
+    {
+        switch ($business->timezone) {
+            case 'America/Chicago':
+                return 'CHIC';
+            case 'America/Denver':
+                return 'DENV';
+            case 'America/Phoenix':
+                return 'PHOE';
+            case 'America/Los_Angeles':
+                return 'LANG';
+            case 'America/New_York':
+            default:
+                return 'NEWY';
+        }
     }
 
     /**
