@@ -3,9 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceInterface;
-use App\BusinessChain;
 use App\Client;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -14,15 +12,17 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $name
  * @property int $client_id
- * @property int|null $payer_id
+ * @property int|null $client_payer_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
+ * @property bool $offline
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Billing\Claim $claim
  * @property-read \App\Client $client
+ * @property-read \App\Billing\ClientPayer|null $clientPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
- * @property-read \App\Billing\Payer|null $payer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newQuery()
@@ -39,13 +39,13 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         'payer_id' => 'int',
         'amount' => 'float',
         'amount_paid' => 'float',
+        'offline' => 'bool',
     ];
 
     /**
      * Get the next invoice name for a client
      *
      * @param int $clientId
-     * @param int $payerId
      * @return string
      */
     public static function getNextName(int $clientId)
@@ -95,11 +95,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo(ClientPayer::class);
     }
 
-    /**
-     * Get the Claim relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-    */
     public function claim()
     {
         return $this->hasOne(Claim::class);
@@ -108,6 +103,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    function isOffline(): bool
+    {
+        return (bool) $this->offline;
+    }
 
     function getClientPayer(): ?ClientPayer
     {
@@ -121,6 +121,10 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function getAmountPaid(): float
     {
+        if ($this->isOffline()) {
+            return (float) $this->offlinePayments()->sum('amount');
+        }
+
         return (float) $this->amount_paid;
     }
 

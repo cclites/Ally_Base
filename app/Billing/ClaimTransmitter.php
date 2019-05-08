@@ -37,6 +37,10 @@ class ClaimTransmitter
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid ID set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
         }
 
+        if (!$invoice->isOffline()) {
+            throw new ClaimTransmissionException("You cannot submit a claim on an online invoice.");
+        }
+
         switch ($this->service) {
             case ClaimService::HHA():
                 if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {

@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Generators\ClientInvoiceGenerator;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 
 class ClientInvoiceController extends Controller
 {
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             if ($request->filled('paid')) {

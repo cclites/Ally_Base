@@ -106,6 +106,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
                 'name' => $this->getInvoiceName($client),
                 'client_id' => $clientPayer->client_id,
                 'client_payer_id' => $clientPayerId,
+                'offline' => $clientPayer->isOffline(),
             ]);
         }
 

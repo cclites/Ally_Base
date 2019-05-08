@@ -7,10 +7,7 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Billing\View\InvoiceViewFactory;
-use App\Billing\View\InvoiceViewGenerator;
-use App\BusinessChain;
+use App\Billing\Queries\OfflineClientInvoiceQuery;
 use App\Http\Requests\PayClaimRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -18,7 +15,6 @@ use App\Billing\ClaimTransmitter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
-use App\Services\HhaExchangeManager;
 
 class ClaimsController extends BaseController
 {
@@ -26,10 +22,10 @@ class ClaimsController extends BaseController
      * Get claims listing.
      *
      * @param Request $request
-     * @param ClientInvoiceQuery $invoiceQuery
+     * @param OfflineClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OfflineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             if ($request->filled('invoiceType')) {
@@ -137,17 +133,11 @@ class ClaimsController extends BaseController
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
         }
 
-        if (floatval($request->amount) > floatval($invoice->claim->balance)) {
+        if ($request->getAmount() > $invoice->claim->getAmountDue()) {
             return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
         }
 
-        \DB::beginTransaction();
-
-        $invoice->claim->payments()->create($request->filtered());
-
-        $invoice->claim->recalculateBalance();
-
-        \DB::commit();
+        $invoice->claim->addPayment($request->toClaimPayment());
 
         return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
     }

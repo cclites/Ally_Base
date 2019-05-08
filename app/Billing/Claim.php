@@ -3,10 +3,25 @@
 namespace App\Billing;
 
 use App\AuditableModel;
-use App\ClaimPayment;
-use Carbon\Carbon;
-use App\Shift;
 
+/**
+ * \App\Billing\Claim
+ *
+ * @property int $id
+ * @property int $client_invoice_id
+ * @property float $amount
+ * @property float $amount_paid
+ * @property string $status
+ * @property string|null $service
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Billing\ClientInvoice $invoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClaimPayment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClaimStatusHistory[] $statuses
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @mixin \Eloquent
+ */
 class Claim extends AuditableModel
 {
     /**
@@ -76,20 +91,42 @@ class Claim extends AuditableModel
     // OTHER FUNCTIONS
     // **********************************************************
 
-    /**
-     * Recalculate the balance of the claim and update the stored value.
-     *
-     * @return Claim
-     */
-    public function recalculateBalance() : self
+    function getAmount(): float
     {
-        $payments = $this->payments->sum('amount');
+        return (float) $this->amount;
+    }
 
-        $this->balance = floatval($this->amount) - floatval($payments);
+    function getAmountPaid(): float
+    {
+        return (float) $this->amount_paid;
+    }
 
-        $this->save();
+    function getAmountDue(): float
+    {
+        return (float) bcsub($this->getAmount(), $this->getAmountPaid(), 2);
+    }
 
-        return $this;
+    function addPayment(ClaimPayment $payment): bool
+    {
+        if ($payment->claim_id) {
+            throw new \InvalidArgumentException('Cannot add an old claim payment.');
+        }
+
+        if ($this->payments()->save($payment)) {
+            return (bool) $this->increment('amount_paid', $payment->amount);
+        }
+
+        return false;
+    }
+
+    function removePayment(ClaimPayment $payment): bool
+    {
+        if ($payment = $this->payments->where('id', $payment->id)->first()) {
+            $payment->delete();
+            return (bool) $this->decrement('amount_paid', $payment->amount);
+        }
+
+        return false;
     }
 
     /**

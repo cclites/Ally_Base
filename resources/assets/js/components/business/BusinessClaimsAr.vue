@@ -94,8 +94,8 @@
                  no-close-on-backdrop
         >
             <b-form-group label="Payment Date">
-                <date-picker v-model="form.payed_at" placeholder="Payment Date" :disabled="form.busy"></date-picker>
-                <input-help :form="form" field="payed_at" text="" />
+                <date-picker v-model="form.payment_date" placeholder="Payment Date" :disabled="form.busy"></date-picker>
+                <input-help :form="form" field="payment_date" text="" />
             </b-form-group>
             <b-form-group label="Payment Type">
                 <b-form-input
@@ -229,7 +229,7 @@
                 paymentModal: false,
                 form: new Form({
                     type: '',
-                    payed_at: moment().format('MM/DD/YYYY'),
+                    payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
                     reference: '',
                 }),
