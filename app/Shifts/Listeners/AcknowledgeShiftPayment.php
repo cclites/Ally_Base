@@ -25,7 +25,7 @@ class AcknowledgeShiftPayment
         $shift = ($invoiceable instanceof ShiftService) ? $invoiceable->getShift() : $invoiceable;
         if ($shift instanceof Shift) {
             if ($this->query($shift)->hasClientInvoicesPaid()->exists()) {
-                $shift->statusManager()->ackPayment($event->getPayment()->id);
+                $shift->statusManager()->ackPayment();
             }
         }
 
