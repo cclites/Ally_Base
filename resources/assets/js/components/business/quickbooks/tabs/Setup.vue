@@ -1,6 +1,10 @@
 <template>
     <b-row>
         <b-col md="12">
+            <b-btn href="/business/quickbooks/connect">Connect your Quickbooks account</b-btn>
+
+
+
             <div>Ally requires various data mapping in order to properly sync with QuickBooks. You may be asked to login to your QuickBooks Online account to establish an initial connection.</div>
             <div class="mb-5">Please reach out to Ally support for assistance in setting this up.</div>
         </b-col>

@@ -409,7 +409,9 @@ Route::group([
     Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
+    Route::get('quickbooks', 'Business\BusinessQuickbooksSettingsController@index')->name('quickbooks.index');
+    Route::get('quickbooks/connect', 'Business\BusinessQuickbooksSettingsController@connect')->name('quickbooks.connect');
+    Route::get('quickbooks/authorization', 'Business\BusinessQuickbooksSettingsController@authorization')->name('quickbooks.authorization');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
