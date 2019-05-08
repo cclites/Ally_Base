@@ -32,14 +32,40 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     public function validateInvoice(ClientInvoice $invoice) : bool
     {
         if (empty($invoice->client->business->tellus_username) || empty($invoice->client->business->getTellusPassword())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have your Tellus credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
+            throw new ClaimTransmissionException('You cannot submit a claim because you do not have your Tellus credentials set for this office location.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
         }
 
-        // TODO: add tellus specific mapping requirements
+        if (empty($invoice->client->business->medicaid_id)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid ID set for this office location.  You can edit this information under Settings > General > Medicaid.');
+        }
 
-//        if (empty($business->medicare)) {
-//            throw new ClaimTransmissionException('');
-//        }
+        if (empty($invoice->client->business->medicaid_npi_number)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPI Number set for this office location.  You can edit this information under Settings > General > Medicaid.');
+        }
+
+        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPM Taxonomy set for this office location.  You can edit this information under Settings > General > Medicaid.');
+        }
+
+        if (empty($invoice->client->business->getAddress()->zip)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because you do not have a zipcode set for this office location\'s address.  You can edit this information under Settings > General > Phone & Address.');
+        }
+
+        if (empty($invoice->client->date_of_birth)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a date of birth set.  You can edit this information under the Client\'s profile.');
+        }
+
+        if (empty($invoice->client->medicaid_plan_id)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Plan Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
+
+        if (empty($invoice->client->medicaid_payer_id)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Payer Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
+
+        if (empty($invoice->client->medicaid_diagnosis_codes)) {
+            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
 
         return parent::validateInvoice($invoice);
     }
@@ -71,44 +97,6 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
                 return true;
             }
         } catch (\Exception $ex) {
-
-
-
-
-
-
-
-
-
-
-
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            // TODO: remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-            dd($ex->getMessage());
-
-
-
-
-
-
-
-
-
-
-
-
             app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
@@ -142,21 +130,18 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
         $diagnosisCodes = $this->getDiagnosisCodes($client);
 
-        /** @var \App\Billing\ClientInvoice $invoice */
-        $invoice = $claim->invoice;
-
         return [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => '', // TODO: figure out how to map from data codes
-            'Plan' => '', // TODO: figure out how to map from data codes
+            'Payer' => $client->medicaid_payer_id,
+            'Plan' => $client->medicaid_plan_id,
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
-            'ProviderMedicaidId' => $business->medicaid_id, // TODO: add validation
-            'ProviderNpi' => $business->medicaid_npi_number, // TODO: add validation
-            'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy, // TODO: add validation
-            'ProviderNPIZipCode' => $business->getAddress()->zip, // TODO: add validation
+            'ProviderMedicaidId' => $business->medicaid_id,
+            'ProviderNpi' => $business->medicaid_npi_number,
+            'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy,
+            'ProviderNPIZipCode' => $business->getAddress()->zip,
             'ProviderEin' => $business->ein,
             'CaregiverFirstName' => $caregiver->firstname,
             'CaregiverLastName' => $caregiver->lastname,
@@ -165,7 +150,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'RecipientMemberId' => '', // N/A
             'RecipientFirstName' => $client->firstname,
             'RecipientLastName' => $client->lastname,
-            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'), // TODO: add validation
+            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'),
             'ServiceAddress1' => $address->address1,
             'ServiceAddress2' => $address->address2,
             'ServiceCity' => $address->city,
@@ -175,7 +160,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceCode' => $this->mapActivities($shift->activities), // TODO: need to map activities
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
-            'DiagnosisCode1' => $diagnosisCodes[0], // TODO: add validation
+            'DiagnosisCode1' => $diagnosisCodes[0],
             'DiagnosisCode2' => $diagnosisCodes[1],
             'DiagnosisCode3' => $diagnosisCodes[2],
             'DiagnosisCode4' => $diagnosisCodes[3],
@@ -198,7 +183,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ReasonCode2' => '', // N/A
             'ReasonCode3' => '', // N/A
             'ReasonCode4' => '', // N/A
-            'Time Zone' => $this->getBusinessTimezone($business),
+            'TimeZone' => $this->getBusinessTimezone($business),
             'visitNote' => $shift->caregiver_comments ?? '',
             'EndAddress1' => $address->address1,
             'EndAddress2' => $address->address2,
