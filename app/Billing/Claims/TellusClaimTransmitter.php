@@ -157,7 +157,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => $this->mapActivities($shift->activities), // TODO: need to map activities
+            'ServiceCode' => $this->mapActivities($shift->activities),
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0],
@@ -312,24 +312,49 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
             switch ($activity->code) {
                 case '001': // Bathing - Shower
+                    return 'S5199';
                 case '002': // Bathing - Bed
+                    return 'S5199';
                 case '003': // Dressing
+                    return 'S5199';
                 case '005': // Hygiene - Hair Care
+                    return 'S5199';
                 case '006': // Shave
+                    return 'S5199';
                 case '004': // Hygiene - Mouth Care
+                    return 'S5199';
                 case '007': // Incontinence Care
+                    return 'S5131';
                 case '021': // Medication Reminders
+                    return 'S5185';
                 case '020': // Turning & Repositioning
+                    return 'S5131';
                 case '022': // Safety Supervision
+                    return 'S5131';
                 case '008': // Toileting
+                    return 'S5199';
                 case '009': // Catheter Care
+                    return 'C1729';
                 case '023': // Meal Preparation
+                    return 'S5131';
                 case '025': // Homemaker Services
+                    return 'S5131';
                 case '026': // Transportation
+                    return 'S5131';
                 case '024': // Feeding
+                    return 'S5131';
                 case '010': // Ostomy Care
+                    return 'S5199';
                 case '027': // Ambulation
+                    return 'S5131';
                 case '011': // Companion Care
+                    return 'S5136';
+                case '028': // Wound Care
+                    return 'S9097';
+                case '029': // Respite Care (Skilled Nursing)
+                    return 'S9125';
+                case '030': // Respite Care (General)
+                    return 'S5151';
                 default:
                     return 'S9122';
             }
