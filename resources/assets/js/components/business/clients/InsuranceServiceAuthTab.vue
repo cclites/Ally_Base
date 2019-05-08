@@ -116,7 +116,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <client-service-auth :clientId="client.id" :auths="auths" :services="services" :payers="payers"></client-service-auth>
+            <client-service-auth :clientId="client.id" :auths="auths" :services="services"></client-service-auth>
         </b-card>
     </div>
 </template>

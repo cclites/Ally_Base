@@ -1039,22 +1039,17 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
     /**
      * Get the total billable hours of the shift based on
-     * service and/or payer including service breakouts.
+     * service including service breakouts.
      *
      * @param int|null $service_id
-     * @param int|null $payer_id
      * @return float
      */
-    public function getBillableHours(?int $service_id = null, ?int $payer_id = null) : float
+    public function getBillableHours(?int $service_id = null) : float
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
             if (! empty($service_id) && $service_id != $this->service_id) {
                 // make sure service id matches the one on the model (or all).
-                return 0;
-            }
-            if (! empty($payer_id) && $this->payer_id != $payer_id) {
-                // make sure payer id matches the one on the model.
                 return 0;
             }
             return $this->duration(true);
@@ -1066,10 +1061,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 $services = $services->where('service_id', $service_id);
             }
 
-            if (! empty($payer_id)) {
-                $services = $services->where('payer_id', $payer_id);
-            }
-
             return floatval($services->sum('duration'));
         } else {
             return floatval(0);
@@ -1078,16 +1069,15 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
     /**
      * Get the total billable hours for a specific day of the shift
-     * based on service and/or payer including service breakouts.
+     * based on service including service breakouts.
      *
      * @param \Carbon\Carbon $date
      * @param int|null $service_id
-     * @param int|null $payer_id
      * @return float
      */
-    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null, ?int $payer_id = null) : float
+    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null) : float
     {
-        $hours = $this->getBillableHours($service_id, $payer_id);
+        $hours = $this->getBillableHours($service_id);
         if (count($this->getDateSpan()) === 1) { // only spans 1 day
             return $hours;
         }
