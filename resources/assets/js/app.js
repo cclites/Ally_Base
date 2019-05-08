@@ -333,6 +333,7 @@ Vue.component('quickbooks-general-mapping', require('./components/business/quick
 Vue.component('quickbooks-rate-mapping', require('./components/business/quickbooks/tabs/RateMapping'));
 Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
 Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
+Vue.component('business-quickbooks-queue', require('./components/business/BusinessQuickbooksQueue'));
 
 Vue.component('business-apply-payment', require('./components/business/accounting/ApplyPayment'));
 Vue.component('business-referral-source-manager', require('./components/business/referral/ReferralSourceManager'));

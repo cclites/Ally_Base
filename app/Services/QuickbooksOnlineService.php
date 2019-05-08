@@ -3,6 +3,7 @@ namespace App\Services;
 
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 use QuickBooksOnline\API\DataService\DataService;
+use QuickBooksOnline\API\Facades\Invoice;
 
 class QuickbooksOnlineService
 {
@@ -117,8 +118,19 @@ class QuickbooksOnlineService
      */
     public function getCustomers() : ?array
     {
-        return $this->authRefreshToken()
+        return $this->autoRefreshToken()
             ->query('SELECT * FROM Customer ORDERBY GivenName');
+    }
+
+    public function createInvoice($data)
+    {
+        $this->autoRefreshToken();
+
+        if ($result = $this->service->Add(Invoice::create($data))) {
+            return $result;
+        }
+
+        return false;
     }
 
     /**
@@ -128,7 +140,7 @@ class QuickbooksOnlineService
      * @throws \QuickBooksOnline\API\Exception\SdkException
      * @throws \QuickBooksOnline\API\Exception\ServiceException
      */
-    protected function authRefreshToken() : self
+    protected function autoRefreshToken() : self
     {
         $period = $this->accessToken->getAccessTokenValidationPeriodInSeconds();
         $now = strtotime(date('Y-m-d H:i:s'));
@@ -180,5 +192,6 @@ class QuickbooksOnlineService
         }
 
         $this->service = DataService::Configure($config);
+        $this->service->throwExceptionOnError(true);
     }
 }

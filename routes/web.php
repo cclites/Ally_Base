@@ -417,6 +417,8 @@ Route::group([
     Route::get('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersList');
     Route::patch('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersUpdate');
     Route::post('quickbooks/{business}/customers/sync', 'Business\BusinessQuickbooksSettingsController@customersSync');
+    Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
+    Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
