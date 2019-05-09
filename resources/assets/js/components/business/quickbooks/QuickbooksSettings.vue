@@ -17,26 +17,12 @@
                         :company="company"
                     />
                 </b-tab>
-
                 <b-tab title="Client Mapping" :disabled="! authenticated">
                     <business-quickbooks-client-map-settings
                         :clients="clients"
                         :businessId="business_id"
                     />
                 </b-tab>
-
-                <b-tab title="General Mapping" :disabled="! authenticated">
-<!--                    <quickbooks-general-mapping></quickbooks-general-mapping>-->
-                </b-tab>
-
-<!--                <b-tab title="Rate Mapping">-->
-<!--                    <quickbooks-rate-mapping></quickbooks-rate-mapping>-->
-<!--                </b-tab>-->
-
-
-<!--                <b-tab title="Caregiver Mapping">-->
-<!--                    <quickbooks-caregiver-mapping :caregivers="caregivers"></quickbooks-caregiver-mapping>-->
-<!--                </b-tab>-->
             </b-tabs>
         </b-card>
     </div>

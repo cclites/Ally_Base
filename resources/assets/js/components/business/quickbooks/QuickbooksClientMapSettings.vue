@@ -17,7 +17,6 @@
                 </b-col>
             </b-row>
 
-
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
                          :items="items"
