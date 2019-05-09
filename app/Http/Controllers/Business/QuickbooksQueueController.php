@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Business;
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\QuickbooksQueueResource;
+use App\Responses\SuccessResponse;
 use App\Services\Quickbooks\QuickbooksInvoice;
 use App\Services\Quickbooks\QuickbooksInvoiceItem;
 use App\Services\QuickbooksOnlineService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use App\Responses\Resources\ClaimResource;
 
 class QuickbooksQueueController extends Controller
 {
@@ -43,14 +44,22 @@ class QuickbooksQueueController extends Controller
                 });
             }
 
-            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claim'])->get();
+            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claim', 'quickbooksInvoice'])->get();
 
-            return ClaimResource::collection($invoices);
+            return QuickbooksQueueResource::collection($invoices);
         }
 
         return view_component('business-quickbooks-queue', 'Quickbooks Invoice Queue');
     }
 
+    /**
+     * Transfer ClientInvoice to Quickbooks.
+     *
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     */
     public function transfer(ClientInvoice $invoice)
     {
         $business = $invoice->client->business;
@@ -64,6 +73,7 @@ class QuickbooksQueueController extends Controller
         $qbInvoice = new QuickbooksInvoice();
         $qbInvoice->date = Carbon::parse($invoice->getDate());
         $qbInvoice->amount = $invoice->getAmount();
+        $qbInvoice->invoiceId = $invoice->getName();
 
         if ($customer = $invoice->client->quickbooksCustomer) {
             $qbInvoice->customerId = $customer->customer_id;
@@ -76,12 +86,25 @@ class QuickbooksQueueController extends Controller
             $lineItem->description = $invoiceItem->group;
             $lineItem->itemId = '3';
             $lineItem->itemName = 'Concrete';
+            $lineItem->quantity = $invoiceItem->units;
+            $lineItem->unitPrice = $invoiceItem->rate;
             $qbInvoice->addItem($lineItem);
         }
 
         $result = app(QuickbooksOnlineService::class)
             ->setAccessToken($connection->access_token)
             ->createInvoice($qbInvoice->toArray());
-        dd($result);
+
+        if (empty($result)) {
+            return new ErrorResponse(500, 'An error occurred while trying to submit the invoice.  Please try again.');
+        }
+
+        $invoice->quickbooksInvoice()->create([
+            'client_invoice_id' => $invoice->id,
+            'quickbooks_invoice_id' => $result->Id,
+        ]);
+
+        $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'payments', 'claim', 'quickbooksInvoice']);
+        return new SuccessResponse('Invoice transmitted successfully.', new QuickbooksQueueResource($invoice));
     }
 }

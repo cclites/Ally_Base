@@ -30,20 +30,6 @@
                             <option value="0">(Client)</option>
                             <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}</option>
                         </b-form-select>
-                        <b-form-select
-                            id="invoiceType"
-                            name="invoiceType"
-                            v-model="invoiceType"
-                            class="mt-1"
-                        >
-                            <option value="">All Invoices</option>
-                            <option value="unpaid">Unpaid Invoices</option>
-                            <option value="paid">Paid Invoices</option>
-                            <option value="has_claim">Has Claim</option>
-                            <option value="no_claim">Does Not Have Claim</option>
-                            <option value="has_balance">Has Claim Balance</option>
-                            <option value="no_balance">Does Not Have Claim Balance</option>
-                        </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
@@ -77,7 +63,10 @@
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transfer(row.item)" :disabled="busy">
+                    <div v-if="row.item.quickbooksInvoice && row.item.quickbooksInvoice.length">
+                        Transferred on {{ formatDateFromUTC(row.item.quickbooksInvoice[0].created_at) }}
+                    </div>
+                    <b-btn v-else variant="primary" class="mr-2" @click="transfer(row.item)" :disabled="busy">
                         <i v-if="row.item.id === transferringId" class="fa fa-spin fa-spinner"></i>
                         <span>Transfer to Quickbooks</span>
                     </b-btn>
@@ -139,6 +128,7 @@
                     },
                     {
                         key: 'actions',
+                        label: 'Transfer',
                         sortable: false,
                     },
                 ],

@@ -144,9 +144,7 @@ class QuickbooksOnlineService
      *
      * @param array $data
      * @return null|\QuickBooksOnline\API\Data\IPPIntuitEntity
-     * @throws \QuickBooksOnline\API\Exception\IdsException
-     * @throws \QuickBooksOnline\API\Exception\SdkException
-     * @throws \QuickBooksOnline\API\Exception\ServiceException
+     * @throws \Exception
      */
     public function createInvoice(array $data) : ?IPPIntuitEntity
     {

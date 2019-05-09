@@ -7,11 +7,43 @@ class QuickbooksInvoiceItem
      * @var string
      */
     public $description;
+
+    /**
+     * @var float
+     */
     public $amount;
+
+    /**
+     * @var string
+     */
     public $itemId;
+
+    /**
+     * @var string
+     */
     public $itemName;
 
-    public function toArray()
+    /**
+     * @var string
+     */
+    public $serviceDate;
+
+    /**
+     * @var float
+     */
+    public $unitPrice;
+
+    /**
+     * @var float
+     */
+    public $quantity;
+
+    /**
+     * Convert object to a Quickbooks API SalesItemLineDetail.
+     *
+     * @return array
+     */
+    public function toArray() : array
     {
         return [
             'Description' => $this->description,
@@ -22,6 +54,9 @@ class QuickbooksInvoiceItem
                     'value' => $this->itemId,
                     'name' => $this->itemName,
                 ],
+                'ServiceDate' => $this->serviceDate,
+                'Qty' => $this->quantity,
+                'UnitPrice' => $this->unitPrice,
             ],
         ];
     }
