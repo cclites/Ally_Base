@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\QuickbooksConnection;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksQueueResource;
 use App\Responses\SuccessResponse;
@@ -58,16 +59,35 @@ class QuickbooksQueueController extends Controller
      * @param ClientInvoice $invoice
      * @return ErrorResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \QuickBooksOnline\API\Exception\SdkException
+     * @throws \Exception
      */
     public function transfer(ClientInvoice $invoice)
     {
-        $business = $invoice->client->business;
+        /** @var \App\Client $client */
+        $client = $invoice->client;
+
+        /** @var \App\Business $client */
+        $business = $client->business;
         $this->authorize('update', $business);
 
+        /** @var QuickbooksConnection $connection */
         $connection = $business->quickbooksConnection;
         if (empty($connection)) {
             return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
+        }
+
+        /** @var \App\Services\QuickbooksOnlineService $api */
+        $api = $connection->getApiService();
+        if (empty($client->quickbooksCustomer)) {
+            // Create new customer relationship.
+            [$customerId, $customerName] = $api->createCustomer($client);
+            $customer = $client->quickbooksCustomer()->create([
+                'business_id' => $business->id,
+                'name' => $customerName,
+                'customer_id' => $customerId,
+            ]);
+            $client->update(['quickbooks_customer_id' => $customer->id]);
+            $client = $client->fresh();
         }
 
         $qbInvoice = new QuickbooksInvoice();
@@ -75,9 +95,11 @@ class QuickbooksQueueController extends Controller
         $qbInvoice->amount = $invoice->getAmount();
         $qbInvoice->invoiceId = $invoice->getName();
 
-        if ($customer = $invoice->client->quickbooksCustomer) {
+        if ($customer = $client->quickbooksCustomer) {
             $qbInvoice->customerId = $customer->customer_id;
             $qbInvoice->customerName = $customer->name;
+        } else {
+            return new ErrorResponse(401, 'Could not find a Customer Client relationship.');
         }
 
         foreach ($invoice->getItems() as $invoiceItem) {
@@ -91,10 +113,7 @@ class QuickbooksQueueController extends Controller
             $qbInvoice->addItem($lineItem);
         }
 
-        $result = app(QuickbooksOnlineService::class)
-            ->setAccessToken($connection->access_token)
-            ->createInvoice($qbInvoice->toArray());
-
+        $result = $api->createInvoice($qbInvoice->toArray());
         if (empty($result)) {
             return new ErrorResponse(500, 'An error occurred while trying to submit the invoice.  Please try again.');
         }

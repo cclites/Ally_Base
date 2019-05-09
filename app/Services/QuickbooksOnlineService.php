@@ -1,9 +1,11 @@
 <?php
 namespace App\Services;
 
+use App\Client;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 use QuickBooksOnline\API\Data\IPPIntuitEntity;
 use QuickBooksOnline\API\DataService\DataService;
+use QuickBooksOnline\API\Facades\Customer;
 use QuickBooksOnline\API\Facades\Invoice;
 
 class QuickbooksOnlineService
@@ -155,6 +157,48 @@ class QuickbooksOnlineService
         }
 
         return null;
+    }
+
+    /**
+     * Create quickbooks customer from Client object and return
+     * an array containing the customer id & name.
+     *
+     * @param \App\Client $client
+     * @return array
+     * @throws \QuickBooksOnline\API\Exception\IdsException
+     */
+    public function createCustomer(Client $client) : array
+    {
+        $this->autoRefreshToken();
+
+        $address = $client->getBillingAddress();
+
+        $data = [
+            'PrimaryEmailAddr' => [
+                'Address' => $client->email,
+            ],
+            'GivenName' => $client->firstname,
+            'FamilyName' => $client->lastname,
+            'DisplayName' => $client->nameLastFirst,
+            'PrimaryPhone' => [
+                'FreeFormNumber' => optional($client->evvPhone)->number,
+            ],
+            'Active' => true,
+            'BillAddr' => [
+                'Line1' => optional($address)->address1,
+                'City' => optional($address)->city,
+                'CountrySubDivisionCode' => optional($address)->state,
+                'PostalCode' => optional($address)->zip,
+                'Lat' => optional($address)->latitude,
+                'Long' => optional($address)->longitude,
+            ],
+        ];
+
+        if ($result = $this->service->Add(Customer::create($data))) {
+            return [$result->Id, $result->DisplayName];
+        }
+
+        return [null, null];
     }
 
     /**

@@ -5,10 +5,10 @@
         <div v-else class="">
             <b-row class="mb-2" align-h="end">
                 <b-col md="6">
-                    <b-btn variant="info" @click="save()" :disabled="loading">Save Changes</b-btn>
+                    <b-btn variant="info" @click="save()" :disabled="busy">Save Changes</b-btn>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn variant="success" @click="refreshCustomers()" :disabled="loading">Sync Quickbooks Customer Data</b-btn>
+                    <b-btn variant="success" @click="refreshCustomers()" :disabled="busy">Sync Quickbooks Customer Data</b-btn>
                 </b-col>
             </b-row>
             <b-row class="mb-2" align-h="end">
@@ -29,7 +29,7 @@
                          :filter="filter"
                 >
                     <template slot="quickbooks_customer_id" scope="row">
-                        <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="loading">
+                        <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="busy">
                             <option value="">Do No Match</option>
                             <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
                         </b-form-select>
@@ -74,7 +74,7 @@
                 fields: [
                     {
                         key: 'nameLastFirst',
-                        label: 'Ally',
+                        label: 'Ally Client',
                         sortable: true
                     },
                     {
@@ -86,6 +86,7 @@
 
                 customers: [],
                 loading: false,
+                busy: false,
             }
         },
 
@@ -121,8 +122,7 @@
                 if (! this.businessId) {
                     return;
                 }
-                console.log('refreshCustomers');
-                this.loading = true;
+                this.busy = true;
 
                 let form = new Form({});
                 form.post(`/business/quickbooks/${this.businessId}/customers/sync`)
@@ -131,7 +131,7 @@
                     })
                     .catch(() => {})
                     .finally(() => {
-                        this.loading = false;
+                        this.busy = false;
                     });
             },
 
@@ -140,21 +140,20 @@
                     return;
                 }
 
-                this.loading = true;
+                this.busy = true;
                 let form = new Form({ clients: this.items });
                 form.patch(`/business/quickbooks/${this.businessId}/customers`)
                     .then( ({ data }) => {
                     })
                     .catch(() => {})
                     .finally(() => {
-                        this.loading = false;
+                        this.busy = false;
                     });
             },
         },
 
         watch: {
             businessId(newValue, oldValue) {
-                console.log('business changed');
                 this.fetchCustomers();
             }
         },

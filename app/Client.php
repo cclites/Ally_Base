@@ -321,6 +321,17 @@ class Client extends AuditableModel implements
                     ->where('type', 'evv');
     }
 
+    /**
+     * Get the Client's billing address.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function billingAddress()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'id')
+                    ->where('type', 'billing');
+    }
+
     public function phoneNumber()
     {
         return $this->evvPhone();
@@ -832,5 +843,24 @@ class Client extends AuditableModel implements
         return $query->whereHas('business', function ($q) use ($chainId) {
             $q->where('businesses.chain_id', $chainId);
         });
+    }
+
+    /**
+     * Get the Client's billing address, or their EVV
+     * address, or ANY address.
+     *
+     * @return Address|null
+     */
+    public function getBillingAddress() : ?Address
+    {
+        if (filled($this->billingAddress)) {
+            return $this->billingAddress;
+        }
+
+        if (filled($this->evvAddress)) {
+            return $this->evvAddress;
+        }
+
+        return $this->addresses->first();
     }
 }
