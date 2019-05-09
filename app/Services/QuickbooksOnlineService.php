@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
+use QuickBooksOnline\API\Data\IPPIntuitEntity;
 use QuickBooksOnline\API\DataService\DataService;
 use QuickBooksOnline\API\Facades\Invoice;
 
@@ -122,7 +123,32 @@ class QuickbooksOnlineService
             ->query('SELECT * FROM Customer ORDERBY GivenName');
     }
 
-    public function createInvoice($data)
+    /**
+     * Get the name of the connected company.
+     *
+     * @return string
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     * @throws \QuickBooksOnline\API\Exception\ServiceException
+     */
+    public function getCompanyName() : string
+    {
+        $data = $this->autoRefreshToken()
+            ->service
+            ->getCompanyInfo();
+
+        return $data->CompanyName;
+    }
+
+    /**
+     * Create an invoice from array of data.
+     *
+     * @param array $data
+     * @return null|\QuickBooksOnline\API\Data\IPPIntuitEntity
+     * @throws \QuickBooksOnline\API\Exception\IdsException
+     * @throws \QuickBooksOnline\API\Exception\SdkException
+     * @throws \QuickBooksOnline\API\Exception\ServiceException
+     */
+    public function createInvoice(array $data) : ?IPPIntuitEntity
     {
         $this->autoRefreshToken();
 
@@ -130,7 +156,7 @@ class QuickbooksOnlineService
             return $result;
         }
 
-        return false;
+        return null;
     }
 
     /**

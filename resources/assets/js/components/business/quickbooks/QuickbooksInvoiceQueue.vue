@@ -88,8 +88,8 @@
 </template>
 
 <script>
-    import FormatsDates from "../../mixins/FormatsDates";
-    import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
         mixins: [FormatsDates, FormatsNumbers],

@@ -410,13 +410,15 @@ Route::group([
     Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\BusinessQuickbooksSettingsController@index')->name('quickbooks.index');
-    Route::get('quickbooks/connect', 'Business\BusinessQuickbooksSettingsController@connect')->name('quickbooks.connect');
-    Route::get('quickbooks/authorization', 'Business\BusinessQuickbooksSettingsController@authorization')->name('quickbooks.authorization');
-    Route::get('quickbooks/test', 'Business\BusinessQuickbooksSettingsController@test');
-    Route::get('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersList');
-    Route::patch('quickbooks/{business}/customers', 'Business\BusinessQuickbooksSettingsController@customersUpdate');
-    Route::post('quickbooks/{business}/customers/sync', 'Business\BusinessQuickbooksSettingsController@customersSync');
+    Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
+    Route::get('quickbooks/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
+    Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');
+    Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
+    Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
+    Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
+    Route::get('quickbooks/{business}/company-info', 'Business\QuickbooksSettingsController@companyInfo');
+
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 

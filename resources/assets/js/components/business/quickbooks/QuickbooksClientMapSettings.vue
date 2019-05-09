@@ -1,62 +1,64 @@
 <template>
-    <b-card>
-        <b-row class="mb-2" align-h="end">
-            <b-col md="6">
-                <b-btn variant="info" @click="save()" :disabled="loading">Save Changes</b-btn>
-            </b-col>
-            <b-col md="6" class="text-right">
-                <b-btn variant="success" @click="refreshCustomers()" :disabled="loading">Sync Quickbooks Customer Data</b-btn>
-            </b-col>
-        </b-row>
-        <b-row class="mb-2" align-h="end">
-            <b-col md="4" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
-            </b-col>
-        </b-row>
+    <div>
+        <loading-card v-if="loading" text="Loading..." />
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     :fields="fields"
-                     :filter="filter"
-            >
-                <template slot="quickbooks_customer_id" scope="row">
-                    <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="loading">
-                        <option value="">Do No Match</option>
-                        <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
-                    </b-form-select>
-                </template>
-            </b-table>
+        <div v-else class="">
+            <b-row class="mb-2" align-h="end">
+                <b-col md="6">
+                    <b-btn variant="info" @click="save()" :disabled="loading">Save Changes</b-btn>
+                </b-col>
+                <b-col md="6" class="text-right">
+                    <b-btn variant="success" @click="refreshCustomers()" :disabled="loading">Sync Quickbooks Customer Data</b-btn>
+                </b-col>
+            </b-row>
+            <b-row class="mb-2" align-h="end">
+                <b-col md="4" class="text-right">
+                    <b-form-input v-model="filter" placeholder="Type to Search" />
+                </b-col>
+            </b-row>
+
+
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                         :items="items"
+                         :current-page="currentPage"
+                         :per-page="perPage"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                         :fields="fields"
+                         :filter="filter"
+                >
+                    <template slot="quickbooks_customer_id" scope="row">
+                        <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="loading">
+                            <option value="">Do No Match</option>
+                            <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
+                        </b-form-select>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
         </div>
-
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
-    </b-card>
+    </div>
 </template>
 
 <script>
-    import BusinessLocationFormGroup from "../../BusinessLocationFormGroup";
-
     export default {
-        components: { BusinessLocationFormGroup },
         props: {
             clients: {
                 type: Array,
                 default: [],
             },
             businessId: {
-                type: Number,
-                default: null,
+                type: [String, Number],
+                default: '',
             },
         },
 
@@ -119,6 +121,7 @@
                 if (! this.businessId) {
                     return;
                 }
+                console.log('refreshCustomers');
                 this.loading = true;
 
                 let form = new Form({});
@@ -151,6 +154,7 @@
 
         watch: {
             businessId(newValue, oldValue) {
+                console.log('business changed');
                 this.fetchCustomers();
             }
         },

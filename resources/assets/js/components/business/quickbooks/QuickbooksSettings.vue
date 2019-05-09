@@ -10,17 +10,23 @@
         </b-row>
         <b-card no-body>
             <b-tabs pills card>
-
-                <b-tab title="Setup">
-                    <quickbooks-setup :business_id="business_id" :authenticated="authenticated"></quickbooks-setup>
+                <b-tab title="Connect" active>
+                    <business-quickbooks-connect-setting
+                        :businessId="business_id"
+                        :authenticated="authenticated"
+                        :company="company"
+                    />
                 </b-tab>
 
-                <b-tab title="General Mapping">
-                    <quickbooks-general-mapping></quickbooks-general-mapping>
+                <b-tab title="Client Mapping" :disabled="! authenticated">
+                    <business-quickbooks-client-map-settings
+                        :clients="clients"
+                        :businessId="business_id"
+                    />
                 </b-tab>
 
-                <b-tab title="Client Mapping" active>
-                    <quickbooks-client-mapping :clients="clients" :businessId="business_id" :authenticated="authenticated"></quickbooks-client-mapping>
+                <b-tab title="General Mapping" :disabled="! authenticated">
+<!--                    <quickbooks-general-mapping></quickbooks-general-mapping>-->
                 </b-tab>
 
 <!--                <b-tab title="Rate Mapping">-->
@@ -54,6 +60,10 @@
             authenticated: {
                 type: Boolean,
                 default: false,
+            },
+            company: {
+                type: String,
+                default: '',
             },
         },
 
