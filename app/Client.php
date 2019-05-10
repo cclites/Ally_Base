@@ -269,6 +269,7 @@ class Client extends AuditableModel implements
         'discharge_internal_notes',
         'sales_person_id',
         'agreement_status',
+        'quickbooks_customer_id',
         'medicaid_payer_id',
         'medicaid_plan_id',
     ];
@@ -318,6 +319,17 @@ class Client extends AuditableModel implements
     {
         return $this->hasOne(Address::class, 'user_id', 'id')
                     ->where('type', 'evv');
+    }
+
+    /**
+     * Get the Client's billing address.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function billingAddress()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'id')
+                    ->where('type', 'billing');
     }
 
     public function phoneNumber()
@@ -494,6 +506,16 @@ class Client extends AuditableModel implements
     public function contacts()
     {
         return $this->hasMany(ClientContact::class);
+    }
+
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function quickbooksCustomer()
+    {
+        return $this->belongsTo(QuickbooksCustomer::class);
     }
 
     ///////////////////////////////////////////
@@ -821,5 +843,24 @@ class Client extends AuditableModel implements
         return $query->whereHas('business', function ($q) use ($chainId) {
             $q->where('businesses.chain_id', $chainId);
         });
+    }
+
+    /**
+     * Get the Client's billing address, or their EVV
+     * address, or ANY address.
+     *
+     * @return Address|null
+     */
+    public function getBillingAddress() : ?Address
+    {
+        if (filled($this->billingAddress)) {
+            return $this->billingAddress;
+        }
+
+        if (filled($this->evvAddress)) {
+            return $this->evvAddress;
+        }
+
+        return $this->addresses->first();
     }
 }
