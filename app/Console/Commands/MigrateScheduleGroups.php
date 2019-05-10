@@ -57,8 +57,9 @@ class MigrateScheduleGroups extends Command
         $chain->enable_schedule_groups = true;
         $chain->save();
 
-        $ids = BusinessChain::find(51)->businesses()->pluck('id')->implode(',');
-        $results = DB::select("SELECT business_id, client_id, caregiver_id, client_rate, caregiver_rate, fixed_rates, care_plan_id, note_id, TIME(starts_at) as time, duration FROM schedules WHERE business_id IN ($ids) GROUP BY business_id, client_id, caregiver_id, TIME(starts_at), duration, client_rate, caregiver_rate, fixed_rates, care_plan_id, note_id HAVING count(*) > 1");
+        $ids = $chain->businesses()->pluck('id')->implode(',');
+        $query = "SELECT business_id, client_id, caregiver_id, client_rate, caregiver_rate, fixed_rates, care_plan_id, note_id, TIME(starts_at) as time, duration FROM schedules WHERE business_id IN ($ids) GROUP BY business_id, client_id, caregiver_id, TIME(starts_at), duration, client_rate, caregiver_rate, fixed_rates, care_plan_id, note_id HAVING count(*) > 1";
+        $results = DB::select($query);
         foreach($results as $result) {
             $matching = [
                 'client_id' => $result->client_id,
