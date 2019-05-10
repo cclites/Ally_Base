@@ -51,28 +51,47 @@ class ProcessChainDeposits
 
         $this->applyExistingDeposits->toChain($chain);
 
-        $invoices = $this->invoiceAggregator->dueForChain($chain);
         $results = [];
-        foreach($invoices as $invoice) {
-            $log = new DepositLog();
-            $log->batch_id = $batchId;
-            try {
-                $deposit = $this->depositProcessor->payInvoice($invoice, $this->methodFactory);
-                $log->setDeposit($deposit);
-                if ($deposit->transaction && $deposit->transaction->method) {
-                    $log->setPaymentMethod($deposit->transaction->method);
-                }
-            }
-            catch (\Exception $e) {
-                $log->setException($e);
-            }
 
-            $results[] = $log;
+        $caregivers = $this->invoiceAggregator->getEligibleCaregivers($chain);
+        foreach($caregivers as $caregiver) {
+            $invoices = $this->invoiceAggregator->dueForCaregiver($caregiver);
+            $results[] = $this->processSingleDeposit($batchId, $invoices);
+        }
+
+        $businesses = $this->invoiceAggregator->getEligibleBusinesses($chain);
+        foreach($businesses as $business) {
+            $invoices = $this->invoiceAggregator->dueForBusiness($business);
+            $results[] = $this->processSingleDeposit($batchId, $invoices);
         }
 
         DepositLog::releaseLock();
 
         return collect($results);
     }
+
+    /**
+     * @param string $batchId
+     * @param \App\Billing\CaregiverInvoice $invoice
+     * @param array $results
+     * @return array
+     */
+    private function processSingleDeposit(string $batchId, iterable $invoices): DepositLog
+    {
+        $log = new DepositLog();
+        $log->batch_id = $batchId;
+        try {
+            $deposit = $this->depositProcessor->payInvoices($invoices, $this->methodFactory);
+            $log->setDeposit($deposit);
+            if ($deposit->transaction && $deposit->transaction->method) {
+                $log->setPaymentMethod($deposit->transaction->method);
+            }
+        } catch (\Exception $e) {
+            $log->setException($e);
+        }
+
+        return $log;
+    }
+
 
 }
