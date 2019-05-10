@@ -135,7 +135,8 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function getAmountPaid(): float
     {
         if ($this->isOffline()) {
-            return (float) $this->offlinePayments()->sum('amount');
+            if (!$this->claim) return 0.0;
+            return (float) $this->claim->getAmountPaid();
         }
 
         return (float) $this->amount_paid;
