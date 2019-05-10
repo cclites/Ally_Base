@@ -1,6 +1,10 @@
 <?php
 require __DIR__ . '/bootstrap.php';
 
+use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Queries\InvoiceableQuery;
+use App\Shift;
+
 \DB::beginTransaction();
 $query = (new InvoiceableQuery(new Shift()))->notBelongingToAnOldFinalizedShift();
 $shifts = (clone $query)->hasClientInvoice()->get();
