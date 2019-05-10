@@ -94,7 +94,6 @@ class QuickbooksSettingsController extends BaseController
 
             $this->authorize('update', $business);
 
-            // TODO: re-work this to include new default business & a office location dropdown
             if ($connection = $business->quickbooksConnection) {
                 $connection->update([
                     'access_token' => $accessTokenObj,
@@ -110,6 +109,7 @@ class QuickbooksSettingsController extends BaseController
             $connection->update(['company_name' => $api->getCompanyName()]);
 
             $this->syncCustomerData($api, $business);
+            $this->syncServiceData($api, $business);
 
             return redirect(route('business.quickbooks.index'));
 
