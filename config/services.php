@@ -80,4 +80,14 @@ return [
         'sftp_host' => env('HHAEXCHANGE_SFTP_HOST', ''),
         'sftp_directory' => env('HHAEXCHANGE_SFTP_DIRECTORY', '/'),
     ],
+
+    'quickbooks' => [
+        'client_id' => env('QUICKBOOKS_APP_CLIENT_ID', ''),
+        'client_secret' => env('QUICKBOOKS_APP_CLIENT_SECRET', ''),
+        /**
+         * env mode, options: production, sandbox
+         * defaults to 'sandbox'
+         */
+        'mode' => env('QUICKBOOKS_MODE', 'sandbox'),
+    ],
 ];

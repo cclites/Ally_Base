@@ -414,6 +414,36 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(SalesPerson::class);
     }
 
+    /**
+     * Get the QuickbooksConnection relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function quickbooksConnection()
+    {
+        return $this->hasOne(QuickbooksConnection::class);
+    }
+
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksCustomers()
+    {
+        return $this->hasMany(QuickbooksCustomer::class);
+    }
+
+    /**
+     * Get the QuickbooksService relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksServices()
+    {
+        return $this->hasMany(QuickbooksService::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

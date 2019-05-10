@@ -327,21 +327,20 @@ Vue.component('admin-nachaach-entry-details', require('./components/admin/nacha-
 Vue.component('admin-nachaach-entry-detail-modal', require('./components/admin/nacha-ach/modal/NewEntryDetail'));
 
 /* Quickbooks */
-Vue.component('quickbooks', require('./components/business/quickbooks/Quickbooks'));
-Vue.component('quickbooks-setup', require('./components/business/quickbooks/tabs/Setup'));
-Vue.component('quickbooks-general-mapping', require('./components/business/quickbooks/tabs/GeneralMapping'));
-Vue.component('quickbooks-rate-mapping', require('./components/business/quickbooks/tabs/RateMapping'));
-Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
-Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
+Vue.component('business-quickbooks-settings', require('./components/business/quickbooks/QuickbooksSettings'));
+Vue.component('business-quickbooks-connect-settings', require('./components/business/quickbooks/QuickbooksConnectSettings'));
+Vue.component('business-quickbooks-general-settings', require('./components/business/quickbooks/QuickbooksGeneralSettings'));
+Vue.component('business-quickbooks-client-map-settings', require('./components/business/quickbooks/QuickbooksClientMapSettings'));
+// Vue.component('quickbooks-general-mapping', require('./components/business/quickbooks/tabs/GeneralMapping'));
+// Vue.component('quickbooks-rate-mapping', require('./components/business/quickbooks/tabs/RateMapping'));
+// Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
+Vue.component('business-quickbooks-queue', require('./components/business/quickbooks/QuickbooksInvoiceQueue'));
 
 Vue.component('business-apply-payment', require('./components/business/accounting/ApplyPayment'));
 Vue.component('business-referral-source-manager', require('./components/business/referral/ReferralSourceManager'));
 Vue.component('business-referral-source-modal', require('./components/business/referral/ReferralSourceModal'));
 Vue.component('business-referral-source', require('./components/business/referral/ReferralSource'));
 Vue.component('business-referral-source-select', require('./components/business/referral/ReferralSourceSelect'));
-
-/* Quickbooks API */
-Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
 /* Payroll Policy */
 Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));

@@ -6,6 +6,7 @@ use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Events\InvoiceablePaymentAdded;
 use App\Billing\Events\InvoiceablePaymentRemoved;
 use App\Client;
+use App\QuickbooksClientInvoice;
 use Illuminate\Support\Collection;
 
 /**
@@ -100,6 +101,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     public function claim()
     {
         return $this->hasOne(Claim::class);
+    }
+
+    /**
+     * Get the QuickbooksClientInvoice relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksInvoice()
+    {
+        return $this->hasMany(QuickbooksClientInvoice::class, 'client_invoice_id', 'id');
     }
 
     ////////////////////////////////////
