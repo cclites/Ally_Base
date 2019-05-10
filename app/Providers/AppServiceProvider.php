@@ -52,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
             return new QuickbooksOnlineService(
                 config('services.quickbooks.client_id'),
                 config('services.quickbooks.client_secret'),
+                route('business.quickbooks.authorization'),
                 config('services.quickbooks.mode')
             );
         });

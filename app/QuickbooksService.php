@@ -2,7 +2,7 @@
 
 namespace App;
 
-class QuickbooksCustomer extends BaseModel
+class QuickbooksService extends BaseModel
 {
     /**
      * The attributes that aren't mass assignable.
@@ -42,16 +42,6 @@ class QuickbooksCustomer extends BaseModel
     public function business()
     {
         return $this->belongsTo(Business::class);
-    }
-
-    /**
-     * Get the Client relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
-    public function client()
-    {
-        return $this->hasMany(Client::class);
     }
 
     // **********************************************************

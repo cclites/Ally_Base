@@ -50,14 +50,15 @@ class QuickbooksOnlineService
      *
      * @param string $clientId
      * @param string $clientSecret
+     * @param string $authRedirect
      * @param string $mode
      * @throws \QuickBooksOnline\API\Exception\SdkException
      */
-    public function __construct(string $clientId, string $clientSecret, string $mode = 'sandbox')
+    public function __construct(string $clientId, string $clientSecret, string $authRedirect, string $mode = 'sandbox')
     {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
-        $this->authRedirect = route('business.quickbooks.authorization');
+        $this->authRedirect = $authRedirect;
         $this->mode = $mode;
         $this->configureDataService();
     }
@@ -123,6 +124,18 @@ class QuickbooksOnlineService
     {
         return $this->autoRefreshToken()
             ->query('SELECT * FROM Customer ORDERBY GivenName');
+    }
+
+    /**
+     * Get a list of items from the API.
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getItems() : ?array
+    {
+        return $this->autoRefreshToken()
+            ->query('SELECT * FROM Item where Type = \'Service\'');
     }
 
     /**

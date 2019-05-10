@@ -54,7 +54,7 @@ class QuickbooksInvoiceItem
                     'value' => $this->itemId,
                     'name' => $this->itemName,
                 ],
-                'ServiceDate' => $this->serviceDate,
+//                'ServiceDate' => $this->serviceDate,
                 'Qty' => $this->quantity,
                 'UnitPrice' => $this->unitPrice,
             ],

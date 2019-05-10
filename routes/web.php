@@ -411,13 +411,15 @@ Route::group([
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
-    Route::get('quickbooks/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
+    Route::get('quickbooks/{business}/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
     Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');
     Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
     Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
     Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
     Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
-    Route::get('quickbooks/{business}/company-info', 'Business\QuickbooksSettingsController@companyInfo');
+    Route::get('quickbooks/{business}/services', 'Business\QuickbooksSettingsController@servicesList');
+    Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
+    Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\QuickbooksConnection;
 use App\Responses\ErrorResponse;
@@ -72,8 +73,8 @@ class QuickbooksQueueController extends Controller
 
         /** @var QuickbooksConnection $connection */
         $connection = $business->quickbooksConnection;
-        if (empty($connection)) {
-            return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
+        if (empty($connection) || ! $connection->isConfigured()) {
+            return new ErrorResponse(401, 'You must be connected to the Quickbooks API and have all your settings configured in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.');
         }
 
         /** @var \App\Services\QuickbooksOnlineService $api */
@@ -106,8 +107,8 @@ class QuickbooksQueueController extends Controller
             $lineItem = new QuickbooksInvoiceItem();
             $lineItem->amount = $invoiceItem->total;
             $lineItem->description = $invoiceItem->group;
-            $lineItem->itemId = '3';
-            $lineItem->itemName = 'Concrete';
+            [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+
             $lineItem->quantity = $invoiceItem->units;
             $lineItem->unitPrice = $invoiceItem->rate;
             $qbInvoice->addItem($lineItem);
@@ -125,5 +126,31 @@ class QuickbooksQueueController extends Controller
 
         $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'payments', 'claim', 'quickbooksInvoice']);
         return new SuccessResponse('Invoice transmitted successfully.', new QuickbooksQueueResource($invoice));
+    }
+
+    /**
+     * Map invoice line item into the service from the
+     * Quickbooks connection configuration.
+     *
+     * @param ClientInvoiceItem $item
+     * @param QuickbooksConnection $connection
+     * @return array
+     */
+    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection) : array
+    {
+        $service = null;
+        if ($item->name == 'Manual Adjustment') {
+            $service = $connection->adjustmentService;
+        } else if ($item->name == 'Mileage') {
+            $service = $connection->mileageService;
+        } else if ($item->name == 'Other Expenses') {
+            $service = $connection->expenseService;
+        } else if ($item->name == 'Refund') {
+            $service = $connection->refundService;
+        } else {
+            $service = $connection->shiftService;
+        }
+
+        return [$service->service_id, $service->name];
     }
 }

@@ -44,6 +44,56 @@ class QuickbooksConnection extends Model
         return $this->belongsTo(Business::class);
     }
 
+    /**
+     * Get the mileage service relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function mileageService()
+    {
+        return $this->hasOne(QuickbooksService::class, 'id', 'mileage_service_id');
+    }
+
+    /**
+     * Get the expense service relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function expenseService()
+    {
+        return $this->hasOne(QuickbooksService::class, 'id', 'expense_service_id');
+    }
+
+    /**
+     * Get the shift service relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function shiftService()
+    {
+        return $this->hasOne(QuickbooksService::class, 'id', 'shift_service_id');
+    }
+
+    /**
+     * Get the adjustment service relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function adjustmentService()
+    {
+        return $this->hasOne(QuickbooksService::class, 'id', 'adjustment_service_id');
+    }
+
+    /**
+     * Get the refund service relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function refundService()
+    {
+        return $this->hasOne(QuickbooksService::class, 'id', 'refund_service_id');
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -76,6 +126,11 @@ class QuickbooksConnection extends Model
     // OTHER FUNCTIONS
     // **********************************************************
 
+    /**
+     * Get a configured API service.
+     *
+     * @return QuickbooksOnlineService|null
+     */
     public function getApiService()
     {
         try {
@@ -85,5 +140,49 @@ class QuickbooksConnection extends Model
         catch (\Exception $ex) {
             return null;
         }
+    }
+
+    /**
+     * Check if the quickbooks connection is authenticated.
+     *
+     * @return bool
+     */
+    public function isAuthenticated() : bool
+    {
+        return !empty($this->attributes['access_token']);
+    }
+
+    /**
+     * Validate that the connection is fully configured.
+     *
+     * @return bool
+     */
+    public function isConfigured() : bool
+    {
+        if (! $this->isAuthenticated()) {
+            return false;
+        }
+
+        if (empty($this->mileage_service_id)) {
+            return false;
+        }
+
+        if (empty($this->shift_service_id)) {
+            return false;
+        }
+
+        if (empty($this->refund_service_id)) {
+            return false;
+        }
+
+        if (empty($this->expense_service_id)) {
+            return false;
+        }
+
+        if (empty($this->adjustment_service_id)) {
+            return false;
+        }
+
+        return true;
     }
 }
