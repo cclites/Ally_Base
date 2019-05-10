@@ -13,6 +13,7 @@ use App\Http\Requests\TransmitClaimRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
 
@@ -43,13 +44,13 @@ class ClaimsController extends BaseController
                         $invoiceQuery->whereDoesntHave('claim');
                         break;
                     case 'has_balance':
-                        $invoiceQuery->whereHas('claim', function ($q) {
-                            $q->where('balance', '<>', 0.0);
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount', '>', 'amount_paid');
                         });
                         break;
                     case 'no_balance':
-                        $invoiceQuery->whereHas('claim', function ($q) {
-                            $q->where('balance', '=', 0.0);
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount', '<=', 'amount_paid');
                         });
                         break;
                 }
