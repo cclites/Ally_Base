@@ -78,6 +78,7 @@ return [
 
     'hha-exchange' => [
         'sftp_host' => env('HHAEXCHANGE_SFTP_HOST', ''),
+        'sftp_port' => env('HHAEXCHANGE_SFTP_PORT', 22),
         'sftp_directory' => env('HHAEXCHANGE_SFTP_DIRECTORY', '/'),
     ],
 
