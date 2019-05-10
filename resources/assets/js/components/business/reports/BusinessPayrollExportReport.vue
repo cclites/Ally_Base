@@ -46,7 +46,10 @@
         </b-row>
         <b-row>
             <b-col>
-                <b-card>
+                <b-card v-if="busy">
+                    <loading-card></loading-card>
+                </b-card>
+                <b-card v-else>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
                             :busy="busy"
