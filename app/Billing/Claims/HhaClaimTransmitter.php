@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Billing\Claims;
 
 use App\Billing\Claim;
@@ -19,7 +20,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice) : bool
+    public function validateInvoice(ClientInvoice $invoice): bool
     {
         if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
@@ -35,7 +36,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function send(Claim $claim) : bool
+    public function send(Claim $claim): bool
     {
         try {
             $hha = new HhaExchangeService(
@@ -64,7 +65,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param \App\Shift $shift
      * @return array
      */
-    public function mapShiftRecord(Claim $claim, Shift $shift) : array
+    public function mapShiftRecord(Claim $claim, Shift $shift): array
     {
         $timeFormat = 'Y-m-d H:i:s';
 
@@ -121,7 +122,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param \Illuminate\Support\Collection $activities
      * @return string
      */
-    public function mapActivities(Collection $activities) : string
+    public function mapActivities(Collection $activities): string
     {
         // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if ($activities->isEmpty()) {
