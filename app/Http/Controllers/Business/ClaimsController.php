@@ -85,22 +85,23 @@ class ClaimsController extends BaseController
     /**
      * Create a claim from an invoice and transmit to HHAeXchange.
      *
-     * @param TransmitClaimRequest $request
      * @param ClientInvoice $invoice
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
      */
-    public function transmitInvoice(TransmitClaimRequest $request, ClientInvoice $invoice)
+    public function transmitInvoice(ClientInvoice $invoice)
     {
-        $data = $request->validated();
-        $service = $data['service'];
-
         $this->authorize('read', $invoice);
+
+        $service = optional($invoice->clientPayer)->payer->getTransmissionMethod();
+        if (empty($service)) {
+            return new ErrorResponse(500, 'You cannot transmit this claim because the Payer for this invoice does not have a transmission method set.  You can edit this on the Billing > Payers section.');
+        }
 
         try {
             \DB::beginTransaction();
 
-            $transmitter = Claim::getTransmitter(ClaimService::$service());
+            $transmitter = Claim::getTransmitter($service);
             $transmitter->validateInvoice($invoice);
 
             $claim = Claim::getOrCreate($invoice);
@@ -108,7 +109,7 @@ class ClaimsController extends BaseController
             $transmitter->send($claim);
 
             $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
-                'service' => ClaimService::$service(),
+                'service' => $service,
             ]);
 
             \DB::commit();
@@ -116,6 +117,7 @@ class ClaimsController extends BaseController
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {
+            \Log::info($ex);
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
         }

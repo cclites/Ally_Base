@@ -257,4 +257,19 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
         }
     }
 
+    /**
+     * Get the ClaimService transmission method for the payer.
+     *
+     * @return ClaimService|null
+     */
+    public function getTransmissionMethod() : ?ClaimService
+    {
+        $method = $this->transmission_method;
+
+        if (empty($method)) {
+            return null;
+        }
+
+        return ClaimService::$method();
+    }
 }
