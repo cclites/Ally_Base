@@ -5,6 +5,7 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Service;
 use App\Business;
 use App\Client;
 use App\Services\TellusService;
@@ -123,17 +124,17 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $caregiver = $shift->caregiver;
 
         /** @var \App\Address $address */
-        $address = $shift->address ?? $shift->client->evvAddress();
+        $address = $shift->address ?? $shift->client->evvAddress;
 
         /** @var \Packages\GMaps\GeocodeCoordinates|false */
-        $geocode = $address->getGeocode();
+        $geocode = optional($address)->getGeocode();
 
         $diagnosisCodes = $this->getDiagnosisCodes($client);
 
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        return [
+        $master = [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
             'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
@@ -171,8 +172,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'EndVerificationType' => $this->getVerificationType($shift->checked_out_method),
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
             'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
-            'ScheduledLatitude' => $geocode->latitude ?? '',
-            'ScheduledLongitude' => $geocode->longitude ?? '',
+            'ScheduledLatitude' => optional($geocode)->latitude ?? '',
+            'ScheduledLongitude' => optional($geocode)->longitude ?? '',
             'ActualStartDatetime' => $shift->checked_in_time->format($this->timeFormat),
             'ActualEndDatetime' => $shift->checked_out_time->format($this->timeFormat),
             'ActualStartLatitude' => $shift->checked_in_latitude ?? '',
@@ -203,6 +204,22 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'PaidAmount' => '', // N/A
             'CareDirectionType' => '', // N/A
         ];
+
+        if ($shift->services->count()) {
+            // Map each individual service.
+            $services = [];
+            /** @var Service $service */
+            foreach ($shift->services as $service) {
+                $serviceEntry = $master;
+                $serviceEntry['ServiceCode'] = 'S5135U2'; // Hard-code procedure code for now.
+                $services[] = $serviceEntry;
+            }
+            return $services;
+        } else {
+            // Convert single service shift record.
+            $master['ServiceCode'] = 'S5135U2'; // Hard-code procedure code for now.
+            return [$master];
+        }
     }
 
     /**

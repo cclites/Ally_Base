@@ -6,6 +6,7 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Service;
 use App\Services\HhaExchangeService;
 use App\Shift;
 use Illuminate\Support\Collection;
@@ -73,7 +74,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     {
         $timeFormat = 'Y-m-d H:i';
 
-        return [
+        $master = [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
             optional($claim->invoice->clientPayer)->payer->getPayerCode(), //    "Payer ID",
             $claim->invoice->client->medicaid_id, //    "Medicaid Number",
@@ -84,7 +85,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
             $shift->caregiver->ssn, //    "Caregiver SSN",
             $shift->id, //    "Schedule ID",
-            'S5135U2', //    "Procedure Code",
+            '', //    "Procedure Code",
             $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
             $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
             $shift->checked_in_time->format($timeFormat), //    "Visit Start Time",
@@ -118,6 +119,22 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
+
+        if ($shift->services->count()) {
+            // Map each individual service.
+            $services = [];
+            /** @var Service $service */
+            foreach ($shift->services as $service) {
+                $serviceEntry = $master;
+                $serviceEntry[10] = 'S5135U2'; // Hard-code procedure code for now.
+                $services[] = $serviceEntry;
+            }
+            return $services;
+        } else {
+            // Convert single service shift record.
+            $master[10] = 'S5135U2'; // Hard-code procedure code for now.
+            return [$master];
+        }
     }
 
     /**
