@@ -204,6 +204,47 @@ class QuickbooksSettingsController extends BaseController
     }
 
     /**
+     * Create a Quickbooks customer relationship
+     * using the client data and update the mapping record.
+     *
+     * @param Request $request
+     * @param Business $business
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \QuickBooksOnline\API\Exception\IdsException
+     */
+    public function customerCreate(Request $request, Business $business)
+    {
+        $client = Client::findOrFail($request->client_id);
+
+        $this->authorize('update', $business);
+
+        if (empty($business->quickbooksConnection)) {
+            return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
+        }
+
+        /** @var QuickbooksOnlineService $api */
+        $api = $business->quickbooksConnection->getApiService();
+        if (empty($api)) {
+            return new ErrorResponse(401, 'Error connecting to the Quickbooks API.  Please try again.');
+        }
+
+        // Create new customer relationship.
+        [$customerId, $customerName] = $api->createCustomer($client);
+        $customer = $client->quickbooksCustomer()->create([
+            'business_id' => $business->id,
+            'name' => $customerName,
+            'customer_id' => $customerId,
+        ]);
+        $client->update(['quickbooks_customer_id' => $customer->id]);
+
+        return new SuccessResponse('Customer record successfully created.', [
+            'client' => $client,
+            'customers' => $business->quickbooksCustomers()->ordered()->get()
+        ]);
+    }
+
+    /**
      * Get a list of clients for use with customer mapping.
      *
      * @return array

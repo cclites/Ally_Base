@@ -416,6 +416,7 @@ Route::group([
     Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
     Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
     Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customer', 'Business\QuickbooksSettingsController@customerCreate');
     Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
     Route::get('quickbooks/{business}/services', 'Business\QuickbooksSettingsController@servicesList');
     Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
