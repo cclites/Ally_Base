@@ -67,7 +67,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      */
     public function mapShiftRecord(Claim $claim, Shift $shift): array
     {
-        $timeFormat = 'Y-m-d H:i:s';
+        $timeFormat = 'Y-m-d H:i';
 
         return [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
