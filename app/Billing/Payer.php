@@ -272,4 +272,24 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
 
         return ClaimService::$method();
     }
+
+    /**
+     * Get payer code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPayerCode() : ?string
+    {
+        return $this->payer_code;
+    }
+
+    /**
+     * Get plan code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPlanCode() : ?string
+    {
+        return $this->payer_code;
+    }
 }

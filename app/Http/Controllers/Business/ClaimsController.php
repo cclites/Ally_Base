@@ -95,7 +95,7 @@ class ClaimsController extends BaseController
 
         $service = optional($invoice->clientPayer)->payer->getTransmissionMethod();
         if (empty($service)) {
-            return new ErrorResponse(500, 'You cannot transmit this claim because the Payer for this invoice does not have a transmission method set.  You can edit this on the Billing > Payers section.');
+            return new ErrorResponse(500, 'You cannot transmit this claim because the Payer for this invoice does not have a transmission method set.  You can edit this on the Billing > Payers section, or contact Ally for assistance.');
         }
 
         try {

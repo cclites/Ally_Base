@@ -55,16 +55,16 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a date of birth set.  You can edit this information under the Client\'s profile.');
         }
 
-        if (empty($invoice->client->medicaid_plan_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Plan Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
-        }
-
-        if (empty($invoice->client->medicaid_payer_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Payer Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
-        }
-
         if (empty($invoice->client->medicaid_diagnosis_codes)) {
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
+
+        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+            throw new ClaimTransmissionException('You cannot submit a claim because there is no Payer Organization identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
+        }
+
+        if (empty(optional($invoice->clientPayer)->payer->getPlanCode())) {
+            throw new ClaimTransmissionException('You cannot submit a claim because there is no Plan Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
         return parent::validateInvoice($invoice);
@@ -130,11 +130,14 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
         $diagnosisCodes = $this->getDiagnosisCodes($client);
 
+        /** @var ClientInvoice $clientInvoice */
+        $clientInvoice = $claim->invoice;
+
         return [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => $client->medicaid_payer_id,
-            'Plan' => $client->medicaid_plan_id,
+            'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
+            'Plan' => optional($clientInvoice->clientPayer)->payer->getPlanCode(),
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
