@@ -79,6 +79,10 @@ class QuickbooksQueueController extends Controller
 
         /** @var \App\Services\QuickbooksOnlineService $api */
         $api = $connection->getApiService();
+        if (empty($api)) {
+            return new ErrorResponse(500, 'An unexpected error occurred trying to connect to the Quickbooks API.  Please try again.');
+        }
+
         if (empty($client->quickbooksCustomer)) {
             // Create new customer relationship.
             [$customerId, $customerName] = $api->createCustomer($client);
