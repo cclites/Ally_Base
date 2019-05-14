@@ -110,11 +110,43 @@ class QuickbooksQueueController extends Controller
         foreach ($invoice->getItems() as $invoiceItem) {
             $lineItem = new QuickbooksInvoiceItem();
             $lineItem->amount = $invoiceItem->total;
-            $lineItem->description = $invoiceItem->group;
-            [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
-
             $lineItem->quantity = $invoiceItem->units;
             $lineItem->unitPrice = $invoiceItem->rate;
+
+            switch ($invoiceItem->invoiceable_type) {
+                case 'shifts':
+                    // mm/dd/yyyy - ($CaregiverLN, $CaregiverFN) $00:00time to $00:00time $ServiceBreakout
+                    // Example Description: 04/22/2019 - (Jones, Steven) 08:00 AM - 10:00 AM RespitCare
+                    $shift = $invoiceItem->getShift();
+                    $service = $shift->service;
+                    $startTime = $shift->checked_in_time->format('h:i A');
+                    $endTime = $shift->checked_out_time->format('h:i A');
+                    $date = $shift->checked_in_time->format('m/d/Y');
+                    $lineItem->serviceDate = $shift->checked_in_time->format('Y-m-d');
+                    $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
+
+                    // Use the shift mapping for now.
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    break;
+                case 'shift_services':
+                    $shiftService = $invoiceItem->getShiftService();
+                    $shift = $shiftService->shift;
+                    $service = $shiftService->service;
+                    $startTime = $shift->checked_in_time->format('h:i A');
+                    $endTime = $shift->checked_out_time->format('h:i A');
+                    $date = $shift->checked_in_time->format('m/d/Y');
+                    $lineItem->serviceDate = $shift->checked_in_time->format('Y-m-d');
+                    $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
+
+                    // Use the shift mapping for now.
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    break;
+                default:
+                    // Convert from raw line item data.
+                    $lineItem->description = $invoiceItem->group;
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    break;
+            }
             $qbInvoice->addItem($lineItem);
         }
 
