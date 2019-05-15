@@ -124,10 +124,21 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         if ($shift->services->count()) {
             // Map each individual service.
             $services = [];
+
+            $visitStart = $shift->checked_in_time->copy();
+            $visitEnd = null;
+
             /** @var ShiftService $service */
             foreach ($shift->services as $service) {
                 $serviceEntry = $master;
                 $serviceEntry[10] = optional($service->service)->code;
+
+                // pro-rate visit start and end times
+                $visitEnd = $visitStart->copy()->addHours($service->duration);
+                $serviceEntry[13] = $visitStart->format($timeFormat);
+                $serviceEntry[14] = $visitEnd->format($timeFormat);
+                $visitStart = $visitEnd->copy()->addSecond(1);
+
                 $services[] = $serviceEntry;
             }
             return $services;
