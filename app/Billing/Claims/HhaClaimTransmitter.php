@@ -131,6 +131,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             /** @var ShiftService $service */
             foreach ($shift->services as $service) {
                 $serviceEntry = $master;
+                $serviceEntry[9] = $shift->id . '-' . $service->id;
                 $serviceEntry[10] = optional($service->service)->code;
 
                 // pro-rate visit start and end times
