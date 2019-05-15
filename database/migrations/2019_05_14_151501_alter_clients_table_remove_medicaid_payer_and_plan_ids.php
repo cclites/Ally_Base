@@ -14,8 +14,7 @@ class AlterClientsTableRemoveMedicaidPayerAndPlanIds extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->dropColumn('medicaid_plan_id');
-            $table->dropColumn('medicaid_payer_id');
+            $table->dropColumn(['medicaid_plan_id', 'medicaid_payer_id']);
         });
     }
 
