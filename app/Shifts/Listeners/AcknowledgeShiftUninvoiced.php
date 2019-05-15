@@ -19,7 +19,7 @@ class AcknowledgeShiftUninvoiced
         $invoiceable = $event->getInvoiceable();
         $shift = ($invoiceable instanceof ShiftService) ? $invoiceable->getShift() : $invoiceable;
         if ($shift instanceof Shift) {
-            $shift->statusManager()->ackClientInvoice();
+            $shift->statusManager()->ackClientInvoiceDeleted();
         }
     }
 }
