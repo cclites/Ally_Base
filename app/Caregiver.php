@@ -670,8 +670,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        $builder->whereHas('businessChains.businesses', function($q) use ($businessIds) {
-            $q->whereIn('id', $businessIds);
+        $builder->whereHas('businesses', function($q) use ($businessIds) {
+            $q->whereIn('businesses.id', $businessIds);
         });
     }
 

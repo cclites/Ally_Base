@@ -43,7 +43,7 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Caregiver::with('clients.business')
+            $query = Caregiver::with('businesses')
                 ->forRequestedBusinesses()
                 ->ordered();
 
@@ -64,16 +64,8 @@ class CaregiverController extends BaseController
                 $query->with('phoneNumber');
             }
 
-            if ($request->filled('location')) {
-                $query->whereHas('clients', function($q1) use ($request) {
-                    $q1->whereHas('business', function ($q2) use ($request) {
-                        $q2->where('id', $request->location);
-                    });
-                });
-            }
-
             $results = $query->get();
-            // dd($results->toArray());
+
             return response()->json($results);
         }
 
