@@ -6,6 +6,7 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Service;
 use App\Services\HhaExchangeService;
 use App\Shift;
@@ -123,16 +124,16 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         if ($shift->services->count()) {
             // Map each individual service.
             $services = [];
-            /** @var Service $service */
+            /** @var ShiftService $service */
             foreach ($shift->services as $service) {
                 $serviceEntry = $master;
-                $serviceEntry[10] = 'S5135U2'; // Hard-code procedure code for now.
+                $serviceEntry[10] = optional($service->service)->code;
                 $services[] = $serviceEntry;
             }
             return $services;
         } else {
             // Convert single service shift record.
-            $master[10] = 'S5135U2'; // Hard-code procedure code for now.
+            $master[10] = optional($shift->service)->code;
             return [$master];
         }
     }
