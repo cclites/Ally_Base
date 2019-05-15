@@ -59,7 +59,7 @@ class CaregiverTest extends TestCase
         $this->assertCount(2, $this->caregiver->businessChains);
     }
 
-    public function testCaregiverBusinessesAttributeCollectsFromChains()
+    public function testCaregiverBusinessesAttributeProvidesExplicitRelationship()
     {
         $chain1 = factory(BusinessChain::class)->create();
         $chain2 = factory(BusinessChain::class)->create();
@@ -71,8 +71,18 @@ class CaregiverTest extends TestCase
         $business2 = $chain1->businesses()->save(factory(Business::class)->make());
         $business3 = $chain2->businesses()->save(factory(Business::class)->make());
 
-        $this->assertCount(3, $this->caregiver->businesses);
-        $this->assertCount(3, $this->caregiver->getBusinessIds());
+        $this->assertCount(0, $this->caregiver->businesses);
+        $this->assertCount(0, $this->caregiver->getBusinessIds());
+        $this->assertFalse(in_array($business3->id, $this->caregiver->getBusinessIds()));
+
+        $this->caregiver->ensureBusinessRelationship($business1);
+        $this->caregiver->ensureBusinessRelationship($business3);
+        $this->caregiver = $this->caregiver->fresh();
+        
+        $this->assertCount(2, $this->caregiver->fresh()->businesses);
+        $this->assertCount(2, $this->caregiver->getBusinessIds());
+        $this->assertTrue(in_array($business1->id, $this->caregiver->getBusinessIds()));
+        $this->assertFalse(in_array($business2->id, $this->caregiver->getBusinessIds()));
         $this->assertTrue(in_array($business3->id, $this->caregiver->getBusinessIds()));
     }
 
