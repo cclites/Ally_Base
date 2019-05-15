@@ -14,8 +14,7 @@ class AlterBusinessCaregiversTableRemoveTypeAndRateColumns extends Migration
     public function up()
     {
         Schema::table('business_caregivers', function (Blueprint $table) {
-            $table->dropColumn('type');
-            $table->dropColumn('default_rate');
+            $table->dropColumn(['type', 'default_rate']);
         });
     }
 
