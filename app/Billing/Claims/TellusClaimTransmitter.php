@@ -5,6 +5,7 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Service;
 use App\Business;
 use App\Client;
@@ -161,7 +162,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => $this->mapActivities($shift->activities),
+            'ServiceCode' => '', //$this->mapActivities($shift->activities),
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0],
@@ -208,16 +209,16 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         if ($shift->services->count()) {
             // Map each individual service.
             $services = [];
-            /** @var Service $service */
+            /** @var ShiftService $service */
             foreach ($shift->services as $service) {
                 $serviceEntry = $master;
-                $serviceEntry['ServiceCode'] = 'S5135U2'; // Hard-code procedure code for now.
+                $serviceEntry['ServiceCode'] = optional($service->service)->code;
                 $services[] = $serviceEntry;
             }
             return $services;
         } else {
             // Convert single service shift record.
-            $master['ServiceCode'] = 'S5135U2'; // Hard-code procedure code for now.
+            $master['ServiceCode'] = optional($shift->service)->code;
             return [$master];
         }
     }
