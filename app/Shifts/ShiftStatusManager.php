@@ -330,6 +330,19 @@ class ShiftStatusManager
     }
 
     /**
+     * Acknowledge that the shift's related invoice has been uninvoiced/deleted
+     * @return bool
+     */
+    public function ackClientInvoiceDeleted()
+    {
+        switch($this->status()) {
+            case Shift::WAITING_FOR_CHARGE:
+                return $this->update(Shift::WAITING_FOR_INVOICE);
+        }
+        return false;
+    }
+
+    /**
      * Acknowledge a successful payment  (payment id deprecated)
      * @return bool
      */

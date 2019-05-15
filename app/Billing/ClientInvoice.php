@@ -5,6 +5,7 @@ use App\AuditableModel;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Events\InvoiceablePaymentAdded;
 use App\Billing\Events\InvoiceablePaymentRemoved;
+use App\Billing\Events\InvoiceableUninvoiced;
 use App\Client;
 use App\QuickbooksClientInvoice;
 use Illuminate\Support\Collection;
@@ -198,6 +199,26 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         }
 
         return false;
+    }
+
+    function delete()
+    {
+        // Collect invoiceables prior to delete
+        $invoiceables = [];
+        foreach($this->getItems() as $item) {
+            if ($item->getInvoiceable()) {
+                $invoiceables[] = $item->getInvoiceable();
+            }
+        }
+
+        // Call parent delete, emitting event if successful
+        if ($return = parent::delete()) {
+            foreach($invoiceables as $invoiceable) {
+                event(new InvoiceableUninvoiced($invoiceable));
+            }
+        }
+
+        return $return;
     }
 
     function getName(): string
