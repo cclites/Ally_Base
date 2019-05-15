@@ -102,6 +102,9 @@ class CaregiverTest extends TestCase
         $business2 = $chain1->businesses()->save(factory(Business::class)->make());
         $business3 = $chain2->businesses()->save(factory(Business::class)->make());
 
+        $this->caregiver->ensureBusinessRelationships($chain1);
+        $caregiver2->ensureBusinessRelationships($chain2);
+
         $result = Caregiver::forBusinesses([$business2->id])->first();
         $count = Caregiver::forBusinesses([$business2->id])->count();
         $this->assertEquals($this->caregiver->id, $result->id);
