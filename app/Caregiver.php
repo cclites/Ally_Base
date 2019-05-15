@@ -597,6 +597,18 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         $this->businesses()->attach($business);
     }
 
+    /**
+     * Add Caregiver to all office locations on a chain.
+     *
+     * @param \App\BusinessChain $chain
+     */
+    public function ensureBusinessRelationships(BusinessChain $chain) : void
+    {
+        foreach ($chain->businesses as $business) {
+            $this->ensureBusinessRelationship($business);
+        }
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
