@@ -30,6 +30,7 @@
                     <b-select v-model="row.item.payer_id" class="form-control-sm">
                         <option :value="0">({{ client.name }})</option>
                         <option v-for="payer in payerOptions" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
+                        <option :value="1">OFFLINE</option>
                     </b-select>
                 </template>
                 <template slot="policy_number" scope="row">

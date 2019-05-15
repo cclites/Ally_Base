@@ -334,6 +334,7 @@ Route::group([
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
     Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
+    Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -410,7 +411,19 @@ Route::group([
     Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
+    Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
+    Route::get('quickbooks/{business}/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
+    Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');
+    Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
+    Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
+    Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
+    Route::get('quickbooks/{business}/services', 'Business\QuickbooksSettingsController@servicesList');
+    Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
+    Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
+
+    Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
+    Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
@@ -436,9 +449,6 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
-    Route::get('tellus', 'Admin\TellusController@index')->name('tellus');
-    Route::get('tellus/download/{shift}', 'Admin\TellusController@download');
-    Route::post('tellus', 'Admin\TellusController@submit');
     Route::get('microbilt', 'Admin\MicrobiltController@index')->name('microbilt');
     Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');

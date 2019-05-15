@@ -19,7 +19,8 @@ use App\Billing\Service;
  * @property string $country
  * @property string|null $phone1
  * @property string|null $phone2
- * @property int $scheduling
+ * @property bool $scheduling
+ * @property bool $enable_schedule_groups
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
@@ -50,6 +51,10 @@ class BusinessChain extends AuditableModel
     protected $table = 'business_chains';
     protected $guarded = ['id'];
     protected $orderedColumn = 'name';
+    protected $casts = [
+        'scheduling' => 'bool',
+        'enable_schedule_groups' => 'bool',
+    ];
 
     ////////////////////////////////////
     //// Static Methods

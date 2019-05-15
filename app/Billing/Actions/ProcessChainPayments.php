@@ -14,7 +14,7 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\Methods\ProviderPayment;
 use App\Billing\Payments\PaymentMethodFactory;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Business;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
@@ -30,7 +30,7 @@ class ProcessChainPayments
      */
     protected $paymentApplicator;
     /**
-     * @var \App\Billing\Queries\ClientInvoiceQuery
+     * @var \App\Billing\Queries\OnlineClientInvoiceQuery
      */
     protected $invoiceQuery;
     /**
@@ -39,12 +39,12 @@ class ProcessChainPayments
     protected $methodFactory;
 
     function __construct(PaymentMethodFactory $methodFactory = null, ProcessInvoicePayment $paymentProcessor = null,
-        ApplyPayment $paymentApplicator = null, ClientInvoiceQuery $invoiceQuery = null)
+        ApplyPayment $paymentApplicator = null, OnlineClientInvoiceQuery $invoiceQuery = null)
     {
         $this->methodFactory = $methodFactory ?: new PaymentMethodFactory(app(ACHPaymentInterface::class), app(CreditCardPaymentInterface::class));
         $this->paymentProcessor = $paymentProcessor ?: app(ProcessInvoicePayment::class);
         $this->paymentApplicator = $paymentApplicator ?: app(ApplyPayment::class);
-        $this->invoiceQuery = $invoiceQuery ?: app(ClientInvoiceQuery::class);
+        $this->invoiceQuery = $invoiceQuery ?: app(OnlineClientInvoiceQuery::class);
     }
 
     /**

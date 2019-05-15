@@ -220,4 +220,21 @@ class ClientPayerTest extends TestCase
         $this->assertFalse($this->validate());
     }
 
+    /**
+     * @test
+     */
+    public function mixing_an_offline_payer_with_an_online_payer_should_fail()
+    {
+        $clientPayerA = $this->createPayer('split', ['split_percentage' => 0.5, 'effective_start' => '2019-01-01']);
+        $clientPayerB = factory(ClientPayer::class)->create([
+            'payer_id' => Payer::OFFLINE_PAY_ID,
+            'client_id' => $this->client->id,
+            'payment_allocation' => 'split',
+            'split_percentage' => 0.5,
+            'effective_start' => '2019-01-01',
+        ]);
+
+        $this->assertFalse($this->validate());
+        $this->assertContains('offline', $this->validator->getErrorMessage());
+    }
 }
