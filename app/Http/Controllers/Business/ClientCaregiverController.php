@@ -86,7 +86,8 @@ class ClientCaregiverController extends BaseController
             ->map(function ($caregiver) {
                 return [
                     'id' => $caregiver->id,
-                    'name' => $caregiver->nameLastFirst
+                    'name' => $caregiver->nameLastFirst,
+                    'businesses' => $caregiver->businesses->pluck('id'),
                 ];
             })
             ->sortBy('name')

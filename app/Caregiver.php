@@ -583,6 +583,20 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->exists();
     }
 
+    /**
+     * Add Caregiver to office location if relationship does not exist.
+     *
+     * @param Business $business
+     */
+    public function ensureBusinessRelationship(Business $business) : void
+    {
+        if ($this->businesses->contains('id', $business->id)) {
+            return;
+        }
+
+        $this->businesses()->attach($business);
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
