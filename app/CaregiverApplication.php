@@ -263,6 +263,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
             ]);
 
             $this->businessChain->caregivers()->attach($caregiver);
+            $caregiver->ensureBusinessRelationships($this->businessChain);
             $caregiver->setAvailability([]); // sets default availability
 
             $address = new Address([
