@@ -29,6 +29,7 @@ class CreateCaregiver
             }
 
             if ($chain->caregivers()->save($caregiver)) {
+                $caregiver->ensureBusinessRelationships($chain);
                 $caregiver->setAvailability([]); // sets default availability
                 return $caregiver;
             }
