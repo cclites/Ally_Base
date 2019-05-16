@@ -53,8 +53,8 @@ class CaregiverTest extends TestCase
         $chain1 = factory(BusinessChain::class)->create();
         $chain2 = factory(BusinessChain::class)->create();
 
-        $this->caregiver->businessChains()->attach($chain1);
-        $this->caregiver->businessChains()->attach($chain2);
+        $chain1->assignCaregiver($this->caregiver);
+        $chain2->assignCaregiver($this->caregiver);
 
         $this->assertCount(2, $this->caregiver->businessChains);
     }
@@ -63,8 +63,6 @@ class CaregiverTest extends TestCase
     {
         $chain1 = factory(BusinessChain::class)->create();
         $chain2 = factory(BusinessChain::class)->create();
-        $this->caregiver->businessChains()->attach($chain1);
-        $this->caregiver->businessChains()->attach($chain2);
 
         // Create 3 businesses across the 2 chains
         $business1 = $chain1->businesses()->save(factory(Business::class)->make());
@@ -75,8 +73,8 @@ class CaregiverTest extends TestCase
         $this->assertCount(0, $this->caregiver->getBusinessIds());
         $this->assertFalse(in_array($business3->id, $this->caregiver->getBusinessIds()));
 
-        $this->caregiver->ensureBusinessRelationship($business1);
-        $this->caregiver->ensureBusinessRelationship($business3);
+        $business1->assignCaregiver($this->caregiver);
+        $business3->assignCaregiver($this->caregiver);
         $this->caregiver = $this->caregiver->fresh();
         
         $this->assertCount(2, $this->caregiver->fresh()->businesses);
@@ -90,20 +88,17 @@ class CaregiverTest extends TestCase
     {
         $chain1 = factory(BusinessChain::class)->create();
         $chain2 = factory(BusinessChain::class)->create();
-        $this->caregiver->businessChains()->attach($chain1);
-        $this->caregiver->businessChains()->attach($chain2);
-
-        // New caregiver only attached to chain2 (should not show up in results)
-        $caregiver2 = factory(Caregiver::class)->create();
-        $caregiver2->businessChains()->attach($chain2);
 
         // Create 3 businesses across the 2 chains
         $business1 = $chain1->businesses()->save(factory(Business::class)->make());
         $business2 = $chain1->businesses()->save(factory(Business::class)->make());
         $business3 = $chain2->businesses()->save(factory(Business::class)->make());
 
-        $this->caregiver->ensureBusinessRelationships($chain1);
-        $caregiver2->ensureBusinessRelationships($chain2);
+        $chain1->assignCaregiver($this->caregiver);
+        
+        // New caregiver only attached to chain2 (should not show up in results)
+        $caregiver2 = factory(Caregiver::class)->create();
+        $chain2->assignCaregiver($caregiver2);
 
         $result = Caregiver::forBusinesses([$business2->id])->first();
         $count = Caregiver::forBusinesses([$business2->id])->count();

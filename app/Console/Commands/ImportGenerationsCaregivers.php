@@ -93,7 +93,7 @@ class ImportGenerationsCaregivers extends BaseImport
                 }
 
                 // Save caregiver to business
-                $business->caregivers()->save($caregiver);
+                $business->assignCaregiver($caregiver);
 
                 // Create Address
                 $address = new Address($addressData);

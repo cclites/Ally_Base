@@ -31,7 +31,7 @@ class ClientRatesTest extends TestCase
         
         $this->client = factory('App\Client')->create(['business_id' => $this->business->id]);
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->assignCaregiver($this->caregiver);
         $this->caregiver->clients()->save($this->client);
 
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->chain->id]);

@@ -28,8 +28,7 @@ class CreateCaregiver
                 $caregiver->setAutoEmail()->save();
             }
 
-            if ($chain->caregivers()->save($caregiver)) {
-                $caregiver->ensureBusinessRelationships($chain);
+            if ($chain->assignCaregiver($caregiver)) {
                 $caregiver->setAvailability([]); // sets default availability
                 return $caregiver;
             }

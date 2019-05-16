@@ -30,7 +30,7 @@ class ManageStatusAliasesTest extends TestCase
         $this->officeUser->businesses()->attach($this->business->id);
     
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->assignCaregiver($this->caregiver);
         $this->client->caregivers()->save($this->caregiver);
     }
 

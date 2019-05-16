@@ -45,8 +45,7 @@ trait CreatesBusinesses
 
         $this->caregiver = factory('App\Caregiver')->create();
         $this->caregiver->clients()->save($this->client);
-        $this->chain->caregivers()->save($this->caregiver);
-        $this->caregiver->ensureBusinessRelationships($this->chain);
+        $this->chain->assignCaregiver($this->caregiver);
 
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
