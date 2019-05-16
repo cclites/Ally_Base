@@ -154,8 +154,14 @@ class ClearSensitiveData extends Command
         Business::chunk(200, function($collection) {
             \DB::beginTransaction();
             $collection->each(function(Business $business) {
-                $business->hha_password = 'password';
-                $business->tellus_password = 'password';
+                if (filled($business->hha_password)) {
+                    $business->setHhaPassword('password');
+                }
+
+                if (filled($business->tellus_password)) {
+                    $business->setTellusPassword('password');
+                }
+
                 $business->save();
             });
             \DB::commit();
