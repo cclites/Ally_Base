@@ -205,6 +205,13 @@ class CaregiverController extends BaseController
         return new ErrorResponse(500, 'The caregiver could not be updated.');
     }
 
+    /**
+     * Save the caregiver's business relationships.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
     public function updateOfficeLocations(Request $request, Caregiver $caregiver)
     {
         $data = $request->validate([
