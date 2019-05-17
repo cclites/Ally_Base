@@ -173,7 +173,10 @@ class ScheduleWarningAggregator
     public function pushWarnings(iterable $warnings, string $label = 'Warning') : void
     {
         foreach ($warnings as $warning) {
-            $this->warnings = $this->warnings->push(['description' => $warning, 'label' => $label]);
+            $this->warnings->push([
+                'description' => $warning,
+                'label' => $label
+            ]);
         }
     }
 }
