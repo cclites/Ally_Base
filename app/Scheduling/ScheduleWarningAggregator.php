@@ -41,6 +41,7 @@ class ScheduleWarningAggregator
     public function getAll() : array
     {
         if (! empty($this->schedule->caregiver)) {
+            $this->checkPreferenceMismatches();
             $this->checkCaregiverRestrictions();
             $this->checkCaregiverDaysOff();
             $this->checkCaregiverLicenses();
@@ -49,6 +50,54 @@ class ScheduleWarningAggregator
         $this->checkClientServiceAuths();
 
         return $this->warnings->toArray();
+    }
+
+    public function checkPreferenceMismatches()
+    {
+        $mismatches = collect([]);
+
+        /** @var \App\Caregiver $caregiver */
+        $caregiver = $this->schedule->caregiver;
+
+        /** @var \App\Client $client */
+        $client = $this->schedule->client;
+
+        /** @var \App\ClientPreferences $preferences */
+        $preferences = $client->preferences;
+
+        if ($preferences->smokes && ! $caregiver->smoking_okay) {
+            $mismatches->push('Caregiver is not okay with smoking');
+        }
+
+        if ($preferences->pets_dogs && ! $caregiver->pets_dogs_okay) {
+            $mismatches->push('Caregiver is not okay with dogs');
+        }
+
+        if ($preferences->pets_cats && ! $caregiver->pets_cats_okay) {
+            $mismatches->push('Caregiver is not okay with cats');
+        }
+
+        if ($preferences->pets_birds && ! $caregiver->pets_birds_okay) {
+            $mismatches->push('Caregiver is not okay with birds');
+        }
+
+        if ($preferences->gender == 'M' && $caregiver->gender != 'M') {
+            $mismatches->push('Client prefers male caregivers');
+        }
+
+        if ($preferences->gender == 'F' && $caregiver->gender != 'F') {
+            $mismatches->push('Client prefers female caregivers');
+        }
+
+        if ($preferences->license && $caregiver->certification != $preferences->license) {
+            $mismatches->push('Client requires a ' . $preferences->license);
+        }
+
+        // TODO: add check for spoken language
+
+        if ($mismatches->count()) {
+            $this->pushWarnings([$mismatches->implode(', ')], 'Preferences Mismatch');
+        }
     }
 
     /**
