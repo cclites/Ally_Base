@@ -164,11 +164,12 @@ class ScheduleWarningAggregator
      * Append the warnings collection with the given data.
      *
      * @param iterable $warnings
+     * @param string $label
      */
-    public function pushWarnings(iterable $warnings) : void
+    public function pushWarnings(iterable $warnings, string $label = 'Warning') : void
     {
-        foreach ($warnings as $warning) {
-            $this->warnings = $this->warnings->push($warning);
-        }
+        $warnings->each(function (string $warning) use ($label) {
+            $this->warnings = $this->warnings->push(['description' => $warning, 'label' => $label]);
+        });
     }
 }
