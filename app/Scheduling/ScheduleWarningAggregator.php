@@ -63,9 +63,13 @@ class ScheduleWarningAggregator
             return false;
         }
 
-        $this->pushWarnings(
-            $this->schedule->caregiver->restrictions->pluck('description')
-        );
+        $restrictions = $this->schedule->caregiver->restrictions->pluck('description');
+        if ($restrictions->count() > 0) {
+            $this->pushWarnings(
+                [$restrictions->implode(', ')],
+                'Caregiver Restrictions'
+            );
+        }
 
         return true;
     }
@@ -168,8 +172,8 @@ class ScheduleWarningAggregator
      */
     public function pushWarnings(iterable $warnings, string $label = 'Warning') : void
     {
-        $warnings->each(function (string $warning) use ($label) {
+        foreach ($warnings as $warning) {
             $this->warnings = $this->warnings->push(['description' => $warning, 'label' => $label]);
-        });
+        }
     }
 }
