@@ -7,6 +7,7 @@ use App\BusinessChain;
 use App\Caregiver;
 use App\Client;
 use App\OfficeUser;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -48,20 +49,24 @@ class SettingTest extends TestCase
     */
     public function testAClientCanNotSeeTheBusinessSettingsPage()
     {
+        $this->expectException(HttpException::class);
+
         $client = factory(Client::class)->create();
         $this->actingAs($client->user);
-        $response = $this->get('/business/settings');
 
-        $response->assertStatus(403);
+        $this->get(route('business.settings.index'))
+            ->assertStatus(403);
     }
 
     public function testACaregiverCanNotSeeTheBusinessSettingsPage()
     {
+        $this->expectException(HttpException::class);
+
         $caregiver = factory(Caregiver::class)->create();
         $this->actingAs($caregiver->user);
-        $response = $this->get('/business/settings');
 
-        $response->assertStatus(403);
+        $this->get(route('business.settings.index'))
+            ->assertStatus(403);
     }
 
     public function testAnOfficeUserCanUpdateBusinessSettings()
