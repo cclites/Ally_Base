@@ -8,21 +8,36 @@ use App\StatusAlias;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\Business;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use App\User;
 
 class StatusAliasController extends BaseController
 {
     /**
+     * Helper function to get all status aliases.
+     *
+     * @return Collection
+     */
+    public function getStatusAliases() : Collection
+    {
+        return $this->businessChain()->statusAliases()
+            ->get()
+            ->groupby('type')
+            ->sortBy('name');
+    }
+
+    /**
      * Get a list of the status aliases available for 
      * the current BusinessChain.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         return response()->json(
-            $this->businessChain()->statusAliases->groupby('type')
+            $this->getStatusAliases()
         );
     }
 
@@ -48,9 +63,9 @@ class StatusAliasController extends BaseController
 
         $this->authorize('update', $this->business());
 
-        $status = $this->businessChain()->statusAliases()->create($data);
+        $this->businessChain()->statusAliases()->create($data);
 
-        return new SuccessResponse('Status alias saved.', $status);
+        return new SuccessResponse('Status alias saved.', $this->getStatusAliases());
     }
 
     /**
@@ -77,14 +92,14 @@ class StatusAliasController extends BaseController
             'type' => 'required|in:client,caregiver',
         ]);
 
-        // cannot allow chaging of the 'active' type once a status alias is in use
+        // cannot allow changing of the 'active' type once a status alias is in use
         // because it will cause issues with how users are filtered.
         if ($data['active'] != $statusAlias->active && User::where('status_alias_id', $statusAlias->id)->exists()) {
             return new ErrorResponse(403, 'Cannot change active value for this status alias because it is currently in use.');
         }
 
         if ($statusAlias->update($data)) {
-            return new SuccessResponse('Status alias updated.', $statusAlias);
+            return new SuccessResponse('Status alias updated.', $this->getStatusAliases());
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred.');
@@ -95,6 +110,7 @@ class StatusAliasController extends BaseController
      *
      * @param  \App\StatusAlias  $statusAlias
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(StatusAlias $statusAlias)
     {
@@ -105,7 +121,7 @@ class StatusAliasController extends BaseController
         }
 
         if ($statusAlias->delete()) {
-            return new SuccessResponse('Status alias removed.', $statusAlias);
+            return new SuccessResponse('Status alias removed.', $this->getStatusAliases());
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred.');
