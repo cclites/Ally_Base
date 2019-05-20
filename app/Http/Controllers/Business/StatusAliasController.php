@@ -36,7 +36,12 @@ class StatusAliasController extends BaseController
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|max:255|unique:status_aliases,name',
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('status_aliases', 'name')
+                    ->where('chain_id', auth()->user()->getChain()->id)
+            ],
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
         ]);
@@ -61,7 +66,13 @@ class StatusAliasController extends BaseController
         $this->authorize('update', $this->business());
 
         $data = $request->validate([
-            'name' => ['required', 'max:255', Rule::unique('status_aliases')->ignore($statusAlias->id)],
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('status_aliases', 'name')
+                    ->where('chain_id', auth()->user()->getChain()->id)
+                    ->ignore($statusAlias->id)
+            ],
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
         ]);
