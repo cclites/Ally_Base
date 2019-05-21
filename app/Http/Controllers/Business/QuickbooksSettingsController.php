@@ -279,8 +279,23 @@ class QuickbooksSettingsController extends BaseController
      */
     protected function syncCustomerData(QuickbooksOnlineService $api, Business $business) : void
     {
-        // TODO: do we need to remove customers that no longer appear via API ?
-        foreach ($api->getCustomers() as $customer) {
+        $customers = collect($api->getCustomers());
+
+        // Find customer records that no longer appear in Quickbooks.
+        $customerIds = $customers->pluck('Id');
+        $deleteIds = $business->quickbooksCustomers()->whereNotIn('customer_id', $customerIds)->get()->pluck('id');
+
+        // Remove any client->customer mappings to those missing customer records.
+        Client::whereIn('quickbooks_customer_id', $deleteIds)
+            ->update([
+                'quickbooks_customer_id' => null,
+            ]);
+
+        // Delete the missing customer records.
+        $business->quickbooksCustomers()->whereIn('id', $deleteIds)->delete();
+
+        // Create OR update each customer record.
+        foreach ($customers as $customer) {
             if ($match = $business->quickbooksCustomers()->where('customer_id', $customer->Id)->first()) {
                 $match->update([
                     'name' => $customer->FullyQualifiedName,
@@ -344,7 +359,22 @@ class QuickbooksSettingsController extends BaseController
      */
     protected function syncServiceData(QuickbooksOnlineService $api, Business $business) : void
     {
-        foreach ($api->getItems() as $service) {
+        $services = collect($api->getItems());
+
+        // Find customer records that no longer appear in Quickbooks.
+        $serviceIds = $services->pluck('Id');
+        $deleteIds = $business->quickbooksServices()->whereNotIn('service_id', $serviceIds)->get()->pluck('id');
+
+        // Remove any service mappings to those missing service records.
+        $columns = ['shift_service_id', 'adjustment_service_id', 'refund_service_id', 'mileage_service_id', 'expense_service_id'];
+        foreach ($columns as $column) {
+            $business->quickbooksConnection()->whereIn($column, $deleteIds)->update([$column => null]);
+        }
+
+        // Delete the missing service records.
+        $business->quickbooksServices()->whereIn('id', $deleteIds)->delete();
+
+        foreach ($services as $service) {
             if ($match = $business->quickbooksServices()->where('service_id', $service->Id)->first()) {
                 $match->update([
                     'name' => $service->Name,
