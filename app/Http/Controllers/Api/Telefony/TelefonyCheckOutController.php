@@ -157,6 +157,12 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->checkForInjuryResponse($shift);
     }
 
+    /**
+     * Ask user if they want to enter mileage.
+     *
+     * @param \App\Shift $shift
+     * @return mixed
+     */
     public function checkForMileageResponse(Shift $shift)
     {
         $gather = $this->telefony->gather([
@@ -177,6 +183,12 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->telefony->response();
     }
 
+    /**
+     * Check for mileage response.
+     *
+     * @param \App\Shift $shift
+     * @return mixed
+     */
     public function checkForMileageAction(Shift $shift)
     {
         switch ($this->request->input('Digits')) {
@@ -191,6 +203,12 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->checkForMileageResponse($shift);
     }
 
+    /**
+     * Ask user for the amount of miles.
+     *
+     * @param \App\Shift $shift
+     * @return mixed
+     */
     public function askForMileageEntry(Shift $shift)
     {
         $gather = $this->telefony->gather([
@@ -212,6 +230,12 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->telefony->response();
     }
 
+    /**
+     * Confirm the mileage entry.
+     *
+     * @param \App\Shift $shift
+     * @return mixed
+     */
     public function confirmMileage(Shift $shift) {
         $mileage = $this->request->input('Digits');
 
@@ -231,6 +255,13 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->telefony->response();
     }
 
+    /**
+     * Save the mileage data.
+     *
+     * @param \App\Shift $shift
+     * @param int $mileage
+     * @return mixed
+     */
     public function recordMileage(Shift $shift, int $mileage)
     {
         if ($this->request->input('Digits') == 1) {
