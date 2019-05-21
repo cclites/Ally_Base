@@ -125,7 +125,7 @@ class ACHPayAgency extends Command
             catch (\Exception $e) {
                 $this->error($e->getMessage());
                 $this->error("The deposit was not successfully applied to all invoices, manual intervention is required.");
-                $this->error("DO NOT RE-RUN THIS COMMAND AS THE DEPOSIT HAS ALREADY BEEN PROCESSED.");
+                $this->error("DO NOT RE-RUN THIS COMMAND AS THE DEPOSIT HAS ALREADY BEEN PROCESSED AT THE BANK.");
                 return false;
             }
         } else {
