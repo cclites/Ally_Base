@@ -11,6 +11,11 @@ use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckOutController extends BaseVoiceController
 {
+    const PromptForMileage = 'Press 2 to enter mileage, or press 1 to continue.';
+    const AskForMileageEntry = 'Enter the number of miles followed by the pound sign.';
+    const ConfirmMileageEntry = 'You have entered, %s miles.  If this is correct, Press 1. To re-enter, Press 2.';
+    const MileageEntrySuccess = 'Your mileage has been recorded.';
+
     /**
      * Return check out response.
      */
@@ -137,7 +142,7 @@ class TelefonyCheckOutController extends BaseVoiceController
     public function checkForInjuryAction(Shift $shift) {
         switch ($this->request->input('Digits')) {
             case 1:
-                return $this->checkForActivitiesResponse($shift);
+                return $this->checkForMileageResponse($shift);
             case 2:
                 $issue = new ShiftIssue();
                 $issue->caregiver_injury = true;
@@ -150,6 +155,90 @@ class TelefonyCheckOutController extends BaseVoiceController
         }
 
         return $this->checkForInjuryResponse($shift);
+    }
+
+    public function checkForMileageResponse(Shift $shift)
+    {
+        $gather = $this->telefony->gather([
+            'timeout' => 5,
+            'numDigits' => 1,
+            'action' => route('telefony.check-out.check-for-mileage', [$shift]),
+        ]);
+        $this->telefony->say(
+            self::PromptForMileage,
+            $gather
+        );
+
+        // Redirect loop if nothing is entered
+        $this->telefony->redirect(
+            route('telefony.check-out.check-for-mileage', [$shift])
+        );
+
+        return $this->telefony->response();
+    }
+
+    public function checkForMileageAction(Shift $shift)
+    {
+        switch ($this->request->input('Digits')) {
+            case 1:
+                return $this->checkForActivitiesResponse($shift);
+            case 2:
+                return $this->askForMileageEntry($shift);
+        }
+
+        return $this->checkForMileageResponse($shift);
+    }
+
+    public function askForMileageEntry(Shift $shift)
+    {
+        $gather = $this->telefony->gather([
+            'timeout' => 30,
+            'finishOnKey' => '#',
+            'action' => route('telefony.check-out.confirm-mileage', [$shift]),
+        ]);
+
+        $this->telefony->say(
+            self::AskForMileageEntry,
+            $gather
+        );
+
+        // Redirect loop if nothing is entered
+        $this->telefony->redirect(
+            route('telefony.check-out.check-for-mileage', [$shift])
+        );
+
+        return $this->telefony->response();
+    }
+
+    public function confirmMileage(Shift $shift) {
+        $mileage = $this->request->input('Digits');
+
+        $gather = $this->telefony->gather([
+            'timeout' => 10,
+            'numDigits' => 1,
+            'action' => route('telefony.check-out.record-mileage', [$shift, $mileage]),
+        ]);
+        $this->telefony->say(
+            sprintf(self::ConfirmMileageEntry, $mileage),
+            $gather
+        );
+
+        // Redirect back if nothing is entered
+        $this->telefony->redirect(route('telefony.check-out.check-for-mileage', [$shift]));
+
+        return $this->telefony->response();
+    }
+
+    public function recordMileage(Shift $shift, int $mileage)
+    {
+        if ($this->request->input('Digits') == 1) {
+            $shift->mileage = $mileage;
+            $this->telefony->say(self::MileageEntrySuccess);
+            $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
+            return $this->telefony->response();
+        }
+
+        return $this->askForMileageEntry($shift);
     }
 
     /**
