@@ -4,9 +4,12 @@ namespace App\Console\Commands;
 
 use App\Actions\CreateClient;
 use App\Address;
+use App\Billing\ClientPayer;
+use App\Billing\Payer;
 use App\Business;
 use App\Client;
 use App\EmergencyContact;
+use App\StatusAlias;
 use App\User;
 
 class ImportClients extends BaseImport
@@ -62,6 +65,8 @@ class ImportClients extends BaseImport
      */
     protected function importRow(int $row)
     {
+        $statusAlias = $this->resolveStatusAlias($row);
+
         $data = [
             'firstname' => $this->resolve('First Name', $row),
             'lastname' => $this->resolve('Last Name', $row),
@@ -72,8 +77,10 @@ class ImportClients extends BaseImport
             'email' => $this->resolve('Email', $row),
             'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),
             'password' => bcrypt(str_random(12)),
-            'active' => $this->resolve('Active', $row),
+            'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'business_id' => $this->business()->id,
+            'hic' => $this->resolve('HIC', $row),
+            'status_alias_id' => $status->id ?? null,
         ];
 
         // Prevent Duplicates
@@ -95,6 +102,7 @@ class ImportClients extends BaseImport
             $this->importPhoneNumbers($client, $row);
             $this->importEmergencyContacts($client, $row);
             $this->importNotes($client, $row);
+            $this->importPayer($client, $row);
 
             return $client;
         }
@@ -125,7 +133,7 @@ class ImportClients extends BaseImport
      * @param $client
      * @param int $row
      */
-    protected function importEmergencyContacts($client, int $row)
+    protected function importEmergencyContacts(Client $client, int $row)
     {
         for ($i = 1; $i <= 3; $i++) {
             if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
@@ -137,6 +145,30 @@ class ImportClients extends BaseImport
                 ]);
             }
         }
+    }
+
+    protected function importPayer(Client $client, int $row)
+    {
+        if (!$payerName = $this->resolve('Payer', $row)) {
+            return;
+        }
+
+        $payer = Payer::where('chain_id', $this->business()->chain_id)
+            ->where('name', 'LIKE', '%' . trim($payerName) . '%')
+            ->first();
+
+        if ($payer) {
+            $clientPayer = new ClientPayer([
+                'payer_id' => $payer->id,
+                'policy_number' => null,
+                'effective_start' => date('Y') . '-01-01',
+                'effective_end' => '9999-12-31',
+                'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
+            ]);
+
+            $client->payers()->save($clientPayer);
+        }
+
     }
 
     /**
@@ -176,6 +208,26 @@ class ImportClients extends BaseImport
             return 'private_pay';
         }
         return strtolower($cellValue);
+    }
+
+    /**
+     * Resolve the status alias from the 'Status' column
+     *
+     * @param int $row
+     * @return StatusAlias|null
+     * @throws \PHPExcel_Exception
+     */
+    protected function resolveStatusAlias(int $row): ?StatusAlias
+    {
+        if ($name = $this->resolve('Status', $row)) {
+            $status = StatusAlias::where('name', $name)
+                ->where('chain_id', $this->business()->chain_id)
+                ->first();
+
+            return $status ?? null;
+        }
+
+        return null;
     }
 
 

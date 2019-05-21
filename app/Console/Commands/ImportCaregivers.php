@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Address;
 use App\BusinessChain;
 use App\Caregiver;
+use App\CaregiverRestriction;
+use App\StatusAlias;
 use App\User;
 
 class ImportCaregivers extends BaseImport
@@ -63,6 +65,8 @@ class ImportCaregivers extends BaseImport
      */
     protected function importRow(int $row)
     {
+        $statusAlias = $this->resolveStatusAlias($row);
+
         $data = [
             'firstname' => $this->resolve('First Name', $row),
             'lastname' => $this->resolve('Last Name', $row),
@@ -73,9 +77,10 @@ class ImportCaregivers extends BaseImport
             'email' => $this->resolve('Email', $row),
             'hire_date' => $this->resolve('Hire Date', $row),
             'gender' => $this->resolve('Gender', $row),
-            'active' => $this->resolve('Active', $row),
+            'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'preferences' => $this->resolve('Preferences', $row),
             'password' => bcrypt(str_random(12)),
+            'status_alias_id' => $status->id ?? null,
         ];
 
         // Prevent Duplicates
@@ -103,6 +108,7 @@ class ImportCaregivers extends BaseImport
             $this->importAddresses($caregiver, $row);
             $this->importPhoneNumbers($caregiver, $row);
             $this->importNotes($caregiver, $row);
+            $this->importRestrictions($caregiver, $row);
 
             return $caregiver;
         }
@@ -147,6 +153,15 @@ class ImportCaregivers extends BaseImport
         ];
         $address = new Address($addressData);
         $caregiver->addresses()->save($address);
+    }
+
+
+    protected function importRestrictions(Caregiver $caregiver, int $row)
+    {
+        if ($restrictionText = $this->resolve('Restrictions', $row)) {
+            $restriction = new CaregiverRestriction(['description' => $restrictionText]);
+            $caregiver->restrictions()->save($restriction);
+        }
     }
 
     /**
@@ -202,6 +217,26 @@ class ImportCaregivers extends BaseImport
     protected function resolveHireDate(int $row, $cellValue)
     {
         return $this->transformDateValue($cellValue);
+    }
+
+    /**
+     * Resolve the status alias from the 'Status' column
+     *
+     * @param int $row
+     * @return StatusAlias|null
+     * @throws \PHPExcel_Exception
+     */
+    protected function resolveStatusAlias(int $row): ?StatusAlias
+    {
+        if ($name = $this->resolve('Status', $row)) {
+            $status = StatusAlias::where('name', $name)
+                ->where('chain_id', $this->businessChain()->id)
+                ->first();
+
+            return $status ?? null;
+        }
+
+        return null;
     }
 
 }

@@ -466,6 +466,9 @@ class Client extends AuditableModel implements
             ->latest();
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function payers()
     {
         return $this->hasMany(ClientPayer::class, 'client_id')

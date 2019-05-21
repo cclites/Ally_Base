@@ -100,6 +100,10 @@ abstract class BaseImport extends Command
      */
     protected function importMeta(Model $model, int $row)
     {
+        if ($exportedId = $this->resolve('ID', $row)) {
+            $model->setMeta('Exported_ID', $exportedId);
+        }
+
         if ($metaFields = $this->option('meta')) {
             $metaFields = array_map('trim', explode(',', $metaFields));
             foreach($metaFields as $field) {
@@ -474,6 +478,7 @@ abstract class BaseImport extends Command
     {
         return is_string($cellValue) ? strtoupper(substr($cellValue, 0, 1)) : null;
     }
+
 
     /**
      * Transform dates to YYYY-MM-DD
