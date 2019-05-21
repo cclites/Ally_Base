@@ -27,7 +27,7 @@ $factory->define(\App\Billing\ClientRate::class, function (Faker $faker) {
         'effective_end' => '9999-12-31',
         'caregiver_hourly_rate' => $hourly = $faker->randomFloat(2, 15, 20),
         'caregiver_fixed_rate' => $faker->randomFloat(2, 50, 75),
-        'client_hourly_rate' => $hourly = $faker->randomFloat(2, 20, 25),
-        'client_fixed_rate' => $faker->randomFloat(2, 75, 100),
+        'client_hourly_rate' => $hourly = $faker->randomFloat(2, 25, 30),
+        'client_fixed_rate' => $faker->randomFloat(2, 100, 125),
     ];
 });
