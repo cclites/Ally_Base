@@ -121,6 +121,8 @@ class TelefonyCheckOutTest extends TelefonyBase
         $response->assertSee(TelefonyCheckOutController::MileageEntrySuccess);
         $response->assertSee('<Redirect');
         $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
+
+        $this->assertEquals($mileage, $shift->fresh()->mileage);
     }
 
     /** @test */

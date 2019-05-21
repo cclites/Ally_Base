@@ -181,6 +181,8 @@ class TelefonyCheckOutController extends BaseVoiceController
     {
         switch ($this->request->input('Digits')) {
             case 1:
+                // Clear mileage.
+                $shift->update(['mileage' => 0]);
                 return $this->checkForActivitiesResponse($shift);
             case 2:
                 return $this->askForMileageEntry($shift);
@@ -232,7 +234,7 @@ class TelefonyCheckOutController extends BaseVoiceController
     public function recordMileage(Shift $shift, int $mileage)
     {
         if ($this->request->input('Digits') == 1) {
-            $shift->mileage = $mileage;
+            $shift->update(['mileage' => $mileage]);
             $this->telefony->say(self::MileageEntrySuccess);
             $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
             return $this->telefony->response();
@@ -362,6 +364,7 @@ class TelefonyCheckOutController extends BaseVoiceController
         try {
             $clockOut = new ClockOut($shift->caregiver);
             $clockOut->setNumber($this->number->national_number);
+            $clockOut->setMileage($shift->mileage); // Carry over mileage from recorded mileage on this call.
             if ($clockOut->clockOut($shift)) {
                 event(new ShiftFlagsCouldChange($shift));
                 $this->telefony->say('You have successfully clocked out.<PAUSE>Thank you. Good bye.');
