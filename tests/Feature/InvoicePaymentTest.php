@@ -97,41 +97,9 @@ class InvoicePaymentTest extends TestCase
         $this->assertEquals(2.00, $invoiceable2->getAllyRate());
     }
 
-    /**
-     * @test
-     */
-    function a_payers_previous_unapplied_payments_are_used_first()
-    {
-        /**
-         * A payer has $50.00 still unapplied of a previous payment, a new invoice of $80.00 comes up, the new payment should only be $30
-         */
-
-        $payment = factory(Payment::class)->create(['client_id' => null, 'payer_id' => $this->clientPayer->payer_id, 'amount' => 50]);
-        $this->createService(80.00);
-        $invoice = $this->invoicer->generateAll($this->client)[0];
-        $payment = $this->processor->payInvoices([$invoice], new DummyCreditCard());
-
-        $this->assertCount(2, $invoice->payments);
-        $this->assertEquals(30.0, $payment->amount);
-    }
-
-    /**
-     * @test
-     */
-    function unapplying_a_payment_should_remove_the_old_allocated_ally_fees()
-    {
-
-    }
-
-    /**
-     * @test
-     */
-    function reapplying_a_payment_should_add_the_new_allocated_ally_fees()
-    {
-
-    }
-
-
+    // TODO: a_payers_previous_unapplied_payments_are_used_first
+    // TODO: unapplying_a_payment_should_remove_the_old_allocated_ally_fees
+    // TODO: reapplying_a_payment_should_add_the_new_allocated_ally_fees
 
 }
 
