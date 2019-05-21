@@ -38,7 +38,7 @@ class CarePlansTest extends TestCase
         factory('App\Activity', 5)->create([
             'business_id' => $this->business->id,
         ]);
-        $this->activities = $this->business->allActivities();
+        $this->activities = $this->business->allActivities()->take(5);
     }
 
     public function createCarePlan($attributes = [])
