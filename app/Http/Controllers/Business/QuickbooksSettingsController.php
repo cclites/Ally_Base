@@ -131,7 +131,9 @@ class QuickbooksSettingsController extends BaseController
     {
         $this->authorize('update', $business);
 
-        $business->quickbooksConnection()->delete();
+        if ($connection = $business->quickbooksConnection) {
+            $connection->update(['access_token' => null]);
+        }
 
         return new SuccessResponse('Your account has been disconnected from the Quickbooks API.', [], '.');
     }
