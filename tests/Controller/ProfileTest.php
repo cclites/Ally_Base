@@ -31,6 +31,6 @@ class ProfileTest extends TestCase
         $this->actingAs($this->client->user);
         $response = $this->get('/profile');
         $response->assertStatus(200);
-        $response->assertSeeText(htmlentities($this->client->lastname));
+        $response->assertSeeText(htmlentities($this->client->lastname, ENT_QUOTES));
     }
 }
