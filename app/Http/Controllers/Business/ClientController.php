@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Client;
+use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
@@ -226,30 +227,35 @@ class ClientController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the client profile.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @param UpdateClientRequest $request
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
         $this->authorize('update', $client);
         $data = $request->filtered();
-        $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
         if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
+        \DB::beginTransaction();
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
+            \DB::commit();
             return new SuccessResponse('The client has been updated.', $client, '.');
         }
+
+        \DB::rollBack();
         return new ErrorResponse(500, 'The client could not be updated.');
     }
 
@@ -368,13 +374,27 @@ class ClientController extends BaseController
         }
     }
 
+    /**
+     * Update the Client's preferences.
+     *
+     * @param UpdateClientPreferencesRequest $request
+     * @param \App\Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
-        $client->setPreferences($request->validated());
+        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->preferences->ethnicities()->delete();
+        $client->preferences->ethnicities()->saveMany(
+            collect($request->ethnicities)->map(function ($ethnicity) {
+                return new ClientEthnicityPreference(compact('ethnicity'));
+            })
+        );
 
-        return new SuccessResponse('Client preferences updated.');
+        return new SuccessResponse('Client preferences updated.', $client->preferences->fresh());
     }
 
     public function defaultRates(Request $request, Client $client)

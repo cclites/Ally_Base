@@ -256,6 +256,7 @@ Vue.component('client-insurance-service-auth', require('./components/business/cl
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-payers-tab', require('./components/business/clients/ClientPayersTab'));
+Vue.component('client-preferences-tab', require('./components/business/clients/ClientPreferencesTab'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));

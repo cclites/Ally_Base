@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 /**
@@ -20,8 +21,80 @@ namespace App;
  */
 class ClientPreferences extends AuditableModel
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'client_preferences';
-    protected $guarded = ['id'];
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
     public $incrementing = false;
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = ['id'];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    public $with = ['ethnicities'];
+
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+
+    /**
+     * Get the ethnicities relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function ethnicities()
+    {
+        return $this->hasMany(ClientEthnicityPreference::class, 'client_id');
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
+
+    /**
+     * Get string array of the client's ethnicity preferences.
+     *
+     * @return array
+     */
+    public function getEthnicities() : array
+    {
+        if (empty($this->ethnicities) || $this->ethnicities->count() === 0) {
+            // There is no reason for a client to have zero ethnicity
+            // preferences so always return all values by default.
+            return array_values(Ethnicity::toArray());
+        }
+
+        return $this->ethnicities->pluck('ethnicity')->toArray();
+    }
 }

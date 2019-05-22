@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Ethnicity;
+use App\Rules\ValidEnum;
 use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
@@ -76,6 +78,7 @@ class UpdateClientRequest extends BusinessRequest
                 $data['username'] = Client::getAutoUsername();
             }
         }
+        $data['updated_by'] = auth()->id();
 
         return $data;
     }
