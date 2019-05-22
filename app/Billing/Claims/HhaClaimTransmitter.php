@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Billing\Claims;
 
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Service;
 use App\Services\HhaExchangeService;
 use App\Shift;
 use Illuminate\Support\Collection;
@@ -19,10 +22,14 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice) : bool
+    public function validateInvoice(ClientInvoice $invoice): bool
     {
         if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
+        }
+
+        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+            throw new ClaimTransmissionException('You cannot submit a claim because there is not MCO/Payer Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
         return parent::validateInvoice($invoice);
@@ -35,7 +42,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function send(Claim $claim) : bool
+    public function send(Claim $claim): bool
     {
         try {
             $hha = new HhaExchangeService(
@@ -64,13 +71,13 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param \App\Shift $shift
      * @return array
      */
-    public function mapShiftRecord(Claim $claim, Shift $shift) : array
+    public function mapShiftRecord(Claim $claim, Shift $shift): array
     {
-        $timeFormat = 'Y-m-d H:i:s';
+        $timeFormat = 'Y-m-d H:i';
 
-        return [
+        $master = [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
-            $claim->invoice->clientPayer->payer_id, //    "Payer ID",
+            optional($claim->invoice->clientPayer)->payer->getPayerCode(), //    "Payer ID",
             $claim->invoice->client->medicaid_id, //    "Medicaid Number",
             $shift->caregiver_id, //    "Caregiver Code",
             $shift->caregiver->firstname, //    "Caregiver First Name",
@@ -79,7 +86,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
             $shift->caregiver->ssn, //    "Caregiver SSN",
             $shift->id, //    "Schedule ID",
-            'S5135U2', //    "Procedure Code",
+            '', //    "Procedure Code",
             $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
             $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
             $shift->checked_in_time->format($timeFormat), //    "Visit Start Time",
@@ -113,6 +120,34 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
+
+        if ($shift->services->count()) {
+            // Map each individual service.
+            $services = [];
+
+            $visitStart = $shift->checked_in_time->copy();
+            $visitEnd = null;
+
+            /** @var ShiftService $service */
+            foreach ($shift->services as $service) {
+                $serviceEntry = $master;
+                $serviceEntry[9] = $shift->id . '-' . $service->id;
+                $serviceEntry[10] = optional($service->service)->code;
+
+                // pro-rate visit start and end times
+                $visitEnd = $visitStart->copy()->addHours($service->duration);
+                $serviceEntry[13] = $visitStart->format($timeFormat);
+                $serviceEntry[14] = $visitEnd->format($timeFormat);
+                $visitStart = $visitEnd->copy()->addSecond(1);
+
+                $services[] = $serviceEntry;
+            }
+            return $services;
+        } else {
+            // Convert single service shift record.
+            $master[10] = optional($shift->service)->code;
+            return [$master];
+        }
     }
 
     /**
@@ -121,7 +156,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param \Illuminate\Support\Collection $activities
      * @return string
      */
-    public function mapActivities(Collection $activities) : string
+    public function mapActivities(Collection $activities): string
     {
         // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if ($activities->isEmpty()) {
