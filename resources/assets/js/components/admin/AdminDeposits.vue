@@ -3,7 +3,7 @@
         <b-form-group>
             <b-form-select v-model="chainId">
                 <option value="">--Select a Chain--</option>
-                <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
+                <option v-for="chain in chains" :value="chain.id">{{ chain.name }} ({{ chain.id }})</option>
             </b-form-select>
             <b-btn variant="primary" v-if="chainLoaded" @click="generateInvoices()">Generate Invoices (1st)</b-btn>
             <b-btn variant="info" v-if="chainLoaded && invoices.length > 0" @click="deposit()">Process Deposits (2nd)</b-btn>
@@ -75,6 +75,9 @@
                         <span v-if="row.item.caregiver_on_hold">- On Hold</span>
                         <span v-if="row.item.business_on_hold">- On Hold</span>
                     </template>
+                    <template slot="actions" scope="row">
+                        <b-button @click="uninvoice(row.item)" variant="danger">Uninvoice</b-button>
+                    </template>
                 </b-table>
             </div>
         </div>
@@ -128,6 +131,9 @@
                     },
                     {
                         key: 'status',
+                    },
+                    {
+                        key: 'actions',
                     }
                 ],
                 sortBy: null,
@@ -231,7 +237,15 @@
 
             depositUrl(id, view="") {
                 return `/admin/deposits/${id}/${view}`;
-            }
+            },
+
+            async uninvoice(invoice) {
+                console.log(invoice);
+                const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
+                let form = new Form({});
+                await form.submit("delete", `/admin/invoices/${type}/${invoice.invoice_id}`);
+                this.invoices = this.invoices.filter(i => invoice.invoice_id != i.invoice_id || invoice.invoice_type != i.invoice_type);
+            },
         },
 
         watch: {

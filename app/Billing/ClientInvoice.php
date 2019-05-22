@@ -3,9 +3,11 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceInterface;
-use App\BusinessChain;
+use App\Billing\Events\InvoiceablePaymentAdded;
+use App\Billing\Events\InvoiceablePaymentRemoved;
+use App\Billing\Events\InvoiceableUninvoiced;
 use App\Client;
-use Illuminate\Database\Eloquent\Builder;
+use App\QuickbooksClientInvoice;
 use Illuminate\Support\Collection;
 
 /**
@@ -14,15 +16,17 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $name
  * @property int $client_id
- * @property int|null $payer_id
+ * @property int|null $client_payer_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
+ * @property bool $offline
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Billing\Claim $claim
  * @property-read \App\Client $client
+ * @property-read \App\Billing\ClientPayer|null $clientPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
- * @property-read \App\Billing\Payer|null $payer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice newQuery()
@@ -37,13 +41,15 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     protected $casts = [
         'client_id' => 'int',
         'payer_id' => 'int',
+        'amount' => 'float',
+        'amount_paid' => 'float',
+        'offline' => 'bool',
     ];
 
     /**
      * Get the next invoice name for a client
      *
      * @param int $clientId
-     * @param int $payerId
      * @return string
      */
     public static function getNextName(int $clientId)
@@ -93,11 +99,31 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo(ClientPayer::class);
     }
 
+    public function claim()
+    {
+        return $this->hasOne(Claim::class);
+    }
+
+    /**
+     * Get the QuickbooksClientInvoice relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksInvoice()
+    {
+        return $this->hasMany(QuickbooksClientInvoice::class, 'client_invoice_id', 'id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
-    function getClientPayer(): ClientPayer
+    function isOffline(): bool
+    {
+        return (bool) $this->offline;
+    }
+
+    function getClientPayer(): ?ClientPayer
     {
         return $this->clientPayer;
     }
@@ -109,6 +135,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function getAmountPaid(): float
     {
+        if ($this->isOffline()) {
+            if (!$this->claim) return 0.0;
+            return (float) $this->claim->getAmountPaid();
+        }
+
         return (float) $this->amount_paid;
     }
 
@@ -125,6 +156,9 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return false;
     }
 
+    /**
+     * @return \Illuminate\Support\Collection|\App\Billing\ClientInvoiceItem[]
+     */
     function getItems(): Collection
     {
         return $this->items;
@@ -137,11 +171,54 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
     function addPayment(Payment $payment, float $amountApplied): bool
     {
-        if ($this->payments()->save($payment, ['amount_applied' => $amountApplied])) {
-            return (bool) $this->increment('amount_paid', $amountApplied);
+        if ($this->payments()->save($payment, ['amount_applied' => $amountApplied])
+            && $this->increment('amount_paid', $amountApplied)) {
+            foreach($this->getItems() as $item) {
+                if ($item->invoiceable) {
+                    event(new InvoiceablePaymentAdded($item->invoiceable, $this, $payment));
+                }
+            }
+
+            return true;
         }
 
         return false;
+    }
+
+    function removePayment(Payment $payment): bool
+    {
+        if (($payment = $this->payments->where('id', $payment->id)->first())
+            && $this->payments()->syncWithoutDetaching([$payment->id => ['amount_applied' => 0]])
+            && $this->decrement('amount_paid', $payment->pivot->amount_applied))
+        {
+            foreach($this->getItems() as $item) {
+                if ($item->getInvoiceable()) {
+                    event(new InvoiceablePaymentRemoved($item->getInvoiceable(), $this, $payment));
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function delete()
+    {
+        // Collect invoiceables prior to delete
+        $invoiceables = [];
+        foreach($this->getItems() as $item) {
+            if ($item->getInvoiceable()) {
+                $invoiceables[] = $item->getInvoiceable();
+            }
+        }
+
+        // Call parent delete, emitting event if successful
+        if ($return = parent::delete()) {
+            foreach($invoiceables as $invoiceable) {
+                event(new InvoiceableUninvoiced($invoiceable));
+            }
+        }
+
+        return $return;
     }
 
     function getName(): string
@@ -152,5 +229,10 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function getDate(): string
     {
         return $this->created_at->format('m/d/Y');
+    }
+
+    function getEstimates(): ClientInvoiceEstimates
+    {
+        return new ClientInvoiceEstimates($this);
     }
 }

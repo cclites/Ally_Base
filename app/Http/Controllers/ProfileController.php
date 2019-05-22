@@ -15,6 +15,8 @@ use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
 use App\Traits\Request\BankAccountRequest;
 use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 
 class ProfileController extends Controller
 {
@@ -23,7 +25,7 @@ class ProfileController extends Controller
     public function index()
     {
         $type = auth()->user()->role_type;
-        $user = auth()->user()->load('phoneNumbers');
+        $user = auth()->user()->load(['phoneNumbers', 'notificationPreferences']);
         
         // include a placeholder for the primary number if one doesn't already exist
         if ($user->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -46,10 +48,23 @@ class ProfileController extends Controller
                     "% Processing Fee)"
             ];
         } else if ($type == 'caregiver') {
-            $user->role->load(['availability', 'skills']);
+            $user->role->load(['availability', 'skills', 'daysOff']);
+        } else if ($type == 'office_user') {
+            $user->role->load(['businesses']);
         }
 
-        return view('profile.' . $type, compact('user', 'payment_type_message'));
+        $notifications = $user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+                'disabled' => $cls::DISABLED,
+            ];
+        });
+
+        $timezones = $this->getAvailableTimezones();
+
+        return view('profile.' . $type, compact('user', 'payment_type_message', 'notifications', 'timezones'));
     }
 
     public function update(UpdateProfileRequest $request)
@@ -58,17 +73,30 @@ class ProfileController extends Controller
 
         $data = $request->validated();
 
-        if(auth()->user()->role_type == 'client') {
-            $client_data = request()->validate([
-                'caregiver_1099' => 'nullable|string|in:ally,client',
-            ]);
-            auth()->user()->role->update($client_data);
+        switch(auth()->user()->role_type) {
+            case 'client':
+                $client_data = request()->validate([
+                    'caregiver_1099' => 'nullable|string|in:ally,client',
+                ]);
+                auth()->user()->role->update($client_data);
+                break;
+            case 'office_user':
+                $officeUserData = request()->validate([
+                    'default_business_id' => 'required|exists:businesses,id',
+                    'timezone' => 'required|string|in:' . $this->getAvailableTimezones()->implode('value', ','),
+                ]);
+                auth()->user()->role->update($officeUserData);
+                break;
         }
 
         $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
         if (auth()->user()->update($data)) {
-            return new SuccessResponse('Your profile has been updated.');
+            return new SuccessResponse(
+                'Your profile has been updated.',
+                [], 
+                auth()->user()->role_type == 'office_user' ? '.' : null
+            );
         }
         return new ErrorResponse(500, 'Unable to update profile.');
     }
@@ -170,6 +198,8 @@ class ProfileController extends Controller
 
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOff);
         return new SuccessResponse('Your availability preferences have been saved.');
     }
 
@@ -197,4 +227,55 @@ class ProfileController extends Controller
         return new SuccessResponse('Caregiver skills updated');
     }
 
+    /**
+     * Update user notification settings.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request)
+    {
+        $data = $request->validated();
+
+        if (! $data['allow_sms_notifications'] && ! $data['notification_email'] && ! $data['allow_system_notifications']) {
+            return new ErrorResponse(422, 'You must select at least one notification type');
+        }
+
+        if (auth()->user()->update($data)) {
+            return new SuccessResponse('Notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating notification options.  Please try again.');
+    }
+
+    /**
+     * Update user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request)
+    {
+        auth()->user()->syncNotificationPreferences($request->validated());
+
+        return new SuccessResponse('Notification preferences have been saved.');
+    }
+
+    /**
+     * Get a list of the available timezones.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getAvailableTimezones()
+    {
+        $zones = array();
+        $timestamp = time();
+        foreach(timezone_identifiers_list() as $key => $zone) {
+            date_default_timezone_set($zone);
+            $zones[$key]['diff'] = date('P', $timestamp);
+            $zones[$key]['value'] = $zone;
+            $zones[$key]['text'] = 'GMT ' . $zones[$key]['diff'] . ' ' . $zones[$key]['value'];
+        }
+        return collect($zones)->sortBy('diff');
+    }
 }

@@ -161,6 +161,8 @@
                                                     name="caregiver_rate"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="form.caregiver_rate"
                                                     @change="updateProviderRates(form)"
                                                     class="money-input"
@@ -174,6 +176,8 @@
                                                         name="provider_fee"
                                                         type="number"
                                                         step="0.01"
+                                                        min="0"
+                                                        max="999.99"
                                                         v-model="form.provider_fee"
                                                         @change="updateClientRates(form)"
                                                         class="money-input"
@@ -191,6 +195,8 @@
                                                         name="client_rate"
                                                         type="number"
                                                         step="0.01"
+                                                        min="0"
+                                                        max="999.99"
                                                         v-model="form.client_rate"
                                                         @change="updateProviderRates(form)"
                                                         class="money-input"
@@ -223,6 +229,8 @@
                                                     name="duration"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="service.duration"
                                                     @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                             </td>
@@ -234,6 +242,8 @@
                                                         name="caregiver_rate"
                                                         type="number"
                                                         step="0.01"
+                                                        min="0"
+                                                        max="999.99"
                                                         v-model="service.caregiver_rate"
                                                         @change="updateProviderRates(service)"
                                                         class="money-input"
@@ -247,6 +257,8 @@
                                                         name="provider_fee"
                                                         type="number"
                                                         step="0.01"
+                                                        min="0"
+                                                        max="999.99"
                                                         v-model="service.provider_fee"
                                                         @change="updateClientRates(service)"
                                                         class="money-input"
@@ -264,6 +276,8 @@
                                                         name="client_rate"
                                                         type="number"
                                                         step="0.01"
+                                                        min="0"
+                                                        max="999.99"
                                                         v-model="service.client_rate"
                                                         @change="updateProviderRates(service)"
                                                         class="money-input"
@@ -294,6 +308,11 @@
                                 <b-alert v-if="isUsingOvertime" variant="warning" show>
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
+                                <div v-if="warnings && warnings.length">
+                                    <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
+                                        <strong>{{ warning.label }}:</strong> {{ warning.description }}
+                                    </b-alert>
+                                </div>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -415,6 +434,7 @@
 </template>
 
 <script>
+    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
     import RateFactory from "../../../classes/RateFactory";
@@ -424,7 +444,7 @@
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates],
 
         props: {
             model: Boolean,
@@ -434,7 +454,6 @@
             },
             passCaregivers: {
                 type: Array,
-                required: true,
             },
             selectedSchedule: {
                 type: Object,
@@ -473,6 +492,7 @@
                 maxHoursWarning: false,
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
+                warnings: [],
             }
         },
 
@@ -484,7 +504,6 @@
         },
 
         computed: {
-
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -539,7 +558,7 @@
 
             caregivers() {
                 if (! this.form.client_id || this.cgMode === 'all') {
-                    return this.allCaregivers;
+                    return this.passCaregivers || this.allCaregivers;
                 }
                 return this.clientCaregivers;
             },
@@ -628,6 +647,32 @@
                 }
             },
 
+            checkForWarnings: _.debounce((vm) => {
+                console.log('check warnings: ', vm);
+                let form = new Form({
+                    caregiver: vm.form.caregiver_id ? vm.form.caregiver_id : '',
+                    client: vm.form.client_id ? vm.form.client_id : '',
+                    duration: vm.getDuration(),
+                    starts_at: vm.getStartsAt(),
+                    id: vm.schedule.id ? vm.schedule.id : '',
+                    payer_id: vm.form.payer_id,
+                    service_id: vm.form.service_id,
+                    services: vm.form.services,
+                });
+
+                if (! form.caregiver && ! form.client) {
+                    // skip warnings if client and cg not set
+                    return;
+                }
+
+                form.alertOnResponse = false;
+                form.post('/business/schedule/warnings')
+                    .then( ({ data }) => {
+                        vm.warnings = data;
+                    })
+                    .catch(e => {})
+            }, 350),
+
             changedStartDate(startDate) {
                 this.fetchAllRates();
             },
@@ -681,6 +726,7 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = schedule.client_rate == null;
+                this.warnings = [];
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -852,8 +898,8 @@
             },
 
             async loadAllCaregivers() {
-                if (!this.allCaregivers || !this.allCaregivers.length) {
-                    const response = await axios.get('/business/caregivers?json=1');
+                if (!this.passCaregivers) {
+                    const response = await axios.get(`/business/caregivers?json=1`);
                     this.allCaregivers = response.data;
                 }
             },
@@ -955,6 +1001,13 @@
         },
 
         watch: {
+            form: {
+                handler(obj){
+                    this.checkForWarnings(this);
+                },
+                deep: true
+            },
+
             'form.hours_type': function(newVal, oldVal) {
                 if (! oldVal || newVal == oldVal) {
                     return;

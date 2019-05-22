@@ -35,18 +35,6 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="allowDebug">
-                    <b-col lg="12">
-                        <div class="form-check">
-                            <input-help :form="form" field="debugMode" text="Enable debug mode (returns variables but does not clock in)"></input-help>
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="debugMode" v-model="form.debugMode" value="1">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description"></span>
-                            </label>
-                        </div>
-                    </b-col>
-                </b-row>
                 <b-row>
                     <b-col>
                         <div class="alert alert-warning" v-show="!!locationWarning">
@@ -55,18 +43,29 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col md="6">
+                    <b-col md="6" v-if="schedules.length > 0">
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)" :disabled="authInactive">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)" :disabled="authInactive">Clock Into Your {{ formatTime(schedule.starts_at.date) }} Shift</b-button>
                         </div>
+                    </b-col>
+                    <b-col md="6" v-else>
                         <div class="form-group" v-if="form.client_id">
-                            <b-button variant="success" @click="clockInWithoutSchedule()" v-if="schedules.length >= 1" :disabled="authInactive">Clock in to an unscheduled shift</b-button>
-                            <b-button variant="success" @click="clockInWithoutSchedule()" v-else :disabled="authInactive">Clock in</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="authInactive">Clock in</b-button>
                         </div>
                     </b-col>
                     <b-col md="6">
                         <div class="d-flex">
                             <user-avatar v-if="form.client_id" :src="avatar" size="75" class="ml-auto" />
+                        </div>
+                    </b-col>
+                </b-row>
+                <b-row v-if="form.client_id && schedules.length > 0">
+                    <b-col md="12" class="mt-3 text-center text-small">
+                        <div v-if="allowUnscheduledClockin">
+                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="authInactive">Clock Into An Unscheduled Shift</b-button>
+                        </div>
+                        <div v-else>
+                            <b-button variant="link" @click="allowUnscheduledClockin = true">If you do not see your shift, Click Here.</b-button>
                         </div>
                     </b-col>
                 </b-row>
@@ -106,11 +105,9 @@
                     schedule_id: null,
                     latitude: null,
                     longitude: null,
-                    debugMode: false,
                 }),
                 clients: [],
                 schedules: [],
-                allowDebug: false,
                 stats: [],
                 time: null,
                 loadingText: null,
@@ -121,6 +118,7 @@
                     maximumAge: 15000,
                     timeout: 30000,
                 },
+                allowUnscheduledClockin: false,
             }
         },
 

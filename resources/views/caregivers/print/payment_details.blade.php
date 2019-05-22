@@ -46,7 +46,7 @@
     <div>
         <div class="row print-header">
             <div class="header-left">
-                <div><a href="{{ is_office_user() ? route('business.caregivers.show', [$deposit->caregiver]) . '#payment_statement' : route('caregivers.reports.payment_history') }}" class="btn btn-info">Return to Payment History</a></div>
+                <div><a href="{{ is_office_user() ? route('business.caregivers.show', [$deposit->caregiver]) . '#payment_statement' : route('caregiver.deposits') }}" class="btn btn-info">Return to Payment History</a></div>
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
                 <div class="h4">Associated Provider: {{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>

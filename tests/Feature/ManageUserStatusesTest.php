@@ -30,9 +30,8 @@ class ManageUserStatusTest extends TestCase
         $this->business->users()->attach($this->officeUser->id);
     
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->attach($this->caregiver->id);
         $this->client->caregivers()->save($this->caregiver);
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
 
         factory(StatusAlias::class)->create(['type' => 'client', 'name' => 'Working', 'active' => true]);
         factory(StatusAlias::class)->create(['type' => 'client', 'name' => 'Discharged', 'active' => false]);
@@ -156,12 +155,10 @@ class ManageUserStatusTest extends TestCase
         $this->actingAs($this->officeUser->user);
 
         $caregiver2 = factory('App\Caregiver')->create();
-        $this->business->caregivers()->attach($caregiver2);
-        $this->business->chain->caregivers()->save($caregiver2);
+        $this->business->assignCaregiver($caregiver2);
 
         $caregiver3 = factory('App\Caregiver')->create();
-        $this->business->caregivers()->attach($caregiver3);
-        $this->business->chain->caregivers()->save($caregiver3);
+        $this->business->assignCaregiver($caregiver3);
 
         $status = factory(StatusAlias::class)->create(['active' => true, 'type' => 'caregiver']);
         $status2 = factory(StatusAlias::class)->create(['active' => true, 'type' => 'caregiver']);

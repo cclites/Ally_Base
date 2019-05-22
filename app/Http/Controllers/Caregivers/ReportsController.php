@@ -50,28 +50,7 @@ class ReportsController extends BaseController
         return view('caregivers.reports.shifts', compact('clients'));
     }
 
-    public function paymentHistory()
-    {
-        Carbon::setWeekStartsAt(Carbon::MONDAY);
-
-        $caregiver = $this->caregiver();
-        $deposits = Deposit::with('shifts')->where('caregiver_id', $caregiver->id)
-            ->orderBy('created_at', 'DESC')
-            ->get()
-            ->map(function ($deposit) {
-                $deposit->amount = floatval($deposit->amount);
-                $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
-                $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
-                return $deposit;
-            });
-
-        // TODO: We should not rely on a single business here  (ALLY-431)
-        $business = $caregiver->businesses->first();
-
-        return view('caregivers.reports.payment_history', compact('caregiver', 'deposits', 'business'));
-    }
-
-    public function printPaymentHistory($year)
+    public function printPaymentHistory($year, $view = "pdf")
     {
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
@@ -90,6 +69,11 @@ class ReportsController extends BaseController
 
         // TODO: We should not rely on a single business here  (ALLY-431)
         $business = $caregiver->businesses->first();
+
+        if ($view !== "pdf") {
+            return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
+        }
+
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
         $filename = $year . '_year_summary.pdf';
         // return $pdf->download($filename);

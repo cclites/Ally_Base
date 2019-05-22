@@ -89,4 +89,17 @@ trait HasAddressesAndNumbers
     {
         return $this->phoneNumbers()->where('id', $id)->limit(1)->delete();
     }
+
+    /**
+     * Get phone number by type.
+     *
+     * @param string $type
+     * @return string
+     */
+    public function getPhoneNumberByType(string $type) : string
+    {
+        $phone = $this->phoneNumbers->where('type', $type)->first();
+
+        return empty($phone) ? '' : (string) $phone->number;
+    }
 }

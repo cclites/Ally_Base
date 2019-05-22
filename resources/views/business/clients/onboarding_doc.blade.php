@@ -225,7 +225,7 @@
                         <div class="col doc-item">{{ $onboarding->hospice_office_location }}</div>
                     </div>
                     <div class="row mt">
-                        <div class="col doc-item">Case Manager Name</div>
+                        <div class="col doc-item">Client Service Coordinator Name</div>
                         <div class="col doc-item">{{ $onboarding->hospice_case_manager }}</div>
                     </div>
                     <div class="row mt">

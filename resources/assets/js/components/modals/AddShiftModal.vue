@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Create a Manual Shift" v-model="showModal" size="lg" class="modal-fit-more">
+    <b-modal title="Create a Manual Shift" v-model="showModal" size="lg" class="modal-fit-more" :no-close-on-backdrop="true">
         <b-container fluid>
             <business-shift 
                 :activities="activities"
@@ -36,8 +36,18 @@
 
         props: {
             value: {},
-            caregiver: {},
-            client: {},
+            caregiver: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
+            client: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
         },
 
         computed: {
@@ -47,8 +57,8 @@
                 },
                 set(value) {
                     this.$refs.businessShift.resetForm();
-                    if (this.caregiver) this.$refs.businessShift.form.caregiver_id = this.caregiver;
-                    if (this.client) this.$refs.businessShift.form.client_id = this.client;
+                    if (this.caregiver) this.$refs.businessShift.form.caregiver_id = this.caregiver.id;
+                    if (this.client) this.$refs.businessShift.form.client_id = this.client.id;
                     this.$emit('input', value);
                 }
             },

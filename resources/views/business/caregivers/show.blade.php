@@ -36,6 +36,9 @@
             <a class="nav-link" data-toggle="tab" href="#clients" role="tab">Clients</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#office-locations" role="tab">Office Locations</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
         </li>
         <li class="nav-item">
@@ -59,6 +62,12 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -74,6 +83,7 @@
                     <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 @endif
                 <a class="dropdown-item" data-toggle="tab" href="#clients" role="tab">Clients</a>
+                <a class="dropdown-item" data-toggle="tab" href="#office-locations" role="tab">Office Locations</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Expirations</a>
@@ -123,6 +133,9 @@
         <div class="tab-pane" id="clients" role="tabpanel">
             <business-caregiver-clients-tab :caregiver="{{ $caregiver }}"></business-caregiver-clients-tab>
         </div>
+        <div class="tab-pane" id="office-locations" role="tabpanel">
+            <business-caregiver-office-locations-tab :caregiver="{{ $caregiver }}"></business-caregiver-office-locations-tab>
+        </div>
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
             <notes-tab :notes="{{ $caregiver->notes }}" :business="{{ $business }}" :caregiver="{{ $caregiver }}"></notes-tab>
         </div>
@@ -166,6 +179,12 @@
         <div class="tab-pane" id="misc" role="tabpanel">
             <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
         </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <notification-preferences :admin="true" :user="{{ $caregiver->user }}" :notifications="{{ $notifications }}"></notification-preferences>
+        </div>
+        <div class="tab-pane" id="restrictions" role="tabpanel">
+            <business-caregiver-restrictions-tab :caregiver="{{ $caregiver }}"></business-caregiver-restrictions-tab>
+        </div>
     </div>
 @endsection
 
@@ -188,8 +207,7 @@
 
         // Change hash for page-reload
         $('.profile-tabs .nav-item a').on('shown.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            window.scrollTo(0,0);
+            history.pushState({}, '', url.split('#')[0] + e.target.hash);
         })
     </script>
 @endpush

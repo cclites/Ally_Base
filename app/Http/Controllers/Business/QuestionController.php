@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Business;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Question;
@@ -15,13 +16,16 @@ class QuestionController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param \App\Business $business
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
-    public function index(Business $business)
+    public function index(Request $request)
     {
+        $business = Business::findOrFail($request->business);
         $this->authorize('update', $business);
-        return response()->json(activeBusiness()->questions);
+
+        return response()->json($business->questions);
     }
 
     /**
@@ -29,13 +33,14 @@ class QuestionController extends Controller
      *
      * @param CreateQuestionRequest $request
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function store(CreateQuestionRequest $request)
     {
-        $data = $request->filtered();
-        $this->authorize('update', $request->getBusiness());
+        $business = Business::findOrFail($request->business);
+        $this->authorize('update', $business);
 
-        if ($question = Question::create($data)) {
+        if ($question = $business->questions()->create($request->filtered())) {
             return new SuccessResponse('Question has been created.', $question);
         }
 
@@ -48,6 +53,7 @@ class QuestionController extends Controller
      * @param CreateQuestionRequest $request
      * @param Question $question
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function update(CreateQuestionRequest $request, Question $question)
     {
@@ -66,6 +72,8 @@ class QuestionController extends Controller
      *
      * @param  Question  $question
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
+     * @throws \Exception
      */
     public function destroy(Question $question)
     {

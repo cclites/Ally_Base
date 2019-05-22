@@ -41,6 +41,7 @@ class CronScheduleConverter extends Command
     {
         $businesses = Business::has('schedules')->orderBy('id')->get();
         foreach($businesses as $business) {
+            $this->output->writeln("Running for Business " . $business->id);
             $converter = new ScheduleConverter($business);
             $converter->convertAllThisWeek();
         }

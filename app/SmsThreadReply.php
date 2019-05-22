@@ -3,6 +3,7 @@ namespace App;
 
 use App\Traits\BelongsToOneBusiness;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Events\SmsThreadReplyCreated;
 
 /**
  * App\SmsThreadReply
@@ -52,6 +53,10 @@ class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
      * @var array
      */
     protected $with = ['user'];
+
+    protected $dispatchesEvents = [
+        'created' => SmsThreadReplyCreated::class,
+    ];
 
     /**
      * Get the business relation.

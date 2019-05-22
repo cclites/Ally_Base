@@ -102,12 +102,7 @@ class Form {
      * @param {string} url
      */
     get(url) {
-        const data = this.data();
-        for(let field in data) {
-            let value = encodeURIComponent(data[field]);
-            url += (url.includes('?')) ? `&${field}=${value}` : `?${field}=${value}`;
-        }
-        return this.submit('get', url);
+        return this.submit('get', this.toQueryString(url));
     }
 
     /**
@@ -243,6 +238,21 @@ class Form {
             this.originalData[property] = otherForm.originalData[property];
             this[property] = otherForm[property];
         }
+    }
+
+    /**
+     * Convert the form data into a query string for get requests.
+     *
+     * @param url
+     * @returns {string|string}
+     */
+    toQueryString(url = '') {
+        const data = this.data();
+        for(let field in data) {
+            let value = encodeURIComponent(data[field]);
+            url += (url.includes('?')) ? `&${field}=${value}` : `?${field}=${value}`;
+        }
+        return url;
     }
 }
 

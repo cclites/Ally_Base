@@ -49,7 +49,7 @@
             setLocationCount(count) {
                 this.locationCount = count;
             }
-        }
+        },
     }
 </script>
 

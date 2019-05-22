@@ -73,6 +73,17 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Client Type" class="form-inline">
+                                <b-form-select v-model="filters.client_type" ref="clientTypeFilter">
+                                    <option value="">All Client Types</option>
+                                    <option value="private_pay">Private Pay</option>
+                                    <option value="medicaid">Medicaid</option>
+                                    <option value="VA">VA</option>
+                                    <option value="LTCI">LTC Insurance</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
                     </b-row>
                     <b-row>
                         <b-col lg="12">
@@ -290,19 +301,18 @@
 
         <add-shift-modal 
             v-model="addShiftModal" 
-            :caregiver="filters.caregiver_id"
-            :client="filters.client_id"
-            :no-close-on-backdrop="true"
+            :caregiver="{id: filters.caregiver_id}"
+            :client="{id: filters.client_id}"
             @shift-created="onShiftCreate"
         ></add-shift-modal>
 
         <edit-shift-modal
             v-model="editShiftModal"
             :shift_id="editingShiftId"
-            :no-close-on-backdrop="true"
             :activities="activities"
             @shift-updated="onShiftUpdate"
             @shift-deleted="onShiftDelete"
+            @closed="editingShiftId = null"
         />
     </div>
 </template>
@@ -363,6 +373,7 @@
                     confirmed_status: "",
                     flag_type: "any",
                     flags: [],
+                    client_type: '',
                 },
                 includeAllFlags: false,
                 filterDescription: '',
@@ -525,7 +536,8 @@
                 return '?start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
-                        + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags})
+                        + '&client_type=' + filters.client_type
+                        + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             }
         },
 
@@ -683,7 +695,7 @@
                     .then(function(response) {
                         let shift = response.data;
                         shift.checked_in_time = moment.utc(shift.checked_in_time).local().format('L LT');
-                        shift.checked_out_time = moment.utc(shift.checked_out_time).local().format('L LT');
+                        shift.checked_out_time = shift.checked_out_time ? moment.utc(shift.checked_out_time).local().format('L LT') : '(Still clocked in)';
                         component.selectedItem = shift;
                         component.detailsModal = true;
                         console.log(component.selectedItem);

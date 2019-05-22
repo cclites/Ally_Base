@@ -1,9 +1,12 @@
 <?php
 namespace App\Payments;
 
+use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Business;
 use App\Client;
 use App\Billing\Payment;
+use Carbon\Carbon;
 
 /**
  * Class SinglePaymentProcessor
@@ -28,13 +31,32 @@ class SinglePaymentProcessor
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
                 'adjustment' => $adjustment,
-                'notes' => $notes,
+                'notes' => str_limit($notes, 250),
                 'success' => $transaction->success,
             ]);
+            $payment->setPaymentMethod($method);
+            $payment->save();
+
+            $invoice = ClientInvoice::create([
+                'name' => ClientInvoice::getNextName($client->id),
+                'client_id' => $client->id,
+            ]);
+            $invoice->addItem(new ClientInvoiceItem([
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'units' => 1,
+                'rate' => $amount,
+                'total' => $amount,
+                'amount_due' => $amount,
+                'date' => new Carbon(),
+                'notes' => str_limit($notes, 250),
+            ]));
+            $invoice->addPayment($payment, $amount);
         }
         return $transaction;
     }
 
+    // TODO: How can we create payment invoices for businesses???
     public static function chargeBusiness(Business $business, $amount, $adjustment = false, $notes = null)
     {
         $method = $business->paymentAccount;

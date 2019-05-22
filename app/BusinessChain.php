@@ -19,7 +19,8 @@ use App\Billing\Service;
  * @property string $country
  * @property string|null $phone1
  * @property string|null $phone2
- * @property int $scheduling
+ * @property bool $scheduling
+ * @property bool $enable_schedule_groups
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
@@ -50,6 +51,10 @@ class BusinessChain extends AuditableModel
     protected $table = 'business_chains';
     protected $guarded = ['id'];
     protected $orderedColumn = 'name';
+    protected $casts = [
+        'scheduling' => 'bool',
+        'enable_schedule_groups' => 'bool',
+    ];
 
     ////////////////////////////////////
     //// Static Methods
@@ -186,6 +191,23 @@ class BusinessChain extends AuditableModel
             ->values();
     }
 
+    /**
+     * Assign a Caregiver to the chain and also all of the office locations.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return bool
+     */
+    public function assignCaregiver(Caregiver $caregiver) : bool
+    {
+        if (! $this->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        return $caregiver->ensureBusinessRelationships($this);
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
@@ -193,5 +215,21 @@ class BusinessChain extends AuditableModel
     public function getCaregiverApplicationUrl()
     {
         return route('business_chain_routes.apply', ['slug' => $this->slug]);
+    }
+
+    /**
+     * Get a list of OfficeUser's notifiable User objects
+     * that should be sent notifications.
+     *
+     * @return array|Collection
+     */
+    public function notifiableUsers()
+    {
+        return $this->users()->with(['user', 'user.notificationPreferences'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->get()
+            ->pluck('user');
     }
 }

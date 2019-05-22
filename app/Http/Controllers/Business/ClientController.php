@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Business;
 
 use App\Actions\CreateClient;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Client;
+use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
@@ -17,7 +17,6 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
-use App\Traits\Request\PaymentMethodRequest;
 use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
@@ -27,8 +26,6 @@ use App\Notifications\TrainingEmail;
 
 class ClientController extends BaseController
 {
-    use PaymentMethodRequest;
-
     /**
      * Display a listing of the resource.
      *
@@ -50,7 +47,7 @@ class ClientController extends BaseController
                 $query->where('client_type', $clientType);
             }
             if ($caseManagerId = $request->input('case_manager_id')) {
-                $query->whereHas('caseManager', function($q) use ($caseManagerId) {
+                $query->whereHas('caseManager', function ($q) use ($caseManagerId) {
                     $q->where('id', $caseManagerId);
                 });
             }
@@ -67,7 +64,6 @@ class ClientController extends BaseController
             if ($request->input('case_managers')) {
                 $query->with('caseManager');
             }
-
 
             $clients = $query->get();
             return $clients;
@@ -87,7 +83,7 @@ class ClientController extends BaseController
         return $query->whereHas('user', function ($q) {
             $q->where('active', true);
         })
-            ->with(['user'])->get()->map(function($client) {
+            ->with(['user'])->get()->map(function ($client) {
                 return [
                     'id' => $client->id,
                     'firstname' => $client->user->firstname,
@@ -126,7 +122,7 @@ class ClientController extends BaseController
         $this->authorize('create', [Client::class, $data]);
 
         // Look for duplicates
-        if (!$request->override) {
+        if (! $request->override) {
             if ($request->email && Client::forRequestedBusinesses()->whereEmail($request->email)->first()) {
                 return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
             }
@@ -135,11 +131,11 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
-        
+
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
         if ($client = $action->create($data, $paymentMethod)) {
-            return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
+            return new CreatedResponse('The client has been created.', ['id' => $client->id, 'url' => route('business.clients.edit', [$client->id])]);
         }
 
         return new ErrorResponse(500, 'The client could not be created.');
@@ -149,11 +145,11 @@ class ClientController extends BaseController
      * Display the specified resource.
      *
      * @param  \App\Client $client
-     * @param \App\Billing\Queries\ClientInvoiceQuery $invoiceQuery
+     * @param \App\Billing\Queries\OnlineClientInvoiceQuery $invoiceQuery
      * @return ErrorResponse|\Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show(Client $client, ClientInvoiceQuery $invoiceQuery)
+    public function show(Client $client, OnlineClientInvoiceQuery $invoiceQuery)
     {
         $this->authorize('read', $client);
 
@@ -198,10 +194,10 @@ class ClientController extends BaseController
         }
 
         // append payment metrics and future schedule count
-        if (!empty($client->default_payment_id)) {
+        if (! empty($client->default_payment_id)) {
             $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
         }
-        if (!empty($client->backup_payment_id)) {
+        if (! empty($client->backup_payment_id)) {
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
@@ -224,34 +220,39 @@ class ClientController extends BaseController
 
     public function edit(Client $client)
     {
-        return $this->show($client, app(ClientInvoiceQuery::class));
+        return $this->show($client, app(OnlineClientInvoiceQuery::class));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the client profile.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @param UpdateClientRequest $request
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
         $this->authorize('update', $client);
         $data = $request->filtered();
-        $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
         if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
+        \DB::beginTransaction();
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
-            return new SuccessResponse('The client has been updated.', $client);
+            \DB::commit();
+            return new SuccessResponse('The client has been updated.', $client, '.');
         }
+
+        \DB::rollBack();
         return new ErrorResponse(500, 'The client could not be updated.');
     }
 
@@ -281,6 +282,7 @@ class ClientController extends BaseController
             $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
         }
 
+        $data['status_alias_id'] = null;
         if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
@@ -298,9 +300,9 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
 
-        if ($client->update(['active' => true, 'inactive_at' => null])) {
+        if ($client->update(['active' => true, 'inactive_at' => null, 'status_alias_id' => null])) {
             $client->clearFutureSchedules();
-            return new SuccessResponse('The client has been re-activated.');
+            return new SuccessResponse('The client has been re-activated.', null, '.');
         }
         return new ErrorResponse(500, 'Could not re-activate the selected client.');
     }
@@ -317,51 +319,6 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
 
         return (new PhoneController())->upsert($request, $client->user, $type, 'The client\'s phone number');
-    }
-
-    public function paymentMethod(Request $request, Client $client, string $type)
-    {
-        $this->authorize('update', $client);
-
-        $backup = ($type === 'backup');
-
-        if ($request->input('use_business')) {
-            if (!$client->business->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
-            if ($client->setPaymentMethod($client->business, $backup)) {
-                return $this->paymentMethodResponse($client, 'The payment method has been set to the provider payment account.');
-            }
-            return new ErrorResponse(500, 'The payment method could not be updated.');
-        }
-
-        $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
-        if ($client->setPaymentMethod($method, $backup)) {
-            return $this->paymentMethodResponse($client, 'The payment method has been updated.');
-        }
-        return new ErrorResponse(500, 'The payment method could not be updated.');
-    }
-
-    public function destroyPaymentMethod(Client $client, string $type)
-    {
-        $this->authorize('update', $client);
-
-        if ($type == 'backup') {
-            $client->backupPayment()->dissociate();
-        }
-        else {
-            $client->defaultPayment()->dissociate();
-        }
-        $client->save();
-
-        return $this->paymentMethodResponse($client, 'The payment method has been removed.');
-    }
-
-    protected function paymentMethodResponse(Client $client, $message)
-    {
-        $allyRate = $client->getAllyPercentage();
-        $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
-        $data['payment_text'] = $paymentTypeMessage;
-        $data['ally_rate'] = $allyRate;
-        return new SuccessResponse($message, $data, '.');
     }
 
     public function getPaymentType(Client $client)
@@ -412,13 +369,27 @@ class ClientController extends BaseController
         }
     }
 
+    /**
+     * Update the Client's preferences.
+     *
+     * @param UpdateClientPreferencesRequest $request
+     * @param \App\Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
-        $client->setPreferences($request->validated());
+        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->preferences->ethnicities()->delete();
+        $client->preferences->ethnicities()->saveMany(
+            collect($request->ethnicities)->map(function ($ethnicity) {
+                return new ClientEthnicityPreference(compact('ethnicity'));
+            })
+        );
 
-        return new SuccessResponse('Client preferences updated.');
+        return new SuccessResponse('Client preferences updated.', $client->preferences->fresh());
     }
 
     public function defaultRates(Request $request, Client $client)

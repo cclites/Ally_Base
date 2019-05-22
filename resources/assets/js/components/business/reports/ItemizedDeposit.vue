@@ -1,15 +1,75 @@
 <template>
     <b-card :title="title">
+        <div class="text-right">
+            <b-btn variant="primary" @click="showSummary=!showSummary">{{ showSummary ? "Hide" : "Show" }} Summary</b-btn>
+        </div>
+
+        <b-row v-if="showSummary">
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Client Summary</th>
+                        <th>Client Total</th>
+                        <th>CG Total</th>
+                        <th>Ally Total</th>
+                        <th>Reg Total</th>
+                    </tr>
+                    <tr v-for="item in clientSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.client) }}</td>
+                        <td>{{ numberFormat(item.caregiver) }}</td>
+                        <td>{{ numberFormat(item.ally) }}</td>
+                        <td>{{ numberFormat(item.provider) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(clientSummaryTotal.client) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.caregiver) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.ally) }}</td>
+                        <td>{{ numberFormat(clientSummaryTotal.provider) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Caregiver Summary</th>
+                        <th>Client Total</th>
+                        <th>CG Total</th>
+                        <th>Ally Total</th>
+                        <th>Reg Total</th>
+                    </tr>
+                    <tr v-for="item in caregiverSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.client) }}</td>
+                        <td>{{ numberFormat(item.caregiver) }}</td>
+                        <td>{{ numberFormat(item.ally) }}</td>
+                        <td>{{ numberFormat(item.provider) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(caregiverSummaryTotal.client) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.caregiver) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.ally) }}</td>
+                        <td>{{ numberFormat(caregiverSummaryTotal.provider) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+        </b-row>
+
+        <h4>Items</h4>
+
         <b-row>
             <b-col lg="8">
                 <b-form inline>
-                    <b-form-select v-model="caregiverId">
-                        <option :value="null">All Caregivers</option>
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </b-form-select>
                     <b-form-select v-model="clientId">
                         <option :value="null">All Clients</option>
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                    </b-form-select>
+                    <b-form-select v-model="caregiverId">
+                        <option :value="null">All Caregivers</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                 </b-form>
             </b-col>
@@ -20,8 +80,8 @@
         </b-row>
 
 
-        <b-table bordered striped hover show-empty
-                 :items="items"
+        <b-table bordered striped hover show-empty class="table-fit-more"
+                 :items="filteredItems"
                  :fields="fields"
                  :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"
@@ -36,6 +96,7 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import {Decimal} from 'decimal.js';
 
     export default {
         name: "ItemizedPayment",
@@ -50,30 +111,98 @@
             invoices: {
                 type: Array,
                 required: true,
+            },
+            items: {
+                type: Array,
+                required: true,
             }
         },
 
         computed: {
-            items() {
+            filteredItems() {
                 let filterFn = (item) => {
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
-                    if (!item.invoiceable) {
+                    if (this.caregiverId && parseInt(item.caregiver.id) !== parseInt(this.caregiverId)) {
                         return false;
                     }
-                    if (this.caregiverId && parseInt(item.invoiceable.caregiver_id) !== parseInt(this.caregiverId)) {
-                        return false;
-                    }
-                    if (this.clientId && parseInt(item.invoiceable.client_id) !== parseInt(this.clientId)) {
+                    if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
                     return true;
                 };
 
-                return this.invoices.reduce((items, invoice) => {
-                    return [...items, ...invoice.items.filter(filterFn)];
-                }, [])
+                return this.items.filter(filterFn).map(item => {
+                    item.client_name = item.client ? item.client.nameLastFirst : "";
+                    item.caregiver_name = item.caregiver ? item.caregiver.nameLastFirst : "";
+                    item.caregiver_total = item.caregiver_rate * item.units;
+                    item.client_total = item.client_rate * item.units;
+                    item.ally_total = item.ally_rate * item.units;
+                    return item;
+                })
+            },
+
+            clientSummary() {
+                this.clientSummaryTotal = {
+                    ally: 0,
+                    client: 0,
+                    caregiver: 0,
+                    provider: 0,
+                };
+                const summary = this.items.reduce((summary, item) => {
+                    const clientId = item.client ? item.client.id : 0;
+                    if (!summary[clientId]) {
+                        summary[clientId] = {
+                            name: item.client ? item.client.nameLastFirst : "Unknown",
+                            ally: 0,
+                            client: 0,
+                            caregiver: 0,
+                            provider: 0,
+                        }
+                    }
+                    summary[clientId].ally += this.calcTotal(item.ally_rate, item.units);
+                    this.clientSummaryTotal.ally += this.calcTotal(item.ally_rate, item.units);
+                    summary[clientId].client += this.calcTotal(item.client_rate, item.units);
+                    this.clientSummaryTotal.client += this.calcTotal(item.client_rate, item.units);
+                    summary[clientId].caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    this.clientSummaryTotal.caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    summary[clientId].provider += this.calcTotal(item.rate, item.units);
+                    this.clientSummaryTotal.provider += this.calcTotal(item.rate, item.units);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
+            caregiverSummary() {
+                this.caregiverSummaryTotal = {
+                    ally: 0,
+                    client: 0,
+                    caregiver: 0,
+                    provider: 0,
+                };
+                const summary = this.items.reduce((summary, item) => {
+                    const caregiverId = item.caregiver ? item.caregiver.id : 0;
+                    if (!summary[caregiverId]) {
+                        summary[caregiverId] = {
+                            name: item.caregiver ? item.caregiver.nameLastFirst : "Unknown",
+                            ally: 0,
+                            client: 0,
+                            caregiver: 0,
+                            provider: 0,
+                        }
+                    }
+                    summary[caregiverId].ally += this.calcTotal(item.ally_rate, item.units);
+                    this.caregiverSummaryTotal.ally += this.calcTotal(item.ally_rate, item.units);
+                    summary[caregiverId].client += this.calcTotal(item.client_rate, item.units);
+                    this.caregiverSummaryTotal.client += this.calcTotal(item.client_rate, item.units);
+                    summary[caregiverId].caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    this.caregiverSummaryTotal.caregiver += this.calcTotal(item.caregiver_rate, item.units);
+                    summary[caregiverId].provider += this.calcTotal(item.rate, item.units);
+                    this.caregiverSummaryTotal.provider += this.calcTotal(item.rate, item.units);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
             },
 
             title() {
@@ -91,14 +220,23 @@
                 clients: [],
                 clientId: null,
                 caregiverId: null,
+                clientSummaryTotal: {},
+                caregiverSummaryTotal: {},
+                showSummary: true,
                 fields: [
                     {
                         key: "date",
-                        formatter: val => this.formatDateFromUTC(val),
+                        formatter: val => this.formatDateTimeFromUTC(val),
                         sortable: true,
                     },
                     {
-                        key: "group",
+                        key: "client_name",
+                        label: "Client",
+                        sortable: true,
+                    },
+                    {
+                        key: "caregiver_name",
+                        label: "Caregiver",
                         sortable: true,
                     },
                     {
@@ -128,11 +266,31 @@
                     },
                     {
                         key: "rate",
+                        label: "Reg Rate",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "client_total",
+                        label: "Client Total",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "caregiver_total",
+                        label: "Caregiver Total",
+                        formatter: val => this.numberFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: "ally_total",
+                        label: "Ally Total",
                         formatter: val => this.numberFormat(val),
                         sortable: true,
                     },
                     {
                         key: "total",
+                        label: "Reg Total",
                         formatter: val => this.numberFormat(val),
                         sortable: true,
                     },
@@ -151,6 +309,9 @@
                 const response = await axios.get("/business/caregivers?json=1");
                 this.caregivers = response.data;
             },
+            calcTotal(rate, units) {
+                return new Decimal(rate || 0).mul(parseFloat(units || 0)).toDecimalPlaces(2).toNumber();
+            }
         },
 
         mounted() {
@@ -161,5 +322,7 @@
 </script>
 
 <style scoped>
-
+    .table-fit-more td {
+        font-size: 12px;
+    }
 </style>

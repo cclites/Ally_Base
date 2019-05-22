@@ -23,7 +23,6 @@
                                 v-model="business_id"
                         >
                             <option value="">--Select a Provider--</option>
-                            <option value="">All Providers</option>
                             <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
@@ -185,7 +184,7 @@
                         this.items = response.data.map(function (item) {
                             item.client_name = (item.client) ? item.client.name : '';
                             item.caregiver_name = (item.caregiver) ? item.caregiver.name : '';
-                            item.authorized = (item.status === 'WAITING_FOR_CHARGE');
+                            item.authorized = (item.status === 'WAITING_FOR_INVOICE');
                             return item;
                         });
                         this.loading = false;

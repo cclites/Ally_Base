@@ -60,7 +60,7 @@ class ScheduleConverter
         $start = Carbon::now($this->timezone)->startOfWeek();
         $end = Carbon::now($this->timezone)->subHours(6);
 
-        if (Carbon::now()->dayOfWeek === Carbon::MONDAY && Carbon::now()->hour < 12) {
+        if (Carbon::now()->dayOfWeek === Carbon::MONDAY) {
             // If monday morning, still use last week
             $start->subWeek();
         }
@@ -82,6 +82,8 @@ class ScheduleConverter
                                       ->onlyStatus($this->convertibleStatuses)
                                       ->getSchedulesStartingBetween($start, $end);
 
+        $this->output("Converting schedules between {$start->toDateTimeString()} and {$end->toDateTimeString()}: ");
+
         foreach ($schedules as $schedule) {
             $expectedClockIn = $schedule->starts_at;
             if (
@@ -94,6 +96,8 @@ class ScheduleConverter
                 }
             }
         }
+
+        $this->output(count($shifts) . "shifts\n");
 
         return $shifts;
     }
@@ -183,4 +187,12 @@ class ScheduleConverter
         return $shift;
     }
 
+    public function output($message)
+    {
+        if (config('app.env') == 'testing') {
+            return;
+        }
+
+        echo $message;
+    }
 }

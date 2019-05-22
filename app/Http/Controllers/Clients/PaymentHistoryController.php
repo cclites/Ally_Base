@@ -20,7 +20,8 @@ class PaymentHistoryController extends Controller
     public function index()
     {
         $client = Client::with('payments.shifts.caregiver', 'payments')->find(auth()->id());
-        return view('clients.payment_history', compact('client'));
+        $payments = $client->payments;
+        return view('clients.payment_history', compact('client', 'payments'));
     }
 
     public function show($id)

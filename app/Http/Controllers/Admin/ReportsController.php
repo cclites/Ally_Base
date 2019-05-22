@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Billing\Generators\CaregiverInvoiceGenerator;
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use Auth;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
@@ -103,11 +105,8 @@ class ReportsController extends Controller
     {
         if ($request->expectsJson() && $request->input('json')) {
             $report = new OnHoldReport();
-            $rows = $report->rows();
-            if ($business_id = $request->input('business_id')) {
-                return $rows->where('business_id', $business_id)->values();
-            }
-            return $rows;
+            $report->forBusiness($request->input('business_id'));
+            return $report->rows();
         }
         return view('admin.reports.on_hold');
     }
@@ -164,41 +163,21 @@ class ReportsController extends Controller
         return view('admin.reports.shared_shifts');
     }
 
-    public function caregiversDepositsWithoutBankAccount()
+    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
     {
-        $businesses = Business::whereHas('caregivers', function ($query) {
-                $query->doesntHave('bankAccount');
-            })
-            ->orderBy('name')
-            ->get();
+        if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
+            $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
+            $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
+                $array = $caregiver->toArray();
+                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
+                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
+                return $array;
+            });
 
-        $results = collect([]);
-        foreach ($businesses as $business) {
-            $caregivers = $business->caregivers()
-                ->with(['shifts' => function ($query) {
-                    $query->where('status', 'WAITING_FOR_PAYOUT');
-                }])
-                ->doesntHave('bankAccount')
-                ->get();
-
-            if ($caregivers->count()) {
-                $results->push([
-                    'id' => $business->id,
-                    'name' => $business->name,
-                    'caregivers' => $caregivers->map(function ($item) {
-                            return [
-                                'id' => $item->id,
-                                'name' => $item->name,
-                                'email' => $item->email
-                            ];
-                        })
-                        ->sortBy('name')
-                        ->values()
-                ]);
-            }
+            \Cache::put('caregivers_missing_accounts', $caregivers, 60);
         }
 
-        return view('admin.reports.caregivers.deposits_without_bank_account', compact('results'));
+        return view('admin.reports.caregivers.deposits_without_bank_account', compact('caregivers'));
     }
 
     public function finances()
@@ -309,6 +288,11 @@ class ReportsController extends Controller
         }
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
+        }
+        if ($client_type = $request->input('client_type')) {
+            $report->whereHas('client', function ($query) use ($client_type) {
+                $query->where('client_type', $client_type);
+            });
         }
     }
 

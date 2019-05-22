@@ -1,6 +1,8 @@
 <?php
 namespace App\Contracts;
 
+use Carbon\Carbon;
+
 interface HasPaymentHold
 {
     /**
@@ -13,10 +15,8 @@ interface HasPaymentHold
      */
     public function isOnHold();
 
-    /**
-     * @return bool
-     */
-    public function addHold();
+
+    public function addHold(string $notes = null, Carbon $check_back_on = null): bool;
 
     /**
      * @return bool

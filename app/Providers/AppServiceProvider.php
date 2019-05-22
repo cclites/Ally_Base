@@ -12,10 +12,14 @@ use App\Billing\Gateway\ECSPayment;
 use App\Contracts\GeocodeInterface;
 use App\Services\DummyGeocodeService;
 use App\Services\GeocodeManager;
+use App\Services\QuickbooksOnlineService;
 use App\Services\Slack;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use App\Services\SFTPWriter;
+use App\Services\DummySFTPWriter;
+use App\Contracts\SFTPWriterInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +40,22 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('settings', SettingsRepository::class);
         $this->app->singleton(ActiveBusiness::class, ActiveBusiness::class);
+
+        // SFTP
+        if (config('services.sftp.driver') == 'sftp') {
+            $this->app->bind(SFTPWriterInterface::class, SFTPWriter::class);
+        } else {
+            $this->app->bind(SFTPWriterInterface::class, DummySFTPWriter::class);
+        }
+
+        $this->app->singleton(QuickbooksOnlineService::class, function() {
+            return new QuickbooksOnlineService(
+                config('services.quickbooks.client_id'),
+                config('services.quickbooks.client_secret'),
+                route('business.quickbooks.authorization'),
+                config('services.quickbooks.mode')
+            );
+        });
     }
 
     /**

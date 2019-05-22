@@ -88,7 +88,7 @@ export default {
         mode() {
             if (this.sheet.id) {
                 // has a timesheet
-                if (this.sheet.exception_count > 0) {
+                if (this.sheet.notification_count > 0) {
                     // reviewing caregiver submitted timesheet
                     return 'review';
                 } else {

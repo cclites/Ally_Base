@@ -84,6 +84,7 @@ use App\Data\ScheduledRates;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read mixed $ally_pct
@@ -217,9 +218,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_CONFIRMATION = 'WAITING_FOR_CONFIRMATION';  // Unconfirmed shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Confirmed shift that needs to be authorized for payment
+    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_INVOICE = 'WAITING_FOR_INVOICE';  // Authorized shift that is waiting for invoicing
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Invoiced shift that is waiting for payment
-    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_BUSINESS_ONLY = 'PAID_BUSINESS_ONLY'; // Shift that failed payment to the caregiver, but paid successfully to the business
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
@@ -316,9 +317,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftIssue::class);
     }
 
-    public function exceptions()
+    public function systemNotifications()
     {
-        return $this->morphMany(SystemException::class, 'reference');
+        return $this->morphMany(SystemNotification::class, 'reference');
     }
 
     public function costHistory()
@@ -472,12 +473,30 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getFlagsAttribute()
     {
-        return $this->shiftFlags->pluck('flag')->unique()->toArray();
+        return $this->shiftFlags->pluck('flag')->unique()->values()->toArray();
     }
 
     //////////////////////////////////////
     /// Instance Methods
     //////////////////////////////////////
+
+    /**
+     * Get the abbreviation code for the hours type of the current shift.
+     *
+     * @return string
+     */
+    public function getPaycode() : string
+    {
+        switch ($this->hours_type) {
+            case self::HOURS_HOLIDAY:
+                return 'HOL';
+            case self::HOURS_OVERTIME:
+                return 'OVT';
+            case self::HOURS_DEFAULT:
+            default:
+                return 'REG';
+        }
+    }
 
     /**
      * Add data to the shift from a shift data class
@@ -876,7 +895,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             if ($mileage) $collection->push($mileage);
 
             if ($shift->services->count()) {
-                $collection->push(...$shift->services->all());
+                $collection = $collection->merge($shift->services);
             } else {
                 $collection->push($shift);
             }
@@ -892,7 +911,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemUnits(): float
     {
-        return $this->duration();
+        return $this->fixed_rates ? 1 : $this->duration();
     }
 
     /**
@@ -956,7 +975,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return null;
         }
 
-        return $this->activities->implode('name', ', ');
+        return str_limit($this->activities->implode('name', ', '), 252);
     }
 
     /**
@@ -969,6 +988,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
@@ -979,13 +1008,19 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->client_rate;
     }
 
-    /**
-     * TODO Implement caregiver deposit invoicing
-     * @return float
-     */
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->caregiver;
+    }
+
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->business;
     }
 
     /**
@@ -1003,27 +1038,27 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the total billable hours of the shift, including service breakouts.
+     * Get the total billable hours of the shift based on
+     * service including service breakouts.
      *
      * @param int|null $service_id
-     * @param int|null $payer_id
      * @return float
      */
-    public function getBillableHours(?int $service_id = null, ?int $payer_id = null) : float
+    public function getBillableHours(?int $service_id = null) : float
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
+            if (! empty($service_id) && $service_id != $this->service_id) {
+                // make sure service id matches the one on the model (or all).
+                return 0;
+            }
             return $this->duration(true);
-        } else if (! empty($this->services)) {
+        } else if ($this->services->isNotEmpty()) {
             // service breakout shift
             $services = $this->services;
 
             if (! empty($service_id)) {
                 $services = $services->where('service_id', $service_id);
-            }
-
-            if (! empty($payer_id)) {
-                $services = $services->where('payer_id', $payer_id);
             }
 
             return floatval($services->sum('duration'));
@@ -1033,16 +1068,59 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the client's service authorizations active during the time
-     * of the shift.  Defaults to today.
+     * Get the total billable hours for a specific day of the shift
+     * based on service including service breakouts.
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     * @param \Carbon\Carbon $date
+     * @param int|null $service_id
+     * @return float
      */
-    public function getActiveServiceAuths() : iterable
+    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null) : float
     {
-        return $this->client->serviceAuthorizations()
-            ->effectiveOn($this->checked_in_time)
-            ->get();
+        $hours = $this->getBillableHours($service_id);
+        if (count($this->getDateSpan()) === 1) { // only spans 1 day
+            return $hours;
+        }
+
+        if ($this->services->isNotEmpty()) {
+            // service breakout shift - return total shift hours for all days since this
+            // is a complicated query and we want to protect them more than be 100% accurate
+            return $hours;
+        } else {
+            // actual hours shift
+            // TODO: this does not properly handle shifts that expand more than two days
+            $tz = $this->client->getTimezone();
+            $start = $this->checked_in_time->copy()->setTimezone($tz);
+            $end = $this->checked_out_time->copy()->setTimezone($tz);
+
+            if ($start->format('Ymd') === $date->format('Ymd')) {
+                $minutes = $start->diffInMinutes($start->copy()->endOfDay());
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            } else {
+                $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            }
+        }
+    }
+
+    /**
+     * Get all of the dates that the shift exists on.
+     *
+     * @return array
+     */
+    public function getDateSpan() : array
+    {
+        // Convert shift dates to the client timezone so they are relative to ClientAuthorizations.
+        $tz = $this->client->getTimezone();
+        $start = $this->checked_in_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+        $end = $this->checked_out_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+
+        if ($start->format('Ymd') == $end->format('Ymd')) {  // same day
+            return [$start];
+        }
+
+        // TODO: this does not properly handle shifts that expand more than two days
+        return [$start, $end];
     }
 
     ///////////////////////////////////////////

@@ -27,7 +27,7 @@ class QuickSearchTest extends TestCase
         $this->business = $this->client->business;
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
@@ -70,7 +70,7 @@ class QuickSearchTest extends TestCase
 
         $anotherBusiness = factory(\App\Business::class)->create();
         $anotherCG = factory('App\Caregiver')->create();
-        $anotherBusiness->caregivers()->save($anotherCG);
+        $anotherBusiness->assignCaregiver($anotherCG);
         factory('App\Client', 5)->create([
             'business_id' => $anotherBusiness->id,
         ]);
@@ -90,7 +90,7 @@ class QuickSearchTest extends TestCase
         $anotherChain = factory(BusinessChain::class)->create();
         $anotherBusiness = factory(\App\Business::class)->create(['chain_id' => $anotherChain->id]);
         $anotherCG = factory('App\Caregiver')->create();
-        $anotherChain->caregivers()->save($anotherCG);
+        $anotherBusiness->assignCaregiver($anotherCG);
         factory('App\Client', 5)->create([
             'business_id' => $anotherBusiness->id,
         ]);

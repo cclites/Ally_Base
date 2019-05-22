@@ -10,6 +10,7 @@ use App\Shift;
 use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\Data\ClockData;
 use Carbon\Carbon;
+use App\Events\UnverifiedClockIn;
 
 class ClockIn extends ClockBase
 {
@@ -31,8 +32,12 @@ class ClockIn extends ClockBase
         );
 
         $data = $this->getClockInVerificationData($schedule->client);
+
         try {
             $shift = $factory->create($data);
+            if (! $shift->checked_in_verified) {
+                event(new UnverifiedClockIn($shift));
+            }
             return $shift;
         }
         catch (\Exception $e) {}

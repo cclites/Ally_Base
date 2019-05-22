@@ -11,7 +11,7 @@ interface ACHDepositInterface
      *
      * @param \App\Billing\Payments\Methods\BankAccount $account
      *
-     * @return \App\Billing\GatewayTransaction
+     * @return \App\Billing\GatewayTransaction|null
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function validateAccount(BankAccount $account);

@@ -1,6 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
+use App\Billing\Exceptions\PaymentMethodError;
 use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Support\Collection;
 
@@ -32,20 +33,32 @@ class ClientInvoice extends Resource
     {
         return $this->resource->attributesToArray() + [
             'client' => $this->whenLoaded('client'),
+            'client_on_hold' => $this->whenLoaded('client', function() {
+                return $this->resource->client->isOnHold();
+            }),
             'payer' => $this->whenLoaded('clientPayer', function() {
                 return $this->resource->getClientPayer()->getPayer();
             }),
             'payer_payment_type' => $this->whenLoaded('clientPayer', function() {
-                if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
-                    return $method->getPaymentStrategy()->getPaymentType();
+                try {
+                    if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
+                        return $method->getPaymentType();
+                    }
                 }
+                catch (PaymentMethodError $e) {}
                 return null;
             }),
             'items' => $this->whenLoaded('items', function() {
                 return $this->groupItems($this->resource->items)->toArray();
             }),
             'payments' => $this->whenLoaded('payments'),
-
+            'estimates' => $this->whenLoaded('clientPayer', function() {
+                return [
+                    'caregiver_total' => $this->resource->getEstimates()->getCaregiverTotal(),
+                    'ally_total' => $this->resource->getEstimates()->getAllyTotal(),
+                    'provider_total' => $this->resource->getEstimates()->getProviderTotal(),
+                ];
+            }),
         ];
     }
 }

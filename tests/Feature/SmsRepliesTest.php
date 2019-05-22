@@ -32,7 +32,7 @@ class SmsRepliesTest extends TestCase
         $this->caregiver = factory('App\Caregiver')->create();
         $number = $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
         $number->update(['receives_sms' => 1]);
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create();
         $this->officeUser->businesses()->attach($this->business->id);
@@ -109,7 +109,7 @@ class SmsRepliesTest extends TestCase
     {
         $caregiver2 = factory('App\Caregiver')->create();
         $caregiver2->user->addPhoneNumber('mobile', '999 555-5555');
-        $this->business->caregivers()->save($caregiver2);
+        $this->business->assignCaregiver($caregiver2);
 
         $thread = $this->generateThread();
 
@@ -285,7 +285,7 @@ class SmsRepliesTest extends TestCase
         $otherCaregiver = factory('App\Caregiver')->create();
         $number = $otherCaregiver->user->addPhoneNumber('primary', '1 (999) 999-8888');
         $number->update(['receives_sms' => 1]);
-        $this->business->chain->caregivers()->save($otherCaregiver);
+        $this->business->chain->assignCaregiver($otherCaregiver);
         
         $thread = $this->generateThread(['sent_at' => Carbon::now()->subMinutes(30)]);
 

@@ -75,6 +75,7 @@ class ShiftStatusManager
     public static function getReadOnlyStatuses()
     {
         return [
+            Shift::WAITING_FOR_INVOICE,
             Shift::WAITING_FOR_CHARGE,
             Shift::WAITING_FOR_PAYOUT,
             Shift::PAID_NOT_CHARGED,
@@ -329,20 +330,33 @@ class ShiftStatusManager
     }
 
     /**
-     * Acknowledge a successful payment
+     * Acknowledge that the shift's related invoice has been uninvoiced/deleted
      * @return bool
      */
-    public function ackPayment($payment_id)
+    public function ackClientInvoiceDeleted()
+    {
+        switch($this->status()) {
+            case Shift::WAITING_FOR_CHARGE:
+                return $this->update(Shift::WAITING_FOR_INVOICE);
+        }
+        return false;
+    }
+
+    /**
+     * Acknowledge a successful payment  (payment id deprecated)
+     * @return bool
+     */
+    public function ackPayment($payment_id = null)
     {
         switch($this->status()) {
             case Shift::PAID_NOT_CHARGED:
-                return $this->update(Shift::PAID, ['payment_id' => $payment_id]);
+                return $this->update(Shift::PAID);
             case Shift::PAID_BUSINESS_ONLY_NOT_CHARGED:
-                return $this->update(Shift::PAID_BUSINESS_ONLY, ['payment_id' => $payment_id]);
+                return $this->update(Shift::PAID_BUSINESS_ONLY);
             case Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED:
-                return $this->update(Shift::PAID_CAREGIVER_ONLY, ['payment_id' => $payment_id]);
+                return $this->update(Shift::PAID_CAREGIVER_ONLY);
             case Shift::WAITING_FOR_CHARGE:
-                return $this->update(Shift::WAITING_FOR_PAYOUT, ['payment_id' => $payment_id]);
+                return $this->update(Shift::WAITING_FOR_PAYOUT);
         }
         return false;
     }

@@ -66,12 +66,29 @@ return [
 
     'tellus' => [
         'endpoint' => env('TELLUS_ENDPOINT', 'https://integration.pilot.4tellus.com/v1.0/ALLY'),
-        'username' => env('TELLUS_USERNAME'),
-        'password' => env('TELLUS_PASSWORD'),
     ],
 
     'fullcalendar' => [
         'key' => env('FULLCALENDAR_KEY'),
     ],
 
+    'sftp' => [
+        'driver' => env('SFTP_DRIVER', 'dummy'),
+    ],
+
+    'hha-exchange' => [
+        'sftp_host' => env('HHAEXCHANGE_SFTP_HOST', ''),
+        'sftp_port' => env('HHAEXCHANGE_SFTP_PORT', 22),
+        'sftp_directory' => env('HHAEXCHANGE_SFTP_DIRECTORY', '/'),
+    ],
+
+    'quickbooks' => [
+        'client_id' => env('QUICKBOOKS_APP_CLIENT_ID', ''),
+        'client_secret' => env('QUICKBOOKS_APP_CLIENT_SECRET', ''),
+        /**
+         * env mode, options: production, sandbox
+         * defaults to 'sandbox'
+         */
+        'mode' => env('QUICKBOOKS_MODE', 'sandbox'),
+    ],
 ];

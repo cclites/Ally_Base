@@ -17,7 +17,7 @@
                 <template slot="service_id" scope="row">
                     <b-select v-model="row.item.service_id" size="sm">
                         <option value="">None</option>
-                        <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
+                        <option v-for="service in services" :value="service.id" :key="service.id">{{ service.code }} {{ service.name }}</option>
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">

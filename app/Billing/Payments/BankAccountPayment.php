@@ -2,7 +2,6 @@
 namespace App\Billing\Payments;
 
 use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Gateway\ACHPaymentInterface;
@@ -48,10 +47,5 @@ class BankAccountPayment implements PaymentMethodStrategy
     public function getPaymentMethod(): ChargeableInterface
     {
         return $this->account;
-    }
-
-    public function getPaymentType(): string
-    {
-        return 'ACH';
     }
 }

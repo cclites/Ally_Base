@@ -57,9 +57,45 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
 {
     use IsUserRole, BelongsToBusinesses, BelongsToOneChain;
 
-    protected $table = 'office_users';
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
-    public $fillable = ['chain_id'];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'office_users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['chain_id', 'default_business_id', 'timezone'];
+
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        \App\Notifications\Business\DeclinedVisit::class, // TODO: implement trigger
+        \App\Notifications\Business\CaregiverAvailable::class, // TODO: implement trigger
+        \App\Notifications\Business\UnverifiedShift::class,
+        \App\Notifications\Business\CertificationExpiring::class,
+        \App\Notifications\Business\CertificationExpired::class,
+        \App\Notifications\Business\ApplicationSubmitted::class,
+        \App\Notifications\Business\ManualTimesheet::class,
+        \App\Notifications\Business\NewSmsReply::class,
+        \App\Notifications\Business\FailedCharge::class, // TODO: implement trigger
+        \App\Notifications\Business\ClientBirthday::class,
+        \App\Notifications\Business\NoProspectContact::class, // TODO: implement trigger
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -80,10 +116,28 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->hasMany(Task::class, 'creator_id');
     }
 
+    /**
+     * Get the default business relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\
+    */
+    public function defaultBusiness()
+    {
+        return $this->belongsTo(Business::class, 'default_business_id', 'id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
+    public function getDefaultBusiness()
+    {
+        if (empty($this->defaultBusiness)) {
+            return $this->businesses->first();
+        }
+
+        return $this->defaultBusiness;
+    }
 
     function getAddress(): ?Address
     {
@@ -103,6 +157,20 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     public function getBusinessIds()
     {
         return $this->businesses->pluck('id')->toArray();
+    }
+
+    /**
+     * Get the office user's timezone
+     *
+     * @return string
+     */
+    public function getTimezone()
+    {
+        if (! empty($this->timezone)) {
+            return $this->timezone;
+        }
+        
+        return $this->businesses->first()->timezone ?? 'America/New_York';
     }
 
     ////////////////////////////////////

@@ -6,8 +6,11 @@ use DateTime;
 
 class CalendarNextDayThreshold extends StringValueObject
 {
-    const DISABLED = "23:59:59"; // Calendar events will never span more than one day
-    const DEFAULT = "09:00:00";
+    private const DISABLED = "23:59:59"; // Calendar events will never span more than one day
+    private const DEFAULT = "09:00:00";
+
+    static function DISABLED() { return new self(self::DISABLED); }
+    static function DEFAULT() { return new self(self::DEFAULT); }
 
     public function __construct(string $value)
     {
@@ -22,4 +25,5 @@ class CalendarNextDayThreshold extends StringValueObject
             throw new \InvalidArgumentException("The provided value is not a valid timestamp.");
         }
     }
+
 }

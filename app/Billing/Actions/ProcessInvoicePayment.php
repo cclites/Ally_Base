@@ -34,21 +34,16 @@ class ProcessInvoicePayment
 
     /**
      * @param \App\Billing\ClientInvoice $invoice
-     * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy|null $strategy
+     * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float|null $amount
      * @return \App\Billing\Payment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
      */
-    function payInvoice(ClientInvoice $invoice, ?PaymentMethodStrategy $strategy = null, ?float $amount = null): Payment
+    function payInvoice(ClientInvoice $invoice, PaymentMethodStrategy $strategy, ?float $amount = null): Payment
     {
         if ($amount === null) {
             $amount = $invoice->getAmountDue();
-        }
-
-        $clientPayer = $invoice->getClientPayer();
-        if (!$strategy) {
-            $strategy = $clientPayer->getPaymentMethod()->getPaymentStrategy();
         }
 
         $payment = $this->paymentProcessor->charge($strategy, $amount);

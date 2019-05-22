@@ -1,15 +1,57 @@
 <template>
     <b-card :title="title">
+        <div class="text-right">
+            <b-btn variant="primary" @click="showSummary=!showSummary">{{ showSummary ? "Hide" : "Show" }} Summary</b-btn>
+        </div>
+
+        <b-row v-if="showSummary">
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Client Summary</th>
+                        <th>Amount Due</th>
+                    </tr>
+                    <tr v-for="item in clientSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.total) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(clientSummaryTotal) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+
+            <b-col lg="6">
+                <table class="table table-bordered table-fit-more">
+                    <tr>
+                        <th>Caregiver Summary</th>
+                        <th>Amount Due</th>
+                    </tr>
+                    <tr v-for="item in caregiverSummary">
+                        <td>{{ item.name }}</td>
+                        <td>{{ numberFormat(item.total) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total</th>
+                        <td>{{ numberFormat(caregiverSummaryTotal) }}</td>
+                    </tr>
+                </table>
+            </b-col>
+        </b-row>
+
+        <h4>Items</h4>
+
         <b-row>
             <b-col lg="8">
                 <b-form inline>
-                    <b-form-select v-model="caregiverId">
-                        <option :value="null">All Caregivers</option>
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </b-form-select>
                     <b-form-select v-model="clientId">
                         <option :value="null">All Clients</option>
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                    </b-form-select>
+                    <b-form-select v-model="caregiverId">
+                        <option :value="null">All Caregivers</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                 </b-form>
             </b-col>
@@ -19,9 +61,8 @@
             </b-col>
         </b-row>
 
-
-        <b-table bordered striped hover show-empty
-                 :items="items"
+        <b-table bordered striped hover show-empty class="table-fit-more"
+                 :items="filteredItems"
                  :fields="fields"
                  :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"
@@ -50,36 +91,68 @@
             invoices: {
                 type: Array,
                 required: true,
+            },
+            items: {
+                type: Array,
+                required: true,
             }
         },
 
         computed: {
-            items() {
+            filteredItems() {
                 let filterFn = (item) => {
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
-                    if (!item.invoiceable) {
+                    if (this.caregiverId && parseInt(item.caregiver.id) !== parseInt(this.caregiverId)) {
                         return false;
                     }
-                    if (this.caregiverId && parseInt(item.invoiceable.caregiver_id) !== parseInt(this.caregiverId)) {
-                        return false;
-                    }
-                    if (this.clientId && parseInt(item.invoiceable.client_id) !== parseInt(this.clientId)) {
+                    if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
                     return true;
                 };
 
-                return this.invoices.reduce((items, invoice) => {
-                    const invoiceItems = invoice.items.filter(filterFn).map(item => {
-                        item.invoice = invoice;
-                        item.invoice_name = invoice.name;
-                        item.client_name = invoice.client.nameLastFirst;
-                        return item;
-                    });
-                    return [...items, ...invoiceItems];
-                }, [])
+                return this.items.filter(filterFn).map(item => {
+                    item.invoice_name = item.invoice.name;
+                    item.client_name = item.client.nameLastFirst;
+                    item.caregiver_name = item.caregiver ? item.caregiver.nameLastFirst : "";
+                    return item;
+                });
+            },
+
+            clientSummary() {
+                this.clientSummaryTotal = 0;
+                const summary = this.items.reduce((summary, item) => {
+                    const clientId = item.client ? item.client.id : 0;
+                    if (!summary[clientId]) {
+                        summary[clientId] = {
+                            name: item.client ? item.client.nameLastFirst : "Unknown",
+                            total: 0
+                        }
+                    }
+                    summary[clientId].total += parseFloat(item.amount_due || 0);
+                    this.clientSummaryTotal += parseFloat(item.amount_due || 0);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
+            },
+
+            caregiverSummary() {
+                this.caregiverSummaryTotal = 0;
+                const summary = this.items.reduce((summary, item) => {
+                    const caregiverId = item.caregiver ? item.caregiver.id : 0;
+                    if (!summary[caregiverId]) {
+                        summary[caregiverId] = {
+                            name: item.caregiver ? item.caregiver.nameLastFirst : "Unknown",
+                            total: 0
+                        }
+                    }
+                    summary[caregiverId].total += parseFloat(item.amount_due || 0);
+                    this.caregiverSummaryTotal += parseFloat(item.amount_due || 0);
+                    return summary;
+                }, {});
+                return Object.values(summary).sort((a, b) => a.name < b.name ? -1 : 1);
             },
 
             title() {
@@ -97,10 +170,13 @@
                 clients: [],
                 clientId: null,
                 caregiverId: null,
+                clientSummaryTotal: 0,
+                caregiverSummaryTotal: 0,
+                showSummary: true,
                 fields: [
                     {
                         key: "date",
-                        formatter: val => this.formatDateFromUTC(val),
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-',
                         sortable: true,
                     },
                     {
@@ -110,10 +186,12 @@
                     },
                     {
                         key: "client_name",
+                        label: "Client",
                         sortable: true,
                     },
                     {
-                        key: "group",
+                        key: "caregiver_name",
+                        label: "Caregiver",
                         sortable: true,
                     },
                     {
@@ -167,5 +245,7 @@
 </script>
 
 <style scoped>
-
+    .table-fit-more td {
+        font-size: 12px;
+    }
 </style>

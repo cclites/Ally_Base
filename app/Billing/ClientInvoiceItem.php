@@ -3,6 +3,8 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Invoiceable\ShiftService;
+use App\Shift;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -61,4 +63,32 @@ class ClientInvoiceItem extends BaseInvoiceItem
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    /**
+     * Get the related invoiceable Shift.
+     *
+     * @return Shift|null
+     */
+    public function getShift() : ?Shift
+    {
+        if ($this->invoiceable_type != 'shifts') {
+            return null;
+        }
+
+        return Shift::find($this->invoiceable_id);
+    }
+
+    /**
+     * Get the related invoiceable ShiftService.
+     *
+     * @return ShiftService|null
+     */
+    public function getShiftService() : ?ShiftService
+    {
+        if ($this->invoiceable_type != 'shift_services') {
+            return null;
+        }
+
+        return ShiftService::find($this->invoiceable_id);
+    }
 }

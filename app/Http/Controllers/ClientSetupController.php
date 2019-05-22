@@ -9,6 +9,7 @@ use App\Traits\Request\PaymentMethodRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
+use App\PhoneNumber;
 
 class ClientSetupController extends Controller
 {
@@ -31,7 +32,7 @@ class ClientSetupController extends Controller
             'client-data' => $client,
             'token' => $token,
         ];
-        return view_component('client-setup-wizard', 'Client Account Setup', $props, null, 'guest');
+        return view_component('client-setup-wizard', 'Client Account Setup', $props, [], 'guest');
     }
 
     /**
@@ -44,6 +45,7 @@ class ClientSetupController extends Controller
      */
     public function step1(ClientStep1Request $request, $token)
     {
+        /** @var Client $client */
         $client = Client::findEncryptedOrFail($token);
 
         // TODO: Refactor how addresses are upserted.
@@ -64,16 +66,11 @@ class ClientSetupController extends Controller
             $client->setupStatusHistory()->create(['status' => $data['setup_status']]);
 
             if (empty($client->evvPhone)) {
-                $client->phoneNumbers()->create([
-                    'national_number' => $request->phone_number,
-                    'country_code' => '1',
-                    'type' => 'primary',
-                ]);
+                $phoneNumber = PhoneNumber::fromInput('primary', $request->phone_number);
+                $client->phoneNumbers()->save($phoneNumber);
             } else {
-                $client->evvPhone->update([
-                    'national_number' => $request->phone_number,
-                    'country_code' => '1',
-                ]);
+                $client->evvPhone->input($request->phone_number);
+                $client->evvPhone->save();
             }
         }
 

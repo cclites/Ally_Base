@@ -11,7 +11,6 @@ use App\Client;
  *
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
- * @property-read \App\Billing\Payer $payer
  * @property-read \App\Billing\Service $service
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
@@ -33,8 +32,14 @@ class ClientAuthorization extends AuditableModel
     protected $casts = [
         'client_id' => 'int',
         'service_id' => 'int',
-        'payer_id' => 'int',
         'units' => 'float',
+        'sunday' => 'float',
+        'monday' => 'float',
+        'tuesday' => 'float',
+        'wednesday' => 'float',
+        'thursday' => 'float',
+        'friday' => 'float',
+        'saturday' => 'float',
     ];
 
     // **********************************************************
@@ -43,6 +48,13 @@ class ClientAuthorization extends AuditableModel
     const PERIOD_DAILY = 'daily';
     const PERIOD_WEEKLY = 'weekly';
     const PERIOD_MONTHLY = 'monthly';
+    const PERIOD_TERM = 'term';
+    const PERIOD_SPECIFIC_DAYS = 'specific_days';
+
+    public static function allPeriods()
+    {
+        return [self::PERIOD_SPECIFIC_DAYS, self::PERIOD_TERM, self::PERIOD_DAILY, self::PERIOD_MONTHLY, self::PERIOD_WEEKLY];
+    }
 
     // **********************************************************
     // Unit Types
@@ -66,16 +78,6 @@ class ClientAuthorization extends AuditableModel
     }
 
     /**
-     * Get the payer relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function payer()
-    {
-        return $this->belongsTo(Payer::class);
-    }
-
-    /**
      * Get the service relation.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -90,13 +92,19 @@ class ClientAuthorization extends AuditableModel
     // **********************************************************
 
     /**
-     * Get the number of units this instance authorizes
+     * Get the number of units this instance authorizes and automatically
+     * pull from the proper day of the week for specific days period types.
      * Note: This should be used instead of directly accessing the units property
      *
-     * @return float
+     * @param null|\Carbon\Carbon $date
+     * @return null|float
      */
-    public function getUnits(): float
+    public function getUnits(?Carbon $date = null): ?float
     {
+        if ($this->period == self::PERIOD_SPECIFIC_DAYS) {
+            return $this->unitsForDay(strtolower($date->format('l')));
+        }
+
         if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
             // Convert to hourly units
             return divide($this->units, 4);
@@ -125,23 +133,45 @@ class ClientAuthorization extends AuditableModel
      * Get an array containing the start and end dates of the authorization
      * period.  Returns UTC dates to be accurate when querying shifts.
      *
+     * @param \Carbon\Carbon $date
+     * @param string $timezone
      * @return array|null
      */
-    public function getPeriodDates($date) : ?array
+    public function getPeriodDates(Carbon $date, string $timezone = 'UTC') : ?array
     {
         switch ($this->period) {
             case self::PERIOD_DAILY:
-                return [$date->copy()->startOfDay()->setTimezone('UTC'), $date->copy()->endOfDay()->setTimezone('UTC')];
+                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
                 break;
             case self::PERIOD_WEEKLY:
-                return [$date->copy()->startOfWeek()->setTimezone('UTC'), $date->copy()->endOfWeek()->setTimezone('UTC')];
+                return [$date->copy()->startOfWeek()->setTimezone($timezone), $date->copy()->endOfWeek()->setTimezone($timezone)];
                 break;
             case self::PERIOD_MONTHLY:
-                return [$date->copy()->startOfMonth()->setTimezone('UTC'), $date->copy()->endOfMonth()->setTimezone('UTC')];
+                return [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
                 break;
+            case self::PERIOD_TERM:
+                return [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
+            case self::PERIOD_SPECIFIC_DAYS:
+                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
             default:
-                return null;
+                return [null, null];
         }
+    }
+
+    /**
+     * Get the units for the day of the week based on
+     * the daily settings on the model.
+     *
+     * @param string $dayOfTheWeek
+     * @return int|null
+     */
+    public function unitsForDay(string $dayOfTheWeek) : ?int
+    {
+        if ($this->period != self::PERIOD_SPECIFIC_DAYS) {
+            return null;
+        }
+
+        return $this->attributes[$dayOfTheWeek];
     }
 
     // **********************************************************
@@ -153,12 +183,12 @@ class ClientAuthorization extends AuditableModel
      * given date.
      *
      * @param \Illuminate\Database\Query\Builder $query
+     * @param \Carbon\Carbon $date
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeEffectiveOn($query, \Carbon\Carbon $date)
+    public function scopeEffectiveOn($query, Carbon $date)
     {
         return $query->where('effective_start', '<=', $date->toDateString())
             ->where('effective_end', '>=', $date->toDateString());
     }
-
 }

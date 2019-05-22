@@ -17,6 +17,16 @@ export default {
                     'icon': 'fa fa-files-o mr-1',
                     'color': 'red',
                 },
+                'duration_mismatch': {
+                    'text': 'Duration Mismatch',
+                    'icon': 'fa fa-exchange mr-1',
+                    'color': 'red',
+                },
+                'missing_rates': {
+                    'text': 'Missing Rates',
+                    'icon': 'fa fa-usd mr-1',
+                    'color': 'red',
+                },
                 'modified': {
                     'text': 'Modified',
                     'icon': 'fa fa-pencil mr-1',
@@ -32,11 +42,6 @@ export default {
                     'icon': 'fa fa-clock-o mr-1',
                     'color': 'red',
                 },
-                'duration_mismatch': {
-                    'text': 'Duration Mismatch',
-                    'icon': 'fa fa-exchange mr-1',
-                    'color': 'red',
-                }
             },
         }
     },

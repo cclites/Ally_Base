@@ -12,10 +12,10 @@
                 <li>
                     <div class="message-center">
                         <!-- Message -->
-                        <a v-for="item in items" :href="'/business/exceptions/' + item.id" :key="item.id">
+                        <a v-for="item in items" :href="'/business/notifications/' + item.id" :key="item.id">
                             <div class="btn btn-danger btn-circle"><i class="fa fa-link"></i></div>
                             <div class="mail-content">
-                                <h5>{{ item.title }}</h5> <span class="mail-desc">{{ item.description }}</span> <span class="time">{{ item.time }}</span>
+                                <h5>{{ item.title }}</h5> <span class="mail-desc">{{ item.message }}</span> <span class="time">{{ item.time }}</span>
                             </div>
                         </a>
                         <a href="javascript:void(0);" v-if="!notifications.length">
@@ -24,7 +24,7 @@
                     </div>
                 </li>
                 <li>
-                    <a class="nav-link text-center" href="/business/exceptions"> <strong>View all notifications</strong> <i class="fa fa-angle-right"></i> </a>
+                    <a class="nav-link text-center" href="/business/notifications"> <strong>View all notifications</strong> <i class="fa fa-angle-right"></i> </a>
                 </li>
             </ul>
         </div>
@@ -32,44 +32,40 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     export default {
         data() {
             return {
-                'notifications': [],
             }
         },
 
-        mounted() {
-            this.loadNotifications();
-            setInterval(this.loadNotifications, 30000);
+        async mounted() {
+            await this.$store.dispatch('notifications/start');
         },
 
         methods: {
-            loadNotifications() {
-                let component = this;
-                axios.get('/business/exceptions?json=1')
-                    .then(function(response) {
-                        component.notifications = response.data;
-                    });
-            }
         },
 
         computed: {
+            ...mapGetters({
+                notifications: 'notifications/notifications',
+            }),
             count() {
                 return this.notifications.length;
             },
             items() {
                 let maxTitle = 36;
                 let maxDescription = 72;
-                return this.notifications.map(function(notification) {
-                    if (notification.description.length > maxDescription) {
-                        notification.description = notification.description.substring(0, maxDescription) + '..';
+                return this.notifications.map((notification) => {
+                    let data = JSON.parse(JSON.stringify(notification));
+                    if (data.message.length > maxDescription) {
+                        data.message = data.message.substring(0, maxDescription) + '..';
                     }
-                    if (notification.title.length > maxTitle) {
-                        notification.title = notification.title.substring(0, maxTitle) + '..';
+                    if (data.title.length > maxTitle) {
+                        data.title = data.title.substring(0, maxTitle) + '..';
                     }
-                    notification.time = moment.utc(notification.created_at).local().format('LT');
-                    return notification;
+                    data.time = moment.utc(data.created_at).local().format('LT');
+                    return data;
                 })
             },
             showTooltip() {

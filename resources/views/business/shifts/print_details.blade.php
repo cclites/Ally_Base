@@ -77,7 +77,12 @@
             </div>
             <div class="with-padding-bottom">
                 <strong>Clocked Out Time</strong><br/>
-                {{ $shift->checked_out_time->setTimezone($timezone)->format('m/d/Y g:i A') }}<br/>
+                @if($shift->checked_out_time)
+                    {{ $shift->checked_out_time->setTimezone($timezone)->format('m/d/Y g:i A') }}
+                @else
+                    (Still clocked in)
+                @endif
+                <br/>
             </div>
             @if ($report_type != 'notes')
                 <div class="with-padding-bottom">

@@ -1,0 +1,72 @@
+<template>
+    <b-card
+        :header="notification.title"
+        header-text-variant="white"
+        header-bg-variant="info"
+        >
+        <b-row>
+            <b-col lg="12">
+                <p><strong>Description</strong></p>
+                <p>
+                    {{ notification.message | nl2br }}
+                </p>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="12" v-if="acknowledger">
+                <p>Acknowledged by {{ acknowledger.firstname }} {{ acknowledger.lastname }} at {{ time }}</p>
+                <p><strong>Notes</strong></p>
+                <p>{{ notification.notes }}</p>
+                <b-button variant="secondary" :href="notification.action_url">{{ referenceUrlTitle }}</b-button>
+            </b-col>
+            <b-col lg="12" v-else>
+                <b-form-group label="Add Notes" label-for="notes">
+                    <b-textarea
+                        id="notes"
+                        name="notes"
+                        :rows="3"
+                        v-model="form.notes"
+                        >
+                    </b-textarea>
+                    <input-help :form="form" field="notes" text=""></input-help>
+                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledge()">Acknowledge Notification</b-button>
+                    <b-button variant="secondary" :href="notification.action_url">{{ referenceUrlTitle }}</b-button>
+                </b-form-group>
+            </b-col>
+        </b-row>
+    </b-card>
+</template>
+
+<script>
+    export default {
+        props: {
+            'notification': {},
+            'acknowledger': {},
+        },
+        data() {
+            return {
+                'form': new Form({
+                    'notes': this.notification.notes,
+                }),
+            }
+        },
+        computed: {
+            time() {
+                return moment.utc(this.notification.created_at).local().format('L LT');
+            },
+            referenceUrlTitle() {
+                if (this.notification.action) {
+                    return this.notification.action || 'Reference Link';
+                }
+            },
+            isTimesheet() {
+                return this.notification.reference_type === 'App\\Timesheet';
+            },
+        },
+        methods: {
+            acknowledge() {
+                this.form.post('/business/notifications/' + this.notification.id + '/acknowledge');
+            }
+        }
+    }
+</script>

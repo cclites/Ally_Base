@@ -3,11 +3,10 @@
 namespace App;
 
 use App\Billing\Deposit;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\PaymentMethodType;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -17,6 +16,7 @@ use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
+use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -284,15 +284,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     * @deprecated Caregivers are attached to the chain, not the business
      */
     public function caregivers()
     {
-        return $this->belongsToMany(Caregiver::class, 'business_caregivers')
-            ->withPivot([
-                'type',
-                'default_rate'
-            ]);
+        return $this->belongsToMany(Caregiver::class, 'business_caregivers');
     }
 
     public function activeCaregivers()
@@ -308,10 +303,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function deposits()
     {
         return $this->hasMany(Deposit::class);
-    }
-
-    public function exceptions() {
-        return $this->hasMany(SystemException::class);
     }
 
     public function payments()
@@ -375,11 +366,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(NoteTemplate::class);
     }
 
-    public function caregiverApplications()
-    {
-        return $this->hasMany(CaregiverApplication::class);
-    }
-
     public function chargedTransactions()
     {
         if ($this->paymentAccount) {
@@ -421,6 +407,36 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function salesPeople()
     {
         return $this->hasMany(SalesPerson::class);
+    }
+
+    /**
+     * Get the QuickbooksConnection relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function quickbooksConnection()
+    {
+        return $this->hasOne(QuickbooksConnection::class);
+    }
+
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksCustomers()
+    {
+        return $this->hasMany(QuickbooksCustomer::class);
+    }
+
+    /**
+     * Get the QuickbooksService relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksServices()
+    {
+        return $this->hasMany(QuickbooksService::class);
     }
 
     ///////////////////////////////////////////
@@ -719,6 +735,22 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     }
 
     /**
+     * Get a list of OfficeUser's notifiable User objects
+     * that should be sent notifications.
+     *
+     * @return array|Collection
+     */
+    public function notifiableUsers()
+    {
+        return $this->users()->with(['user', 'user.notificationPreferences'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->get()
+            ->pluck('user');
+    }
+
+    /**
      * Return the owner of the payment method or account
      *
      * @return \Illuminate\Database\Eloquent\Model
@@ -775,18 +807,17 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->getPhoneNumber();
     }
 
-    function getPaymentStrategy(): PaymentMethodStrategy
-    {
-        if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
-        return $this->paymentAccount->getPaymentStrategy();
-    }
-
     /**
      * @return string
      */
     public function getHash(): string
     {
         return 'businesses:' . $this->id;
+    }
+
+    public function getPaymentType(): PaymentMethodType
+    {
+        return PaymentMethodType::ACH_P();
     }
 
     /**
@@ -797,6 +828,71 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getDisplayValue(): string
     {
         return 'ACH-P *' . $this->paymentAccount->last_four;
+    }
+
+    /**
+     * Setter for hha_password field.
+     *
+     * @param $value
+     */
+    public function setHhaPassword($value) : void
+    {
+        $this->attributes['hha_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for hha_password field.
+     *
+     * @return string
+     */
+    public function getHhaPassword() : string
+    {
+        return empty($this->attributes['hha_password']) ? null : Crypt::decrypt($this->attributes['hha_password']);
+    }
+
+    /**
+     * Setter for tellus_password field.
+     *
+     * @param $value
+     */
+    public function setTellusPassword($value) : void
+    {
+        $this->attributes['tellus_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for tellus_password field.
+     *
+     * @return string
+     */
+    public function getTellusPassword() : string
+    {
+        return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
+    }
+
+    /**
+     * Attach a Caregiver to the business and also the parent chain.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return bool
+     */
+    public function assignCaregiver(Caregiver $caregiver) : bool
+    {
+        // Assign to the parent chain first.
+        if (! $this->businessChain->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->businessChain->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        // Assign to this business location.
+        if (! $this->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     ////////////////////////////////////

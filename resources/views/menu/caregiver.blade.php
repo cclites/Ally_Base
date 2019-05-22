@@ -21,7 +21,6 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('caregivers.reports.shifts') }}">Shift History</a></li>
         <li><a href="{{ route('caregiver.deposits') }}">Payment History</a></li>
-{{--        <li><a href="{{ route('caregivers.reports.payment_history') }}">Payment History</a></li>--}}
     </ul>
 </li>
 <li>
@@ -34,8 +33,8 @@
         <i class="fa fa-users"></i><span class="hide-menu">My Clients</span>
     </a>
 </li>
-{{--<li>--}}
-    {{--<a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">--}}
-        {{--<i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>--}}
-    {{--</a>--}}
-{{--</li>--}}
+<li>
+    <a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">
+        <i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>
+    </a>
+</li>

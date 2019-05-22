@@ -28,6 +28,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+        </li>
     </ul>
 
     <!-- Mobile nav tabs (drop down) -->
@@ -89,6 +92,13 @@
         <div class="tab-pane" id="skills" role="tabpanel">
             <business-caregiver-skills-tab :caregiver="{{ $user->role }}"></business-caregiver-skills-tab>
         </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -102,8 +112,7 @@
 
         // Change hash for page-reload
         $('.nav-item a').on('shown.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            window.scrollTo(0,0);
+            history.pushState({}, '', url.split('#')[0] + e.target.hash);
         })
     </script>
 @endpush

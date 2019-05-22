@@ -135,52 +135,15 @@ class DepositsController extends Controller
         return view('admin.reports.failed_deposits');
     }
 
-    public function markSuccessful(Deposit $deposit)
-    {
-        if ($deposit->transaction) {
-            $deposit->transaction->update(['success' => true]);
-        }
-        $deposit->update(['success' => true]);
-        foreach($deposit->shifts as $shift) {
-            if ($deposit->caregiver) {
-                $shift->statusManager()->ackCaregiverDeposit();
-            }
-            else if ($deposit->business) {
-                $shift->statusManager()->ackBusinessDeposit();
-            }
-        }
-        $msg = 'Deposit marked as successful.';
-        if ($deposit->caregiver && $deposit->caregiver->isOnHold()) {
-            $msg .= ' This caregiver is still on hold.';
-        }
-        else if ($deposit->business && $deposit->business->isOnHold()) {
-            $msg .= ' This business is still on hold.';
-        }
-        return new SuccessResponse($msg);
-    }
-
     public function markFailed(Deposit $deposit)
     {
         if ($deposit->transaction) {
-            $deposit->transaction->update(['success' => false]);
+            $deposit->transaction->recordFailure();
         }
-        $deposit->update(['success' => false]);
-        foreach($deposit->shifts as $shift) {
-            if ($deposit->caregiver) {
-                $shift->statusManager()->ackReturnedCaregiverDeposit();
-            }
-            else if ($deposit->business) {
-                $shift->statusManager()->ackReturnedBusinessDeposit();
-            }
+        else {
+            $deposit->markFailed();
         }
-        if ($deposit->caregiver) {
-            $entity = 'caregiver';
-            $deposit->caregiver->addHold();
-        }
-        else if ($deposit->business) {
-            $entity = 'registry';
-            $deposit->business->addHold();
-        }
-        return new SuccessResponse('Deposit marked as failed.  This ' . $entity . ' has been put on hold. ' . "\n" . 'Once the hold is removed, the related shifts will be eligible for re-deposit.');
+
+        return new SuccessResponse('Deposit marked as failed.  This entity has been put on hold. ' . "\n" . 'Once the hold is removed, the related invoice(s) will be eligible for re-deposit.');
     }
 }

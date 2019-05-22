@@ -4,6 +4,7 @@ namespace App\Billing\Generators;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Events\InvoiceableInvoiced;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\BaseInvoiceItem;
@@ -66,11 +67,22 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         if (count($invoiceables)) {
             DB::beginTransaction();
 
-            foreach($invoiceables as $invoiceable) {
-                $this->assignInvoiceable($client, $invoiceable);
+            try {
+                foreach($invoiceables as $invoiceable) {
+                    $this->assignInvoiceable($client, $invoiceable);
+                }
+            }
+            catch (\Throwable $e) {
+                DB::rollBack();
+                $this->clearExistingInvoices();
+                throw $e;
             }
 
             DB::commit();
+        }
+
+        foreach($invoiceables as $invoiceable) {
+            event(new InvoiceableInvoiced($invoiceable));
         }
 
         return array_values($this->invoices);
@@ -98,6 +110,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
                 'name' => $this->getInvoiceName($client),
                 'client_id' => $clientPayer->client_id,
                 'client_payer_id' => $clientPayerId,
+                'offline' => $clientPayer->isOffline(),
             ]);
         }
 
@@ -188,6 +201,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             'date' => $invoiceable->getItemDate(),
             'total' => round(bcmul($invoiceable->getItemUnits(), $clientRate, 4), 2),
             'amount_due' => $amountDue,
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 

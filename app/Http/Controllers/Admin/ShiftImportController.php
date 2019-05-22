@@ -159,8 +159,8 @@ class ShiftImportController extends Controller
             'user_id' => \Auth::id()
         ]);
         foreach($shifts as $shift) {
-            event(new ShiftFlagsCouldChange($shift));
             $import->shifts()->save($shift);
+            event(new ShiftFlagsCouldChange($shift));
         }
         \DB::commit();
 

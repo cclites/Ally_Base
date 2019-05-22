@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Timesheet;
-use App\SystemException;
+use App\Events\TimesheetCreated;
 
 class ManageTimesheetsTest extends TestCase
 {
@@ -28,7 +28,7 @@ class ManageTimesheetsTest extends TestCase
         $this->business->update(['allows_manual_shifts' => true]);
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
         $this->caregiver->clients()->save($this->client);
         
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
@@ -122,19 +122,23 @@ class ManageTimesheetsTest extends TestCase
     }
 
     /** @test */
-    public function when_a_cg_submits_a_timesheet_an_exception_should_be_created()
+    public function when_a_cg_submits_a_timesheet_it_should_trigger_an_exception_event()
     {
+        \Event::fake();
+
         $this->actingAs($this->caregiver->user);
 
-        $this->assertCount(0, SystemException::all());
-        
-        $this->post(route('timesheets.store'), [
+        $result = $this->post(route('timesheets.store'), [
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'entries' => [$this->generateEntry()],
         ])->assertStatus(200);
         
-        $this->assertCount(1, SystemException::all());
+        $cg = $this->caregiver->id;
+
+        \Event::assertDispatched(TimesheetCreated::class, function ($e) use ($cg) {
+            return $e->timesheet->caregiver->id === $cg;
+        });
     }
 
     /** @test */
@@ -151,24 +155,6 @@ class ManageTimesheetsTest extends TestCase
         ])->assertStatus(200);
         
         $this->assertCount(1, $this->business->fresh()->timesheets);
-    }
-
-    /** @test */
-    public function when_a_business_creates_a_timesheet_there_should_be_no_exception()
-    {
-        $this->actingAs($this->officeUser->user);
-
-        $this->assertCount(0, $this->business->timesheets);
-        $this->assertCount(0, SystemException::all());
-
-        $this->post(route('business.timesheet.store'), [
-            'caregiver_id' => $this->caregiver->id,
-            'client_id' => $this->client->id,
-            'entries' => [$this->generateEntry()],
-        ])->assertStatus(200);
-        
-        $this->assertCount(1, $this->business->fresh()->timesheets);
-        $this->assertCount(0, SystemException::all());
     }
 
     /** @test */

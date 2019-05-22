@@ -33,13 +33,14 @@ export default {
                 start_date: '',
                 end_date: '',
                 active: null,
+                client_type: null,
             },
         };
     },
 
     computed: {
         items() {
-            const {start_date, end_date, active} = this.filters;
+            const {start_date, end_date, active, client_type} = this.filters;
             let items = this.data;
 
             if(start_date && end_date) {
@@ -48,6 +49,10 @@ export default {
 
             if(typeof active == 'boolean') {
                 items = items.filter(client => client.active == active);
+            }
+
+            if (client_type) {
+                items = items.filter(client => client.client_type == client_type);
             }
 
             return items;
@@ -85,10 +90,6 @@ export default {
     },
 
     methods: {
-        formatDate(date) {
-            return moment(date).format('MM-DD-YYYY');
-        },
-
         printTable() {
             $('#table').print();
         },

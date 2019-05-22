@@ -1,16 +1,13 @@
 <?php
 namespace App\Scheduling\Data;
 
-use App\Data\StringValueObject;
+use MyCLabs\Enum\Enum;
 
-class CalendarCaregiverFilter extends StringValueObject
+class CalendarCaregiverFilter extends Enum
 {
-    const ALL = "all";
-    const UNASSIGNED = "unassigned";
+    private const ALL = "all";
+    private const UNASSIGNED = "unassigned";
 
-    public function __construct(string $value)
-    {
-        $this->assertValueInConstants($value);
-        $this->setValue($value);
-    }
+    static function ALL() { return new self(self::ALL); }
+    static function UNASSIGNED() { return new self(self::UNASSIGNED); }
 }

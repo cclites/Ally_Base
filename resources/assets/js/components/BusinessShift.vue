@@ -189,6 +189,8 @@
                                                     name="caregiver_rate"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="form.caregiver_rate"
                                                     @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                     class="money-input"
@@ -202,6 +204,8 @@
                                                     name="provider_fee"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="form.provider_fee"
                                                     @change="updateClientRates(form)"
                                                     class="money-input"
@@ -219,6 +223,8 @@
                                                     name="client_rate"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="form.client_rate"
                                                     @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                     class="money-input"
@@ -251,6 +257,8 @@
                                                     name="duration"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="service.duration"
                                                     @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
                                         </td>
@@ -262,6 +270,8 @@
                                                     name="caregiver_rate"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="service.caregiver_rate"
                                                     @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                     class="money-input"
@@ -275,6 +285,8 @@
                                                     name="provider_fee"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="service.provider_fee"
                                                     @change="updateClientRates(service)"
                                                     class="money-input"
@@ -292,6 +304,8 @@
                                                     name="client_rate"
                                                     type="number"
                                                     step="0.01"
+                                                    min="0"
+                                                    max="999.99"
                                                     v-model="service.client_rate"
                                                     @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                     class="money-input"
@@ -534,8 +548,18 @@
                     return {};
                 }
             },
-            'caregiver': {},
-            'client': {},
+            'caregiver': {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
+            'client': {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
             'activities': Array,
             'admin': Number,
             'is_modal': 0,
@@ -748,8 +772,8 @@
             initForm(shift = {}) {
                 console.log('initForm', this.form);
                 return {
-                    client_id: shift.client_id || null,
-                    caregiver_id: shift.caregiver_id || null,
+                    client_id: shift.id ? shift.client_id : this.client.id || null,
+                    caregiver_id: shift.id ? shift.caregiver_id : this.caregiver.id || null,
                     caregiver_comments: shift.caregiver_comments || null,
                     checked_in_time: shift.checked_in_time || null,
                     checked_out_time: shift.checked_out_time || null,

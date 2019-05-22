@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Billing\Claim;
+use App\Billing\ClaimService;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Payer;
 use Illuminate\Support\Carbon;
@@ -36,6 +38,7 @@ class CreatePayerRequest extends FormRequest
             'city' => 'nullable',
             'state' => 'nullable',
             'zip' => 'nullable|min:5',
+            'payment_method_type' => 'nullable|string|in:businesses',
             'email' => 'nullable|email',
             'phone_number' => ['nullable', new PhonePossible()],
             'fax_number' => ['nullable', new PhonePossible()],
@@ -51,6 +54,9 @@ class CreatePayerRequest extends FormRequest
             'rates.*.hourly_rate' => 'required|numeric|between:0,999.99',
             'rates.*.effective_start' => 'required|date',
             'rates.*.effective_end' => 'required|date', //|after_or_equal:' . $this->input('rates.*.effective_start'),
+            'transmission_method' => 'nullable|in:' . ClaimService::HHA() . ',' . ClaimService::TELLUS(),
+            'payer_code' => 'nullable|string|max:255',
+            'plan_code' => 'nullable|string|max:255',
         ];
     }
 

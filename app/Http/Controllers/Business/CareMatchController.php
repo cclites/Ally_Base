@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\Client;
+use App\Ethnicity;
+use App\Rules\ValidEnum;
 use App\Scheduling\CareMatch;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,10 +43,13 @@ class CareMatchController extends BaseController
             'exclude_overtime' => 'boolean',
             'radius' => 'nullable|numeric',
             'rating' => 'nullable|numeric',
-            'smoking' => 'required|in:1,0,client'
+            'smoking' => 'required|in:1,0,client',
+            'ethnicity' => 'nullable|in:client,select',
+            'ethnicities' => 'required_if:ethnicity,select|array',
         ], [
             'starts_at.*' => 'The start date and time are invalid.',
             'duration.*' => 'The start time and end time are required for overtime calculations.',
+            'ethnicities.*' => 'You must select at least one ethnicity',
         ]);
 
         $this->careMatch->matchesClientActivities($client, $request->matches_activities);
@@ -105,7 +110,15 @@ class CareMatchController extends BaseController
                 }
             }
         }
-        
+
+        if ($request->ethnicity) {
+            if ($request->ethnicity === 'client') {
+                $preferences['ethnicities'] = optional($client->preferences)->getEthnicities();
+            } else {
+                $preferences['ethnicities'] = $request->ethnicities;
+            }
+        }
+
         if (isset($preferences)) {
             $this->careMatch->matchesPreferences(array_filter($preferences));
         }

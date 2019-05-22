@@ -25,7 +25,7 @@ class ManageQuestionsTest extends TestCase
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->assignCaregiver($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create();
         $this->officeUser->businesses()->attach($this->business->id);

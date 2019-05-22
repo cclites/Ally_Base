@@ -9,6 +9,7 @@ use App\Businesses\Timezone;
 use App\Caregiver;
 use App\Client;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Events\PaymentFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\Model;
@@ -197,6 +198,20 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     function getPaymentMethod(): ?ChargeableInterface
     {
         return $this->paymentMethod;
+    }
+
+
+    /**
+     * Mark the payment as failed and emit the domain event
+     *
+     * @throws \Exception
+     */
+    function markFailed()
+    {
+        if (!$this->update(['success' => false])) {
+            throw new \Exception('The payment could not be marked as failed.');
+        }
+        event(new PaymentFailed($this));
     }
 
 }

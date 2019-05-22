@@ -59,10 +59,11 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
             'units' => $invoiceable->getItemUnits(),
             'client_rate' => $invoiceable->getClientRate(),
             'caregiver_rate' => $invoiceable->getCaregiverRate(),
-            'ally_rate' => $invoiceable->getAllyRate(),
+            'ally_rate' => $invoiceable->getAllyRate() ?? 0,
             'rate' => $invoiceable->getProviderRate(),
             'total' => $total,
             'date' => $invoiceable->getItemDate(),
+            'notes' => $invoiceable->getItemNotes(),
         ];
     }
 }

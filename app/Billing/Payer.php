@@ -5,6 +5,7 @@ use App\Address;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PayerAssignmentError;
+use App\Billing\Payments\Methods\Offline;
 use App\Business;
 use App\Client;
 use App\Contracts\BelongsToChainsInterface;
@@ -66,6 +67,7 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
     use BelongsToOneChain;
 
     const PRIVATE_PAY_ID = 0;
+    const OFFLINE_PAY_ID = 1;
 
     protected $orderedColumn = 'name';
 
@@ -77,11 +79,6 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
     ];
 
     protected $with = ['rates'];
-
-    /**
-     * @var \App\Client|null
-     */
-    protected $client;
 
     ////////////////////////////////////
     //// Relationship Methods
@@ -106,43 +103,49 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
         return $this->id === self::PRIVATE_PAY_ID;
     }
 
-    function setPrivatePayer(Client $client)
+    function isOffline()
     {
-        $this->client = $client;
-    }
-
-    function getPrivatePayer(): ?Client
-    {
-        return $this->isPrivatePay() ? $this->client : null;
+        return $this->id === self::OFFLINE_PAY_ID || (!$this->isPrivatePay() && !$this->payment_method_type);
     }
 
     function getUniqueKey(): string
     {
         if ($this->isPrivatePay()) {
-            if (!$this->getPrivatePayer()) {
-                throw new PayerAssignmentError("The private payer does not have a client record attached.");
-            }
-
-            return (string) $this->id . ':' . $this->getPrivatePayer()->id;
+            throw new PayerAssignmentError("The private payer record does not have a unique key.");
         }
 
         return (string) $this->id;
     }
 
-    /**
-     * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
-     * @return bool
-     */
-    function setPaymentMethod(ChargeableInterface $paymentMethod)
+    function setPaymentMethod(ChargeableInterface $paymentMethod): bool
     {
         if ($paymentMethod instanceof Model && $paymentMethod->getKey()) {
             return $this->paymentMethod()->associate($paymentMethod)->save();
         }
 
-        // Allow for provider pay to be defined from the Payer without linking directly to a business bank account
-        $this->payment_method_type = maps_from_model($paymentMethod);
+        if ($paymentMethod instanceof Business) {
+            $this->payment_method_type = maps_from_model($paymentMethod);
+        }
+
+        if ($paymentMethod instanceof Offline) {
+            $this->payment_method_type = null;
+        }
+
         $this->payment_method_id = null;
         return $this->save();
+    }
+
+    function getPaymentMethod(): ?ChargeableInterface
+    {
+        if (maps_to_class($this->payment_method_type) === Business::class) {
+            return new Business();
+        }
+
+        if ($this->isOffline()) {
+            return new Offline();
+        }
+
+        return null;
     }
 
     /**
@@ -155,20 +158,12 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
         return $this->setPaymentMethod(new Business());
     }
 
-    function getPaymentMethod(): ?ChargeableInterface
-    {
-        if (maps_to_class($this->payment_method_type) === Business::class) {
-            return new Business();
-        }
-
-        return null;
-    }
-
 
     function name(): string
     {
         if ($this->isPrivatePay()) {
-            return ($client = $this->getPrivatePayer()) ? $client->name() : 'Client';
+            // This method shouldn't really be used for private pay, use ClientPayer instead
+            return 'Client';
         }
 
         return $this->name;
@@ -262,4 +257,39 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
         }
     }
 
+    /**
+     * Get the ClaimService transmission method for the payer.
+     *
+     * @return ClaimService|null
+     */
+    public function getTransmissionMethod() : ?ClaimService
+    {
+        $method = $this->transmission_method;
+
+        if (empty($method)) {
+            return null;
+        }
+
+        return ClaimService::$method();
+    }
+
+    /**
+     * Get payer code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPayerCode() : ?string
+    {
+        return $this->payer_code;
+    }
+
+    /**
+     * Get plan code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPlanCode() : ?string
+    {
+        return $this->payer_code;
+    }
 }

@@ -77,22 +77,19 @@ class CostCalculator
             // New (February 2019)
             if ($this->shift->services->count()) {
                 $shiftFee = $this->shift->services->reduce(function($carry, ShiftService $service) {
-                    $amount = multiply($service->client_rate ?? 0, $service->duration);
+                    $amount = multiply($service->getClientRate() ?? 0, $service->duration);
                     $fee = ($this->paymentType)
                         ? $this->paymentType->getAllyFee($amount, true)
                         : $this->client->getAllyFee($amount, true);
                     return add($carry, $fee);
                 }, 0.0);
-            } else if ($this->shift->fixed_rates) {
-                $shiftFee = ($this->paymentType)
-                    ? $this->paymentType->getAllyFee($this->getClientCost(), true)
-                    : $this->client->getAllyFee($this->getClientCost(), true);
-
             } else {
-                $hourlyRate = ($this->paymentType)
-                    ? $this->paymentType->getAllyFee($this->shift->client_rate, true)
-                    : $this->client->getAllyFee($this->shift->client_rate, true);
-                $shiftFee = multiply($hourlyRate, $this->shift->duration());
+                $rate = ($this->paymentType)
+                    ? $this->paymentType->getAllyFee($this->shift->getClientRate(), true)
+                    : $this->client->getAllyFee($this->shift->getClientRate(), true);
+                $shiftFee = ($this->shift->fixed_rates)
+                    ? $rate
+                    : multiply($rate, $this->shift->duration());
             }
         } else {
             // Old (Pre-February 2019)
@@ -262,7 +259,9 @@ class CostCalculator
     /**
      * Return the total cost of a shift with all expenses included (amount owed by client)
      *
+     * @param bool $expensesIncluded
      * @return float
+     * @throws \Exception
      */
     public function getTotalCost($expensesIncluded = true)
     {
@@ -283,7 +282,7 @@ class CostCalculator
         // Old (Pre-February 2019)
         return round(
             bcadd(
-                bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
+                bcadd($this->getProviderFee(), $this->getCaregiverCost($expensesIncluded), self::DEFAULT_SCALE),
                 $this->getAllyFee(),
                 self::DEFAULT_SCALE
             ),
@@ -344,17 +343,11 @@ class CostCalculator
 
     /**
      *  Get the total cost per hour of this shift
+     *  @deprecated
      */
     public function getTotalHourlyCost()
     {
-        $allyFee = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
-        return round(
-            bcadd(
-                bcadd($this->shift->caregiver_rate, $this->shift->provider_fee, 4),
-                $allyFee,
-                4
-            ), 2
-        );
+        return $this->shift->client_rate;
     }
 
     /**
@@ -411,6 +404,6 @@ class CostCalculator
 
     protected function isUsingClientRate()
     {
-        return $this->shift->client_rate || $this->shift->services->count();
+        return $this->shift->client_rate !== null || $this->shift->services->count();
     }
 }

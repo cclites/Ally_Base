@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\ClientRate;
+use App\Billing\ScheduleService;
 use App\Business;
+use App\Caregiver;
+use App\CaregiverLicense;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
@@ -10,6 +14,7 @@ use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
+use App\Notifications\Caregiver\CertificationExpiring;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -21,6 +26,7 @@ use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Scheduling\ScheduleEditor;
+use App\Scheduling\ScheduleWarningAggregator;
 use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -96,7 +102,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
         }
 
-        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->client_rate, $request->fixed_rates);
 
         $creator->startsAt(Carbon::parse($request->input('starts_at')))
             ->duration($request->duration)
@@ -177,7 +183,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
         }
 
-        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->client_rate, $request->fixed_rates);
 
         // Weekday mapping
         $dowMap = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
@@ -232,22 +238,23 @@ class ScheduleController extends BaseController
      *
      * @param $client_id
      * @param $caregiver_id
+     * @param $caregiver_rate
+     * @param $client_rate
+     * @param bool $fixed
      */
-    protected function ensureCaregiverAssignment($client_id, $caregiver_id, $caregiver_rate, $provider_fee, $daily = false)
+    protected function ensureCaregiverAssignment($client_id, $caregiver_id, $caregiver_rate, $client_rate, $fixed = false)
     {
-        // attach caregiver to client if relationship doesn't exist
         $client = Client::findOrFail($client_id);
         if ($caregiver_id && !$client->hasCaregiver($caregiver_id)) {
-            $data = [
-                'caregiver_fixed_rate' => $daily ? $caregiver_rate : 0,
-                'provider_fixed_fee' => $daily ? $provider_fee : 0,
-                'caregiver_hourly_rate' => $daily ? 0 : $caregiver_rate,
-                'provider_hourly_fee' => $daily ? 0 : $provider_fee,
-            ];
-
-            $data = array_map('floatval', $data);
-
-            $client->caregivers()->syncWithoutDetaching([$caregiver_id => $data]);
+            ClientRate::add($client, [
+                'caregiver_id' => $caregiver_id,
+                'effective_start' => date('Y') . '-01-01',
+                'effective_end' => '9999-12-31',
+                'caregiver_hourly_rate' => ($fixed ? 0 : $caregiver_rate) ?? 0,
+                'caregiver_fixed_rate' => ($fixed ? $caregiver_rate : 0) ?? 0,
+                'client_hourly_rate' => ($fixed ? 0 : $client_rate) ?? 0,
+                'client_fixed_rate' => ($fixed ? $client_rate : 0) ?? 0,
+            ]);
         }
     }
 
@@ -535,5 +542,35 @@ class ScheduleController extends BaseController
         $data['client_phone'] = $schedule->client->evvPhone->number ?? null;
 
         return response()->json($data);
+    }
+
+    /**
+     * Create a temp schedule object with the request data and
+     * check if there are any warnings that should be displayed
+     * to the OfficeUser.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function warnings(Request $request)
+    {
+        $schedule = Schedule::make([
+            'caregiver_id' => $request->caregiver,
+            'client_id' => $request->client,
+            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone()),
+            'duration' => $request->duration,
+            'payer_id' => $request->payer_id,
+            'service_id' => $request->service_id,
+        ]);
+        $schedule->id = $request->id ? $request->id : null;
+
+        $services = collect([]);
+        foreach ($request->services as $service) {
+            $services->push(ScheduleService::make($service));
+        }
+        $schedule->setRelation('services', $services);
+
+        $aggregator = new ScheduleWarningAggregator($schedule);
+        return response()->json($aggregator->getAll());
     }
 }

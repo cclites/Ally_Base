@@ -63,11 +63,12 @@
 
         methods: {
             save() {
-                let component = this;
-                let method = 'patch';
-                component.form.submit(method, this.url)
-                    .then(function(response) {
-                        component.showModal = false;
+                this.form.patch(this.url)
+                    .then((response) => {
+                        this.showModal = false;
+                        this.form.reset();
+                    })
+                    .catch(e => {
                     });
             },
 

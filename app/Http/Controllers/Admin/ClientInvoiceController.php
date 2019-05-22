@@ -3,20 +3,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Generators\ClientInvoiceGenerator;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\BusinessChain;
 use App\Client;
 use App\Http\Controllers\Controller;
 use App\Responses\CreatedResponse;
+use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientInvoice as ClientInvoiceResponse;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ClientInvoiceController extends Controller
 {
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             if ($request->filled('paid')) {
@@ -41,7 +43,7 @@ class ClientInvoiceController extends Controller
                 $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();
+            $invoices = $invoiceQuery->with(['client', 'client.business.chain', 'clientPayer.payer', 'payments'])->get();
 
             return ClientInvoiceResponse::collection($invoices);
         }
@@ -55,8 +57,6 @@ class ClientInvoiceController extends Controller
         $request->validate([
             'chain_id' => 'required|exists:business_chains,id',
         ]);
-
-        \DB::beginTransaction();
 
         $invoices = [];
         $chain = BusinessChain::findOrFail($request->input('chain_id'));
@@ -84,8 +84,6 @@ class ClientInvoiceController extends Controller
             }
         }
 
-        \DB::commit();
-
         return new CreatedResponse(count($invoices) . ' invoices were created.', [
             'invoices' => $invoices,
             'errors' => $errors,
@@ -97,5 +95,18 @@ class ClientInvoiceController extends Controller
         $strategy = InvoiceViewFactory::create($invoice, $view);
         $viewGenerator = new InvoiceViewGenerator($strategy);
         return $viewGenerator->generateClientInvoice($invoice);
+    }
+
+    public function destroy(ClientInvoice $invoice)
+    {
+        if ($invoice->payments()->exists()) {
+            return new ErrorResponse(400, "This invoice cannot be removed because it has payments assigned.");
+        }
+
+        if ($invoice->delete()) {
+            return new SuccessResponse("The invoice has been removed.");
+        }
+
+        return new ErrorResponse(500, "Unable to remove invoice.");
     }
 }

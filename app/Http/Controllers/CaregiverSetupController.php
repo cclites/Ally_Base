@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Validation\Rule;
@@ -33,7 +34,7 @@ class CaregiverSetupController extends Controller
             'caregiver-data' => $caregiver,
             'token' => $token,
         ];
-        return view_component('caregiver-setup-wizard', 'Caregiver Account Setup', $props, null, 'guest');
+        return view_component('caregiver-setup-wizard', 'Caregiver Account Setup', $props, [], 'guest');
     }
 
     /**
@@ -62,16 +63,11 @@ class CaregiverSetupController extends Controller
             $caregiver->setupStatusHistory()->create(['status' => $data['setup_status']]);
 
             if (empty($this->phoneNumber)) {
-                $caregiver->phoneNumbers()->create([
-                    'national_number' => $request->phone_number,
-                    'country_code' => '1',
-                    'type' => 'primary',
-                ]);
+                $phoneNumber = PhoneNumber::fromInput('primary', $request->phone_number);
+                $caregiver->phoneNumbers()->save($phoneNumber);
             } else {
-                $caregiver->phoneNumber->update([
-                    'national_number' => $request->phone_number,
-                    'country_code' => '1',
-                ]);
+                $caregiver->phoneNumber->input($request->phone_number);
+                $caregiver->phoneNumber->save();
             }
         }
 
@@ -155,6 +151,7 @@ class CaregiverSetupController extends Controller
      *
      * @param string $token
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function checkStep($token)
     {

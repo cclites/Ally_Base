@@ -299,6 +299,25 @@ class ClientInvoiceTest extends TestCase
     /**
      * @test
      */
+    function the_amount_paid_should_be_reduce_when_a_payment_is_marked_as_failed()
+    {
+        $invoice = factory(ClientInvoice::class)->create();
+
+        $this->assertEquals(0, $invoice->amount_paid);
+
+        $payment = factory(Payment::class)->make(['amount' => 20.00]);
+        $invoice->addPayment($payment, 20);
+
+        $this->assertEquals(20, $invoice->amount_paid);
+
+        $payment->markFailed();
+
+        $this->assertEquals(0, $invoice->fresh()->amount_paid);
+    }
+
+    /**
+     * @test
+     */
     function shifts_should_be_waiting_for_charge_after_invoicing()
     {
         $payerA = $this->createAllowancePayer(20.00);

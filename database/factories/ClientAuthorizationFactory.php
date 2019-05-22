@@ -13,11 +13,6 @@ $factory->define(\App\Billing\ClientAuthorization::class, function (Faker $faker
             $service = \App\Billing\Service::inRandomOrder()->first() ?? factory(\App\Billing\Service::class)->create();
             return $service->id;
         },
-        'payer_id' => function() {
-            if (mt_rand(0,3) === 0) return null; // 25% null
-            $payer = \App\Billing\Payer::inRandomOrder()->first() ?? factory(\App\Billing\Payer::class)->create();
-            return $payer->id;
-        },
         'effective_start' => $faker->date('Y-m-d', 'now'),
         'effective_end' => '9999-12-31',
         'units' => ($units = mt_rand(5,10)) === 5 ? 5.25 : $units, // small chance of a decimal

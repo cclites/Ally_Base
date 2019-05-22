@@ -197,7 +197,7 @@ class ReportsController extends BaseController
     {
         if ($request->expectsJson() && $request->input('json')) {
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date));
+                $report->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date . ' 23:59:59'));
             }
 
             return $report->forRequestedBusinesses()
@@ -701,9 +701,10 @@ class ReportsController extends BaseController
     /**
      * List of referral sources and how many Clients have been referred by each.
      *
+     * @param \Illuminate\Http\Request $request
      * @return Response
      */
-    public function clientReferralSources()
+    public function clientReferralSources(Request $request)
     {
         $reports = [];
         $shiftstatuses = ShiftStatusManager::getPendingStatuses();
@@ -713,8 +714,18 @@ class ReportsController extends BaseController
             ->withCount('clients', 'prospects')
             ->with(['clients.shifts' => function ($query) use ($shiftstatuses) {
                 $query->whereNotIn('status', $shiftstatuses)->get();
-            }])->get();
+            }]);
+        
+        if($request->referral_source) {
+            $referralsources->where('id', $request->referral_source);
+        }
 
+        if($request->start_date && $request->end_date) {
+            $referralsources->where('created_at','>', (new Carbon($request->start_date)));
+            $referralsources->where('created_at','<', (new Carbon($request->end_date)));
+        }
+
+        $referralsources = $referralsources->get();
         if ($referralsources) {
             foreach($referralsources as $referralsource) {
                 $reports[] = [
@@ -736,16 +747,22 @@ class ReportsController extends BaseController
         }
 
         $reports = collect($reports);
-        $type = "client";
+        $type = 'client';
+
+        if($request->expectsJson()) {
+            return response()->json($reports);
+        }
+
         return view('business.reports.referral_sources', compact('reports', 'type'));
     }
 
     /**
      * List of referral sources and how many Caregivers have been referred by each.
      *
+     * @param \Illuminate\Http\Request $request
      * @return Response
      */
-    public function caregiverReferralSources()
+    public function caregiverReferralSources(Request $request)
     {
         $reports = [];
         $shiftstatuses = ShiftStatusManager::getPendingStatuses();
@@ -756,7 +773,17 @@ class ReportsController extends BaseController
             ->with(['caregivers.shifts' => function ($query) use ($shiftstatuses) {
                 $query->whereNotIn('status', $shiftstatuses)->get();
             }])->get();
+        
+        if($request->referral_source) {
+            $referralsources->where('id', $request->referral_source);
+        }
 
+        if($request->start_date && $request->end_date) {
+            $referralsources->where('created_at','>', (new Carbon($request->start_date)));
+            $referralsources->where('created_at','<', (new Carbon($request->end_date)));
+        }
+
+        $referralsources = $referralsources->get();
         if ($referralsources) {
             foreach($referralsources as $referralsource) {
                 $reports[] = [
@@ -777,7 +804,12 @@ class ReportsController extends BaseController
         }
 
         $reports = collect($reports);
-        $type = "caregiver";
+        $type = 'caregiver';
+
+        if($request->expectsJson()) {
+            return response()->json($reports);
+        }
+
         return view('business.reports.referral_sources', compact('reports', 'type'));
     }
 
@@ -940,7 +972,7 @@ class ReportsController extends BaseController
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
-            $report->with('meta');
+            $report->query()->with('meta');
         }
 
         if($request->has('active')) {
@@ -976,11 +1008,15 @@ class ReportsController extends BaseController
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
-            $report->with('meta');
+            $report->query()->with('meta');
         }
 
-        if($request->has('active')) {
+        if($request->filled('active')) {
             $report->where('users.active', $request->active);
+        }
+
+        if($request->filled('client_type')) {
+            $report->where('client_type', $request->client_type);
         }
 
         $report->applyColumnFilters($request->except(['start_date','end_date','active']));

@@ -3,7 +3,8 @@
         header-bg-variant="info"
         header-text-variant="white"
         >
-        <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
+        <loading-card v-if="loading" text="Loading profile..."></loading-card>
+        <form v-else @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="First Name" label-for="firstname" label-class="required">
@@ -156,6 +157,14 @@
                         </b-form-select>
                         <input-help :form="form" field="smoking_okay" text="" />
                     </b-form-group>
+                    <b-form-group label="Ethnicity" label-for="ethnicity">
+                        <b-form-select v-model="form.ethnicity" :options="ethnicityOptions">
+                            <template slot="first">
+                                <option value="">Unknown</option>
+                            </template>
+                        </b-form-select>
+                        <input-help :form="form" field="ethnicity" />
+                    </b-form-group>
                     <b-form-group label="Acceptable Pets:">
                         <b-form-checkbox v-model="form.pets_dogs_okay" value="1" unchecked-value="0">Dogs</b-form-checkbox>
                         <b-form-checkbox v-model="form.pets_cats_okay" value="1" unchecked-value="0">Cats</b-form-checkbox>
@@ -179,7 +188,7 @@
 
                     <b-form-group label="Account Setup URL">
                         <a :href="caregiver.setup_url" target="_blank">{{ caregiver.setup_url }}</a>
-                        <input-help :form="form" text="The URL the caregiver can use to setup their account."></input-help>
+                        <input-help :form="form" field="_none" text="The URL the caregiver can use to setup their account."></input-help>
                     </b-form-group>
 
                     <div>
@@ -193,11 +202,21 @@
                         </label>
                     </div>
 
-                    <b-button variant="info" @click="sendWelcomeEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingWelcomeEmail"
+                        @click.prevent="sendWelcomeEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingWelcomeEmail"></i>
                         Send Welcome Email
                     </b-button>
 
-                    <b-button variant="info" @click="sendTrainingEmail()">
+                    <b-button variant="info"
+                        type="button"
+                        :disabled="sendingTrainingEmail"
+                        @click.prevent="sendTrainingEmail()"
+                    >
+                        <i class="fa fa-spinner fa-spin" v-if="sendingTrainingEmail"></i>
                         Send Training Email
                     </b-button>
                 </b-col>
@@ -237,6 +256,7 @@
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
+    import Constants from '../mixins/Constants';
     import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
     import { mapGetters } from 'vuex'
 
@@ -245,7 +265,7 @@
             'caregiver': {},
         },
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, Constants],
         
         components: {
           DeactivateCaregiverModal
@@ -272,6 +292,7 @@
                     referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
                     status_alias_id: this.caregiver.status_alias_id || '',
                     smoking_okay: this.caregiver.smoking_okay,
+                    ethnicity: this.caregiver.ethnicity ? this.caregiver.ethnicity : '',
                     pets_dogs_okay: this.caregiver.pets_dogs_okay,
                     pets_cats_okay: this.caregiver.pets_cats_okay,
                     pets_birds_okay: this.caregiver.pets_birds_okay,
@@ -281,13 +302,16 @@
                 activateModal: false,
                 inactive_at: '',
                 statusAliases: [],
+                loading: false,
+                sendingTrainingEmail: false,
+                sendingWelcomeEmail: false,
             }
         },
 
-        mounted() {
+        async mounted() {
             this.checkForNoEmailDomain();
             this.checkForNoUsername();
-            this.fetchStatusAliases();
+            await this.fetchStatusAliases();
         },
 
         computed: {
@@ -339,12 +363,16 @@
                     return;
                 }
                 this.$refs.confirmWelcomeEmail.confirm(() => {
+                    this.sendingWelcomeEmail = true;
                     let form = new Form({});
                     form.post(`/business/caregivers/${this.caregiver.id}/welcome-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingWelcomeEmail = false;
+                        });
                 });
             },
 
@@ -353,12 +381,16 @@
                     return;
                 }
                 this.$refs.confirmTrainingEmail.confirm(() => {
+                    this.sendingTrainingEmail = true;
                     let form = new Form({});
                     form.post(`/business/caregivers/${this.caregiver.id}/training-email`)
                         .then(response => {
                         })
                         .catch( e => {
                         })
+                        .finally(() => {
+                            this.sendingTrainingEmail = true;
+                        });
                 });
             },
 
@@ -401,17 +433,13 @@
                     })
             },
 
-            fetchStatusAliases() {
-                axios.get('/business/status-aliases')
-                    .then( ({ data }) => {
-                        if (data && data.caregiver) {
-                            this.statusAliases = data;
-                        } else {
-                            this.statusAliases = {caregiver: [], client: []};
-                        }
-                    })
-                    .catch(e => {
-                    })
+            async fetchStatusAliases() {
+                let response = await axios.get('/business/status-aliases');
+                if (response.data && response.data.caregiver) {
+                    this.statusAliases = response.data;
+                } else {
+                    this.statusAliases = {caregiver: [], client: []};
+                }
             },
 
             toggleNoEmail() {

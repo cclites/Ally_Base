@@ -40,6 +40,8 @@ class RefundPayment
 
             $refundPayment = Payment::create([
                 'payment_type' => $payment->payment_type,
+                'payment_method_type' => $payment->payment_method_type,
+                'payment_method_id' => $payment->payment_method_id,
                 'amount' => $amount * -1,
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,

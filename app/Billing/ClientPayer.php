@@ -60,11 +60,6 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         'split_percentage' => 'float',
     ];
 
-    /**
-     * @var array
-     */
-    protected $newInvoiceAmounts = [];
-
     ///////////////////////////////////////
     /// Payment Allocation Types
     ///////////////////////////////////////
@@ -209,6 +204,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         return $this->getPayer()->isPrivatePay();
     }
 
+    function isOffline(): bool
+    {
+        return $this->getPayer()->isOffline();
+    }
+
     function getUniqueKey(): string
     {
         if ($this->isPrivatePay()) {
@@ -227,14 +227,14 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
             return $paymentMethod;
         }
 
+        if (($method = $this->paymentMethod) && $method instanceof ChargeableInterface) {
+            return $method;
+        }
+
         if ($method = $this->getPayer()->getPaymentMethod()) {
             if ($method instanceof Business) {
                 $method = $this->client->business;
             }
-            return $method;
-        }
-
-        if ($method = $this->paymentMethod) {
             return $method;
         }
 

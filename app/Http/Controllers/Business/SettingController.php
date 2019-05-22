@@ -6,11 +6,13 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Http\Requests\UpdateBusinessBankRequest;
 use App\Http\Requests\UpdateBusinessRequest;
+use App\Http\Resources\BusinessSettingsResource;
 use App\OfficeUser;
 use App\Payments\PaymentMethodReplace;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Traits\Request\BankAccountRequest;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\BusinessRequest;
@@ -78,27 +80,16 @@ class SettingController extends BaseController
      * @param UpdateBusinessRequest $request
      * @param  int $id
      * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(UpdateBusinessRequest $request, $id)
     {
         $business = $request->getBusiness();
         $this->authorize('update', $business);
 
-        $data = $request->validated();
-        
-        if ($data['auto_confirm'] == 1) {
-            // turn off related other confirm settings
-            $data['allow_client_confirmations'] = 0;
-            $data['auto_confirm_modified'] = 0;
-            $data['shift_confirmation_email'] = 0;
-            $data['charge_diff_email'] = 0;
-            $data['auto_append_hours'] = 0;
-            $data['auto_confirm_unmodified_shifts'] = 0;
-        }
+        app('settings')->set($business, $request->filtered());
 
-        app('settings')->set($business, $data);
-
-        return new SuccessResponse('Business settings updated.', $request->getBusiness());
+        return new SuccessResponse('Business settings updated.', new BusinessSettingsResource($request->getBusiness()));
     }
 
     /**

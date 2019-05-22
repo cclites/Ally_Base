@@ -83,8 +83,14 @@
                 this.loading = true;
                 axios.get(`/business/status-aliases`)
                     .then( ({ data }) => {
-                        if (data && data.caregiver) {
-                            this.statuses = data;
+                        if (data) {
+                            this.statuses = {};
+                            if (data.caregiver) {
+                                this.statuses.caregiver = data.caregiver;
+                            }
+                            if (data.client) {
+                                this.statuses.client = data.client;
+                            }
                         } else {
                             this.statuses = {caregiver: [], client: []};
                         }
@@ -102,10 +108,7 @@
                     url += `/${this.form.id}`;
                     this.form.patch(url)
                         .then( ({ data }) => {
-                            let index = this.statuses[this.form.type].findIndex(x => x.id == data.data.id);
-                            if (index >= 0) {
-                                this.statuses[this.form.type].splice(index, 1, data.data);
-                            }
+                            Vue.set(this, 'statuses', data.data);
                             this.statusAliasModal = false;
                         })
                         .catch(e => {
@@ -113,7 +116,7 @@
                 } else {
                     this.form.post(url)
                         .then( ({ data }) => {
-                            this.statuses[this.form.type].push(data.data);
+                            Vue.set(this, 'statuses', data.data);
                             this.statusAliasModal = false;
                         })
                         .catch(e => {
@@ -144,9 +147,8 @@
 
                 let f = new Form({});
                 f.submit('DELETE', `/business/status-aliases/${item.id}`)
-                    .then(response => {
-                        let index = this.statuses[item.type].findIndex(x => x.id == item.id);
-                        this.statuses[item.type].splice(index, 1);
+                    .then( ({ data }) => {
+                        Vue.set(this, 'statuses', data.data);
                     })
                     .catch(e => {
                     })

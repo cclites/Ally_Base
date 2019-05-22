@@ -15,6 +15,7 @@
             <select id="provider" v-model="provider" class="form-control">
                 <option value="acorn">Acorn Format</option>
                 <option value="louisville">Louisville Format</option>
+                <option value="nurture">Nurture Care Format</option>
                 <option value="sarasota">Sarasota Format</option>
             </select>
         </div>

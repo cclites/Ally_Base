@@ -54,6 +54,8 @@
         @if(activeBusiness()->use_rate_codes)
             <li><a href="{{ route('business.rate-codes.index') }}">Rate Codes</a></li>
         @endif
+        <li><a href="{{ route('business.claims-ar') }}">Claims & AR</a></li>
+        <li><a href="{{ route('business.quickbooks-queue') }}">Quickbooks Queue</a></li>
         {{-- <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li> --}}
         {{-- <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li> --}}
         {{-- @if(app()->environment() === 'demo') --}}
@@ -87,6 +89,11 @@
     </ul>
 </li>
 <li>
+    <a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">
+        <i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>
+    </a>
+</li>
+<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.settings.index') }}">General</a></li>
@@ -95,8 +102,3 @@
         <li><a href="{{ route('business.quickbooks.index') }}">Quickbooks</a></li>
     </ul>
 </li>
-{{--<li>--}}
-    {{--<a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">--}}
-        {{--<i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>--}}
-    {{--</a>--}}
-{{--</li>--}}

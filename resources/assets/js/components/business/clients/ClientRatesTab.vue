@@ -69,7 +69,9 @@
                         <td>
                             <b-select v-model="item.service_id" size="sm" @change="(e) => onChangeService(e, item)">
                                 <option :value="null">(All)</option>
-                                <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
+                                <option v-for="service in services" :value="service.id" :key="service.id">
+                                    <template v-if="service.code">{{ service.code }} - </template>{{ service.name }}
+                                </option>
                             </b-select>
                         </td>
                         <!-- Payer -->
@@ -469,7 +471,7 @@
                     service_id: rateObject.service_id || null,
                     payer_id: rateObject.payer_id || null,
                     caregiver_id: rateObject.caregiver_id || null,
-                    effective_start: rateObject.effective_start || moment().format('MM/DD/YYYY'),
+                    effective_start: rateObject.effective_start || moment().subtract(1, 'week').format('MM/DD/YYYY'),
                     effective_end: rateObject.effective_end || moment('9999-12-31').format('MM/DD/YYYY'),
                     caregiver_hourly_rate: rateObject.caregiver_hourly_rate || '0.00',
                     caregiver_fixed_rate: rateObject.caregiver_fixed_rate || '0.00',

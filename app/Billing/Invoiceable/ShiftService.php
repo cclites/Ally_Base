@@ -5,6 +5,8 @@ use App\Billing\ClientInvoiceItem;
 use App\Billing\Invoiceable\Traits\BelongsToThroughShift;
 use App\Billing\Service;
 use App\Billing\Payer;
+use App\Business;
+use App\Caregiver;
 use App\Client;
 use App\Shift;
 use Carbon\Carbon;
@@ -158,6 +160,15 @@ class ShiftService extends InvoiceableModel
         return true;
     }
 
+    public function getShift(): ?Shift
+    {
+        return $this->shift;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->shift->getClient();
+    }
 
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
@@ -175,6 +186,16 @@ class ShiftService extends InvoiceableModel
     public function getCaregiverRate(): float
     {
         return $this->caregiver_rate;
+    }
+
+    public function getCaregiver(): ?Caregiver
+    {
+        return $this->shift->getCaregiver();
+    }
+
+    public function getBusiness(): ?Business
+    {
+        return $this->shift->getBusiness();
     }
 
     /**

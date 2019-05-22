@@ -18,7 +18,7 @@
                         </b-form-radio-group> -->
                         <b-form-select v-if="addMode === true" v-model="caregiver_select">
                             <option value="">--Select a Caregiver--</option>
-                            <option v-for="caregiver in potentialCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
+                            <option v-for="caregiver in getPotentialCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
                         <b-form-select v-else v-model="caregiver_select">
                             <option value="">--Select a Caregiver--</option>
@@ -27,6 +27,14 @@
                         <p>
                             <small v-if="caregiver_type === 'all'">Note: "All Caregivers" rates will only be used if there isn't a specific caregiver rate available.</small>
                         </p>
+
+                        <div class="form-check" v-if="addMode === true">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="remember" v-model="showAllCaregivers" />
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Show Caregivers from all Office Locations</span>
+                            </label>
+                        </div>
                     </template>
                     <template v-if="step === 2">
                         <h4>Service Type</h4>
@@ -275,8 +283,9 @@
         ally_fixed: "0.00",
         total_fixed: "0.00",
         today: moment().format('MM/DD/YYYY'),
-        start_date: moment().format('MM/DD/YYYY'),
+        start_date: moment().subtract(1, 'week').format('MM/DD/YYYY'),
         end_date: "12/31/9999",
+        showAllCaregivers: false,
     });
 
     export default {
@@ -286,6 +295,13 @@
             return initialState();
         },
         computed: {
+            getPotentialCaregivers() {
+                if (this.showAllCaregivers) {
+                    return this.potentialCaregivers;
+                } else {
+                    return this.potentialCaregivers.filter(cg => cg.businesses.includes(this.client.business_id));
+                }
+            },
             localValue: {
                 get() {
                     return this.value;
