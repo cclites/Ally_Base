@@ -333,6 +333,7 @@ Route::group([
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
     Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
+    Route::get('reports/disaster-plan-report', 'Business\Report\BusinessDisasterPlanReportController@index')->name('reports.disaster-plan');
     Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');

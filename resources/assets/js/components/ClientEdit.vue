@@ -239,14 +239,11 @@
                         <input-help :form="form" field="diagnosis"></input-help>
                     </b-form-group>
                     <b-form-group label="Disaster Code Plan" label-for="disaster_code_plan">
-                        <b-form-input
-                            id="disaster_code_plan"
-                            name="disaster_code_plan"
-                            type="text"
-                            v-model="form.disaster_code_plan"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="disaster_code_plan" text="Enter their Disaster Code Plan."></input-help>
+                        <b-select name="disaster_code_plan" id="disaster_code_plan" v-model="form.disaster_code_plan">
+                            <option value="">-- Select a Disaster Code Plan --</option>
+                            <option v-for="item in disasterCodes" :key="item" :value="item">{{ item }}</option>
+                        </b-select>
+                        <input-help :form="form" field="disaster_code_plan" text="Select their Disaster Code Plan."></input-help>
                     </b-form-group>
                     <b-form-group label="Disaster Planning" label-for="disaster_planning">
                         <b-form-textarea
@@ -727,6 +724,10 @@
                         text: item.name,
                     };
                 });
+            },
+
+            disasterCodes() {
+                return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
         },
     }
