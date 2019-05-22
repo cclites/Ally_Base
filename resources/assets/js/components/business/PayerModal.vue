@@ -72,7 +72,7 @@
                 <b-col lg="6">
                     <b-form-group label="Payment Method" label-for="payment_method_type" label-class="required">
                         <b-select v-model="form.payment_method_type">
-                            <option value="businesses">Provider Pay (Ally will pay customers)</option>
+                            <option value="businesses">Provider Pay (Ally will pay caregivers)</option>
                             <option :value="null">Offline (Caregivers will NOT be paid)</option>
                         </b-select>
                         <input-help :form="form" field="payment_method_type"></input-help>
