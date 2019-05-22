@@ -56,7 +56,7 @@ class QuickbooksInvoice
         return [
             'DocNumber' => $this->invoiceId,
             'TxnDate' => $this->date->format('Y-m-d'),
-            'DueDate' => $this->date->format('Y-m-d'),
+//            'DueDate' => $this->date->format('Y-m-d'),
             'Line' => $items,
             'CustomerRef' => [
                 'value' => $this->customerId,

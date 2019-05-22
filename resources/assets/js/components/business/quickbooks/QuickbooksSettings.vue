@@ -68,8 +68,9 @@
         },
 
         watch: {
-            businessId(newValue, oldValue) {
+            business_id(newValue, oldValue) {
                 if (newValue) {
+                    this.loading = true;
                     this.fetchConnection();
                 }
             },
