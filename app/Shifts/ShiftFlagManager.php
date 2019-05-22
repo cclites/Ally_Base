@@ -119,13 +119,13 @@ class ShiftFlagManager
      */
     public function isOutsideAuth() : bool
     {
-        $validator = new ServiceAuthValidator($this->shift);
+        $validator = new ServiceAuthValidator($this->shift->client);
 
-        if ($validator->exceedsMaxClientHours()) {
+        if ($validator->shiftExceedsMaxClientHours($this->shift)) {
             return true;
         }
 
-        if ($validator->exceededServiceAuthorization()) {
+        if ($validator->shiftExceedsServiceAuthorization($this->shift)) {
             return true;
         }
 
@@ -158,6 +158,11 @@ class ShiftFlagManager
         }
 
         return false;
+    }
+
+    public function isMissingRates() : bool
+    {
+        return $this->shift->costs()->getClientCost(false) == 0;
     }
 
     /**

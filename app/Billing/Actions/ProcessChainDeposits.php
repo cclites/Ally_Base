@@ -3,16 +3,12 @@ namespace App\Billing\Actions;
 
 use App\Billing\DepositLog;
 use App\Billing\Gateway\ACHDepositInterface;
+use App\Billing\Payments\DepositMethodFactory;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
 
 class ProcessChainDeposits
 {
-    /**
-     * @var \App\Billing\Gateway\ACHDepositInterface
-     */
-    protected $achGateway;
-
     /**
      * @var \App\Billing\Actions\ProcessInvoiceDeposit
      */
@@ -26,12 +22,16 @@ class ProcessChainDeposits
      * @var \App\Billing\Actions\ApplyExistingDeposits
      */
     protected $applyExistingDeposits;
+    /**
+     * @var \App\Billing\Payments\DepositMethodFactory
+     */
+    protected $methodFactory;
 
 
-    function __construct(ACHDepositInterface $achGateway = null, ProcessInvoiceDeposit $depositProcessor = null,
+    function __construct(DepositMethodFactory $methodFactory = null, ProcessInvoiceDeposit $depositProcessor = null,
         DepositInvoiceAggregator $invoiceAggregator = null, ApplyExistingDeposits $applyExistingDeposits = null)
     {
-        $this->achGateway = $achGateway ?: app(ACHDepositInterface::class);
+        $this->methodFactory = $methodFactory ?: new DepositMethodFactory(app(ACHDepositInterface::class));
         $this->depositProcessor = $depositProcessor ?: app(ProcessInvoiceDeposit::class);
         $this->invoiceAggregator = $invoiceAggregator ?: app(DepositInvoiceAggregator::class);
         $this->applyExistingDeposits = $applyExistingDeposits ?: app(ApplyExistingDeposits::class);
@@ -51,28 +51,47 @@ class ProcessChainDeposits
 
         $this->applyExistingDeposits->toChain($chain);
 
-        $invoices = $this->invoiceAggregator->dueForChain($chain);
         $results = [];
-        foreach($invoices as $invoice) {
-            $log = new DepositLog();
-            $log->batch_id = $batchId;
-            try {
-                $deposit = $this->depositProcessor->payInvoice($invoice);
-                $log->setDeposit($deposit);
-                if ($deposit->transaction && $deposit->transaction->method) {
-                    $log->setPaymentMethod($deposit->transaction->method);
-                }
-            }
-            catch (\Exception $e) {
-                $log->setException($e);
-            }
 
-            $results[] = $log;
+        $caregivers = $this->invoiceAggregator->getEligibleCaregivers($chain);
+        foreach($caregivers as $caregiver) {
+            $invoices = $this->invoiceAggregator->dueForCaregiver($caregiver);
+            $results[] = $this->processSingleDeposit($batchId, $invoices);
+        }
+
+        $businesses = $this->invoiceAggregator->getEligibleBusinesses($chain);
+        foreach($businesses as $business) {
+            $invoices = $this->invoiceAggregator->dueForBusiness($business);
+            $results[] = $this->processSingleDeposit($batchId, $invoices);
         }
 
         DepositLog::releaseLock();
 
         return collect($results);
     }
+
+    /**
+     * @param string $batchId
+     * @param \App\Billing\CaregiverInvoice $invoice
+     * @param array $results
+     * @return array
+     */
+    private function processSingleDeposit(string $batchId, iterable $invoices): DepositLog
+    {
+        $log = new DepositLog();
+        $log->batch_id = $batchId;
+        try {
+            $deposit = $this->depositProcessor->payInvoices($invoices, $this->methodFactory);
+            $log->setDeposit($deposit);
+            if ($deposit->transaction && $deposit->transaction->method) {
+                $log->setPaymentMethod($deposit->transaction->method);
+            }
+        } catch (\Exception $e) {
+            $log->setException($e);
+        }
+
+        return $log;
+    }
+
 
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Bug;
+namespace Tests\Bugs;
 
 use App\Billing\Deposit;
 use App\Shift;

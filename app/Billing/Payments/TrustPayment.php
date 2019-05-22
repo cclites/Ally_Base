@@ -47,9 +47,4 @@ class TrustPayment implements PaymentMethodStrategy
     {
         return $this->trust;
     }
-
-    public function getPaymentType(): string
-    {
-        return 'Trust';
-    }
 }

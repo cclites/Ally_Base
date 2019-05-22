@@ -112,7 +112,7 @@ class CronDailyNotifications extends Command
     public function expiringCertifications()
     {
         $licenses = CaregiverLicense::with('caregiver')
-            ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(CertificationExpiring::$threshold)])
+            ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(CertificationExpiring::THRESHOLD)])
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(CertificationExpiring::getKey(), $licenses->pluck('id'));

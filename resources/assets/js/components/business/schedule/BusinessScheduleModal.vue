@@ -454,7 +454,6 @@
             },
             passCaregivers: {
                 type: Array,
-                required: true,
             },
             selectedSchedule: {
                 type: Object,
@@ -559,7 +558,7 @@
 
             caregivers() {
                 if (! this.form.client_id || this.cgMode === 'all') {
-                    return this.allCaregivers;
+                    return this.passCaregivers || this.allCaregivers;
                 }
                 return this.clientCaregivers;
             },
@@ -634,7 +633,6 @@
                 this.loadCarePlans(clientId);
                 this.loadClientRates(clientId);
                 this.loadClientPayers(clientId);
-                this.checkForWarnings(this);
             },
 
             changedCaregiver(caregiverId) {
@@ -647,8 +645,6 @@
                 if (caregiverId && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
                     this.form.status = 'OK';
                 }
-
-                this.checkForWarnings(this);
             },
 
             checkForWarnings: _.debounce((vm) => {
@@ -659,37 +655,34 @@
                     duration: vm.getDuration(),
                     starts_at: vm.getStartsAt(),
                     id: vm.schedule.id ? vm.schedule.id : '',
+                    payer_id: vm.form.payer_id,
+                    service_id: vm.form.service_id,
+                    services: vm.form.services,
                 });
 
-                if (! form.caregiver) {
-                    // skip warnings for now because they are all related to the CG
+                if (! form.caregiver && ! form.client) {
+                    // skip warnings if client and cg not set
                     return;
                 }
 
                 form.alertOnResponse = false;
-                form.get('/business/schedule/warnings')
+                form.post('/business/schedule/warnings')
                     .then( ({ data }) => {
                         vm.warnings = data;
                     })
                     .catch(e => {})
             }, 350),
 
-            // async checkForWarnings() {
-            // },
-
             changedStartDate(startDate) {
                 this.fetchAllRates();
-                this.checkForWarnings(this);
             },
 
             changedStartTime(startTime) {
                 this.form.duration = this.getDuration();
-                this.checkForWarnings(this);
             },
 
             changedEndTime(endTime) {
                 this.form.duration = this.getDuration();
-                this.checkForWarnings(this);
             },
 
             changedPayer(service, payerId) {
@@ -733,6 +726,7 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = schedule.client_rate == null;
+                this.warnings = [];
 
                 // Initialize form
                 this.$nextTick(() => {
@@ -770,7 +764,6 @@
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
                     this.setDateTimeFromSchedule(schedule);
-                    this.checkForWarnings(this);
                 });
             },
 
@@ -905,8 +898,8 @@
             },
 
             async loadAllCaregivers() {
-                if (!this.allCaregivers || !this.allCaregivers.length) {
-                    const response = await axios.get(`/business/schedule/caregivers`);
+                if (!this.passCaregivers) {
+                    const response = await axios.get(`/business/caregivers?json=1`);
                     this.allCaregivers = response.data;
                 }
             },
@@ -1008,6 +1001,13 @@
         },
 
         watch: {
+            form: {
+                handler(obj){
+                    this.checkForWarnings(this);
+                },
+                deep: true
+            },
+
             'form.hours_type': function(newVal, oldVal) {
                 if (! oldVal || newVal == oldVal) {
                     return;

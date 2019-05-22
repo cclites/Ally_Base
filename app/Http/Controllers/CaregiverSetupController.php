@@ -34,7 +34,7 @@ class CaregiverSetupController extends Controller
             'caregiver-data' => $caregiver,
             'token' => $token,
         ];
-        return view_component('caregiver-setup-wizard', 'Caregiver Account Setup', $props, null, 'guest');
+        return view_component('caregiver-setup-wizard', 'Caregiver Account Setup', $props, [], 'guest');
     }
 
     /**

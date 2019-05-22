@@ -1,17 +1,15 @@
 <?php
 namespace App\Scheduling\Data;
 
-use App\Data\StringValueObject;
+use MyCLabs\Enum\Enum;
 
-class CalendarView extends StringValueObject
+class CalendarView extends Enum
 {
-    const MONTH = "month";
-    const TIMELINE_WEEK = "timelineWeek";
-    const TIMELINE_DAY = "timelineDay";
+    private const MONTH = "month";
+    private const TIMELINE_WEEK = "timelineWeek";
+    private const TIMELINE_DAY = "timelineDay";
 
-    public function __construct(string $value)
-    {
-        $this->assertValueInConstants($value);
-        $this->setValue($value);
-    }
+    static function MONTH() { return new self(self::MONTH); }
+    static function TIMELINE_WEEK() { return new self(self::TIMELINE_WEEK); }
+    static function TIMELINE_DAY() { return new self(self::TIMELINE_DAY); }
 }

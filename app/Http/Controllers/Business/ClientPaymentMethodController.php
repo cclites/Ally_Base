@@ -47,12 +47,7 @@ class ClientPaymentMethodController extends BaseController
     {
         $this->authorize('update', $client);
 
-        if ($type == 'backup') {
-            $relation = $client->backupPayment();
-        }
-        else {
-            $relation = $client->defaultPayment();
-        }
+        $relation = $type == 'backup' ? $client->backupPayment() : $client->defaultPayment();
 
         if ($relation->first() instanceof Trust) {
             if (!is_admin()) {

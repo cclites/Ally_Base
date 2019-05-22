@@ -125,7 +125,7 @@ Route::group([
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
 
-    Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
+    Route::get('reports/payment-history/print/{year}/{view?}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
     Route::get('reports/payment-history/{id}/print', 'Caregivers\ReportsController@printPaymentDetails')->name('caregivers.reports.print_payment_details');
     Route::get('reports/payment-history/{id}', 'Caregivers\ReportsController@paymentDetails')->name('caregivers.reports.payment_details');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
@@ -333,6 +333,7 @@ Route::group([
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
     Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
+    Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -350,8 +351,7 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
-    Route::get('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
-    Route::get('schedule/caregivers', 'Business\ScheduleController@caregiverData')->name('schedule.caregivers');
+    Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
@@ -410,7 +410,19 @@ Route::group([
     Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
+    Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
+    Route::get('quickbooks/{business}/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
+    Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');
+    Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
+    Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
+    Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
+    Route::get('quickbooks/{business}/services', 'Business\QuickbooksSettingsController@servicesList');
+    Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
+    Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
+
+    Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
+    Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
@@ -436,9 +448,6 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
-    Route::get('tellus', 'Admin\TellusController@index')->name('tellus');
-    Route::get('tellus/download/{shift}', 'Admin\TellusController@download');
-    Route::post('tellus', 'Admin\TellusController@submit');
     Route::get('microbilt', 'Admin\MicrobiltController@index')->name('microbilt');
     Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
@@ -550,10 +559,13 @@ Route::group([
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::delete('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@destroy');
     Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
+    Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
+    Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');

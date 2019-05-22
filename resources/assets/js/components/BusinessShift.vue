@@ -548,8 +548,18 @@
                     return {};
                 }
             },
-            'caregiver': {},
-            'client': {},
+            'caregiver': {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
+            'client': {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
             'activities': Array,
             'admin': Number,
             'is_modal': 0,
@@ -762,8 +772,8 @@
             initForm(shift = {}) {
                 console.log('initForm', this.form);
                 return {
-                    client_id: shift.id ? shift.client_id || null : this.client || null,
-                    caregiver_id: shift.id ? shift.caregiver_id || null : this.caregiver || null,
+                    client_id: shift.id ? shift.client_id : this.client.id || null,
+                    caregiver_id: shift.id ? shift.caregiver_id : this.caregiver.id || null,
                     caregiver_comments: shift.caregiver_comments || null,
                     checked_in_time: shift.checked_in_time || null,
                     checked_out_time: shift.checked_out_time || null,

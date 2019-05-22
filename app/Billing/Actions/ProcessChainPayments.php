@@ -6,27 +6,21 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\Payment;
 use App\Billing\PaymentLog;
 use App\Billing\Payments\BankAccountPayment;
 use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\Methods\ProviderPayment;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Payments\PaymentMethodFactory;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Business;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
 
 class ProcessChainPayments
 {
-    /**
-     * @var \App\Billing\Gateway\ACHPaymentInterface
-     */
-    protected $achGateway;
-    /**
-     * @var \App\Billing\Gateway\CreditCardPaymentInterface
-     */
-    protected $ccGateway;
     /**
      * @var \App\Billing\Actions\ProcessInvoicePayment
      */
@@ -36,18 +30,21 @@ class ProcessChainPayments
      */
     protected $paymentApplicator;
     /**
-     * @var \App\Billing\Queries\ClientInvoiceQuery
+     * @var \App\Billing\Queries\OnlineClientInvoiceQuery
      */
     protected $invoiceQuery;
+    /**
+     * @var \App\Billing\Payments\PaymentMethodFactory
+     */
+    protected $methodFactory;
 
-    function __construct(ACHPaymentInterface $achGateway = null, CreditCardPaymentInterface $ccGateway = null,
-        ProcessInvoicePayment $paymentProcessor = null, ApplyPayment $paymentApplicator = null, ClientInvoiceQuery $invoiceQuery = null)
+    function __construct(PaymentMethodFactory $methodFactory = null, ProcessInvoicePayment $paymentProcessor = null,
+        ApplyPayment $paymentApplicator = null, OnlineClientInvoiceQuery $invoiceQuery = null)
     {
-        $this->achGateway = $achGateway ?: app(ACHPaymentInterface::class);
-        $this->ccGateway = $ccGateway ?: app(CreditCardPaymentInterface::class);
+        $this->methodFactory = $methodFactory ?: new PaymentMethodFactory(app(ACHPaymentInterface::class), app(CreditCardPaymentInterface::class));
         $this->paymentProcessor = $paymentProcessor ?: app(ProcessInvoicePayment::class);
         $this->paymentApplicator = $paymentApplicator ?: app(ApplyPayment::class);
-        $this->invoiceQuery = $invoiceQuery ?: app(ClientInvoiceQuery::class);
+        $this->invoiceQuery = $invoiceQuery ?: app(OnlineClientInvoiceQuery::class);
     }
 
     /**
@@ -76,7 +73,7 @@ class ProcessChainPayments
                 }
                 $paymentMethod = $this->getPaymentMethod($invoices[0]);
                 $log->setPaymentMethod($paymentMethod);
-                $strategy = $this->buildStrategy($paymentMethod);
+                $strategy = $this->methodFactory->getStrategy($paymentMethod);
                 $log->setPayment($this->paymentProcessor->payInvoices($invoices, $strategy));
             }
             catch (\Exception $e) {
@@ -144,26 +141,5 @@ class ProcessChainPayments
         }
 
         return $paymentMethod;
-    }
-
-    /**
-     * Build a payment method strategy for the given payment method using the injected gateways
-     *
-     * @param \App\Billing\Contracts\ChargeableInterface $chargeable
-     * @return \App\Billing\Payments\BankAccountPayment|\App\Billing\Payments\CreditCardPayment|\App\Billing\Payments\Methods\ProviderPayment
-     * @throws \App\Billing\Exceptions\PaymentMethodError
-     */
-    function buildStrategy(ChargeableInterface $chargeable)
-    {
-        if ($chargeable instanceof CreditCard) {
-            return new CreditCardPayment($chargeable, clone $this->ccGateway);
-        }
-        if ($chargeable instanceof BankAccount) {
-            return new BankAccountPayment($chargeable, clone $this->achGateway);
-        }
-        if ($chargeable instanceof Business) {
-            return new ProviderPayment($chargeable, clone $this->achGateway);
-        }
-        throw new PaymentMethodError("Unable to build payment strategy.");
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
+use App\Billing\ScheduleService;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
@@ -544,21 +545,6 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Get a list of all the current business's caregivers
-     * for use on the BusinessSchedule component.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function caregiverData()
-    {
-        return response()->json(Caregiver::with(['clients.business'])
-            ->forRequestedBusinesses()
-            ->ordered()
-            ->get()
-        );
-    }
-
-    /**
      * Create a temp schedule object with the request data and
      * check if there are any warnings that should be displayed
      * to the OfficeUser.
@@ -571,9 +557,18 @@ class ScheduleController extends BaseController
         $schedule = Schedule::make([
             'caregiver_id' => $request->caregiver,
             'client_id' => $request->client,
-            'starts_at' => Carbon::parse($request->starts_at),
+            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone()),
             'duration' => $request->duration,
+            'payer_id' => $request->payer_id,
+            'service_id' => $request->service_id,
         ]);
+        $schedule->id = $request->id ? $request->id : null;
+
+        $services = collect([]);
+        foreach ($request->services as $service) {
+            $services->push(ScheduleService::make($service));
+        }
+        $schedule->setRelation('services', $services);
 
         $aggregator = new ScheduleWarningAggregator($schedule);
         return response()->json($aggregator->getAll());

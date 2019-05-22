@@ -8,6 +8,7 @@ class ImportManager
         'acorn'      => AcornImportProcessor::class,
         'sarasota'   => SarasotaImportProcessor::class,
         'louisville' => LouisvilleImportProcessor::class,
+        'nurture'    => NurtureCareImportProcessor::class,
     ];
 
     /**

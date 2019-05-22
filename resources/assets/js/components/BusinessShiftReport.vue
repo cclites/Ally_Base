@@ -301,8 +301,8 @@
 
         <add-shift-modal 
             v-model="addShiftModal" 
-            :caregiver="filters.caregiver_id"
-            :client="filters.client_id"
+            :caregiver="{id: filters.caregiver_id}"
+            :client="{id: filters.client_id}"
             @shift-created="onShiftCreate"
         ></add-shift-modal>
 

@@ -75,6 +75,7 @@ class CronReminders extends Command
 
         $schedules = Schedule::forBusinesses([$business->id])
             ->whereBetween('starts_at', [$from, $to])
+            ->whereNotNull('caregiver_id')
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
@@ -102,8 +103,10 @@ class CronReminders extends Command
         $to = Carbon::now()->subMinutes(20)->tz($business->timezone);
 
         $schedules = Schedule::forBusinesses([$business->id])
+            ->has('caregiver')
             ->with('shifts')
             ->whereBetween('starts_at', [$from, $to])
+            ->whereNotNull('caregiver_id')
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ClockInReminder::getKey(), $schedules->pluck('id'));
@@ -113,7 +116,7 @@ class CronReminders extends Command
                 continue;
             }
 
-            if ($schedule->shift_status != Schedule::SCHEDULED) {
+            if ($schedule->getShiftStatus() != Schedule::SCHEDULED) {
                 // schedule has a shift attached, which means it has been clocked in already
                 continue;
             }
@@ -134,6 +137,7 @@ class CronReminders extends Command
     {
         $shifts = Shift::forBusinesses([$business->id])
             ->where('status', Shift::CLOCKED_IN)
+            ->whereNotNull('caregiver_id')
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ClockOutReminder::getKey(), $shifts->pluck('id'));

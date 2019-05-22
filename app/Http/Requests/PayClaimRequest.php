@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Billing\ClaimPayment;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -25,10 +26,11 @@ class PayClaimRequest extends FormRequest
     public function rules()
     {
         return [
-            'payed_at' => 'required|date',
-            'amount' => 'required|numeric|between:0,99999.99',
-            'reference' => 'nullable|string|max:255',
+            'payment_date' => 'required|date',
+            'amount' => 'required|numeric|between:0,9999999.99',
             'type' => 'nullable|string|max:255',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:4096',
         ];
     }
     
@@ -40,7 +42,24 @@ class PayClaimRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
-        $data['payed_at'] = Carbon::parse($data['payed_at'])->format('Y-m-d');
+        $data['payment_date'] = Carbon::parse($data['payment_date'])->format('Y-m-d');
         return $data;
+    }
+
+
+    public function toClaimPayment(): ClaimPayment
+    {
+        return new ClaimPayment([
+            'payment_date' => $this->filtered()['payment_date'],
+            'amount' => $this->filtered()['amount'],
+            'type' => $this->filtered()['type'] ?? null,
+            'reference' => $this->filtered()['reference'] ?? null,
+            'notes' => $this->filtered()['notes'] ?? null,
+        ]);
+    }
+
+    public function getAmount(): float
+    {
+        return (float) $this->input('amount');
     }
 }

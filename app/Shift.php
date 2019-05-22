@@ -1038,27 +1038,27 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the total billable hours of the shift, including service breakouts.
+     * Get the total billable hours of the shift based on
+     * service including service breakouts.
      *
      * @param int|null $service_id
-     * @param int|null $payer_id
      * @return float
      */
-    public function getBillableHours(?int $service_id = null, ?int $payer_id = null) : float
+    public function getBillableHours(?int $service_id = null) : float
     {
         if ($this->fixed_rates || ! empty($this->service_id)) {
             // actual hours shift
+            if (! empty($service_id) && $service_id != $this->service_id) {
+                // make sure service id matches the one on the model (or all).
+                return 0;
+            }
             return $this->duration(true);
-        } else if (! empty($this->services)) {
+        } else if ($this->services->isNotEmpty()) {
             // service breakout shift
             $services = $this->services;
 
             if (! empty($service_id)) {
                 $services = $services->where('service_id', $service_id);
-            }
-
-            if (! empty($payer_id)) {
-                $services = $services->where('payer_id', $payer_id);
             }
 
             return floatval($services->sum('duration'));
@@ -1068,16 +1068,59 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Get the client's service authorizations active during the time
-     * of the shift.  Defaults to today.
+     * Get the total billable hours for a specific day of the shift
+     * based on service including service breakouts.
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
+     * @param \Carbon\Carbon $date
+     * @param int|null $service_id
+     * @return float
      */
-    public function getActiveServiceAuths() : iterable
+    public function getBillableHoursForDay(Carbon $date, ?int $service_id = null) : float
     {
-        return $this->client->serviceAuthorizations()
-            ->effectiveOn($this->checked_in_time)
-            ->get();
+        $hours = $this->getBillableHours($service_id);
+        if (count($this->getDateSpan()) === 1) { // only spans 1 day
+            return $hours;
+        }
+
+        if ($this->services->isNotEmpty()) {
+            // service breakout shift - return total shift hours for all days since this
+            // is a complicated query and we want to protect them more than be 100% accurate
+            return $hours;
+        } else {
+            // actual hours shift
+            // TODO: this does not properly handle shifts that expand more than two days
+            $tz = $this->client->getTimezone();
+            $start = $this->checked_in_time->copy()->setTimezone($tz);
+            $end = $this->checked_out_time->copy()->setTimezone($tz);
+
+            if ($start->format('Ymd') === $date->format('Ymd')) {
+                $minutes = $start->diffInMinutes($start->copy()->endOfDay());
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            } else {
+                $minutes = $end->copy()->startOfDay()->diffInMinutes($end);
+                return $minutes === 0 ? 0 : ($minutes / 60);
+            }
+        }
+    }
+
+    /**
+     * Get all of the dates that the shift exists on.
+     *
+     * @return array
+     */
+    public function getDateSpan() : array
+    {
+        // Convert shift dates to the client timezone so they are relative to ClientAuthorizations.
+        $tz = $this->client->getTimezone();
+        $start = $this->checked_in_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+        $end = $this->checked_out_time->copy()->setTimezone($tz)->setTime(0, 0, 0);
+
+        if ($start->format('Ymd') == $end->format('Ymd')) {  // same day
+            return [$start];
+        }
+
+        // TODO: this does not properly handle shifts that expand more than two days
+        return [$start, $end];
     }
 
     ///////////////////////////////////////////

@@ -42,7 +42,7 @@ class ClientInvoice extends Resource
             'payer_payment_type' => $this->whenLoaded('clientPayer', function() {
                 try {
                     if ($method = $this->resource->getClientPayer()->getPaymentMethod()) {
-                        return $method->getPaymentStrategy()->getPaymentType();
+                        return $method->getPaymentType();
                     }
                 }
                 catch (PaymentMethodError $e) {}

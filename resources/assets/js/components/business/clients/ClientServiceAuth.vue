@@ -47,12 +47,12 @@
             <b-modal id="filterColumnsModal" :title="title" v-model="showAuthModal" size="lg">
                 <b-container fluid>
                     <b-row>
-                        <b-col lg="3">
+                        <b-col lg="4">
                             <b-form-group label="Service Auth ID" label-class="required">
                                 <b-form-input v-model="form.service_auth_id" type="text" max="255"></b-form-input>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="5">
+                        <b-col lg="6">
                             <b-row>
                                 <b-col lg="6">
                                     <b-form-group label="Service Code" label-class="required">
@@ -68,14 +68,6 @@
                                     </b-form-group>
                                 </b-col>
                             </b-row>
-                        </b-col>
-                        <b-col lg="4">
-                            <b-form-group label="Payer">
-                                <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
-                                    <option :value="null">(Any Payer)</option>
-                                    <option v-for="p in payers" :value="p.id" :key="p.id">{{ p.name }}</option>
-                                </b-form-select>
-                            </b-form-group>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -191,7 +183,7 @@
     export default {
         mixins: [FormatsStrings],
 
-        props: ['auths', 'payers', 'services', 'clientId'],
+        props: ['auths', 'services', 'clientId'],
 
         data() {
             return {
@@ -201,16 +193,10 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'payer',
+                sortBy: 'service_type',
                 sortDesc: false,
                 filter: null,
                 fields: [
-                    {
-                        key: 'payer',
-                        label: 'Payer',
-                        sortable: true,
-                        formatter: (val) => val ? val.name : '-',
-                    },
                     {
                         key: 'service_type',
                         label: 'Service Type',
@@ -326,7 +312,6 @@
                     service_auth_id: defaults.service_auth_id || '',
                     client_id: this.clientId,
                     service_id: defaults.service_id || null,
-                    payer_id: defaults.payer_id || null,
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
                     effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
                     units: defaults.units || 0,

@@ -3,6 +3,7 @@
 namespace Tests\Controller\Business;
 
 use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use App\Client;
 use App\OfficeUser;
@@ -19,10 +20,11 @@ class SettingTest extends TestCase
     public function setUp()
     {
         parent::setUp();
+        $this->disableExceptionHandling();
 
-        $business = factory(Business::class)->create();
-        $this->officeUser = factory(OfficeUser::class)->create();
-        $this->actingAs($this->officeUser->user);
+        $chain = factory(BusinessChain::class)->create();
+        $business = factory(Business::class)->create(['chain_id' => $chain->id]);
+        $this->officeUser = factory(OfficeUser::class)->create(['chain_id' => $chain->id]);
         $this->officeUser->businesses()->attach($business->id);
     }
 

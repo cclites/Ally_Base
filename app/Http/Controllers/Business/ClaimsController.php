@@ -3,18 +3,19 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\Claim;
+use App\Billing\ClaimService;
+use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Billing\View\InvoiceViewFactory;
-use App\Billing\View\InvoiceViewGenerator;
-use App\BusinessChain;
+use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Queries\OfflineClientInvoiceQuery;
 use App\Http\Requests\PayClaimRequest;
+use App\Http\Requests\TransmitClaimRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ClaimResource;
-use App\Services\HhaExchangeManager;
 
 class ClaimsController extends BaseController
 {
@@ -22,10 +23,10 @@ class ClaimsController extends BaseController
      * Get claims listing.
      *
      * @param Request $request
-     * @param ClientInvoiceQuery $invoiceQuery
+     * @param OfflineClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OfflineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             if ($request->filled('invoiceType')) {
@@ -43,13 +44,13 @@ class ClaimsController extends BaseController
                         $invoiceQuery->whereDoesntHave('claim');
                         break;
                     case 'has_balance':
-                        $invoiceQuery->whereHas('claim', function ($q) {
-                            $q->where('balance', '<>', 0.0);
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount', '>', 'amount_paid');
                         });
                         break;
                     case 'no_balance':
-                        $invoiceQuery->whereHas('claim', function ($q) {
-                            $q->where('balance', '=', 0.0);
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount', '<=', 'amount_paid');
                         });
                         break;
                 }
@@ -84,50 +85,40 @@ class ClaimsController extends BaseController
     /**
      * Create a claim from an invoice and transmit to HHAeXchange.
      *
-     * @param Request $request
+     * @param TransmitClaimRequest $request
      * @param ClientInvoice $invoice
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
      */
-    public function transmitInvoice(Request $request, ClientInvoice $invoice)
+    public function transmitInvoice(TransmitClaimRequest $request, ClientInvoice $invoice)
     {
+        $data = $request->validated();
+        $service = $data['service'];
+
         $this->authorize('read', $invoice);
 
-        // Disabled for now
-        return new ErrorResponse(412, "Contact Ally to configure your account for claim transmission.");
+        try {
+            \DB::beginTransaction();
 
-        if (empty($invoice->client->business->ein)) {
-            return new ErrorResponse(412, 'You cannot submit a claim because you do not have an EIN set.  Please visit Settings > General > Medicaid and to this value.');
-        }
-        if (empty($invoice->client->medicaid_id)) {
-            return new ErrorResponse(412, 'You cannot submit a claim because the client does not have a Medicaid ID set.  Please visit the client profile and set this value under the Insurance & Service Auths section.');
-        }
+            $transmitter = Claim::getTransmitter(ClaimService::$service());
+            $transmitter->validateInvoice($invoice);
 
-        $claim = $invoice->claim;
-        if (empty($claim)) {
-            $claim = Claim::create([
-                'client_invoice_id' => $invoice->id,
-                'amount' => $invoice->amount,
-                'balance' => $invoice->amount,
-                'status' => Claim::CREATED,
+            $claim = Claim::getOrCreate($invoice);
+
+            $transmitter->send($claim);
+
+            $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
+                'service' => ClaimService::$service(),
             ]);
 
-            $claim->statuses()->create(['status' => Claim::CREATED]);
-        }
-
-        $shiftData = $claim->getHhaExchangeData();
-        if (empty($shiftData)) {
-            return new ErrorResponse(412, 'You cannot create a claim because there are no shifts attached to this invoice.');
-        }
-
-        $hha = new HhaExchangeManager($invoice->client->business->ein);
-        $hha->addItems($shiftData);
-        if ($hha->uploadCsv()) {
-            $claim->updateStatus(Claim::TRANSMITTED);
+            \DB::commit();
             return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
+        } catch (ClaimTransmissionException $ex) {
+            return new ErrorResponse(500, $ex->getMessage());
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
         }
-
-        return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
     }
 
     /**
@@ -144,17 +135,11 @@ class ClaimsController extends BaseController
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
         }
 
-        if (floatval($request->amount) > floatval($invoice->claim->balance)) {
+        if ($request->getAmount() > $invoice->claim->getAmountDue()) {
             return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
         }
 
-        \DB::beginTransaction();
-
-        $invoice->claim->payments()->create($request->filtered());
-
-        $invoice->claim->recalculateBalance();
-
-        \DB::commit();
+        $invoice->claim->addPayment($request->toClaimPayment());
 
         return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
     }

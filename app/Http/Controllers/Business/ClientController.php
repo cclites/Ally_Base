@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Actions\CreateClient;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Client;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
@@ -148,11 +148,11 @@ class ClientController extends BaseController
      * Display the specified resource.
      *
      * @param  \App\Client $client
-     * @param \App\Billing\Queries\ClientInvoiceQuery $invoiceQuery
+     * @param \App\Billing\Queries\OnlineClientInvoiceQuery $invoiceQuery
      * @return ErrorResponse|\Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show(Client $client, ClientInvoiceQuery $invoiceQuery)
+    public function show(Client $client, OnlineClientInvoiceQuery $invoiceQuery)
     {
         $this->authorize('read', $client);
 
@@ -223,7 +223,7 @@ class ClientController extends BaseController
 
     public function edit(Client $client)
     {
-        return $this->show($client, app(ClientInvoiceQuery::class));
+        return $this->show($client, app(OnlineClientInvoiceQuery::class));
     }
 
     /**
@@ -362,6 +362,8 @@ class ClientController extends BaseController
             'ltci_fax',
             'medicaid_id',
             'medicaid_diagnosis_codes',
+            'medicaid_plan_id',
+            'medicaid_payer_id',
             'max_weekly_hours'
         ]);
 

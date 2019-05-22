@@ -3,11 +3,10 @@
 namespace App;
 
 use App\Billing\Deposit;
-use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\PaymentMethodType;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -17,6 +16,7 @@ use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
+use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -414,6 +414,36 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(SalesPerson::class);
     }
 
+    /**
+     * Get the QuickbooksConnection relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function quickbooksConnection()
+    {
+        return $this->hasOne(QuickbooksConnection::class);
+    }
+
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksCustomers()
+    {
+        return $this->hasMany(QuickbooksCustomer::class);
+    }
+
+    /**
+     * Get the QuickbooksService relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function quickbooksServices()
+    {
+        return $this->hasMany(QuickbooksService::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -782,18 +812,17 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->getPhoneNumber();
     }
 
-    function getPaymentStrategy(): PaymentMethodStrategy
-    {
-        if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
-        return $this->paymentAccount->getPaymentStrategy();
-    }
-
     /**
      * @return string
      */
     public function getHash(): string
     {
         return 'businesses:' . $this->id;
+    }
+
+    public function getPaymentType(): PaymentMethodType
+    {
+        return PaymentMethodType::ACH_P();
     }
 
     /**
@@ -804,6 +833,46 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getDisplayValue(): string
     {
         return 'ACH-P *' . $this->paymentAccount->last_four;
+    }
+
+    /**
+     * Setter for hha_password field.
+     *
+     * @param $value
+     */
+    public function setHhaPassword($value) : void
+    {
+        $this->attributes['hha_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for hha_password field.
+     *
+     * @return string
+     */
+    public function getHhaPassword() : string
+    {
+        return empty($this->attributes['hha_password']) ? null : Crypt::decrypt($this->attributes['hha_password']);
+    }
+
+    /**
+     * Setter for tellus_password field.
+     *
+     * @param $value
+     */
+    public function setTellusPassword($value) : void
+    {
+        $this->attributes['tellus_password'] = $value ? Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Getter for tellus_password field.
+     *
+     * @return string
+     */
+    public function getTellusPassword() : string
+    {
+        return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
     }
 
     ////////////////////////////////////
