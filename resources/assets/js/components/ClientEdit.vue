@@ -656,7 +656,7 @@
 
             async fetchStatusAliases() {
                 let response = await axios.get(`/business/status-aliases?business_id=${this.client.business_id}`);
-                if (response.data && response.data.caregiver) {
+                if (response.data && response.data.client) {
                     this.statusAliases = response.data;
                 } else {
                     this.statusAliases = {caregiver: [], client: []};

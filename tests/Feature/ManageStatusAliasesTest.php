@@ -86,6 +86,58 @@ class ManageStatusAliasesTest extends TestCase
     }
 
     /** @test */
+    function creating_aliases_restricts_unique_names_per_chain()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $alias = factory(StatusAlias::class)->create([
+            'name' => 'Test',
+            'chain_id' => $this->chain->id,
+        ]);
+
+        $data = factory(StatusAlias::class)->raw(['name' => $alias->name]);
+        $this->postJson(route('business.status-aliases.store'), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+        $this->assertCount(1, $this->chain->fresh()->statusAliases);
+
+        $otherChain = factory(BusinessChain::class)->create();
+        $alias->update(['chain_id' => $otherChain->id]);
+        $this->assertCount(0, $this->chain->fresh()->statusAliases);
+
+        $this->postJson(route('business.status-aliases.store'), $data)
+            ->assertStatus(200);
+        $this->assertCount(1, $this->chain->fresh()->statusAliases);
+    }
+
+    /** @test */
+    function updating_aliases_restricts_unique_names_per_chain()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $alias1 = factory(StatusAlias::class)->create([
+            'name' => 'Test',
+            'chain_id' => $this->chain->id,
+        ]);
+        $alias2 = factory(StatusAlias::class)->create([
+            'name' => 'Anything Else',
+            'chain_id' => $this->chain->id,
+        ]);
+
+        $alias2->name = 'Test';
+        $this->patchJson(route('business.status-aliases.update', ['status_alias' => $alias2]), $alias2->toArray())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+        $this->assertEquals('Anything Else', $alias2->fresh()->name);
+
+        $otherChain = factory(BusinessChain::class)->create();
+        $alias1->update(['chain_id' => $otherChain->id]);
+        $this->patchJson(route('business.status-aliases.update', ['status_alias' => $alias2]), $alias2->toArray())
+            ->assertStatus(200);
+        $this->assertEquals('Test', $alias2->fresh()->name);
+    }
+
+    /** @test */
     public function creating_a_new_alias_requires_a_valid_type()
     {
         $this->actingAs($this->officeUser->user);
