@@ -27,7 +27,15 @@
             }),
             selectedBusiness: {
                 get() {
-                    return this.value || this.$store.getters.defaultBusiness.id || "";
+                    if (this.value) {
+                        return this.value;
+                    }
+
+                    if (this.officeUserSettings) {
+                        return this.officeUserSettings.default_business_id;
+                    }
+
+                    return this.$store.getters.defaultBusiness.id || "";
                 },
                 set(value) {
                     this.$emit('input', value);

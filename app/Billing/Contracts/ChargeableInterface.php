@@ -89,7 +89,7 @@ interface ChargeableInterface extends HasAllyFeeInterface
     /**
      * Return the owner of the payment method or account
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function getOwnerModel();
 

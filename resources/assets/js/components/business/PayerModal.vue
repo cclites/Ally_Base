@@ -69,6 +69,15 @@
                         <input-help :form="form" field="zip" text=""></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Payment Method" label-for="payment_method_type" label-class="required">
+                        <b-select v-model="form.payment_method_type">
+                            <option value="businesses">Provider Pay (Ally will pay customers)</option>
+                            <option :value="null">Offline (Caregivers will NOT be paid)</option>
+                        </b-select>
+                        <input-help :form="form" field="payment_method_type"></input-help>
+                    </b-form-group>
+                </b-col>
             </b-row>
             <b-row class="mb-2">
                 <b-col lg="6">
@@ -135,6 +144,7 @@
 
         methods: {
             makeForm(defaults = {}) {
+                console.log(defaults);
                 return new Form({
                     name: defaults.name,
                     npi_number: defaults.npi_number,
@@ -145,6 +155,7 @@
                     city: defaults.city,
                     state: defaults.state,
                     zip: defaults.zip,
+                    payment_method_type: defaults.payment_method_type === undefined ? "businesses" : defaults.payment_method_type,
                     phone_number: defaults.phone_number,
                     fax_number: defaults.fax_number,
                     email: defaults.email,

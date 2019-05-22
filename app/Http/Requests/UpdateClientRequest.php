@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\DisasterCode;
+use App\Ethnicity;
 use App\Rules\ValidEnum;
 use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
@@ -79,6 +80,7 @@ class UpdateClientRequest extends BusinessRequest
                 $data['username'] = Client::getAutoUsername();
             }
         }
+        $data['updated_by'] = auth()->id();
 
         return $data;
     }

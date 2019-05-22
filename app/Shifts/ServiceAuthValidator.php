@@ -122,7 +122,7 @@ class ServiceAuthValidator
                     // Get total hours billed for each shift on this date only
                     $total = $query->get()
                         ->map(function (Shift $item) use ($day, $auth) {
-                            return $item->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                            return $item->getBillableHoursForDay($day, $auth->service_id);
                         })
                         ->sum();
 
@@ -162,7 +162,7 @@ class ServiceAuthValidator
                     $total = $this->getMatchingShiftsQuery($auth, $day)
                         ->get()
                         ->map(function (Shift $item) use ($day, $auth) {
-                            return $item->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                            return $item->getBillableHoursForDay($day, $auth->service_id);
                         })
                         ->sum();
 
@@ -170,13 +170,13 @@ class ServiceAuthValidator
                     $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)
                         ->get()
                         ->map(function (Schedule $item) use ($day, $auth) {
-                            return $item->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                            return $item->getBillableHoursForDay($day, $auth->service_id);
                         })
                         ->sum();
 
                     // Add total of billable hours on the schedule being checked
                     // since those changes may not be persisted yet.
-                    $total += $schedule->getBillableHoursForDay($day, $auth->service_id, $auth->payer_id);
+                    $total += $schedule->getBillableHoursForDay($day, $auth->service_id);
 
                     // Check total against service auth units
                     if ($total > $auth->getUnits($day)) {
@@ -214,18 +214,12 @@ class ServiceAuthValidator
             $query->where('fixed_rates', 1);
         }
 
-        // Must match service and/or payer
+        // Must match service
         $query->where(function($q) use ($auth) {
             $q->where(function($q3) use ($auth) {
                 $q3->where('service_id', $auth->service_id);
-                if (! empty($auth->payer_id)) {
-                    $q3->where('payer_id', $auth->payer_id);
-                }
             })->orWhereHas('services', function ($q2) use ($auth) {
                     $q2->where('service_id', $auth->service_id);
-                    if (! empty($auth->payer_id)) {
-                        $q2->where('payer_id', $auth->payer_id);
-                    }
                 });
         });
 
@@ -265,18 +259,12 @@ class ServiceAuthValidator
             $query->where('fixed_rates', 1);
         }
 
-        // Must match service and/or payer
+        // Must match service
         $query->where(function($q) use ($auth) {
             $q->where(function($q3) use ($auth) {
                 $q3->where('service_id', $auth->service_id);
-                if (! empty($auth->payer_id)) {
-                    $q3->where('payer_id', $auth->payer_id);
-                }
             })->orWhereHas('services', function ($q2) use ($auth) {
                     $q2->where('service_id', $auth->service_id);
-                    if (! empty($auth->payer_id)) {
-                        $q2->where('payer_id', $auth->payer_id);
-                    }
                 });
         });
 

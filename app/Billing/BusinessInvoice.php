@@ -3,6 +3,8 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\DepositInvoiceInterface;
+use App\Billing\Events\InvoiceableDepositAdded;
+use App\Billing\Events\InvoiceableDepositRemoved;
 use App\Business;
 use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
@@ -99,17 +101,31 @@ class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
 
     function addDeposit(Deposit $deposit, float $amountApplied): bool
     {
-        if ($this->deposits()->save($deposit, ['amount_applied' => $amountApplied])) {
-            return (bool) $this->increment('amount_paid', $amountApplied);
+        if ($this->deposits()->save($deposit, ['amount_applied' => $amountApplied])
+            && $this->increment('amount_paid', $amountApplied)) {
+            foreach($this->getItems() as $item) {
+                if ($item->getInvoiceable()) {
+                    event(new InvoiceableDepositAdded($item->getInvoiceable(), $deposit));
+                }
+            }
+
+            return true;
         }
         return false;
     }
 
     function removeDeposit(Deposit $deposit): bool
     {
-        if ($deposit = $this->deposits->where('id', $deposit->id)->first()) {
-            $this->deposits()->syncWithoutDetaching([$deposit->id => ['amount_applied' => 0]]);
-            return (bool) $this->decrement('amount_paid', $deposit->pivot->amount_applied);
+        if (($deposit = $this->deposits->where('id', $deposit->id)->first())
+            && $this->deposits()->syncWithoutDetaching([$deposit->id => ['amount_applied' => 0]])
+            && $this->decrement('amount_paid', $deposit->pivot->amount_applied)){
+            foreach($this->getItems() as $item) {
+                if ($item->getInvoiceable()) {
+                    event(new InvoiceableDepositRemoved($item->getInvoiceable(), $deposit));
+                }
+            }
+
+            return true;
         }
 
         return false;
@@ -125,6 +141,7 @@ class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
         return subtract($this->amount, $this->amount_paid);
     }
 
+    /** @return Collection|\App\Billing\BusinessInvoiceItem[] */
     function getItems(): Collection
     {
         return $this->items;

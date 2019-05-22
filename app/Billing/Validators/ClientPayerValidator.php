@@ -51,6 +51,10 @@ class ClientPayerValidator
             return $this->error("Client has no payers assigned on $date.");
         }
 
+        if ($this->countOffline($payers) && $this->countOffline($payers) !== $payers->count()) {
+            return $this->error("You cannot mix offline and online payers on $date.");
+        }
+
         if ($duplicatePayer = $this->findDuplicate($payers)) {
             $name = $duplicatePayer->name();
             return $this->error("There is a duplicate payer assignment for $name on $date.");
@@ -160,7 +164,7 @@ class ClientPayerValidator
      */
     protected function findType(Collection $payers, string $type)
     {
-        return $payers->first(function($payer) use ($type) {
+        return $payers->first(function(ClientPayer $payer) use ($type) {
             return $payer->payment_allocation === $type;
         });
     }
@@ -172,8 +176,19 @@ class ClientPayerValidator
      */
     protected function countType(Collection $payers, string $type): int
     {
-        return $payers->filter(function($payer) use ($type) {
+        return $payers->filter(function(ClientPayer $payer) use ($type) {
             return $payer->payment_allocation === $type;
+        })->count();
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection|\App\Billing\ClientPayer[] $payers
+     * @return int
+     */
+    protected function countOffline(Collection $payers): int
+    {
+        return $payers->filter(function(ClientPayer $payer) {
+            return $payer->isOffline();
         })->count();
     }
 

@@ -196,8 +196,12 @@ use App\Traits\CanHaveEmptyUsername;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, ReconcilableInterface, HasPaymentHold,
-    HasAllyFeeInterface, BelongsToBusinessesInterface
+class Client extends AuditableModel implements
+    UserRole,
+    ReconcilableInterface,
+    HasPaymentHold,
+    HasAllyFeeInterface,
+    BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
@@ -265,6 +269,9 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         'discharge_internal_notes',
         'sales_person_id',
         'agreement_status',
+        'quickbooks_customer_id',
+        'medicaid_payer_id',
+        'medicaid_plan_id',
     ];
 
     ///////////////////////////////////////////
@@ -283,7 +290,7 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
     const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
     const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
-    
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -312,6 +319,17 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     {
         return $this->hasOne(Address::class, 'user_id', 'id')
                     ->where('type', 'evv');
+    }
+
+    /**
+     * Get the Client's billing address.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function billingAddress()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'id')
+                    ->where('type', 'billing');
     }
 
     public function phoneNumber()
@@ -422,7 +440,8 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         return $this->hasOne(ClientReferralServiceAgreement::class);
     }
 
-    public function referralSource() {
+    public function referralSource()
+    {
         return $this->belongsTo('App\ReferralSource');
     }
 
@@ -489,6 +508,16 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         return $this->hasMany(ClientContact::class);
     }
 
+    /**
+     * Get the QuickbooksCustomer relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function quickbooksCustomer()
+    {
+        return $this->belongsTo(QuickbooksCustomer::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -505,7 +534,7 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
      */
     public function getSetupUrlAttribute()
     {
-        return route('setup.clients', ['token' => $this->getEncryptedKey()]);    
+        return route('setup.clients', ['token' => $this->getEncryptedKey()]);
     }
 
     ///////////////////////////////////////////
@@ -573,7 +602,8 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
      * @param array $data
      * @return \App\ClientPreferences|false
      */
-    public function setPreferences(array $data) {
+    public function setPreferences(array $data)
+    {
         $preferences = $this->preferences()->firstOrNew([]);
         $preferences->fill($data);
         return $preferences->save() ? $preferences : false;
@@ -590,8 +620,8 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
             if ($payer && $method = $payer->getPaymentMethod()) {
                 return $method->getPaymentType();
             }
+        } catch (\Throwable $e) {
         }
-        catch (\Throwable $e) {}
 
         return PaymentMethodType::NONE();
     }
@@ -692,8 +722,9 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         $this->load(['defaultPayment', 'backupPayment']);
         $backup = $this->backupPayment;
         $default = $this->defaultPayment;
-        if (!$backup || !$default) throw new \Exception('Client needs a backup and primary payment method for this method to work.');
-
+        if (! $backup || ! $default) {
+            throw new \Exception('Client needs a backup and primary payment method for this method to work.');
+        }
         $this->defaultPayment()->associate($backup)->save();
         $this->backupPayment()->associate($default)->save();
     }
@@ -712,11 +743,11 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     {
         return GatewayTransaction::select('gateway_transactions.*')
                                  ->with('lastHistory')
-                                 ->leftJoin('bank_accounts', function($q) {
+                                 ->leftJoin('bank_accounts', function ($q) {
                                      $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
                                        ->where('gateway_transactions.method_type', BankAccount::class);
                                  })
-                                 ->leftJoin('credit_cards', function($q) {
+                                 ->leftJoin('credit_cards', function ($q) {
                                      $q->on('credit_cards.id', '=', 'gateway_transactions.method_id')
                                        ->where('gateway_transactions.method_type', CreditCard::class);
                                  })
@@ -783,7 +814,7 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
     }
 
     /**
-     * Get the client's service authorizations active on the 
+     * Get the client's service authorizations active on the
      * specified date.  Defaults to today.
      *
      * @param null|\Carbon\Carbon $date
@@ -812,5 +843,24 @@ class Client extends AuditableModel implements UserRole, ReconcilableInterface, 
         return $query->whereHas('business', function ($q) use ($chainId) {
             $q->where('businesses.chain_id', $chainId);
         });
+    }
+
+    /**
+     * Get the Client's billing address, or their EVV
+     * address, or ANY address.
+     *
+     * @return Address|null
+     */
+    public function getBillingAddress() : ?Address
+    {
+        if (filled($this->billingAddress)) {
+            return $this->billingAddress;
+        }
+
+        if (filled($this->evvAddress)) {
+            return $this->evvAddress;
+        }
+
+        return $this->addresses->first();
     }
 }

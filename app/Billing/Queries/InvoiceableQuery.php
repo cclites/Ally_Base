@@ -15,6 +15,7 @@ class InvoiceableQuery extends BaseQuery
 
     /**
      * @var \App\Billing\Invoiceable\InvoiceableModel
+     * The entity type that is being queried
      */
     protected $invoiceableModel;
 
@@ -32,6 +33,13 @@ class InvoiceableQuery extends BaseQuery
     function forCaregivers(array $caregiverIds): self
     {
         parent::forCaregivers($caregiverIds);
+
+        return $this;
+    }
+
+    function forInvoiceable(InvoiceableModel $invoiceable): self
+    {
+        $this->where($this->invoiceableModel->getKeyName(), '=', $invoiceable->getKey());
 
         return $this;
     }

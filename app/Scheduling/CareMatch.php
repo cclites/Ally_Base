@@ -309,6 +309,10 @@ class CareMatch
         if ($pets_birds = array_get($this->preferences, 'pets_birds')) {
             $this->queryCaregiverUser($builder, 'pets_birds_okay', $pets_birds);
         }
+
+        if ($ethnicities = array_get($this->preferences, 'ethnicities')) {
+            $builder->whereIn('ethnicity', $ethnicities);
+        }
     }
 
     protected function queryOvertime($builder)

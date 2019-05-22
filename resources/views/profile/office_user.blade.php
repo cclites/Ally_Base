@@ -45,7 +45,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-profile :user="{{ $user }}" :client="{{ $user->role }}"></client-profile>
+                    <client-profile :user="{{ $user }}" :client="{{ $user->role }}" :timezones="{{ $timezones }}"></client-profile>
                 </div>
             </div>
             <div class="row">
@@ -101,8 +101,7 @@
 
         // Change hash for page-reload
         $('.nav-item a').on('shown.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            window.scrollTo(0,0);
+            history.pushState({}, '', url.split('#')[0] + e.target.hash);
         })
     </script>
 @endpush

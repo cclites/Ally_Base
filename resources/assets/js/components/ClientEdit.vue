@@ -62,6 +62,7 @@
                                 {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
                             </option>
                         </b-form-select>
+                        <input-help :form="form" field="sales_person_id"></input-help>
                     </b-form-group>
                     <b-form-group label="Client Status">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
@@ -78,6 +79,7 @@
                             <b-form-radio value="M">Male</b-form-radio>
                             <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
+                        <input-help :form="form" field="gender"></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
@@ -154,6 +156,7 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                        <input-help :form="form" field="avatar"></input-help>
                     </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
@@ -181,12 +184,13 @@
                 <b-col lg="6">
                     <b-form-group label="Date inquired about Service">
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
+                        <input-help :form="form" field="inquiry_date"></input-help>
                     </b-form-group>
 
                     <b-form-group class="mb-2">
                         <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                         <div class="d-flex justify-content-end">
-                            <input-help :form="form" field="referred_by" text="Enter how the prospect was referred."/>
+                            <input-help :form="form" field="referral_source_id" text="Enter how the prospect was referred."/>
                         </div>
                     </b-form-group>
 
@@ -222,14 +226,17 @@
                             <option value="client">On Client's Behalf</option>
                             <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
                         </b-form-select>
+                        <input-help :form="form" field="caregiver_1099"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
+                        <input-help :form="form" field="service_start_date"></input-help>
                     </b-form-group>
                     <b-form-group label="Diagnosis">
                         <b-form-input id="diagnosis" v-model="form.diagnosis"></b-form-input>
+                        <input-help :form="form" field="diagnosis"></input-help>
                     </b-form-group>
                     <b-form-group label="Disaster Code Plan" label-for="disaster_code_plan">
                         <b-select name="disaster_code_plan" id="disaster_code_plan" v-model="form.disaster_code_plan">
@@ -297,75 +304,6 @@
                 </b-col>
             </b-row>
             <b-row>
-                <b-col>
-                    <p class="h6">CareMatch Preferences</p>
-                    <hr>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Caregiver Gender" label-for="gender">
-                        <b-form-select id="gender"
-                                       v-model="preferences.gender"
-                        >
-                            <option :value="null">No Preference</option>
-                            <option value="F">Female</option>
-                            <option value="M">Male</option>
-                        </b-form-select>
-                        <input-help :form="preferences" field="gender" text="" />
-                    </b-form-group>
-                    <b-form-group label="Caregiver License/Certification" label-for="license">
-                        <b-form-select id="license"
-                                       v-model="preferences.license"
-                        >
-                            <option :value="null">No Preference</option>
-                            <option value="CNA">CNA</option>
-                            <option value="HHA">HHA</option>
-                            <option value="RN">RN</option>
-                            <option value="LPN">LPN</option>
-                        </b-form-select>
-                        <input-help :form="preferences" field="license" text="" />
-                    </b-form-group>
-                    <b-form-group label="Caregiver's Spoken Language" label-for="language">
-                        <b-form-select id="language"
-                                       v-model="preferences.language"
-                        >
-                            <option :value="null">No Preference</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="fr">French</option>
-                            <option value="de">German</option>
-                        </b-form-select>
-                        <input-help :form="preferences" field="language" text="" />
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Preferred Hospital">
-                        <b-form-input id="hospital_name"
-                                      v-model="form.hospital_name"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Hospital Phone Number">
-                        <b-form-input id="hospital_number"
-                                      v-model="form.hospital_number"></b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Does the client smoke?" label-for="smokes">
-                        <b-form-select id="smokes"
-                                       v-model="preferences.smokes"
-                        >
-                            <option :value="1">Yes</option>
-                            <option :value="0">No</option>
-                        </b-form-select>
-                        <input-help :form="preferences" field="smokes" text="" />
-                    </b-form-group>
-                    <b-form-group label="Does this client have pets?">
-                        <b-form-checkbox v-model="preferences.pets_dogs" value="1" unchecked-value="0">Dogs</b-form-checkbox>
-                        <b-form-checkbox v-model="preferences.pets_cats" value="1" unchecked-value="0">Cats</b-form-checkbox>
-                        <b-form-checkbox v-model="preferences.pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
                 <b-col lg="12">
                     <hr />
                 </b-col>
@@ -401,7 +339,7 @@
                     </div>
                     <b-form-group label="Account Setup URL">
                         <a :href="client.setup_url" target="_blank">{{ client.setup_url }}</a>
-                        <input-help :form="form" text="The URL the client can use to setup their account."></input-help>
+                        <small class="form-text text-muted">The URL the client can use to setup their account.</small>
                     </b-form-group>
 
                     <div>
@@ -559,15 +497,6 @@
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
                 }),
-                preferences: new Form({
-                    gender: this.client.preferences ? this.client.preferences.gender : null,
-                    license: this.client.preferences ? this.client.preferences.license : null,
-                    language: this.client.preferences ? this.client.preferences.language : null,
-                    smokes: this.client.preferences ? this.client.preferences.smokes : 0,
-                    pets_dogs: this.client.preferences ? this.client.preferences.pets_dogs : 0,
-                    pets_cats: this.client.preferences ? this.client.preferences.pets_cats : 0,
-                    pets_birds: this.client.preferences ? this.client.preferences.pets_birds : 0,
-                }),
                 passwordModal: false,
                 active: this.client.active,
                 deactivateModal: false,
@@ -703,16 +632,18 @@
             },
 
             async saveProfile() {
-                let response = await this.form.patch('/business/clients/' + this.client.id)
-                this.form.avatar = response.data.data.avatar;
-
-                this.preferences.alertOnResponse = false;
-                this.preferences.post('/business/clients/' + this.client.id + '/preferences');
-                if (this.form.ssn) this.form.ssn = '***-**-****';
-                if (this.form.wasModified('agreement_status')) {
-                    this.client.agreement_status = this.form.agreement_status;
-                    this.localLastStatusDate = moment.utc().format();
-                }
+                await this.form.patch('/business/clients/' + this.client.id)
+                    .then( ({ data }) => {
+                        this.form.avatar = data.data.avatar;
+                        if (this.form.ssn) {
+                            this.form.ssn = '***-**-****';
+                        }
+                        if (this.form.wasModified('agreement_status')) {
+                            this.client.agreement_status = this.form.agreement_status;
+                            this.localLastStatusDate = moment.utc().format();
+                        }
+                    })
+                    .catch(e => {});
             },
 
             startOnboarding() {

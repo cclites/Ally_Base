@@ -62,7 +62,6 @@ class ServiceAuthValidatorTest extends TestCase
         return factory(ClientAuthorization::class)->create(array_merge([
             'client_id' => $this->client->id,
             'service_id' => $this->service->id,
-            'payer_id' => null,
             'units' => 0.0,
             'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
             'period' => ClientAuthorization::PERIOD_MONTHLY,
@@ -144,14 +143,10 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
 
-        $shift = $this->createShift(Carbon::today(), '11:00:00', 7, [
-            'payer_id' => null,
-        ]);
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 7);
         $this->assertDoesNotExceedServiceAuth($shift);
 
-        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6, [
-            'payer_id' => null,
-        ]);
+        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6);
         $this->assertExceedsServiceAuth($shift2);
     }
 
@@ -163,14 +158,10 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_MONTHLY,
         ]);
 
-        $shift = $this->createShift(Carbon::now()->startOfMonth(), '11:00:00', 7, [
-            'payer_id' => null,
-        ]);
+        $shift = $this->createShift(Carbon::now()->startOfMonth(), '11:00:00', 7);
         $this->assertDoesNotExceedServiceAuth($shift);
 
-        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6, [
-            'payer_id' => null,
-        ]);
+        $shift2 = $this->createShift(Carbon::today(), '12:00:00', 6);
         $this->assertExceedsServiceAuth($shift2);
     }
 
@@ -182,14 +173,10 @@ class ServiceAuthValidatorTest extends TestCase
             'period' => ClientAuthorization::PERIOD_DAILY,
         ]);
 
-        $shift = $this->createShift(Carbon::yesterday(), '10:00:00', 4, [
-            'payer_id' => null,
-        ]);
+        $shift = $this->createShift(Carbon::yesterday(), '10:00:00', 4);
         $this->assertDoesNotExceedServiceAuth($shift);
 
-        $shift2 = $this->createShift(Carbon::today(), '10:00:00', 5.5, [
-            'payer_id' => null,
-        ]);
+        $shift2 = $this->createShift(Carbon::today(), '10:00:00', 5.5);
         $this->assertExceedsServiceAuth($shift2);
     }
 
@@ -238,7 +225,6 @@ class ServiceAuthValidatorTest extends TestCase
         $otherPayer = factory(Payer::class)->create();
 
         $this->createClientAuth([
-            'payer_id' => null,
             'units' => 5,
             'period' => ClientAuthorization::PERIOD_WEEKLY,
         ]);
@@ -259,57 +245,6 @@ class ServiceAuthValidatorTest extends TestCase
         $shift = $shift->fresh();
 
         $this->assertExceedsServiceAuth($shift);
-    }
-
-    /** @test */
-    public function a_service_breakout_shift_can_fail_based_on_a_specific_payer()
-    {
-        $payer = factory(Payer::class)->create();
-        $otherPayer = factory(Payer::class)->create();
-
-        $this->createClientAuth([
-            'payer_id' => $payer->id,
-            'units' => 5,
-            'period' => ClientAuthorization::PERIOD_WEEKLY,
-        ]);
-
-        // shift with only 3 hours of specified payer id should not flag yet
-        $shift = $this->createShift(Carbon::today(), '11:00:00', 6, ['service_id' => null]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-            'payer_id' => $payer->id,
-        ]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-            'payer_id' => $otherPayer->id,
-        ]);
-        $shift = $shift->fresh();
-
-        $this->assertEquals(3, $shift->getBillableHours($this->service->id, $payer->id));
-        $this->assertDoesNotExceedServiceAuth($shift);
-
-        // a second shift with 3 more hours of payer service id should flag
-        $shift2 = $this->createShift(Carbon::today(), '11:00:00', 6, ['service_id' => null]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift2->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-            'payer_id' => $payer->id,
-        ]);
-        factory(ShiftService::class)->create([
-            'shift_id' => $shift2->id,
-            'duration' => 3,
-            'service_id' => $this->service->id,
-            'payer_id' => $otherPayer->id,
-        ]);
-        $shift2 = $shift2->fresh();
-
-        $this->assertEquals(3, $shift2->getBillableHours($this->service->id, $payer->id));
-        $this->assertExceedsServiceAuth($shift2);
     }
 
     /** @test */
@@ -458,7 +393,7 @@ class ServiceAuthValidatorTest extends TestCase
             'tuesday' => 500,
         ]);
 
-        // shift with only 3 hours of specified payer id should not flag yet
+        // shift with only 4 hours should not flag yet
         $shift = $this->createServiceBreakoutShift(
             Carbon::parse('last monday'),
             '23:00:00',
@@ -490,7 +425,8 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         // create shift that expands from monday - tuesday
-        $shift = $this->createShift(Carbon::parse('last monday'), '23:00:00', 5, [
+        $monday = Carbon::parse('last monday');
+        $shift = $this->createShift($monday, '23:00:00', 5, [
             'fixed_rates' => 1,
         ]);
 
@@ -498,7 +434,7 @@ class ServiceAuthValidatorTest extends TestCase
         $this->assertDoesNotExceedServiceAuth($shift);
 
         // create another shift on tuesday
-        $shift = $this->createShift(Carbon::parse('last tuesday'), '06:00:00', 3, [
+        $shift = $this->createShift($monday->copy()->addDays(1), '06:00:00', 3, [
             'fixed_rates' => 1,
         ]);
 
@@ -531,7 +467,7 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $shift1 = $this->createShift(Carbon::parse('last tuesday'), '01:00:00', 4);
-        $shift2 = $this->createShift(Carbon::parse('last wednesday'), '01:00:00', 4, [
+        $shift2 = $this->createShift(Carbon::parse('last tuesday')->addDays(1), '01:00:00', 4, [
             'fixed_rates' => 1,
         ]);
 
@@ -690,75 +626,6 @@ class ServiceAuthValidatorTest extends TestCase
 
         $schedule2->duration = 7 * 60;
         $this->assertExceedsServiceAuth($schedule2);
-    }
-
-    /** @test */
-    function it_can_fail_based_on_a_specific_schedule_payer()
-    {
-        $payer = factory(Payer::class)->create();
-        $otherPayer = factory(Payer::class)->create();
-
-        $this->createClientAuth([
-            'payer_id' => $payer->id,
-            'units' => 8,
-            'period' => ClientAuthorization::PERIOD_WEEKLY,
-        ]);
-
-        $tuesday = Carbon::parse('last tuesday');
-        $schedule = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $payer->id]);
-        $this->assertDoesNotExceedServiceAuth($schedule);
-
-        $schedule2 = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $otherPayer->id]);
-        $this->assertDoesNotExceedServiceAuth($schedule2);
-
-        $schedule3 = $this->createSchedule($tuesday, '01:00:00', 5, ['payer_id' => $payer->id]);
-        $this->assertExceedsServiceAuth($schedule3);
-    }
-
-    /** @test */
-    function it_can_fail_on_a_specific_service_breakout_schedule_payer()
-    {
-        $payer = factory(Payer::class)->create();
-        $otherPayer = factory(Payer::class)->create();
-
-        $this->createClientAuth([
-            'payer_id' => $payer->id,
-            'units' => 8,
-            'period' => ClientAuthorization::PERIOD_WEEKLY,
-        ]);
-
-        $tuesday = Carbon::parse('last tuesday');
-        $schedule = $this->createSchedule($tuesday, '01:00:00', 5);
-        $schedule->update(['service_id' => null]);
-        factory(ScheduleService::class)->create([
-            'schedule_id' => $schedule->id,
-            'duration' => 5,
-            'service_id' => $this->service->id,
-            'payer_id' => $payer->id,
-        ]);
-        factory(ScheduleService::class)->create([
-            'schedule_id' => $schedule->id,
-            'duration' => 5,
-            'service_id' => $this->service->id,
-            'payer_id' => $otherPayer->id,
-        ]);
-        $this->assertDoesNotExceedServiceAuth($schedule->fresh());
-
-        $schedule2 = $this->createSchedule($tuesday, '01:00:00', 5);
-        $schedule2->update(['service_id' => null]);
-        factory(ScheduleService::class)->create([
-            'schedule_id' => $schedule2->id,
-            'duration' => 5,
-            'service_id' => $this->service->id,
-            'payer_id' => $payer->id,
-        ]);
-        factory(ScheduleService::class)->create([
-            'schedule_id' => $schedule2->id,
-            'duration' => 5,
-            'service_id' => $this->service->id,
-            'payer_id' => $otherPayer->id,
-        ]);
-        $this->assertExceedsServiceAuth($schedule2->fresh());
     }
 
     /** @test */

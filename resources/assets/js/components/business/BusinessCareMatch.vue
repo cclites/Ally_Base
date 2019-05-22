@@ -155,6 +155,26 @@
                                 <b-form-checkbox v-model="pets_birds" value="1" unchecked-value="0">Birds</b-form-checkbox>
                             </div>
                         </b-form-group>
+
+                        <b-form-group label="Caregiver Ethnicity">
+                            <b-form-select v-model="ethnicity">
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="select">Select Specific Ethnicities</option>
+                            </b-form-select>
+                            <input-help :form="form" field="ethnicity" />
+                            <div v-if="ethnicity == 'select'">
+                                <b-form-checkbox v-for="item in ethnicityOptions"
+                                    :key="item.value"
+                                    v-model="ethnicities"
+                                    :value="item.value"
+                                    unchecked-value="null"
+                                >
+                                    {{ item.text }}
+                                </b-form-checkbox>
+                                <input-help :form="form" field="ethnicities" />
+                            </div>
+                        </b-form-group>
                     </div>
 
                     <!--<div class="form-check">-->
@@ -214,9 +234,10 @@
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import FormatsDistance from "../../mixins/FormatsDistance";
     import Languages from "../../classes/Languages";
+    import Constants from '../../mixins/Constants';
 
     export default {
-        mixins: [FormatsNumbers, FormatsDistance],
+        mixins: [Constants, FormatsNumbers, FormatsDistance],
 
         props: {
             clients: Array,
@@ -252,6 +273,8 @@
                 pets_dogs: 0,
                 pets_cats: 0,
                 pets_birds: 0,
+                ethnicity: '',
+                ethnicities: [],
 
                 languages: new Languages(),
                 daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
@@ -314,12 +337,19 @@
             async getMatches(callback) {
                 this.form = this.makeForm();
                 this.loading = true;
-                const response = await this.form.post(`/business/care-match/client-matches/${this.clientId}`);
-                this.matches = response.data;
-                this.loading = false;
-                if (callback) {
-                    callback();
-                }
+                this.matches = [];
+
+                this.form.post(`/business/care-match/client-matches/${this.clientId}`)
+                    .then( ({ data }) => {
+                        this.matches = data;
+                        if (callback) {
+                            callback();
+                        }
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.loading = false;
+                    })
             },
 
             setDataFromSchedule()
@@ -354,6 +384,8 @@
                     pets_cats: this.pets_cats,
                     pets_birds: this.pets_birds,
                     pets: this.pets,
+                    ethnicity: this.ethnicity,
+                    ethnicities: this.ethnicities,
                 })
             },
 

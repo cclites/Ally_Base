@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Billing\Events\InvoiceableDepositAdded;
+use App\Billing\Events\InvoiceableDepositRemoved;
+use App\Billing\Events\InvoiceableInvoiced;
+use App\Billing\Events\InvoiceablePaymentAdded;
+use App\Billing\Events\InvoiceablePaymentRemoved;
+use App\Billing\Events\InvoiceableUninvoiced;
 use App\Events\BusinessChainCreated;
 use App\Events\ClientCreated;
 use App\Events\DepositFailed;
@@ -22,6 +28,12 @@ use App\Listeners\UnapplyFailedPayments;
 use App\Listeners\UnverifiedShiftAcknowledgement;
 use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
+use App\Shifts\Listeners\AcknowledgeShiftDeposit;
+use App\Shifts\Listeners\AcknowledgeShiftDepositFailure;
+use App\Shifts\Listeners\AcknowledgeShiftInvoice;
+use App\Shifts\Listeners\AcknowledgeShiftPayment;
+use App\Shifts\Listeners\AcknowledgeShiftPaymentFailure;
+use App\Shifts\Listeners\AcknowledgeShiftUninvoiced;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\TimesheetCreated;
 use App\Events\TaskAssigned;
@@ -60,6 +72,24 @@ class EventServiceProvider extends ServiceProvider
         ],
         FailedTransactionRecorded::class => [
             AddPaymentHoldsOnFailedTransaction::class,
+        ],
+        InvoiceableDepositAdded::class => [
+            AcknowledgeShiftDeposit::class,
+        ],
+        InvoiceableDepositRemoved::class => [
+            AcknowledgeShiftDepositFailure::class,
+        ],
+        InvoiceableInvoiced::class => [
+            AcknowledgeShiftInvoice::class,
+        ],
+        InvoiceablePaymentAdded::class => [
+            AcknowledgeShiftPayment::class,
+        ],
+        InvoiceablePaymentRemoved::class => [
+            AcknowledgeShiftPaymentFailure::class,
+        ],
+        InvoiceableUninvoiced::class => [
+            AcknowledgeShiftUninvoiced::class,
         ],
         PaymentFailed::class => [
             UnapplyFailedPayments::class,

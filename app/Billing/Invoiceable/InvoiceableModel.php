@@ -117,8 +117,12 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     public function getProviderRate(): float
     {
         $allyRate = $this->getAllyRate();
-        if ($allyRate === null)
-        {
+
+        if ($allyRate === null && ($this->getClientRate() == 0 && $this->getCaregiverRate() == 0 || $this->getItemUnits() == 0)) {
+            return 0.0;  // Fix for when the rates are set to 0 or the hours/units are set to 0 and therefore no payment is recorded/necessary.
+        }
+
+        if ($allyRate === null) {
             throw new \InvalidArgumentException("There was a problem with the Ally Fee calculation.");
         }
 
