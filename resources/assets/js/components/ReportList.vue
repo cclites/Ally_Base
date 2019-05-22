@@ -454,6 +454,7 @@
                         url: 'reports/disaster-plan-report',
                         description: 'Export Client Disaster Codes and Plans',
                         category: 2,
+                        allowed: ['office_user'],
                     },
                     {
                         name: 'Medicaid Billing',
