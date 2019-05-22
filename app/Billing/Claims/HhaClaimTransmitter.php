@@ -75,6 +75,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     {
         $timeFormat = 'Y-m-d H:i';
 
+        $hasEvv = $this->checkShiftForFullEVV($shift);
         $master = [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
             optional($claim->invoice->clientPayer)->payer->getPayerCode(), //    "Payer ID",
@@ -104,16 +105,16 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->checked_out_longitude, //    "Clock-Out Longitude",
             '', //    "Clock-Out EVV Other Info",
             $claim->client_invoice_id, //    "Invoice Number",
-            '', //    "Visit Edit Reason Code",
-            '', //    "Visit Edit Action Taken",
+            $hasEvv ? '' : '910', //    "Visit Edit Reason Code",
+            $hasEvv ? '' : '14', //    "Visit Edit Action Taken",
             '', //    "Notes",
             'N', //    "Is Deletion",
             '', //    "Invoice Line Item ID",
             'N', //    "Missed Visit",
             '', //    "Missed Visit Reason Code",
             '', //    "Missed Visit Action Taken Code",
-            '', //    "Timesheet Required",
-            '', //    "Timesheet Approved",
+            $hasEvv ? '' : 'Y', //    "Timesheet Required",
+            $hasEvv ? '' : 'Y', //    "Timesheet Approved",
             '', //    "User Field 1",
             '', //    "User Field 2",
             '', //    "User Field 3",
@@ -148,6 +149,41 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $master[10] = optional($shift->service)->code;
             return [$master];
         }
+    }
+
+    /**
+     * Check if a shift has EVV data set for both clock in and out.
+     *
+     * @param \App\Shift $shift
+     * @return bool
+     */
+    public function checkShiftForFullEVV(Shift $shift) : bool
+    {
+        if ($shift->checked_in_method == Shift::METHOD_TELEPHONY) {
+            if (! filled($shift->checked_in_number)) {
+                return false;
+            }
+        } else if ($shift->checked_in_method == Shift::METHOD_GEOLOCATION) {
+            if (! filled($shift->checked_in_latitude) || ! filled($shift->checked_in_longitude)) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        if ($shift->checked_out_method == Shift::METHOD_TELEPHONY) {
+            if (! filled($shift->checked_out_number)) {
+                return false;
+            }
+        } else if ($shift->checked_out_method == Shift::METHOD_GEOLOCATION) {
+            if (! filled($shift->checked_out_latitude) || ! filled($shift->checked_out_longitude)) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
     }
 
     /**
