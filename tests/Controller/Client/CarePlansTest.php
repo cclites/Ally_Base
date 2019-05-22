@@ -27,7 +27,7 @@ class CarePlansTest extends TestCase
         $this->business = $this->client->business;
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->assignCaregiver($this->caregiver);
 
         // init logged in office user
         $this->officeUser = factory('App\OfficeUser')->create();

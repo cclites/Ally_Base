@@ -245,6 +245,16 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->withTimestamps();
     }
 
+    /**
+     * Get the businesses relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    */
+    public function businesses()
+    {
+        return $this->belongsToMany(Business::class, 'business_caregivers');
+    }
+
     public function clients()
     {
         return $this->belongsToMany(Client::class, 'client_caregivers')
@@ -350,19 +360,6 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
-
-    /**
-     * Backwards compatibility with old relationship, return a collection of all businesses through chains
-     * @return \App\Business[]|\Illuminate\Database\Eloquent\Collection
-     */
-    public function getBusinessesAttribute()
-    {
-        foreach($this->businessChains as $chain) {
-            $collection = $chain->businesses;
-            $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
-        }
-        return $businesses ?? collect();
-    }
 
     /**
      * Get the account setup URL.
@@ -611,6 +608,38 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->exists();
     }
 
+    /**
+     * Add Caregiver to office location if relationship does not exist.
+     *
+     * @param Business $business
+     * @return bool
+     */
+    public function ensureBusinessRelationship(Business $business) : bool
+    {
+        if ($this->businesses->contains('id', $business->id)) {
+            return true;
+        }
+
+        $this->businesses()->attach($business);
+
+        return true;
+    }
+
+    /**
+     * Add Caregiver to all office locations on a chain.
+     *
+     * @param \App\BusinessChain $chain
+     * @return bool
+     */
+    public function ensureBusinessRelationships(BusinessChain $chain) : bool
+    {
+        foreach ($chain->businesses as $business) {
+            $this->ensureBusinessRelationship($business);
+        }
+
+        return true;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -672,8 +701,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        $builder->whereHas('businessChains.businesses', function($q) use ($businessIds) {
-            $q->whereIn('id', $businessIds);
+        $builder->whereHas('businesses', function($q) use ($businessIds) {
+            $q->whereIn('businesses.id', $businessIds);
         });
     }
 

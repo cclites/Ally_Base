@@ -24,7 +24,7 @@ class PaymentHistoryTest extends TestCase
         $caregiver = factory(Caregiver::class)->create();
         $chain = factory(BusinessChain::class)->create();
         $business = factory(Business::class)->create(['chain_id' => $chain->id]);
-        $chain->caregivers()->attach($caregiver->id);
+        $chain->assignCaregiver($caregiver);
 
         $this->actingAs($caregiver->user);
 

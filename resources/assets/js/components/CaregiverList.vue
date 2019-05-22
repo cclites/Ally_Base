@@ -5,7 +5,7 @@
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
             <b-col lg="3">
-                <!--<business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>-->
+                <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>
             </b-col>
             <b-col lg="3">
                 <b-form-select v-model="statusFilter">
@@ -83,7 +83,6 @@
                 filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
-                location: 'all',
                 caregivers: [],
                 fields: [
                     {
@@ -121,7 +120,6 @@
                         key: 'location',
                         label: 'Location',
                         sortable: true,
-                        // class: 'location d-none'
                     },
                     {
                         key: 'actions',
@@ -159,7 +157,7 @@
                     }
                 }
 
-                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&location=${this.businessFilter}`;
+                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&businesses=${this.businessFilter}`;
             },
         },
 
@@ -207,16 +205,7 @@
                 this.currentPage = 1;
             },
             getBusinessNames(caregiver) {
-                if (! caregiver || ! caregiver.clients ) {
-                    return 'None';
-                }
-
-                let businesses = caregiver.clients.map(x => x.business);
-                businesses = businesses.filter((item, index) => {
-                    return businesses.findIndex(x => x.id == item.id) === index;
-                })
-
-                return businesses.map(x => x.name);
+                return caregiver.businesses.map(x => x.name);
             },
 
             async fetchStatusAliases() {

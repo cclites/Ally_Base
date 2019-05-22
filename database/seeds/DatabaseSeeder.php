@@ -60,13 +60,13 @@ class DatabaseSeeder extends Seeder
             'username' => 'caregiver@allyms.com',
             'password' => bcrypt('demo')
         ]);
-        $business->caregivers()->attach($caregiver, ['default_rate' => 20.00]);
+        $business->assignCaregiver($caregiver);
 
         // Create Other Users
         factory(Business::class, 3)->create();
         factory(Client::class, 30)->create();
         factory(Caregiver::class, 20)->create()->each(function($user) {
-            Business::inRandomOrder()->first()->caregivers()->attach($user);
+            Business::inRandomOrder()->first()->assignCaregiver($user);
         });
         factory(OfficeUser::class, 6)->create()->each(function($user) {
             Business::inRandomOrder()->first()->users()->attach($user);

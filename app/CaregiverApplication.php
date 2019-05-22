@@ -262,7 +262,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
                 'application_date' => Carbon::now(),
             ]);
 
-            $this->businessChain->caregivers()->attach($caregiver);
+            $this->businessChain->assignCaregiver($caregiver);
             $caregiver->setAvailability([]); // sets default availability
 
             $address = new Address([
