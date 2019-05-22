@@ -18,6 +18,13 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences whereLicense($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences whereMinimumRating($value)
  * @mixin \Eloquent
+ * @property int $smokes
+ * @property int $pets_dogs
+ * @property int $pets_cats
+ * @property int $pets_birds
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences query()
  */
 class ClientPreferences extends AuditableModel
 {

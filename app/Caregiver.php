@@ -129,6 +129,30 @@ use Illuminate\Notifications\Notifiable;
  * @property-read mixed $masked_name
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
+ * @property string|null $certification
+ * @property string|null $deactivation_note
+ * @property \Illuminate\Support\Carbon|null $application_date
+ * @property \Illuminate\Support\Carbon|null $orientation_date
+ * @property int|null $referral_source_id
+ * @property int $smoking_okay
+ * @property int $pets_dogs_okay
+ * @property int $pets_cats_okay
+ * @property int $pets_birds_okay
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverDayOff[] $daysOff
+ * @property-read \App\DeactivationReason $deactivationReason
+ * @property-read mixed $deactivation_reason_id
+ * @property-read mixed $reactivation_date
+ * @property-read mixed $setup_status
+ * @property-read string $setup_url
+ * @property-read mixed $status_alias_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @property-read \App\ReferralSource|null $referralSource
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverRestriction[] $restrictions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver query()
  */
 class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
