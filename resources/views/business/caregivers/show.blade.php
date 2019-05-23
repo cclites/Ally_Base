@@ -200,8 +200,7 @@
 
         // Change hash for page-reload
         $('.profile-tabs .nav-item a').on('shown.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            window.scrollTo(0,0);
+            history.pushState({}, '', url.split('#')[0] + e.target.hash);
         })
     </script>
 @endpush
