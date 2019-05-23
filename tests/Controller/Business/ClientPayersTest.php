@@ -32,7 +32,7 @@ class ClientPayersTest extends TestCase
         $this->client = factory('App\Client')->create(['business_id' => $this->business->id]);
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->assignCaregiver($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->chain->id]);
         $this->business->users()->attach($this->officeUser);

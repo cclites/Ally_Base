@@ -17,6 +17,8 @@ use App\SmsThreadReply;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use App\Business;
+use App\QuickbooksConnection;
 
 class ClearSensitiveData extends Command
 {
@@ -147,6 +149,33 @@ class ClearSensitiveData extends Command
         \DB::statement('UPDATE shifts SET caregiver_comments = ? WHERE caregiver_comments IS NOT NULL', [$this->faker->sentence]);
         \DB::statement('UPDATE shifts SET checked_in_latitude = checked_in_latitude + RAND(), checked_out_latitude = checked_out_latitude + RAND() WHERE checked_in_latitude IS NOT NULL');
         \DB::statement('UPDATE shifts SET checked_in_number = "555555555", checked_out_number = "555555555" WHERE checked_in_number IS NOT NULL');
+
+        // Clear HHA/Tellus credentials
+        Business::chunk(200, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(Business $business) {
+                if (filled($business->hha_password)) {
+                    $business->setHhaPassword('password');
+                }
+
+                if (filled($business->tellus_password)) {
+                    $business->setTellusPassword('password');
+                }
+
+                $business->save();
+            });
+            \DB::commit();
+        });
+
+        // Clear Quickbooks access tokens
+        QuickbooksConnection::chunk(200, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(QuickbooksConnection $quickbooksConnection) {
+                $quickbooksConnection->access_token = null;
+                $quickbooksConnection->save();
+            });
+            \DB::commit();
+        });
     }
 
     protected function clearPersonalData(Model $user)

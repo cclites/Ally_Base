@@ -14,13 +14,17 @@ class ProspectController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
     public function index(Request $request)
     {
-        if ($request->expectsJson()) {
-            $query = Prospect::forRequestedBusinesses()->ordered();
+        if ($request->expectsJson() && $request->filled('json')) {
+            $query = Prospect::with('business')
+                ->forRequestedBusinesses()
+                ->ordered();
+
             return $query->get();
         }
 

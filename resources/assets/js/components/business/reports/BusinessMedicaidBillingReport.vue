@@ -45,6 +45,11 @@
         <b-row>
             <b-col>
                 <b-card>
+                    <div class="d-flex mb-2">
+                        <b-btn class="ml-auto" variant="success" @click="printTable()">
+                            <i class="fa fa-print"></i> Print
+                        </b-btn>
+                    </div>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
                             :busy="busy"
@@ -54,7 +59,9 @@
                             :per-page="perPage"
                             :sort-by.sync="sortBy"
                             :sort-desc.sync="sortDesc"
-                            :empty-text="emptyText">
+                            :empty-text="emptyText"
+                            class="report-table"
+                        >
                             <template slot="client_name" scope="row">
                                 <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
                             </template>
@@ -163,6 +170,10 @@
                         this.busy = false;
                         this.hasRun = true;
                     })
+            },
+
+            printTable() {
+                $(".report-table").print();
             },
         },
 

@@ -284,15 +284,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     * @deprecated Caregivers are attached to the chain, not the business
      */
     public function caregivers()
     {
-        return $this->belongsToMany(Caregiver::class, 'business_caregivers')
-            ->withPivot([
-                'type',
-                'default_rate'
-            ]);
+        return $this->belongsToMany(Caregiver::class, 'business_caregivers');
     }
 
     public function activeCaregivers()
@@ -873,6 +868,31 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getTellusPassword() : string
     {
         return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
+    }
+
+    /**
+     * Attach a Caregiver to the business and also the parent chain.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return bool
+     */
+    public function assignCaregiver(Caregiver $caregiver) : bool
+    {
+        // Assign to the parent chain first.
+        if (! $this->businessChain->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->businessChain->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        // Assign to this business location.
+        if (! $this->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     ////////////////////////////////////

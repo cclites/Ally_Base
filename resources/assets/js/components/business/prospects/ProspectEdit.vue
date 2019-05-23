@@ -57,7 +57,6 @@
                                 type="email"
                                 v-model="form.email"
                                 :disabled="form.no_email"
-                                @change="copyEmailToUsername()"
                         >
                         </b-form-input>
                         <input-help :form="form" field="email"

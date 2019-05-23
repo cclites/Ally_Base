@@ -94,6 +94,28 @@
                 </b-col>
             </b-row>
             <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Transmission Method" label-for="transmission_method" label-class="required">
+                        <b-select v-model="form.transmission_method">
+                            <option value="">-- Select Transmission Method --</option>
+                            <option value="HHA">HHAeXchange</option>
+                            <option value="TELLUS">Tellus</option>
+                        </b-select>
+                        <input-help :form="form" field="transmission_method"></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="MCO / Payer Identifier" label-for="payer_code">
+                        <b-form-input type="text" v-model="form.payer_code" />
+                        <input-help :form="form" field="payer_code" text=""></input-help>
+                    </b-form-group>
+                    <b-form-group label="Plan Identifier" label-for="plan_code">
+                        <b-form-input type="text" v-model="form.plan_code" />
+                        <input-help :form="form" field="plan_code" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="12">
                     <business-payer-rates-table 
                         ref="ratesTable"
@@ -159,6 +181,9 @@
                     phone_number: defaults.phone_number,
                     fax_number: defaults.fax_number,
                     email: defaults.email,
+                    transmission_method: defaults.transmission_method || '',
+                    payer_code: defaults.payer_code || '',
+                    plan_code: defaults.plan_code || '',
                 });
             },
 

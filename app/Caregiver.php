@@ -129,6 +129,30 @@ use Illuminate\Notifications\Notifiable;
  * @property-read mixed $masked_name
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
+ * @property string|null $certification
+ * @property string|null $deactivation_note
+ * @property \Illuminate\Support\Carbon|null $application_date
+ * @property \Illuminate\Support\Carbon|null $orientation_date
+ * @property int|null $referral_source_id
+ * @property int $smoking_okay
+ * @property int $pets_dogs_okay
+ * @property int $pets_cats_okay
+ * @property int $pets_birds_okay
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverDayOff[] $daysOff
+ * @property-read \App\DeactivationReason $deactivationReason
+ * @property-read mixed $deactivation_reason_id
+ * @property-read mixed $reactivation_date
+ * @property-read mixed $setup_status
+ * @property-read string $setup_url
+ * @property-read mixed $status_alias_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @property-read \App\ReferralSource|null $referralSource
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverRestriction[] $restrictions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver query()
  */
 class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
@@ -171,6 +195,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         'pets_dogs_okay',
         'pets_cats_okay',
         'pets_birds_okay',
+        'ethnicity',
     ];
     protected $appends = ['masked_ssn'];
 
@@ -218,6 +243,16 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     {
         return $this->belongsToMany(BusinessChain::class, 'chain_caregivers', 'caregiver_id', 'chain_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Get the businesses relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    */
+    public function businesses()
+    {
+        return $this->belongsToMany(Business::class, 'business_caregivers');
     }
 
     public function clients()
@@ -325,19 +360,6 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
-
-    /**
-     * Backwards compatibility with old relationship, return a collection of all businesses through chains
-     * @return \App\Business[]|\Illuminate\Database\Eloquent\Collection
-     */
-    public function getBusinessesAttribute()
-    {
-        foreach($this->businessChains as $chain) {
-            $collection = $chain->businesses;
-            $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
-        }
-        return $businesses ?? collect();
-    }
 
     /**
      * Get the account setup URL.
@@ -586,6 +608,38 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             ->exists();
     }
 
+    /**
+     * Add Caregiver to office location if relationship does not exist.
+     *
+     * @param Business $business
+     * @return bool
+     */
+    public function ensureBusinessRelationship(Business $business) : bool
+    {
+        if ($this->businesses->contains('id', $business->id)) {
+            return true;
+        }
+
+        $this->businesses()->attach($business);
+
+        return true;
+    }
+
+    /**
+     * Add Caregiver to all office locations on a chain.
+     *
+     * @param \App\BusinessChain $chain
+     * @return bool
+     */
+    public function ensureBusinessRelationships(BusinessChain $chain) : bool
+    {
+        foreach ($chain->businesses as $business) {
+            $this->ensureBusinessRelationship($business);
+        }
+
+        return true;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -647,8 +701,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        $builder->whereHas('businessChains.businesses', function($q) use ($businessIds) {
-            $q->whereIn('id', $businessIds);
+        $builder->whereHas('businesses', function($q) use ($businessIds) {
+            $q->whereIn('businesses.id', $businessIds);
         });
     }
 
