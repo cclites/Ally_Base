@@ -30,6 +30,12 @@ class ImportCaregivers extends BaseImport
      */
     protected $businessChain;
 
+    /**
+     * A store for duplicate row checks
+     * @var array
+     */
+    protected $processedHashes = [];
+
 
     /**
      * Return the current business model for who the data should be imported in to
@@ -65,6 +71,11 @@ class ImportCaregivers extends BaseImport
      */
     protected function importRow(int $row)
     {
+        if ($this->duplicateDataProcessed($row)) {
+            $this->output->writeln('Skipping duplicate data found on row : ' . $row);
+            return false;
+        }
+
         $statusAlias = $this->resolveStatusAlias($row);
 
         $data = [
@@ -87,13 +98,12 @@ class ImportCaregivers extends BaseImport
         if ($data['email'] && User::where('email', $data['email'])->exists()) {
             $this->output->writeln('Skipping duplicate email: ' . $data['email']);
             return false;
-        } else {
-            if (!$data['email']) {
-                $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
-                $data['email'] = 'placeholder' . uniqid();
-                $noemail = true;
-            }
+        } else if (!$data['email']) {
+            $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
+            $data['email'] = 'placeholder' . uniqid();
+            $noemail = true;
         }
+
 
         /** @var Caregiver $caregiver */
         $caregiver = $this->businessChain()->caregivers()->create($data);
@@ -159,8 +169,10 @@ class ImportCaregivers extends BaseImport
     protected function importRestrictions(Caregiver $caregiver, int $row)
     {
         if ($restrictionText = $this->resolve('Restrictions', $row)) {
-            $restriction = new CaregiverRestriction(['description' => $restrictionText]);
-            $caregiver->restrictions()->save($restriction);
+            foreach(explode("\n\n", $restrictionText) as $description) {
+                $restriction = new CaregiverRestriction(['description' => str_limit($description, 253, '..')]);
+                $caregiver->restrictions()->save($restriction);
+            }
         }
     }
 
@@ -237,6 +249,33 @@ class ImportCaregivers extends BaseImport
         }
 
         return null;
+    }
+
+    /**
+     * Check for duplicate data in the same import file
+     *
+     * @param int $row
+     * @return bool
+     * @throws \PHPExcel_Exception
+     */
+    private function duplicateDataProcessed(int $row)
+    {
+        $parts = [
+            $this->resolve('Name', $row),
+            $this->resolve('First Name', $row),
+            $this->resolve('Last Name', $row),
+            $this->resolve('Email', $row),
+            $this->resolve('Address1', $row),
+        ];
+
+        $hash = md5(implode(',', array_filter($parts)));
+
+        if (array_key_exists($hash, $this->processedHashes)) {
+            return true;
+        }
+
+        $this->processedHashes[$hash] = 1;
+        return false;
     }
 
 }

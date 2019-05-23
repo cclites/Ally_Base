@@ -154,7 +154,7 @@ class ImportClients extends BaseImport
         }
 
         $payer = Payer::where('chain_id', $this->business()->chain_id)
-            ->where('name', 'LIKE', '%' . trim($payerName) . '%')
+            ->where('name', $payerName)
             ->first();
 
         if ($payer) {
@@ -166,7 +166,12 @@ class ImportClients extends BaseImport
                 'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
             ]);
 
-            $client->payers()->save($clientPayer);
+            if ($client->payers()->save($clientPayer)) {
+                // Delete default payer (created by CreateDefaultClientPayer event listener)
+                ClientPayer::where('client_id', $client->id)
+                    ->where('payer_id', '!=', $payer->id)
+                    ->delete();
+            }
         }
 
     }
