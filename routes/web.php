@@ -201,6 +201,7 @@ Route::group([
     Route::post('/caregivers/{caregiver}/welcome-email', 'Business\CaregiverController@welcomeEmail');
     Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
     Route::resource('caregivers/{caregiver}/restrictions', 'Business\BusinessCaregiverRestrictionController');
+    Route::patch('caregivers/{caregiver}/office-locations', 'Business\CaregiverController@updateOfficeLocations');
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
@@ -223,7 +224,7 @@ Route::group([
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
-    Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
+    Route::patch('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
     Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
     Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
     Route::patch('clients/{client}/contacts/{clientContact}', 'Business\ClientContactController@update');
@@ -333,6 +334,7 @@ Route::group([
     Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');
     Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
+    Route::get('reports/disaster-plan-report', 'Business\Report\BusinessDisasterPlanReportController@index')->name('reports.disaster-plan');
     Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
@@ -416,6 +418,7 @@ Route::group([
     Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
     Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
     Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');
+    Route::post('quickbooks/{business}/customer', 'Business\QuickbooksSettingsController@customerCreate');
     Route::post('quickbooks/{business}/customers/sync', 'Business\QuickbooksSettingsController@customersSync');
     Route::get('quickbooks/{business}/services', 'Business\QuickbooksSettingsController@servicesList');
     Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
@@ -539,12 +542,6 @@ Route::group([
     /*Nacha Ach*/
     Route::get('nacha-ach', 'Admin\NachaAchController@index')->name('nacha_ach');
     Route::post('nacha-ach/generate', 'Admin\NachaAchController@generate')->name('nacha_ach.generate');
-
-    /*QuickBooks API*/
-    Route::get('quickbooks-api', 'Admin\QuickBooksApiController@index')->name('quickbooks_api');
-    Route::get('quickbooks-api/authorization', 'Admin\QuickBooksApiController@authorization')->name('quickbooks_api.authorization');
-    Route::get('quickbooks-api/connection', 'Admin\QuickBooksApiController@connection')->name('quickbooks_api.connection');
-    Route::post('quickbooks-api/create-invoice', 'Admin\QuickBooksApiController@createInvoice');
 
     Route::get('knowledge-manager', 'Admin\KnowledgeManagerController@index')->name('knowledge.manager');
     Route::post('knowledge-manager', 'Admin\KnowledgeManagerController@store');

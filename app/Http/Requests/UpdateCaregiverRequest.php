@@ -7,6 +7,8 @@ use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Caregiver;
+use App\Rules\ValidEnum;
+use App\Ethnicity;
 
 class UpdateCaregiverRequest extends FormRequest
 {
@@ -48,6 +50,7 @@ class UpdateCaregiverRequest extends FormRequest
             'pets_dogs_okay' => 'nullable|boolean',
             'pets_cats_okay' => 'nullable|boolean',
             'pets_birds_okay' => 'nullable|boolean',
+            'ethnicity' => ['nullable', new ValidEnum(Ethnicity::class)],
         ];
     }
 

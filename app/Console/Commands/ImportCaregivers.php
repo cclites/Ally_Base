@@ -108,6 +108,9 @@ class ImportCaregivers extends BaseImport
         /** @var Caregiver $caregiver */
         $caregiver = $this->businessChain()->caregivers()->create($data);
         if ($caregiver) {
+            // Assign to all the chain's businesses.
+            $caregiver->ensureBusinessRelationships($this->businessChain());
+
             // Replace placeholder email
             if (isset($noemail)) {
                 $caregiver->setAutoEmail()->save();

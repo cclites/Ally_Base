@@ -35,6 +35,9 @@ Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::post('check-out/enter-digits', 'Api\Telefony\TelefonyCheckOutController@enterPhoneNumberDigits')->name('check-out.enter-digits');
     Route::post('check-out/accept-digits', 'Api\Telefony\TelefonyCheckOutController@acceptPhoneNumberDigits')->name('check-out.accept-digits');
     Route::post('check-out/check-for-injury/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkForInjuryAction')->name('check-out.check-for-injury');
+    Route::post('check-out/check-for-mileage/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkForMileageAction')->name('check-out.check-for-mileage');
+    Route::post('check-out/confirm-mileage/{shift}', 'Api\Telefony\TelefonyCheckOutController@confirmMileage')->name('check-out.confirm-mileage');
+    Route::post('check-out/record-mileage/{shift}/{mileage}', 'Api\Telefony\TelefonyCheckOutController@recordMileage')->name('check-out.record-mileage');
     Route::post('check-out/check-for-activities/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkForActivitiesResponse')->name('check-out.check-for-activities');
     Route::post('check-out/confirm-activity/{shift}', 'Api\Telefony\TelefonyCheckOutController@confirmActivity')->name('check-out.confirm-activity');
     Route::post('check-out/record-activity/{shift}/{activity}', 'Api\Telefony\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');

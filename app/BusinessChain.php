@@ -191,6 +191,23 @@ class BusinessChain extends AuditableModel
             ->values();
     }
 
+    /**
+     * Assign a Caregiver to the chain and also all of the office locations.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return bool
+     */
+    public function assignCaregiver(Caregiver $caregiver) : bool
+    {
+        if (! $this->caregivers()->where('caregiver_id', $caregiver->id)->exists()) {
+            if (! $this->caregivers()->save($caregiver)) {
+                return false;
+            }
+        }
+
+        return $caregiver->ensureBusinessRelationships($this);
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

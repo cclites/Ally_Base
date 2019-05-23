@@ -149,6 +149,7 @@ Vue.component('business-client-goals', require('./components/business/clients/Cl
 Vue.component('business-client-care-details', require('./components/business/clients/ClientCareDetails'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
+Vue.component('business-caregiver-office-locations-tab', require('./components/business/caregivers/CaregiverOfficeLocationsTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
@@ -221,6 +222,7 @@ Vue.component('business-payer-modal', require('./components/business/PayerModal'
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
 Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
+Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
@@ -256,6 +258,7 @@ Vue.component('client-insurance-service-auth', require('./components/business/cl
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-payers-tab', require('./components/business/clients/ClientPayersTab'));
+Vue.component('client-preferences-tab', require('./components/business/clients/ClientPreferencesTab'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));

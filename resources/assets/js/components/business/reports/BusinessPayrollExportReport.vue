@@ -30,8 +30,8 @@
                         <b-select v-model="form.output_format" class="mr-2 mb-2">
                             <option value="">-- Select Format --</option>
                             <option value="ADP">ADP</option>
-                            <option value="PAYCHEX">Paychex</option>
                             <option value="BCN">BCN</option>
+                            <option value="PAYCHEX">Paychex</option>
                         </b-select>
                         <b-button @click="fetch()" variant="info" :disabled="busy || form.output_format == ''" class="mr-2 mb-2">
                             <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
@@ -46,7 +46,10 @@
         </b-row>
         <b-row>
             <b-col>
-                <b-card>
+                <b-card v-if="busy">
+                    <loading-card></loading-card>
+                </b-card>
+                <b-card v-else>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
                             :busy="busy"

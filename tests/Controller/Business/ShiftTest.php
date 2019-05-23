@@ -31,7 +31,7 @@ class ShiftTest extends TestCase
         $caregiver = factory(Caregiver::class)->create();
 
         // attach users to the business
-        $business->caregivers()->attach($caregiver->id);
+        $business->assignCaregiver($caregiver);
         $business->users()->attach($office_user->id);
 
         $business = Business::with('clients', 'caregivers')->find($business->id);

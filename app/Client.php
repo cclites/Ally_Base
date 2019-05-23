@@ -270,8 +270,6 @@ class Client extends AuditableModel implements
         'sales_person_id',
         'agreement_status',
         'quickbooks_customer_id',
-        'medicaid_payer_id',
-        'medicaid_plan_id',
     ];
 
     ///////////////////////////////////////////
