@@ -74,6 +74,7 @@ class CertificationExpiring extends BaseNotification
      */
     public function toSms($notifiable)
     {
+        // TODO: we should not rely on a single business here
         $business = optional($this->license->caregiver->businesses)->first();
 
         if (empty($business)) {

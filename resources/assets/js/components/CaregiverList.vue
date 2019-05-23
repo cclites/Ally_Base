@@ -1,24 +1,26 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="3">
+            <b-col lg="12">
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
-            <b-col lg="3">
-                <!--<business-location-select v-model="businessFilter" :allow-all="true" :hideable="false"></business-location-select>-->
-            </b-col>
-            <b-col lg="3">
-                <b-form-select v-model="statusFilter">
-                    <option value="">All Caregivers</option>
-                    <option value="active">Active Caregivers</option>
-                    <option value="inactive">Inactive Caregivers</option>
-                    <option v-for="status in statuses.caregiver" :key="status.id" :value="status.id">
-                        {{ status.name }}
-                    </option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="3" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
+        </b-row>
+        <b-row class="mb-2">
+            <b-col lg="12">
+                <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
+                    <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
+
+                    <b-form-select v-model="statusFilter" class="f-1 mr-2">
+                        <option value="">All Caregivers</option>
+                        <option value="active">Active Caregivers</option>
+                        <option value="inactive">Inactive Caregivers</option>
+                        <option v-for="status in statuses.caregiver" :key="status.id" :value="status.id">
+                            {{ status.name }}
+                        </option>
+                    </b-form-select>
+
+                    <b-form-input v-model="filter" placeholder="Type to Search" class="f-1" />
+                </div>
             </b-col>
         </b-row>
 
@@ -83,7 +85,6 @@
                 filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
-                location: 'all',
                 caregivers: [],
                 fields: [
                     {
@@ -121,7 +122,6 @@
                         key: 'location',
                         label: 'Location',
                         sortable: true,
-                        // class: 'location d-none'
                     },
                     {
                         key: 'actions',
@@ -159,7 +159,7 @@
                     }
                 }
 
-                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&location=${this.businessFilter}`;
+                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&businesses=${this.businessFilter}`;
             },
         },
 
@@ -207,16 +207,7 @@
                 this.currentPage = 1;
             },
             getBusinessNames(caregiver) {
-                if (! caregiver || ! caregiver.clients ) {
-                    return 'None';
-                }
-
-                let businesses = caregiver.clients.map(x => x.business);
-                businesses = businesses.filter((item, index) => {
-                    return businesses.findIndex(x => x.id == item.id) === index;
-                })
-
-                return businesses.map(x => x.name);
+                return caregiver.businesses.map(x => x.name);
             },
 
             async fetchStatusAliases() {

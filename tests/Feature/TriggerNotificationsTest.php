@@ -49,7 +49,7 @@ class TriggerNotificationsTest extends TestCase
         $this->caregiver->clients()->save($this->client);
         $number = $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
         $number->update(['receives_sms' => 1]);
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
 
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
@@ -326,14 +326,15 @@ class TriggerNotificationsTest extends TestCase
 
         // create a second office user to another business on the same chain
         $otherBusiness = factory('App\Business')->create();
-        $otherBusiness->chain->caregivers()->save($this->caregiver);
+        $otherBusiness->assignCaregiver($this->caregiver);
+
         $otherOfficeUser = factory('App\OfficeUser')->create();
         $otherOfficeUser->businesses()->attach($otherBusiness->id);
 
         // create a third office user to a third business on another chain
         $otherChain = factory('App\BusinessChain')->create();
         $thirdBusiness = factory('App\Business')->create(['chain_id' => $otherChain->id]);
-        $otherChain->caregivers()->save($this->caregiver);
+        $thirdBusiness->assignCaregiver($this->caregiver);
         $thirdOfficeUser = factory('App\OfficeUser')->create();
         $thirdOfficeUser->businesses()->attach($thirdBusiness->id);
 
@@ -476,14 +477,14 @@ class TriggerNotificationsTest extends TestCase
 
         // create a second office user to another business on the same chain
         $otherBusiness = factory('App\Business')->create();
-        $otherBusiness->chain->caregivers()->save($this->caregiver);
+        $otherBusiness->chain->assignCaregiver($this->caregiver);
         $otherOfficeUser = factory('App\OfficeUser')->create();
         $otherOfficeUser->businesses()->attach($otherBusiness->id);
 
         // create a third office user to a third business on another chain
         $otherChain = factory('App\BusinessChain')->create();
         $thirdBusiness = factory('App\Business')->create(['chain_id' => $otherChain->id]);
-        $otherChain->caregivers()->save($this->caregiver);
+        $otherChain->assignCaregiver($this->caregiver);
         $thirdOfficeUser = factory('App\OfficeUser')->create();
         $thirdOfficeUser->businesses()->attach($thirdBusiness->id);
 

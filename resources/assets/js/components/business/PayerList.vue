@@ -124,21 +124,9 @@
             },
 
             save(data) {
-                let item = this.items.find(x => x.id === data.id);
-                if (item) {
-                    item.name = data.name;
-                    item.npi_number = data.npi_number;
-                    item.week_start = data.week_start;
-                    item.email = data.email;
-                    item.address1 = data.address1;
-                    item.address2 = data.address2;
-                    item.city = data.city;
-                    item.state = data.state;
-                    item.zip = data.zip;
-                    item.payment_method_type = data.payment_method_type;
-                    item.phone_number = data.phone_number;
-                    item.fax_number = data.fax_number;
-                    item.rates = data.rates;
+                let index = this.items.findIndex(x => x.id === data.id);
+                if (index >= 0) {
+                    this.items.splice(index, 1, data);
                 } else {
                     this.items.push(data);
                 }

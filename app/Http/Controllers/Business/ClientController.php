@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Business;
 use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Client;
+use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
@@ -17,7 +17,6 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
-use App\Traits\Request\PaymentMethodRequest;
 use App\Billing\Service;
 use App\Billing\Payer;
 use Carbon\Carbon;
@@ -48,7 +47,7 @@ class ClientController extends BaseController
                 $query->where('client_type', $clientType);
             }
             if ($caseManagerId = $request->input('case_manager_id')) {
-                $query->whereHas('caseManager', function($q) use ($caseManagerId) {
+                $query->whereHas('caseManager', function ($q) use ($caseManagerId) {
                     $q->where('id', $caseManagerId);
                 });
             }
@@ -65,7 +64,6 @@ class ClientController extends BaseController
             if ($request->input('case_managers')) {
                 $query->with('caseManager');
             }
-
 
             $clients = $query->get();
             return $clients;
@@ -85,7 +83,7 @@ class ClientController extends BaseController
         return $query->whereHas('user', function ($q) {
             $q->where('active', true);
         })
-            ->with(['user'])->get()->map(function($client) {
+            ->with(['user'])->get()->map(function ($client) {
                 return [
                     'id' => $client->id,
                     'firstname' => $client->user->firstname,
@@ -124,7 +122,7 @@ class ClientController extends BaseController
         $this->authorize('create', [Client::class, $data]);
 
         // Look for duplicates
-        if (!$request->override) {
+        if (! $request->override) {
             if ($request->email && Client::forRequestedBusinesses()->whereEmail($request->email)->first()) {
                 return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
             }
@@ -133,11 +131,11 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
-        
+
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
         if ($client = $action->create($data, $paymentMethod)) {
-            return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
+            return new CreatedResponse('The client has been created.', ['id' => $client->id, 'url' => route('business.clients.edit', [$client->id])]);
         }
 
         return new ErrorResponse(500, 'The client could not be created.');
@@ -196,10 +194,10 @@ class ClientController extends BaseController
         }
 
         // append payment metrics and future schedule count
-        if (!empty($client->default_payment_id)) {
+        if (! empty($client->default_payment_id)) {
             $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
         }
-        if (!empty($client->backup_payment_id)) {
+        if (! empty($client->backup_payment_id)) {
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
@@ -226,30 +224,35 @@ class ClientController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the client profile.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @param UpdateClientRequest $request
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
         $this->authorize('update', $client);
         $data = $request->filtered();
-        $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
         if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
         }
 
+        \DB::beginTransaction();
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
             }
 
+            \DB::commit();
             return new SuccessResponse('The client has been updated.', $client, '.');
         }
+
+        \DB::rollBack();
         return new ErrorResponse(500, 'The client could not be updated.');
     }
 
@@ -356,8 +359,6 @@ class ClientController extends BaseController
             'ltci_fax',
             'medicaid_id',
             'medicaid_diagnosis_codes',
-            'medicaid_plan_id',
-            'medicaid_payer_id',
             'max_weekly_hours'
         ]);
 
@@ -368,13 +369,27 @@ class ClientController extends BaseController
         }
     }
 
+    /**
+     * Update the Client's preferences.
+     *
+     * @param UpdateClientPreferencesRequest $request
+     * @param \App\Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
-        $client->setPreferences($request->validated());
+        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->preferences->ethnicities()->delete();
+        $client->preferences->ethnicities()->saveMany(
+            collect($request->ethnicities)->map(function ($ethnicity) {
+                return new ClientEthnicityPreference(compact('ethnicity'));
+            })
+        );
 
-        return new SuccessResponse('Client preferences updated.');
+        return new SuccessResponse('Client preferences updated.', $client->preferences->fresh());
     }
 
     public function defaultRates(Request $request, Client $client)

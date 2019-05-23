@@ -33,6 +33,9 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#preferences" class="nav-link">Preferences</a>
+        </li>
+        <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Payers</a>
         </li>
         <li class="nav-item">
@@ -85,6 +88,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+                <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Payers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Caregivers &amp; Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
@@ -140,6 +144,9 @@
         </div>
         <div class="tab-pane" id="payers" role="tabpanel">
             <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
+        </div>
+        <div class="tab-pane" id="preferences" role="tabpanel">
+            <client-preferences-tab :client="{{ $client }}" />
         </div>
         <div class="tab-pane" id="rates" role="tabpanel">
             <!-- Includes caregivers -->

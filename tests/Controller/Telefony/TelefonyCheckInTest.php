@@ -38,7 +38,7 @@ class TelefonyCheckInTest extends TelefonyBase
     {
         // Tests a caregiver of the same business but not assigned to the client
         $caregiver = factory(Caregiver::class)->create();
-        $this->business->caregivers()->attach($caregiver);
+        $this->business->assignCaregiver($caregiver);
         $phone = factory(PhoneNumber::class)->make(['national_number' => '5555552000']);
         $caregiver->phoneNumbers()->save($phone);
         $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 2000]);

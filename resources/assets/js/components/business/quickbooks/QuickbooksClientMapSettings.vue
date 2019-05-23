@@ -27,11 +27,18 @@
                          :fields="fields"
                          :filter="filter"
                 >
+                    <template slot="nameLastFirst" scope="row">
+                        <a :href="`/business/clients/${row.item.id}`">{{ row.item.nameLastFirst }}</a>
+                    </template>
                     <template slot="quickbooks_customer_id" scope="row">
-                        <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="busy">
-                            <option value="">Do No Match</option>
-                            <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
-                        </b-form-select>
+                        <div class="d-flex">
+                            <b-form-select v-model="row.item.quickbooks_customer_id" :disabled="busy" class="f-1 mr-2">
+                                <option value="">Do No Match</option>
+                                <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
+                            </b-form-select>
+
+                            <b-btn v-if="! row.item.quickbooks_customer_id" variant="primary" @click="createCustomer(row.item)" :disabled="busy">Create Customer</b-btn>
+                        </div>
                     </template>
                 </b-table>
             </div>
@@ -143,6 +150,25 @@
                 let form = new Form({ clients: this.items });
                 form.patch(`/business/quickbooks/${this.businessId}/customers`)
                     .then( ({ data }) => {
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.busy = false;
+                    });
+            },
+
+            createCustomer(item) {
+                if (! this.businessId) {
+                    return;
+                }
+
+                this.busy = true;
+                let form = new Form({ client_id: item.id });
+                form.post(`/business/quickbooks/${this.businessId}/customer`)
+                    .then( ({ data }) => {
+                        let client = this.items.find(x => x.id === data.data.client.id);
+                        client.quickbooks_customer_id = data.data.client.quickbooks_customer_id;
+                        this.customers = data.data.customers;
                     })
                     .catch(() => {})
                     .finally(() => {

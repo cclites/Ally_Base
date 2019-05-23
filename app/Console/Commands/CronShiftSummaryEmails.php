@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Mail\ClientShiftSummaryEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use App\ShiftConfirmation;
 use App\Reports\UnconfirmedShiftsReport;
@@ -65,14 +66,14 @@ class CronShiftSummaryEmails extends Command
      */
     public function handle()
     {
-        foreach ($this->getIncludedBusinessIds() as $businessId) {
+        foreach ($this->getIncludedBusinesses() as $business) {
             try {
-                $this->processEmailsForBusiness($businessId);
+                $this->processEmailsForBusiness($business);
             }
             catch (\Exception $ex) {
                 //  failed on business
                 app('sentry')->captureException($ex);
-                $this->errors[] = "Failed to process emails for business #$businessId";
+                $this->errors[] = "Failed to process emails for business #{$business->id}";
             }
         }
 
@@ -83,21 +84,21 @@ class CronShiftSummaryEmails extends Command
      * Process and send summary emails to matching
      * client's from the specified business.
      *
-     * @param int $businessId
+     * @param \App\Business $business
      */
-    protected function processEmailsForBusiness(int $businessId) : void
+    protected function processEmailsForBusiness(Business $business) : void
     {
-        $clients = $this->getIncludedClientIds($businessId);
+        $clients = $this->getIncludedClientIds($business->id);
         if (empty($clients)) {
             return;
         }
 
         $report = new UnconfirmedShiftsReport();
-        $results = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime())
+        $results = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime($business->timezone))
             ->includeConfirmed()
             ->includeClockedIn()
             ->includeInProgress()
-            ->forBusinesses($businessId)
+            ->forBusinesses($business->id)
             ->forClients($clients)
             ->maskNames()
             ->rows()
@@ -179,26 +180,24 @@ class CronShiftSummaryEmails extends Command
      * Get the businesses that are set up to send shift confirmation emails.
      * Returns an empty array if report is not for email.
      *
-     * @return array
+     * @return Collection
      */
-    protected function getIncludedBusinessIds()
+    protected function getIncludedBusinesses()
     {
         return Business::where('shift_confirmation_email', true)
-            ->get()
-            ->pluck('id')
-            ->toArray();
+            ->get();
     }
 
     /**
      * Filter the clients to only those that have their 
      * weekly summary emails turned ON.
      *
-     * @param int $business
+     * @param int $businessId
      * @return array
      */
-    protected function getIncludedClientIds($business)
+    protected function getIncludedClientIds($businessId)
     {
-        return Client::where('business_id', $business)
+        return Client::where('business_id', $businessId)
                 ->where('receive_summary_email', 1)
                 ->get()
                 ->pluck('id')
@@ -208,10 +207,11 @@ class CronShiftSummaryEmails extends Command
     /**
      * Get the cut off time for when a shift is excluded from this email (Sunday at 11:59:59 in EST)
      *
+     * @param string $timezone
      * @return \Carbon\Carbon
      */
-    protected function cutOffDateTime()
+    protected function cutOffDateTime(string $timezone)
     {
-        return Carbon::now('America/New_York')->startOfWeek()->subSecond();
+        return Carbon::now($timezone)->startOfWeek()->subSecond();
     }
 }

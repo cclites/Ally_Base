@@ -36,6 +36,9 @@
             <a class="nav-link" data-toggle="tab" href="#clients" role="tab">Clients</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#office-locations" role="tab">Office Locations</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
         </li>
         <li class="nav-item">
@@ -80,6 +83,7 @@
                     <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 @endif
                 <a class="dropdown-item" data-toggle="tab" href="#clients" role="tab">Clients</a>
+                <a class="dropdown-item" data-toggle="tab" href="#office-locations" role="tab">Office Locations</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Expirations</a>
@@ -128,6 +132,9 @@
         </div>
         <div class="tab-pane" id="clients" role="tabpanel">
             <business-caregiver-clients-tab :caregiver="{{ $caregiver }}"></business-caregiver-clients-tab>
+        </div>
+        <div class="tab-pane" id="office-locations" role="tabpanel">
+            <business-caregiver-office-locations-tab :caregiver="{{ $caregiver }}"></business-caregiver-office-locations-tab>
         </div>
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
             <notes-tab :notes="{{ $caregiver->notes }}" :business="{{ $business }}" :caregiver="{{ $caregiver }}"></notes-tab>
