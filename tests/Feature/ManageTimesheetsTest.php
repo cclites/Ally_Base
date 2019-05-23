@@ -2,20 +2,14 @@
 
 namespace Tests\Feature;
 
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Timesheet;
 use App\Events\TimesheetCreated;
 
 class ManageTimesheetsTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public $client;
-    public $caregiver;
-    public $business;
-    public $officeUser;
-    public $activities;
+    use RefreshDatabase, CreatesBusinesses;
 
     public function setUp()
     {
@@ -23,17 +17,9 @@ class ManageTimesheetsTest extends TestCase
 
         $this->disableExceptionHandling();
 
-        $this->client = factory('App\Client')->create();
-        $this->business = $this->client->business;
+        $this->createBusinessWithUsers();
+
         $this->business->update(['allows_manual_shifts' => true]);
-
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->chain->assignCaregiver($this->caregiver);
-        $this->caregiver->clients()->save($this->client);
-        
-        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
-        $this->officeUser->businesses()->attach($this->business->id);
-
         factory('App\Activity', 5)->create([
             'business_id' => $this->business->id,
         ]);
@@ -51,8 +37,6 @@ class ManageTimesheetsTest extends TestCase
             'other_expenses' => 0.0,
             'checked_in_time' => $start,
             'checked_out_time' => $end,
-            'caregiver_rate' => 12.00,
-            'provider_fee' => 2.50,
             'activities' => $this->activities,
             'caregiver_comments' => 'test',
         ];
@@ -145,7 +129,7 @@ class ManageTimesheetsTest extends TestCase
     public function a_business_can_create_a_timesheet()
     {
         $this->actingAs($this->officeUser->user);
-        
+
         $this->assertCount(0, $this->business->timesheets);
 
         $this->post(route('business.timesheet.store'), [
