@@ -43,7 +43,7 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Caregiver::with('clients.business')
+            $query = Caregiver::with('businesses')
                 ->forRequestedBusinesses()
                 ->ordered();
 
@@ -64,16 +64,8 @@ class CaregiverController extends BaseController
                 $query->with('phoneNumber');
             }
 
-            if ($request->filled('location')) {
-                $query->whereHas('clients', function($q1) use ($request) {
-                    $q1->whereHas('business', function ($q2) use ($request) {
-                        $q2->where('id', $request->location);
-                    });
-                });
-            }
-
             $results = $query->get();
-            // dd($results->toArray());
+
             return response()->json($results);
         }
 
@@ -132,6 +124,7 @@ class CaregiverController extends BaseController
         $this->authorize('read', $caregiver);
 
         $caregiver->load([
+            'businesses',
             'deposits' => function ($query) {
                 return $query->orderBy('created_at');
             },
@@ -210,6 +203,41 @@ class CaregiverController extends BaseController
             return new SuccessResponse('The caregiver has been updated.', $caregiver, '.');
         }
         return new ErrorResponse(500, 'The caregiver could not be updated.');
+    }
+
+    /**
+     * Save the caregiver's business relationships.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     */
+    public function updateOfficeLocations(Request $request, Caregiver $caregiver)
+    {
+        $data = $request->validate([
+            'businesses' => 'required|array|min:1',
+            'businesses.*' => 'int|exists:businesses,id',
+        ]);
+
+        // Restrict dropping business relation if they have clients:
+        $availableBusinesses = auth()->user()->role->businessChain->businesses;
+        foreach ($availableBusinesses as $business) {
+            if (in_array($business->id, $data['businesses'])) {
+                continue;
+            }
+
+            $hasClients = $caregiver->clients()
+                ->where('business_id', $business->id)
+                ->exists();
+
+            if ($hasClients) {
+                return new ErrorResponse(412, "Cannot remove caregiver from the {$business->name} location because they are currently assigned to clients at that location.");
+            }
+        }
+
+        $caregiver->businesses()->sync($data['businesses']);
+
+        return new SuccessResponse('Successfully updated caregiver\'s locations');
     }
 
     /**

@@ -123,7 +123,36 @@ class QuickbooksOnlineService
     public function getCustomers() : ?array
     {
         return $this->autoRefreshToken()
-            ->query('SELECT * FROM Customer ORDERBY GivenName');
+            ->queryAll('SELECT * FROM Customer ORDERBY GivenName');
+    }
+
+    /**
+     * Get ALL results from a query by paginating the results
+     * until there are no more.
+     *
+     * @param string $query
+     * @param int $perPage
+     * @return array|null
+     * @throws \Exception
+     */
+    public function queryAll(string $query, int $perPage = 250) : ?array
+    {
+        $data = collect([]);
+        $page = 0;
+        $perPage = 250;
+        while (true) {
+            $offset = $page * $perPage + ($page > 0 ? 1 : 0);
+            $results = $this->query($query, $offset, $perPage);
+
+            if (empty($results)) {
+                break;
+            }
+
+            $data = $data->merge($results);
+            $page++;
+        }
+
+        return $data->toArray();
     }
 
     /**
@@ -135,7 +164,7 @@ class QuickbooksOnlineService
     public function getItems() : ?array
     {
         return $this->autoRefreshToken()
-            ->query('SELECT * FROM Item where Type = \'Service\'');
+            ->queryAll('SELECT * FROM Item where Type = \'Service\'');
     }
 
     /**
@@ -240,12 +269,14 @@ class QuickbooksOnlineService
      * Query the data service.
      *
      * @param string $query
+     * @param null|int $startPosition Starting page number
+     * @param null|int $maxResults Page size
      * @return array|null
      * @throws \Exception
      */
-    protected function query(string $query) : ?array
+    protected function query(string $query, ?int $startPosition = null, ?int $maxResults = null) : ?array
     {
-        return $this->service->Query($query);
+        return $this->service->Query($query, $startPosition, $maxResults);
     }
 
     /**

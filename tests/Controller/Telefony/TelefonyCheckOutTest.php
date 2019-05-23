@@ -2,6 +2,7 @@
 namespace Tests\Controller\Telefony;
 
 use App\Activity;
+use App\Http\Controllers\Api\Telefony\TelefonyCheckOutController;
 use App\PhoneNumber;
 
 class TelefonyCheckOutTest extends TelefonyBase
@@ -61,11 +62,78 @@ class TelefonyCheckOutTest extends TelefonyBase
         $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
     }
 
-    public function test_when_no_injuries_are_recorded_then_check_for_activities()
+    public function test_when_no_injuries_are_recorded_then_check_for_mileage()
     {
         $shift = $this->createShift();
         $response = $this->telefonyPost('check-out/check-for-injury/' . $shift->id, ['Digits' => 1]);
+        $response->assertSee('<Say');
+        $response->assertSee(TelefonyCheckOutController::PromptForMileage);
+        $response->assertSee('<Gather timeout="5" numDigits="1" action="' . route('telefony.check-out.check-for-mileage', [$shift]) . '">');
+    }
+
+    /** @test */
+    function check_for_mileage_response()
+    {
+        $shift = $this->createShift();
+        $response = $this->telefonyPost('check-out/check-for-mileage/' . $shift->id);
+
+        $response->assertSee('<Say');
+        $response->assertSee(TelefonyCheckOutController::PromptForMileage);
+        $response->assertSee('<Gather timeout="5" numDigits="1" action="' . route('telefony.check-out.check-for-mileage', [$shift]) . '">');
+    }
+
+    /** @test */
+    function if_mileage_is_skipped_then_prompt_for_activities()
+    {
+        $shift = $this->createShift();
+        $response = $this->telefonyPost('check-out/check-for-mileage/' . $shift->id, ['Digits' => 1]);
         $this->checkActivitiesResponse($response, $shift);
+    }
+
+    /** @test */
+    function check_ask_for_mileage_entry()
+    {
+        $shift = $this->createShift();
+        $response = $this->telefonyPost('check-out/check-for-mileage/' . $shift->id, ['Digits' => 2]);
+
+        $response->assertSee('<Say');
+        $response->assertSee(TelefonyCheckOutController::AskForMileageEntry);
+        $response->assertSee('<Gather timeout="30" finishOnKey="#" action="' . route('telefony.check-out.confirm-mileage', [$shift]) . '">');
+    }
+
+    /** @test */
+    function check_mileage_is_confirmed()
+    {
+        $shift = $this->createShift();
+        $mileage = 13;
+        $response = $this->telefonyPost('check-out/confirm-mileage/' . $shift->id, ['Digits' => $mileage]);
+
+        $response->assertSee(sprintf(TelefonyCheckOutController::ConfirmMileageEntry, $mileage));
+        $response->assertSee('<Gather timeout="10" numDigits="1" action="' . route('telefony.check-out.record-mileage', [$shift, $mileage]) . '">');
+    }
+
+    /** @test */
+    function check_mileage_can_be_recorded()
+    {
+        $shift = $this->createShift();
+        $mileage = 13;
+        $response = $this->telefonyPost('check-out/record-mileage/'.$shift->id.'/'.$mileage, ['Digits' => 1]);
+        $response->assertSee(TelefonyCheckOutController::MileageEntrySuccess);
+        $response->assertSee('<Redirect');
+        $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
+
+        $this->assertEquals($mileage, $shift->fresh()->mileage);
+    }
+
+    /** @test */
+    function check_mileage_can_be_re_entered()
+    {
+        $shift = $this->createShift();
+        $mileage = 13;
+        $response = $this->telefonyPost('check-out/record-mileage/'.$shift->id.'/'.$mileage, ['Digits' => 2]);
+        $response->assertSee('<Say');
+        $response->assertSee(TelefonyCheckOutController::AskForMileageEntry);
+        $response->assertSee('<Gather timeout="30" finishOnKey="#" action="' . route('telefony.check-out.confirm-mileage', [$shift]) . '">');
     }
 
     public function test_check_for_activities_response()

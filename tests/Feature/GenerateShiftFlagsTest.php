@@ -40,8 +40,7 @@ class GenerateShiftFlagsTest extends TestCase
 
         $this->business = $this->client->business;
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
-        $this->business->chain->caregivers()->save($this->caregiver);
+        $this->business->chain->assignCaregiver($this->caregiver);
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
 

@@ -36,7 +36,7 @@ class BusinessTest extends TestCase
 
         $this->business->users()->attach($user1);
         $this->business->users()->attach($user2);
-        $this->business->caregivers()->attach($user3);
+        $this->business->assignCaregiver($user3);
 
         $this->assertCount(2, $this->business->users);
     }
@@ -50,7 +50,7 @@ class BusinessTest extends TestCase
 
         $this->business->clients()->save($user1);
         $this->business->clients()->save($user2);
-        $this->business->caregivers()->attach($user3);
+        $this->business->assignCaregiver($user3);
 
         $this->assertCount(2, $this->business->clients);
     }
@@ -61,8 +61,8 @@ class BusinessTest extends TestCase
         $user2 = factory(Caregiver::class)->create();
         $user3 = factory(OfficeUser::class)->create();
 
-        $this->business->caregivers()->attach($user1);
-        $this->business->caregivers()->attach($user2);
+        $this->business->assignCaregiver($user1);
+        $this->business->assignCaregiver($user2);
         $this->business->users()->attach($user3);
 
         $this->assertCount(2, $this->business->caregivers);

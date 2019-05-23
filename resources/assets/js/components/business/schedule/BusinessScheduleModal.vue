@@ -310,7 +310,7 @@
                                 </b-alert>
                                 <div v-if="warnings && warnings.length">
                                     <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
-                                        <strong>Warning:</strong> {{ warning }}
+                                        <strong>{{ warning.label }}:</strong> {{ warning.description }}
                                     </b-alert>
                                 </div>
                             </b-col>

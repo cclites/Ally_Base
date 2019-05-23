@@ -183,7 +183,7 @@ class PayrollExportReport extends BaseReport
      */
     public function mapReportRecord(Collection $rows) : array
     {
-        return [
+        $result = [
             'caregiver_id' => $rows[0]['caregiver_id'],
             'name' => $rows[0]['name'],
             'paycode' => $rows[0]['paycode'],
@@ -196,10 +196,16 @@ class PayrollExportReport extends BaseReport
             }, 0),
             'dept' => '',
             'division' => '',
-            'location' => $rows[0]['location'],
             'caregiver_last_name' => $rows[0]['caregiver_last_name'],
             'caregiver_first_name' => $rows[0]['caregiver_first_name'],
         ];
+
+        // Only add zipcode if BCN.
+        if ($this->format === self::BCN) {
+            $result['location'] = $rows[0]['location'];
+        }
+
+        return $result;
     }
 
     /**

@@ -35,7 +35,7 @@ class TimesheetExportTest extends TestCase
         $office_user = factory(OfficeUser::class)->create();
 
         $business->users()->attach($office_user->id);
-        $business->caregivers()->attach($caregiver->id);
+        $business->assignCaregiver($caregiver);
 
         $shift = factory(Shift::class)->create([
             'client_id' => $client->id,

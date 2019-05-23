@@ -71,7 +71,7 @@
                     },
                     {
                         key: 'code',
-                        label: 'Code',
+                        label: 'HSPCS Code',
                         sortable: true
                     },
                     {
