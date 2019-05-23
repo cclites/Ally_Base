@@ -37,6 +37,12 @@ class ImportClients extends BaseImport
      */
     protected $createClient;
 
+    /**
+     * A store for duplicate row checks
+     * @var array
+     */
+    protected $processedHashes = [];
+
 
     public function __construct(CreateClient $createClient)
     {
@@ -65,6 +71,11 @@ class ImportClients extends BaseImport
      */
     protected function importRow(int $row)
     {
+        if ($this->duplicateDataProcessed($row)) {
+            $this->output->writeln('Skipping duplicate data found on row : ' . $row);
+            return false;
+        }
+
         $statusAlias = $this->resolveStatusAlias($row);
 
         $data = [
@@ -235,5 +246,30 @@ class ImportClients extends BaseImport
         return null;
     }
 
+    /**
+     * Check for duplicate data in the same import file
+     *
+     * @param int $row
+     * @return bool
+     * @throws \PHPExcel_Exception
+     */
+    private function duplicateDataProcessed(int $row)
+    {
+        $parts = [
+            $this->resolve('Name', $row),
+            $this->resolve('First Name', $row),
+            $this->resolve('Last Name', $row),
+            $this->resolve('Email', $row),
+            $this->resolve('Address1', $row),
+        ];
 
+        $hash = md5(implode(',', array_filter($parts)));
+
+        if (array_key_exists($hash, $this->processedHashes)) {
+            return true;
+        }
+
+        $this->processedHashes[$hash] = 1;
+        return false;
+    }
 }

@@ -126,6 +126,7 @@ abstract class BaseImport extends Command
             foreach ($phoneFields as $type => $phoneField) {
                 $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
                 $phone = PhoneNumber::fromInput($type, $number);
+                $phone->number(); // This should throw an exception if invalid format
                 $phone->notes = $this->resolve("${phoneField}Notes",  $row); // ex. Phone1Notes
                 $model->phoneNumbers()->save($phone);
             }
