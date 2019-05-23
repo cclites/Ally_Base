@@ -61,7 +61,7 @@ class StatusAliasController extends BaseController
             'type' => 'required|in:client,caregiver',
         ]);
 
-        $this->authorize('update', $this->business());
+        $this->authorize('update', $this->businessChain());
 
         $this->businessChain()->statusAliases()->create($data);
 
@@ -78,7 +78,7 @@ class StatusAliasController extends BaseController
      */
     public function update(Request $request, StatusAlias $statusAlias)
     {
-        $this->authorize('update', $this->business());
+        $this->authorize('update', $this->businessChain());
 
         $data = $request->validate([
             'name' => [
@@ -114,7 +114,7 @@ class StatusAliasController extends BaseController
      */
     public function destroy(StatusAlias $statusAlias)
     {
-        $this->authorize('update', $this->business());
+        $this->authorize('update', $this->businessChain());
 
         if (User::where('status_alias_id', $statusAlias->id)->exists()) {
             return new ErrorResponse(403, 'Unable to remove status alias because it is already in use.');
