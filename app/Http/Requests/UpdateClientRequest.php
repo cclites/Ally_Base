@@ -23,7 +23,7 @@ class UpdateClientRequest extends BusinessRequest
     public function rules()
     {
         $client = $this->route('client');
-        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+        $aliases = StatusAlias::forAuthorizedChain()->forClients()->pluck('id')->toArray();
 
         return [
             'firstname' => 'required|string|max:45',
