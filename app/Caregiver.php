@@ -616,7 +616,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function ensureBusinessRelationship(Business $business) : bool
     {
-        if ($this->businesses->contains('id', $business->id)) {
+        if ($this->businesses()->get()->contains('id', $business->id)) {
             return true;
         }
 
