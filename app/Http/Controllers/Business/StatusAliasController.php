@@ -56,6 +56,7 @@ class StatusAliasController extends BaseController
                 'max:255',
                 Rule::unique('status_aliases', 'name')
                     ->where('chain_id', auth()->user()->getChain()->id)
+                    ->where('type', $request->type)
             ],
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
@@ -86,6 +87,7 @@ class StatusAliasController extends BaseController
                 'max:255',
                 Rule::unique('status_aliases', 'name')
                     ->where('chain_id', auth()->user()->getChain()->id)
+                    ->where('type', $request->type)
                     ->ignore($statusAlias->id)
             ],
             'active' => 'required|boolean',
