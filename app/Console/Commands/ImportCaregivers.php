@@ -91,7 +91,7 @@ class ImportCaregivers extends BaseImport
             'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'preferences' => $this->resolve('Preferences', $row),
             'password' => bcrypt(str_random(12)),
-            'status_alias_id' => $status->id ?? null,
+            'status_alias_id' => $statusAlias->id ?? null,
         ];
 
         // Prevent Duplicates
@@ -246,9 +246,10 @@ class ImportCaregivers extends BaseImport
         if ($name = $this->resolve('Status', $row)) {
             $status = StatusAlias::where('name', $name)
                 ->where('chain_id', $this->businessChain()->id)
+                ->where('type', 'caregiver')
                 ->first();
 
-            return $status ?? null;
+            return $status;
         }
 
         return null;

@@ -91,7 +91,7 @@ class ImportClients extends BaseImport
             'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'business_id' => $this->business()->id,
             'hic' => $this->resolve('HIC', $row),
-            'status_alias_id' => $status->id ?? null,
+            'status_alias_id' => $statusAlias->id ?? null,
         ];
 
         // Prevent Duplicates
@@ -238,9 +238,10 @@ class ImportClients extends BaseImport
         if ($name = $this->resolve('Status', $row)) {
             $status = StatusAlias::where('name', $name)
                 ->where('chain_id', $this->business()->chain_id)
+                ->where('type', 'client')
                 ->first();
 
-            return $status ?? null;
+            return $status;
         }
 
         return null;
