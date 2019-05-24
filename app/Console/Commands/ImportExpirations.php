@@ -58,7 +58,7 @@ class ImportExpirations extends BaseImport
 
     protected function matchCaregiver(int $exportedId): ?Caregiver
     {
-        return Caregiver::where('chain_id', $this->businessChain()->id)
+        return Caregiver::forChains([$this->businessChain()->id])
             ->whereMeta('Exported_ID', $exportedId)
             ->first();
     }
