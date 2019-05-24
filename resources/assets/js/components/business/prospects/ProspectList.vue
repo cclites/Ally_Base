@@ -5,6 +5,14 @@
                 <a href="/business/prospects/create" class="btn btn-info">Add Prospect</a>
             </b-col>
         </b-row>
+        <b-row class="mb-2">
+            <b-col lg="12">
+                <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
+                    <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
+                    <b-form-input v-model="filter" placeholder="Type to Search" class="f-1" />
+                </div>
+            </b-col>
+        </b-row>
 
         <loading-card v-show="loading"></loading-card>
         <div class="table-responsive" v-if="!loading">
@@ -18,6 +26,9 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
+                <template slot="business_id" scope="row">
+                    {{ row.item.business.name }}
+                </template>
                 <template slot="actions" scope="row">
                     <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                     <b-btn size="sm" :href="'/business/prospects/' + row.item.id">
@@ -42,11 +53,9 @@
 </template>
 
 <script>
+    import BusinessLocationSelect from "../../business/BusinessLocationSelect";
     export default {
-        props: {
-            'clients': Array,
-            'multi_location': Object,
-        },
+        components: {BusinessLocationSelect},
 
         data() {
             return {
@@ -89,12 +98,14 @@
                         key: 'zip',
                         sortable: true
                     },
+                    { key: 'business_id', sortable: false },
                     {
                         key: 'actions',
                         class: 'hidden-print'
                     }
                 ],
                 loading: false,
+                businessFilter: '',
             }
         },
 
@@ -103,16 +114,20 @@
         },
 
         computed: {
-
         },
 
         methods: {
             async loadProspects() {
                 this.loading = true;
-                const response = await axios.get('/business/prospects?json=1');
-                this.items = response.data;
-                this.totalRows = this.items.length;
-                this.loading = false;
+                axios.get(`/business/prospects?json=1&businesses=${this.businessFilter}`)
+                    .then(response => {
+                        this.items = response.data;
+                        this.totalRows = this.items.length;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
             },
             convert(item) {
                 if (!confirm(`Are you sure you wish to convert ${item.firstname} ${item.lastname} to a client?`)) return;
@@ -128,6 +143,12 @@
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
             }
-        }
+        },
+
+        watch: {
+            businessFilter(newValue, oldValue) {
+                this.loadProspects();
+            },
+        },
     }
 </script>

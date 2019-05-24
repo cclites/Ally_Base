@@ -131,7 +131,9 @@ class QuickbooksSettingsController extends BaseController
     {
         $this->authorize('update', $business);
 
-        $business->quickbooksConnection()->delete();
+        if ($connection = $business->quickbooksConnection) {
+            $connection->update(['access_token' => null]);
+        }
 
         return new SuccessResponse('Your account has been disconnected from the Quickbooks API.', [], '.');
     }
@@ -204,6 +206,47 @@ class QuickbooksSettingsController extends BaseController
     }
 
     /**
+     * Create a Quickbooks customer relationship
+     * using the client data and update the mapping record.
+     *
+     * @param Request $request
+     * @param Business $business
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \QuickBooksOnline\API\Exception\IdsException
+     */
+    public function customerCreate(Request $request, Business $business)
+    {
+        $client = Client::findOrFail($request->client_id);
+
+        $this->authorize('update', $business);
+
+        if (empty($business->quickbooksConnection)) {
+            return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
+        }
+
+        /** @var QuickbooksOnlineService $api */
+        $api = $business->quickbooksConnection->getApiService();
+        if (empty($api)) {
+            return new ErrorResponse(401, 'Error connecting to the Quickbooks API.  Please try again.');
+        }
+
+        // Create new customer relationship.
+        [$customerId, $customerName] = $api->createCustomer($client);
+        $customer = $client->quickbooksCustomer()->create([
+            'business_id' => $business->id,
+            'name' => $customerName,
+            'customer_id' => $customerId,
+        ]);
+        $client->update(['quickbooks_customer_id' => $customer->id]);
+
+        return new SuccessResponse('Customer record successfully created.', [
+            'client' => $client,
+            'customers' => $business->quickbooksCustomers()->ordered()->get()
+        ]);
+    }
+
+    /**
      * Get a list of clients for use with customer mapping.
      *
      * @return array
@@ -236,8 +279,23 @@ class QuickbooksSettingsController extends BaseController
      */
     protected function syncCustomerData(QuickbooksOnlineService $api, Business $business) : void
     {
-        // TODO: do we need to remove customers that no longer appear via API ?
-        foreach ($api->getCustomers() as $customer) {
+        $customers = collect($api->getCustomers());
+
+        // Find customer records that no longer appear in Quickbooks.
+        $customerIds = $customers->pluck('Id');
+        $deleteIds = $business->quickbooksCustomers()->whereNotIn('customer_id', $customerIds)->get()->pluck('id');
+
+        // Remove any client->customer mappings to those missing customer records.
+        Client::whereIn('quickbooks_customer_id', $deleteIds)
+            ->update([
+                'quickbooks_customer_id' => null,
+            ]);
+
+        // Delete the missing customer records.
+        $business->quickbooksCustomers()->whereIn('id', $deleteIds)->delete();
+
+        // Create OR update each customer record.
+        foreach ($customers as $customer) {
             if ($match = $business->quickbooksCustomers()->where('customer_id', $customer->Id)->first()) {
                 $match->update([
                     'name' => $customer->FullyQualifiedName,
@@ -301,7 +359,22 @@ class QuickbooksSettingsController extends BaseController
      */
     protected function syncServiceData(QuickbooksOnlineService $api, Business $business) : void
     {
-        foreach ($api->getItems() as $service) {
+        $services = collect($api->getItems());
+
+        // Find customer records that no longer appear in Quickbooks.
+        $serviceIds = $services->pluck('Id');
+        $deleteIds = $business->quickbooksServices()->whereNotIn('service_id', $serviceIds)->get()->pluck('id');
+
+        // Remove any service mappings to those missing service records.
+        $columns = ['shift_service_id', 'adjustment_service_id', 'refund_service_id', 'mileage_service_id', 'expense_service_id'];
+        foreach ($columns as $column) {
+            $business->quickbooksConnection()->whereIn($column, $deleteIds)->update([$column => null]);
+        }
+
+        // Delete the missing service records.
+        $business->quickbooksServices()->whereIn('id', $deleteIds)->delete();
+
+        foreach ($services as $service) {
             if ($match = $business->quickbooksServices()->where('service_id', $service->Id)->first()) {
                 $match->update([
                     'name' => $service->Name,

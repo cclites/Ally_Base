@@ -5,6 +5,8 @@ use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Service;
 use App\Business;
 use App\Client;
 use App\Services\TellusService;
@@ -55,16 +57,16 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a date of birth set.  You can edit this information under the Client\'s profile.');
         }
 
-        if (empty($invoice->client->medicaid_plan_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Plan Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
-        }
-
-        if (empty($invoice->client->medicaid_payer_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Payer Identifier set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
-        }
-
         if (empty($invoice->client->medicaid_diagnosis_codes)) {
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+        }
+
+        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+            throw new ClaimTransmissionException('You cannot submit a claim because there is no Payer Organization identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
+        }
+
+        if (empty(optional($invoice->clientPayer)->payer->getPlanCode())) {
+            throw new ClaimTransmissionException('You cannot submit a claim because there is no Plan Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
         return parent::validateInvoice($invoice);
@@ -123,18 +125,21 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $caregiver = $shift->caregiver;
 
         /** @var \App\Address $address */
-        $address = $shift->address ?? $shift->client->evvAddress();
+        $address = $shift->address ?? $shift->client->evvAddress;
 
         /** @var \Packages\GMaps\GeocodeCoordinates|false */
-        $geocode = $address->getGeocode();
+        $geocode = optional($address)->getGeocode();
 
         $diagnosisCodes = $this->getDiagnosisCodes($client);
 
-        return [
+        /** @var ClientInvoice $clientInvoice */
+        $clientInvoice = $claim->invoice;
+
+        $master = [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => $client->medicaid_payer_id,
-            'Plan' => $client->medicaid_plan_id,
+            'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
+            'Plan' => optional($clientInvoice->clientPayer)->payer->getPlanCode(),
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
@@ -157,7 +162,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => $this->mapActivities($shift->activities),
+            'ServiceCode' => '', //$this->mapActivities($shift->activities),
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0],
@@ -168,8 +173,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'EndVerificationType' => $this->getVerificationType($shift->checked_out_method),
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
             'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
-            'ScheduledLatitude' => $geocode->latitude ?? '',
-            'ScheduledLongitude' => $geocode->longitude ?? '',
+            'ScheduledLatitude' => optional($geocode)->latitude ?? '',
+            'ScheduledLongitude' => optional($geocode)->longitude ?? '',
             'ActualStartDatetime' => $shift->checked_in_time->format($this->timeFormat),
             'ActualEndDatetime' => $shift->checked_out_time->format($this->timeFormat),
             'ActualStartLatitude' => $shift->checked_in_latitude ?? '',
@@ -200,6 +205,22 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'PaidAmount' => '', // N/A
             'CareDirectionType' => '', // N/A
         ];
+
+        if ($shift->services->count()) {
+            // Map each individual service.
+            $services = [];
+            /** @var ShiftService $service */
+            foreach ($shift->services as $service) {
+                $serviceEntry = $master;
+                $serviceEntry['ServiceCode'] = optional($service->service)->code;
+                $services[] = $serviceEntry;
+            }
+            return $services;
+        } else {
+            // Convert single service shift record.
+            $master['ServiceCode'] = optional($shift->service)->code;
+            return [$master];
+        }
     }
 
     /**

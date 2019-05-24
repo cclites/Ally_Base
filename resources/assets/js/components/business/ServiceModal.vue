@@ -8,7 +8,7 @@
                         <b-form-input v-model="form.name" type="text" required />
                         <input-help :form="form" field="name"></input-help>
                     </b-form-group>
-                    <b-form-group label="Service Code" label-for="code">
+                    <b-form-group label="HSPCS Code" label-for="code">
                         <b-form-input v-model="form.code" type="text" />
                         <input-help :form="form" field="code"></input-help>
                     </b-form-group>

@@ -43,6 +43,7 @@ class PayerController extends BaseController
      *
      * @param  CreatePayerRequest  $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function store(CreatePayerRequest $request)
     {
@@ -80,8 +81,9 @@ class PayerController extends BaseController
      * Update the specified resource in storage.
      *
      * @param  UpdatePayerRequest  $request
-     * @param  \App\Payer  $payer
+     * @param  \App\Billing\Payer  $payer
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function update(UpdatePayerRequest $request, Payer $payer)
     {
@@ -117,8 +119,9 @@ class PayerController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Payer  $payer
+     * @param  \App\Billing\Payer  $payer
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(Payer $payer)
     {

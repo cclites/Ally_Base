@@ -75,6 +75,11 @@ class ClientRatesController extends Controller
                 $client->caregivers()->sync($caregivers);
             }
 
+            // Add caregivers to the client's business location if not added already.
+            foreach (Caregiver::whereIn('id', $caregivers)->get() as $caregiver) {
+                $caregiver->ensureBusinessRelationship($client->business);
+            }
+
             if ($client->syncRates($rates)) {
                 $validator = new ClientRateValidator();
                 if (! $validator->validate($client->fresh())) {
