@@ -1,9 +1,11 @@
 <?php
 namespace Tests\Feature;
 
+use App\Billing\Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use App\Scheduling\ScheduleAggregator;
 use App\Schedule;
@@ -11,38 +13,21 @@ use App\Exceptions\MaximumWeeklyHoursExceeded;
 
 class ScheduleManagerTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public $client;
-    
-    public $caregiver;
-    
-    public $business;
+    use RefreshDatabase, CreatesBusinesses;
 
     public $aggregator;
 
-    public $officeUser;
+    public $service;
 
     public function setUp()
     {
         parent::setUp();
 
-        // Disable exception handling
-        $this->disableExceptionHandling();
-
         $this->aggregator = new ScheduleAggregator();
+        $this->createBusinessWithUsers();
+        $this->service = factory(Service::class)->create(['chain_id' => $this->chain->id, 'default' => true]);
 
-        $this->client = factory('App\Client')->create();
-
-        $this->business = $this->client->business;
-
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->assignCaregiver($this->caregiver);
-
-        // init logged in office user
-        $this->officeUser = factory('App\OfficeUser')->create();
         $this->actingAs($this->officeUser->user);
-        $this->officeUser->businesses()->attach($this->business->id);
     }
 
     public function createShift($date, $hours)
@@ -78,7 +63,9 @@ class ScheduleManagerTest extends TestCase
         ]), [
             'fixed_rates' => 0,
             'duration' => 6 * 60, // = 11 hours total
-            'starts_at' => $shift->starts_at->timestamp
+            'starts_at' => $shift->starts_at->toDateTimeString(),
+            'service_id' => $this->service->id,
+            'status' => Schedule::OK,
         ]);
 
         $response = $this->JSON('put', route('business.schedule.update', ['schedule' => $shift->id]), $data);
@@ -93,6 +80,8 @@ class ScheduleManagerTest extends TestCase
     /** @test */
     public function creating_a_schedule_should_fail_if_max_weekly_client_hours_are_exceeded()
     {
+        $this->withExceptionHandling();
+
         $this->client->update(['max_weekly_hours' => 10]);
 
         $date = new Carbon('next tuesday');
@@ -110,7 +99,9 @@ class ScheduleManagerTest extends TestCase
         ]), [
             'fixed_rates' => 0,
             'duration' => 6 * 60, // = 11 hours total
-            'starts_at' => $shift->starts_at->timestamp
+            'starts_at' => $shift->starts_at->toDateTimeString(),
+            'service_id' => $this->service->id,
+            'status' => Schedule::OK,
         ]);
 
         $this->JSON('post', route('business.schedule.store'), $data)
