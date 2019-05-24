@@ -11,6 +11,7 @@ use App\Caregiver;
 use App\CaregiverLicense;
 use App\Client;
 use App\PhoneNumber;
+use Carbon\Carbon;
 
 class ImportAuthorizations extends BaseImport
 {
@@ -60,7 +61,7 @@ class ImportAuthorizations extends BaseImport
 
     protected function matchClient(int $exportedId): ?Client
     {
-        return Client::forBusinesses($this->businessChain()->businesses->pluck('id'))
+        return Client::forBusinesses($this->businessChain()->businesses->pluck('id')->toArray())
             ->whereMeta('Exported_ID', $exportedId)
             ->first();
     }
@@ -76,7 +77,7 @@ class ImportAuthorizations extends BaseImport
     {
         $id = $this->resolve('Client ID', $row);
         if (!$client = $this->matchClient($id)) {
-            $this->output->write("No matches for exported client ID $id");
+            $this->output->writeln("No matches for exported client ID $id");
             return false;
         }
 
@@ -107,7 +108,7 @@ class ImportAuthorizations extends BaseImport
      */
     protected function warningMessage()
     {
-        return 'Importing expirations into ' . $this->businessChain()->name . '..';
+        return 'Importing service authorizations into ' . $this->businessChain()->name . '..';
     }
 
     /**
@@ -118,7 +119,7 @@ class ImportAuthorizations extends BaseImport
      */
     protected function emptyRow(int $row)
     {
-        return !$this->resolve('Expiration Name', $row);
+        return !$this->resolve('Service Code', $row);
     }
 
     protected function resolvePeriod(int $row, string $cellValue)
@@ -131,6 +132,7 @@ class ImportAuthorizations extends BaseImport
                 return ClientAuthorization::PERIOD_DAILY;
             case 'Every Month':
                 return ClientAuthorization::PERIOD_MONTHLY;
+            case 'Every Year':
             case 'Range':
                 return ClientAuthorization::PERIOD_TERM;
         }
@@ -140,6 +142,23 @@ class ImportAuthorizations extends BaseImport
         }
 
         throw new \Exception("Invalid period found: " . $cellValue);
+    }
+
+    protected function resolveEffectiveEnd(int $row, string $cellValue)
+    {
+        if ($count = $this->resolve("Count", $row) && $period = $this->resolve("Period", $row)) {
+            $start = Carbon::parse($this->resolve("Effective Start", $row));
+            switch($period) {
+                case ClientAuthorization::PERIOD_WEEKLY:
+                    return $start->copy()->addWeeks($count)->toDateString();
+                case ClientAuthorization::PERIOD_DAILY:
+                    return $start->copy()->addDays($count)->toDateString();
+                case ClientAuthorization::PERIOD_MONTHLY:
+                    return $start->copy()->addMonths($count)->toDateString();
+            }
+        }
+
+        return $cellValue;
     }
 
     protected function resolveUnitType(int $row, string $cellValue)

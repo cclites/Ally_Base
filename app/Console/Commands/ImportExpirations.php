@@ -74,7 +74,7 @@ class ImportExpirations extends BaseImport
     {
         $id = $this->resolve('Caregiver ID', $row);
         if (!$caregiver = $this->matchCaregiver($id)) {
-            $this->output->write("No matches for exported caregiver ID $id");
+            $this->output->writeln("No matches for exported caregiver ID $id");
             return false;
         }
 
