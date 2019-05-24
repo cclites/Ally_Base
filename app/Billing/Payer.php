@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $chain_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $invoice_format
  * @property string|null $payment_method_type
  * @property int|null $payment_method_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits

@@ -9,10 +9,33 @@ use App\Client;
 /**
  * App\Billing\ClientAuthorization
  *
+ * @property int $id
+ * @property int $client_id
+ * @property int $service_id
+ * @property string|null $service_auth_id
+ * @property string $effective_start
+ * @property string $effective_end
+ * @property float $units
+ * @property string $unit_type
+ * @property string $period
+ * @property float $sunday
+ * @property float $monday
+ * @property float $tuesday
+ * @property float $wednesday
+ * @property float $thursday
+ * @property float $friday
+ * @property float $saturday
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
  * @property-read \App\Billing\Service $service
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization effectiveOn(\Carbon\Carbon $date)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization query()
  * @mixin \Eloquent
  */
 class ClientAuthorization extends AuditableModel
