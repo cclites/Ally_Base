@@ -15,7 +15,7 @@ class BusinessChainPolicy extends BasePolicy
     public function read(User $user, BusinessChain $businessChain)
     {
         return $user->role_type === 'admin'
-            || optional($user->officeUser)->chain_id === $businessChain->id;
+            || (int) optional($user->officeUser)->chain_id === $businessChain->id;
     }
 
     public function update(User $user, BusinessChain $businessChain)
