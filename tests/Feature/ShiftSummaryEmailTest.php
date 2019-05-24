@@ -114,7 +114,9 @@ class ShiftSummaryEmailTest extends TestCase
     /** @test */
     function it_should_calculate_shift_dates_based_on_the_business_timezone()
     {
+        app('settings')->set($this->business, 'timezone', 'America/Los_Angeles');
         $this->business->update(['timezone' => 'America/Los_Angeles']);
+
         \Mail::fake();
 
         $badShift = $this->createShift(Carbon::now()->startOfWeek(), '01:01', 4, [
