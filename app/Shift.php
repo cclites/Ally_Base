@@ -852,6 +852,15 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'notes' => $this->other_expenses_desc,
             ]);
         }
+        else if ($this->other_expenses < 0) {
+            return ShiftExpense::create([
+                'shift_id' => $this->id,
+                'name' => 'Expense Adjustment',
+                'units' => 1,
+                'rate' => $this->other_expenses,
+                'notes' => $this->other_expenses_desc,
+            ]);
+        }
         return null;
     }
 
