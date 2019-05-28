@@ -70,6 +70,20 @@
                         </b-form-input>
                         <input-help :form="form" field="zip" text="Enter their zip code."></input-help>
                     </b-form-group>
+                    <b-form-group label="Calendar Start of Week" label-for="calendar_week_start" label-class="required">
+                        <b-form-select id="calendar_week_start" v-model="form.calendar_week_start">
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </b-form-select>
+                        <input-help :form="form"
+                                    field="calendar_week_start"
+                                    text="Choose which day of the week should show first on the Schedules page." />
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -96,6 +110,7 @@
                     city: this.chain.city,
                     state: this.chain.state,
                     zip: this.chain.zip,
+                    calendar_week_start: this.chain.calendar_week_start,
                 })
             }
         },
