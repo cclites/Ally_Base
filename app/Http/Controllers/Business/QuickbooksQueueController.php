@@ -67,6 +67,9 @@ class QuickbooksQueueController extends Controller
         /** @var \App\Client $client */
         $client = $invoice->client;
 
+        /** @var string $timezone */
+        $timezone = $client->getTimezone();
+
         /** @var \App\Business $client */
         $business = $client->business;
         $this->authorize('update', $business);
@@ -119,10 +122,10 @@ class QuickbooksQueueController extends Controller
                     // Example Description: 04/22/2019 - (Jones, Steven) 08:00 AM - 10:00 AM RespitCare
                     $shift = $invoiceItem->getShift();
                     $service = $shift->service;
-                    $startTime = $shift->checked_in_time->format('h:i A');
-                    $endTime = $shift->checked_out_time->format('h:i A');
-                    $date = $shift->checked_in_time->format('m/d/Y');
-                    $lineItem->serviceDate = $shift->checked_in_time->format('Y-m-d');
+                    $startTime = $shift->checked_in_time->timezone($timezone)->format('h:i A');
+                    $endTime = $shift->checked_out_time->timezone($timezone)->format('h:i A');
+                    $date = $shift->checked_in_time->timezone($timezone)->format('m/d/Y');
+                    $lineItem->serviceDate = $shift->checked_in_time->timezone($timezone)->format('Y-m-d');
                     $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
 
                     // Use the shift mapping for now.
@@ -132,10 +135,10 @@ class QuickbooksQueueController extends Controller
                     $shiftService = $invoiceItem->getShiftService();
                     $shift = $shiftService->shift;
                     $service = $shiftService->service;
-                    $startTime = $shift->checked_in_time->format('h:i A');
-                    $endTime = $shift->checked_out_time->format('h:i A');
-                    $date = $shift->checked_in_time->format('m/d/Y');
-                    $lineItem->serviceDate = $shift->checked_in_time->format('Y-m-d');
+                    $startTime = $shift->checked_in_time->timezone($timezone)->format('h:i A');
+                    $endTime = $shift->checked_out_time->timezone($timezone)->format('h:i A');
+                    $date = $shift->checked_in_time->timezone($timezone)->format('m/d/Y');
+                    $lineItem->serviceDate = $shift->checked_in_time->timezone($timezone)->format('Y-m-d');
                     $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
 
                     // Use the shift mapping for now.
