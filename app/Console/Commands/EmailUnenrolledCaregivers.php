@@ -60,14 +60,20 @@ class EmailUnenrolledCaregivers extends Command
             foreach($caregivers as $caregiver) {
                 $caregiver->update(['welcome_email_sent_at' => Carbon::now()]);
                 $caregiver->notify(new CaregiverWelcomeEmail($caregiver, $chain));
+                sleep(1);
             }
+
+            $this->output->writeln("$count welcome emails sent.");
         }
 
         if ($this->confirm("Do you wish to send the training email to all $count caregivers?")) {
             foreach($caregivers as $caregiver) {
                 $caregiver->update(['training_email_sent_at' => Carbon::now()]);
                 $caregiver->notify(new TrainingEmail());
+                sleep(1);
             }
+
+            $this->output->writeln("$count welcome emails sent.");
         }
 
         $this->output->writeln("Completed.");
