@@ -47,7 +47,7 @@ class TelefonyCheckOutController extends BaseVoiceController
             case 0:
                 return $this->mainMenuResponse();
             case 2:
-                return $this->checkForInjuryResponse($shift);
+                return $this->checkForMileageResponse($shift);
             case 3:
                 return $this->enterPhoneNumberDigits();
         }
@@ -114,48 +114,48 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->telefony->response();
     }
 
-    /**
-     * Ask if there were any injuries or issues
-     */
-    public function checkForInjuryResponse(Shift $shift) {
-        $gather = $this->telefony->gather([
-            'timeout' => 5,
-            'numDigits' => 1,
-            'action' => route('telefony.check-out.check-for-injury', [$shift]),
-        ]);
-        $this->telefony->say(
-            'Were you injured on your shift? Press 1 if there were no injuries. Press 2 if you suffered an injury or unusual circumstances.',
-            $gather
-        );
-
-        // Redirect loop if nothing is entered
-        $this->telefony->redirect(
-            route('telefony.check-out.check-for-injury', [$shift])
-        );
-
-        return $this->telefony->response();
-    }
-
-    /**
-     * Receive the injury response
-     */
-    public function checkForInjuryAction(Shift $shift) {
-        switch ($this->request->input('Digits')) {
-            case 1:
-                return $this->checkForMileageResponse($shift);
-            case 2:
-                $issue = new ShiftIssue();
-                $issue->caregiver_injury = true;
-                $issue->comments = 'Injury recorded via Telephony System';
-                $shift->issues()->save($issue);
-
-                $this->telefony->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
-                $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
-                return $this->telefony->response();
-        }
-
-        return $this->checkForInjuryResponse($shift);
-    }
+//    /**
+//     * Ask if there were any injuries or issues
+//     */
+//    public function checkForInjuryResponse(Shift $shift) {
+//        $gather = $this->telefony->gather([
+//            'timeout' => 5,
+//            'numDigits' => 1,
+//            'action' => route('telefony.check-out.check-for-injury', [$shift]),
+//        ]);
+//        $this->telefony->say(
+//            'Were you injured on your shift? Press 1 if there were no injuries. Press 2 if you suffered an injury or unusual circumstances.',
+//            $gather
+//        );
+//
+//        // Redirect loop if nothing is entered
+//        $this->telefony->redirect(
+//            route('telefony.check-out.check-for-injury', [$shift])
+//        );
+//
+//        return $this->telefony->response();
+//    }
+//
+//    /**
+//     * Receive the injury response
+//     */
+//    public function checkForInjuryAction(Shift $shift) {
+//        switch ($this->request->input('Digits')) {
+//            case 1:
+//                return $this->checkForMileageResponse($shift);
+//            case 2:
+//                $issue = new ShiftIssue();
+//                $issue->caregiver_injury = true;
+//                $issue->comments = 'Injury recorded via Telephony System';
+//                $shift->issues()->save($issue);
+//
+//                $this->telefony->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
+//                $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
+//                return $this->telefony->response();
+//        }
+//
+//        return $this->checkForInjuryResponse($shift);
+//    }
 
     /**
      * Ask user if they want to enter mileage.

@@ -44,32 +44,32 @@ class TelefonyCheckOutTest extends TelefonyBase
         $response->assertSee('You entered, 1,,0,,0,,0, but ' . $this->caregiver->firstname . ' is not clocked in');
     }
 
-    public function test_check_out_on_a_shift_asks_about_injuries()
+    public function test_check_out_on_a_shift_asks_about_mileage()
     {
         $shift = $this->createShift();
         $response = $this->telefonyPost('check-out/' . $shift->id, ['Digits' => 2]);
         $response->assertSee('<Say');
-        $response->assertSee('Were you injured on your shift?');
-        $response->assertSee('<Gather timeout="5" numDigits="1" action="' . route('telefony.check-out.check-for-injury', [$shift]) . '">');
-    }
-
-    public function test_injury_can_be_recorded()
-    {
-        $shift = $this->createShift();
-        $response = $this->telefonyPost('check-out/check-for-injury/' . $shift->id, ['Digits' => 2]);
-        $this->assertEquals(1, $shift->issues()->first()->caregiver_injury);
-        $response->assertSee('<Redirect');
-        $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
-    }
-
-    public function test_when_no_injuries_are_recorded_then_check_for_mileage()
-    {
-        $shift = $this->createShift();
-        $response = $this->telefonyPost('check-out/check-for-injury/' . $shift->id, ['Digits' => 1]);
-        $response->assertSee('<Say');
         $response->assertSee(TelefonyCheckOutController::PromptForMileage);
         $response->assertSee('<Gather timeout="5" numDigits="1" action="' . route('telefony.check-out.check-for-mileage', [$shift]) . '">');
     }
+
+//    public function test_injury_can_be_recorded()
+//    {
+//        $shift = $this->createShift();
+//        $response = $this->telefonyPost('check-out/check-for-injury/' . $shift->id, ['Digits' => 2]);
+//        $this->assertEquals(1, $shift->issues()->first()->caregiver_injury);
+//        $response->assertSee('<Redirect');
+//        $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
+//    }
+
+//    public function test_when_no_injuries_are_recorded_then_check_for_mileage()
+//    {
+//        $shift = $this->createShift();
+//        $response = $this->telefonyPost('check-out/check-for-injury/' . $shift->id, ['Digits' => 1]);
+//        $response->assertSee('<Say');
+//        $response->assertSee(TelefonyCheckOutController::PromptForMileage);
+//        $response->assertSee('<Gather timeout="5" numDigits="1" action="' . route('telefony.check-out.check-for-mileage', [$shift]) . '">');
+//    }
 
     /** @test */
     function check_for_mileage_response()
