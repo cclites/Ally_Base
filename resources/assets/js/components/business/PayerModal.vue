@@ -100,6 +100,7 @@
                             <option value="">-- Select Transmission Method --</option>
                             <option value="HHA">HHAeXchange</option>
                             <option value="TELLUS">Tellus</option>
+                            <option value="MANUAL">Mail/Email/Fax</option>
                         </b-select>
                         <input-help :form="form" field="transmission_method"></input-help>
                     </b-form-group>

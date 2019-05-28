@@ -4,6 +4,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Claims\HhaClaimTransmitter;
+use App\Billing\Claims\ManualClaimTransmitter;
 use App\Billing\Claims\TellusClaimTransmitter;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
@@ -184,6 +185,9 @@ class Claim extends AuditableModel
                 break;
             case ClaimService::TELLUS():
                 return new TellusClaimTransmitter();
+                break;
+            case ClaimService::MANUAL():
+                return new ManualClaimTransmitter();
                 break;
             default:
                 throw new ClaimTransmissionException('Claim service not supported.');
