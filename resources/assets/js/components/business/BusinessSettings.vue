@@ -252,6 +252,11 @@
                 </b-tab>
                 <b-tab title="Clock Out Questions" href="#questions">
                     <b-row>
+                        <b-col md="12">
+                            <b-alert show variant="info">
+                                Note: These options only affect our mobile app.  Any changes here will not be reflected on your telephony system.
+                            </b-alert>
+                        </b-col>
                         <b-col lg="12">
                             <h4>Options</h4>
                             <hr/>
