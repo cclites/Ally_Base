@@ -240,7 +240,11 @@
                 default() {
                     return 'timelineWeek';
                 }
-            }
+            },
+            'weekStart': {
+                type: Number,
+                default: 1,
+            },
         },
 
         data() {
@@ -379,6 +383,7 @@
                             click: this.printCalendar
                         }
                     },
+                    firstDay: this.weekStart,
                 }
             },
 

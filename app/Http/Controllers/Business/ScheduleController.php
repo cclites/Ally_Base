@@ -11,6 +11,7 @@ use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
+use App\Http\Requests\BusinessRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
@@ -34,9 +35,11 @@ use App\Client;
 
 class ScheduleController extends BaseController
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('business.schedule', ['business' => $this->business()]);
+        $chain = $this->businessChain();
+
+        return view('business.schedule', ['business' => $this->business(), 'weekStart' => $chain->calendar_week_start]);
     }
 
     public function events(Request $request)
