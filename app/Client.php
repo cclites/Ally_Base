@@ -588,9 +588,9 @@ class Client extends AuditableModel implements
     /**
      * Get the client timezone (currently retrieved from the business record)
      *
-     * @return mixed
+     * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
         return Timezone::getTimezone($this->business_id);
     }
