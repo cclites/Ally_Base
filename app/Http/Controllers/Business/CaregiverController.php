@@ -468,7 +468,7 @@ class CaregiverController extends BaseController
 
         $caregiver->update(['training_email_sent_at' => Carbon::now()]);
 
-        $caregiver->notify(new TrainingEmail($caregiver));
+        $caregiver->notify(new TrainingEmail());
 
         // Use the reload page redirect to update the timestamp
         return new SuccessResponse('A training email was dispatched to the Caregiver.', null, '.');

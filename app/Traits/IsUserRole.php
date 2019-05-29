@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DeactivationReason;
 use App\UserNotificationPreferences;
 use App\SetupStatusHistory;
+use org\apache\maven\POM\_4_0_0\Build;
 
 trait IsUserRole
 {
@@ -254,17 +255,17 @@ trait IsUserRole
 
     public function getDeactivationReasonIdAttribute()
     {
-        return $this->user->deactivation_reason_id;
+        return $this->user ? $this->user->deactivation_reason_id : null;
     }
 
     public function getStatusAliasIdAttribute()
     {
-        return $this->user->status_alias_id;
+        return $this->user ? $this->user->status_alias_id : null;
     }
 
     public function getSetupStatusAttribute()
     {
-        return $this->user->setup_status;
+        return $this->user ? $this->user->setup_status : null;
     }
 
     ///////////////////////////////////////////
@@ -381,6 +382,32 @@ trait IsUserRole
     public function scopeActive(Builder $builder)
     {
         return $builder->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
+    /**
+     * Returns only users with real email addresses
+     *
+     * @param Builder $builder
+     * @return Builder
+     */
+    public function scopeHasEmail(Builder $builder)
+    {
+        return $builder->whereHas('user', function(Builder $q) {
+            $q->whereNotNull('email')->where('email', 'NOT LIKE', '%@noemail.allyms.com');
+        });
+    }
+
+    /**
+     * Returns only users without email addresses
+     *
+     * @param Builder $builder
+     * @return Builder
+     */
+    public function scopeDoesntHaveEmail(Builder $builder)
+    {
+        return $builder->whereHas('user', function(Builder $q) {
+            $q->whereNull('email')->orWhere('email', 'LIKE', '%@noemail.allyms.com');
+        });
     }
 
     /**

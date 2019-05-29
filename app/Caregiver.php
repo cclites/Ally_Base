@@ -153,6 +153,11 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver query()
+ * @property string|null $ethnicity
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver doesntHaveEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver hasEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver notOnboarded()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver onboarded()
  */
 class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
@@ -722,5 +727,25 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         $builder->whereHas('businessChains', function($q) use ($chains) {
             $q->whereIn('chain_id', $chains);
         });
+    }
+
+    /**
+     * A query scope for filtering onboarded caregivers
+     *
+     * @param Builder $builder
+     */
+    public function scopeOnboarded(Builder $builder)
+    {
+        $builder->whereNotNull('onboarded')->orHas('shifts');
+    }
+
+    /**
+     * A query scope for filtering caregivers who have not been onboarded
+     *
+     * @param Builder $builder
+     */
+    public function scopeNotOnboarded(Builder $builder)
+    {
+        $builder->whereNull('onboarded')->doesntHave('shifts');
     }
 }

@@ -61,6 +61,9 @@ class ScheduleWarningAggregator
 
         /** @var \App\Client $client */
         $client = $this->schedule->client;
+        if (empty($client)) {
+            return;
+        }
 
         /** @var \App\ClientPreferences $preferences */
         $preferences = $client->preferences;
