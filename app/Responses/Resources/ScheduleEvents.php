@@ -172,6 +172,11 @@ class ScheduleEvents implements Responsable
             // Open shift
             return '#d9c01c';
         }
+
+        if (! $schedule->will_be_converted) {
+            return '#124aa5';
+        }
+
         return '#1c81d9';
     }
 

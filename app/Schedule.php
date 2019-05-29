@@ -8,6 +8,7 @@ use App\Exceptions\MissingTimezoneException;
 use App\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
+use App\Shifts\ScheduleConverter;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -201,6 +202,31 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+    /**
+     * Get whether of not the schedule will be converted by
+     * the schedule converter CRON.
+     *
+     * @return bool
+     * @throws MissingTimezoneException
+     */
+    public function getWillBeConvertedAttribute()
+    {
+        // Note: Logic here is reflected in the ScheduleConverter class.
+        if (! in_array($this->status, ScheduleConverter::$convertibleStatuses)) {
+            return false;
+        }
+
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
+        $start = Carbon::now($this->getTimezone())->startOfWeek();
+        if (Carbon::now()->dayOfWeek === Carbon::MONDAY) {
+            // If monday morning, still use last week
+            $start->subWeek();
+        }
+
+        return $this->starts_at->greaterThanOrEqualTo($start);
+    }
 
     public function getNotesAttribute()
     {
