@@ -8,9 +8,9 @@
         <b-row class="mb-2">
             <b-col lg="12">
                 <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
-                    <business-location-select v-model="businessFilter" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
+                    <business-location-select v-model="filters.business" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
 
-                    <b-form-select v-model="statusFilter" class="f-1 mr-2">
+                    <b-form-select v-model="filters.status" class="f-1 mr-2">
                         <option value="">All Caregivers</option>
                         <option value="active">Active Caregivers</option>
                         <option value="inactive">Inactive Caregivers</option>
@@ -19,48 +19,52 @@
                         </option>
                     </b-form-select>
 
-                    <b-form-input v-model="filter" placeholder="Type to Search" class="f-1" />
+                    <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
                 </div>
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading"></loading-card>
-        <div v-if="!loading">
-            <div class="table-responsive">
-                <b-table bordered striped hover show-empty
-                         :items="caregivers"
-                         :fields="fields"
-                         :current-page="currentPage"
-                         :per-page="perPage"
-                         :filter="filter"
-                         :sort-by.sync="sortBy"
-                         :sort-desc.sync="sortDesc"
-                         @filtered="onFiltered"
-                >
-                    <template slot="actions" scope="row">
-                        <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                        <b-btn size="sm" :href="'/business/caregivers/' + row.item.id">
-                            <i class="fa fa-edit"></i>
-                        </b-btn>
-                    </template>
-                    <template slot="location" scope="data">
-                        <div v-for="(business, index) in getBusinessNames(data.item)" :key="index">
-                            {{ business }}
-                        </div>
-                    </template>
-                </b-table>
-            </div>
-
-            <b-row>
-                <b-col lg="6" >
-                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-                </b-col>
-                <b-col lg="6" class="text-right">
-                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-                </b-col>
-            </b-row>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="itemProvider"
+                     :fields="fields"
+                     :current-page="currentPage"
+                     :per-page="perPage"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :busy="loading"
+                     ref="table"
+            >
+                <template slot="primaryPhone" scope="row">
+                    {{ getPhone(row.item.caregiver) }}
+                </template>
+                <template slot="city" scope="row">
+                    {{ getAddress(row.item.caregiver).city }}
+                </template>
+                <template slot="zipcode" scope="row">
+                    {{ getAddress(row.item.caregiver).zip }}
+                </template>
+                <template slot="location" scope="data">
+                    <div v-for="(business, index) in getBusinessNames(data.item.caregiver)" :key="index">
+                        {{ business }}
+                    </div>
+                </template>
+                <template slot="actions" scope="row">
+                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
+                    <b-btn size="sm" :href="'/business/caregivers/' + row.item.id">
+                        <i class="fa fa-edit"></i>
+                    </b-btn>
+                </template>
+            </b-table>
         </div>
-
+        <b-row>
+            <b-col lg="6" >
+                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
@@ -77,12 +81,11 @@
         data() {
             return {
                 totalRows: 0,
-                perPage: 15,
+                perPage: 25,
                 currentPage: 1,
                 sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
-                filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 caregivers: [],
@@ -104,24 +107,24 @@
                         formatter: this.formatEmail,
                     },
                     {
-                        key: 'primaryphone',
+                        key: 'primaryPhone',
                         label: 'Primary Phone',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'city',
                         label: 'City',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'zipcode',
                         label: 'Zip Code',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'location',
                         label: 'Location',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'actions',
@@ -129,65 +132,78 @@
                     }
                 ],
                 loading: false,
-                businessFilter: '',
                 statuses: {caregiver: [], client: []},
-                statusFilter: 'active',
+                filters: new Form({
+                    business: '',
+                    status: '',
+                    search: '',
+                }),
             }
         },
 
         async mounted() {
             await this.fetchStatusAliases();
-            this.loadCaregivers();
+            this.loadTable();
         },
 
         computed: {
             listUrl() {
                 let active = '';
                 let aliasId = '';
-                if (this.statusFilter === '') {
+                if (this.filters.status === '') {
                     active = '';
-                } else if (this.statusFilter === 'active') {
+                } else if (this.filters.status === 'active') {
                     active = 1;
-                } else if (this.statusFilter === 'inactive') {
-                    active = 0;    
+                } else if (this.filters.status === 'inactive') {
+                    active = 0;
                 } else {
-                    aliasId = this.statusFilter;
-                    let alias = this.statuses.caregiver.find(x => x.id == this.statusFilter);
+                    aliasId = this.filters.status;
+                    let alias = this.statuses.caregiver.find(x => x.id == this.filters.status);
                     if (alias) {
                         aliasId = alias.id;
                         active = alias.active;
                     }
                 }
 
-                return `/business/caregivers?json=1&address=1&phone_number=1&active=${active}&status=${aliasId}&businesses=${this.businessFilter}`;
+                return `/business/caregivers/paginate?search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
             },
         },
 
         methods: {
-            async loadCaregivers() {
-                this.loading = true;
-                const response = await axios.get(this.listUrl);
-                this.caregivers = response.data.map(caregiver => {
-                    caregiver.primaryphone = this.getPhone(caregiver).number;
-                    caregiver.zipcode = this.getAddress(caregiver).zip;
-                    caregiver.city = this.getAddress(caregiver).city;
-                    return caregiver;
-                });
-                this.loading = false;
+            loadTable() {
+                this.$refs.table.refresh()
             },
+
+            itemProvider(ctx) {
+                this.loading = true;
+                let sort = ctx.sortBy == null ? '' : ctx.sortBy;
+                return axios.get(this.listUrl + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                    .then( ({ data }) => {
+                        this.totalRows = data.total;
+                        return data.results || [];
+                    })
+                    .catch(() => {
+                        return [];
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+
             getAddress(caregiver)
             {
                 if (caregiver.address) {
                     return caregiver.address;
                 }
-                return {};
+                return { city: '-', zip: '-' };
             },
+
             getPhone(caregiver)
             {
                 if (caregiver.phone_number) {
-                    return caregiver.phone_number;
+                    return caregiver.phone_number.number;
                 }
-                return {};
+                return '-';
             },
 
             details(item, index, button) {
@@ -197,21 +213,17 @@
 //                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
                 this.editModalVisible = true;
             },
+
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
             },
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
-            },
+
             getBusinessNames(caregiver) {
                 return caregiver.businesses.map(x => x.name);
             },
 
             async fetchStatusAliases() {
-                this.loading = true;
                 axios.get(`/business/status-aliases`)
                     .then( ({ data }) => {
                         if (data && data.caregiver) {
@@ -220,18 +232,30 @@
                             this.statuses = {caregiver: [], client: []};
                         }
                     })
-                    .catch(e => {
-                    })
-                    .finally(() => {
-                        this.loading = false;
-                    })
+                    .catch(() => {})
             },
         },
 
         watch: {
-            listUrl() {
-                this.loadCaregivers();
-            }
-        }
+            'filters.status'(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.$refs.table.refresh();
+                }
+            },
+
+            'filters.business'(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.$refs.table.refresh();
+                }
+            },
+
+            'filters.search'(newVal, oldVal) {
+                // debounce the reloading of the table to prevent
+                // unnecessary calls.
+                _.debounce(() => {
+                    this.$refs.table.refresh();
+                }, 350)();
+            },
+        },
     }
 </script>
