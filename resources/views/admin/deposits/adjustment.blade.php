@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pending Deposits')
+@section('title', 'Manual Deposit Adjustment')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
