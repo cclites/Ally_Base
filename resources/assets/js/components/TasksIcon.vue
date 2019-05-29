@@ -89,7 +89,7 @@
         },
 
         async mounted() {
-            await this.$store.dispatch('tasks/start');
+            await this.$store.dispatch('tasks/start', this.role);
         },
     }
 </script>
