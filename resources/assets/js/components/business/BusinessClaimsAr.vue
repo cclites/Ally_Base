@@ -141,6 +141,10 @@
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
             </div>
         </b-modal>
+
+        <confirm-modal title="Mail/E-Mail/Fax Transmission" ref="confirmManualTransmission" yesButton="Okay">
+            <p>Based on the transmission type for this Invoice, this will assume you have sent in via Mail/E-Mail/Fax.</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -243,7 +247,14 @@
         },
 
         methods: {
-            transmitClaim(invoice) {
+            transmitClaim(invoice, skipAlert = false) {
+                if (!skipAlert && invoice.payer && invoice.payer.transmission_method == 'MANUAL') {
+                    this.$refs.confirmManualTransmission.confirm(() => {
+                        this.transmitClaim(invoice, true);
+                    });
+                    return;
+                }
+
                 this.busy = true;
                 this.transmittingId = invoice.id;
                 let form = new Form({});
