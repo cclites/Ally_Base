@@ -4,6 +4,11 @@
             header-bg-variant="info"
     >
         <b-row>
+            <b-col>
+                <b-alert show variant="info">This report only shows projections based on scheduled shifts with assigned caregivers.</b-alert>
+            </b-col>
+        </b-row>
+        <b-row>
             <b-col md="3">
                 <b-row>
                     <b-col>
