@@ -61,6 +61,7 @@ class ProjectedBillingReportController extends Controller
         $schedules = Schedule::forRequestedBusinesses()
             ->has('client.business')
             ->with('client')
+            ->whereHas('caregiver')
             ->when(request()->filled('client'), function ($query) {
                 $query->where('client_id', request('client'));
             })
