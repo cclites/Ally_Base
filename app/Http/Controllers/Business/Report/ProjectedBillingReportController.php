@@ -35,7 +35,8 @@ class ProjectedBillingReportController extends Controller
                     'id' => $item,
                     'name' => title_case(str_replace('_', ' ', $item)),
                 ];
-            });
+            })
+            ->values();
 
         return view('business.reports.projected_billing', compact('clientOptions', 'caregiverOptions', 'clientTypeOptions'));
     }

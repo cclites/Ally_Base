@@ -97,9 +97,8 @@
                 required: true
             },
             clientTypeOptions: {
-                type: [Array, Object],
+                type: Array,
                 required: true,
-                default: () => { return []; },
             },
             caregiverOptions: {
                 type: Array,
