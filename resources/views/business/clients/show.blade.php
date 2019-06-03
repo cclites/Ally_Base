@@ -77,6 +77,10 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
         </li>
+
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#communications" role="tab">Communications</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -220,6 +224,9 @@
         </div>
         <div class="tab-pane" id="misc">
             <client-misc-tab :client="{{ $client }}"></client-misc-tab>
+        </div>
+        <div class="tab-pane" id="communications">
+            <client-communications-tab :client="{{ $client }}"></client-communications-tab>
         </div>
     </div>
 @endsection

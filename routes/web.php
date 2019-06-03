@@ -91,6 +91,7 @@ Route::group([
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
+    Route::resource('client/messaging', 'Clients\ClientCommunicationsController');
 });
 
 Route::group([

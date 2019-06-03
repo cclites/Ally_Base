@@ -30,6 +30,7 @@ use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
+use App\ClientCommunications;
 
 /**
  * App\Client
@@ -550,6 +551,10 @@ class Client extends AuditableModel implements
     public function quickbooksCustomer()
     {
         return $this->belongsTo(QuickbooksCustomer::class);
+    }
+
+    public function clientCommunications(){
+        return hasOne(ClientCommunications::class);
     }
 
     ///////////////////////////////////////////
