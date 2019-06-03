@@ -298,10 +298,14 @@ class ClearSensitiveData extends Command
 
         Caregiver::chunk(400, function($collection) {
             \DB::beginTransaction();
-            $collection->each(function(Caregiver $user) {
-                if ($user->getOriginal('ssn')) {
-                    $user->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
-                    $user->save();
+            $collection->each(function(Caregiver $caregiver) {
+                if (! $caregiver->user) {
+                    $this->advance();
+                    return;
+                }
+                if ($caregiver->getOriginal('ssn')) {
+                    $caregiver->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $caregiver->save();
                 }
                 $this->advance();
             });
@@ -329,11 +333,15 @@ class ClearSensitiveData extends Command
 
         Client::chunk(400, function($collection) {
             \DB::beginTransaction();
-            $collection->each(function(Client $user) {
-                if ($user->getOriginal('ssn')) {
-                    $user->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+            $collection->each(function(Client $client) {
+                if (! $client->user) {
+                    $this->advance();
+                    return;
                 }
-                $user->save();
+                if ($client->getOriginal('ssn')) {
+                    $client->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $client->save();
+                }
                 $this->advance();
             });
             \DB::commit();
