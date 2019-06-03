@@ -91,7 +91,7 @@ class ClearSensitiveData extends Command
         $this->clean3rdPartyCredentials();
 
         if (! $this->option('fix-only')) {
-            // Only execute these options if fix-only if off
+            // Only execute these options if fix-only if OFF
             $this->clearAuditLog();
             $this->cleanUserData();
             $this->cleanAddresses();
@@ -101,9 +101,9 @@ class ClearSensitiveData extends Command
             $this->cleanNotes();
             $this->cleanShifts();
             $this->cleanSmsData();
-
-            $this->fixDemoAccounts($this->argument('password'));
         }
+
+        $this->fixDemoAccounts($this->argument('password'));
 
         $this->info('Success.');
 
