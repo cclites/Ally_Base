@@ -64,12 +64,16 @@
                         </b-form-select>
                         <input-help :form="form" field="sales_person_id"></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Status">
+
+
+                    <b-form-group label="Client Status Alias">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
+                        <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>
                     </b-form-group>
+
+
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
                                                   field="business_id"
@@ -380,7 +384,9 @@
                 <b-col lg="12" class="mt-4">
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
+
                     <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
+
                     <template v-else>
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                         <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
@@ -496,6 +502,7 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
+                    status_help: this.client.status_help,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -724,6 +731,11 @@
                         text: item.name,
                     };
                 });
+            },
+
+            showStatusHelp(){
+                return "Note: To set this client to an " + (this.client.active === "active" ? 'active': 'inactive') + " status, use the " + (this.client.active === "active" ? 'Activate' : 'Deactivate') + " Client button below.";
+
             },
 
             disasterCodes() {
