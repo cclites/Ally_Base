@@ -301,6 +301,7 @@ class ClearSensitiveData extends Command
             $collection->each(function(Caregiver $user) {
                 if ($user->getOriginal('ssn')) {
                     $user->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $user->save();
                 }
                 $this->advance();
             });
@@ -332,6 +333,7 @@ class ClearSensitiveData extends Command
                 if ($user->getOriginal('ssn')) {
                     $user->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
                 }
+                $user->save();
                 $this->advance();
             });
             \DB::commit();
