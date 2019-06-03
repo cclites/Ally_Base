@@ -734,7 +734,7 @@ class ClearSensitiveData extends Command
      */
     protected function finish() : void
     {
-        $this->progressBar->advance($this->progressTotal);
+        $this->progressBar->setProgress($this->progressTotal);
         $this->line('');
     }
 }
