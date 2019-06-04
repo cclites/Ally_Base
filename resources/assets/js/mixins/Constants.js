@@ -11,5 +11,5 @@ export default {
             ],
             smsLength: 160
         };
-    },
-}
+    }
+};

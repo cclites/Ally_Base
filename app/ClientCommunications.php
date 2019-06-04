@@ -2,7 +2,7 @@
 
 namespace App;
 
-class ClientCommunicationsOptions extends BaseModel{
+class ClientCommunications extends BaseModel{
 
     protected $table = "client_communications_options";
 

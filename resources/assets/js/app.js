@@ -249,7 +249,7 @@ Vue.component('adjoining-caregivers-card', require('./components/caregivers/Adjo
 Vue.component('caregiver-setup-wizard', require('./components/account-setup/CaregiverSetupWizard.vue'));
 
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
-Vue.component('client-communications-tab', require('./components/clients/ClientCommunicationsTab'));
+Vue.component('client-communications-tab', require('./components/business/clients/ClientCommunicationsTab'));
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-insurance-service-auth', require('./components/business/clients/InsuranceServiceAuthTab'));
@@ -355,6 +355,7 @@ Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeMana
 Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
+
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

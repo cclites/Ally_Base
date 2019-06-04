@@ -91,7 +91,7 @@ Route::group([
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
-    Route::resource('client/communications', 'Clients\ClientCommunicationsController');
+
 });
 
 Route::group([
@@ -269,6 +269,9 @@ Route::group([
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
+
+    Route::get('clients/{client}/communications', 'Business\Clients\ClientCommunicationsController@show');
+    Route::post('clients/{client}/communications', 'Business\Clients\ClientCommunicationsController@create');
 
     Route::resource('rate-codes', 'Business\RateCodeController');
 
