@@ -18,8 +18,8 @@ class ClaimResource extends ClientInvoice
             'clientPayer' => $this->resource->clientPayer,
             'payer' => optional($this->resource->clientPayer)->payer,
             'payments' => $this->resource->payments,
-            'balance' => $this->resource->amount - $this->resource->amount_paid,
-            'claim_balance' => empty($this->resource->claim) ? 0.00 : $this->resource->claim->balance,
+            'balance' => $this->resource->amount - $this->resource->getAmountPaid(),
+            'claim_balance' => empty($this->resource->claim) ? 0.00 : $this->resource->claim->getAmountDue(),
             'claim_status' => empty($this->resource->claim) ? ClaimStatus::NOT_SENT() : $this->resource->claim->status,
             'claim' => $this->resource->claim,
         ]);
