@@ -9,6 +9,7 @@ export default {
                 { value: 'hawaiian', text: 'Native Hawaiian or Other Pacific Islander' },
                 { value: 'white', text: 'White or Caucasian' },
             ],
-        }
+            smsLength: 160
+        };
     },
 }

@@ -8,7 +8,6 @@
 
                 <form @submit.prevent="saveMessaging()">
 
-
                   <div class="row">
 
 
@@ -37,9 +36,9 @@
                           <b-form-group label="Auto Reply Message" for="auto_reply_message">
 
                               <b-form-textarea
-                                      id="Enter auto respond message"
+                                      id="auto_reply_message"
                                       v-model="auto_reply_message"
-                                      placeholder=""
+                                      placeholder="Enter auto respond message"
                                       rows="3"
                                       max-rows="6"
                               ></b-form-textarea>
@@ -86,7 +85,15 @@
 
 <script>
     export default {
-        name: "ClientCommunicationsTab",
+
+        async mounted() {
+            await this.fetchMessagingData();
+        },
+
+
+        computed: {
+            //calculateRemainingCharacters(){},   //<-- Might not use
+        },
 
         data() {
             return {
@@ -99,16 +106,55 @@
                     weekend_start_time: this.week_start_time || '',
                     weekend_end_time: this.week_end_time || '',
                     auto_reply_message: this.auto_reply_message || '',
-                    client_id: '',
                 }),
+
             }
         },
 
         methods: {
-            saveMessaging(){},
 
-            calculateRemainingCharacters(){}
+
+            async fetchMessagingData(){
+                let response = await axios.get('/client/communications/' + this.client.id);
+                if (Array.isArray(response.data)) {
+                    this.form = response.data;
+                } else {
+                    this.form = [];
+                }
+            },
+
+            saveMessaging(){
+                const response = axios.post('/client/communications/' + this.form.data())
+                                    .then(response => {
+                                            this.setItems(response.data);
+                                        }).catch(error => {
+                                            console.error(error.response);
+                                        });
+            },
+
+            setItems(data){
+
+            }
         },
+
+        mixins : [Constants],
+
+        name: "ClientCommunicationsTab",
+
+        props: {
+            client: {
+                type: Object,
+                required: true,
+            }
+        },
+
+        watch: {
+            auto_reply_message: function(val){
+                if(val.length >= smsLength){
+                   this.form.auto_reply_message = val.substring(0, smsLength);
+                }
+            }
+        }
     }
 </script>
 
