@@ -132,7 +132,7 @@ class PayerController extends BaseController
                 return new SuccessResponse('Payer deleted successfully.', $payer);
             }
         } catch (\Exception $ex) {
-            logger($e->getMessage());
+            logger($ex->getMessage());
         }
 
         return new ErrorResponse(500, 'Payer could not be deleted.');
