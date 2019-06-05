@@ -34,6 +34,7 @@
                                 <business-location-form-group v-model="form.business_id"
                                                               :form="form"
                                                               field="business_id"
+                                                              name="business_id"
                                                               help-text="">
                                 </business-location-form-group>
                             </b-col>
