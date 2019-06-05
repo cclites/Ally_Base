@@ -3,9 +3,9 @@
         <div v-if="message"></div>
         <slot></slot>
         <div slot="modal-footer">
-            <b-btn :variant="cancelVariant" @click.prevent="onCancel()">{{ cancelButton }}</b-btn>
-            <b-btn :variant="noVariant" @click.prevent="onNo()" v-if="noButton">{{ noButton }}</b-btn>
-            <b-btn :variant="yesVariant" @click.prevent="onYes()">{{ yesButton }}</b-btn>
+            <b-btn :variant="cancelVariant" @click.prevent="onCancel()" :disabled="cancelDisabled">{{ cancelButton }}</b-btn>
+            <b-btn :variant="noVariant" @click.prevent="onNo()" v-if="noButton" :disabled="noDisabled">{{ noButton }}</b-btn>
+            <b-btn :variant="yesVariant" @click.prevent="onYes()" :disabled="yesDisabled">{{ yesButton }}</b-btn>
         </div>
     </b-modal>
 </template>
@@ -46,6 +46,18 @@ export default {
         cancelVariant: {
             type: String,
             default: 'secondary',
+        },
+        yesDisabled: {
+            type: Boolean,
+            default: false,
+        },
+        noDisabled: {
+            type: Boolean,
+            default: false,
+        },
+        cancelDisabled: {
+            type: Boolean,
+            default: false,
         },
     },
 
