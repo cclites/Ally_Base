@@ -12,6 +12,10 @@
                         <b-form-input v-model="form.name" type="text" required />
                         <input-help :form="form" field="name"></input-help>
                     </b-form-group>
+                    <b-form-group label="NPI Number" label-for="npi_number">
+                        <b-form-input v-model="form.npi_number" type="text" />
+                        <input-help :form="form" field="npi_number"></input-help>
+                    </b-form-group>
                     <b-form-group label="Start of Service Week" label-for="week_start" label-class="required">
                         <b-select v-model="form.week_start">
                             <option value="0">Sunday</option>
@@ -23,10 +27,6 @@
                             <option value="6">Saturday</option>
                         </b-select>
                         <input-help :form="form" field="week_start"></input-help>
-                    </b-form-group>
-                    <b-form-group label="NPI Number" label-for="npi_number">
-                        <b-form-input v-model="form.npi_number" type="text" />
-                        <input-help :form="form" field="npi_number"></input-help>
                     </b-form-group>
                     <b-form-group label="Payment Method" label-for="payment_method_type" label-class="required">
                         <b-select v-model="form.payment_method_type">
