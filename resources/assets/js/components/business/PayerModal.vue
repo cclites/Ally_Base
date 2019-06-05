@@ -52,12 +52,17 @@
                         ></b-form-input>
                         <input-help :form="form" field="invoice_format" text=""></input-help>
                     </b-form-group>
-                    <b-form-group label="Transmission Method" label-for="transmission_method">
+                    <b-form-group label="Transmission Method" label-for="transmission_method" label-class="required">
                         <b-select v-model="form.transmission_method">
                             <option value="">-- Select Transmission Method --</option>
-                            <option value="HHA">HHAeXchange</option>
-                            <option value="TELLUS">Tellus</option>
-                            <option value="MANUAL">Mail/Email/Fax</option>
+                            <option value="-" disabled>Direct Transmission:</option>
+                            <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
+                            <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
+                            <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
+                            <option value="-" disabled>-</option>
+                            <option value="-" disabled>Offline:</option>
+                            <option :value="CLAIM_SERVICE.EMAIL">Email</option>
+                            <option :value="CLAIM_SERVICE.FAX">Fax</option>
                         </b-select>
                         <input-help :form="form" field="transmission_method"></input-help>
                     </b-form-group>
@@ -94,43 +99,6 @@
                     <b-form-group label="Fax Number" label-for="fax_number">
                         <b-form-input type="text" v-model="form.fax_number" />
                         <input-help :form="form" field="fax_number" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Transmission Method" label-for="transmission_method" label-class="required">
-                        <b-select v-model="form.transmission_method">
-                            <option value="">-- Select Transmission Method --</option>
-                            <option value="-" disabled>Direct Transmission:</option>
-                            <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
-                            <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
-                            <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
-                            <option value="-" disabled>-</option>
-                            <option value="-" disabled>Offline:</option>
-                            <option :value="CLAIM_SERVICE.EMAIL">Email</option>
-                            <option :value="CLAIM_SERVICE.FAX">Fax</option>
-                        </b-select>
-                        <input-help :form="form" field="transmission_method"></input-help>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="MCO / Payer Identifier" label-for="payer_code">
-                        <b-form-input type="text" v-model="form.payer_code" />
-                        <input-help :form="form" field="payer_code" text=""></input-help>
-                    </b-form-group>
-                    <b-form-group label="Plan Identifier" label-for="plan_code">
-                        <b-form-input type="text" v-model="form.plan_code" />
-                        <input-help :form="form" field="plan_code" text=""></input-help>
-                    </b-form-group>
-                    <b-form-group label="Contact Name" label-for="contact_name">
-                        <b-form-input
-                            v-model="form.contact_name"
-                            id="contact_name"
-                            name="contact_name"
-                            type="text"
-                        ></b-form-input>
-                        <input-help :form="form" field="contact_name" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
