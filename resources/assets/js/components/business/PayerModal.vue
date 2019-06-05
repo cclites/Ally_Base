@@ -100,6 +100,15 @@
                         <b-form-input type="text" v-model="form.fax_number" />
                         <input-help :form="form" field="fax_number" text=""></input-help>
                     </b-form-group>
+                    <b-form-group label="Contact Name" label-for="contact_name">
+                        <b-form-input
+                            v-model="form.contact_name"
+                            id="contact_name"
+                            name="contact_name"
+                            type="text"
+                        ></b-form-input>
+                        <input-help :form="form" field="contact_name" text=""></input-help>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
