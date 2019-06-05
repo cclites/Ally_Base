@@ -307,16 +307,13 @@
             setOccurrences() {
                 this.calculatingOccurrences = true;
                 this.form.occurrences = this.getOccurrencesFromEndDate();
-                console.log('occurrences set to', this.form.occurrences);
                 this.$nextTick(() => {
                     this.calculatingOccurrences = false;
                 });
             },
 
             getOccurrencesFromEndDate() {
-                console.log('getOccurrencesFromEndDate');
                 if (! ['daily', 'weekly', 'monthly'].includes(this.form.period)) {
-                    console.log('clearing occurrences');
                     return '';
                 }
 
@@ -325,18 +322,14 @@
 
                 let between = moment.duration(end.diff(start));
 
-                console.log('raw diff between dates: ', between);
                 switch (this.form.period)
                 {
                     case 'daily':
-                        console.log('days: ', between.as('days'));
-                        return between.as('days');
+                        return Math.ceil(between.as('days'));
                     case 'weekly':
-                        console.log('weeks: ', between.as('weeks'));
-                        return between.as('weeks');
+                        return Math.ceil(between.as('weeks'));
                     case 'monthly':
-                        console.log('months: ', between.as('months'));
-                        return between.as('months');
+                        return Math.ceil(between.as('months'));
                     default:
                         return;
                 }
@@ -344,10 +337,8 @@
 
             calculateEndDateFromOccurrences() {
                 if (! this.form.effective_start || ! this.form.occurrences) {
-                    console.log('cant calculate end date.');
                     return;
                 }
-                console.log('calculating end date');
 
                 let endDate = moment(this.form.effective_start);
                 switch (this.form.period)
@@ -365,8 +356,6 @@
                         return;
                 }
                 
-                console.log('should change effective end', endDate);
-
                 this.form.effective_end = endDate.format('MM/DD/YYYY');
             },
 
