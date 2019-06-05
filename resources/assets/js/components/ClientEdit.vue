@@ -64,11 +64,11 @@
                         </b-form-select>
                         <input-help :form="form" field="sales_person_id"></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Status">
+                    <b-form-group label="Client Status Alias">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
+                        <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
@@ -724,6 +724,10 @@
                         text: item.name,
                     };
                 });
+            },
+
+            showStatusHelp() {
+                return "Note: To set this client to an " + (this.client.active ? 'inactive': 'active') + " status, use the " + (this.client.active ? 'Deactivate' : 'Re-activate') + " Client button below.";
             },
 
             disasterCodes() {

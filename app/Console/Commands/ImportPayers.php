@@ -28,7 +28,6 @@ class ImportPayers extends BaseImport
      */
     protected $businessChain;
 
-
     /**
      * Return the current business model for who the data should be imported in to
      *
@@ -53,23 +52,6 @@ class ImportPayers extends BaseImport
         return $this->businessChain()->businesses->first();
     }
 
-    protected function parseAddress(string $text): Address
-    {
-        $lines = explode("\n", $text);
-        $address = new Address();
-        $address->address1 = $lines[0];
-        $address->address2 = count($lines) > 2 ? $lines[1] : null;
-
-        $parts = explode(",", trim(end($lines)));
-        if (count($parts) > 1) {
-            $address->city = $parts[0];
-            $address->state = preg_replace("/[^A-Z]/i", "", $parts[1]);
-            $address->zip = preg_replace("/[^0-9]/", "", $parts[1]);
-        }
-
-        return $address;
-    }
-
     /**
      * Import the specified row of data from the sheet and return the related model
      *
@@ -79,27 +61,29 @@ class ImportPayers extends BaseImport
      */
     protected function importRow(int $row)
     {
-        $address = $this->parseAddress($this->resolve("Full Address", $row) ?? "");
+//        $address = $this->parseAddress($this->resolve("Full Address", $row) ?? "");
+        $payer = new Payer();
+        $payer->payment_method_type = "businesses";
+        $payer->chain_id = $this->businessChain()->id;
+        $payer->week_start = 1;
+
+        $payer->name = $this->resolve("Payer Name", $row);
+        $payer->address1 = $this->resolve("Address 1", $row);
+        $payer->address2 = $this->resolve("Address 2", $row);
+        $payer->city = $this->resolve("City", $row);
+        $payer->state = $this->resolve("State", $row);
+        $payer->zip = $this->resolve("Zip", $row);
+        $payer->contact_name = $this->resolve('Contact Name', $row);
+        $payer->invoice_format = $this->resolve("Invoice Format", $row);
+
         if ($number = $this->resolve("Phone", $row)) {
             $phone = PhoneNumber::fromInput("phone", $number);
         }
         if ($number = $this->resolve("Fax", $row)) {
             $fax = PhoneNumber::fromInput("phone", $number);
         }
-
-        $payer = new Payer();
-        $payer->name = $this->resolve("Name", $row);
-        $payer->address1 = $address->address1;
-        $payer->address2 = $address->address2;
-        $payer->city = $address->city;
-        $payer->state = $address->state;
-        $payer->zip = $address->zip;
-        $payer->payment_method_type = "businesses";
-        $payer->invoice_format = $this->resolve("Invoice Format", $row);
         $payer->phone_number = isset($phone) ? $phone->number() : null;
         $payer->fax_number = isset($fax) ? $fax->number() : null;
-        $payer->chain_id = $this->businessChain()->id;
-        $payer->week_start = 1;
 
         // Prevent Duplicates
         if (Payer::where('chain_id', $payer->chain_id)->where('name', $payer->name)->exists()) {
@@ -125,9 +109,33 @@ class ImportPayers extends BaseImport
      *
      * @param int $row
      * @return bool
+     * @throws \PHPExcel_Exception
      */
     protected function emptyRow(int $row)
     {
-        return !$this->resolve('Name', $row);
+        return !$this->resolve('Payer Name', $row);
+    }
+
+    /**
+     * Parse the address field into a usable address.
+     *
+     * @param string $text
+     * @return Address
+     */
+    protected function parseAddress(string $text): Address
+    {
+        $lines = explode("\n", $text);
+        $address = new Address();
+        $address->address1 = $lines[0];
+        $address->address2 = count($lines) > 2 ? $lines[1] : null;
+
+        $parts = explode(",", trim(end($lines)));
+        if (count($parts) > 1) {
+            $address->city = $parts[0];
+            $address->state = preg_replace("/[^A-Z]/i", "", $parts[1]);
+            $address->zip = preg_replace("/[^0-9]/", "", $parts[1]);
+        }
+
+        return $address;
     }
 }

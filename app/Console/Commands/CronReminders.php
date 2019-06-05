@@ -81,6 +81,11 @@ class CronReminders extends Command
         $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
 
         foreach ($schedules as $schedule) {
+            if (! $schedule->caregiver->active) {
+                // ignore inactive caregivers (shouldn't be on the schedule but just in case)
+                continue;
+            }
+
             if ($triggered->contains($schedule->id)) {
                 continue;
             }
@@ -121,6 +126,11 @@ class CronReminders extends Command
                 continue;
             }
 
+            if (! $schedule->caregiver->active) {
+                // ignore inactive caregivers (shouldn't be on the schedule but just in case)
+                continue;
+            }
+
             \Notification::send($schedule->caregiver->user, new ClockInReminder($schedule));
 
             TriggeredReminder::markTriggered(ClockInReminder::getKey(), $schedule->id);
@@ -148,6 +158,11 @@ class CronReminders extends Command
             }
 
             if ($triggered->contains($shift->id)) {
+                continue;
+            }
+
+            if (! $shift->caregiver->active) {
+                // ignore inactive caregivers (shouldn't be clocked in but just in case)
                 continue;
             }
 

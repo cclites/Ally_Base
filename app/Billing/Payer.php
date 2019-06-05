@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $zip
  * @property string|null $phone_number
  * @property string|null $fax_number
+ * @property string|null $contact_name
  * @property int|null $chain_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
