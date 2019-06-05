@@ -98,9 +98,14 @@
                     <b-form-group label="Transmission Method" label-for="transmission_method" label-class="required">
                         <b-select v-model="form.transmission_method">
                             <option value="">-- Select Transmission Method --</option>
-                            <option value="HHA">HHAeXchange</option>
-                            <option value="TELLUS">Tellus</option>
-                            <option value="MANUAL">Mail/Email/Fax</option>
+                            <option value="-" disabled>Direct Transmission:</option>
+                            <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
+                            <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
+                            <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
+                            <option value="-" disabled>-</option>
+                            <option value="-" disabled>Offline:</option>
+                            <option :value="CLAIM_SERVICE.EMAIL">Email</option>
+                            <option :value="CLAIM_SERVICE.FAX">Fax</option>
                         </b-select>
                         <input-help :form="form" field="transmission_method"></input-help>
                     </b-form-group>
@@ -139,7 +144,11 @@
 </template>
 
 <script>
+    import Constants from '../../mixins/Constants';
+
     export default {
+        mixins: [Constants],
+
         components: {},
 
         props: {

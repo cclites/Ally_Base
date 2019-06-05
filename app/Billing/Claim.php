@@ -186,7 +186,11 @@ class Claim extends AuditableModel
             case ClaimService::TELLUS():
                 return new TellusClaimTransmitter();
                 break;
-            case ClaimService::MANUAL():
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
                 return new ManualClaimTransmitter();
                 break;
             default:

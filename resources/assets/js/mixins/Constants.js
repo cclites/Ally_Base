@@ -1,6 +1,9 @@
 export default {
     data() {
         return {
+            PRIVATE_PAY_ID: 0,
+            OFFLINE_PAY_ID: 1,
+
             ethnicityOptions: [
                 { value: 'american_indian', text: 'American Indian or Alaska Native' },
                 { value: 'asian', text: 'Asian' },
