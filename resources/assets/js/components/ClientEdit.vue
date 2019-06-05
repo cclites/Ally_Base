@@ -496,7 +496,6 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
-                    status_help: this.client.status_help,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -729,7 +728,6 @@
 
             showStatusHelp(){
                 return "Note: To set this client to an " + (this.client.active === "active" ? 'active': 'inactive') + " status, use the " + (this.client.active === "active" ? 'Activate' : 'Deactivate') + " Client button below.";
-
             },
 
             disasterCodes() {

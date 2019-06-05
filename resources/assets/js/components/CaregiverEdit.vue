@@ -332,7 +332,6 @@
 
             showStatusHelp(){
                 return "Note: To set this caregiver to an " + (this.caregiver.active === "active" ? 'active': 'inactive') + " status, use the " + (this.caregiver.active === "active" ? 'Activate' : 'Deactivate') + " Caregiver button below.";
-
             },
         },
 
