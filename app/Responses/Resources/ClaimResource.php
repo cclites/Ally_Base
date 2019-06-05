@@ -22,6 +22,7 @@ class ClaimResource extends ClientInvoice
             'claim_balance' => empty($this->resource->claim) ? 0.00 : $this->resource->claim->getAmountDue(),
             'claim_status' => empty($this->resource->claim) ? ClaimStatus::NOT_SENT() : $this->resource->claim->status,
             'claim' => $this->resource->claim,
+            'claim_service' => optional($this->resource->claim)->service,
         ]);
     }
 }

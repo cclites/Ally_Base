@@ -154,13 +154,13 @@
                 <b-select v-model="selectedTransmissionMethod">
                     <option value="">-- Select Transmission Method --</option>
                     <option value="-" disabled>Direct Transmission:</option>
-                    <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
-                    <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
-                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
+                    <option :value="CLAIM_SERVICE.HHA">{{ serviceLabel(CLAIM_SERVICE.HHA) }}</option>
+                    <option :value="CLAIM_SERVICE.TELLUS">{{ serviceLabel(CLAIM_SERVICE.TELLUS) }}</option>
+                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>
                     <option value="-" disabled>-</option>
                     <option value="-" disabled>Offline:</option>
-                    <option :value="CLAIM_SERVICE.EMAIL">Email</option>
-                    <option :value="CLAIM_SERVICE.FAX">Fax</option>
+                    <option :value="CLAIM_SERVICE.EMAIL">{{ serviceLabel(CLAIM_SERVICE.EMAIL) }}</option>
+                    <option :value="CLAIM_SERVICE.FAX">{{ serviceLabel(CLAIM_SERVICE.FAX) }}</option>
                 </b-select>
             </b-form-group>
         </confirm-modal>
@@ -228,6 +228,12 @@
                         sortable: true,
                     },
                     {
+                        key: 'claim_service',
+                        label: 'Claim Service',
+                        formatter: (x) => this.serviceLabel(x),
+                        sortable: true,
+                    },
+                    {
                         key: 'claim_balance',
                         label: 'Claim Balance',
                         formatter: (val) => this.moneyFormat(val),
@@ -272,6 +278,18 @@
         },
 
         methods: {
+            serviceLabel(serviceValue) {
+                switch (serviceValue) {
+                    case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
+                    case this.CLAIM_SERVICE.TELLUS: return 'Tellus';
+                    case this.CLAIM_SERVICE.CLEARINGHOUSE: return 'CareExchange LTC Clearinghouse';
+                    case this.CLAIM_SERVICE.EMAIL: return 'E-Mail';
+                    case this.CLAIM_SERVICE.FAX: return 'Fax';
+                    default:
+                        return '-';
+                }
+            },
+
             transmitClaim(invoice, skipAlert = false) {
                 if (! skipAlert) {
                     if (invoice.payer && [this.PRIVATE_PAY_ID, this.OFFLINE_PAY_ID].includes(invoice.payer.id)) {
