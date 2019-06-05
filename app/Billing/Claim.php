@@ -160,7 +160,7 @@ class Claim extends AuditableModel
         if (empty($claim)) {
             $claim = Claim::create([
                 'client_invoice_id' => $invoice->id,
-                'amount' => $invoice->amount,
+                'amount' => $invoice->getAmount(),
                 'status' => ClaimStatus::CREATED(),
             ]);
 
@@ -186,7 +186,11 @@ class Claim extends AuditableModel
             case ClaimService::TELLUS():
                 return new TellusClaimTransmitter();
                 break;
-            case ClaimService::MANUAL():
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
                 return new ManualClaimTransmitter();
                 break;
             default:
