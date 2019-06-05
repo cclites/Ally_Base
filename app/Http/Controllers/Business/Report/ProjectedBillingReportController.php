@@ -35,7 +35,8 @@ class ProjectedBillingReportController extends Controller
                     'id' => $item,
                     'name' => title_case(str_replace('_', ' ', $item)),
                 ];
-            });
+            })
+            ->values();
 
         return view('business.reports.projected_billing', compact('clientOptions', 'caregiverOptions', 'clientTypeOptions'));
     }
@@ -61,6 +62,7 @@ class ProjectedBillingReportController extends Controller
         $schedules = Schedule::forRequestedBusinesses()
             ->has('client.business')
             ->with('client')
+            ->whereHas('caregiver')
             ->when(request()->filled('client'), function ($query) {
                 $query->where('client_id', request('client'));
             })
