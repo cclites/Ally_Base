@@ -85,11 +85,12 @@ class ClaimsController extends BaseController
     /**
      * Create a claim from an invoice and transmit to HHAeXchange.
      *
+     * @param \Illuminate\Http\Request $request
      * @param ClientInvoice $invoice
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
      */
-    public function transmitInvoice(ClientInvoice $invoice)
+    public function transmitInvoice(Request $request, ClientInvoice $invoice)
     {
         $this->authorize('read', $invoice);
 
@@ -97,7 +98,13 @@ class ClaimsController extends BaseController
             return new ErrorResponse(500, 'No payer assigned to this invoice, cannot transmit this claim.');
         }
 
-        $service = $invoice->clientPayer->payer->getTransmissionMethod();
+        // if no transmission set on the payer, attempt to get it from the request
+        if (! $service = $invoice->clientPayer->payer->getTransmissionMethod()) {
+            if ($method = $request->input('method', null)) {
+                $service = ClaimService::$method();
+            }
+        }
+
         if (empty($service)) {
             return new ErrorResponse(500, 'You cannot transmit this claim because the Payer for this invoice does not have a transmission method set.  You can edit this on the Billing > Payers section, or contact Ally for assistance.');
         }

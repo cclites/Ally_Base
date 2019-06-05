@@ -142,8 +142,31 @@
             </div>
         </b-modal>
 
-        <confirm-modal title="Mail/E-Mail/Fax Transmission" ref="confirmManualTransmission" yesButton="Okay">
-            <p>Based on the transmission type for this Invoice, this will assume you have sent in via Mail/E-Mail/Fax.</p>
+        <confirm-modal
+            title="Select Transmission Method"
+            ref="confirmTransmissionMethod"
+            yesButton="Transmit"
+            :yes-disabled="!selectedTransmissionMethod"
+        >
+            <p>Private and Offline Payer types do not have a default transmission method.</p>
+            <p>Please select the method would you like to use to submit this invoice.</p>
+            <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
+                <b-select v-model="selectedTransmissionMethod">
+                    <option value="">-- Select Transmission Method --</option>
+                    <option value="-" disabled>Direct Transmission:</option>
+                    <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
+                    <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
+                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
+                    <option value="-" disabled>-</option>
+                    <option value="-" disabled>Offline:</option>
+                    <option :value="CLAIM_SERVICE.EMAIL">Email</option>
+                    <option :value="CLAIM_SERVICE.FAX">Fax</option>
+                </b-select>
+            </b-form-group>
+        </confirm-modal>
+
+        <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
+            <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
     </b-card>
 </template>
@@ -151,9 +174,10 @@
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import Constants from '../../mixins/Constants';
 
     export default {
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
             return {
@@ -230,6 +254,7 @@
                 selectedInvoice: {},
                 busy: false,
                 transmittingId: null,
+                selectedTransmissionMethod: '',
             }
         },
 
@@ -248,16 +273,30 @@
 
         methods: {
             transmitClaim(invoice, skipAlert = false) {
-                if (!skipAlert && invoice.payer && invoice.payer.transmission_method == 'MANUAL') {
-                    this.$refs.confirmManualTransmission.confirm(() => {
-                        this.transmitClaim(invoice, true);
-                    });
-                    return;
+                if (! skipAlert) {
+                    if (invoice.payer && [this.PRIVATE_PAY_ID, this.OFFLINE_PAY_ID].includes(invoice.payer.id)) {
+                        // offline and private pay Payer objects have no transmission method set
+                        // so we allow the user to select which method they would like to use
+                        this.selectedTransmissionMethod = '';
+                        this.$refs.confirmTransmissionMethod.confirm(() => {
+                            this.transmitClaim(invoice, true);
+                        });
+                        return;
+                    }
+
+                    if (invoice.payer && [this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.payer.transmission_method)) {
+                        this.$refs.confirmManualTransmission.confirm(() => {
+                            this.transmitClaim(invoice, true);
+                        });
+                        return;
+                    }
                 }
 
                 this.busy = true;
                 this.transmittingId = invoice.id;
-                let form = new Form({});
+                let form = new Form({
+                    method: this.selectedTransmissionMethod,
+                });
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
                         // success
