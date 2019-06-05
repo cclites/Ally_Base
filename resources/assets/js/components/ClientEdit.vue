@@ -726,8 +726,8 @@
                 });
             },
 
-            showStatusHelp(){
-                return "Note: To set this client to an " + (this.client.active === "active" ? 'active': 'inactive') + " status, use the " + (this.client.active === "active" ? 'Activate' : 'Deactivate') + " Client button below.";
+            showStatusHelp() {
+                return "Note: To set this client to an " + (this.client.active ? 'inactive': 'active') + " status, use the " + (this.client.active ? 'Deactivate' : 'Re-activate') + " Client button below.";
             },
 
             disasterCodes() {
