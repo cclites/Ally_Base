@@ -1,5 +1,6 @@
 <template>
-    <b-card :header="`${uppercaseWords(action)} custom field`" header-bg-variant="info" header-text-variant="white">
+    <b-modal title="Create a Manual Shift" v-model="showModal" size="lg" class="modal-fit-more" :no-close-on-backdrop="true">
+<!--    <b-card :header="`${uppercaseWords(action)} custom field`" header-bg-variant="info" header-text-variant="white">-->
         <form @submit.prevent="save()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
@@ -142,14 +143,15 @@
                 </b-col>
             </b-row>
         </form>
-    </b-card>
+    </b-modal>
 </template>
 
 <script>
     import FormatsStrings from '../../../mixins/FormatsStrings';
-    
-    export default {
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
+    export default {
+        components: {BusinessLocationFormGroup},
         props: {
             field: {
                 type: Object,
@@ -169,6 +171,7 @@
             return {
                 submitting: false,
                 form: new Form({
+                    business_id: this.getOriginal('business_id'),
                     user_type: this.getOriginal('user_type'),
                     type: this.getOriginal('type'),
                     label: this.getOriginal('label'),
