@@ -3,13 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\BusinessChain;
-use App\CustomFieldOption;
-use App\CaregiverMeta;
-use App\ClientMeta;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
-use Illuminate\Database\Eloquent\Builder;
 
 class CustomField extends Model implements BelongsToChainsInterface
 {
@@ -56,8 +51,8 @@ class CustomField extends Model implements BelongsToChainsInterface
         parent::boot();
         
         // Delete all related options for dropdown
-        self::deleting(function($field) {
-            if($field->type == 'dropdown') {
+        self::deleting(function(CustomField $field) {
+            if($field->isDropdown()) {
                 $field->options->each(function($option) {
                     $option->delete();
                 });
@@ -73,19 +68,9 @@ class CustomField extends Model implements BelongsToChainsInterface
         });
     }
 
-    /**
-     * Get the displayable value of the default for this custom field
-     *
-     * @return string
-     */
-    public function getDefaultAttribute()
-    {
-        if($this->type == 'dropdown' && $this->default_value) {
-            return $this->options->where('value', $this->default_value)->first()->label;
-        }
-
-        return $this->default_value ?: '';
-    }
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
 
     /**
      * Get the business chain that this field was created for
@@ -120,12 +105,107 @@ class CustomField extends Model implements BelongsToChainsInterface
     /**
      * Get the value of the custom field for the clients who have set one
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function clients()
     {
         return $this->hasMany(ClientMeta::class, 'key', 'key');
     }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+
+    /**
+     * Get the displayable value of the default for this custom field
+     *
+     * @return string
+     */
+    public function getDefaultAttribute()
+    {
+        if ($this->isDropdown() && $this->default_value) {
+            return $this->options->where('value', $this->default_value)->first()->label;
+        }
+
+        return $this->default_value ?: '';
+    }
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    /**
+     *
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int|BusinessChain $chain
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForChain($query, $chain)
+    {
+        $id = $chain;
+        if (is_object($chain)) {
+            $id = $chain->id;
+        }
+
+        return $query->where('chain_id', $id);
+    }
+
+    /**
+     *
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClients($query)
+    {
+        return $query->where('user_type', 'client');
+    }
+
+    /**
+     *
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForCaregivers($query)
+    {
+        return $query->where('user_type', 'caregiver');
+    }
+
+    // **********************************************************
+    // STATIC FUNCTIONS
+    // **********************************************************
+
+    /**
+     * Check for duplicate CustomField.
+     *
+     * @param \App\BusinessChain $chain
+     * @param string $userType
+     * @param string $label
+     * @param string $key
+     * @param null|string $ignoreId
+     * @return bool
+     */
+    public static function findDuplicate(BusinessChain $chain, string $userType, string $label, string $key, string $ignoreId = null) : bool
+    {
+        $query = self::forChain($chain)
+            ->where('user_type', $userType)
+            ->where(function ($query) use ($label, $key) {
+                $query->where('label', $label)
+                    ->orWhere('key', $key);
+            });
+
+        if (filled($ignoreId)) {
+            $query->whereNotIn('id', [$ignoreId]);
+        }
+
+        return $query->exists();
+    }
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
 
     /**
      * Return an array of business IDs the entity is attached to
@@ -135,5 +215,15 @@ class CustomField extends Model implements BelongsToChainsInterface
     public function getBusinessIds()
     {
         return $this->businessChain->businesses->pluck('id')->toArray();
+    }
+
+    /**
+     * Check if the custom field is a dropdown field.
+     *
+     * @return bool
+     */
+    public function isDropdown() : bool
+    {
+        return $this->type == 'dropdown';
     }
 }
