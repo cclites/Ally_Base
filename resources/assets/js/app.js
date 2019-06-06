@@ -223,6 +223,7 @@ Vue.component('business-payer-rates-table', require('./components/business/Payer
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
 Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
+Vue.component('business-offline-invoice-ar', require('./components/business/BusinessOfflineInvoiceAr'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
