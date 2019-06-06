@@ -22,12 +22,12 @@ class AddConstraintsToCustomFieldTables extends Migration
             $table->unique(['chain_id', 'user_type', 'key']);
         });
 
-        Schema::create('business_custom_field_options', function (Blueprint $table) {
-            $table->string('value'. 255)->change();
+        Schema::table('business_custom_field_options', function (Blueprint $table) {
+            $table->string('value', 255)->change();
             $table->string('label', 255)->change();
         });
 
-        Schema::create('business_custom_field_options', function (Blueprint $table) {
+        Schema::table('business_custom_field_options', function (Blueprint $table) {
             $table->unique(['field_id', 'value']);
         });
     }
@@ -48,11 +48,11 @@ class AddConstraintsToCustomFieldTables extends Migration
             $table->text('type')->change();
         });
 
-        Schema::create('business_custom_field_options', function (Blueprint $table) {
-            $table->dropUnique(['field_id\', \'value']);
+        Schema::table('business_custom_field_options', function (Blueprint $table) {
+            $table->dropUnique(['field_id', 'value']);
         });
 
-        Schema::create('business_custom_field_options', function (Blueprint $table) {
+        Schema::table('business_custom_field_options', function (Blueprint $table) {
             $table->text('value')->change();
             $table->text('label')->change();
         });
