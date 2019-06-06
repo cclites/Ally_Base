@@ -245,8 +245,8 @@
                 }
             },
             'weekStart': {
-                type: Number,
-                default: 1,
+                type: String,
+                default: "1",
             },
         },
 
