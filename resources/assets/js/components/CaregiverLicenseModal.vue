@@ -3,7 +3,7 @@
         <b-container fluid>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Name" label-for="name">
+                    <b-form-group label="Expiration Type" label-for="type">
                         <b-form-input
                             id="name"
                             name="name"
@@ -11,7 +11,16 @@
                             v-model="form.name"
                             >
                         </b-form-input>
-                        <input-help :form="form" field="name" text="Enter the name of the license"></input-help>
+                        <chain-expirations-autocomplete
+                            id="type"
+                            name="type"
+                            :caregiverId="this.caregiverId"
+                            :selectedItem="this.selectedItem"
+                            @updateSelectedItem="updateSelectedType"
+                            :filterBy="this.form.name"
+                            >
+                        </chain-expirations-autocomplete>
+
                     </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
@@ -48,15 +57,20 @@
                 }
             },
             items: {},
+            filterBy:'',
             caregiverId: {},
+            chain_expiration: {
+                type: [Number,String],
+                default: function () {
+                    return '';
+                },
+            },
         },
-
         data() {
             return {
                 form: new Form(),
             }
         },
-
         computed: {
             showModal: {
                 get() {
@@ -67,7 +81,7 @@
                 }
             },
             title() {
-                return (this.selectedItem) ? 'Edit Certification' : 'Create Certification';
+                return (this.form.name) ? 'Edit Expiration' : 'Create Expiration';
             }
         },
 
@@ -77,6 +91,7 @@
                     name: (this.selectedItem) ? this.selectedItem.name : '',
                     description: (this.selectedItem) ? this.selectedItem.description : '',
                     expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
+                    business_id: this.officeUserSettings.default_business_id,
                 });
             },
 
@@ -87,10 +102,13 @@
                     method = 'patch';
                     url = url + '/' + this.selectedItem.id;
                 }
+
                 this.form.submit(method, url)
                     .then(response => {
+
                         // Push the newly created item without mutating the prop, requires the sync modifier
                         let newItems = this.items;
+
                         if (this.selectedItem.id) {
                             let index = newItems.findIndex(item => item.id === this.selectedItem.id);
                             newItems[index] = response.data.data;
@@ -103,13 +121,28 @@
 
                         this.showModal = false;
                     });
+            },
+
+            updateBusinessId(){
+                let businessId = this.officeUserSettings.default_business_id;
+            },
+
+            updateSelectedType(type){
+                if(type){
+                    this.form.name=type;
+                }
+
+            },
+
+            filterType(){
+                this.filter=this.form.name;
             }
         },
 
         watch: {
             selectedItem() {
                 this.makeForm();
-            }
-        }
+            },
+        },
     }
 </script>

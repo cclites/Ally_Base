@@ -18,6 +18,7 @@ import VeeValidate from 'vee-validate'
 import * as VueGoogleMaps from 'vue2-google-maps'
 import 'vue-plyr';
 import 'vue-plyr/dist/vue-plyr.css';
+import Suggestions from 'v-suggestions'
 
 window.Form = Form;
 window.Vue = require('vue');
@@ -352,6 +353,9 @@ Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeMana
 Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
+
+Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ChainExpirationsAutocomplete"));
+Vue.component('suggestions', Suggestions); //remove this
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

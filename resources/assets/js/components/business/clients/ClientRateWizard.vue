@@ -47,7 +47,7 @@
                         </b-form-radio-group>
                         <b-form-select v-if="service_type === 'specific'" v-model="service_select">
                             <option value="">--Select a specific service type--</option>
-                            <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
+                            <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }} {{ service.code }}</option>
                         </b-form-select>
                         <p class="mt-2">
                             <small v-if="service_type === 'specific'">Note: You must assign this service on the schedule for it to use this rate.</small>

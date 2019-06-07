@@ -1,6 +1,6 @@
 \<template>
     <b-card
-        header="Certifications"
+        header="Expirations"
         header-text-variant="white"
         header-bg-variant="info"
         >

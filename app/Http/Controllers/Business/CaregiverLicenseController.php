@@ -8,6 +8,7 @@ use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
+use Log;
 
 class CaregiverLicenseController extends BaseController
 {
@@ -32,6 +33,7 @@ class CaregiverLicenseController extends BaseController
     public function store(Request $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);
+        $this->addNewExpirationType($request->all());
 
         $data = $request->validate([
             'name' => 'required|max:200',
@@ -58,6 +60,7 @@ class CaregiverLicenseController extends BaseController
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
         $this->authorize('update', $caregiver);
+        $this->addNewExpirationType($request->all());
 
         $data = $request->validate([
             'name' => 'required|max:200',
@@ -94,5 +97,35 @@ class CaregiverLicenseController extends BaseController
         $this->authorize('read', $license->caregiver);
 
         $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
+    }
+
+    public function addNewExpirationType($request){
+
+        $business = \App\Business::find($request["business_id"])->first();
+
+        //make sure we dont re-add a default type.
+        $defaultTypes = \App\ChainExpiration::where('type', $request["name"])
+                        ->whereNull('chain_id')
+                        ->get();
+
+        if(!$defaultTypes->isEmpty()){
+            return;
+        }else{
+            $type = \App\ChainExpiration::where('type', $request["name"])
+                                          ->where('chain_id', $business->chain_id)
+                                          ->where('business_id', $business->id)
+                                          ->get();
+
+            if($type->isEmpty()){
+                $newType = new \App\ChainExpiration();
+                $newType->type = $request["name"];
+                $newType->chain_id = $business->chain_id;
+                $newType->business_id = $request["business_id"];
+                $newType->save();
+            }
+        }
+
+        return;
+
     }
 }
