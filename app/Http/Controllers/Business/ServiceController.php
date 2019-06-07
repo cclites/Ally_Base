@@ -1,12 +1,15 @@
 <?php
 namespace App\Http\Controllers\Business;
 
+use App\Billing\ClientAuthorization;
+use App\Responses\ConfirmationResponse;
 use Auth;
 use App\Billing\Service;
 use App\Http\Requests\CreateServiceRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ServiceController extends BaseController
@@ -78,7 +81,7 @@ class ServiceController extends BaseController
      * @param  \App\Billing\Service  $service
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Service $service)
+    public function destroy(Service $service, Request $request)
     {
         $this->authorize('delete', $service);
 
@@ -94,6 +97,6 @@ class ServiceController extends BaseController
             logger($e->getMessage());
         }
 
-        return new ErrorResponse(500, 'The service could not be deleted.');
+        return new ErrorResponse(500, 'The service could not be deleted due to existing shifts or service authorizations using this code.');
     }
 }
