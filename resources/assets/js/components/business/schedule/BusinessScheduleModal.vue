@@ -326,7 +326,7 @@
                                     <b-form-checkbox v-if="caregiverAssignmentMode" :checked="true" :disabled="true">
                                         Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
-                                    <b-form-checkbox v-else v-model="defaultRates">
+                                    <b-form-checkbox v-show="!caregiverAssignmentMode" v-model="defaultRates">
                                         Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
                                     <a v-if="form.client_id" :href="`/business/clients/${form.client_id}#rates`" target="_blank">Manage Client Rates</a>
@@ -739,7 +739,7 @@
                 if (!schedule) schedule = this.schedule;
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = schedule.client_rate == null;
+                this.defaultRates = this.caregiverAssignmentMode ? false : schedule.client_rate == null;
                 console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
