@@ -287,7 +287,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 
     public function licenses()
     {
-        return $this->hasMany(CaregiverLicense::class);
+        return $this->hasMany(CaregiverLicense::class)
+                    ->orderBy("expires_at", 'ASC');
     }
 
     public function payments()

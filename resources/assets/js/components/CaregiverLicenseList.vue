@@ -54,6 +54,10 @@
                         sortable: true,
                     },
                     {
+                        key: 'description',
+                        label: "Notes"
+                    },
+                    {
                         key: 'expires_at',
                         label: 'Expiration Date',
                         sortable: true,
