@@ -48,6 +48,11 @@ class AssignCaregiverFromScheduleTest extends TestCase
         return $this->post(route('business.schedule.store'), $data);
     }
 
+    public function submitUpdateForm(Schedule $schedule, array $data)
+    {
+        return $this->patch(route('business.schedule.update', ['schedule' => $schedule->id]), $data);
+    }
+
     /** @test */
     function it_should_create_and_use_a_default_rate_when_creating_a_hourly_rate_schedule()
     {
@@ -224,5 +229,36 @@ class AssignCaregiverFromScheduleTest extends TestCase
 
         $this->assertCount(0, Schedule::all());
         $this->assertCount(0, ClientRate::all());
+    }
+
+    /** @test */
+    function it_should_create_and_use_a_default_rate_when_updating_a_hourly_rate_schedule()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $schedule = $this->createSchedule(Carbon::today(), '03:00:00', 4, [
+            'fixed_rates' => 0,
+            'caregiver_rate' => 15.00,
+            'client_rate' => 20.00,
+        ]);
+
+        $newCaregiver = factory('App\Caregiver')->create();
+        $this->chain->assignCaregiver($newCaregiver);
+
+        $data = array_merge($schedule->toArray(), ['caregiver_id' => $newCaregiver->id]);
+
+        $this->submitUpdateForm($schedule, $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, Schedule::all());
+        $schedule = Schedule::first();
+
+        $this->assertCount(1, ClientRate::all());
+        $newRate = ClientRate::first();
+        $this->assertEquals($data['caregiver_rate'], $newRate->caregiver_hourly_rate);
+        $this->assertEquals($data['client_rate'], $newRate->client_hourly_rate);
+        $this->assertEquals(null, $schedule->getRates()->clientRate());
+        $this->assertEquals(null, $schedule->getRates()->caregiverRate());
+        $this->assertEquals(false, $schedule->getRates()->fixedRates());
     }
 }
