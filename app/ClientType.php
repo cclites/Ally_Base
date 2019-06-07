@@ -8,7 +8,6 @@ class ClientType
     const MEDICAID = 'medicaid';
     const LTCI = 'LTCI';
     const VA = 'VA';
-    
 
     /**
      * Get all of the ClientTypes in array form.
