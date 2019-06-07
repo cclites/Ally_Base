@@ -1073,6 +1073,12 @@
             allyPct() {
                 this.recalculateAllRates(this.form)
             },
+
+            caregiverAssignmentMode(newVal, oldVal) {
+                if (newVal) {
+                    this.defaultRates = false;
+                }
+            },
         },
     }
 </script>
