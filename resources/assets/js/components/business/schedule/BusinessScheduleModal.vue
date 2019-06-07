@@ -47,7 +47,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
+                                    <small v-if="selectedCaregiverNotAssigned" class="form-text text-muted">
                                         <span class="text-warning">Caregivers that are not currently assigned to the client will be automatically assigned.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -301,6 +301,9 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <b-alert v-if="selectedCaregiverNotAssigned" show variant="info">
+                                    Because you are assigning a new Caregiver, this will create new default rates using the services/payers above.
+                                </b-alert>
 
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
                                     Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
@@ -318,9 +321,10 @@
                         <b-row>
                             <b-col lg="6">
                                 <label>
-                                    <b-form-checkbox v-model="defaultRates">
+                                    <b-form-checkbox v-model="defaultRates" :disabled="selectedCaregiverNotAssigned">
                                         Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
+                                    <a v-if="form.client_id" :href="`/business/clients/${form.client_id}#rates`" target="_blank">Manage Client Rates</a>
                                 </label>
                             </b-col>
                             <!--<b-col lg="6" class="text-right">-->
@@ -477,6 +481,7 @@
                 allyPct: 0.05,
                 paymentType: 'NONE',
                 clientCaregivers: [],
+                clientCaregiversLoaded: false,
                 cgMode: 'client',
                 care_plans: [],
                 daysOfWeek: {
@@ -504,6 +509,10 @@
         },
 
         computed: {
+            selectedCaregiverNotAssigned() {
+                return this.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
+            },
+
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -726,6 +735,7 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = schedule.client_rate == null;
+                console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
                 // Initialize form
@@ -879,10 +889,14 @@
             },
 
             loadCaregivers(clientId) {
+                this.clientCaregiversLoaded = false;
                 if (clientId) {
                     axios.get('/business/clients/' + clientId + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
+                        })
+                        .finally(() => {
+                            this.clientCaregiversLoaded = true;
                         });
                 }
             },
@@ -1001,6 +1015,13 @@
         },
 
         watch: {
+            selectedCaregiverNotAssigned(newVal, oldVal) {
+                console.log('selected caregiver not assigned', newVal);
+                if (newVal) {
+                    this.defaultRates = false;
+                }
+            },
+
             form: {
                 handler(obj){
                     this.checkForWarnings(this);

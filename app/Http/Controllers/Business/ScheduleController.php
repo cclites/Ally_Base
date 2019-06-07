@@ -7,6 +7,7 @@ use App\Billing\ScheduleService;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
@@ -28,6 +29,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Scheduling\ScheduleEditor;
 use App\Scheduling\ScheduleWarningAggregator;
+use App\Shift;
 use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -87,6 +89,71 @@ class ScheduleController extends BaseController
     }
 
     /**
+     * Automatically assign Caregiver to the requested Client
+     * and create ClientRate records for each service/payer.
+     *
+     * @param CreateScheduleRequest $request
+     * @return bool
+     * @throws AutomaticCaregiverAssignmentException
+     */
+    public function ensureCaregiverAssignmentAndCreateDefaultRates(CreateScheduleRequest $request) : bool
+    {
+        $client = Client::findOrFail($request->client_id);
+        if ($request->caregiver_id && ! $client->hasCaregiver($request->caregiver_id)) {
+            if (filled($request->service_id)) { // hourly or fixed rate
+                if ($request->hours_type != Shift::HOURS_DEFAULT) {
+                    throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
+                }
+
+                // Create default rates based on the rates in the request
+                ClientRate::add($client, [
+                    'caregiver_id' => $request->caregiver_id,
+                    'effective_start' => date('Y') . '-01-01',
+                    'effective_end' => '9999-12-31',
+                    'caregiver_hourly_rate' => ($request->fixed_rates ? 0 : $request->caregiver_rate) ?? 0,
+                    'client_hourly_rate' => ($request->fixed_rates ? 0 : $request->client_rate) ?? 0,
+                    'caregiver_fixed_rate' => ($request->fixed_rates ? $request->caregiver_rate : 0) ?? 0,
+                    'client_fixed_rate' => ($request->fixed_rates ? $request->client_rate : 0) ?? 0,
+                    'service_id' => $request->service_id,
+                    'payer_id' => $request->payer_id,
+                ]);
+
+            } else { // service breakout
+                // Create default rates for each *UNIQUE* service entry
+                foreach ($request->getServices() as $service) {
+                    if (app(RateFactory::class)->matchingRateExists($client, Carbon::parse($request->starts_at)->toDateString(), $service['service_id'], $service['payer_id'], $request->caregiver_id)) {
+                        throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you have different rates for the same service/payer.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
+                    }
+
+                    if ($service['hours_type'] != Shift::HOURS_DEFAULT) {
+                        throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
+                    }
+
+                    // Create default rates based on the rates in the request
+                    ClientRate::add($client, [
+                        'caregiver_id' => $request->caregiver_id,
+                        'effective_start' => date('Y') . '-01-01',
+                        'effective_end' => '9999-12-31',
+                        'caregiver_hourly_rate' => $service['caregiver_rate'],
+                        'client_hourly_rate' => $service['client_rate'],
+                        'caregiver_fixed_rate' => 0,
+                        'client_fixed_rate' => 0,
+                        'service_id' => $service['service_id'],
+                        'payer_id' => $service['payer_id'],
+                    ]);
+
+                    $service['caregiver_rate'] = null;
+                    $service['client_rate'] = null;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Create a new schedule, including recurrence
      *
      * @param \App\Http\Requests\CreateScheduleRequest $request
@@ -105,13 +172,34 @@ class ScheduleController extends BaseController
             return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
         }
 
-        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->client_rate, $request->fixed_rates);
+        $services = $request->getServices();
+
+        \DB::beginTransaction();
+
+        // Check if Caregiver is assigned to the client
+        try {
+            if ($this->ensureCaregiverAssignmentAndCreateDefaultRates($request)) {
+                // Clear out the rates for all services so they are
+                // pulled from the defaults that were just created.
+                $request->caregiver_rate = null;
+                $request->client_rate = null;
+
+                $services = collect($services)->map(function ($service) {
+                    $service['caregiver_rate'] = null;
+                    $service['client_rate'] = null;
+                    return $service;
+                })->toArray();
+            }
+        } catch (AutomaticCaregiverAssignmentException $ex) {
+            \DB::rollBack();
+            return new ErrorResponse($ex->getStatusCode(), $ex->getMessage());
+        }
 
         $creator->startsAt(Carbon::parse($request->input('starts_at')))
             ->duration($request->duration)
             ->assignments($business->id, $request->client_id, $request->caregiver_id, $request->service_id, $request->payer_id)
             ->rates($request->caregiver_rate, $request->client_rate, $request->fixed_rates)
-            ->addServices($request->getServices());
+            ->addServices($services);
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
@@ -140,6 +228,7 @@ class ScheduleController extends BaseController
         try {
             $created = $creator->create($this->userSettings()->enable_schedule_groups());
             if ($count = $created->count()) {
+                \DB::commit();
                 if ($count > 1) {
                     return new CreatedResponse('The scheduled shifts have been created.');
                 }
