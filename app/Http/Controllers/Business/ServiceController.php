@@ -1,15 +1,11 @@
 <?php
 namespace App\Http\Controllers\Business;
 
-use App\Billing\ClientAuthorization;
-use App\Responses\ConfirmationResponse;
-use Auth;
 use App\Billing\Service;
 use App\Http\Requests\CreateServiceRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ServiceController extends BaseController
@@ -81,7 +77,7 @@ class ServiceController extends BaseController
      * @param  \App\Billing\Service  $service
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Service $service, Request $request)
+    public function destroy(Service $service)
     {
         $this->authorize('delete', $service);
 
