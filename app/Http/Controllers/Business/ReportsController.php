@@ -554,9 +554,6 @@ class ReportsController extends BaseController
     public function timesheetData(TimesheetReportRequest $request)
     {
         $data = $request->validated();
-
-        Log::info(json_encode($request->all()));
-
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
         $business = $request->getBusiness();
