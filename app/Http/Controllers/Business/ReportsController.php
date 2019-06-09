@@ -40,6 +40,8 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 
+use Log;
+
 class ReportsController extends BaseController
 {
 
@@ -552,6 +554,9 @@ class ReportsController extends BaseController
     public function timesheetData(TimesheetReportRequest $request)
     {
         $data = $request->validated();
+
+        Log::info(json_encode($request->all()));
+
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
         $business = $request->getBusiness();
@@ -664,6 +669,8 @@ class ReportsController extends BaseController
 
     private function clientShiftGroups(Business $business, array $data)
     {
+        Log::info(json_encode($data));
+
         return $business->shifts()
             ->with('activities', 'client', 'caregiver')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])

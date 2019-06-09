@@ -10,6 +10,7 @@ require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
+
 import BootstrapVue from 'bootstrap-vue'
 import Form from './classes/Form'
 import store from './store'

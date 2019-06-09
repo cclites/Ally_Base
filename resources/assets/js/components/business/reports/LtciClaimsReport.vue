@@ -33,11 +33,7 @@
                         <b-col lg="2">
                             <b-form-group label="Client Type">
                                 <b-form-select v-model="clientType" class="mr-1 mb-1" name="client_id">
-                                    <option value="">All Client Types</option>
-                                    <option value="LTCI">LTC Insurance</option>
-                                    <option value="medicaid">Medicaid</option>
-                                    <option value="VA">VA</option>
-                                    <option value="private_pay">Private Pay</option>
+                                    <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -130,9 +126,10 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from '../../../mixins/Constants';
 
     export default {
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, Constants],
 
         props: ['token'],
 
@@ -147,7 +144,6 @@
                     end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                     caregiver_id: '',
                     client_id: '',
-                    client_type: '',
                     export_type: 'html',
                 }),
                 clientType: 'LTCI',
@@ -198,6 +194,7 @@
                 this.loadingClients = true;
                 const response = await axios.get('/business/clients?json=1&client_type=' + this.clientType);
                 this.clients = response.data;
+                this.client_id = '';
                 this.loadingClients = false;
             },
 
@@ -223,7 +220,8 @@
                     case 'holiday':
                         return 'HOL';
                 }
-            }
+            },
+
         },
 
         watch: {

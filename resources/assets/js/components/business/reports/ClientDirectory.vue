@@ -35,13 +35,7 @@
 
                         <b-col lg="3">
                             <b-form-group label="Client Type">
-                                <b-form-select v-model="filters.client_type">
-                                    <option :value="null">All Clients</option>
-                                    <option value="private_pay">Private Pay</option>
-                                    <option value="LTCI">LTCI</option>
-                                    <option value="medicaid">Medicaid</option>
-                                    <option value="VA">VA</option>
-                                </b-form-select>
+                                <client-types-dropdown v-model="filters.client_type" @clientType="updateClientType"></client-types-dropdown>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -144,8 +138,19 @@
                     formatter: val => this.formatDate(val)
                 },
             },
+            filters:{
+                client_type: '',
+            }
+
         };
     },
+
+     methods: {
+         updateClientType(type){
+             this.filters.client_type = type;
+         },
+     },
+
  }
  </script>
  

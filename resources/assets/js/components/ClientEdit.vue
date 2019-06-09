@@ -35,11 +35,7 @@
                                 name="client_type"
                                 v-model="form.client_type"
                         >
-                            <option value="">--Select--</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
+                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
@@ -436,6 +432,7 @@
     import DeactivateClientModal from './modals/DeactivateClientModal';
     import DischargeSummaryModal from './modals/DischargeSummaryModal';
     import AuthUser from '../mixins/AuthUser';
+    import Constants from '../mixins/Constants';
 
     window.croppie = require('croppie');
 
@@ -450,7 +447,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates, AuthUser],
+        mixins: [ClientForm, FormatsDates, AuthUser, Constants],
 
         components: {
             BusinessLocationFormGroup,
