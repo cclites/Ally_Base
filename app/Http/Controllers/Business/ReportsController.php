@@ -669,8 +669,6 @@ class ReportsController extends BaseController
 
     private function clientShiftGroups(Business $business, array $data)
     {
-        Log::info(json_encode($data));
-
         return $business->shifts()
             ->with('activities', 'client', 'caregiver')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
