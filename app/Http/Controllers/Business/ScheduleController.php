@@ -241,15 +241,19 @@ class ScheduleController extends BaseController
         switch($request->input('group_update')) {
             case 'total_all':
                 $editor->updateGroup($schedule->group, $schedule, $updatedData, $request->getNotes(), $services);
+                \DB::commit();
                 return new SuccessResponse('All schedule occurrences have been updated.');
             case 'total_weekday':
                 $editor->updateGroup($schedule->group, $schedule, $updatedData, $request->getNotes(), $services, $weekdayInt);
+                \DB::commit();
                 return new SuccessResponse("All $weekdayText occurrences have been updated.");
             case 'future_all':
                 $editor->updateFuture($schedule->group, $schedule, $updatedData, $request->getNotes(), $services);
+                \DB::commit();
                 return new SuccessResponse('All future occurrences have been updated.');
             case 'future_weekday':
                 $editor->updateFuture($schedule->group, $schedule, $updatedData, $request->getNotes(), $services, $weekdayInt);
+                \DB::commit();
                 return new SuccessResponse("All future $weekdayText occurrences have been updated.");
             default:
                 $editor->updateSingle($schedule, $updatedData, $request->getNotes(), $services);
