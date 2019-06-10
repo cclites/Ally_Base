@@ -8,7 +8,7 @@
                 >
                     <b-form inline @submit.prevent="loadItems()">
                         <business-location-form-group
-                            v-model="form.businesses"
+                            v-model="businesses"
                             :label="null"
                             class="mr-1 mt-1"
                             :allow-all="true"
@@ -202,8 +202,8 @@
                 payerFilter: '',
                 loadingPayers: false,
                 paymentModal: false,
+                businesses: '',
                 form: new Form({
-                    businesses: '',
                     type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
@@ -284,7 +284,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/offline-invoice-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/offline-invoice-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;
