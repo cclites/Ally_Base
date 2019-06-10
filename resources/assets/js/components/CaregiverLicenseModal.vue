@@ -4,23 +4,14 @@
             <b-row>
                 <b-col lg="12">
                     <b-form-group label="Expiration Type" label-for="type">
-                        <b-form-input
-                            id="name"
-                            name="name"
-                            type="text"
-                            v-model="form.name"
-                            >
-                        </b-form-input>
                         <chain-expirations-autocomplete
                             id="type"
                             name="type"
                             :caregiverId="this.caregiverId"
                             :selectedItem="this.selectedItem"
-                            @updateSelectedItem="updateSelectedType"
-                            :filterBy="this.form.name"
+                            @updateSelectedType="updateSelectedType"
                             >
                         </chain-expirations-autocomplete>
-
                     </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
@@ -57,14 +48,8 @@
                 }
             },
             items: {},
-            filterBy:'',
+            //filterBy:'',
             caregiverId: {},
-            chain_expiration: {
-                type: [Number,String],
-                default: function () {
-                    return '';
-                },
-            },
         },
         data() {
             return {
@@ -133,10 +118,12 @@
                 }
 
             },
-
+/*
             filterType(){
                 this.filter=this.form.name;
             }
+
+ */
         },
 
         watch: {

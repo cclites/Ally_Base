@@ -1,12 +1,25 @@
 <template>
-    <b-select name="chain_expirations"
-              id="chain_expirations"
-              v-model="chain_expiration"
-              :disabled="loading"
-              v-if="this.chain_expirations.length"
-              @change="emitSelected($event)">
-        <option v-for="item in chain_expirations" :key="item.id" :value="item.type">{{ item.type }}</option>
-    </b-select>
+    <div class="autocomplete">
+        <b-form-input
+                id="searchInput"
+                name="searchInput"
+                v-model="filterBy"
+        >
+        </b-form-input>
+        <div class="form-control"
+             :class="[this.isVisible ? 'showBlock' : 'hideBlock']"
+             name="chain_expirations"
+             id="chain_expirations"
+             v-model="chain_expirations"
+        >
+            <div class="row"
+                 v-for="item in chain_expirations"
+                 @click="updateSelected(item.type)"
+            >
+                    {{ item.type }}
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -15,7 +28,6 @@
         props: {
             value: {
                 type: [String, String],
-
                 default: function () {
                     return "0";
                 },
@@ -25,25 +37,19 @@
                 required: false,
                 default: false,
             },
-
             caregiverId: {},
             selectedItem: {},
-            //tempItems: [],
-
-            filterBy: {
-                type: String,
-                default: '',
-            },
         },
 
         data() {
             return {
                 chain_expirations: [],
-                chain_expiration: {},
                 loading: false,
                 selected_type: '',
                 all_expirations_types: [],
-                doFilter: false,
+                searchInput: '',
+                filterBy: '',
+                isVisible: false,
             }
         },
 
@@ -59,61 +65,76 @@
                     })
                     .catch(e => {});
             },
-            emitSelected(value){
 
-                this.chain_expirations = [];
-                this.selected_type = '';
-                this.doFilter = false;
-
-                if(value){
-                    this.$emit('updateSelectedItem', value);
+            updateSelected(filter){
+                this.filterBy = filter;
+                this.$emit('updateSelectedType', filter);
+                document.getElementById('chain_expirations').innerHTML='';
+                this.chain_expirations=[];
+                if(this.chain_expirations.length > 0){
+                    this.isVisible = true;
+                }else{
+                    this.isVisible = false;
                 }
             },
+
+            updateFilterBy(){
+
+                const typeObj = this.all_expirations_types;
+                let filter = this.filterBy;
+                this.$emit('updateSelectedType', filter);
+
+                this.chain_expirations = [];
+                this.isVisible = false;
+
+                if(filter.length > 2){
+
+                    for (let [key, value] of Object.entries(typeObj)) {
+                        if(value.type.startsWith(filter) && value.type !== this.filterBy){
+                            this.chain_expirations.push(value);
+                        }
+                    }
+                }
+
+                if(this.chain_expirations.length > 0){
+                    this.isVisible = true;
+                }else{
+                    this.isVisible = false;
+                }
+            }
         },
 
         watch:{
+
+            selectedItem(){
+                this.filterBy = this.selectedItem.name;
+            },
+
             filterBy(){
-
-                if(this.doFilter){
-                    const typeObj = this.all_expirations_types;
-                    let filter = this.filterBy;
-
-                    this.chain_expirations = [];
-
-                    if(filter.length > 2){
-
-                        for (let [key, value] of Object.entries(typeObj)) {
-                            //console.log(`${key}: ${value.type}`);
-
-                            if(value.type.startsWith(filter) && value.type !== this.selectedItem.name){
-                                console.log(value.type);
-                                this.chain_expirations.push(value);
-                            }
-
-                        }
-                    }
-                }else{
-                    this.doFilter=true;
-                }
-
-
-
-
-
-            }
-
+              this.updateFilterBy();
+            },
         },
-
 
         async mounted() {
             this.loading = true;
             await this.fetchChainExpirations();
-            this.chain_expiration = this.value;
             this.loading = false;
         },
     }
 </script>
 
-<style scoped>
+<style>
+    #chain_expirations div.row{
+        cursor: pointer;
+        padding: 0 6px;
+        margin: 0;
+    }
 
+    .hideBlock{
+        display: none;
+    }
+
+    .showBlock{
+        display: block;
+    }
 </style>
