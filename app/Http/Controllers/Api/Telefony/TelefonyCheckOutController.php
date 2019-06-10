@@ -239,6 +239,14 @@ class TelefonyCheckOutController extends BaseVoiceController
     public function confirmMileage(Shift $shift) {
         $mileage = $this->request->input('Digits');
 
+        if (! is_numeric($mileage)) {
+            // Redirect back if empty or invalid entry is entered
+            $this->telefony->redirect(
+                route('telefony.check-out.check-for-mileage', [$shift])
+            );
+            return $this->telefony->response();
+        }
+
         $gather = $this->telefony->gather([
             'timeout' => 10,
             'numDigits' => 1,
@@ -259,11 +267,15 @@ class TelefonyCheckOutController extends BaseVoiceController
      * Save the mileage data.
      *
      * @param \App\Shift $shift
-     * @param int $mileage
+     * @param string $mileage
      * @return mixed
      */
-    public function recordMileage(Shift $shift, int $mileage)
+    public function recordMileage(Shift $shift, string $mileage)
     {
+        if (! is_numeric($mileage)) {
+            $mileage = 0;
+        }
+
         if ($this->request->input('Digits') == 1) {
             $shift->update(['mileage' => $mileage]);
             $this->telefony->say(self::MileageEntrySuccess);
