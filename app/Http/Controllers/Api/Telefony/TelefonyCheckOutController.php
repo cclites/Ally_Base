@@ -2,11 +2,9 @@
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Activity;
-use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
 use App\Shifts\ClockOut;
 use App\Shift;
-use App\ShiftIssue;
 use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckOutController extends BaseVoiceController
@@ -40,6 +38,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Check in caregiver if identity confirmed by pressing 1.
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function checkOut(Shift $shift)
     {
@@ -288,6 +288,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Ask for activity codes
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function checkForActivitiesResponse(Shift $shift) {
         $gather = $this->telefony->gather([
@@ -311,6 +313,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Read out activity codes
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function sayAllActivities(Shift $shift) {
         $gather = $this->telefony->gather([
@@ -346,6 +350,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Confirm an entered activity code
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function confirmActivity(Shift $shift) {
         $code = $this->request->input('Digits');
@@ -378,6 +384,9 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Record an activity after confirmation
+     * @param \App\Shift $shift
+     * @param \App\Activity $activity
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function recordActivity(Shift $shift, Activity $activity) {
 
@@ -393,6 +402,9 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Complete the check out
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     * @throws TelefonyMessageException
      */
     public function finalizeCheckOut(Shift $shift) {
         // If not private pay, one ADL is required
