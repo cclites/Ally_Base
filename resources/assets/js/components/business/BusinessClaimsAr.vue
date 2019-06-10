@@ -7,6 +7,12 @@
                         header-bg-variant="info"
                 >
                     <b-form inline @submit.prevent="loadItems()">
+                        <business-location-form-group
+                            v-model="businesses"
+                            :label="null"
+                            class="mr-1 mt-1"
+                            :allow-all="true"
+                        />
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -172,11 +178,13 @@
 </template>
 
 <script>
+    import BusinessLocationFormGroup from '../../components/business/BusinessLocationFormGroup';
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import Constants from '../../mixins/Constants';
 
     export default {
+        components: { BusinessLocationFormGroup },
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -249,6 +257,7 @@
                 clientFilter: '',
                 payers: [],
                 payerFilter: '',
+                businesses: '',
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
@@ -384,7 +393,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/claims-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/claims-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;
