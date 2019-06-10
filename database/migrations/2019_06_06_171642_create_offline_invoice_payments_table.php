@@ -15,6 +15,12 @@ class CreateOfflineInvoicePaymentsTable extends Migration
     {
         Schema::create('offline_invoice_payments', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('client_invoice_id');
+            $table->date('payment_date');
+            $table->decimal('amount', 9, 2);
+            $table->string('type')->nullable();
+            $table->string('reference')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

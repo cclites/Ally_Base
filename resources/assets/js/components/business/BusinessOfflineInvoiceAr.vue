@@ -41,8 +41,6 @@
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
-                            <option value="has_balance">Has Balance</option>
-                            <option value="no_balance">Does Not Have Balance</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -77,8 +75,7 @@
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
+                    <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)" v-if="row.item.balance != 0">Apply Payment</b-btn>
                 </template>
             </b-table>
         </div>

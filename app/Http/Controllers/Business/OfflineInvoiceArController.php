@@ -39,17 +39,6 @@ class OfflineInvoiceArController extends BaseController
                     case 'unpaid':
                         $invoiceQuery->notPaidInFull();
                         break;
-                    // TODO: fix balances!
-//                    case 'has_balance':
-//                        $invoiceQuery->whereHas('claim', function (Builder $q) {
-//                            $q->whereColumn('amount', '>', 'amount_paid');
-//                        });
-//                        break;
-//                    case 'no_balance':
-//                        $invoiceQuery->whereHas('claim', function (Builder $q) {
-//                            $q->whereColumn('amount', '<=', 'amount_paid');
-//                        });
-//                        break;
                 }
             }
 
@@ -80,7 +69,7 @@ class OfflineInvoiceArController extends BaseController
     }
 
     /**
-     * Apply payment to a the Invoice's claim.
+     * Apply an offline 'payment' to a the Invoice.
      *
      * @param PayOfflineInvoiceRequest $request
      * @param ClientInvoice $invoice
@@ -96,11 +85,10 @@ class OfflineInvoiceArController extends BaseController
         }
 
         if ($request->getAmount() > $invoice->getAmountDue()) {
-            return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
+            return new ErrorResponse(412, 'This payment amount exceeds the remaining invoice balance.  Please modify the payment amount and try again.');
         }
 
-        // TODO: handle payment
-//        $invoice->addPayment($request->toClaimPayment());
+        $invoice->addOfflinePayment($request->toOfflineInvoicePayment());
 
         return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
     }

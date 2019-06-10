@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Billing\ClaimPayment;
+use App\Billing\OfflineInvoicePayment;
+use App\Billing\Payments\OfflinePayment;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -46,10 +48,9 @@ class PayOfflineInvoiceRequest extends FormRequest
         return $data;
     }
 
-
-    public function toClaimPayment(): ClaimPayment
+    public function toOfflineInvoicePayment() : OfflineInvoicePayment
     {
-        return new ClaimPayment([
+        return new OfflineInvoicePayment([
             'payment_date' => $this->filtered()['payment_date'],
             'amount' => $this->filtered()['amount'],
             'type' => $this->filtered()['type'] ?? null,
