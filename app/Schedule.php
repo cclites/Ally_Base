@@ -633,7 +633,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 $services = $services->where('payer_id', $payer_id);
             }
 
-            return $services->sum('duration');
+            return $services->reduce(function ($sum, $service) {
+                return add($sum, floatval($service->duration));
+            }, 0);
         } else {
             return floatval(0);
         }
