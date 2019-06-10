@@ -761,7 +761,7 @@
                         'care_plan_id': schedule.care_plan_id || '',
                         'status': schedule.status || 'OK',
                         'service_id': schedule.service_id || this.defaultService.id,
-                        'payer_id': schedule.payer_id || null,
+                        'payer_id': schedule.payer_id == 0 ? 0 : schedule.payer_id || null,
                         'interval_type': "",
                         'recurring_end_date': "",
                         'bydays': [],
