@@ -7,6 +7,13 @@
                         header-bg-variant="info"
                 >
                     <b-form inline @submit.prevent="loadItems()">
+                        <business-location-form-group
+                            v-model="form.businesses"
+                            :label="null"
+                            class="mr-1 mt-1"
+                            :allow-all="true"
+                        />
+
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -132,11 +139,13 @@
 </template>
 
 <script>
+    import BusinessLocationFormGroup from '../../components/business/BusinessLocationFormGroup';
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import Constants from '../../mixins/Constants';
 
     export default {
+        components: { BusinessLocationFormGroup },
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -194,6 +203,7 @@
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
+                    businesses: '',
                     type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
