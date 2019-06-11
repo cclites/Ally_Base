@@ -40,8 +40,6 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 
-use Log;
-
 class ReportsController extends BaseController
 {
 

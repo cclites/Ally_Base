@@ -20,8 +20,6 @@
                             <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                         </b-form-select>
 
-                        <!--client-types-dropdown v-model="form.client_type" @clientType="updateClientType" class="mb-2 mr-2"></client-types-dropdown-->
-
                         <b-select v-model="form.client" class="mb-2 mr-2">
                             <option value="">All Clients</option>
                             <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
@@ -109,10 +107,6 @@
                 type: [Array, Object],
                 default: () => { return []; },
             },
-            client_types: {
-                type: [Array, Object],
-                default: () => { return []; },
-            },
         },
 
         computed: {
@@ -177,12 +171,6 @@
 
             printTable() {
                 $(".report-table").print();
-            },
-
-            updateClientType(type){
-                if(type){
-                    this.form.client_type = type;
-                }
             },
         },
 

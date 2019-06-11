@@ -35,7 +35,9 @@
 
                         <b-col lg="3">
                             <b-form-group label="Client Type">
-                                <client-types-dropdown v-model="filters.client_type" @clientType="updateClientType"></client-types-dropdown>
+                                <b-form-select v-model="filters.client_type" class="mb-2 mr-2" name="client_id">
+                                    <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
+                                </b-form-select>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -79,10 +81,10 @@
  </template>
  
  <script>
- import moment from 'moment';
  import FormatsListData from '../../../mixins/FormatsListData';
  import UserDirectory from '../../../mixins/UserDirectory';
  import FormatsDates from "../../../mixins/FormatsDates";
+ import Constants from '../../../mixins/Constants';
 
  export default {
      props: {
@@ -92,7 +94,7 @@
          },
      },
 
-     mixins: [FormatsListData, FormatsDates, UserDirectory],
+     mixins: [FormatsListData, FormatsDates, UserDirectory, Constants],
 
     data() {
         return {
@@ -144,13 +146,6 @@
 
         };
     },
-
-     methods: {
-         updateClientType(type){
-             this.filters.client_type = type;
-         },
-     },
-
  }
  </script>
  
