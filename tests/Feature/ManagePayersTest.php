@@ -2,37 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Billing\ClientPayer;
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Billing\Payer;
 
 class ManagePayersTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesBusinesses;
 
-    public $officeUser;
-    public $client;
-    public $caregiver;
-    public $business;
-    public $chain;
-    
     public function setUp()
     {
         parent::setUp();
 
         $this->withoutExceptionHandling();
 
-        $this->business = factory('App\Business')->create();
-        $this->chain = $this->business->chain;
-        
-        $this->client = factory('App\Client')->create(['business_id' => $this->business->id]);
-
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->assignCaregiver($this->caregiver);
-        
-        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->chain->id]);
-        $this->business->users()->attach($this->officeUser);
+        $this->createBusinessWithUsers();
 
         $this->actingAs($this->officeUser->user);
     }
@@ -153,6 +138,27 @@ class ManagePayersTest extends TestCase
             ->assertStatus(403);
 
         $this->assertCount(1, $otherChain->fresh()->payers);
+    }
+
+    /** @test */
+    public function an_office_user_cannot_delete_payers_that_are_assigned()
+    {
+        $this->withExceptionHandling();
+
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $this->assertCount(1, $this->chain->payers);
+
+        factory(ClientPayer::class)->create([
+            'payer_id' => $payer->id,
+            'client_id' => $this->client,
+        ]);
+        $this->assertCount(1, $this->client->fresh()->payers);
+
+        $this->deleteJson(route('business.payers.destroy', ['payer' => $payer]))
+            ->assertStatus(500)
+            ->assertSee('because it is currently assigned');
+
+        $this->assertCount(1, $this->chain->fresh()->payers);
     }
 
     /** @test */

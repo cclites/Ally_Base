@@ -35,11 +35,7 @@
                                 name="client_type"
                                 v-model="form.client_type"
                         >
-                            <option value="">--Select--</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
+                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
@@ -64,11 +60,11 @@
                         </b-form-select>
                         <input-help :form="form" field="sales_person_id"></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Status">
+                    <b-form-group label="Client Status Alias">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
+                        <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
@@ -436,6 +432,7 @@
     import DeactivateClientModal from './modals/DeactivateClientModal';
     import DischargeSummaryModal from './modals/DischargeSummaryModal';
     import AuthUser from '../mixins/AuthUser';
+    import Constants from '../mixins/Constants';
 
     window.croppie = require('croppie');
 
@@ -450,7 +447,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates, AuthUser],
+        mixins: [ClientForm, FormatsDates, AuthUser, Constants],
 
         components: {
             BusinessLocationFormGroup,
@@ -724,6 +721,10 @@
                         text: item.name,
                     };
                 });
+            },
+
+            showStatusHelp() {
+                return "Note: To set this client to an " + (this.client.active ? 'inactive': 'active') + " status, use the " + (this.client.active ? 'Deactivate' : 'Re-activate') + " Client button below.";
             },
 
             disasterCodes() {

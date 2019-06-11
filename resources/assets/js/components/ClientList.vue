@@ -28,11 +28,7 @@
                     </b-form-select>
 
                     <b-form-select v-model="filters.client_type" class="f-1 mr-2">
-                        <option value="">All Client Types</option>
-                        <option value="private_pay">Private Pay</option>
-                        <option value="medicaid">Medicaid</option>
-                        <option value="VA">VA</option>
-                        <option value="LTCI">LTC Insurance</option>
+                        <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                     </b-form-select>
 
                     <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
@@ -83,10 +79,11 @@
     import BusinessLocationSelect from "./business/BusinessLocationSelect";
     import business from "../store/modules/business";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import Constants from '../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsListData],
+        mixins: [FormatsListData, Constants],
 
         data() {
             return {

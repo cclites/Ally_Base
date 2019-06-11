@@ -475,6 +475,7 @@
                     <business-salesperson-list :business-id="businessId"></business-salesperson-list>
                 </b-tab>
                 <b-tab title="Custom fields" href="#custom-fields">
+                    <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
                     <custom-field-list />
                 </b-tab>
                 <b-tab title="Deactivation Reasons" href="#deactivation-reasons">

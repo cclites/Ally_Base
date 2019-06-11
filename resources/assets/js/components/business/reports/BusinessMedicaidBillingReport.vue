@@ -16,13 +16,9 @@
                         &nbsp;to&nbsp;
                         <date-picker v-model="form.end" placeholder="End Date" class="mb-2 mr-2"></date-picker>
 
-                        <b-select v-model="form.client_type" class="mb-2 mr-2">
-                            <option value="">All Client Types</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
-                        </b-select>
+                        <b-form-select v-model="form.client_type" class="mb-2 mr-2" name="client_id">
+                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
+                        </b-form-select>
 
                         <b-select v-model="form.client" class="mb-2 mr-2">
                             <option value="">All Clients</option>
@@ -97,10 +93,11 @@
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import FormatsDates from '../../../mixins/FormatsDates';
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: { BusinessLocationFormGroup },
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, Constants],
         props: {
             clients: {
                 type: [Array, Object],

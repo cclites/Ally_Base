@@ -3,7 +3,7 @@
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
-            <b-btn variant="info" class="mb-3" href="/business/custom-fields/create">Create custom field</b-btn>
+            <b-btn variant="info" class="mb-3" href="/business/custom-fields/create">Create A Custom Field</b-btn>
             
             <div v-for="(userType, i) in ['caregiver', 'client']" :key="i">
                 <h3>{{uppercaseWords(userType)}} fields</h3>

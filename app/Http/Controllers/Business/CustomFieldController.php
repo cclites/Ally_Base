@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\StoreCustomFieldRequest;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\CustomField;
 use App\CustomFieldOption;
-use App\Business;
 use App\Caregiver;
 use App\Client;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCustomFieldRequest;
 use App\Http\Requests\UpdateCustomFieldOptionsRequest;
 use App\Responses\SuccessResponse;
@@ -21,26 +21,23 @@ class CustomFieldController extends BaseController
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Request $request)
     {
-        $this->authorize('update', $this->businessChain());
+        $this->authorize('read', $this->businessChain());
 
         $request->validate([
             'type' => 'required|in:all,caregiver,client',
         ]);
 
-        $fields = $this->businessChain()->fields;
-        if($request->type != 'all') {
-            $fields = $fields->where('user_type', $request->type)->values();
+        $query = $this->businessChain()->fields()->with('options');
+
+        if ($request->type != 'all') {
+            $query->where('user_type', $request->type);
         }
 
-        $fields = $fields->map(function(CustomField $field) {
-            $field->options = $field->options;
-            return $field;
-        });
-
-        return response()->json($fields);
+        return response()->json($query->get()->values());
     }
 
     /**
@@ -50,201 +47,137 @@ class CustomFieldController extends BaseController
      */
     public function create()
     {
-        return view('business.custom_fields.show');
+        return view_component('custom-field-edit', 'Create a Custom Field', [],
+            [
+                'Home' => route('home'),
+                'Settings' => route('business-settings'),
+                'Custom Fields' => route('business-settings').'#custom-fields',
+            ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateCustomFieldRequest  $request
+     * @param  \App\Http\Requests\StoreCustomFieldRequest  $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
-    public function store(UpdateCustomFieldRequest $request)
+    public function store(StoreCustomFieldRequest $request)
     {
-        $data = $request->filtered();
-        $data['key'] = preg_replace('/[^A-Za-z0-9]/', '', snake_case($request->label));
-        $data['chain_id'] = $this->businessChain()->id;
         $this->authorize('update', $this->businessChain());
-        
-        $alreadyExist = CustomField::where('chain_id', $data['chain_id'])
-            ->where('label', $data['label'])
-            ->where('user_type', $data['user_type'])
-            ->first();
 
-        if($alreadyExist) {
+        $data = $request->filtered();
+
+        if (CustomField::findDuplicate($this->businessChain(), $data['user_type'], $data['label'], $data['key'])) {
             return new ErrorResponse(500, 'A custom field with this label already exists. Please try again.');
         }
 
-        if ($field = CustomField::create($data)) {
+        \DB::beginTransaction();
+
+        if ($field = $this->businessChain()->fields()->create($data)) {
+            if ($field->isDropdown()) {
+                foreach ($data['options'] as $option) {
+                    $field->options()->create([
+                        'label' => $option,
+                        'value' => CustomFieldOption::getValueFromLabel($option),
+                    ]);
+                }
+            }
+
+            \DB::commit();
             return new SuccessResponse('Custom field has been created.', ['id' => $field->id]);
         }
 
+        \DB::rollBack();
         return new ErrorResponse(500, 'Could not create the custom field.  Please try again.');
-    }
-
-    /**
-     * Store the newly created options for a custom dropdown field
-     *
-     * @param \App\Http\Requests\UpdateCustomFieldOptionsRequest $request
-     * @param \App\CustomField $field
-     * @return \Illuminate\Http\Response
-     */
-    public function storeOptions(UpdateCustomFieldOptionsRequest $request, CustomField $field)
-    {
-        $this->authorize('update', $field);
-
-        if($field->type != 'dropdown') {
-            return new ErrorResponse(500, 'Could not create the custom field options for a field that is not a drop down.  Please try again.');
-        }
-
-        $data = $request->filtered();
-        $options = array_unique(explode(',', $data['options']));
-        foreach ($options as $option) {
-            $strippedString = preg_replace('/[^A-Za-z0-9]/', '', $option);
-            CustomFieldOption::create([
-                'field_id' => $field->id,
-                'value' => snake_case($strippedString),
-                'label' => $option,
-            ]);
-        }
-
-        return $field->options;
-    }
-
-    /**
-     * Store/Update the value for a custom field on a caregiver or client
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $account The type of account to service
-     * @param string $id The ID of the account
-     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Packages\MetaData\Exceptions\ModelNotSavedException
-     */
-    public function storeValue(Request $request, string $account, string $id)
-    {
-        if($account != 'caregiver' && $account != 'client') {
-            return new ErrorResponse(422, 'An error occured while trying to save your custom fields, please try again.');
-        }
-
-        if($account == 'caregiver') {
-            $instance = Caregiver::findOrFail($id);
-            $this->authorize('update', $instance);
-        }else if($account == 'client') {
-            $instance = Client::findOrFail($id);
-            $this->authorize('update', $instance);
-        }
-
-        $customFields = activeBusiness()->chain->fields->where('user_type', $account);
-        foreach ($customFields as $field) {
-            $value = $request->input($field->key) ?: '';
-
-            if($field->required && strlen($value) == 0) {
-                return new ErrorResponse(422, 'The custom field '. $field->label . ' value is required.');
-            }
-            
-            if($request->has($field->key) && $field->default_value !== $value) {
-                $instance->setMeta($field->key, $value);
-            }
-        }
-
-        return new SuccessResponse('Your custom field values were successfully saved.');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\CustomField $customField
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show($id)
+    public function show(CustomField $customField)
     {
-        $field = CustomField::findOrFail($id)->load('options');
-        $this->authorize('read', $field);
+        $this->authorize('read', $customField);
 
-        return view('business.custom_fields.show', compact('field'));
-    }
+        $customField->load('options');
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return view_component('custom-field-edit', 'Edit Custom Field', ['field' => $customField],
+            [
+                'Home' => route('home'),
+                'Settings' => route('business-settings'),
+                'Custom Fields' => route('business-settings').'#custom-fields',
+            ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateCustomFieldRequest  $request
-     * @param  int  $id
+     * @param  \App\CustomField  $customField
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
-    public function update(UpdateCustomFieldRequest $request, $id)
+    public function update(UpdateCustomFieldRequest $request, CustomField $customField)
     {
-        $data = $request->filtered();
-        $field = CustomField::findOrFail($id);
-        $this->authorize('update', $field);
+        $this->authorize('update', $customField);
 
-        if ($field->update($data)) {
-            return new SuccessResponse('Custom field has been saved.', $field->fresh());
+        $data = $request->filtered();
+
+        if (CustomField::findDuplicate($this->businessChain(), $data['user_type'], $data['label'], $customField->key, $customField->id)) {
+            return new ErrorResponse(500, 'A custom field with this label already exists. Please try again.');
         }
 
+        \DB::beginTransaction();
+
+        if ($customField->update($data)) {
+            $optionsToRemove = CustomFieldOption::findMissingIds($customField, $data['options']);
+
+            if ($customField->isDropdown()) {
+                foreach ($data['options'] as $label) {
+                    $value = CustomFieldOption::getValueFromLabel($label);
+                    if ($existingOption = $customField->options->where('value', $value)->first()) {
+                        // Update label only (would really only occur if user changes case)
+                        $existingOption->update([
+                            'label' => $label,
+                        ]);
+                    } else {
+                        $customField->options()->create([
+                            'label' => $label,
+                            'value' => $value,
+                        ]);
+                    }
+                }
+            }
+
+            $customField->options()->whereIn('id', $optionsToRemove)->delete();
+
+            \DB::commit();
+            return new SuccessResponse('Custom field has been saved.', $customField->fresh()->load('options'));
+        }
+
+        \DB::rollBack();
         return new ErrorResponse(500, 'Could not save the custom field.  Please try again.');
-    }
-
-    /**
-     * Update the options for the specified dropdown field
-     *
-     * @param \App\Http\Requests\UpdateCustomFieldOptionsRequest $request
-     * @param \App\CustomField $field
-     * @return \Illuminate\Http\Response
-     */
-    public function updateOptions(UpdateCustomFieldOptionsRequest $request, CustomField $field)
-    {
-        $this->authorize('update', $request->getBusiness());
-
-        if($field->type != 'dropdown') {
-            return new ErrorResponse(500, 'Could not create the custom field options for a field that is not a drop down.  Please try again.');
-        }
-
-        $data = $request->filtered();
-        $options = array_unique(explode(',', $data['options']));
-        $optionsKey = [];
-
-        foreach ($options as $option) {
-            $optionsKey[] = $key = preg_replace('/[^A-Za-z0-9]/', '', snake_case($option));
-            CustomFieldOption::firstOrCreate([
-                'field_id' => $field->id,
-                'value' => $key,
-                'label' => $option,
-            ]);
-        }
-
-        # Create options (or select if already exist) then delete every option that wasnt submitted
-        # since we're doing a replace-all type of updating
-        CustomFieldOption::where('field_id', $field->id)
-            ->whereNotIn('value', $optionsKey)
-            ->delete();
-
-        return $field->options;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\CustomField  $customField
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(CustomField $customField)
     {
-        $field = CustomField::findOrFail($id);
-        $this->authorize('delete', $field);
+        $this->authorize('delete', $customField);
 
-        if ($field->delete()) {
+        if ($customField->delete()) {
             return new SuccessResponse('The field has been deleted.', null, route('business-settings').'#custom-fields');
         }
 
