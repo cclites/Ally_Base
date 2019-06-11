@@ -13,6 +13,7 @@
                             class="mr-1 mt-1"
                             :allow-all="true"
                         />
+
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -47,10 +48,6 @@
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
-                            <option value="has_claim">Has Claim</option>
-                            <option value="no_claim">Does Not Have Claim</option>
-                            <option value="has_balance">Has Claim Balance</option>
-                            <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -62,7 +59,7 @@
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
             <b-col lg="6" class="text-right">
-                <a href="/business/reports/claims-ar-aging" target="_blank">View Aging Report</a>
+                <a href="/business/reports/offline-ar-aging" target="_blank">View Aging Report</a>
             </b-col>
         </b-row>
         <loading-card v-if="loaded == 0"></loading-card>
@@ -88,17 +85,12 @@
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
-                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
-                        <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
-                        <span>Transmit Claim</span>
-                    </b-btn>
+                    <b-btn variant="success" class="mr-2" @click="showPaymentModal(row.item)" v-if="row.item.balance != 0">Apply Payment</b-btn>
                 </template>
             </b-table>
         </div>
         <b-modal id="applyPaymentModal"
-                 :title="`Apply Payment to Claim #${selectedInvoice.name}`"
+                 :title="`Apply Payment to Offline Invoice #${selectedInvoice.name}`"
                  v-model="paymentModal"
                  no-close-on-backdrop
         >
@@ -126,15 +118,7 @@
                 />
                 <input-help :form="form" field="reference" text="" />
             </b-form-group>
-            <b-form-group label="Claim Balance">
-                <b-form-input
-                    name="claim_balance"
-                    v-model="selectedInvoice.claim_balance"
-                    :disabled="true"
-                />
-                <input-help :form="form" field="claim_balance" text="" />
-            </b-form-group>
-            <b-form-group label="Payment Amount Towards Claim">
+            <b-form-group label="Payment Amount Towards Invoice">
                 <b-form-input
                     name="amount"
                     type="number"
@@ -150,29 +134,6 @@
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
             </div>
         </b-modal>
-
-        <confirm-modal
-            title="Select Transmission Method"
-            ref="confirmTransmissionMethod"
-            yesButton="Transmit"
-            :yes-disabled="!selectedTransmissionMethod"
-        >
-            <p>Private and Offline Payer types do not have a default transmission method.</p>
-            <p>Please select the method would you like to use to submit this invoice.</p>
-            <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
-                <b-select v-model="selectedTransmissionMethod">
-                    <option value="">-- Select Transmission Method --</option>
-                    <option value="-" disabled>Direct Transmission:</option>
-                    <option :value="CLAIM_SERVICE.HHA">{{ serviceLabel(CLAIM_SERVICE.HHA) }}</option>
-                    <option :value="CLAIM_SERVICE.TELLUS">{{ serviceLabel(CLAIM_SERVICE.TELLUS) }}</option>
-                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>
-                    <option value="-" disabled>-</option>
-                    <option value="-" disabled>Offline:</option>
-                    <option :value="CLAIM_SERVICE.EMAIL">{{ serviceLabel(CLAIM_SERVICE.EMAIL) }}</option>
-                    <option :value="CLAIM_SERVICE.FAX">{{ serviceLabel(CLAIM_SERVICE.FAX) }}</option>
-                </b-select>
-            </b-form-group>
-        </confirm-modal>
 
         <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
@@ -229,24 +190,6 @@
                     },
                     {
                         key: 'balance',
-                        label: 'Invoice Balance',
-                        formatter: (val) => this.moneyFormat(val),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_status',
-                        formatter: (x) => _.capitalize(_.startCase(x)),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_service',
-                        label: 'Claim Service',
-                        formatter: (x) => this.serviceLabel(x),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
@@ -260,9 +203,9 @@
                 clientFilter: '',
                 payers: [],
                 payerFilter: '',
-                businesses: '',
                 loadingPayers: false,
                 paymentModal: false,
+                businesses: '',
                 form: new Form({
                     type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
@@ -290,58 +233,6 @@
         },
 
         methods: {
-            serviceLabel(serviceValue) {
-                switch (serviceValue) {
-                    case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
-                    case this.CLAIM_SERVICE.TELLUS: return 'Tellus';
-                    case this.CLAIM_SERVICE.CLEARINGHOUSE: return 'CareExchange LTC Clearinghouse';
-                    case this.CLAIM_SERVICE.EMAIL: return 'E-Mail';
-                    case this.CLAIM_SERVICE.FAX: return 'Fax';
-                    default:
-                        return '-';
-                }
-            },
-
-            transmitClaim(invoice, skipAlert = false) {
-                if (! skipAlert) {
-                    if (invoice.payer && [this.PRIVATE_PAY_ID, this.OFFLINE_PAY_ID].includes(invoice.payer.id)) {
-                        // offline and private pay Payer objects have no transmission method set
-                        // so we allow the user to select which method they would like to use
-                        this.selectedTransmissionMethod = '';
-                        this.$refs.confirmTransmissionMethod.confirm(() => {
-                            this.transmitClaim(invoice, true);
-                        });
-                        return;
-                    }
-
-                    if (invoice.payer && [this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.payer.transmission_method)) {
-                        this.$refs.confirmManualTransmission.confirm(() => {
-                            this.transmitClaim(invoice, true);
-                        });
-                        return;
-                    }
-                }
-
-                this.busy = true;
-                this.transmittingId = invoice.id;
-                let form = new Form({
-                    method: this.selectedTransmissionMethod,
-                });
-                form.post(`/business/claims-ar/${invoice.id}/transmit`)
-                    .then( ({ data }) => {
-                        // success
-                        let index = this.items.findIndex(x => x.id == invoice.id);
-                        if (index >= 0) {
-                            this.items.splice(index, 1, data.data);
-                        }
-                    })
-                    .catch(e => {})
-                    .finally(() => {
-                        this.busy = false;
-                        this.transmittingId = null;
-                    });
-            },
-
             async fetchPayers() {
                 this.payers = [];
                 this.loadingPayers = true;
@@ -373,12 +264,12 @@
             },
 
             applyPayment() {
-                if (! confirm('Are you sure you wish to apply payment to this claim?')) {
+                if (! confirm('Are you sure you wish to apply payment to this invoice?')) {
                     return ;
                 }
 
                 this.form.busy = true;
-                this.form.post(`/business/claims-ar/${this.selectedInvoice.id}/pay`)
+                this.form.post(`/business/offline-invoice-ar/${this.selectedInvoice.id}/pay`)
                     .then( ({ data }) => {
                         console.log('payment response', data);
                         let index = this.items.findIndex(x => x.id == this.selectedInvoice.id);
@@ -396,7 +287,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/claims-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/offline-invoice-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;
