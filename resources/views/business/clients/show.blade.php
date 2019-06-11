@@ -67,13 +67,6 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
         </li>
-
-        @if($client->client_type === 'medicaid')
-            <li class="nav-item">
-                <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
-            </li>
-        @endif
-
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
         </li>
