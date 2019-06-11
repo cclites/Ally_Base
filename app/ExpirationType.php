@@ -47,7 +47,7 @@ class ExpirationType extends AuditableModel
      */
     public static function existsForChain(BusinessChain $chain, string $type) : bool
     {
-        return self::where('type', 'LIKE', "%$type%")
+        return self::where('type', 'LIKE', "$type")
             ->where(function ($q) use ($chain) {
                 $q->whereNull('chain_id')
                     ->orWhere('chain_id', $chain->id);
