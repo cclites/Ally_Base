@@ -57,9 +57,12 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col lg="12" class="text-right">
+        <b-row class="mb-2">
+            <b-col lg="6">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                <a href="/business/reports/claims-ar-aging" target="_blank">View Aging Report</a>
             </b-col>
         </b-row>
         <loading-card v-if="loaded == 0"></loading-card>
