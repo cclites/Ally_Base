@@ -16,7 +16,7 @@
                  v-for="item in expiration_types"
                  @click="updateSelected(item.type)"
             >
-                    {{ item.type }}
+                {{ item.type }}
             </div>
         </div>
     </div>
@@ -55,65 +55,42 @@
 
         methods: {
             async fetchChainExpirations() {
-
-                let url='/business/chains/expiration-types/';
-
-                await axios.get(url)
-                    .then( ({ data }) => {
+                await axios.get(`/business/expiration-types`)
+                    .then(({data}) => {
                         this.all_expirations_types = data;
                     })
-                    .catch(e => {});
+                    .catch(e => {
+                    });
             },
 
-            updateSelected(filter){
+            updateSelected(filter) {
                 this.filterBy = filter;
                 this.$emit('updateSelectedType', filter);
-                this.expiration_types=[];
-                if(this.expiration_types.length > 0){
-                    this.isVisible = true;
-                }else{
-                    this.isVisible = false;
-                }
-
+                this.expiration_types = [];
+                this.isVisible = this.expiration_types.length > 0;
             },
 
-            updateFilterBy(){
-
-                const typeObj = this.all_expirations_types;
-                let filter = this.filterBy;
-
-                if(filter === undefined || filter === null){
+            updateFilterBy() {
+                if (! this.filterBy) {
                     return;
                 }
 
-                this.$emit('updateSelectedType', filter);
+                this.$emit('updateSelectedType', this.filterBy);
 
                 this.expiration_types = [];
                 this.isVisible = false;
-
-                if(filter.length > 2){
-
-                    for (let [key, value] of Object.entries(typeObj)) {
-
-                        let value_lc = value.type.toLowerCase();
-                        let filter_lc = filter.toLowerCase();
-
-                        if(value_lc.startsWith(filter_lc) && value.type !== this.filterBy){
-                            this.expiration_types.push(value);
-                        }
-                    }
+                if (this.filterBy.length > 1) {
+                    this.expiration_types = this.all_expirations_types.filter((item) => {
+                        return item.type.toLowerCase().startsWith(this.filterBy.toLowerCase())
+                            && item.type !== this.filterBy;
+                    });
                 }
 
-                if(this.expiration_types.length > 0){
-                    this.isVisible = true;
-                }else{
-                    this.isVisible = false;
-                }
+                this.isVisible = this.expiration_types.length > 0;
             }
         },
 
         watch:{
-
             selectedItem(){
                 this.filterBy = this.selectedItem.name;
             },

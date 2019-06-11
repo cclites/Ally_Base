@@ -13,14 +13,16 @@ class CreateChainExpirationTypes extends Migration
      */
     public function up()
     {
-        Schema::create('expiration_types', function (Blueprint $table) {
+        Schema::create('chain_expiration_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('type');
+            $table->string('type')->index();
             $table->unsignedInteger('chain_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('chain_id')->references('id')->on('business_chains')->onDelete('restrict')->onUpdate('cascade');
         });
 
-        DB::table('expiration_types')->insert([
+        DB::table('chain_expiration_types')->insert([
             ['type'=>"Driver’s License"],
             ['type'=>'Auto Insurance'],
             ['type'=>'Car Registration'],

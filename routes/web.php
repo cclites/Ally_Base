@@ -442,7 +442,7 @@ Route::group([
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
 
     /** CHAINS **/
-    Route::get('chains/expiration-types/', 'Business\ExpirationTypesController@index');
+    Route::get('expiration-types', 'Business\ExpirationTypesController@index');
 
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');

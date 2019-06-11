@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers\Business;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-use Log;
+use App\ExpirationType;
 
 class ExpirationTypesController extends BaseController
 {
-    public function index(Request $request){
-
-        $chain_id = $this->businessChain()->id;
-
-        $types =  \App\ExpirationTypes::whereNull('chain_id')
-                            ->orWhere('chain_id', $chain_id)
-                            //->orderBy('type')
-                            ->get()
-                            ->toArray();
-
-        return response()->json($types);
-
+    /**
+     * Get a list of the Chain's default expiration types.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        return response()->json(
+            ExpirationType::whereNull('chain_id')
+            ->orWhere('chain_id', $this->businessChain()->id)
+            ->orderBy('type')
+            ->get()
+            ->values()
+        );
     }
 }
