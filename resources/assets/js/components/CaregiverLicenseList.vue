@@ -16,6 +16,9 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
+                <template slot="expires_sort" scope="row">
+                    {{ row.item.expires_at }}
+                </template>
                 <template slot="actions" scope="row">
                     <b-btn size="sm" @click="editLicense(row.item)">Edit</b-btn>
                     <b-btn size="sm" @click="deleteLicense(row.item)" variant="danger">X</b-btn>
@@ -58,7 +61,7 @@
                         label: "Notes"
                     },
                     {
-                        key: 'expires_at',
+                        key: 'expires_sort',
                         label: 'Expiration Date',
                         sortable: true,
                     },
@@ -87,6 +90,7 @@
                 get() {
                     return this.licenseItems.map(function(license) {
                         license.expires_at = moment(license.expires_at).format('MM/DD/YYYY');
+                        license.expires_sort = moment(license.expires_at).format('YYYYMMDD');
                         license.updated_at = moment.utc(license.updated_at).local().format('MM/DD/YYYY h:mm A');
                         return license;
                     });
