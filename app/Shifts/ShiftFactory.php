@@ -230,6 +230,17 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
+            if ($rates->caregiver_rate == 0 && $rates->client_rate == 0) {
+                $rates = $rateFactory->findMatchingRate(
+                    $client,
+                    $effectiveDate,
+                    true,
+                    $serviceId,
+                    $payerId,
+                    $caregiverId
+                );
+            }
+
             if ($scheduledRates) {
                 $payer = $payerId ? Payer::find($payerId) : null;
                 if ($scheduledRates->hoursType() == 'overtime') {
