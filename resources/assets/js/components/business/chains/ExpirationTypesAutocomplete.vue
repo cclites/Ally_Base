@@ -8,12 +8,12 @@
         </b-form-input>
         <div class="form-control"
              :class="[this.isVisible ? 'showBlock' : 'hideBlock']"
-             name="chain_expirations"
-             id="chain_expirations"
-             v-model="chain_expirations"
+             name="expiration_types"
+             id="expiration_types"
+             v-model="expiration_types"
         >
             <div class="row"
-                 v-for="item in chain_expirations"
+                 v-for="item in expiration_types"
                  @click="updateSelected(item.type)"
             >
                     {{ item.type }}
@@ -43,7 +43,7 @@
 
         data() {
             return {
-                chain_expirations: [],
+                expiration_types: [],
                 loading: false,
                 selected_type: '',
                 all_expirations_types: [],
@@ -56,8 +56,7 @@
         methods: {
             async fetchChainExpirations() {
 
-                let businessId = this.officeUserSettings.default_business_id;
-                let url='/business/chains/chain-expirations/' + this.caregiverId + '?business_id=' + businessId;
+                let url='/business/chains/expiration-types/';
 
                 await axios.get(url)
                     .then( ({ data }) => {
@@ -69,34 +68,43 @@
             updateSelected(filter){
                 this.filterBy = filter;
                 this.$emit('updateSelectedType', filter);
-                document.getElementById('chain_expirations').innerHTML='';
-                this.chain_expirations=[];
-                if(this.chain_expirations.length > 0){
+                this.expiration_types=[];
+                if(this.expiration_types.length > 0){
                     this.isVisible = true;
                 }else{
                     this.isVisible = false;
                 }
+
             },
 
             updateFilterBy(){
 
                 const typeObj = this.all_expirations_types;
                 let filter = this.filterBy;
+
+                if(filter === undefined || filter === null){
+                    return;
+                }
+
                 this.$emit('updateSelectedType', filter);
 
-                this.chain_expirations = [];
+                this.expiration_types = [];
                 this.isVisible = false;
 
                 if(filter.length > 2){
 
                     for (let [key, value] of Object.entries(typeObj)) {
-                        if(value.type.startsWith(filter) && value.type !== this.filterBy){
-                            this.chain_expirations.push(value);
+
+                        let value_lc = value.type.toLowerCase();
+                        let filter_lc = filter.toLowerCase();
+
+                        if(value_lc.startsWith(filter_lc) && value.type !== this.filterBy){
+                            this.expiration_types.push(value);
                         }
                     }
                 }
 
-                if(this.chain_expirations.length > 0){
+                if(this.expiration_types.length > 0){
                     this.isVisible = true;
                 }else{
                     this.isVisible = false;
@@ -124,7 +132,7 @@
 </script>
 
 <style>
-    #chain_expirations div.row{
+    #expiration_types div.row{
         cursor: pointer;
         padding: 0 6px;
         margin: 0;

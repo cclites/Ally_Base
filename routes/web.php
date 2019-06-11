@@ -440,7 +440,7 @@ Route::group([
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
 
     /** CHAINS **/
-    Route::get('chains/chain-expirations/{caregiverId}', 'Business\ChainsExpirationsController@index');
+    Route::get('chains/expiration-types/', 'Business\ExpirationTypesController@index');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

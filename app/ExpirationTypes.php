@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ChainExpiration extends Model
+class ExpirationTypes extends Model
 {
-    protected $table = 'chain_expiration_types';
+    protected $table = 'expiration_types';
 
     public function getType($type){
 

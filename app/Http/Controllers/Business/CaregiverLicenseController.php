@@ -104,20 +104,20 @@ class CaregiverLicenseController extends BaseController
         $business = \App\Business::find($request["business_id"])->first();
 
         //make sure we dont re-add a default type.
-        $defaultTypes = \App\ChainExpiration::where('type', $request["name"])
+        $defaultTypes = \App\ExpirationTypes::where('type', $request["name"])
                         ->whereNull('chain_id')
                         ->get();
 
         if(!$defaultTypes->isEmpty()){
             return;
         }else{
-            $type = \App\ChainExpiration::where('type', $request["name"])
+            $type = \App\ExpirationTypes::where('type', $request["name"])
                                           ->where('chain_id', $business->chain_id)
                                           ->where('business_id', $business->id)
                                           ->get();
 
             if($type->isEmpty()){
-                $newType = new \App\ChainExpiration();
+                $newType = new \App\ExpirationTypes();
                 $newType->type = $request["name"];
                 $newType->chain_id = $business->chain_id;
                 $newType->business_id = $request["business_id"];
