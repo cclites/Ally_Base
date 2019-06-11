@@ -1,6 +1,7 @@
 <template>
     <b-modal :title="defaultRate ? 'New Default Rate' : 'Add Caregiver'"
              v-model="localValue"
+             no-close-on-backdrop
              ref="rateWizardModal">
         <b-container fluid>
             <b-row>
