@@ -76,11 +76,7 @@
                         <b-col xl="4" lg="6">
                             <b-form-group label="Client Type" class="form-inline">
                                 <b-form-select v-model="filters.client_type" ref="clientTypeFilter">
-                                    <option value="">All Client Types</option>
-                                    <option value="private_pay">Private Pay</option>
-                                    <option value="medicaid">Medicaid</option>
-                                    <option value="VA">VA</option>
-                                    <option value="LTCI">LTC Insurance</option>
+                                    <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -329,6 +325,7 @@
     import LocalStorage from "../mixins/LocalStorage";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import ShiftFlags from "../mixins/ShiftFlags";
+    import Constants from '../mixins/Constants';
 
     export default {
         components: {
@@ -341,7 +338,7 @@
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, LocalStorage, ShiftFlags],
+        mixins: [FormatsDates, FormatsNumbers, LocalStorage, ShiftFlags, Constants],
 
         props: {
             admin: Number,

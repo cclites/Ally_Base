@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\ClientPayer;
 use App\Billing\Payer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -126,6 +127,14 @@ class PayerController extends BaseController
     public function destroy(Payer $payer)
     {
         $this->authorize('delete', $payer);
+
+        $clientPayersFound = ClientPayer::where('payer_id', $payer->id)->count();
+        if ($clientPayersFound === 1) {
+            $client = ClientPayer::where('payer_id', $payer->id)->first()->client;
+            return new ErrorResponse(500, "Payer could not be deleted because it is currently assigned to the client {$client->name}.");
+        } else if ($clientPayersFound > 1) {
+            return new ErrorResponse(500, "Payer could not be deleted because it is currently assigned to {$clientPayersFound} clients.");
+        }
 
         try {
             if ($payer->delete()) {

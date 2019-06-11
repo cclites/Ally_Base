@@ -58,6 +58,8 @@ class CreatePayerRequest extends FormRequest
             'transmission_method' => ['nullable', new ValidEnum(ClaimService::class)],
             'payer_code' => 'nullable|string|max:255',
             'plan_code' => 'nullable|string|max:255',
+            'contact_name' => 'nullable|string|max:255',
+            'invoice_format' => 'nullable|string|max:255',
         ];
     }
 

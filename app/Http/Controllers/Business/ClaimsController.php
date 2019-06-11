@@ -7,7 +7,7 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
-use App\Billing\Queries\OfflineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Http\Requests\PayClaimRequest;
 use App\Http\Requests\TransmitClaimRequest;
 use App\Responses\ErrorResponse;
@@ -23,10 +23,10 @@ class ClaimsController extends BaseController
      * Get claims listing.
      *
      * @param Request $request
-     * @param OfflineClientInvoiceQuery $invoiceQuery
+     * @param ClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, OfflineClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             if ($request->filled('invoiceType')) {
@@ -85,15 +85,26 @@ class ClaimsController extends BaseController
     /**
      * Create a claim from an invoice and transmit to HHAeXchange.
      *
+     * @param \Illuminate\Http\Request $request
      * @param ClientInvoice $invoice
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
      */
-    public function transmitInvoice(ClientInvoice $invoice)
+    public function transmitInvoice(Request $request, ClientInvoice $invoice)
     {
         $this->authorize('read', $invoice);
 
-        $service = optional($invoice->clientPayer)->payer->getTransmissionMethod();
+        if (! $invoice->clientPayer) {
+            return new ErrorResponse(500, 'No payer assigned to this invoice, cannot transmit this claim.');
+        }
+
+        // if no transmission set on the payer, attempt to get it from the request
+        if (! $service = $invoice->clientPayer->payer->getTransmissionMethod()) {
+            if ($method = $request->input('method', null)) {
+                $service = ClaimService::$method();
+            }
+        }
+
         if (empty($service)) {
             return new ErrorResponse(500, 'You cannot transmit this claim because the Payer for this invoice does not have a transmission method set.  You can edit this on the Billing > Payers section, or contact Ally for assistance.');
         }
@@ -132,6 +143,8 @@ class ClaimsController extends BaseController
      */
     public function pay(PayClaimRequest $request, ClientInvoice $invoice)
     {
+        $this->authorize('read', $invoice);
+
         if (empty($invoice->claim)) {
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
         }

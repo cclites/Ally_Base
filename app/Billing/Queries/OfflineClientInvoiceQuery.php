@@ -16,20 +16,14 @@ final class OfflineClientInvoiceQuery extends ClientInvoiceQuery
 
     public function paidInFull(): self
     {
-        $this->whereHas('claim', function(Builder $builder) {
-            $builder->whereColumn('amount_paid', '=', 'amount');
-        });
+        $this->whereColumn('offline_amount_paid', '=', 'amount');
 
         return $this;
     }
 
     public function notPaidInFull(): self
     {
-        $this->where(function(Builder $builder) {
-            $builder->whereHas('claim', function (Builder $builder) {
-                $builder->whereColumn('amount_paid', '=', 'amount');
-            })->orDoesntHave('claim');
-        });
+        $this->whereColumn('offline_amount_paid', '<', 'amount');
 
         return $this;
     }

@@ -53,11 +53,11 @@
                         </b-form-select>
                         <input-help :form="form" field="certification" text="Select the caregiver's certification / license."></input-help>
                     </b-form-group>
-                    <b-form-group label="Caregiver Status">
+                    <b-form-group label="Caregiver Status Alias">
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="status_alias_id"></input-help>
+                        <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
@@ -328,6 +328,10 @@
                         text: item.name,
                     };
                 });
+            },
+
+            showStatusHelp() {
+                return "Note: To set this caregiver to an " + (this.caregiver.active ? 'inactive': 'active') + " status, use the " + (this.caregiver.active ? 'Deactivate' : 'Re-activate') + " Caregiver button below.";
             },
         },
 
