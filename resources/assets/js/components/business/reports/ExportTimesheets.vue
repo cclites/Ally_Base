@@ -163,10 +163,6 @@
                         return 'HOL';
                 }
             },
-
-            updateClientType(type){
-                this.form.client_type = type;
-            },
         }
     }
 </script>
