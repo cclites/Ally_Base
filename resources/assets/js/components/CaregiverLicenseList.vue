@@ -1,6 +1,6 @@
 \<template>
     <b-card
-        header="Certifications"
+        header="Expirations"
         header-text-variant="white"
         header-bg-variant="info"
         >
@@ -52,6 +52,10 @@
                         key: 'name',
                         label: 'Name',
                         sortable: true,
+                    },
+                    {
+                        key: 'description',
+                        label: "Notes"
                     },
                     {
                         key: 'expires_at',

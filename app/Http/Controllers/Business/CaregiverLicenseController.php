@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\ExpirationType;
 use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -33,6 +34,10 @@ class CaregiverLicenseController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
+
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
@@ -58,6 +63,10 @@ class CaregiverLicenseController extends BaseController
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
         $this->authorize('update', $caregiver);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data = $request->validate([
             'name' => 'required|max:200',

@@ -441,9 +441,13 @@ Route::group([
     Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
 
+    /** CHAINS **/
+    Route::get('expiration-types', 'Business\ExpirationTypesController@index');
+
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
+
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -473,6 +477,7 @@ Route::group([
     Route::get('chains/{chain}', "Admin\BusinessChainController@show")->name("businesses.chains.show");
     Route::patch('chains/{chain}', "Admin\BusinessChainController@update")->name("businesses.chains.update");
     Route::resource('chains/{chain}/users', 'Admin\OfficeUserController');
+
 
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');

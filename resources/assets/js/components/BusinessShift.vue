@@ -168,7 +168,7 @@
                                     <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                         <td>
                                             <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                                <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                                <option v-for="service in services" :value="service.id">{{ service.name }} {{ service.code }}</option>
                                             </b-form-select>
                                         </td>
                                         <td>
@@ -242,7 +242,7 @@
                                     <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
                                         <td>
                                             <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                                <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
+                                                <option v-for="s in services" :value="s.id">{{ s.name }} {{ s.code }}</option>
                                             </b-form-select>
                                         </td>
                                         <td>
