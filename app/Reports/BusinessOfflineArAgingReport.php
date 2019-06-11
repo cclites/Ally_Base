@@ -38,10 +38,10 @@ class BusinessOfflineArAgingReport extends BaseReport
         $today = \Carbon\Carbon::now();
         $this->datePeriods = [
             ['period' => 'current', 'start' => $today->copy()->subDays(30), 'end' => $today->copy()],
-            ['period' => '30_45', 'start' => $today->copy()->subDays(45), 'end' => $today->copy()->subDays(30)],
-            ['period' => '46_60', 'start' => $today->copy()->subDays(60), 'end' => $today->copy()->subDays(46)],
-            ['period' => '61_75', 'start' => $today->copy()->subDays(75), 'end' => $today->copy()->subDays(61)],
-            ['period' => '75_plus', 'start' => Carbon::parse('01/01/2018'), 'end' => $today->copy()->subDays(75)],
+            ['period' => 'period_30_45', 'start' => $today->copy()->subDays(45), 'end' => $today->copy()->subDays(30)],
+            ['period' => 'period_46_60', 'start' => $today->copy()->subDays(60), 'end' => $today->copy()->subDays(46)],
+            ['period' => 'period_61_75', 'start' => $today->copy()->subDays(75), 'end' => $today->copy()->subDays(61)],
+            ['period' => 'period_75_plus', 'start' => Carbon::parse('01/01/2018'), 'end' => $today->copy()->subDays(75)],
         ];
     }
 
@@ -100,32 +100,45 @@ class BusinessOfflineArAgingReport extends BaseReport
             });
         }
 
-        $clients = $query->get()->pluck('client');
-
-        $periodData = [];
-        foreach ($this->datePeriods as $period) {
-            $periodData[$period['period']] = $this->getBalanceForDates($clients->pluck('id'), [$period['start'], $period['end']]);
-        }
-
-        $report = collect([]);
-        foreach ($clients as $client) {
-            $record = [
-                'client_name' => $client->name,
-            ];
+        return $query->get()->map(function ($invoice) {
+            /** @var \App\Billing\ClientInvoice $invoice  */
+            $data = $invoice->toArray();
+            $data['client_name'] = $invoice->client->name;
 
             foreach ($this->datePeriods as $period) {
-                $record[$period['period']] = (float) $periodData[$period['period']]->where('client_id', $client->id)->sum('balance');
+                $data[$period['period']] = 0.00;
+
+                if ($invoice->created_at->between($period['start'], $period['end'])) {
+                    $data[$period['period']] = $invoice->getAmountDue();
+                }
             }
 
-            $report->push($record);
-        }
-
-        return $report;
-        return $query->get()->map(function ($item) {
-            return array_merge($item->toArray(), [
-                'client_name' => $item->client->name,
-            ]);
+            return $data;
         });
+
+        // this code is for grouping invoice totals by client
+        // i have a feeling this might get used again
+//        $clients = $query->get()->pluck('client');
+//
+//        $periodData = [];
+//        foreach ($this->datePeriods as $period) {
+//            $periodData[$period['period']] = $this->getBalanceForDates($clients->pluck('id'), [$period['start'], $period['end']]);
+//        }
+//
+//        $report = collect([]);
+//        foreach ($clients as $client) {
+//            $record = [
+//                'client_name' => $client->name,
+//            ];
+//
+//            foreach ($this->datePeriods as $period) {
+//                $record[$period['period']] = (float) $periodData[$period['period']]->where('client_id', $client->id)->sum('balance');
+//            }
+//
+//            $report->push($record);
+//        }
+//
+//        return $report;
     }
 
     /**
