@@ -151,7 +151,7 @@
                     },
                     {
                         key: 'payer',
-                        formatter: (val, key, item) => `${val.name} (${item.payer_payment_type})`,
+                        formatter: (val, key, item) => `${val ? val.name : '-'} (${item.payer_payment_type})`,
                         sortable: true,
                     },
                     {
