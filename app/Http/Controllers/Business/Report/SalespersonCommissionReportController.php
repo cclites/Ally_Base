@@ -18,7 +18,10 @@ use Log;
 
 class SalespersonCommissionReportController extends BaseController{
 
-
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index(Request $request){
 
         return view_component('sales-people-commission-report', 'Salesperson Commission Report', [], [
@@ -27,6 +30,11 @@ class SalespersonCommissionReportController extends BaseController{
         ]);
     }
 
+    /**
+     * Populate the salesperson dropdown
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function salesPeopleForCommissionReport(){
 
         $salesPersons = $this->businessChain()->salesPeopleForChain();
@@ -42,6 +50,13 @@ class SalespersonCommissionReportController extends BaseController{
 
     }
 
+    /**
+     * generate the report
+     *
+     * @param Request $request
+     * @param SalespersonCommissionReport $report
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function generate(Request $request, SalespersonCommissionReport $report){
 
         if ($request->has('json')){
@@ -53,43 +68,14 @@ class SalespersonCommissionReportController extends BaseController{
             }
 
             //this populates the report
-            $data = $report->forBusinesses($businesses)
+            $data = $report->forBusinessId($businesses)
                 ->forDates($request->dates['start'], $request->dates['end'])
                 ->forSalespersonId($request->salesperson)
                 ->rows();
 
-            Log::info(json_encode($data));
-            //return response()->json($data);
+            return response()->json($data);
         }
 
-
-
-        //$dates = json_decode($request->dates);
-
-        /*
-        $request->validate([
-            'dates->start' => 'required|date',
-            'dates->end' => 'required|date',
-            'business' => 'nullable|string',
-            'salesperson' => 'nullable|string',
-        ]);
-        */
-
-        //Log::info("Validated?");
-
-        //$report->forDates($request->dates->start, $request->dates->end);
-        //$report->forBusinessId($request->business);
-        //$report->forSalerspersonId($request->salespersonId);
-
-        //Log::info(json_encode($report->query()));
-        //$data = $report->forDates($request->dates["start"], $request->dates["end"]);
-                       //->forBusinessId($request->business)
-                       //->forSalespersonId($request->salesperson)
-                       //->get();
-
-        //Log::info(json_encode($data));
-
-        //return response()->json([]);
     }
 
 }

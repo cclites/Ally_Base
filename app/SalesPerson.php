@@ -35,6 +35,11 @@ class SalesPerson extends Model implements BelongsToBusinessesInterface
         return $query->where('active', 1);
     }
 
+    /**
+     * Concatenate the salesperson's name
+     *
+     * @return string
+     */
     public function fullName(){
         return $this->firstname . " " . $this->lastname;
     }

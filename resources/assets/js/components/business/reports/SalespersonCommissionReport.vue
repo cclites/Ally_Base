@@ -57,7 +57,7 @@
         <div id="salesperson_commission_report" v-else>
             <b-row>
                 <b-col>
-                    <b-table :items="filters.salespersons" :fields="fields"></b-table>
+                    <b-table :items="salespersons" :fields="fields"></b-table>
                 </b-col>
             </b-row>
         </div>
@@ -107,10 +107,6 @@
             }
         },
 
-        created () {
-            //this.fetchData()
-        },
-
         methods: {
             filterDates(value, key) {
                 this.filters.dates[key] = value;
@@ -140,10 +136,13 @@
                     `&business=${this.filters.business}` +
                     `&json=1`;
 
-                //window.location = url;
                 let response = await axios.get(url);
+                this.salespersons = response.data;
 
-                console.log(response);
+            },
+
+            print(){
+                $('salesperson_commission_report').print();
             },
         },
 
@@ -152,14 +151,6 @@
             await this.fetchSalespersons();
             this.loading = false;
         },
-
-        watch: {
-
-        }
-
     }
+
 </script>
-
-<style scoped>
-
-</style>
