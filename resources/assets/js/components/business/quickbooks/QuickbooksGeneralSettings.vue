@@ -32,7 +32,7 @@
                 <b-col md="6">
                     <b-form-group label="Shift Service" label-for="shift_service_id">
                         <b-select name="shift_service_id" id="shift_service_id" v-model="form.shift_service_id" :disabled="busy">
-                            <option value="">-- Map Shift Service --</option>
+                            <option value="">-- Pull From Shifts --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
                         </b-select>
                         <input-help :form="form" field="shift_service_id" text="Select the service to use for general shift entries."></input-help>

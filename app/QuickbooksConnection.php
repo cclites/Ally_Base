@@ -167,9 +167,9 @@ class QuickbooksConnection extends Model
             return false;
         }
 
-        if (empty($this->shift_service_id)) {
-            return false;
-        }
+//        if (empty($this->shift_service_id)) {
+//            return false;
+//        }
 
         if (empty($this->refund_service_id)) {
             return false;

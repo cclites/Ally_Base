@@ -1,9 +1,11 @@
 <?php
 namespace Tests\Feature;
 
+use App\Billing\ScheduleService;
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
+use App\QuickbooksService;
 use App\Schedule;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
@@ -207,5 +209,38 @@ class ScheduleCreatorTest extends TestCase
         $this->assertTrue($schedules[0]->added_to_past);
         $this->assertFalse($schedules[1]->added_to_past);
         $this->assertFalse($schedules[10]->added_to_past);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_a_quickbooks_service_mapping()
+    {
+        $service = factory(QuickbooksService::class)->create();
+
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+                              ->duration(60)
+                              ->assignments(1, 1)
+                              ->attachQuickbooksService($service->id);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertEquals($service->id, $schedules->first()->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_quickbooks_service_mapping_per_service_breakout_entry()
+    {
+        $service1 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+        $service2 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+        $service3 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+            ->duration(60)
+            ->assignments(1, 1)
+            ->addServices([$service1, $service2, $service3]);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(3, $schedules->first()->services);
+        $this->assertTrue($schedules->first()->services()->where('quickbooks_service_id', $service1['quickbooks_service_id'])->exists());
     }
 }

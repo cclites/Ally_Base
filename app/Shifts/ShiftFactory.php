@@ -105,6 +105,7 @@ class ShiftFactory implements Arrayable
             'client_rate'       => $rates->clientRate(),
             'caregiver_rate'    => $rates->caregiverRate(),
             'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
+            'quickbooks_service_id' => $schedule->quickbooks_service_id,
         ]);
 
         if ($schedule->services->count()) {
