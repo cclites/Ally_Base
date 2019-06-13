@@ -26,9 +26,9 @@
             </b-col>
             <b-col md="2">
                 <business-location-form-group
-                    v-model="filters.businesses"
-                    label="Business"
-                    :allow-all="false"
+                    v-model="filters.business"
+                    label="Office Location"
+                    :allow-all="true"
             />
             </b-col>
             <b-col md="2">
@@ -92,7 +92,6 @@
                 },
                 salespersons: [],
                 allSalespersons: [],
-                businesses: [],
                 stats: {},
                 fields: [
                     {

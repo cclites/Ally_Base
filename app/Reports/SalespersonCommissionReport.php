@@ -36,15 +36,6 @@ class SalespersonCommissionReport extends BusinessResourceReport {
      */
     protected $salespersonId;
 
-    /**
-     * The business ID.
-     *
-     * @var int
-     */
-    protected $businessId;
-
-
-
     public function __construct()
     {
         $this->query = SalesPerson::query();
@@ -77,16 +68,6 @@ class SalespersonCommissionReport extends BusinessResourceReport {
         return $this;
     }
 
-
-    /**
-     * @param $businessId
-     */
-    public function forBusiness($businessId = null)
-    {
-        $this->businessId = $businessId;
-        return $this;
-    }
-
     /**
      * @param $salespersonId
      */
@@ -98,15 +79,11 @@ class SalespersonCommissionReport extends BusinessResourceReport {
 
     protected function results()
     {
+        if (filled($this->salespersonId)) {
+            $this->query->where('id', $this->salespersonId);
+        }
 
-        $detail = $this->query
-                  ->forSalespersonId($this->salespersonId)
-                  ->get();
-
-        return json_encode($detail);
-
+        return $this->query->get();
     }
-
-
 }
 

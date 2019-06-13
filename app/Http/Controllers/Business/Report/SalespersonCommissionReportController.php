@@ -12,6 +12,7 @@ use App\User;
 use App\SalesPerson;
 use App\BusinessChain;
 
+use Illuminate\Support\Facades\Auth;
 use Log;
 
 
@@ -44,10 +45,18 @@ class SalespersonCommissionReportController extends BaseController{
     public function generate(Request $request, SalespersonCommissionReport $report){
 
         if ($request->has('json')){
+            // Validate the user has access to the requested business
+            $businesses = Auth::user()->filterAttachedBusinesses([$request->business]);
+            if (empty($businesses)) {
+                // If empty, show all office locations they are assigned to
+                $businesses = Auth::user()->getBusinessIds();
+            }
 
             //this populates the report
-            $data = $report->forSalespersonId($request->salesperson)
-                           ->rows();
+            $data = $report->forBusinesses($businesses)
+                ->forDates($request->dates['start'], $request->dates['end'])
+                ->forSalespersonId($request->salesperson)
+                ->rows();
 
             Log::info(json_encode($data));
             return response()->json($data);
