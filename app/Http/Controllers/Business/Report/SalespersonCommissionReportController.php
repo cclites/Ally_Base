@@ -59,7 +59,7 @@ class SalespersonCommissionReportController extends BaseController{
                 ->rows();
 
             Log::info(json_encode($data));
-            return response()->json($data);
+            //return response()->json($data);
         }
 
 

@@ -1,12 +1,10 @@
 <?php
 namespace App\Reports;
 
-use App\Business;
-use App\User;
 use App\SalesPerson;
-use App\BusinessChain;
-use App\Clients;
-use App\Contracts\BusinessReportInterface;
+use App\Client;
+use App\Traits\IsUserRole;
+
 
 use Log;
 
@@ -64,9 +62,9 @@ class SalespersonCommissionReport extends BusinessResourceReport {
     {
         $this->startDate = $start;
         $this->endDate = $end;
-
         return $this;
     }
+
 
     /**
      * @param $salespersonId
@@ -82,6 +80,11 @@ class SalespersonCommissionReport extends BusinessResourceReport {
         if (filled($this->salespersonId)) {
             $this->query->where('id', $this->salespersonId);
         }
+
+        $this->query->whereHas('clients', function($q){
+            $q->where('created_at', '>=', $this->startDate);
+        });
+
 
         return $this->query->get();
     }
