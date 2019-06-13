@@ -5,6 +5,9 @@ namespace App;
 use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Client;
+
+use Log;
 
 class SalesPerson extends Model implements BelongsToBusinessesInterface
 {
@@ -17,6 +20,10 @@ class SalesPerson extends Model implements BelongsToBusinessesInterface
         return $this->belongsTo(Business::class);
     }
 
+    public function clients(){
+        return $this->hasMany(Client::class);
+    }
+
     /**
      * Get only the active sales people.
      *
@@ -27,4 +34,10 @@ class SalesPerson extends Model implements BelongsToBusinessesInterface
     {
         return $query->where('active', 1);
     }
+
+    public function fullName(){
+        return $this->firstname . " " . $this->lastname;
+    }
+
+
 }

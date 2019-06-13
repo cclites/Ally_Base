@@ -162,6 +162,7 @@ Route::group([
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('sales-people/{business}', 'Business\SalesPersonController@index')->name('sales-people.index');
+    Route::get('sales-people', 'Business\SalesPersonController@index')->name('sales-people.index');
     Route::post('sales-people', 'Business\SalesPersonController@store')->name('sales-people.store');
     Route::delete('sales-people/{salesPerson}', 'Business\SalesPersonController@destroy')->name('sales-people.destroy');
     Route::put('sales-people/{salesPerson}', 'Business\SalesPersonController@update')->name('sales-people.update');
@@ -297,6 +298,12 @@ Route::group([
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
 
+    Route::get('reports/sales-people-commission', 'Business\Report\SalespersonCommissionReportController@index')->name('reports.sales-people-commission');
+    Route::get('reports/sales-people', 'Business\Report\SalespersonCommissionReportController@salesPeopleForCommissionReport');
+    Route::get('reports/sales-people-commission/generate', 'Business\Report\SalespersonCommissionReportController@generate');
+    Route::get('reports/sales-people-commission/print', 'Business\Report\SalespersonCommissionReportController@print');
+
+
     Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
     Route::post('reports/claims-report', 'Business\ClaimController@data');
     Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
@@ -306,6 +313,7 @@ Route::group([
     Route::post('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources');
     Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
+
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
     Route::get('reports/prospects', 'Business\ReportsController@prospects')->name('reports.prospects');
     Route::get('reports/evv', 'Business\ReportsController@evv')->name('reports.evv');

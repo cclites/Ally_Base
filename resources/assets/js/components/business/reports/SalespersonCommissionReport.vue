@@ -25,17 +25,25 @@
                 </b-row>
             </b-col>
             <b-col md="2">
+                <business-location-form-group
+                    v-model="filters.businesses"
+                    label="Business"
+                    :allow-all="false"
+            />
+            </b-col>
+            <b-col md="2">
                 <b-form-group label="Salesperson">
                     <b-form-select v-model="filters.salesperson" @change="filterItems($event, 'salesperson')">
                         <option value="">All</option>
-                        <option v-for="item in salespersonOptions" :value="item.id">{{ item.name }}</option>
+                        <option v-for="item in allSalespersons" :value="item.value">{{ item.text }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
+
             <b-col md="2">
                 <b-form-group label="&nbsp;">
                     <b-button-group>
-                        <b-button @click="generatePdf()"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                        <b-button @click="generateReport()"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
                         <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
                     </b-button-group>
                 </b-form-group>
@@ -49,7 +57,7 @@
         <div id="salesperson_commission_report" v-else>
             <b-row>
                 <b-col>
-                    <b-table :items="salespersonStats" :fields="fields"></b-table>
+                    <b-table :items="filters.salespersons" :fields="fields"></b-table>
                 </b-col>
             </b-row>
         </div>
@@ -58,16 +66,19 @@
 </template>
 
 <script>
-    import FormatsNumbers from '../../../mixins/FormatsNumbers'
-    export default {
-        props: {
-            salespersonOptions: {
-                type: Array,
-                required: true
-            }
-        },
+    import FormatsNumbers from '../../../mixins/FormatsNumbers';
+    import FormatsDates from '../../../mixins/FormatsDates';
+    import FormatsListData from "../../../mixins/FormatsListData";
+    import BusinessLocationSelect from "../../business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
 
-        mixins: [FormatsNumbers],
+    export default {
+
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
+        mixins: [FormatsNumbers, FormatsDates, FormatsListData],
+
+        props: {
+        },
 
         data () {
             return {
@@ -77,46 +88,44 @@
                         start: moment ().format ('MM/DD/YYYY'),
                         end: moment ().add(30, 'day').format ('MM/DD/YYYY')
                     },
+                    business: '',
                 },
-                salespersonStats: [],
+                salespersons: [],
+                allSalespersons: [],
+                businesses: [],
                 stats: {},
                 fields: [
                     {
-                        key: 'name',
+                        key: 'text',
                         label: 'Salesperson',
                     },
                     {
-                        key: 'hours',
+                        key: 'clients',
                         label: 'Total Number of Clients',
-                        formatter: (val) => this.numberFormat(val)
                     },
                 ],
-                loading: false
+                loading: false,
             }
         },
 
         created () {
-            this.fetchData()
+            //this.fetchData()
         },
 
         methods: {
             filterDates(value, key) {
                 this.filters.dates[key] = value;
-                this.fetchData()
             },
 
             filterItems(value, key) {
                 this.filters[key] = value;
-                this.fetchData();
             },
 
-            async fetchData() {
+            //default load
+            async fetchSalespersons() {
                 this.loading = true;
-                let form = new Form(this.filters);
-                let response = await form.post('/business/reports/projected-billing').catch(err => console.error(err))
-                this.stats = response.data.stats;
-                this.salespersonStats = response.data.clientStats;
-                this.clientTypeStats = response.data.clientTypeStats;
+                let response = await axios.get (`/business/reports/sales-people`);
+                this.allSalespersons = response.data;
                 this.loading = false;
             },
 
@@ -124,21 +133,31 @@
                 return _.startCase(text)
             },
 
-            generatePdf() {
+            async generateReport() {
                 this.filters.print = true;
-                let url = `/business/reports/projected-billing/print?dates[start]=${this.filters.dates.start}` +
+                let url = `/business/reports/sales-people-commission/generate?dates[start]=${this.filters.dates.start}` +
                     `&dates[end]=${this.filters.dates.end}` +
-                    `&caregiver=${this.filters.caregiver}` +
-                    `&client=${this.filters.client}` +
-                    `&clientType=${this.filters.clientType}`;
-                console.log(url);
-                window.location = url;
-            },
+                    `&salesperson=${this.filters.salesperson}` +
+                    `&business=${this.filters.business}` +
+                    `&json=1`;
 
-            print() {
-                $('#salesperson_commission_report').print();
-            }
+                //window.location = url;
+                let response = await axios.get(url);
+
+                console.log(response);
+            },
+        },
+
+        async mounted() {
+            this.loading = true;
+            await this.fetchSalespersons();
+            this.loading = false;
+        },
+
+        watch: {
+
         }
+
     }
 </script>
 

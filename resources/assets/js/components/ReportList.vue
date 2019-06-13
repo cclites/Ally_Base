@@ -470,6 +470,14 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Salesperson Commission',
+                        url: 'reports/sales-people-commission',
+                        description: 'Salesperson Commission Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },
