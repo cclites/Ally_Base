@@ -148,9 +148,6 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
-    Route::post('custom-fields/options/{field}', 'Business\CustomFieldController@storeOptions')->name('custom_fields.options.create');
-    Route::put('custom-fields/options/{field}', 'Business\CustomFieldController@updateOptions')->name('custom_fields.options.update');
-    Route::post('custom-fields/{account}/{id}', 'Business\CustomFieldController@storeValue')->name('custom_fields.value.update');
     Route::resource('custom-fields', 'Business\CustomFieldController');
     Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
@@ -203,8 +200,11 @@ Route::group([
     Route::post('/caregivers/{caregiver}/training-email', 'Business\CaregiverController@trainingEmail');
     Route::resource('caregivers/{caregiver}/restrictions', 'Business\BusinessCaregiverRestrictionController');
     Route::patch('caregivers/{caregiver}/office-locations', 'Business\CaregiverController@updateOfficeLocations');
+    Route::patch('caregivers/{caregiver}/meta', 'Business\CaregiverMetaController@update')->name('caregivers.meta.update');
 
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
+    Route::patch('clients/{client}/meta', 'Business\ClientMetaController@update')->name('clients.meta.update');
+
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
     Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
     Route::put('clients/onboarding/{clientOnboarding}', 'Business\ClientOnboardingController@update')->name('clients.onboarding.update');
@@ -337,6 +337,8 @@ Route::group([
     Route::get('reports/payroll-export', 'Business\Report\BusinessPayrollExportReportController@index')->name('reports.payroll-export');
     Route::get('reports/disaster-plan-report', 'Business\Report\BusinessDisasterPlanReportController@index')->name('reports.disaster-plan');
     Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
+    Route::get('reports/offline-ar-aging', 'Business\Report\BusinessOfflineArAgingReportController@index')->name('reports.offline-ar-aging');
+    Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -438,6 +440,14 @@ Route::group([
     Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
     Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
+
+    /** CHAINS **/
+    Route::get('expiration-types', 'Business\ExpirationTypesController@index');
+
+    /* Offline Invoice AR */
+    Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
+    Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
+
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -467,6 +477,7 @@ Route::group([
     Route::get('chains/{chain}', "Admin\BusinessChainController@show")->name("businesses.chains.show");
     Route::patch('chains/{chain}', "Admin\BusinessChainController@update")->name("businesses.chains.update");
     Route::resource('chains/{chain}/users', 'Admin\OfficeUserController');
+
 
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');

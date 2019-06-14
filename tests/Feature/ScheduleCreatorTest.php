@@ -165,4 +165,47 @@ class ScheduleCreatorTest extends TestCase
         $this->assertEquals('2019-03-06 12:00:00', $results[0]->starts_at->toDateTimeString());
         $this->assertEquals('2019-03-13 12:00:00', $results[1]->starts_at->toDateTimeString());
     }
+
+    /** @test */
+    function creating_a_single_schedule_in_the_past_should_be_flagged_as_such()
+    {
+        $this->scheduleCreator->startsAt(Carbon::now()->subSecond(1))
+            ->duration(60)
+            ->assignments(1, 1);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(1, $schedules);
+        $this->assertTrue($schedules[0]->added_to_past);
+    }
+
+    /** @test */
+    function creating_a_single_schedule_after_the_current_time_is_not_added_to_past()
+    {
+        $this->scheduleCreator->startsAt(Carbon::now()->addSecond(1))
+            ->duration(60)
+            ->assignments(1, 1);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(1, $schedules);
+        $this->assertFalse($schedules[0]->added_to_past);
+    }
+
+    /** @test */
+    function creating_a_recurring_schedule_should_flag_any_past_times()
+    {
+        $this->scheduleCreator->startsAt(Carbon::parse("last monday"))
+                              ->duration(60)
+                              ->assignments(1, 1)
+                              ->interval('weekly', Carbon::today()->addWeeks(10), ['mo']);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(11, $schedules);
+
+        $this->assertTrue($schedules[0]->added_to_past);
+        $this->assertFalse($schedules[1]->added_to_past);
+        $this->assertFalse($schedules[10]->added_to_past);
+    }
 }

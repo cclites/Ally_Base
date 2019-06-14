@@ -143,6 +143,8 @@ class ClaimsController extends BaseController
      */
     public function pay(PayClaimRequest $request, ClientInvoice $invoice)
     {
+        $this->authorize('read', $invoice);
+
         if (empty($invoice->claim)) {
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
         }

@@ -7,6 +7,12 @@
                         header-bg-variant="info"
                 >
                     <b-form inline @submit.prevent="loadItems()">
+                        <business-location-form-group
+                            v-model="businesses"
+                            :label="null"
+                            class="mr-1 mt-1"
+                            :allow-all="true"
+                        />
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -51,9 +57,12 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col lg="12" class="text-right">
+        <b-row class="mb-2">
+            <b-col lg="6">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                <a href="/business/reports/claims-ar-aging" target="_blank">View Aging Report</a>
             </b-col>
         </b-row>
         <loading-card v-if="loaded == 0"></loading-card>
@@ -132,10 +141,16 @@
                     v-model="form.amount"
                     step="0.01"
                     required
-                    :disabled="form.busy"
+                    :disabled="form.busy || payFullBalance"
                 />
                 <input-help :form="form" field="amount" text="" />
             </b-form-group>
+            <label class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" v-model="payFullBalance" @change="updateFullBalance()" />
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Pay Full Balance</span>
+            </label>
+
             <div slot="modal-footer">
                 <b-btn variant="default" @click="cancelPayment()" :disabled="form.busy">Cancel</b-btn>
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
@@ -172,11 +187,13 @@
 </template>
 
 <script>
+    import BusinessLocationFormGroup from '../../components/business/BusinessLocationFormGroup';
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import Constants from '../../mixins/Constants';
 
     export default {
+        components: { BusinessLocationFormGroup },
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -249,6 +266,7 @@
                 clientFilter: '',
                 payers: [],
                 payerFilter: '',
+                businesses: '',
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
@@ -261,6 +279,7 @@
                 busy: false,
                 transmittingId: null,
                 selectedTransmissionMethod: '',
+                payFullBalance: false,
             }
         },
 
@@ -351,6 +370,7 @@
             },
 
             showPaymentModal(invoice) {
+                this.payFullBalance = false;
                 this.selectedInvoice = invoice;
                 this.paymentModal = true;
             },
@@ -384,7 +404,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/claims-ar?json=1&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/claims-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;
@@ -399,6 +419,12 @@
 
             invoiceUrl(invoice, view="") {
                 return `/business/client/invoices/${invoice.id}/${view}`;
+            },
+
+            updateFullBalance() {
+                if (this.payFullBalance) {
+                    this.form.amount = this.selectedInvoice.claim_balance;
+                }
             },
         }
     }
