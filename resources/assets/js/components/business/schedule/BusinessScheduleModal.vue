@@ -3,7 +3,7 @@
         <b-modal id="businessScheduleModal"
                  :title="title"
                  class="modal-fit-more"
-                 size="lg"
+                 size="xl"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
         >
@@ -131,6 +131,7 @@
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
+                                            <th>Quickbooks Mapping</th>
                                             <th class="service-actions"></th>
                                         </tr>
                                         </thead>
@@ -202,10 +203,16 @@
                                                         class="money-input"
                                                 />
                                             </td>
-                                            <td colspan="2">
+                                            <td>
                                                 <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td colspan="2">
+                                                <b-form-select v-model="form.quickbooks_service_id">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
                                             </td>
                                         </tr>
@@ -287,6 +294,12 @@
                                                 <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-select v-model="service.quickbooks_service_id">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td class="service-actions text-nowrap">
@@ -441,6 +454,7 @@
     import ConfirmationModal from "../../modals/ConfirmationModal";
     import ShiftServices from "../../../mixins/ShiftServices";
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
@@ -504,6 +518,12 @@
         },
 
         computed: {
+            ...mapGetters({
+                quickbooksServices: 'quickbooks/services',
+                quickbooksBusiness: 'quickbooks/businessId',
+                quickbooksAuth: 'quickbooks/isAuthorized',
+            }),
+
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -633,6 +653,9 @@
                 this.loadCarePlans(clientId);
                 this.loadClientRates(clientId);
                 this.loadClientPayers(clientId);
+                if (this.selectedClient.business_id) {
+                    this.$store.dispatch('quickbooks/fetchServices', this.selectedClient.business_id);
+                }
             },
 
             changedCaregiver(caregiverId) {
@@ -759,7 +782,8 @@
                             'caregiver_rate': null,
                             'provider_fee': null,
                             'ally_fee': null,
-                        }
+                        },
+                        'quickbooks_service_id': '',
                     });
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
