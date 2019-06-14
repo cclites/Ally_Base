@@ -16,7 +16,7 @@ class OfflineInvoiceArResource extends ClientInvoice
         return array_merge(parent::toArray($request), [
             'client' => $this->resource->client,
             'payments' => $this->resource->payments,
-            'balance' => $this->resource->amount - $this->resource->getAmountPaid(),
+            'balance' => (float) bcsub($this->resource->amount, $this->resource->getAmountPaid(), 2),
         ]);
     }
 }

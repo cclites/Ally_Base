@@ -141,10 +141,16 @@
                     v-model="form.amount"
                     step="0.01"
                     required
-                    :disabled="form.busy"
+                    :disabled="form.busy || payFullBalance"
                 />
                 <input-help :form="form" field="amount" text="" />
             </b-form-group>
+            <label class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" v-model="payFullBalance" @change="updateFullBalance()" />
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Pay Full Balance</span>
+            </label>
+
             <div slot="modal-footer">
                 <b-btn variant="default" @click="cancelPayment()" :disabled="form.busy">Cancel</b-btn>
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
@@ -273,6 +279,7 @@
                 busy: false,
                 transmittingId: null,
                 selectedTransmissionMethod: '',
+                payFullBalance: false,
             }
         },
 
@@ -363,6 +370,7 @@
             },
 
             showPaymentModal(invoice) {
+                this.payFullBalance = false;
                 this.selectedInvoice = invoice;
                 this.paymentModal = true;
             },
@@ -411,6 +419,12 @@
 
             invoiceUrl(invoice, view="") {
                 return `/business/client/invoices/${invoice.id}/${view}`;
+            },
+
+            updateFullBalance() {
+                if (this.payFullBalance) {
+                    this.form.amount = this.selectedInvoice.claim_balance;
+                }
             },
         }
     }
