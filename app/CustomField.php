@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 
-class CustomField extends Model implements BelongsToChainsInterface
+class CustomField extends BaseModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;
 
@@ -89,7 +89,8 @@ class CustomField extends Model implements BelongsToChainsInterface
      */
     public function options()
     {
-        return $this->hasMany(CustomFieldOption::class, 'field_id');
+        return $this->hasMany(CustomFieldOption::class, 'field_id')
+            ->ordered();
     }
 
     /**
