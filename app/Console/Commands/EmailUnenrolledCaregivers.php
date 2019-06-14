@@ -49,7 +49,7 @@ class EmailUnenrolledCaregivers extends Command
         $caregivers = $chain->caregivers()
             ->active()
             ->hasEmail()
-            ->notOnboarded()
+            ->whereNotSetup()
             ->get();
 
         $count = $caregivers->count();
