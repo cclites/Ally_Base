@@ -57,6 +57,7 @@
                         <input-help :form="form" field="notes" text="Enter a note explaining why this adjustment has occurred." />
                     </b-form-group>
                     <b-btn type="submit" :disabled="submitting">Submit</b-btn>
+                    <span class="text-danger warning">DO NOT USE THIS FOR REFUNDS. USE THE CHARGES REPORT AND REFUND FROM THERE.</span>
                 </form>
             </b-col>
         </b-row>
@@ -138,3 +139,11 @@
         },
     }
 </script>
+
+<style>
+  span.warning{
+      padding-left: 12px;
+      font-size: 15px;
+      font-weight: 600;
+  }
+</style>
