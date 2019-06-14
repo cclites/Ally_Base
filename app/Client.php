@@ -30,7 +30,7 @@ use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
-use App\ClientCommunications;
+use App\BusinessCommunications;
 
 /**
  * App\Client
@@ -554,7 +554,7 @@ class Client extends AuditableModel implements
     }
 
     public function clientCommunications(){
-        return hasOne(ClientCommunications::class);
+        return hasOne(BusinessCommunications::class);
     }
 
     ///////////////////////////////////////////

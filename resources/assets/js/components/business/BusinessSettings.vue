@@ -496,7 +496,7 @@
                 <b-tab title="Overtime" href="#overtime">
                     <business-overtime-settings :business="this.business"></business-overtime-settings>
                 </b-tab>
-                <b-tab title="Claims" href="#cliams">
+                <b-tab title="Claims" href="#claims">
                     <b-row>
                         <b-col lg="6">
                             <h4>HHAeXchange Credentials</h4>
@@ -531,6 +531,9 @@
                             </b-btn>
                         </b-col>
                     </b-row>
+                </b-tab>
+                <b-tab title="Communications" href="#communications">
+                    <business-communications-tab :business-id="businessId"></business-communications-tab>
                 </b-tab>
             </b-tabs>
         </b-card>
@@ -583,7 +586,7 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#communications'];
                 } else {
                     return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
                 }

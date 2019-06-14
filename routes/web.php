@@ -270,8 +270,8 @@ Route::group([
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
 
-    Route::get('clients/{client}/communications', 'Business\Clients\ClientCommunicationsController@show');
-    Route::post('clients/{client}/communications', 'Business\Clients\ClientCommunicationsController@create');
+    Route::get('/communications/{businessId}', 'Business\BusinessCommunicationsController@show');
+    Route::post('/communications/{businessId}', 'Business\BusinessCommunicationsController@create');
 
     Route::resource('rate-codes', 'Business\RateCodeController');
 

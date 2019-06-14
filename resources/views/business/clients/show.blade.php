@@ -77,10 +77,6 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
         </li>
-
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#communications" role="tab">Communications</a>
-        </li>
     </ul>
 
     <!-- Smaller device tabs -->
