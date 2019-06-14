@@ -423,7 +423,6 @@
 
             updateFullBalance() {
                 if (this.payFullBalance) {
-                    console.log(this.selectedInvoice.claim_balance);
                     this.form.amount = this.selectedInvoice.claim_balance;
                 }
             },
