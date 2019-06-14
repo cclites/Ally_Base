@@ -1,19 +1,13 @@
 <?php
+
 namespace App\Reports;
 
 use App\SalesPerson;
 use App\Client;
-use App\Traits\IsUserRole;
-
-
 use Carbon\Carbon;
-use Log;
 
-use Illuminate\Http\Request;
-
-
-class SalespersonCommissionReport extends BusinessResourceReport {
-
+class SalespersonCommissionReport extends BaseReport
+{
     /**
      * The begin date.
      *
@@ -35,8 +29,14 @@ class SalespersonCommissionReport extends BusinessResourceReport {
      */
     protected $salespersonId;
 
-    protected $businessId;
+    /**
+     * @var array
+     */
+    protected $businesses = [];
 
+    /**
+     * SalespersonCommissionReport constructor.
+     */
     public function __construct()
     {
         $this->query = SalesPerson::query();
@@ -52,20 +52,17 @@ class SalespersonCommissionReport extends BusinessResourceReport {
         return $this->query;
     }
 
-
-
     /**
      * Filter the results to between two dates.
      *
      * @param string $start
      * @param string $end
+     * @param $timezone
      * @return $this
      */
-    public function forDates($start, $end)
+    public function forDates(string $start, string $end, string $timezone): self
     {
-
-        //format the date
-        $timezone = activeBusiness()->timezone;
+        // Format the date UTC to match the database.
         $startDate = Carbon::parse($start . ' 00:00:00', $timezone)->setTimezone('UTC')->toDateTimeString();
         $endDate = Carbon::parse($end . ' 23:59:59', $timezone)->setTimezone('UTC')->toDateTimeString();
 
@@ -74,54 +71,57 @@ class SalespersonCommissionReport extends BusinessResourceReport {
         return $this;
     }
 
-    public function forBusinessId($id){
-        $this->businessId = $id;
+    /**
+     * Filter by business IDs.
+     *
+     * @param array|null $businessIds
+     * @return SalespersonCommissionReport
+     */
+    public function forBusinesses(array $businessIds = null) : self
+    {
+        $this->businesses = $businessIds ? $businessIds : [];
         return $this;
     }
+
     /**
-     * @param $salespersonId
+     * Filter by sales person.
+     *
+     * @param null $salespersonId
+     * @return $this
      */
-    public function forSalespersonId($salespersonId = null)
+    public function forSalespersonId($salespersonId = null) : self
     {
         $this->salespersonId = $salespersonId;
         return $this;
     }
 
-    protected function results()
+    /**
+     * @return iterable
+     */
+    protected function results(): iterable
     {
-        //get salespeople for business
-        if (filled($this->salespersonId)) {
-            $this->query->where('sales_people.id', $this->salespersonId)
-                 ->whereIn('sales_people.business_id', $this->businessId);
-        }else{
-            $this->query->whereIn('sales_people.business_id', $this->businessId);
-        }
+        // Get all sales people for the requested businesses.
+        $salesPeople = SalesPerson::select(['id', 'firstname', 'lastname'])
+            ->whereIn('business_id', $this->businesses)
+            ->get();
 
-        $salespeople =  $this->query->get();
+        // Get the number of clients matching the salespersonId and date range filters.
+        $clients = Client::select(['sales_person_id', \DB::raw('COUNT(id) as client_count')])
+            ->forBusinesses($this->businesses)
+            ->whereIn('sales_person_id', $this->salespersonId ? [$this->salespersonId] : $salesPeople->pluck('id'))
+            ->whereHas('user', function ($q) {
+                $q->whereBetween('created_at', [$this->startDate, $this->endDate]);
+            })
+            ->groupBy('sales_person_id')
+            ->get();
 
-        //get client counts for each salesperson and append
-        foreach($salespeople as $salesperson){
-
-            $clients = Client::where('sales_person_id', $salesperson->id)
-                               ->whereHas('user', function($q){
-                                   $q->whereBetween('created_at', [$this->startDate, $this->endDate]);
-                               })
-                               ->get()->toArray();
-
-            $salesperson['clientCount'] = count($clients);
-
-        }
-
-        //reduce the amount of information being sent to the view
-        $salespeople = $salespeople->map(function($item){
-                          return [
-                              'text'=>$item->firstname . " " . $item->lastname,
-                              'clients' => $item->clientCount
-                          ];
-                       });
-
-
-        return $salespeople;
+        // Combine the results.
+        return $salesPeople->map(function (SalesPerson $item) use ($clients) {
+            $count = $clients->where('sales_person_id', $item->id)->first()['client_count'];
+            return [
+                'name' => $item->fullname(),
+                'clients' => empty($count) ? 0 : (int) $count,
+            ];
+        });
     }
 }
-

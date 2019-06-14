@@ -9,7 +9,7 @@ use App\Client;
 
 use Log;
 
-class SalesPerson extends Model implements BelongsToBusinessesInterface
+class SalesPerson extends BaseModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 

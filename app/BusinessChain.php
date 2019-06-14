@@ -232,21 +232,4 @@ class BusinessChain extends AuditableModel
             ->get()
             ->pluck('user');
     }
-
-    public function salesPeopleForChain(){
-
-        $businesses = $this->businesses;
-        $salesPeople = collect();
-
-        foreach($businesses as $business){
-
-            $business->load('salesPeople');
-
-            foreach($business->salesPeople as $salesPerson){
-                $salesPeople[] = $salesPerson;
-            }
-        }
-
-        return $salesPeople;
-    }
 }

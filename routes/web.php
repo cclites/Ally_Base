@@ -299,7 +299,7 @@ Route::group([
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
 
     Route::get('reports/sales-people-commission', 'Business\Report\SalespersonCommissionReportController@index')->name('reports.sales-people-commission');
-    Route::get('reports/sales-people', 'Business\Report\SalespersonCommissionReportController@salesPeopleForCommissionReport');
+    Route::get('reports/sales-people-commission/sales-people', 'Business\Report\SalespersonCommissionReportController@salesPeopleDropdown');
     Route::get('reports/sales-people-commission/generate', 'Business\Report\SalespersonCommissionReportController@generate');
     Route::get('reports/sales-people-commission/print', 'Business\Report\SalespersonCommissionReportController@print');
 

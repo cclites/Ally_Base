@@ -43,7 +43,7 @@
             <b-col md="2">
                 <b-form-group label="&nbsp;">
                     <b-button-group>
-                        <b-button @click="generateReport()"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                        <b-button @click="generateReport()" variant="info" :disabled="loading"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
                         <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
                     </b-button-group>
                 </b-form-group>
@@ -54,10 +54,17 @@
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>
         </div>
-        <div id="salesperson_commission_report" v-else>
+        <div v-else>
             <b-row>
                 <b-col>
-                    <b-table :items="salespersons" :fields="fields"></b-table>
+                    <b-table
+                        class="sales-commission-table"
+                        :items="salespersons"
+                        :fields="fields"
+                        sort-by="name"
+                        empty-text="No Results"
+                        :busy="loading"
+                    />
                 </b-col>
             </b-row>
         </div>
@@ -95,12 +102,14 @@
                 stats: {},
                 fields: [
                     {
-                        key: 'text',
+                        key: 'name',
                         label: 'Salesperson',
+                        sortable: true,
                     },
                     {
                         key: 'clients',
                         label: 'Total Number of Clients',
+                        sortable: true,
                     },
                 ],
                 loading: false,
@@ -118,38 +127,39 @@
 
             //default load
             async fetchSalespersons() {
-                this.loading = true;
-                let response = await axios.get (`/business/reports/sales-people`);
+                let response = await axios.get (`/business/reports/sales-people-commission/sales-people`);
                 this.allSalespersons = response.data;
-                this.loading = false;
-            },
-
-            startCase(text) {
-                return _.startCase(text)
             },
 
             async generateReport() {
-                this.filters.print = true;
                 let url = `/business/reports/sales-people-commission/generate?dates[start]=${this.filters.dates.start}` +
                     `&dates[end]=${this.filters.dates.end}` +
                     `&salesperson=${this.filters.salesperson}` +
                     `&business=${this.filters.business}` +
                     `&json=1`;
 
-                let response = await axios.get(url);
-                this.salespersons = response.data;
+                this.loading = true;
+                axios.get(url)
+                    .then( ({ data }) => {
+                        this.salespersons = data;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
 
+            startCase(text) {
+                return _.startCase(text)
             },
 
             print(){
-                $('salesperson_commission_report').print();
+                $('.sales-commission-table').print();
             },
         },
 
         async mounted() {
-            this.loading = true;
             await this.fetchSalespersons();
-            this.loading = false;
         },
     }
 
