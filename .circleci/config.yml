@@ -20,6 +20,7 @@ jobs:
       - checkout
       - run: sudo apt install -y libsqlite3-dev libpng-dev
       - run: sudo docker-php-ext-install bcmath
+
       # Composer
       - restore_cache:
           keys:
@@ -29,6 +30,7 @@ jobs:
           paths:
             - ./vendor
           key: composer-dependencies-{{ checksum "composer.json" }}
+
       # NPM
       - restore_cache:
           keys:
@@ -39,6 +41,9 @@ jobs:
           paths:
             - ./node_modules
 
+      # compile assets properly
+      - run: npm run dev
+
       # run tests_core script
       - run: php scripts/test_core.php
 
@@ -46,6 +51,3 @@ jobs:
       - run:
           name: "Run test suite"
           command: vendor/bin/phpunit --configuration phpunit.xml --stop-on-failure
-
-      # compile assets properly
-      - run: npm run dev
