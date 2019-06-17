@@ -61,9 +61,15 @@ class ScheduleWarningAggregator
 
         /** @var \App\Client $client */
         $client = $this->schedule->client;
+        if (empty($client)) {
+            return;
+        }
 
         /** @var \App\ClientPreferences $preferences */
         $preferences = $client->preferences;
+        if (empty($preferences)) {
+            return;
+        }
 
         if ($preferences->smokes && ! $caregiver->smoking_okay) {
             $mismatches->push('Caregiver is not okay with smoking');

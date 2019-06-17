@@ -58,6 +58,7 @@ class BusinessChainController extends Controller
             'state' => 'string|nullable',
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
+            'calendar_week_start' => 'required|in:0,1,2,3,4,5,6',
         ]);
 
         if ($chain->update($chainData)) {

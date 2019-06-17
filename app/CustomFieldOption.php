@@ -2,10 +2,9 @@
 
 namespace App;
 
-use App\CustomField;
 use Illuminate\Database\Eloquent\Model;
 
-class CustomFieldOption extends Model
+class CustomFieldOption extends BaseModel
 {   
     /**
      * The database table associated with this model
@@ -24,7 +23,12 @@ class CustomFieldOption extends Model
         'value',
         'label',
     ];
-    
+
+    /**
+     * @var string  The column to sort by default when using ordered()
+     */
+    protected $orderedColumn = 'label';
+
     /**
      * The custom model attributes to add to the Eloquent model
      *
@@ -54,6 +58,24 @@ class CustomFieldOption extends Model
         });
     }
 
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+
+    /**
+     * Get the custom dropdown field that this option belongs to
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function field()
+    {
+        return $this->belongsTo(CustomField::class);
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+
     /**
      * Create an alias for the label attribute to simplify usage of custom field options in the front end
      *
@@ -64,13 +86,42 @@ class CustomFieldOption extends Model
         return $this->label;
     }
 
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
+
     /**
-     * Get the custom dropdown field that this option belongs to
+     * Get the value for a list option from it's label.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param string $label
+     * @return string
      */
-    public function field()
+    public static function getValueFromLabel(string $label) : string
     {
-        return $this->belongsTo(CustomField::class);
+        return snake_case(preg_replace('/[^A-Za-z0-9]/', '', $label));
+    }
+
+    /**
+     * Get the IDs of all options that do not have labels present
+     * in the given array.
+     *
+     * @param \App\CustomField $customField
+     * @param array $labels
+     * @return array
+     */
+    public static function findMissingIds(CustomField $customField, array $labels) : array
+    {
+        $values = collect($labels)->map(function ($item) {
+            return self::getValueFromLabel($item);
+        });
+
+        return $customField->options()
+            ->whereNotIn('value', $values)
+            ->pluck('id')
+            ->toArray();
     }
 }

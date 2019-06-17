@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Business;
 
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\SystemNotification;
 
@@ -37,6 +39,7 @@ class SystemNotificationController extends BaseController
      *
      * @param  \App\SystemNotification  $notification
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function show(SystemNotification $notification)
     {
@@ -51,6 +54,7 @@ class SystemNotificationController extends BaseController
      * @param \Illuminate\Http\Request $request
      * @param \App\SystemNotification $notification
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws AuthorizationException
      */
     public function acknowledge(Request $request, SystemNotification $notification)
     {
@@ -61,5 +65,20 @@ class SystemNotificationController extends BaseController
         }
 
         return new ErrorResponse(500, 'Error updating notification.');
+    }
+
+    /**
+     * Mark all unread notifications as acknowledged.
+     *
+     * @param Request $request
+     * @return SuccessResponse
+     */
+    public function acknowledgeAll(Request $request)
+    {
+        auth()->user()->systemNotifications()
+            ->whereNull('acknowledged_at')
+            ->update(['acknowledged_at' => Carbon::now()]);
+
+        return new SuccessResponse('All notifications have been marked as acknowledged.', [], '.');
     }
 }

@@ -100,6 +100,7 @@ class ScheduleEvents implements Responsable
                 'status' => $schedule->status,
                 'shift_status' => $schedule->shift_status,
                 'has_overtime' => $schedule->hasOvertime(),
+                'added_to_past' => $schedule->added_to_past,
             ], $additionalOptions);
         });
     }
@@ -172,6 +173,11 @@ class ScheduleEvents implements Responsable
             // Open shift
             return '#d9c01c';
         }
+
+        if ($schedule->added_to_past) {
+            return '#124aa5';
+        }
+
         return '#1c81d9';
     }
 

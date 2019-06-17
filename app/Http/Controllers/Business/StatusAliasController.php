@@ -50,12 +50,18 @@ class StatusAliasController extends BaseController
      */
     public function store(Request $request)
     {
+        $unique = Rule::unique('status_aliases', 'name')
+            ->where('chain_id', auth()->user()->getChain()->id);
+
+        if ($request->type) {
+            $unique->where('type', $request->type);
+        }
+
         $data = $request->validate([
             'name' => [
                 'required',
                 'max:255',
-                Rule::unique('status_aliases', 'name')
-                    ->where('chain_id', auth()->user()->getChain()->id)
+                $unique
             ],
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
@@ -86,6 +92,7 @@ class StatusAliasController extends BaseController
                 'max:255',
                 Rule::unique('status_aliases', 'name')
                     ->where('chain_id', auth()->user()->getChain()->id)
+                    ->where('type', $request->type)
                     ->ignore($statusAlias->id)
             ],
             'active' => 'required|boolean',

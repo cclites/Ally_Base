@@ -40,6 +40,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="OVERTIME"> <span class="badge badge-primary overtime" v-b-popover.hover="`Filter scheduled shifts that are marked as overtime or holiday pay. ${statusHelp}`">HOL / OT</span>
                         </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="ADDED_TO_PAST"> <span class="badge badge-primary added_to_past" v-b-popover.hover="`Visit was added after the start date. This visit will not be copied into the Shift History and is not included in billing. ${statusHelp}`">Added to Past</span>
+                        </label>
                     </b-col>
                 </b-row>
             </b-col>
@@ -240,7 +243,11 @@
                 default() {
                     return 'timelineWeek';
                 }
-            }
+            },
+            'weekStart': {
+                type: String,
+                default: "1",
+            },
         },
 
         data() {
@@ -379,6 +386,7 @@
                             click: this.printCalendar
                         }
                     },
+                    firstDay: this.weekStart,
                 }
             },
 
@@ -421,7 +429,8 @@
                                 || this.statusFilters.includes(event.shift_status)
                                 // Open shifts are calculated from the cg canceled status or a missing cg assignment
                                 || (this.statusFilters.includes('OPEN') && (event.caregiver_id == 0 || event.status === 'CAREGIVER_CANCELED'))
-                                || (this.statusFilters.includes('OVERTIME') && event.has_overtime);
+                                || (this.statusFilters.includes('OVERTIME') && event.has_overtime)
+                                || (this.statusFilters.includes('ADDED_TO_PAST') && event.added_to_past == true);
                     });
                 }
 
@@ -1099,6 +1108,7 @@
     .badge.missed_clock_in { background-color: #E468B2; }
     .badge.no_show { background-color: #63cbc7; }
     .badge.overtime { background-color: #fc4b6c; }
+    .badge.added_to_past { background-color: #124aa5; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */

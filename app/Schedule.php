@@ -8,6 +8,7 @@ use App\Exceptions\MissingTimezoneException;
 use App\Data\ScheduledRates;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
+use App\Shifts\ScheduleConverter;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +41,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
+ * @property bool $added_to_past
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
@@ -105,6 +107,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         'caregiver_rate' => 'float',
         'client_rate' => 'float',
         'provider_fee' => 'float',
+        'added_to_past' => 'boolean',
     ];
 
     /**
@@ -201,6 +204,31 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+    /**
+     * Get whether of not the schedule will be converted by
+     * the schedule converter CRON.
+     *
+     * @return bool
+     * @throws MissingTimezoneException
+     */
+    public function getWillBeConvertedAttribute()
+    {
+        // Note: Logic here is reflected in the ScheduleConverter class.
+        if (! in_array($this->status, ScheduleConverter::$convertibleStatuses)) {
+            return false;
+        }
+
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
+        $start = Carbon::now($this->getTimezone())->startOfWeek();
+        if (Carbon::now()->dayOfWeek === Carbon::MONDAY) {
+            // If monday morning, still use last week
+            $start->subWeek();
+        }
+
+        return $this->starts_at->greaterThanOrEqualTo($start);
+    }
 
     public function getNotesAttribute()
     {
@@ -607,7 +635,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 $services = $services->where('payer_id', $payer_id);
             }
 
-            return $services->sum('duration');
+            return $services->reduce(function ($sum, $service) {
+                return add($sum, floatval($service->duration));
+            }, 0);
         } else {
             return floatval(0);
         }

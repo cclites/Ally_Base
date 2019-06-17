@@ -223,6 +223,9 @@ Vue.component('business-payer-rates-table', require('./components/business/Payer
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
 Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
+Vue.component('business-offline-invoice-ar', require('./components/business/BusinessOfflineInvoiceAr'));
+Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
+Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
@@ -352,6 +355,8 @@ Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeMana
 Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
+
+Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ExpirationTypesAutocomplete"));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

@@ -39,7 +39,7 @@ class ScheduleConverter
      *
      * @var array
      */
-    protected $convertibleStatuses = [Schedule::OK, Schedule::ATTENTION_REQUIRED];
+    public static $convertibleStatuses = [Schedule::OK, Schedule::ATTENTION_REQUIRED];
     
     public function __construct(Business $business, ScheduleAggregator $aggregator = null)
     {
@@ -55,6 +55,8 @@ class ScheduleConverter
      */
     public function convertAllThisWeek()
     {
+        // Note: A change in logic here will need to be reflected in the
+        // will_be_converted attribute of the Schedule model.
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
         $start = Carbon::now($this->timezone)->startOfWeek();
@@ -79,7 +81,7 @@ class ScheduleConverter
     {
         $shifts = [];
         $schedules = $this->aggregator->where('business_id', $this->business->id)
-                                      ->onlyStatus($this->convertibleStatuses)
+                                      ->onlyStatus(self::$convertibleStatuses)
                                       ->getSchedulesStartingBetween($start, $end);
 
         $this->output("Converting schedules between {$start->toDateTimeString()} and {$end->toDateTimeString()}: ");

@@ -34,6 +34,7 @@
                                 <business-location-form-group v-model="form.business_id"
                                                               :form="form"
                                                               field="business_id"
+                                                              name="business_id"
                                                               help-text="">
                                 </business-location-form-group>
                             </b-col>
@@ -58,11 +59,7 @@
                             <b-col lg="2">
                                 <b-form-group label="Client Type">
                                     <b-form-select v-model="form.client_type" class="mb-1" name="client_type">
-                                        <option value="">All</option>
-                                        <option value="private_pay">Private Pay</option>
-                                        <option value="LTCI">LTCI</option>
-                                        <option value="medicaid">MedicAid</option>
-                                        <option value="VA">VA</option>
+                                        <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                                     </b-form-select>
                                 </b-form-group>
                             </b-col>
@@ -112,11 +109,12 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup},
 
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, Constants],
 
         props: ['clients', 'caregivers', 'token'],
 
@@ -164,7 +162,7 @@
                     case 'holiday':
                         return 'HOL';
                 }
-            }
+            },
         }
     }
 </script>

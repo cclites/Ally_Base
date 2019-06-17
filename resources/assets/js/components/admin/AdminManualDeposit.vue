@@ -50,6 +50,13 @@
                             <span class="custom-control-description">Adjustment</span>
                         </label>
                     </div>
+                    <b-form-group label="" label-for="amount">
+                        <b-form-radio-group v-model="form.process">
+                            <b-radio value="1">Process Immediately</b-radio>
+                            <b-radio value="0">Create Invoice to Aggregate</b-radio>
+                        </b-form-radio-group>
+                        <input-help :form="form" field="process" text="" />
+                    </b-form-group>
                     <b-form-group label="Notes" label-for="notes">
                         <b-textarea id="notes"
                                     :rows="3"
@@ -97,6 +104,7 @@
                     'amount': 0,
                     'adjustment': true,
                     'notes': "",
+                    process: 1,
                 });
             },
 

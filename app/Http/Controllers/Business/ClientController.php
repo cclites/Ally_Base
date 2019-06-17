@@ -431,7 +431,7 @@ class ClientController extends BaseController
     {
         $client->update(['training_email_sent_at' => Carbon::now()]);
 
-        $client->notify(new TrainingEmail($client));
+        $client->notify(new TrainingEmail());
 
         // Use the reload page redirect to update the timestamp
         return new SuccessResponse('A training email was dispatched to the Client.', null, '.');

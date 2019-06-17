@@ -4,6 +4,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Claims\HhaClaimTransmitter;
+use App\Billing\Claims\ManualClaimTransmitter;
 use App\Billing\Claims\TellusClaimTransmitter;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
@@ -159,7 +160,7 @@ class Claim extends AuditableModel
         if (empty($claim)) {
             $claim = Claim::create([
                 'client_invoice_id' => $invoice->id,
-                'amount' => $invoice->amount,
+                'amount' => $invoice->getAmount(),
                 'status' => ClaimStatus::CREATED(),
             ]);
 
@@ -184,6 +185,13 @@ class Claim extends AuditableModel
                 break;
             case ClaimService::TELLUS():
                 return new TellusClaimTransmitter();
+                break;
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
+                return new ManualClaimTransmitter();
                 break;
             default:
                 throw new ClaimTransmissionException('Claim service not supported.');

@@ -2,6 +2,7 @@
 namespace Tests\Feature;
 
 use App\Address;
+use App\Billing\ClientRate;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -17,9 +18,24 @@ class ClockInTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @var Business
+     */
     public $business;
+
+    /**
+     * @var Client
+     */
     public $client;
+
+    /**
+     * @var Caregiver
+     */
     public $caregiver;
+
+    /**
+     * @var Schedule
+     */
     public $schedule;
 
     public function setUp()
@@ -139,5 +155,32 @@ class ClockInTest extends TestCase
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertTrue($shift->checked_in_verified);
+    }
+
+    /** @test */
+    function if_a_caregiver_with_only_fixed_rates_assigned_clocks_in_without_a_schedule_it_should_mark_the_shift_as_fixed()
+    {
+        ClientRate::whereRaw(1)->delete();
+
+        $rate = factory(ClientRate::class)->create([
+            'effective_start' => Carbon::yesterday()->format('Y-m-d'),
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+            'caregiver_hourly_rate' => 0.00,
+            'caregiver_fixed_rate' => 50.00,
+            'client_hourly_rate' => 0.00,
+            'client_fixed_rate' => 60.00,
+            'payer_id' => null,
+            'service_id' => null,
+        ]);
+
+        $this->assertCount(1, ClientRate::all());
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->clockInWithoutSchedule($this->client);
+
+        $this->assertTrue($shift->fixed_rates);
+        $this->assertEquals(50, $shift->caregiver_rate);
+        $this->assertEquals(60, $shift->client_rate);
     }
 }

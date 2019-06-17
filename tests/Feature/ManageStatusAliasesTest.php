@@ -80,9 +80,10 @@ class ManageStatusAliasesTest extends TestCase
         $alias = factory(StatusAlias::class)->create([
             'name' => 'Test',
             'chain_id' => $this->chain->id,
+            'type' => 'client',
         ]);
 
-        $data = factory(StatusAlias::class)->raw(['name' => $alias->name]);
+        $data = factory(StatusAlias::class)->raw(['name' => $alias->name, 'type' => 'client']);
         $this->postJson(route('business.status-aliases.store'), $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
@@ -105,10 +106,12 @@ class ManageStatusAliasesTest extends TestCase
         $alias1 = factory(StatusAlias::class)->create([
             'name' => 'Test',
             'chain_id' => $this->chain->id,
+            'type' => 'client',
         ]);
         $alias2 = factory(StatusAlias::class)->create([
             'name' => 'Anything Else',
             'chain_id' => $this->chain->id,
+            'type' => 'client',
         ]);
 
         $alias2->name = 'Test';
@@ -122,6 +125,29 @@ class ManageStatusAliasesTest extends TestCase
         $this->patchJson(route('business.status-aliases.update', ['status_alias' => $alias2]), $alias2->toArray())
             ->assertStatus(200);
         $this->assertEquals('Test', $alias2->fresh()->name);
+    }
+
+    /** @test */
+    function creating_aliases_restricts_unique_names_per_alias_type()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $alias = factory(StatusAlias::class)->create([
+            'name' => 'Test',
+            'chain_id' => $this->chain->id,
+            'type' => 'client',
+        ]);
+
+        $data = factory(StatusAlias::class)->raw(['name' => $alias->name, 'type' => 'client']);
+        $this->postJson(route('business.status-aliases.store'), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+        $this->assertCount(1, $this->chain->fresh()->statusAliases);
+
+        $alias->update(['type' => 'caregiver']);
+        $this->postJson(route('business.status-aliases.store'), $data)
+            ->assertStatus(200);
+        $this->assertCount(2, $this->chain->fresh()->statusAliases);
     }
 
     /** @test */

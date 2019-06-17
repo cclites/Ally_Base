@@ -70,7 +70,7 @@
                             <b-select v-model="item.service_id" size="sm" @change="(e) => onChangeService(e, item)">
                                 <option :value="null">(All)</option>
                                 <option v-for="service in services" :value="service.id" :key="service.id">
-                                    <template v-if="service.code">{{ service.code }} - </template>{{ service.name }}
+                                    {{ service.name }}<template v-if="service.code"> : {{ service.code }}  </template>
                                 </option>
                             </b-select>
                         </td>

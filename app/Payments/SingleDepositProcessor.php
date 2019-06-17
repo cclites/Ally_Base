@@ -43,23 +43,31 @@ class SingleDepositProcessor
                 'success' => $transaction->success,
             ]);
 
-            $invoice = CaregiverInvoice::create([
-                'name' => CaregiverInvoice::getNextName($caregiver->id),
-                'caregiver_id' => $caregiver->id,
-            ]);
-            $invoice->addItem(new CaregiverInvoiceItem([
-                'group' => 'Adjustments',
-                'name' => 'Manual Adjustment',
-                'units' => 1,
-                'rate' => $amount,
-                'total' => $amount,
-                'date' => new Carbon(),
-                'notes' => str_limit($notes, 250),
-            ]));
+            $invoice = self::generateCaregiverAdjustmentInvoice($caregiver, $amount, $notes);
             $invoice->addDeposit($deposit, $amount);
         }
 
         return $transaction;
+    }
+
+    public static function generateCaregiverAdjustmentInvoice(Caregiver $caregiver, $amount, $notes = null) : CaregiverInvoice
+    {
+        $invoice = CaregiverInvoice::create([
+            'name' => CaregiverInvoice::getNextName($caregiver->id),
+            'caregiver_id' => $caregiver->id,
+        ]);
+
+        $invoice->addItem(new CaregiverInvoiceItem([
+            'group' => 'Adjustments',
+            'name' => 'Manual Adjustment',
+            'units' => 1,
+            'rate' => $amount,
+            'total' => $amount,
+            'date' => new Carbon(),
+            'notes' => str_limit($notes, 250),
+        ]));
+
+        return $invoice;
     }
 
     public static function depositBusiness(Business $business, $amount, $adjustment = false, $notes = null)
@@ -76,26 +84,34 @@ class SingleDepositProcessor
                 'success' => $transaction->success,
             ]);
 
-            $invoice = BusinessInvoice::create([
-                'name' => BusinessInvoice::getNextName($business->id),
-                'business_id' => $business->id,
-            ]);
-            $invoice->addItem(new BusinessInvoiceItem([
-                'group' => 'Adjustments',
-                'name' => 'Manual Adjustment',
-                'units' => 1,
-                'client_rate' => 0,
-                'caregiver_rate' => 0,
-                'ally_rate' => 0,
-                'rate' => $amount,
-                'total' => $amount,
-                'date' => new Carbon(),
-                'notes' => str_limit($notes, 250),
-            ]));
+            $invoice = self::generateBusinessAdjustmentInvoice($business, $amount, $notes);
             $invoice->addDeposit($deposit, $amount);
         }
 
         return $transaction;
+    }
+
+    public static function generateBusinessAdjustmentInvoice(Business $business, $amount, $notes = null) : BusinessInvoice
+    {
+        $invoice = BusinessInvoice::create([
+            'name' => BusinessInvoice::getNextName($business->id),
+            'business_id' => $business->id,
+        ]);
+
+        $invoice->addItem(new BusinessInvoiceItem([
+            'group' => 'Adjustments',
+            'name' => 'Manual Adjustment',
+            'units' => 1,
+            'client_rate' => 0,
+            'caregiver_rate' => 0,
+            'ally_rate' => 0,
+            'rate' => $amount,
+            'total' => $amount,
+            'date' => new Carbon(),
+            'notes' => str_limit($notes, 250),
+        ]));
+
+        return $invoice;
     }
 
     protected static function handleTransaction(BankAccount $account, $amount)

@@ -83,12 +83,12 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Units" label-class="required">
                                 <b-form-input type="number" step="any" v-model="form.units" :disabled="form.period == 'specific_days'" />
                             </b-form-group>
                         </b-col>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Unit Type" label-class="required">
                                 <b-form-select v-model="form.unit_type" class="mr-1 mb-1">
                                     <option value="15m">15 Minutes</option>
@@ -97,7 +97,7 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Period" label-class="required">
                                 <b-form-select v-model="form.period" class="mr-1 mb-1">
                                     <option value="daily">Daily</option>
@@ -106,6 +106,17 @@
                                     <option value="term">Term</option>
                                     <option value="specific_days">Specific Days of Week</option>
                                 </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="# of Occurrences">
+                                <b-form-input
+                                    type="number"
+                                    step="any"
+                                    min="1"
+                                    v-model="form.occurrences"
+                                    :disabled="['specific_days', 'term'].includes(form.period)"
+                                />
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -250,7 +261,8 @@
                     }
                 ],
                 form: this.makeForm(this.auth),
-                loading: false
+                loading: false,
+                calculatingOccurrences: false,
             }
         },
 
@@ -274,7 +286,79 @@
             },
         },
 
+        watch: {
+            'form.period'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.effective_end'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.effective_start'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.occurrences'(newValue, oldValue) {
+                if (this.calculatingOccurrences) {
+                    return;
+                }
+                this.calculateEndDateFromOccurrences();
+            },
+        },
         methods: {
+            setOccurrences() {
+                this.calculatingOccurrences = true;
+                this.form.occurrences = this.getOccurrencesFromEndDate();
+                this.$nextTick(() => {
+                    this.calculatingOccurrences = false;
+                });
+            },
+
+            getOccurrencesFromEndDate() {
+                if (! ['daily', 'weekly', 'monthly'].includes(this.form.period)) {
+                    return '';
+                }
+
+                let start = moment(this.form.effective_start);
+                let end = moment(this.form.effective_end);
+
+                let between = moment.duration(end.diff(start));
+
+                switch (this.form.period)
+                {
+                    case 'daily':
+                        return Math.ceil(between.as('days'));
+                    case 'weekly':
+                        return Math.ceil(between.as('weeks'));
+                    case 'monthly':
+                        return Math.ceil(between.as('months'));
+                    default:
+                        return;
+                }
+            },
+
+            calculateEndDateFromOccurrences() {
+                if (! this.form.effective_start || ! this.form.occurrences) {
+                    return;
+                }
+
+                let endDate = moment(this.form.effective_start);
+                switch (this.form.period)
+                {
+                    case 'daily':
+                        endDate.add(this.form.occurrences, 'days');
+                        break;
+                    case 'weekly':
+                        endDate.add(this.form.occurrences, 'weeks');
+                        break;
+                    case 'monthly':
+                        endDate.add(this.form.occurrences, 'months');
+                        break;
+                    default:
+                        return;
+                }
+                
+                this.form.effective_end = endDate.format('MM/DD/YYYY');
+            },
+
             authSaved(data) {
                 let item = this.items.find(x => x.id === data.id);
                 if (item) {
@@ -286,11 +370,13 @@
             addAuth() {
                 this.auth = {};
                 this.form = this.makeForm(this.auth);
+                this.setOccurrences();
                 this.showAuthModal = true;
             },
             editAuth(id) {
                 this.auth = this.items.find(x => x.id == id);
                 this.form = this.makeForm(this.auth);
+                this.setOccurrences();
                 this.showAuthModal = true;
             },
             deleteAuth(id) {
@@ -317,6 +403,7 @@
                     units: defaults.units || 0,
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
+                    occurrences: '',
                     notes: defaults.notes || "",
                     sunday: defaults.sunday || 0,
                     monday: defaults.monday || 0,

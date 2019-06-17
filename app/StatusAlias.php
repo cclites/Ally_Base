@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * \App\StatusAlias
  *
+ * @property int $id
+ * @property int $chain_id
+ * @property string $type
+ * @property string $name
+ * @property int $active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\BusinessChain $businessChain
  * @method static \Illuminate\Database\Eloquent\Builder|\App\StatusAlias forAuthorizedChain(\App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\StatusAlias forCaregivers()

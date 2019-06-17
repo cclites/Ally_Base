@@ -143,6 +143,16 @@ class BusinessChain extends AuditableModel
             ->ordered();
     }
 
+    /**
+     * Get the expiration types relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function expirationTypes()
+    {
+        return $this->hasMany(ExpirationType::class, 'chain_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

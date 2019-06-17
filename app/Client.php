@@ -195,6 +195,39 @@ use App\Traits\CanHaveEmptyUsername;
  * @property-read \App\Billing\ClientPayer $primaryPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
+ * @property string|null $hic
+ * @property string|null $travel_directions
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property string|null $disaster_code_plan
+ * @property string|null $disaster_planning
+ * @property string|null $caregiver_1099
+ * @property string|null $discharge_reason
+ * @property string|null $discharge_condition
+ * @property string|null $discharge_goals_eval
+ * @property string|null $discharge_disposition
+ * @property string|null $discharge_internal_notes
+ * @property int|null $sales_person_id
+ * @property int|null $quickbooks_customer_id
+ * @property-read \App\Address $billingAddress
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientContact[] $contacts
+ * @property-read \App\DeactivationReason $deactivationReason
+ * @property-read mixed $deactivation_reason_id
+ * @property-read mixed $last_service_date
+ * @property-read mixed $reactivation_date
+ * @property-read mixed $setup_status
+ * @property-read string $setup_url
+ * @property-read mixed $status_alias_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read \App\QuickbooksCustomer|null $quickbooksCustomer
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[] $serviceAuthorizations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client doesntHaveEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forChain($chainId)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client hasEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client query()
  */
 class Client extends AuditableModel implements
     UserRole,
@@ -464,6 +497,9 @@ class Client extends AuditableModel implements
             ->latest();
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function payers()
     {
         return $this->hasMany(ClientPayer::class, 'client_id')
@@ -552,9 +588,9 @@ class Client extends AuditableModel implements
     /**
      * Get the client timezone (currently retrieved from the business record)
      *
-     * @return mixed
+     * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
         return Timezone::getTimezone($this->business_id);
     }

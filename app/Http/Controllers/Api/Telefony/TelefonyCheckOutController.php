@@ -2,11 +2,9 @@
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Activity;
-use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
 use App\Shifts\ClockOut;
 use App\Shift;
-use App\ShiftIssue;
 use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckOutController extends BaseVoiceController
@@ -40,6 +38,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Check in caregiver if identity confirmed by pressing 1.
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function checkOut(Shift $shift)
     {
@@ -47,7 +47,7 @@ class TelefonyCheckOutController extends BaseVoiceController
             case 0:
                 return $this->mainMenuResponse();
             case 2:
-                return $this->checkForInjuryResponse($shift);
+                return $this->checkForMileageResponse($shift);
             case 3:
                 return $this->enterPhoneNumberDigits();
         }
@@ -114,48 +114,48 @@ class TelefonyCheckOutController extends BaseVoiceController
         return $this->telefony->response();
     }
 
-    /**
-     * Ask if there were any injuries or issues
-     */
-    public function checkForInjuryResponse(Shift $shift) {
-        $gather = $this->telefony->gather([
-            'timeout' => 5,
-            'numDigits' => 1,
-            'action' => route('telefony.check-out.check-for-injury', [$shift]),
-        ]);
-        $this->telefony->say(
-            'Were you injured on your shift? Press 1 if there were no injuries. Press 2 if you suffered an injury or unusual circumstances.',
-            $gather
-        );
-
-        // Redirect loop if nothing is entered
-        $this->telefony->redirect(
-            route('telefony.check-out.check-for-injury', [$shift])
-        );
-
-        return $this->telefony->response();
-    }
-
-    /**
-     * Receive the injury response
-     */
-    public function checkForInjuryAction(Shift $shift) {
-        switch ($this->request->input('Digits')) {
-            case 1:
-                return $this->checkForMileageResponse($shift);
-            case 2:
-                $issue = new ShiftIssue();
-                $issue->caregiver_injury = true;
-                $issue->comments = 'Injury recorded via Telephony System';
-                $shift->issues()->save($issue);
-
-                $this->telefony->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
-                $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
-                return $this->telefony->response();
-        }
-
-        return $this->checkForInjuryResponse($shift);
-    }
+//    /**
+//     * Ask if there were any injuries or issues
+//     */
+//    public function checkForInjuryResponse(Shift $shift) {
+//        $gather = $this->telefony->gather([
+//            'timeout' => 5,
+//            'numDigits' => 1,
+//            'action' => route('telefony.check-out.check-for-injury', [$shift]),
+//        ]);
+//        $this->telefony->say(
+//            'Were you injured on your shift? Press 1 if there were no injuries. Press 2 if you suffered an injury or unusual circumstances.',
+//            $gather
+//        );
+//
+//        // Redirect loop if nothing is entered
+//        $this->telefony->redirect(
+//            route('telefony.check-out.check-for-injury', [$shift])
+//        );
+//
+//        return $this->telefony->response();
+//    }
+//
+//    /**
+//     * Receive the injury response
+//     */
+//    public function checkForInjuryAction(Shift $shift) {
+//        switch ($this->request->input('Digits')) {
+//            case 1:
+//                return $this->checkForMileageResponse($shift);
+//            case 2:
+//                $issue = new ShiftIssue();
+//                $issue->caregiver_injury = true;
+//                $issue->comments = 'Injury recorded via Telephony System';
+//                $shift->issues()->save($issue);
+//
+//                $this->telefony->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
+//                $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
+//                return $this->telefony->response();
+//        }
+//
+//        return $this->checkForInjuryResponse($shift);
+//    }
 
     /**
      * Ask user if they want to enter mileage.
@@ -239,6 +239,14 @@ class TelefonyCheckOutController extends BaseVoiceController
     public function confirmMileage(Shift $shift) {
         $mileage = $this->request->input('Digits');
 
+        if (! is_numeric($mileage)) {
+            // Redirect back if empty or invalid entry is entered
+            $this->telefony->redirect(
+                route('telefony.check-out.check-for-mileage', [$shift])
+            );
+            return $this->telefony->response();
+        }
+
         $gather = $this->telefony->gather([
             'timeout' => 10,
             'numDigits' => 1,
@@ -259,11 +267,15 @@ class TelefonyCheckOutController extends BaseVoiceController
      * Save the mileage data.
      *
      * @param \App\Shift $shift
-     * @param int $mileage
+     * @param string $mileage
      * @return mixed
      */
-    public function recordMileage(Shift $shift, int $mileage)
+    public function recordMileage(Shift $shift, string $mileage)
     {
+        if (! is_numeric($mileage)) {
+            $mileage = 0;
+        }
+
         if ($this->request->input('Digits') == 1) {
             $shift->update(['mileage' => $mileage]);
             $this->telefony->say(self::MileageEntrySuccess);
@@ -276,6 +288,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Ask for activity codes
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function checkForActivitiesResponse(Shift $shift) {
         $gather = $this->telefony->gather([
@@ -299,6 +313,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Read out activity codes
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function sayAllActivities(Shift $shift) {
         $gather = $this->telefony->gather([
@@ -334,6 +350,8 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Confirm an entered activity code
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function confirmActivity(Shift $shift) {
         $code = $this->request->input('Digits');
@@ -366,6 +384,9 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Record an activity after confirmation
+     * @param \App\Shift $shift
+     * @param \App\Activity $activity
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function recordActivity(Shift $shift, Activity $activity) {
 
@@ -381,6 +402,9 @@ class TelefonyCheckOutController extends BaseVoiceController
 
     /**
      * Complete the check out
+     * @param \App\Shift $shift
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     * @throws TelefonyMessageException
      */
     public function finalizeCheckOut(Shift $shift) {
         // If not private pay, one ADL is required

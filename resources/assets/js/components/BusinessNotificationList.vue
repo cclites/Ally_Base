@@ -4,6 +4,11 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
+        <div class="d-flex mb-2">
+            <div class="ml-auto">
+                <b-button variant="primary" @click="acknowledgeAll()">Acknowledge All Notifications</b-button>
+            </div>
+        </div>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -111,7 +116,15 @@
 
             formatType(str) {
                 return str.replace("App\\", "");
-            }
+            },
+
+            acknowledgeAll() {
+                let form = new Form({});
+                form.post(`notifications/acknowledge-all`)
+                    .then(() => {
+                    })
+                    .catch(() => {});
+            },
         }
     }
 </script>

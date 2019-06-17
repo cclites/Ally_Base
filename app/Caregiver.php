@@ -153,6 +153,11 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver query()
+ * @property string|null $ethnicity
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver doesntHaveEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver hasEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver notOnboarded()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver onboarded()
  */
 class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
     HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
@@ -282,7 +287,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 
     public function licenses()
     {
-        return $this->hasMany(CaregiverLicense::class);
+        return $this->hasMany(CaregiverLicense::class)
+                    ->orderBy("expires_at", 'ASC');
     }
 
     public function payments()
@@ -616,7 +622,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function ensureBusinessRelationship(Business $business) : bool
     {
-        if ($this->businesses()->get()->contains('id', $business->id)) {
+        if ($this->businesses()->where('business_id', $business->id)->exists()) {
             return true;
         }
 
@@ -643,6 +649,21 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
+
+    /**
+     * Get only the users who have not completed
+     * the account setup wizard.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereNotSetup($query)
+    {
+        return $query->whereHas('user', function ($q) {
+            $q->where('setup_status', '<>', self::SETUP_ADDED_PAYMENT)
+                ->orWhereNull('setup_status');
+        });
+    }
 
     /**
      * Get the date of the last shift between the Caregiver and
@@ -722,5 +743,25 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         $builder->whereHas('businessChains', function($q) use ($chains) {
             $q->whereIn('chain_id', $chains);
         });
+    }
+
+    /**
+     * A query scope for filtering onboarded caregivers
+     *
+     * @param Builder $builder
+     */
+    public function scopeOnboarded(Builder $builder)
+    {
+        $builder->whereNotNull('onboarded')->orHas('shifts');
+    }
+
+    /**
+     * A query scope for filtering caregivers who have not been onboarded
+     *
+     * @param Builder $builder
+     */
+    public function scopeNotOnboarded(Builder $builder)
+    {
+        $builder->whereNull('onboarded')->doesntHave('shifts');
     }
 }

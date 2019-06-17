@@ -101,6 +101,7 @@ class DepositsController extends Controller
             'amount' => 'required|numeric|min:0.1',
             'adjustment' => 'nullable|boolean',
             'notes' => 'nullable|max:1024',
+            'process' => 'required|boolean',
         ]);
 
         $amount = (float) $request->amount;
@@ -110,17 +111,29 @@ class DepositsController extends Controller
 
         if ($request->caregiver_id) {
             $caregiver = Caregiver::findOrFail($request->caregiver_id);
-            if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
-            $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
+
+            if ($request->process) {
+                if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
+                $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
+            } else {
+                $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice($caregiver, $amount, $request->notes);
+            }
         }
         else if ($request->business_id) {
             $business = Business::findOrFail($request->business_id);
-            if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
-            $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
+
+            if ($request->process) {
+                if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
+                $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
+            } else {
+                $invoice = SingleDepositProcessor::generateBusinessAdjustmentInvoice($business, $amount, $request->notes);
+            }
         }
 
-        if ($transaction) {
+        if (isset($transaction) && $transaction) {
             return new SuccessResponse('Transaction processed for $' . $amount);
+        } else if (isset($invoice) && $invoice) {
+            return new SuccessResponse('Invoice generated for $' . $amount);
         }
         return new ErrorResponse(400, 'Transaction failure');
     }

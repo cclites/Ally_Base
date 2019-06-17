@@ -121,6 +121,11 @@ class CronDailyNotifications extends Command
                 continue;
             }
 
+            if (!  $license->caregiver->active) {
+                // skip inactive caregivers
+                continue;
+            }
+
             // notify the Caregiver that owns the license
             \Notification::send($license->caregiver->user, new CertificationExpiring($license));
 
@@ -152,6 +157,11 @@ class CronDailyNotifications extends Command
 
         foreach ($licenses as $license) {
             if ($triggered->contains($license->id)) {
+                continue;
+            }
+
+            if (!  $license->caregiver->active) {
+                // skip inactive caregivers
                 continue;
             }
 

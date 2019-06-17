@@ -369,13 +369,16 @@ class ScheduleCreator
 
         try {
             foreach ($occurrences as $date) {
+                 $isPast = Carbon::parse($date->format('Y-m-d H:i:s'))->isPast();
+
                  $schedule = Schedule::create(
                     array_merge(
                         $this->data,
                         [
-                            'starts_at' => $date->format('Y-m-d H:i:s'), // keep in business timezone
-                            'weekday'   => $date->format('w'),
-                            'group_id'  => $group->id ?? null,
+                            'starts_at'     => $date->format('Y-m-d H:i:s'), // keep in business timezone
+                            'weekday'       => $date->format('w'),
+                            'group_id'      => $group->id ?? null,
+                            'added_to_past' => $isPast,
                         ]
                     )
                 );

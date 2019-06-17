@@ -199,7 +199,8 @@ class CareMatch
      */
     function resultsForClient(Client $client)
     {
-        $query = $client->caregivers()->active();
+        $relation = $client->caregivers();
+        $query = $relation->active()->getQuery();
 
         return $this->getResults($query);
     }

@@ -1,8 +1,11 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="12">
+            <b-col lg="6">
                 <b-btn @click="add()" variant="info">Add Payer</b-btn>
+            </b-col>
+            <b-col lg="6">
+                <b-form-input v-model="filter" placeholder="Type to Search" class="f-1" />
             </b-col>
         </b-row>
         <div>

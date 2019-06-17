@@ -151,7 +151,7 @@
                     },
                     {
                         key: 'payer',
-                        formatter: (val, key, item) => `${val.name} (${item.payer_payment_type})`,
+                        formatter: (val, key, item) => `${val ? val.name : '-'} (${item.payer_payment_type})`,
                         sortable: true,
                     },
                     {
@@ -214,9 +214,9 @@
             },
             totalEstimates() {
                 return this.invoices.reduce((carry, invoice) => ({
-                    caregiver_total: parseFloat(carry.caregiver_total || 0) + parseFloat(invoice.estimates.caregiver_total),
-                    ally_total: parseFloat(carry.ally_total || 0) + parseFloat(invoice.estimates.ally_total),
-                    provider_total: parseFloat(carry.provider_total || 0) + parseFloat(invoice.estimates.provider_total),
+                    caregiver_total: parseFloat(carry.caregiver_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.caregiver_total : 0),
+                    ally_total: parseFloat(carry.ally_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.ally_total : 0),
+                    provider_total: parseFloat(carry.provider_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.provider_total : 0),
                 }), {});
             },
         },

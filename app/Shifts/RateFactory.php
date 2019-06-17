@@ -111,6 +111,18 @@ class RateFactory
         return $rates;
     }
 
+    public function matchingRateExists(Client $client, string $effectiveDateYMD, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): bool
+    {
+        $effectiveRates = $client->rates()
+            ->where('effective_start', '<=', $effectiveDateYMD)
+            ->where('effective_end', '>=', $effectiveDateYMD)
+            ->get();
+
+        $clientRate = $this->findMatchingClientRate($effectiveRates, $serviceId, $payerId, $caregiverId);
+
+        return $clientRate !== null;
+    }
+
     public function findMatchingRate(Client $client, string $effectiveDateYMD, bool $fixedRates = false, ?int $serviceId = null, ?int $payerId = null, ?int $caregiverId = null): Rates
     {
         $effectiveRates = $client->rates()

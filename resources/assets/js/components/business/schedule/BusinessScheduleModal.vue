@@ -47,7 +47,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
+                                    <small v-if="caregiverAssignmentMode" class="form-text text-muted">
                                         <span class="text-warning">Caregivers that are not currently assigned to the client will be automatically assigned.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -140,7 +140,7 @@
                                         <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                             <td>
                                                 <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                                    <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                                    <option v-for="service in services" :value="service.id">{{ service.name }} {{ service.code }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td>
@@ -214,7 +214,7 @@
                                         <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
                                             <td>
                                                 <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                                    <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
+                                                    <option v-for="s in services" :value="s.id">{{ s.name }} {{ s.code }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td>
@@ -301,7 +301,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
                                     Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
                                 </div>
@@ -316,11 +315,21 @@
                             </b-col>
                         </b-row>
                         <b-row>
+                            <b-col lg="12">
+                                <b-alert v-if="caregiverAssignmentMode" show variant="info">
+                                    <strong>Note:</strong> Because you are assigning a new Caregiver, this will automatically create new default rates using the services/payers above.
+                                </b-alert>
+                            </b-col>
                             <b-col lg="6">
                                 <label>
-                                    <b-form-checkbox v-model="defaultRates">
+                                    <!-- Create a dummy checkbox if we are in assign cg mode -->
+                                    <b-form-checkbox v-if="caregiverAssignmentMode" :checked="true" :disabled="true">
                                         Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
+                                    <b-form-checkbox v-show="!caregiverAssignmentMode" v-model="defaultRates">
+                                        Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
+                                    </b-form-checkbox>
+                                    <a v-if="form.client_id" :href="`/business/clients/${form.client_id}#rates`" target="_blank">Manage Client Rates</a>
                                 </label>
                             </b-col>
                             <!--<b-col lg="6" class="text-right">-->
@@ -477,6 +486,7 @@
                 allyPct: 0.05,
                 paymentType: 'NONE',
                 clientCaregivers: [],
+                clientCaregiversLoaded: false,
                 cgMode: 'client',
                 care_plans: [],
                 daysOfWeek: {
@@ -504,6 +514,10 @@
         },
 
         computed: {
+            caregiverAssignmentMode() {
+                return this.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
+            },
+
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -725,7 +739,8 @@
                 if (!schedule) schedule = this.schedule;
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = schedule.client_rate == null;
+                this.defaultRates = this.caregiverAssignmentMode ? false : schedule.client_rate == null;
+                console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
                 // Initialize form
@@ -746,7 +761,7 @@
                         'care_plan_id': schedule.care_plan_id || '',
                         'status': schedule.status || 'OK',
                         'service_id': schedule.service_id || this.defaultService.id,
-                        'payer_id': schedule.payer_id || null,
+                        'payer_id': schedule.payer_id == 0 ? 0 : schedule.payer_id || null,
                         'interval_type': "",
                         'recurring_end_date': "",
                         'bydays': [],
@@ -879,10 +894,14 @@
             },
 
             loadCaregivers(clientId) {
+                this.clientCaregiversLoaded = false;
                 if (clientId) {
                     axios.get('/business/clients/' + clientId + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
+                        })
+                        .finally(() => {
+                            this.clientCaregiversLoaded = true;
                         });
                 }
             },
@@ -1053,6 +1072,12 @@
 
             allyPct() {
                 this.recalculateAllRates(this.form)
+            },
+
+            caregiverAssignmentMode(newVal, oldVal) {
+                if (newVal) {
+                    this.defaultRates = false;
+                }
             },
         },
     }

@@ -33,7 +33,7 @@ class QuickbooksSettingsController extends BaseController
             }
 
             return response()->json([
-                'clients' => $this->getClients(),
+                'clients' => $this->getClients($business),
                 'connection' => new QuickbooksConnectionResource($business->quickbooksConnection),
             ]);
         }
@@ -168,7 +168,14 @@ class QuickbooksSettingsController extends BaseController
         \DB::beginTransaction();
 
         foreach ($request->clients as $mapping) {
-            $client = Client::where('business_id', $business->id)->where('id', $mapping['id'])->first();
+            $client = Client::where('business_id', $business->id)
+                ->where('id', $mapping['id'])
+                ->first();
+
+            if (empty($client)) {
+                return new ErrorResponse(500, 'Client #'.$mapping['id'].' not found, please refresh and try again.');
+            }
+
             $client->update([
                 'quickbooks_customer_id' => $mapping['quickbooks_customer_id'],
             ]);
@@ -249,11 +256,12 @@ class QuickbooksSettingsController extends BaseController
     /**
      * Get a list of clients for use with customer mapping.
      *
+     * @param \App\Business $business
      * @return array
      */
-    protected function getClients()
+    protected function getClients(Business $business) : array
     {
-        return Client::forRequestedBusinesses()
+        return $business->clients()
             ->active()
             ->get()
             ->map(function ($row) {

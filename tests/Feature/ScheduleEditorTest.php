@@ -7,6 +7,7 @@ use App\Schedule;
 use App\ScheduleGroup;
 use App\Scheduling\ScheduleEditor;
 use App\Client;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -184,5 +185,22 @@ class ScheduleEditorTest extends TestCase
 
         $this->editor->updateGroup($group, $schedule1, ['starts_at' => '2019-03-06 12:00:00']);
         $this->assertEquals('12:00:00', $schedule3->fresh()->starts_at->toTimeString());
+    }
+
+    /** @test */
+    function editing_a_single_schedule_should_flag_when_start_date_added_to_past()
+    {
+        $schedule = factory(Schedule::class)->create();
+
+        $data = [
+            'starts_at' => Carbon::yesterday(),
+            'duration' => 60,
+        ];
+
+        $this->editor->updateSingle($schedule, $data, null);
+
+        $this->assertEquals($data['starts_at'], $schedule->fresh()->starts_at->toDateTimeString());
+        $this->assertEquals($data['duration'], $schedule->duration);
+        $this->assertTrue($schedule->fresh()->added_to_past);
     }
 }

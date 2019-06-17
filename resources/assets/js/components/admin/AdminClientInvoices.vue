@@ -110,7 +110,7 @@
                     },
                     {
                         key: 'client',
-                        formatter: (val) => val.name,
+                        formatter: (val) => val ? val.name : '-',
                         sortable: true,
                     },
                     {
@@ -120,7 +120,7 @@
                     },
                     {
                         key: 'payer',
-                        formatter: (val) => val.name,
+                        formatter: (val) => val ? val.name : '-',
                         sortable: true,
                     },
                     {

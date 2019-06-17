@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Address;
 use App\BusinessChain;
 use App\Caregiver;
+use App\CaregiverRestriction;
+use App\StatusAlias;
 use App\User;
 
 class ImportCaregivers extends BaseImport
@@ -27,6 +29,12 @@ class ImportCaregivers extends BaseImport
      * @var \App\BusinessChain
      */
     protected $businessChain;
+
+    /**
+     * A store for duplicate row checks
+     * @var array
+     */
+    protected $processedHashes = [];
 
 
     /**
@@ -63,6 +71,13 @@ class ImportCaregivers extends BaseImport
      */
     protected function importRow(int $row)
     {
+        if ($this->duplicateDataProcessed($row)) {
+            $this->output->writeln('Skipping duplicate data found on row : ' . $row);
+            return false;
+        }
+
+        $statusAlias = $this->resolveStatusAlias($row);
+
         $data = [
             'firstname' => $this->resolve('First Name', $row),
             'lastname' => $this->resolve('Last Name', $row),
@@ -73,22 +88,22 @@ class ImportCaregivers extends BaseImport
             'email' => $this->resolve('Email', $row),
             'hire_date' => $this->resolve('Hire Date', $row),
             'gender' => $this->resolve('Gender', $row),
-            'active' => $this->resolve('Active', $row),
+            'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'preferences' => $this->resolve('Preferences', $row),
             'password' => bcrypt(str_random(12)),
+            'status_alias_id' => $statusAlias->id ?? null,
         ];
 
         // Prevent Duplicates
         if ($data['email'] && User::where('email', $data['email'])->exists()) {
             $this->output->writeln('Skipping duplicate email: ' . $data['email']);
             return false;
-        } else {
-            if (!$data['email']) {
-                $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
-                $data['email'] = 'placeholder' . uniqid();
-                $noemail = true;
-            }
+        } else if (!$data['email']) {
+            $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
+            $data['email'] = 'placeholder' . uniqid();
+            $noemail = true;
         }
+
 
         /** @var Caregiver $caregiver */
         $caregiver = $this->businessChain()->caregivers()->create($data);
@@ -106,6 +121,7 @@ class ImportCaregivers extends BaseImport
             $this->importAddresses($caregiver, $row);
             $this->importPhoneNumbers($caregiver, $row);
             $this->importNotes($caregiver, $row);
+            $this->importRestrictions($caregiver, $row);
 
             return $caregiver;
         }
@@ -150,6 +166,17 @@ class ImportCaregivers extends BaseImport
         ];
         $address = new Address($addressData);
         $caregiver->addresses()->save($address);
+    }
+
+
+    protected function importRestrictions(Caregiver $caregiver, int $row)
+    {
+        if ($restrictionText = $this->resolve('Restrictions', $row)) {
+            foreach(explode("\n\n", $restrictionText) as $description) {
+                $restriction = new CaregiverRestriction(['description' => str_limit($description, 253, '..')]);
+                $caregiver->restrictions()->save($restriction);
+            }
+        }
     }
 
     /**
@@ -205,6 +232,54 @@ class ImportCaregivers extends BaseImport
     protected function resolveHireDate(int $row, $cellValue)
     {
         return $this->transformDateValue($cellValue);
+    }
+
+    /**
+     * Resolve the status alias from the 'Status' column
+     *
+     * @param int $row
+     * @return StatusAlias|null
+     * @throws \PHPExcel_Exception
+     */
+    protected function resolveStatusAlias(int $row): ?StatusAlias
+    {
+        if ($name = $this->resolve('Status', $row)) {
+            $status = StatusAlias::where('name', $name)
+                ->where('chain_id', $this->businessChain()->id)
+                ->where('type', 'caregiver')
+                ->first();
+
+            return $status;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check for duplicate data in the same import file
+     *
+     * @param int $row
+     * @return bool
+     * @throws \PHPExcel_Exception
+     */
+    private function duplicateDataProcessed(int $row)
+    {
+        $parts = [
+            $this->resolve('Name', $row),
+            $this->resolve('First Name', $row),
+            $this->resolve('Last Name', $row),
+            $this->resolve('Email', $row),
+            $this->resolve('Address1', $row),
+        ];
+
+        $hash = md5(implode(',', array_filter($parts)));
+
+        if (array_key_exists($hash, $this->processedHashes)) {
+            return true;
+        }
+
+        $this->processedHashes[$hash] = 1;
+        return false;
     }
 
 }
