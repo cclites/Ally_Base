@@ -425,4 +425,22 @@ class QuickbooksSettingsController extends BaseController
 
         return new SuccessResponse('Settings updated successfully.');
     }
+
+    /**
+     * Get the quickbooks configuration for a given business.
+     *
+     * @param Business $business
+     * @return QuickbooksConnectionResource|\Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function config(Business $business)
+    {
+        $this->authorize('read', $business);
+
+        if (empty($business->quickbooksConnection)) {
+            return response()->json([]);
+        }
+
+        return new QuickbooksConnectionResource($business->quickbooksConnection);
+    }
 }

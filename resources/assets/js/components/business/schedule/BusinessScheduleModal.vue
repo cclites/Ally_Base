@@ -131,7 +131,7 @@
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
-                                            <th>Quickbooks Mapping</th>
+                                            <th v-if="allowQuickbooksMapping">Quickbooks Mapping</th>
                                             <th class="service-actions"></th>
                                         </tr>
                                         </thead>
@@ -203,14 +203,14 @@
                                                         class="money-input"
                                                 />
                                             </td>
-                                            <td>
+                                            <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                                 <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
-                                            <td colspan="2">
-                                                <b-form-select v-model="form.quickbooks_service_id">
+                                            <td colspan="2" v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
                                                     <option value="">--None--</option>
                                                     <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
@@ -296,8 +296,8 @@
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
-                                            <td>
-                                                <b-form-select v-model="service.quickbooks_service_id">
+                                            <td v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
                                                     <option value="">--None--</option>
                                                     <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
@@ -507,6 +507,7 @@
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
                 warnings: [],
+                loadingQuickbooksConfig: false,
             }
         },
 
@@ -521,7 +522,8 @@
             ...mapGetters({
                 quickbooksServices: 'quickbooks/services',
                 quickbooksBusiness: 'quickbooks/businessId',
-                quickbooksAuth: 'quickbooks/isAuthorized',
+                quickbooksIsAuthorized: 'quickbooks/isAuthorized',
+                quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
             }),
 
             selectedCaregiver() {
@@ -634,6 +636,14 @@
             currentWeekdayInt() {
                 return this.startDate ? moment(this.startDate).day() : 0;
             },
+
+            allowQuickbooksMapping() {
+                return this.quickbooksAllowMapping && this.quickbooksIsAuthorized;
+            },
+
+            disableQuickbooksMapping() {
+                return !this.business || this.loadingQuickbooksConfig;
+            },
         },
 
         methods: {
@@ -653,9 +663,6 @@
                 this.loadCarePlans(clientId);
                 this.loadClientRates(clientId);
                 this.loadClientPayers(clientId);
-                if (this.selectedClient.business_id) {
-                    this.$store.dispatch('quickbooks/fetchServices', this.selectedClient.business_id);
-                }
             },
 
             changedCaregiver(caregiverId) {
@@ -1077,6 +1084,16 @@
 
             allyPct() {
                 this.recalculateAllRates(this.form)
+            },
+
+            // Watch if the business changes and refresh the current quickbooks settings.
+            async business(newVal, oldVal) {
+                if (newVal && newVal.id != oldVal.id) {
+                    this.loadingQuickbooksConfig = true;
+                    await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
+                    await this.$store.dispatch('quickbooks/fetchServices');
+                    this.loadingQuickbooksConfig = false;
+                }
             },
         },
     }

@@ -19,6 +19,9 @@ const getters = {
     isAuthorized(state) {
         return !!state.config.access_token;
     },
+    mapServiceFromShifts(state) {
+        return state.config.shift_service == null;
+    }
 };
 
 // mutations
@@ -33,22 +36,22 @@ const mutations = {
 
 // actions
 const actions = {
-    async fetchServices(context) {
-        if (! context.state.config.business_id) {
+    async fetchConfig({commit}, businessId) {
+        await axios.get(`quickbooks/${businessId}/config`)
+            .then( ({ data }) => {
+                commit('setConfig', data ? data.data : []);
+            })
+            .catch(() => {});
+    },
+    async fetchServices({commit, state}) {
+        if (! state.config.business_id) {
             // cannot run until config is fetched
             return;
         }
 
-        await axios.get(`quickbooks/${businessId}/services`)
+        await axios.get(`quickbooks/${state.config.business_id}/services`)
             .then( ({ data }) => {
-                context.commit('setServices', data ? data : []);
-            })
-            .catch(() => {});
-    },
-    async fetchConfig(context, businessId) {
-        await axios.get(`quickbooks/${businessId}/services`)
-            .then( ({ data }) => {
-                context.commit('setServices', data ? data : []);
+                commit('setServices', data ? data : []);
             })
             .catch(() => {});
     },
