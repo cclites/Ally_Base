@@ -6,6 +6,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\QuickbooksConnection;
+use App\QuickbooksService;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksQueueResource;
 use App\Responses\SuccessResponse;
@@ -129,7 +130,7 @@ class QuickbooksQueueController extends Controller
                     $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
 
                     // Use the shift mapping for now.
-                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection, $shift->quickbooks_service_id);
                     break;
                 case 'shift_services':
                     $shiftService = $invoiceItem->getShiftService();
@@ -142,7 +143,7 @@ class QuickbooksQueueController extends Controller
                     $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime {$service->name}";
 
                     // Use the shift mapping for now.
-                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection, $shiftService->quickbooks_service_id);
                     break;
                 default:
                     // Convert from raw line item data.
@@ -173,9 +174,10 @@ class QuickbooksQueueController extends Controller
      *
      * @param ClientInvoiceItem $item
      * @param QuickbooksConnection $connection
+     * @param int $overrideServiceId
      * @return array
      */
-    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection) : array
+    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection, int $overrideServiceId) : array
     {
         $service = null;
         if ($item->name == 'Manual Adjustment') {
@@ -187,7 +189,19 @@ class QuickbooksQueueController extends Controller
         } else if ($item->name == 'Refund') {
             $service = $connection->refundService;
         } else {
-            $service = $connection->shiftService;
+            // Shifts and Services
+            if (! empty($connection->shiftService)) {
+                $service = $connection->shiftService;
+            } else {
+                // 'Pull from shift' option is selected
+                if ($overrideServiceId) {
+                    // use override service
+                    $service = QuickbooksService::findOrFail($overrideServiceId);
+                } else {
+                    // TODO: Create or use a default Ally Service
+                }
+            }
+
         }
 
         return [$service->service_id, $service->name];
