@@ -39,21 +39,21 @@ if (!$ideHelper->isSuccessful()) {
     exit(4);
 }
 
-$phpunitConfig = base_path('phpunit.xml');
-$phpunitBin = "$vendorDir/bin/phpunit";
-if (!file_exists($phpunitBin)) {
-    echo("phpunit binary does not exist.\n");
-    exit(3);
-}
-$phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConfig));
-
-$phpunitCmd = new Process($phpunit);
-$phpunitCmd->setTimeout(600);
-$phpunitCmd->run();
-if (!$phpunitCmd->isSuccessful()) {
-    echo($phpunitCmd->getOutput() . "\n");
-    echo($phpunitCmd->getErrorOutput() . "\n");
-    exit(2);
-}
+//$phpunitConfig = base_path('phpunit.xml');
+//$phpunitBin = "$vendorDir/bin/phpunit";
+//if (!file_exists($phpunitBin)) {
+//    echo("phpunit binary does not exist.\n");
+//    exit(3);
+//}
+//$phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConfig));
+//
+//$phpunitCmd = new Process($phpunit);
+//$phpunitCmd->setTimeout(600);
+//$phpunitCmd->run();
+//if (!$phpunitCmd->isSuccessful()) {
+//    echo($phpunitCmd->getOutput() . "\n");
+//    echo($phpunitCmd->getErrorOutput() . "\n");
+//    exit(2);
+//}
 
 echo "\xE2\x9C\x94\n";
