@@ -19,7 +19,7 @@
                             <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>
                         </b-col>-->
                         <b-col>
-                            <div class="pull-right">{{ formatDate(note.created_at) + ' ' + formatTime(note.created_at) }}</div>
+                            <div class="pull-right">{{ formatDateFromUTC(note.created_at) + ' ' + formatTimeFromUTC(note.created_at) }}</div>
                         </b-col>
                     </b-row>
                 </div>
