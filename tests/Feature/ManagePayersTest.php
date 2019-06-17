@@ -17,7 +17,7 @@ class ManagePayersTest extends TestCase
 
         $this->withoutExceptionHandling();
 
-        $this->createBusinessWithUsers();
+        $this->createBusinessWithUsers(false);
 
         $this->actingAs($this->officeUser->user);
     }
@@ -27,7 +27,7 @@ class ManagePayersTest extends TestCase
     {
         factory('App\Billing\Payer', 5)->create(['chain_id' => $this->chain->id]);
 
-        $this->assertCount(5, $this->chain->payers);
+        $this->assertCount(5, $this->chain->fresh()->payers);
 
         $this->getJson(route('business.payers.index') . '?json=1')
             ->assertStatus(200)

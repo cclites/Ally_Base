@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Caregiver;
 use App\User;
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Task;
@@ -14,20 +15,12 @@ use App\Business;
 
 class ManageTasksTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public $business;
-    public $officeUser;
+    use RefreshDatabase, CreatesBusinesses;
 
     public function setUp()
     {
         parent::setUp();
-
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->client = factory('App\Client')->create();
-        $this->business = $this->client->business;
-        $this->officeUser = factory('App\OfficeUser')->create();
-        $this->officeUser->businesses()->attach($this->business->id);
+        $this->createBusinessWithUsers();
     }
 
     public function setupMultiBusinessTasks()
@@ -276,17 +269,19 @@ class ManageTasksTest extends TestCase
 
         $task = factory(Task::class)->create(['assigned_user_id' => $this->officeUser->id]);
 
-        $that = $this;
-
-        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task, $that) {
-            return $mail->task->id === $task->id && $task->assigned_user_id == $that->officeUser->id;
-        });
+        // temp disable this feature
+        \Mail::assertNotSent(AssignedTaskEmail::class);
+//        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task) {
+//            return $mail->task->id === $task->id && $task->assigned_user_id == $this->officeUser->id;
+//        });
 
         $task->update(['assigned_user_id' => $user2->id]);
 
-        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task, $user2) {
-            return $mail->task->id === $task->id && $task->assigned_user_id == $user2->id;
-        });
+        // temp disable this feature
+        \Mail::assertNotSent(AssignedTaskEmail::class);
+//        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task, $user2) {
+//            return $mail->task->id === $task->id && $task->assigned_user_id == $user2->id;
+//        });
     }
 
     /** @test */
@@ -417,19 +412,6 @@ class ManageTasksTest extends TestCase
         $this->getJson(route('business.tasks.index') . '?overdue=1')
             ->assertStatus(200)
             ->assertJsonCount(1);
-    }
-
-    /** @test */
-    public function an_office_user_should_see_the_number_of_pending_tasks_in_the_nav_menu()
-    {
-        $this->setupMultiBusinessTasks();
-        $this->assertCount(9, Task::all());
-
-        $this->actingAs($this->officeUser->user);
-
-        $this->get(route('business.tasks.index'))
-            ->assertStatus(200)
-            ->assertSee('menu-badge">7');
     }
 
     /** @test */

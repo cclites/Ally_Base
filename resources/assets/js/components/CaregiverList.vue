@@ -39,10 +39,10 @@
                     {{ getPhone(row.item.caregiver) }}
                 </template>
                 <template slot="city" scope="row">
-                    {{ getAddress(row.item.caregiver).city }}
+                    {{ row.item.city ? row.item.city : '-' }}
                 </template>
                 <template slot="zipcode" scope="row">
-                    {{ getAddress(row.item.caregiver).zip }}
+                    {{ row.item.zipcode ? row.item.zipcode : '-' }}
                 </template>
                 <template slot="location" scope="data">
                     <div v-for="(business, index) in getBusinessNames(data.item.caregiver)" :key="index">
@@ -114,12 +114,12 @@
                     {
                         key: 'city',
                         label: 'City',
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'zipcode',
                         label: 'Zip Code',
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'location',

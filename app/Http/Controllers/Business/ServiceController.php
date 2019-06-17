@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers\Business;
 
-use Auth;
 use App\Billing\Service;
 use App\Http\Requests\CreateServiceRequest;
 use App\Responses\CreatedResponse;
@@ -94,6 +93,6 @@ class ServiceController extends BaseController
             logger($e->getMessage());
         }
 
-        return new ErrorResponse(500, 'The service could not be deleted.');
+        return new ErrorResponse(500, 'The service could not be deleted due to existing shifts or service authorizations using this code.');
     }
 }

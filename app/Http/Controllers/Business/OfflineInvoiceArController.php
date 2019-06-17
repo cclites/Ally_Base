@@ -90,6 +90,6 @@ class OfflineInvoiceArController extends BaseController
 
         $invoice->addOfflinePayment($request->toOfflineInvoicePayment());
 
-        return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
+        return new SuccessResponse('Payment was successfully applied.', new OfflineInvoiceArResource($invoice->fresh()));
     }
 }
