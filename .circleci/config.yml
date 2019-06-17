@@ -50,4 +50,4 @@ jobs:
       # run entire phpunit test suite
       - run:
           name: "Run test suite"
-          command: vendor/bin/phpunit --configuration phpunit.xml --stop-on-failure
+          command: vendor/bin/phpunit -d memory_limit=512M --configuration phpunit.xml --stop-on-failure
