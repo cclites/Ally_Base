@@ -269,15 +269,15 @@ class ManageTasksTest extends TestCase
 
         $task = factory(Task::class)->create(['assigned_user_id' => $this->officeUser->id]);
 
-        $that = $this;
-
+        // temp disable this feature
         \Mail::assertNotSent(AssignedTaskEmail::class);
-//        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task, $that) {
-//            return $mail->task->id === $task->id && $task->assigned_user_id == $that->officeUser->id;
+//        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task) {
+//            return $mail->task->id === $task->id && $task->assigned_user_id == $this->officeUser->id;
 //        });
 
         $task->update(['assigned_user_id' => $user2->id]);
 
+        // temp disable this feature
         \Mail::assertNotSent(AssignedTaskEmail::class);
 //        \Mail::assertSent(AssignedTaskEmail::class, function ($mail) use ($task, $user2) {
 //            return $mail->task->id === $task->id && $task->assigned_user_id == $user2->id;
