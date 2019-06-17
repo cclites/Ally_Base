@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Caregiver;
-use App\PhoneNumber;
+use App\BusinessChain;
+use App\Reports\CaregiverContactInfoReport;
 use Illuminate\Console\Command;
 
 class DumpCaregiverContacts extends Command
@@ -13,7 +13,7 @@ class DumpCaregiverContacts extends Command
      *
      * @var string
      */
-    protected $signature = 'dump:caregiver-contacts';
+    protected $signature = 'dump:caregiver-contacts {chain_id}';
 
     /**
      * The console command description.
@@ -39,23 +39,34 @@ class DumpCaregiverContacts extends Command
      */
     public function handle()
     {
-        $query = Caregiver::forChains(51)
-            ->active()
-            ->whereNotSetup();
+        $chain = BusinessChain::findOrFail($this->argument('chain_id'));
 
-        $data = $query->get()->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->nameLastFirst,
-                'email' => $item->user->email,
-                'numbers' => $item->user->phoneNumbers->map(function (PhoneNumber $item) {
-                    return $item->number;
-                })->implode(', '),
-            ];
-        })
-        ->sortBy('name');
+        $filter = $this->choice('What type of Caregiver\'s would you like see?', [
+            'All',
+            'Active',
+            'Active and Not Set Up',
+            'Active and Not Set Up but on the Schedule',
+        ], 4);
 
-        $headers = ['ID', 'Name', 'Email', 'Phone Number(s)'];
-        $this->table($headers, $data);
+        $report = new CaregiverContactInfoReport();
+        $report->query()->forChains([$chain->id]);
+
+        switch ($filter) {
+            case 'All':
+                break;
+            case 'Active':
+                $report->query()->active(true);
+                break;
+            case 'Active and Not Set Up':
+                $report->query()->active()->whereNotSetup();
+                break;
+            case 'Active and Not Set Up but on the Schedule':
+            default:
+                $report->query()->active()->whereScheduled()->whereNotSetup();
+                break;
+        }
+
+        $this->info($report->toCsv());
+        $this->info('Found ' . $report->count() . ' Results');
     }
 }
