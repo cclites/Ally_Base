@@ -417,8 +417,8 @@ Route::group([
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
-    Route::get('quickbooks/{business}/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
     Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');
+    Route::get('quickbooks/{business}/connect', 'Business\QuickbooksSettingsController@connect')->name('quickbooks.connect');
     Route::post('quickbooks/{business}/disconnect', 'Business\QuickbooksSettingsController@disconnect');
     Route::get('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersList');
     Route::patch('quickbooks/{business}/customers', 'Business\QuickbooksSettingsController@customersUpdate');

@@ -805,7 +805,7 @@
                             'provider_fee': null,
                             'ally_fee': null,
                         },
-                        'quickbooks_service_id': '',
+                        'quickbooks_service_id': schedule.quickbooks_service_id || '',
                     });
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);

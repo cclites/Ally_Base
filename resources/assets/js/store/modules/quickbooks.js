@@ -20,7 +20,7 @@ const getters = {
         return !!state.config.access_token;
     },
     mapServiceFromShifts(state) {
-        return state.config.shift_service == null;
+        return state.config.shift_service_id == null;
     }
 };
 
@@ -37,7 +37,7 @@ const mutations = {
 // actions
 const actions = {
     async fetchConfig({commit}, businessId) {
-        await axios.get(`quickbooks/${businessId}/config`)
+        await axios.get(`/business/quickbooks/${businessId}/config`)
             .then( ({ data }) => {
                 commit('setConfig', data ? data.data : []);
             })
@@ -49,7 +49,7 @@ const actions = {
             return;
         }
 
-        await axios.get(`quickbooks/${state.config.business_id}/services`)
+        await axios.get(`/business/quickbooks/${state.config.business_id}/services`)
             .then( ({ data }) => {
                 commit('setServices', data ? data : []);
             })
