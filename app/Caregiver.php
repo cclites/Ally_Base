@@ -660,7 +660,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function scopeWhereNotSetup($query)
     {
         return $query->whereHas('user', function ($q) {
-            $q->where('setup_status', '<>', self::SETUP_ADDED_PAYMENT);
+            $q->where('setup_status', '<>', self::SETUP_ADDED_PAYMENT)
+                ->orWhereNull('setup_status');
         });
     }
 
