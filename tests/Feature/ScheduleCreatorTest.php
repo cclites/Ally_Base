@@ -195,7 +195,9 @@ class ScheduleCreatorTest extends TestCase
     /** @test */
     function creating_a_recurring_schedule_should_flag_any_past_times()
     {
-        $this->scheduleCreator->startsAt(Carbon::parse("last monday"))
+        Carbon::setTestNow(Carbon::parse('2019-06-18 12:00:00')); // tuesday
+
+        $this->scheduleCreator->startsAt(Carbon::yesterday())
                               ->duration(60)
                               ->assignments(1, 1)
                               ->interval('weekly', Carbon::today()->addWeeks(10), ['mo']);
