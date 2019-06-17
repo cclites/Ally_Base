@@ -20,6 +20,7 @@ jobs:
       - checkout
       - run: sudo apt install -y libsqlite3-dev libpng-dev
       - run: sudo docker-php-ext-install bcmath
+
       # Composer
       - restore_cache:
           keys:
@@ -29,6 +30,7 @@ jobs:
           paths:
             - ./vendor
           key: composer-dependencies-{{ checksum "composer.json" }}
+
       # NPM
       - restore_cache:
           keys:
@@ -39,9 +41,13 @@ jobs:
           paths:
             - ./node_modules
 
-      # run tests!
-      # replace this with the whole test suite eventually
-      - run: php scripts/test_core.php
-
       # compile assets properly
       - run: npm run dev
+
+      # run tests_core script
+      - run: php scripts/test_core.php
+
+      # run entire phpunit test suite
+      - run:
+          name: "Run test suite"
+          command: vendor/bin/phpunit -d memory_limit=512M --configuration phpunit.xml --stop-on-failure

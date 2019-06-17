@@ -35,9 +35,10 @@ trait CreatesBusinesses
      * Set up a business with an assigned office user that
      * has one client with an assigned caregiver.
      *
+     * @param bool $includeClientRate
      * @return void
      */
-    public function createBusinessWithUsers()
+    public function createBusinessWithUsers($includeClientRate = true)
     {
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
@@ -50,9 +51,11 @@ trait CreatesBusinesses
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
 
-        factory(ClientRate::class)->create([
-            'caregiver_id' => $this->caregiver->id,
-            'client_id' => $this->client->id,
-        ]);
+        if ($includeClientRate) {
+            factory(ClientRate::class)->create([
+                'caregiver_id' => $this->caregiver->id,
+                'client_id' => $this->client->id,
+            ]);
+        }
     }
 }

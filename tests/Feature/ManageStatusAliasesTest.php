@@ -2,36 +2,23 @@
 
 namespace Tests\Feature;
 
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\StatusAlias;
-use App\Business;
 use App\BusinessChain;
 
 class ManageStatusAliasesTest extends TestCase
 {
-    use RefreshDatabase;
-    
-    public $client;
-    public $business;
-    public $officeUser;
-    public $contact;
-    public $chain;
+    use RefreshDatabase, CreatesBusinesses;
     
     public function setUp()
     {
         parent::setUp();
-    
-        $this->client = factory('App\Client')->create();
-        $this->business = $this->client->business;
-        $this->chain = $this->business->businessChain;
-        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
-        $this->officeUser->businesses()->attach($this->business->id);
-    
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->assignCaregiver($this->caregiver);
-        $this->client->caregivers()->save($this->caregiver);
+
+        $this->createBusinessWithUsers();
+
+        $this->assertEquals($this->chain->id, $this->officeUser->chain_id);
     }
 
     /** @test */

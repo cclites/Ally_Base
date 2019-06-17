@@ -21,7 +21,7 @@ class UpdateCaregiverRequest extends FormRequest
     {
         /** @var \App\Caregiver $caregiver */
         $caregiver = $this->route('caregiver');
-        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+        $aliases = StatusAlias::forAuthorizedChain()->forCaregivers()->pluck('id')->toArray();
 
         return [
             'firstname' => 'required|string|max:45',
