@@ -833,7 +833,7 @@
                         'provider_fee': null,
                         'ally_fee': null,
                     },
-                    quickbooks_service_id: shift.quickboks_service_id || '',
+                    quickbooks_service_id: shift.quickbooks_service_id || '',
                 };
             },
             createIssue() {
