@@ -116,10 +116,6 @@ class ShiftController extends BaseController
 
         $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
 
-        if ($request->filled('quickbooks_service_id')) {
-            $data['quickbooks_service_id'] = $request->quickbooks_service_id;
-        }
-
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
             $fields = [];

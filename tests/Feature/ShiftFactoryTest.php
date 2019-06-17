@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Address;
 use App\Billing\ClientRate;
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ScheduleService;
 use App\Business;
 use App\Caregiver;
@@ -403,6 +404,46 @@ class ShiftFactoryTest extends TestCase
             $schedule,
             new ClockData(Shift::METHOD_GEOLOCATION)
         );
+
+        $shift = $factory->create();
+        $this->assertCount(2, $shift->services);
+        $this->assertEquals($qbService->id, $shift->services[0]->quickbooks_service_id);
+        $this->assertEquals($qbService->id, $shift->services[1]->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_shift_created_without_a_schedule_should_set_the_quickbooks_service_mapping()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $factory = ShiftFactory::withoutSchedule(
+            $this->client,
+            $this->caregiver,
+            new ClockData(Shift::METHOD_GEOLOCATION),
+            null,
+            null,
+            null,
+            null,
+            null,
+            $qbService->id
+        );
+
+        $shift = $factory->create();
+        $this->assertEquals($qbService->id, $shift->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_breakout_shift_created_without_a_schedule_should_set_all_the_quickbooks_service_mappings()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $services = factory(ShiftService::class, 2)->create(['quickbooks_service_id' => $qbService->id]);
+
+        $factory = ShiftFactory::withoutSchedule(
+            $this->client,
+            $this->caregiver,
+            new ClockData(Shift::METHOD_GEOLOCATION)
+        )->withServices($services->toArray());
 
         $shift = $factory->create();
         $this->assertCount(2, $shift->services);

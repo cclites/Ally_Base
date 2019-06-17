@@ -155,7 +155,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             $rates,
             $status,
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
-            $this->input('payer') ? Payer::find($this->input('payer')) : null
+            $this->input('payer') ? Payer::find($this->input('payer')) : null,
+            $this->input('quickbooks_service_id')
         )->withData($clockOutData)->withServices($this->getServices());
 
         return $shiftData;

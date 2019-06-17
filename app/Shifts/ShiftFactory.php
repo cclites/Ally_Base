@@ -40,6 +40,7 @@ class ShiftFactory implements Arrayable
      * @param string|null $currentStatus
      * @param \App\Billing\Service|null $service
      * @param \App\Billing\Payer|null $payer
+     * @param int $quickbooksService
      * @return \App\Shifts\ShiftFactory
      */
     public static function withoutSchedule(
@@ -50,7 +51,8 @@ class ShiftFactory implements Arrayable
         ?ScheduledRates $rates = null,
         ?string $currentStatus = null,
         ?Service $service = null,
-        ?Payer $payer = null
+        ?Payer $payer = null,
+        ?int $quickbooksService = null
     ): self
     {
         $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
@@ -69,6 +71,7 @@ class ShiftFactory implements Arrayable
             'client_rate'       => $rates->clientRate(),
             'caregiver_rate'    => $rates->caregiverRate(),
             'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
+            'quickbooks_service_id' => $quickbooksService,
         ]);
     }
 
