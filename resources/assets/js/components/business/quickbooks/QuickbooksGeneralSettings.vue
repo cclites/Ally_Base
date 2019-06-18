@@ -161,20 +161,20 @@
             },
 
             refreshServices() {
-                    if (! this.businessId) {
-                        return;
-                    }
-                    this.busy = true;
+                if (! this.businessId) {
+                    return;
+                }
+                this.busy = true;
 
-                    let form = new Form({});
-                    form.post(`/business/quickbooks/${this.businessId}/services/sync`)
-                        .then( ({ data }) => {
-                            this.quickbooksServices = data.data;
-                        })
-                        .catch(() => {})
-                        .finally(() => {
-                            this.busy = false;
-                        });
+                let form = new Form({});
+                form.post(`/business/quickbooks/${this.businessId}/services/sync`)
+                    .then( ({ data }) => {
+                        this.quickbooksServices = data.data;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.busy = false;
+                    });
             }
         },
 

@@ -190,7 +190,11 @@ class QuickbooksQueueController extends Controller
             $service = $connection->refundService;
         } else { // Shift Services
             if ($connection->allow_shift_overrides && filled($overrideServiceId)) {
-                $service = QuickbooksService::findOrFail($overrideServiceId);
+                $service = QuickbooksService::find($overrideServiceId);
+                if (empty($service)) {
+                    // Service was deleted and not active.
+                    $service = $connection->shiftService;
+                }
             } else {
                 $service = $connection->shiftService;
             }

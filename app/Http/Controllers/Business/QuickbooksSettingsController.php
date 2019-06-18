@@ -11,6 +11,7 @@ use App\Responses\Resources\QuickbooksConnectionResource;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidActivityCode;
 use App\Services\QuickbooksOnlineService;
+use App\Shift;
 use Illuminate\Http\Request;
 use Session;
 
@@ -379,6 +380,12 @@ class QuickbooksSettingsController extends BaseController
         foreach ($columns as $column) {
             $business->quickbooksConnection()->whereIn($column, $deleteIds)->update([$column => null]);
         }
+
+        // Keep reference to deleted services for now to allow for historical
+        // accuracy.  Quickbooks doesn't allow actual deletion of items, so
+        // the mapping still works.
+//        $business->shifts()->whereIn('quickbooks_service_id', $deleteIds)->update(['quickbooks_service_id' => null]);
+//        $business->schedules()->whereIn('quickbooks_service_id', $deleteIds)->update(['quickbooks_service_id' => null]);
 
         // Delete the missing service records.
         $business->quickbooksServices()->whereIn('id', $deleteIds)->delete();
