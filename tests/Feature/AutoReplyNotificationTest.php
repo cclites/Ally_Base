@@ -17,14 +17,14 @@ use Log;
 
 
 
-class AutoReplyNotificationTest extends TestCase
-{
+class AutoReplyNotificationTest extends TestCase{
     use RefreshDatabase, FakesTwilioWebhooks;
 
     public $client;
     public $caregiver;
     public $business;
     public $officeUser;
+    public $smsAutoResponseSettings;
     public $outgoingSmsNumber = '(561) 417-9272';
 
 
@@ -34,7 +34,7 @@ class AutoReplyNotificationTest extends TestCase
 
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
-        $this->business->update(['outgoing_sms_number' => $this->outgoingSmsNumber]);
+        $this->business->update(['phone1' => $this->outgoingSmsNumber]);
 
         $this->caregiver = factory('App\Caregiver')->create();
         $number = $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
@@ -43,6 +43,10 @@ class AutoReplyNotificationTest extends TestCase
 
         $this->officeUser = factory('App\OfficeUser')->create();
         $this->officeUser->businesses()->attach($this->business->id);
+
+        //$this->businessCommunications = factory('App\BusinessCommunications')->create(['business_id'=>$this->business->id]);
+        //$this->businessCommunications->update(['business_id'=>$this->business->id]);
+        //$this->business->autoResponseSettings = $this->smsAutoResponseSettings;
     }
 
     public function generateThread($overrides = [])
@@ -63,10 +67,68 @@ class AutoReplyNotificationTest extends TestCase
      */
     public function testHasBusinessCommunicationsSettings(){
 
+        Log::info("Has communication settings");
+        $this->businessCommunications = factory('App\BusinessCommunications')->create(['business_id'=>$this->business->id]);
         $data = $this->generateWebhook($this->outgoingSmsNumber, '+12019999999', 'test');
-        $this->post(route('telefony.sms.incoming'), $data);
-
-
+        $this->post(route('telefony.sms.incoming'), $data)->assertStatus(200);
 
     }
+
+    public function testDoNotSend(){
+
+        Log::info("Has no active settings");
+        $this->businessCommunications = factory('App\BusinessCommunications')
+                            ->create(['business_id'=>$this->business->id,
+                                      'on_indefinitely'=>false,
+                                      'auto_off'=>true
+                                     ]);
+
+        $data = $this->generateWebhook($this->outgoingSmsNumber, '+12019999999', 'test');
+        $this->post(route('telefony.sms.incoming'), $data)->assertStatus(200);
+    }
+
+    /*
+    public function testSendForRange(){
+        $this->businessCommunications = factory('App\BusinessCommunications')
+            ->create(['business_id'=>$this->business->id,
+                'on_indefinitely'=>false,
+                'auto_off'=>false,
+                'week_end'=>'23:00'
+            ]);
+
+        $data = $this->generateWebhook($this->outgoingSmsNumber, '+12019999999', 'test');
+        $this->post(route('telefony.sms.incoming'), $data)->assertStatus(200);
+    }*/
+
+    public function testShouldSend(){
+        Log::info("should send");
+        $this->businessCommunications = factory('App\BusinessCommunications')
+            ->create(['business_id'=>$this->business->id,
+                'on_indefinitely'=>false,
+                'auto_off'=>false,
+                'week_start'=>'24:00',
+                'week_end'=>'23:00'
+            ]);
+
+        $data = $this->generateWebhook($this->outgoingSmsNumber, '+12019999999', 'test');
+        $this->post(route('telefony.sms.incoming'), $data)->assertStatus(200);
+
+    }
+
+    public function testShouldNotSend(){
+        Log::info("Should not send");
+        $this->businessCommunications = factory('App\BusinessCommunications')
+            ->create(['business_id'=>$this->business->id,
+                'on_indefinitely'=>false,
+                'auto_off'=>false,
+                'week_start'=>'23:00',
+                'week_end'=>'5:00'
+            ]);
+
+        $data = $this->generateWebhook($this->outgoingSmsNumber, '+12019999999', 'test');
+        $this->post(route('telefony.sms.incoming'), $data)->assertStatus(200);
+
+    }
+
+
 }

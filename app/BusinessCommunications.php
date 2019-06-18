@@ -11,6 +11,7 @@ class BusinessCommunications extends BaseModel{
     use BelongsToOneBusiness;
 
     protected $table = "business_communications_settings";
+    protected $fillable = ['business_id'];
 
     public $timestamps = false;
 

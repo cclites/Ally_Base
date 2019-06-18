@@ -588,7 +588,7 @@
                 if (this.business.type == 'agency') {
                     return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#communications'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#communications'];
                 }
             },
         },

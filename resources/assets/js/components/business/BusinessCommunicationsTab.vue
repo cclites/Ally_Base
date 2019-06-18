@@ -90,20 +90,18 @@
             await this.fetchMessagingData();
         },
 
-        computed: {
-            //calculateRemainingCharacters(){},   //<-- Might not use
-        },
+        mixins : [Constants],
 
         data() {
             return {
                 form: new Form({
-                    auto_off: this.comms.auto_off || true,
-                    on_indefinitely: this.comms.on_indefinitely || false,
-                    week_start: this.comms.week_start? this.comms.week_start : '',
-                    week_end: this.comms.week_end ? this.comms.week_end : '',
-                    weekend_start: this.comms.weekend_start ? this.comms.weekend_start : '',
-                    weekend_end: this.comms.weekend_end ? this.comms.weekend_end : '',
-                    message: this.comms.message || '',
+                    auto_off: '',
+                    on_indefinitely: '',
+                    week_start: '',
+                    week_end: '',
+                    weekend_start: '',
+                    weekend_end: '',
+                    message: '',
                 }),
             }
         },
@@ -112,29 +110,25 @@
 
 
             async fetchMessagingData(){
-
-                console.log("Fetch messaging data");
                 let response = await axios.get('/business/communication/sms-autoresponse/' + this.businessId)
-                        .then(response => {
-                            console.log("Logging response");
-                            console.log(response.data);
-                            this.form = response.data;
-                        }).catch(error => {
-                        console.log("Logging error response");
-                            console.error(error.response);
-                        });
+                            .then(response => {
 
-                /*
-                if (Array.isArray(response.data)) {
-                    console.log(response.data);
-                    this.form = response.data;
-                }*/
+                                let data = response.data;
+                                this.form.auto_off = data.auto_off;
+                                this.form.on_indefinitely = data.on_indefinitely;
+                                this.form.message = data.message;
+                                this.form.week_start = this.formatMysqlTime(data.week_start);
+                                this.form.week_end = this.formatMysqlTime(data.week_end);
+                                this.form.weekend_start = this.formatMysqlTime(data.weekend_start);
+                                this.form.weekend_end = this.formatMysqlTime(data.weekend_end);
+
+                            }).catch(error => {
+                            console.log("Logging error response");
+                                console.error(error.response);
+                            });
             },
 
             saveMessaging(){
-
-                console.log("Saving messaging");
-
                 let params = '?auto_off=' + this.form.auto_off + "&on_indefinitely=" +
                              this.form.on_indefinitely + "&message=" + this.form.message +
                              '&week_start=' + this.form.week_start + '&week_end=' + this.form.week_end +
@@ -142,55 +136,39 @@
 
                 const response = axios.post('/business/communication/sms-autoresponse/' + this.businessId + params)
                                         .then(response => {
-                                            //this.setItems(response.data);
                                             console.log(response);
                                         }).catch(error => {
                                             console.error(error.response);
                                         });
             },
 
-            setItems(data){
-              //ToDo
+            formatMysqlTime(time){
+                return time.slice(0,5);
             }
         },
 
-        mixins : [Constants],
+
 
         name: "ClientCommunicationsTab",
 
         props: {
-
             businessId : Number,
-            comms: {
-                type: Object,
-                default(){
-                    return {};
-                }
-            }
         },
 
         watch: {
             message: function(val){
                 if(val.length >= smsLength){
-                   this.form.message = val.substring(0, smsLength);
+                   //this.form.message = val.substring(0, smsLength);
                 }
             },
             week_start: function(val){
-
-                console.log("Start time val is " + val);
-
-                //week_start = week_start.format('HH:mm');
                 this.form.week_start = val;
             },
             week_end: function(val){
-
-                console.log("End time val is " + val);
-
-               // week_end = week_end.format('HH:mm');
                 this.form.week_end = val;
             },
             weekend_start: function(val){
-                    this.form.weekend_start = val;
+                this.form.weekend_start = val;
             },
             weekend_end: function(val){
                 this.form.weekend_end = val;

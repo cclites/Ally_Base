@@ -15,15 +15,15 @@ class CreateBusinessCommunicationsSettings extends Migration
     {
         $this->down();
 
-        Schema::create('business_communications_settingss', function (Blueprint $table) {
+        Schema::create('business_communications_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->boolean('auto_off')->default(true);
             $table->boolean('on_indefinitely')->default(false);
-            $table->text('week_start');
-            $table->text('week_end');
-            $table->text('weekend_start');
-            $table->text('weekend_end');
-            $table->text('message');
+            $table->time('week_start');
+            $table->time('week_end');
+            $table->time('weekend_start');
+            $table->time('weekend_end');
+            $table->string('message');
             $table->unsignedInteger('business_id');
         });
     }

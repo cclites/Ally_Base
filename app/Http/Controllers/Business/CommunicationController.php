@@ -218,19 +218,33 @@ class CommunicationController extends Controller
     public function saveRecipients(Request $request)
     {
         $request->session()->flash('sms.load-recipients', $request->ids);
-
         return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
 
     /**
-     * Retrieve auto-sms reply settings
+     * Retrieve auto-sms reply settings for business or return defaults
      *
      * @param $businessId
      * @return \Illuminate\Http\JsonResponse
      */
     public function showAutoSms($businessId){
-        $comms  = \App\BusinessCommunications::where('business_id', $businessId)->first();
-        return response()->json($comms);
+
+        $settings  = \App\BusinessCommunications::where('business_id', $businessId)->first();
+
+        if(!$settings){
+
+            $settings = [
+                'auto_off'=>true,
+                'on_indefinitely'=>false,
+                'week_start'=>'17:00:00',
+                'week_end'=>'08:00:00',
+                'weekend_start'=>'17:00:00',
+                'weekend_end'=>'08:00:00',
+                'message'=>''
+            ];
+        }
+
+        return response()->json($settings);
     }
 
     /**
@@ -242,30 +256,39 @@ class CommunicationController extends Controller
      */
     public function updateAutoSms(Request $request, $businessId){
 
-        $comms = \App\BusinessCommunications::where('business_id', $businessId)->first();
+        $settings = \App\BusinessCommunications::where('business_id', $businessId)->first();
 
-        if($comms){
-            $comms->auto_off = $request->auto_off;
-            $comms->on_indefinitely = ($request->auto_off == 'true') ? true : false;
-            $comms->week_start = ($request->on_indefinitely == 'true') ? true : false;
-            $comms->week_end = $request->week_end;
-            $comms->weekend_start = $request->weekend_start;
-            $comms->weekend_end = $request->weekend_end;
-            $comms->message = $request->message;
+        //need to require message if auto_off=false or on_indefinitely=true
+        $request->validate([
+            'week_start' => 'required|string|max:8',
+            'week_end' => 'required|string|max:8',
+            'weekend_start' => 'required|string|max:8',
+            'weekend_end' => 'required|string|max:8',
+        ]);
+
+
+        if($settings){
+            $settings->auto_off = ($request->auto_off == 'true') ? true : false;
+            $settings->on_indefinitely = ($request->on_indefinitely == 'true') ? true : false;
+            $settings->week_start = $request->week_end;
+            $settings->week_end = $request->week_end;
+            $settings->weekend_start = $request->weekend_start;
+            $settings->weekend_end = $request->weekend_end;
+            $settings->message = $request->message;
         }else{
-            $comms = new \App\BusinessCommunications();
-            $comms->auto_off = ($request->auto_off == 'true') ? true : false;
-            $comms->on_indefinitely = ($request->on_indefinitely == 'true') ? true : false;
-            $comms->week_start = $request->week_start;
-            $comms->week_end = $request->week_end;
-            $comms->weekend_start = $request->weekend_start;
-            $comms->weekend_end = $request->weekend_end;
-            $comms->message = $request->message;
-            $comms->business_id = $businessId;
-            $comms->save();
+            $settings = new \App\BusinessCommunications();
+            $settings->auto_off = ($request->auto_off == 'true') ? true : false;
+            $settings->on_indefinitely = ($request->on_indefinitely == 'true') ? true : false;
+            $settings->week_start = $request->week_end;
+            $settings->week_end = $request->week_end;
+            $settings->weekend_start = $request->weekend_start;
+            $settings->weekend_end = $request->weekend_end;
+            $settings->message = $request->message;
+            $settings->business_id = $businessId;
+            $settings->save();
         }
 
-        return response()->json($comms);
+        return new SuccessResponse('Auto Reply settings updated.');
 
     }
 }
