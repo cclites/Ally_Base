@@ -4,10 +4,9 @@ namespace App;
 
 use App\Services\QuickbooksOnlineService;
 use Crypt;
-use Illuminate\Database\Eloquent\Model;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 
-class QuickbooksConnection extends Model
+class QuickbooksConnection extends BaseModel
 {
     /**
      * The attributes that aren't mass assignable.
@@ -167,9 +166,9 @@ class QuickbooksConnection extends Model
             return false;
         }
 
-//        if (empty($this->shift_service_id)) {
-//            return false;
-//        }
+        if (empty($this->shift_service_id)) {
+            return false;
+        }
 
         if (empty($this->refund_service_id)) {
             return false;

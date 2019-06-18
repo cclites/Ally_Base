@@ -174,10 +174,10 @@ class QuickbooksQueueController extends Controller
      *
      * @param ClientInvoiceItem $item
      * @param QuickbooksConnection $connection
-     * @param int $overrideServiceId
+     * @param int|null $overrideServiceId
      * @return array
      */
-    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection, int $overrideServiceId) : array
+    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection, ?int $overrideServiceId = null) : array
     {
         $service = null;
         if ($item->name == 'Manual Adjustment') {
@@ -188,20 +188,12 @@ class QuickbooksQueueController extends Controller
             $service = $connection->expenseService;
         } else if ($item->name == 'Refund') {
             $service = $connection->refundService;
-        } else {
-            // Shifts and Services
-            if (! empty($connection->shiftService)) {
-                $service = $connection->shiftService;
+        } else { // Shift Services
+            if ($connection->allow_shift_overrides && filled($overrideServiceId)) {
+                $service = QuickbooksService::findOrFail($overrideServiceId);
             } else {
-                // 'Pull from shift' option is selected
-                if ($overrideServiceId) {
-                    // use override service
-                    $service = QuickbooksService::findOrFail($overrideServiceId);
-                } else {
-                    // TODO: Create or use a default Ally Service
-                }
+                $service = $connection->shiftService;
             }
-
         }
 
         return [$service->service_id, $service->name];

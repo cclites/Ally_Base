@@ -20,8 +20,8 @@ const getters = {
         return !!state.config.access_token;
     },
     mapServiceFromShifts(state) {
-        return state.config.shift_service_id == null;
-    }
+        return !!state.config.allow_shift_overrides;
+    },
 };
 
 // mutations

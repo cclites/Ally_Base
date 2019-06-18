@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Http\Requests\UpdateQuickbooksSettingsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksConnectionResource;
 use App\Responses\SuccessResponse;
@@ -399,29 +400,19 @@ class QuickbooksSettingsController extends BaseController
     /**
      * Update the general settings tab.
      *
-     * @param Request $request
+     * @param UpdateQuickbooksSettingsRequest $request
      * @param Business $business
      * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function updateSettings(Request $request, Business $business)
+    public function updateSettings(UpdateQuickbooksSettingsRequest $request, Business $business)
     {
         if (empty($business->quickbooksConnection)) {
             return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
         }
-
         $this->authorize('update', $business);
 
-        $data = $request->validate([
-            'name_format' => 'required|in:first_last,last_first',
-            'mileage_service_id' => 'nullable|exists:quickbooks_services,id',
-            'refund_service_id' => 'nullable|exists:quickbooks_services,id',
-            'shift_service_id' => 'nullable|exists:quickbooks_services,id',
-            'expense_service_id' => 'nullable|exists:quickbooks_services,id',
-            'adjustment_service_id' => 'nullable|exists:quickbooks_services,id',
-        ]);
-
-        $business->quickbooksConnection->update($data);
+        $business->quickbooksConnection->update($request->validated());
 
         return new SuccessResponse('Settings updated successfully.');
     }
