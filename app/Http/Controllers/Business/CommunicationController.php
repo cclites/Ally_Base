@@ -221,4 +221,51 @@ class CommunicationController extends Controller
 
         return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
+
+    /**
+     * Retrieve auto-sms reply settings
+     *
+     * @param $businessId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showAutoSms($businessId){
+        $comms  = \App\BusinessCommunications::where('business_id', $businessId)->first();
+        return response()->json($comms);
+    }
+
+    /**
+     * Create or update auto-sms reply settings
+     *
+     * @param Request $request
+     * @param $businessId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateAutoSms(Request $request, $businessId){
+
+        $comms = \App\BusinessCommunications::where('business_id', $businessId)->first();
+
+        if($comms){
+            $comms->auto_off = $request->auto_off;
+            $comms->on_indefinitely = ($request->auto_off == 'true') ? true : false;
+            $comms->week_start = ($request->on_indefinitely == 'true') ? true : false;
+            $comms->week_end = $request->week_end;
+            $comms->weekend_start = $request->weekend_start;
+            $comms->weekend_end = $request->weekend_end;
+            $comms->message = $request->message;
+        }else{
+            $comms = new \App\BusinessCommunications();
+            $comms->auto_off = ($request->auto_off == 'true') ? true : false;
+            $comms->on_indefinitely = ($request->on_indefinitely == 'true') ? true : false;
+            $comms->week_start = $request->week_start;
+            $comms->week_end = $request->week_end;
+            $comms->weekend_start = $request->weekend_start;
+            $comms->weekend_end = $request->weekend_end;
+            $comms->message = $request->message;
+            $comms->business_id = $businessId;
+            $comms->save();
+        }
+
+        return response()->json($comms);
+
+    }
 }

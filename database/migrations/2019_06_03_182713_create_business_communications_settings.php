@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBusinessCommunicationsOptions extends Migration
+class CreateBusinessCommunicationsSettings extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class CreateBusinessCommunicationsOptions extends Migration
     {
         $this->down();
 
-        Schema::create('business_communications_options', function (Blueprint $table) {
+        Schema::create('business_communications_settingss', function (Blueprint $table) {
             $table->increments('id');
             $table->boolean('auto_off')->default(true);
             $table->boolean('on_indefinitely')->default(false);
@@ -35,6 +35,6 @@ class CreateBusinessCommunicationsOptions extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('business_communications_options');
+        Schema::dropIfExists('business_communications_settings');
     }
 }

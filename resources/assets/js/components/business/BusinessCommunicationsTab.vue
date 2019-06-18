@@ -114,7 +114,7 @@
             async fetchMessagingData(){
 
                 console.log("Fetch messaging data");
-                let response = await axios.get('/business/communications/' + this.businessId)
+                let response = await axios.get('/business/communication/sms-autoresponse/' + this.businessId)
                         .then(response => {
                             console.log("Logging response");
                             console.log(response.data);
@@ -140,7 +140,7 @@
                              '&week_start=' + this.form.week_start + '&week_end=' + this.form.week_end +
                              '&weekend_start=' + this.form.weekend_start + '&weekend_end=' + this.form.weekend_end;
 
-                const response = axios.post('/business/communications/' + this.businessId + params)
+                const response = axios.post('/business/communication/sms-autoresponse/' + this.businessId + params)
                                         .then(response => {
                                             //this.setItems(response.data);
                                             console.log(response);
