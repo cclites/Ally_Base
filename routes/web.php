@@ -443,6 +443,8 @@ Route::group([
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
+    Route::post('expiration-types/store/{type}', 'Business\ExpirationTypesController@store');
+    Route::delete('expiration-types/destroy/{id}', 'Business\ExpirationTypesController@destroy');
 
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
