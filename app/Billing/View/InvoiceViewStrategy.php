@@ -7,5 +7,5 @@ use Illuminate\Support\Collection;
 
 interface InvoiceViewStrategy
 {
-    public function generate(InvoiceInterface $invoice, ContactableInterface $sender, ContactableInterface $recipient, Collection $payments);
+    public function generate(InvoiceInterface $invoice, ContactableInterface $sender, ContactableInterface $recipient, ContactableInterface $subject, Collection $payments);
 }
