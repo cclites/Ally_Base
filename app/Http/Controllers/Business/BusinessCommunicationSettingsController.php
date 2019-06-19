@@ -7,8 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use App\Responses\SuccessResponse;
 
-use Log;
-
 class BusinessCommunicationSettingsController extends Controller
 {
     /**
@@ -47,8 +45,6 @@ class BusinessCommunicationSettingsController extends Controller
     public function store(Request $request, $businessId){
 
         $settings = \App\BusinessCommunications::where('business_id', $businessId)->first();
-
-        Log::info(json_encode($request->all()));
 
         $request->validate([
             'selected' => Rule::in(['off', 'on', 'schedule']),
