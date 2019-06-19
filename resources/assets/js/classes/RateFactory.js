@@ -28,8 +28,8 @@ class RateFactory {
         if (! clientRate) {
             return 0;
         }
-        clientRate = new Decimal(clientRate);
-        caregiverRate = new Decimal(caregiverRate);
+        clientRate = new Decimal(clientRate || 0);
+        caregiverRate = new Decimal(caregiverRate || 0);
         let allyFee = this.getAllyFee(allyPct, clientRate, allyFeeIncluded);
         let providerFee = clientRate.sub(caregiverRate).sub(allyFee);
 
