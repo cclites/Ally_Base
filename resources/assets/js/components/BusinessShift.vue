@@ -337,9 +337,14 @@
                                 Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                             </b-alert>
 
+                            <b-alert v-if="isUsingDefaultRates" variant="info" show>
+                                This shift is using the default rates.
+                            </b-alert>
+                            <b-alert v-else variant="warning" show>
+                                This shift is not using the default rates.
+                            </b-alert>
                             <label class="mt-1">
                                 <b-form-checkbox v-model="defaultRates">
-                                    Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     Update with Default Rates from Caregivers &amp; Rates Tab of Client Profile on Save
                                 </b-form-checkbox>
                             </label>
