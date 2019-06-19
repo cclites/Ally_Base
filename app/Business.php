@@ -896,8 +896,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return true;
     }
 
-    public function smsAutoResponseSettings(){
-        return hasOne(BusinessCommunications::class, 'business_communications_settings');
+    public function communicationSettings(){
+        return $this->hasOne(BusinessCommunications::class);
     }
 
     ////////////////////////////////////

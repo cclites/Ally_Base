@@ -2,102 +2,76 @@
 
 namespace App\Listeners;
 
-use App\Business;
 use App\Events\SmsThreadReplyCreated;
 use Carbon\Carbon;
 use App\Events\SmsThreadReply;
-use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
-use App\PhoneNumber;
-use App\BusinessCommunications;
-
-use Log;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * Class HandleSmsAutoReply
  * @package App\Listeners
  */
-class HandleSmsAutoReply extends BaseNotification{
-
-    public $sendNotification = false;
+class HandleSmsAutoReply implements ShouldQueue
+{
+    /**
+     * @var SmsThreadReplyCreated
+     */
+    private $event;
 
     /**
      * Handle the event.
      *
-     * @param  SmsThreadReplyCreated  $event
+     * @param SmsThreadReplyCreated $event
      * @return void
      */
     public function handle(SmsThreadReplyCreated $event)
     {
-        $to = $event->reply->to_number;
+        $this->event = $event;
 
-        //Didn't use the PhoneNumber object
-        $toNumber = "(".substr($to, 0, 3).") ".substr($to, 3, 3)."-".substr($to,6);
-        $toNumber2 = substr($to, 0, 3)."-".substr($to, 3, 3)."-".substr($to,6);
-
-        $this->sendResponse = false;
-
-        $now = Carbon::now('UTC');
-        $formattedTime = $now->format('G:i');
-
-        $settings = BusinessCommunications::whereHas('business', function($q) use ($toNumber, $toNumber2){
-                        $q->where('phone1', $toNumber, 'like')
-                          ->orWhere('phone1', $toNumber2, 'like');
-                    })
-                    ->where('auto_off', false)
-                    ->orWhere('on_indefinitely', true)
-                    ->first();
-
-        if(!is_null($settings)){
-
-            $tz = Business::where('id', $settings->business_id)->select('timezone')->first();
-
-            if($settings->on_indefinitely === true){
-               $this->sendResponse = true;
-            }elseif($now->isWeekday()){
-               $this->checkTimeRange($settings->week_start, $settings->week_end, $formattedTime, $tz->timezone);
-            }elseif($now->isWeekend()){
-               $this->checkTimeRange($settings->weekend_start, $settings->weekend_end, $formattedTime, $tz->timezone);
-            }
-
-        }else{
+        if (empty($event->reply->business)) {
+            // SMS did not match any business numbers in the system,
+            // so there are no auto reply settings to check.
             return;
         }
 
-        if($this->sendResponse === true){
-            dispatch(new SendTextMessage($event->reply->from_number, $settings->message));
+        if ($message = $this->getAutoReply()) {
+            dispatch(new SendTextMessage($event->reply->from_number, $message, $event->reply->business->outgoing_sms_number));
         }
-
     }
 
     /**
-     * This is a bit of a mind warp. The $end represents the time in the
-     * morning when auto-replies should stop. $start represents the time
-     * later in the day when auto-replies should start
+     * Check for message to send auto-reply.
      *
-     * @param $start
-     * @param $end
-     * @param $now
+     * @return string|null
      */
-    public function checkTimeRange($start, $end, $now, $tz = null){
+    public function getAutoReply() : ?string
+    {
+        $settings = $this->event->reply->business->communicationSettings;
+        $timezone = $this->event->reply->business->timezone ?: 'America/New_York';
 
-        $startTuples = explode(":", $start);
-        $start = Carbon::createFromTime($startTuples[0], $startTuples[1], 00, $tz)->format('G:i');
-        $endTuples = explode(":", $end);
-        $end = Carbon::createFromTime($endTuples[0], $endTuples[1], 00, $tz)->format('G:i');
-
-        $end = intval(str_replace(':', "", $end));
-        $start = intval(str_replace(':', "", $start));
-        $now = intval(str_replace(':', "", $now));
-
-        if ($now > $end && $now < $start){
-            $this->sendResponse = false;
-        }else{
-            $this->sendResponse = true;
+        if ($settings->auto_off) {
+            return null;
+        } else if ($settings->on_indefinitely) {
+            return $settings->message;
         }
 
+        // Check scheduled times.
+        $now = Carbon::now()->setTimezone($timezone);
+        if ($now->isWeekday()) {
+            $start = Carbon::parse($now->toDateString() . ' ' . $settings->week_start, $timezone);
+            $end = Carbon::parse($now->toDateString() . ' ' . $settings->week_end, $timezone);
+        } else if ($now->isWeekend()) {
+            $start = Carbon::parse($now->toDateString() . ' ' . $settings->weekend_start, $timezone);
+            $end = Carbon::parse($now->toDateString() . ' ' . $settings->weekend_end, $timezone);
+        } else {
+            return null;
+        }
 
+        if ($now->greaterThan($start) || $now->lessThan($end)) {
+            return $settings->message;
+        }
+
+        return null;
     }
 }
-
-?>

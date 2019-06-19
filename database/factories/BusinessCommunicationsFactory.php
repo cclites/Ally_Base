@@ -11,7 +11,10 @@ $factory->define(BusinessCommunications::class, function (Faker $faker) {
         'week_end'=>$faker->randomElement(['03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00']),
         'weekend_start'=>$faker->randomElement(['13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']),
         'weekend_end'=>$faker->randomElement(['03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00']),
-        'message'=>"testing SMS Auto Reply",
-        'business_id'=>0,
+        'message'=>$faker->sentence,
+        'business_id' => function() {
+            $business = \App\Business::inRandomOrder()->first() ?? factory(\App\Business::class)->create();
+            return $business->id;
+        },
     ];
 });
