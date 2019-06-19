@@ -270,8 +270,8 @@ Route::group([
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
 
-    Route::get('/communication/sms-autoresponse/{businessId}', 'Business\CommunicationController@showAutoSms');
-    Route::post('/communication/sms-autoresponse/{businessId}', 'Business\CommunicationController@updateAutoSms');
+    Route::get('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@show');
+    Route::post('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@store');
 
     Route::resource('rate-codes', 'Business\RateCodeController');
 

@@ -107,8 +107,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'selected' => 'schedule',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
@@ -124,8 +123,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'selected' => 'schedule',
             'weekend_start'=>'17:00', // 5PM
             'weekend_end'=>'08:00' // 8AM
         ]);
@@ -145,8 +143,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'selected' => 'schedule',
             'weekend_start'=>'17:00', // 5PM
             'weekend_end'=>'08:00' // 8AM
         ]);
@@ -162,8 +159,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'selected' => 'schedule',
             'weekend_start'=>'00:00', // 12:01 AM
             'weekend_end'=>'00:00' // 12:01 AM
         ]);
@@ -192,8 +188,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>true,
-            'auto_off'=>false,
+            'selected' => 'on',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
@@ -213,8 +208,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>true,
+            'selected' => 'off',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
