@@ -728,4 +728,68 @@ class ServiceAuthValidatorTest extends TestCase
         $schedule2 = $this->createServiceBreakoutSchedule($month1->copy()->endOfMonth(), '22:00:00', $services, 1);
         $this->assertExceedsServiceAuth($schedule2);
     }
+
+    /** @test */
+    public function weekly_auth_periods_should_calculate_shifts_based_on_their_week_start_value()
+    {
+        Carbon::setTestNow(Carbon::parse('2019-06-10 12:00:00')); // today is Monday
+
+        $authorization = $this->createClientAuth([
+            'units' => 10,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'week_start' => 2, // Tuesday
+            'effective_start' => Carbon::yesterday()->format('Ymd'),
+        ]);
+
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 5);
+        $this->createShift(Carbon::tomorrow(), '12:00:00', 6);
+
+        $this->assertDoesNotExceedServiceAuth($shift);
+
+        $authorization->update(['week_start' => 1]); // Set weeks to start on Monday
+        $this->assertExceedsServiceAuth($shift);
+    }
+
+    /** @test */
+    public function weekly_auth_periods_should_calculate_schedules_based_on_their_week_start_value()
+    {
+        Carbon::setTestNow(Carbon::parse('2019-06-10 12:00:00')); // today is Monday
+
+        $authorization = $this->createClientAuth([
+            'units' => 10,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'week_start' => 2, // Tuesday
+            'effective_start' => Carbon::yesterday()->format('Ymd'),
+        ]);
+
+        $schedule = $this->createSchedule(Carbon::today(), '11:00:00', 5);
+        $this->createSchedule(Carbon::tomorrow(), '11:00:00', 6);
+
+        $this->assertDoesNotExceedServiceAuth($schedule);
+
+        $authorization->update(['week_start' => 1]); // Set weeks to start on Monday
+        $this->assertExceedsServiceAuth($schedule);
+    }
+
+    /** @test */
+    public function running_a_weekly_period_check_should_not_alter_the_global_carbon_start_of_week_value()
+    {
+        $this->assertEquals(Carbon::MONDAY, Carbon::getWeekStartsAt());
+        $this->assertEquals(Carbon::SUNDAY, Carbon::getWeekEndsAt());
+
+        Carbon::setTestNow(Carbon::parse('2019-06-10 12:00:00')); // today is Monday
+
+        $this->createClientAuth([
+            'units' => 10,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'week_start' => 2, // Tuesday
+            'effective_start' => Carbon::yesterday()->format('Ymd'),
+        ]);
+
+        $shift = $this->createShift(Carbon::today(), '11:00:00', 5);
+        $this->assertDoesNotExceedServiceAuth($shift);
+
+        $this->assertEquals(Carbon::MONDAY, Carbon::getWeekStartsAt());
+        $this->assertEquals(Carbon::SUNDAY, Carbon::getWeekEndsAt());
+    }
 }
