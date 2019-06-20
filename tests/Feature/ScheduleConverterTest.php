@@ -4,6 +4,7 @@ namespace Tests\Feature;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\QuickbooksService;
 use App\Schedule;
 use App\Shift;
 use App\Shifts\ScheduleConverter;

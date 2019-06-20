@@ -160,6 +160,10 @@ class ScheduleController extends BaseController
             $creator->overrideMaxHours();
         }
 
+        if ($request->quickbooks_service_id) {
+            $creator->attachQuickbooksService($request->quickbooks_service_id);
+        }
+
         try {
             $created = $creator->create($this->userSettings()->enable_schedule_groups());
             if ($count = $created->count()) {

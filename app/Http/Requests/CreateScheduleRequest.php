@@ -5,6 +5,7 @@ use App\Rules\ValidEffectivePayer;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use App\Schedule;
+use Illuminate\Validation\Rule;
 
 class CreateScheduleRequest extends BusinessClientRequest
 {
@@ -30,6 +31,11 @@ class CreateScheduleRequest extends BusinessClientRequest
             'bydays' => 'required_if:interval_type,weekly,biweekly|array',
             'care_plan_id' => 'nullable|exists:care_plans,id',
             'service_id' => 'nullable|exists:services,id',
+            'quickbooks_service_id' => ['nullable',
+                Rule::exists('quickbooks_services', 'id')->where(function ($query) {
+                    $query->where('business_id', $this->getBusinessId());
+                }),
+            ],
             'payer_id' => [
                 'nullable',
                 new ValidEffectivePayer($this->client, Carbon::parse($this->input('starts_at')))
@@ -45,6 +51,11 @@ class CreateScheduleRequest extends BusinessClientRequest
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
             'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
+            'services.*.quickbooks_service_id' => ['nullable',
+                Rule::exists('quickbooks_services', 'id')->where(function ($query) {
+                    $query->where('business_id', $this->getBusinessId());
+                }),
+            ],
             'status' => 'required|in:' . join(',', [Schedule::OK, Schedule::ATTENTION_REQUIRED, Schedule::CAREGIVER_CANCELED, Schedule::CLIENT_CANCELED, Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT]),
         ];
     }
@@ -83,7 +94,7 @@ class CreateScheduleRequest extends BusinessClientRequest
     public function getServices(): array
     {
         return array_map(function($service) {
-            return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate']);
+            return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate', 'quickbooks_service_id']);
         }, $this->validated()['services'] ?? []);
     }
 }

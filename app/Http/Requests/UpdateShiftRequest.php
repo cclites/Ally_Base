@@ -13,6 +13,7 @@ use App\Shifts\Data\ClockData;
 use App\Shifts\ShiftFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 
 class UpdateShiftRequest extends BusinessClientRequest
 {
@@ -41,6 +42,11 @@ class UpdateShiftRequest extends BusinessClientRequest
                 'nullable',
                 new ValidEffectivePayer($this->client, Carbon::parse($this->input('checked_in_time')))
             ],
+            'quickbooks_service_id' => ['nullable',
+                Rule::exists('quickbooks_services', 'id')->where(function ($query) {
+                    $query->where('business_id', $this->getBusinessId());
+                }),
+            ],
             'issues.id' => 'nullable|numeric',
             'issues.caregiver_injury' => 'boolean',
             'issues.client_injury' => 'boolean',
@@ -58,6 +64,11 @@ class UpdateShiftRequest extends BusinessClientRequest
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
             'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
+            'services.*.quickbooks_service_id' => ['nullable',
+                Rule::exists('quickbooks_services', 'id')->where(function ($query) {
+                    $query->where('business_id', $this->getBusinessId());
+                }),
+            ],
         ];
     }
 
@@ -101,7 +112,7 @@ class UpdateShiftRequest extends BusinessClientRequest
     public function getServices(): array
     {
         return array_map(function($service) {
-            return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate']);
+            return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate', 'quickbooks_service_id']);
         }, $this->validated()['services'] ?? []);
     }
 
@@ -144,7 +155,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             $rates,
             $status,
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
-            $this->input('payer') ? Payer::find($this->input('payer')) : null
+            $this->input('payer') ? Payer::find($this->input('payer')) : null,
+            $this->input('quickbooks_service_id')
         )->withData($clockOutData)->withServices($this->getServices());
 
         return $shiftData;
