@@ -133,7 +133,6 @@
         },
 
 
-
         name: "ClientCommunicationsTab",
 
         props: {
@@ -141,11 +140,6 @@
         },
 
         watch: {
-            message: function (val) {
-                if (val.length >= smsLength) {
-                    //this.form.message = val.substring(0, smsLength);
-                }
-            },
         }
     }
 </script>

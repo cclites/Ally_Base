@@ -46,14 +46,18 @@ class BusinessCommunicationSettingsController extends Controller
 
         $settings = \App\BusinessCommunications::where('business_id', $businessId)->first();
 
-        $request->validate([
+        $messages = [
+            'message.required_unless'=>'An auto reply message is required.'
+        ];
+
+        $this->validate($request, [
             'reply_option' => Rule::in(['off', 'on', 'schedule']),
             'week_start' => 'required|string|max:8',
             'week_end' => 'required|string|max:8',
             'weekend_start' => 'required|string|max:8',
             'weekend_end' => 'required|string|max:8',
             'message'=>'required_unless:reply_option,off|max:160',
-        ]);
+        ], $messages);
 
         if($settings){
             $settings->reply_option = $request->reply_option;
