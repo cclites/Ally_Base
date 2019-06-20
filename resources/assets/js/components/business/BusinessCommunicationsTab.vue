@@ -12,12 +12,12 @@
 
                       <div class="col-lg-6">
                           <b-form-group label="Select an option">
-                              <b-form-radio-group v-model="form.selected">
-                                  <b-form-radio name="selected" value="off" stacked>Auto Reply Off</b-form-radio>
+                              <b-form-radio-group v-model="form.reply_option">
+                                  <b-form-radio name="reply_option" value="off" stacked>Auto Reply Off</b-form-radio>
                                   <br>
-                                  <b-form-radio name="selected" value="on" stacked>Auto Reply Always On</b-form-radio>
+                                  <b-form-radio name="reply_option" value="on" stacked>Auto Reply Always On</b-form-radio>
                                   <br>
-                                  <b-form-radio name="selected" value="schedule" stacked>Auto Reply On Schedule</b-form-radio>
+                                  <b-form-radio name="reply_option" value="schedule" stacked>Auto Reply On Schedule</b-form-radio>
                               </b-form-radio-group>
                           </b-form-group>
                       </div>
@@ -88,7 +88,7 @@
         data() {
             return {
                 form: new Form({
-                    selected: 'off',
+                    reply_option: 'off',
                     week_start: '',
                     week_end: '',
                     weekend_start: '',
@@ -100,13 +100,12 @@
 
         methods: {
 
-
             async fetchMessagingData(){
                 let response = await axios.get('/business/settings/sms-autoresponse/' + this.businessId)
                             .then(response => {
 
                                 let data = response.data;
-                                this.form.selected = data.selected;
+                                this.form.reply_option = data.reply_option;
                                 this.form.message = data.message;
                                 this.form.week_start = this.formatMysqlTime(data.week_start);
                                 this.form.week_end = this.formatMysqlTime(data.week_end);
@@ -120,14 +119,6 @@
             },
 
             saveMessaging(){
-
-                /*
-                let params = '?auto_off=' + this.form.auto_off + "&on_indefinitely=" +
-                             this.form.on_indefinitely + "&message=" + this.form.message +
-                             '&week_start=' + this.form.week_start + '&week_end=' + this.form.week_end +
-                             '&weekend_start=' + this.form.weekend_start + '&weekend_end=' + this.form.weekend_end;
-
-                 */
 
                 this.form.post('/business/settings/sms-autoresponse/' + this.businessId)
                     .then( ({ data }) => {
@@ -155,22 +146,6 @@
                     //this.form.message = val.substring(0, smsLength);
                 }
             },
-
-            week_start: function (val) {
-                this.form.week_end = val;
-            },
-
-            week_end: function (val) {
-                this.form.week_end = val;
-            },
-
-            weekend_start: function (val) {
-                this.form.weekend_start = val;
-            },
-
-            weekend_end: function (val) {
-                this.form.weekend_end = val;
-            }
         }
     }
 </script>

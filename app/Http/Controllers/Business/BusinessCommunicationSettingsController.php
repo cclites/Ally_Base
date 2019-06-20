@@ -22,7 +22,7 @@ class BusinessCommunicationSettingsController extends Controller
         if(!$settings){
 
             $settings = [
-                'selected'=>'off',
+                'reply_option'=>'off',
                 'week_start'=>'17:00:00',
                 'week_end'=>'08:00:00',
                 'weekend_start'=>'17:00:00',
@@ -47,16 +47,16 @@ class BusinessCommunicationSettingsController extends Controller
         $settings = \App\BusinessCommunications::where('business_id', $businessId)->first();
 
         $request->validate([
-            'selected' => Rule::in(['off', 'on', 'schedule']),
+            'reply_option' => Rule::in(['off', 'on', 'schedule']),
             'week_start' => 'required|string|max:8',
             'week_end' => 'required|string|max:8',
             'weekend_start' => 'required|string|max:8',
             'weekend_end' => 'required|string|max:8',
-            'message'=>'string|max:160:required_if:selected,!=,off',
+            'message'=>'required_unless:reply_option,off|max:160',
         ]);
 
         if($settings){
-            $settings->selected = $request->selected;
+            $settings->reply_option = $request->reply_option;
             $settings->week_start = $request->week_start;
             $settings->week_end = $request->week_end;
             $settings->weekend_start = $request->weekend_start;
@@ -65,7 +65,7 @@ class BusinessCommunicationSettingsController extends Controller
             $settings->save();
         }else{
             $settings = new \App\BusinessCommunications();
-            $settings->selected = $request->selected;
+            $settings->reply_option = $request->reply_option;
             $settings->week_start = $request->week_start;
             $settings->week_end = $request->week_end;
             $settings->weekend_start = $request->weekend_start;
