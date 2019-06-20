@@ -168,6 +168,7 @@ use App\Data\ScheduledRates;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientConfirmed($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
+ * @property int $quickbooks_service_id
  */
 class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {

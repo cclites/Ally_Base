@@ -99,6 +99,7 @@ export default {
                     'provider_fee': null,
                     'ally_fee': null,
                 },
+                quickbooks_service_id: service.quickbooks_service_id || '',
             };
             if (!service.id) {
                 this.fetchDefaultRate(newService);

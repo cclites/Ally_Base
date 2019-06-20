@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Business;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Http\Requests\UpdateQuickbooksSettingsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksConnectionResource;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidActivityCode;
 use App\Services\QuickbooksOnlineService;
+use App\Shift;
 use Illuminate\Http\Request;
 use Session;
 
@@ -379,6 +381,12 @@ class QuickbooksSettingsController extends BaseController
             $business->quickbooksConnection()->whereIn($column, $deleteIds)->update([$column => null]);
         }
 
+        // Keep reference to deleted services for now to allow for historical
+        // accuracy.  Quickbooks doesn't allow actual deletion of items, so
+        // the mapping still works.
+//        $business->shifts()->whereIn('quickbooks_service_id', $deleteIds)->update(['quickbooks_service_id' => null]);
+//        $business->schedules()->whereIn('quickbooks_service_id', $deleteIds)->update(['quickbooks_service_id' => null]);
+
         // Delete the missing service records.
         $business->quickbooksServices()->whereIn('id', $deleteIds)->delete();
 
@@ -399,30 +407,38 @@ class QuickbooksSettingsController extends BaseController
     /**
      * Update the general settings tab.
      *
-     * @param Request $request
+     * @param UpdateQuickbooksSettingsRequest $request
      * @param Business $business
      * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function updateSettings(Request $request, Business $business)
+    public function updateSettings(UpdateQuickbooksSettingsRequest $request, Business $business)
     {
         if (empty($business->quickbooksConnection)) {
             return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
         }
-
         $this->authorize('update', $business);
 
-        $data = $request->validate([
-            'name_format' => 'required|in:first_last,last_first',
-            'mileage_service_id' => 'nullable|exists:quickbooks_services,id',
-            'refund_service_id' => 'nullable|exists:quickbooks_services,id',
-            'shift_service_id' => 'nullable|exists:quickbooks_services,id',
-            'expense_service_id' => 'nullable|exists:quickbooks_services,id',
-            'adjustment_service_id' => 'nullable|exists:quickbooks_services,id',
-        ]);
-
-        $business->quickbooksConnection->update($data);
+        $business->quickbooksConnection->update($request->validated());
 
         return new SuccessResponse('Settings updated successfully.');
+    }
+
+    /**
+     * Get the quickbooks configuration for a given business.
+     *
+     * @param Business $business
+     * @return QuickbooksConnectionResource|\Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function config(Business $business)
+    {
+        $this->authorize('read', $business);
+
+        if (empty($business->quickbooksConnection)) {
+            return response()->json([]);
+        }
+
+        return new QuickbooksConnectionResource($business->quickbooksConnection);
     }
 }
