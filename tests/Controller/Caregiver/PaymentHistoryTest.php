@@ -21,7 +21,7 @@ class PaymentHistoryTest extends TestCase
     public function testACaregiverCanPrintTheirPaymentHistory()
     {
         $this->disableExceptionHandling();
-        $caregiver = factory(Caregiver::class)->create();
+        $caregiver = factory(Caregiver::class)->create(['firstname' => 'Boov', 'lastname' => 'Clapstein']);
         $chain = factory(BusinessChain::class)->create();
         $business = factory(Business::class)->create(['chain_id' => $chain->id]);
         $chain->assignCaregiver($caregiver);
@@ -31,7 +31,6 @@ class PaymentHistoryTest extends TestCase
         $response = $this->get('/reports/payment-history/print/'.Carbon::now()->year."/html");
 
         $response->assertStatus(200);
-        $response->assertSeeText(htmlentities($caregiver->firstname));
-        $response->assertSeeText(htmlentities($caregiver->lastname));
+        $response->assertSeeText('Boov Clapstein');
     }
 }
