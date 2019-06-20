@@ -159,7 +159,7 @@
                                         <th>Ally Fee</th>
                                         <th width="12%">Total Rate</th>
                                         <th>Payer</th>
-                                        <th v-if="allowQuickbooksMapping">Quickbooks Mapping</th>
+                                        <th v-if="allowQuickbooksMapping">Quickbooks Service Mapping</th>
                                         <th class="service-actions"></th>
                                     </tr>
                                     </thead>
