@@ -96,4 +96,33 @@ trait CreatesSchedules
 
         return $schedule->fresh();
     }
+
+    /**
+     * Helper to make a service breakout Schedule.
+     *
+     * @param \Carbon\Carbon $date
+     * @param string $time
+     * @param array $serviceIds
+     * @param float $hoursPerService
+     * @return array
+     */
+    public function makeServiceBreakoutSchedule(Carbon $date, string $time, array $serviceIds, float $hoursPerService): array
+    {
+        $hours = count($serviceIds) * $hoursPerService;
+        $schedule = $this->makeSchedule($date, $time, $hours, [
+            'service_id' => null,
+        ]);
+
+        $schedule['services'] = [];
+        foreach ($serviceIds as $id) {
+            array_push($schedule['services'], factory(ScheduleService::class)->raw([
+                'schedule_id' => null,
+                'duration' => $hoursPerService,
+                'service_id' => $id,
+                'payer_id' => null,
+            ]));
+        }
+
+        return $schedule;
+    }
 }

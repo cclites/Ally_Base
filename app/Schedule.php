@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
  * @property bool $added_to_past
+ * @property int $quickbooks_service_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
@@ -635,7 +636,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 $services = $services->where('payer_id', $payer_id);
             }
 
-            return $services->sum('duration');
+            return $services->reduce(function ($sum, $service) {
+                return add($sum, floatval($service->duration));
+            }, 0);
         } else {
             return floatval(0);
         }

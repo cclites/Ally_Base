@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CustomFieldOption extends Model
+class CustomFieldOption extends BaseModel
 {   
     /**
      * The database table associated with this model
@@ -23,7 +23,12 @@ class CustomFieldOption extends Model
         'value',
         'label',
     ];
-    
+
+    /**
+     * @var string  The column to sort by default when using ordered()
+     */
+    protected $orderedColumn = 'label';
+
     /**
      * The custom model attributes to add to the Eloquent model
      *

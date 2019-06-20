@@ -31,6 +31,17 @@ class PaginatedCaregiverController extends BaseController
             ->where('role_type', 'caregiver')
             ->forRequestedBusinesses();
 
+        // Need to join the address table to allow sorting by city/zip.
+        $query->leftJoin('addresses', function ($join) {
+            $join->on('users.id', '=', 'addresses.user_id')
+                ->where('addresses.type', 'home');
+        });
+
+        // Being explicit with the selected fields allows easy
+        // access to the city & zip fields but is also required
+        // for the caregiver relation to load properly.
+        $query->select('users.id as id', 'users.firstname as firstname', 'users.lastname as lastname', 'users.email as email', 'addresses.city as city', 'addresses.zip as zipcode');
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('users.email', 'LIKE', "%$search%")

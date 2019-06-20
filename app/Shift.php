@@ -168,6 +168,7 @@ use App\Data\ScheduledRates;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientConfirmed($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
+ * @property int $quickbooks_service_id
  */
 class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
@@ -849,7 +850,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Other Expenses',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => $this->other_expenses_desc,
+                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
             ]);
         }
         else if ($this->other_expenses < 0) {
@@ -858,7 +859,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Expense Adjustment',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => $this->other_expenses_desc,
+                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
             ]);
         }
         return null;

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Business;
+use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -9,26 +11,13 @@ use App\Question;
 
 class ManageQuestionsTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesBusinesses;
 
-    public $officeUser;
-    public $client;
-    public $caregiver;
-    public $business;
-    
     public function setUp()
     {
         parent::setUp();
-
         $this->withoutExceptionHandling();
-
-        $this->client = factory('App\Client')->create();
-        $this->business = $this->client->business;
-        $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->assignCaregiver($this->caregiver);
-        
-        $this->officeUser = factory('App\OfficeUser')->create();
-        $this->officeUser->businesses()->attach($this->business->id);
+        $this->createBusinessWithUsers();
     }
 
     /** @test */
@@ -40,7 +29,7 @@ class ManageQuestionsTest extends TestCase
 
         $data = factory(Question::class)->make();
 
-        $this->postJson(route('business.questions.store'), $data->toArray())
+        $this->postJson(route('business.questions.store')."?business={$this->business->id}", $data->toArray())
             ->assertStatus(200);
 
         $this->assertCount(1, $this->business->fresh()->questions);
@@ -53,7 +42,7 @@ class ManageQuestionsTest extends TestCase
         
         $data = factory(Question::class)->make(['required' => true]);
 
-        $this->postJson(route('business.questions.store'), $data->toArray())
+        $this->postJson(route('business.questions.store')."?business={$this->business->id}", $data->toArray())
             ->assertStatus(200);
 
         $this->assertEquals(1, $this->business->fresh()->questions()->first()->required);
@@ -68,7 +57,7 @@ class ManageQuestionsTest extends TestCase
 
         unset($data['client_type']);
 
-        $this->postJson(route('business.questions.store'), $data->toArray())
+        $this->postJson(route('business.questions.store')."?business={$this->business->id}", $data->toArray())
             ->assertStatus(200);
 
         $this->assertNull($this->business->questions()->first()->client_type);
@@ -77,9 +66,11 @@ class ManageQuestionsTest extends TestCase
     /** @test */
     public function a_custom_question_requires_a_question()
     {
+        $this->withExceptionHandling();
+
         $this->actingAs($this->officeUser->user);
-        
-        $this->postJson(route('business.questions.store'), [])
+
+        $this->postJson(route('business.questions.store')."?business={$this->business->id}", [])
             ->assertJsonValidationErrors(['question']);
 
         $this->assertCount(0, Question::all());
@@ -94,7 +85,7 @@ class ManageQuestionsTest extends TestCase
      
         $this->assertCount(5, Question::all());
 
-        $this->getJson(route('business.questions.index'))
+        $this->getJson(route('business.questions.index')."?business={$this->business->id}")
             ->assertStatus(200)
             ->assertJsonCount(5);
     }
@@ -103,12 +94,13 @@ class ManageQuestionsTest extends TestCase
     public function an_office_user_shouldnt_see_another_businesses_questions()
     {
         $this->actingAs($this->officeUser->user);
-        
-        factory(Question::class, 5)->create();
+
+        $otherBusiness = factory(Business::class)->create();
+        factory(Question::class, 5)->create(['business_id' => $otherBusiness->id]);
 
         $this->assertCount(5, Question::all());
 
-        $this->getJson(route('business.questions.index'))
+        $this->getJson(route('business.questions.index')."?business={$this->business->id}")
             ->assertStatus(200)
             ->assertJsonCount(0);
     }
@@ -131,9 +123,12 @@ class ManageQuestionsTest extends TestCase
     /** @test */
     public function an_office_user_cannot_delete_another_businesses_question()
     {
+        $this->withExceptionHandling();
+
         $this->actingAs($this->officeUser->user);
-        
-        $question = factory(Question::class)->create();
+
+        $otherBusiness = factory(Business::class)->create();
+        $question = factory(Question::class)->create(['business_id' => $otherBusiness->id]);
 
         $this->assertCount(1, Question::all());
 
@@ -170,9 +165,12 @@ class ManageQuestionsTest extends TestCase
     /** @test */
     public function an_office_user_cannot_update_anther_businesses_questions()
     {
+        $this->withExceptionHandling();
+
         $this->actingAs($this->officeUser->user);
 
-        $question = factory(Question::class)->create();
+        $otherBusiness = factory(Business::class)->create();
+        $question = factory(Question::class)->create(['business_id' => $otherBusiness->id]);
 
         $data = [
             'question' => 'new question?',

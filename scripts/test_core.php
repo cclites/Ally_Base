@@ -39,30 +39,4 @@ if (!$ideHelper->isSuccessful()) {
     exit(4);
 }
 
-$phpunitConfig = base_path('phpunit.xml');
-$phpunitBin = "$vendorDir/bin/phpunit";
-if (!file_exists($phpunitBin)) {
-    echo("phpunit binary does not exist.\n");
-    exit(3);
-}
-$phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConfig));
-
-$phpunitCmds = [
-    "$phpunit --testsuite Model",
-    "$phpunit --testsuite Bugs",
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|ShiftFactory|RateFactory|ScheduleConverter|ServiceAuthValidatorTest|ScheduleCreator|ScheduleEditor|QueryTest/'", // core feature tests
-    "$phpunit --filter '/Payer|InvoiceTest|ClientRateTest|ApplyPaymentTest|ProcessPaymentTest|AllyPercentageTest/'", // new billing tests (add invoice generators once done)
-];
-
-foreach($phpunitCmds as $cmdline) {
-    $phpunitCmd = new Process($cmdline);
-    $phpunitCmd->setTimeout(600);
-    $phpunitCmd->run();
-    if (!$phpunitCmd->isSuccessful()) {
-        echo($phpunitCmd->getOutput() . "\n");
-        echo($phpunitCmd->getErrorOutput() . "\n");
-        exit(2);
-    }
-}
-
 echo "\xE2\x9C\x94\n";

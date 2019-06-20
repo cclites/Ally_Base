@@ -86,7 +86,7 @@ export default {
             const newService = {
                 id: service.id || null,
                 service_id: service.service_id ? service.service_id : (this.defaultService ? this.defaultService.id : null),
-                payer_id: service.payer_id || null,
+                payer_id: service.payer_id == 0 ? 0 : service.payer_id || null,
                 hours_type: service.hours_type || 'default',
                 duration: service.duration || 1,
                 caregiver_rate: service.caregiver_rate || null,
@@ -99,6 +99,7 @@ export default {
                     'provider_fee': null,
                     'ally_fee': null,
                 },
+                quickbooks_service_id: service.quickbooks_service_id || '',
             };
             if (!service.id) {
                 this.fetchDefaultRate(newService);
@@ -186,7 +187,7 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
-            console.log('handleChangedDefaultRates', form);
+            console.log('handleChangedDefaultRates', value, form);
             // initiated from watcher
             if (value) {
                 this.fetchDefaultRate(form);
@@ -198,17 +199,20 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
-                if (! form.default_rates) {
-                    return;
-                }
-                form.client_rate = form.default_rates.client_rate || null;
-                form.caregiver_rate = form.default_rates.caregiver_rate || null;
-                this.recalculateRates(form, form.client_rate, form.caregiver_rate);
-                for(let service of form.services) {
-                    service.client_rate = service.default_rates.client_rate || 0;
-                    service.caregiver_rate = service.default_rates.caregiver_rate || 0;
-                    this.recalculateRates(service, service.client_rate, service.caregiver_rate);
-                }
+                console.log('handleChangedDefaultRates: use defaults is off, do nothing');
+                // if (! form.default_rates) {
+                //     console.log('skipped');
+                //     return;
+                // }
+                // console.log('Assigning all rates to the defaults.');
+                // form.client_rate = form.default_rates.client_rate || null;
+                // form.caregiver_rate = form.default_rates.caregiver_rate || null;
+                // this.recalculateRates(form, form.client_rate, form.caregiver_rate);
+                // for(let service of form.services) {
+                //     service.client_rate = service.default_rates.client_rate || 0;
+                //     service.caregiver_rate = service.default_rates.caregiver_rate || 0;
+                //     this.recalculateRates(service, service.client_rate, service.caregiver_rate);
+                // }
             }
         },
 

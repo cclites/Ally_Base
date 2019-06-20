@@ -464,6 +464,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Claims AR Aging',
+                        url: 'reports/claims-ar-aging',
+                        description: 'Claims AR Aging Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Offline AR Aging',
                         url: 'reports/offline-ar-aging',
                         description: 'Offline Invoice AR Aging Report',

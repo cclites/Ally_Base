@@ -3,7 +3,7 @@
         <b-modal id="businessScheduleModal"
                  :title="title"
                  class="modal-fit-more"
-                 size="lg"
+                 size="xl"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
         >
@@ -47,7 +47,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
+                                    <small v-if="caregiverAssignmentMode" class="form-text text-muted">
                                         <span class="text-warning">Caregivers that are not currently assigned to the client will be automatically assigned.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -131,6 +131,7 @@
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
+                                            <th v-if="allowQuickbooksMapping">Quickbooks Service Mapping</th>
                                             <th class="service-actions"></th>
                                         </tr>
                                         </thead>
@@ -202,10 +203,16 @@
                                                         class="money-input"
                                                 />
                                             </td>
-                                            <td colspan="2">
+                                            <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                                 <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td colspan="2" v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
                                             </td>
                                         </tr>
@@ -289,6 +296,12 @@
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
+                                            <td v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                                </b-form-select>
+                                            </td>
                                             <td class="service-actions text-nowrap">
                                                 <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
                                                     <i class="fa fa-times"></i>
@@ -301,7 +314,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-
                                 <div v-if="billingType === 'services' && serviceHours != scheduledHours" class="alert alert-warning">
                                     Warning: The scheduled hours ({{ numberFormat(scheduledHours) }}) do not match the broken out service hours ({{ numberFormat(serviceHours) }}).
                                 </div>
@@ -316,11 +328,21 @@
                             </b-col>
                         </b-row>
                         <b-row>
+                            <b-col lg="12">
+                                <b-alert v-if="caregiverAssignmentMode" show variant="info">
+                                    <strong>Note:</strong> Because you are assigning a new Caregiver, this will automatically create new default rates using the services/payers above.
+                                </b-alert>
+                            </b-col>
                             <b-col lg="6">
                                 <label>
-                                    <b-form-checkbox v-model="defaultRates">
+                                    <!-- Create a dummy checkbox if we are in assign cg mode -->
+                                    <b-form-checkbox v-if="caregiverAssignmentMode" :checked="true" :disabled="true">
                                         Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
                                     </b-form-checkbox>
+                                    <b-form-checkbox v-show="!caregiverAssignmentMode" v-model="defaultRates">
+                                        Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
+                                    </b-form-checkbox>
+                                    <a v-if="form.client_id" :href="`/business/clients/${form.client_id}#rates`" target="_blank">Manage Client Rates</a>
                                 </label>
                             </b-col>
                             <!--<b-col lg="6" class="text-right">-->
@@ -441,6 +463,7 @@
     import ConfirmationModal from "../../modals/ConfirmationModal";
     import ShiftServices from "../../../mixins/ShiftServices";
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
@@ -477,6 +500,7 @@
                 allyPct: 0.05,
                 paymentType: 'NONE',
                 clientCaregivers: [],
+                clientCaregiversLoaded: false,
                 cgMode: 'client',
                 care_plans: [],
                 daysOfWeek: {
@@ -493,6 +517,7 @@
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
                 warnings: [],
+                loadingQuickbooksConfig: false,
             }
         },
 
@@ -504,6 +529,17 @@
         },
 
         computed: {
+            ...mapGetters({
+                quickbooksServices: 'quickbooks/services',
+                quickbooksBusiness: 'quickbooks/businessId',
+                quickbooksIsAuthorized: 'quickbooks/isAuthorized',
+                quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
+            }),
+
+            caregiverAssignmentMode() {
+                return this.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
+            },
+
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
                     for(let index in this.clientCaregivers) {
@@ -613,6 +649,14 @@
 
             currentWeekdayInt() {
                 return this.startDate ? moment(this.startDate).day() : 0;
+            },
+
+            allowQuickbooksMapping() {
+                return this.quickbooksAllowMapping && this.quickbooksIsAuthorized;
+            },
+
+            disableQuickbooksMapping() {
+                return !this.business || this.loadingQuickbooksConfig;
             },
         },
 
@@ -725,7 +769,8 @@
                 if (!schedule) schedule = this.schedule;
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
-                this.defaultRates = schedule.client_rate == null;
+                this.defaultRates = this.caregiverAssignmentMode ? false : schedule.client_rate == null;
+                console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
                 // Initialize form
@@ -746,7 +791,7 @@
                         'care_plan_id': schedule.care_plan_id || '',
                         'status': schedule.status || 'OK',
                         'service_id': schedule.service_id || this.defaultService.id,
-                        'payer_id': schedule.payer_id || null,
+                        'payer_id': schedule.payer_id == 0 ? 0 : schedule.payer_id || null,
                         'interval_type': "",
                         'recurring_end_date': "",
                         'bydays': [],
@@ -759,7 +804,8 @@
                             'caregiver_rate': null,
                             'provider_fee': null,
                             'ally_fee': null,
-                        }
+                        },
+                        'quickbooks_service_id': schedule.quickbooks_service_id || '',
                     });
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
@@ -879,10 +925,14 @@
             },
 
             loadCaregivers(clientId) {
+                this.clientCaregiversLoaded = false;
                 if (clientId) {
                     axios.get('/business/clients/' + clientId + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
+                        })
+                        .finally(() => {
+                            this.clientCaregiversLoaded = true;
                         });
                 }
             },
@@ -1053,6 +1103,22 @@
 
             allyPct() {
                 this.recalculateAllRates(this.form)
+            },
+
+            // Watch if the business changes and refresh the current quickbooks settings.
+            async business(newVal, oldVal) {
+                if (newVal && newVal.id != oldVal.id) {
+                    this.loadingQuickbooksConfig = true;
+                    await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
+                    await this.$store.dispatch('quickbooks/fetchServices');
+                    this.loadingQuickbooksConfig = false;
+                }
+            },
+            
+            caregiverAssignmentMode(newVal, oldVal) {
+                if (newVal) {
+                    this.defaultRates = false;
+                }
             },
         },
     }

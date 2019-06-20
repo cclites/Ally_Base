@@ -4,6 +4,7 @@ import business from './modules/business'
 import paymentMethod from './modules/paymentMethod'
 import notifications from './modules/notifications';
 import tasks from './modules/tasks';
+import quickbooks from './modules/quickbooks';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ export default new Vuex.Store({
         paymentMethod,
         notifications,
         tasks,
+        quickbooks,
     },
     strict: debug,
 })
