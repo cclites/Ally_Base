@@ -3,7 +3,7 @@
         <b-modal id="businessScheduleModal"
                  :title="title"
                  class="modal-fit-more"
-                 size="lg"
+                 size="xl"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
         >
@@ -131,6 +131,7 @@
                                             <th>Ally Fee</th>
                                             <th width="12%">Total Rate</th>
                                             <th>Payer</th>
+                                            <th v-if="allowQuickbooksMapping">Quickbooks Service Mapping</th>
                                             <th class="service-actions"></th>
                                         </tr>
                                         </thead>
@@ -202,10 +203,16 @@
                                                         class="money-input"
                                                 />
                                             </td>
-                                            <td colspan="2">
+                                            <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                                 <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td colspan="2" v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
                                             </td>
                                         </tr>
@@ -287,6 +294,12 @@
                                                 <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td class="service-actions text-nowrap">
@@ -450,6 +463,7 @@
     import ConfirmationModal from "../../modals/ConfirmationModal";
     import ShiftServices from "../../../mixins/ShiftServices";
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
@@ -503,6 +517,7 @@
                 allCaregivers: this.passCaregivers,
                 groupModal: false,
                 warnings: [],
+                loadingQuickbooksConfig: false,
             }
         },
 
@@ -514,6 +529,13 @@
         },
 
         computed: {
+            ...mapGetters({
+                quickbooksServices: 'quickbooks/services',
+                quickbooksBusiness: 'quickbooks/businessId',
+                quickbooksIsAuthorized: 'quickbooks/isAuthorized',
+                quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
+            }),
+
             caregiverAssignmentMode() {
                 return this.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
             },
@@ -627,6 +649,14 @@
 
             currentWeekdayInt() {
                 return this.startDate ? moment(this.startDate).day() : 0;
+            },
+
+            allowQuickbooksMapping() {
+                return this.quickbooksAllowMapping && this.quickbooksIsAuthorized;
+            },
+
+            disableQuickbooksMapping() {
+                return !this.business || this.loadingQuickbooksConfig;
             },
         },
 
@@ -774,7 +804,8 @@
                             'caregiver_rate': null,
                             'provider_fee': null,
                             'ally_fee': null,
-                        }
+                        },
+                        'quickbooks_service_id': schedule.quickbooks_service_id || '',
                     });
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
@@ -1074,6 +1105,16 @@
                 this.recalculateAllRates(this.form)
             },
 
+            // Watch if the business changes and refresh the current quickbooks settings.
+            async business(newVal, oldVal) {
+                if (newVal && newVal.id != oldVal.id) {
+                    this.loadingQuickbooksConfig = true;
+                    await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
+                    await this.$store.dispatch('quickbooks/fetchServices');
+                    this.loadingQuickbooksConfig = false;
+                }
+            },
+            
             caregiverAssignmentMode(newVal, oldVal) {
                 if (newVal) {
                     this.defaultRates = false;

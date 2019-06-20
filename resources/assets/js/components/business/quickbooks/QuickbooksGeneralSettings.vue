@@ -10,7 +10,7 @@
             </b-row>
             <b-row class="mb-4">
                 <b-col lg="6">
-                    <b-form-group label="Customer Name Format" label-for="name_format">
+                    <b-form-group label="Customer Name Format" label-for="name_format" label-class="required">
                         <b-select name="name_format" id="name_format" v-model="form.name_format" :disabled="busy">
                             <option value="">-- Select Name Format --</option>
                             <option value="first_last">John Doe</option>
@@ -30,15 +30,24 @@
             </b-row>
             <b-row>
                 <b-col md="6">
-                    <b-form-group label="Shift Service" label-for="shift_service_id">
+                    <b-form-group label="Shift Service Overrides" label-for="allow_shift_overrides">
+                        <label class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" v-model="form.allow_shift_overrides" />
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Allow service mapping from schedules and shifts</span>
+                        </label>
+                        <input-help :form="form" field="allow_shift_overrides" text=""></input-help>
+                    </b-form-group>
+
+                    <b-form-group label="Default Shift Service" label-for="shift_service_id" label-class="required">
                         <b-select name="shift_service_id" id="shift_service_id" v-model="form.shift_service_id" :disabled="busy">
                             <option value="">-- Map Shift Service --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
                         </b-select>
-                        <input-help :form="form" field="shift_service_id" text="Select the service to use for general shift entries."></input-help>
+                        <input-help :form="form" field="shift_service_id" text="Select the service to use for shift and service entries."></input-help>
                     </b-form-group>
 
-                    <b-form-group label="Mileage Service" label-for="mileage_service_id">
+                    <b-form-group label="Mileage Service" label-for="mileage_service_id" label-class="required">
                         <b-select name="mileage_service_id" id="mileage_service_id" v-model="form.mileage_service_id" :disabled="busy">
                             <option value="">-- Map Mileage Service --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
@@ -46,7 +55,7 @@
                         <input-help :form="form" field="mileage_service_id" text="Select the service to use for shift mileage reimbursement"></input-help>
                     </b-form-group>
 
-                    <b-form-group label="Expense Service" label-for="expense_service_id">
+                    <b-form-group label="Expense Service" label-for="expense_service_id" label-class="required">
                         <b-select name="expense_service_id" id="expense_service_id" v-model="form.expense_service_id" :disabled="busy">
                             <option value="">-- Map Expense Service --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
@@ -55,7 +64,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Refund Service" label-for="refund_service_id">
+                    <b-form-group label="Refund Service" label-for="refund_service_id" label-class="required">
                         <b-select name="refund_service_id" id="refund_service_id" v-model="form.refund_service_id" :disabled="busy">
                             <option value="">-- Map Refund Service --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
@@ -63,7 +72,7 @@
                         <input-help :form="form" field="refund_service_id" text="Select the service to use for refunds."></input-help>
                     </b-form-group>
 
-                    <b-form-group label="Adjustment Service" label-for="adjustment_service_id">
+                    <b-form-group label="Adjustment Service" label-for="adjustment_service_id" label-class="required">
                         <b-select name="adjustment_service_id" id="adjustment_service_id" v-model="form.adjustment_service_id" :disabled="busy">
                             <option value="">-- Map Adjustment Service --</option>
                             <option v-for="item in quickbooksServices" :key="item.id" :value="item.id">{{ item.name }}</option>
@@ -83,7 +92,9 @@
 </template>
 
 <script>
+    import BFormCheckbox from "bootstrap-vue/src/components/form-checkbox";
     export default {
+        components: {BFormCheckbox},
         props: {
             connection: {
                 type: [Array, Object],
@@ -104,6 +115,7 @@
                     adjustment_service_id: this.connection.adjustment_service_id || '',
                     refund_service_id: this.connection.refund_service_id || '',
                     expense_service_id: this.connection.expense_service_id || '',
+                    allow_shift_overrides: this.connection.allow_shift_overrides || false,
                 }),
                 loading: false,
                 busy: false,
@@ -149,20 +161,20 @@
             },
 
             refreshServices() {
-                    if (! this.businessId) {
-                        return;
-                    }
-                    this.busy = true;
+                if (! this.businessId) {
+                    return;
+                }
+                this.busy = true;
 
-                    let form = new Form({});
-                    form.post(`/business/quickbooks/${this.businessId}/services/sync`)
-                        .then( ({ data }) => {
-                            this.quickbooksServices = data.data;
-                        })
-                        .catch(() => {})
-                        .finally(() => {
-                            this.busy = false;
-                        });
+                let form = new Form({});
+                form.post(`/business/quickbooks/${this.businessId}/services/sync`)
+                    .then( ({ data }) => {
+                        this.quickbooksServices = data.data;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.busy = false;
+                    });
             }
         },
 

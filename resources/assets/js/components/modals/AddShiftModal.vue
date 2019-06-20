@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Create a Manual Shift" v-model="showModal" size="lg" class="modal-fit-more" :no-close-on-backdrop="true">
+    <b-modal title="Create a Manual Shift" v-model="showModal" size="xl" class="modal-fit-more" :no-close-on-backdrop="true">
         <b-container fluid>
             <business-shift 
                 :activities="activities"

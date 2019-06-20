@@ -651,6 +651,17 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ////////////////////////////////////
 
     /**
+     * Filter only Caregivers that are on the schedule.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereScheduled($query)
+    {
+        return $query->whereHas('schedules');
+    }
+
+    /**
      * Get only the users who have not completed
      * the account setup wizard.
      *

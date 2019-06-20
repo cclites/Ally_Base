@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+
 /**
  * Space out curly braces to prevent XSS attacks with Vue.js interpolation
  *
@@ -277,4 +279,32 @@ if (! function_exists('faker')) {
 function view_component(string $component, string $title, array $props = [], array $breadcrumbs = [], string $layout = 'app')
 {
     return view('vue', compact('component', 'title', 'props', 'breadcrumbs', 'layout'));
+}
+
+if (! function_exists('alterStartOfWeekDay')) {
+    /**
+     * Alter the day of the week that weeks start on and then
+     * revert back to the original week start value after
+     * the callback is called.
+     *
+     * @param int $day
+     * @param Closure $callback
+     * @return mixed
+     */
+    function alterStartOfWeekDay(int $day, Closure $callback) {
+        $previousWeekStart = Carbon::getWeekStartsAt();
+        $previousWeekEnd = Carbon::getWeekEndsAt();
+
+        $week_end = $day == Carbon::SUNDAY ? Carbon::SATURDAY : ((int)$day) - 1;
+
+        Carbon::setWeekStartsAt((int) $day);
+        Carbon::setWeekEndsAt($week_end);
+
+        $result = $callback();
+
+        Carbon::setWeekStartsAt($previousWeekStart);
+        Carbon::setWeekEndsAt($previousWeekEnd);
+
+        return $result;
+    }
 }

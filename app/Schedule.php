@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
  * @property bool $added_to_past
+ * @property int $quickbooks_service_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business

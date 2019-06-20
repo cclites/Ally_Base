@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Billing\ScheduleService;
 use App\Business;
+use App\QuickbooksService;
 use App\Schedule;
 use App\ScheduleGroup;
 use App\Scheduling\ScheduleEditor;
@@ -202,5 +204,35 @@ class ScheduleEditorTest extends TestCase
         $this->assertEquals($data['starts_at'], $schedule->fresh()->starts_at->toDateTimeString());
         $this->assertEquals($data['duration'], $schedule->duration);
         $this->assertTrue($schedule->fresh()->added_to_past);
+    }
+
+    /** @test */
+    function a_schedule_can_be_updated_with_a_quickbooks_service_mapping()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $schedule = factory(Schedule::class)->create(['quickbooks_service_id' => null]);
+
+        $this->editor->updateSingle($schedule, ['quickbooks_service_id' => $qbService->id], null);
+        $this->assertEquals($qbService->id, $schedule->fresh()->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_quickbooks_service_mapping_per_service_breakout_entry()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $schedule = factory(Schedule::class)->create([
+            'service_id' => null,
+            'quickbooks_service_id' => null,
+        ]);
+        $service1 = factory(ScheduleService::class)->create(['schedule_id' => $schedule->id]);
+        $service2 = factory(ScheduleService::class)->create(['schedule_id' => $schedule->id]);
+
+        $service1->quickbooks_service_id = $qbService->id;
+        $service2->quickbooks_service_id = $qbService->id;
+
+        $this->editor->updateSingle($schedule, [], null, [$service1->toArray(), $service2->toArray()]);
+        $this->assertEquals($qbService->id, $schedule->fresh()->services->first()->quickbooks_service_id);
     }
 }

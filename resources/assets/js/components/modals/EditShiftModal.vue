@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Edit Shift" v-model="showModal" size="lg" class="modal-fit-more" hide-footer style="overflow-y: auto;" :no-close-on-backdrop="true" @hidden="$emit('closed')">
+    <b-modal title="Edit Shift" v-model="showModal" size="xl" class="modal-fit-more" hide-footer style="overflow-y: auto;" :no-close-on-backdrop="true" @hidden="$emit('closed')">
         <b-container>
             <loading-card text="Loading Data" v-if="loading"></loading-card>
             <business-shift

@@ -99,12 +99,23 @@
                         </b-col>
                         <b-col lg="3">
                             <b-form-group label="Period" label-class="required">
-                                <b-form-select v-model="form.period" class="mr-1 mb-1">
+                                <b-form-select v-model="form.period" class="mr-1">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="monthly">Monthly</option>
                                     <option value="term">Term</option>
                                     <option value="specific_days">Specific Days of Week</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group v-if="form.period == 'weekly'" label="Start of Week" label-class="required">
+                                <b-form-select id="week_start" v-model="form.week_start" class="mr-1 mb-1">
+                                    <option value="0">Sunday</option>
+                                    <option value="1">Monday</option>
+                                    <option value="2">Tuesday</option>
+                                    <option value="3">Wednesday</option>
+                                    <option value="4">Thursday</option>
+                                    <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -282,7 +293,7 @@
                 if (service) {
                     return service.name;
                 }
-                return '';
+                return '-';
             },
         },
 
@@ -403,6 +414,7 @@
                     units: defaults.units || 0,
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
+                    week_start: defaults.week_start || 1,
                     occurrences: '',
                     notes: defaults.notes || "",
                     sunday: defaults.sunday || 0,
