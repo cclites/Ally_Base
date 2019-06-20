@@ -2,7 +2,12 @@
 
 namespace Tests;
 
+use App\Billing\ClientPayer;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payer;
+use App\Billing\Service;
+use App\BusinessChain;
+use App\Client;
 use App\Shift;
 use Carbon\Carbon;
 
@@ -27,6 +32,11 @@ trait CreatesShifts
      * @var \App\Service
      */
     protected $service;
+
+    /**
+     * @var \App\Billing\Payer
+     */
+    protected $payer;
 
     /**
      * Helper to persist a Shift.
@@ -97,5 +107,34 @@ trait CreatesShifts
         }
 
         return $shift->fresh();
+    }
+
+    /**
+     * Create a General service for the chain.
+     *
+     * @param BusinessChain $chain
+     * @return mixed
+     */
+    public function createDefaultService(BusinessChain $chain) : Service
+    {
+        return factory(Service::class)->create([
+            'chain_id' => $chain->id,
+            'default' => true
+        ]);
+    }
+
+    /**
+     * Create a Payer and ClientPayer relationship.
+     *
+     * @return ClientPayer
+     */
+    public function createEffectivePayer() : ClientPayer
+    {
+        $this->payer = factory(Payer::class)->create();
+
+        return factory(ClientPayer::class)->create([
+            'client_id' => $this->client->id,
+            'payer_id' => $this->payer->id
+        ]);
     }
 }

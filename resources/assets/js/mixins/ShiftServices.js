@@ -38,6 +38,34 @@ export default {
             }
         },
 
+        isUsingDefaultRates() {
+            if (this.defaultRates) {
+                // default rates box is checked, always true
+                return true;
+            }
+
+            if (this.billingType === 'services') {
+                // service breakout
+                for (let service of this.form.services) {
+                    let defaultRates = RateFactory.findMatchingRate(this.clientRates, this.startDate, service.service_id, service.payer_id, this.form.caregiver_id, this.form.fixed_rates);
+                    if (
+                        defaultRates.client_rate != service.client_rate
+                        || defaultRates.caregiver_rate != service.caregiver_rate
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (this.billingType === 'fixed') {
+                let defaultRates = RateFactory.findMatchingRate(this.clientRates, this.startDate, this.form.service_id, this.form.payer_id, this.form.caregiver_id, this.form.fixed_rates);
+                return this.form.client_rate == defaultRates.client_fixed_rate
+                    && this.form.caregiver_rate == defaultRates.caregiver_fixed_rate;
+            } else { // hourly
+                let defaultRates = RateFactory.findMatchingRate(this.clientRates, this.startDate, this.form.service_id, this.form.payer_id, this.form.caregiver_id, this.form.fixed_rates);
+                return this.form.client_rate == defaultRates.client_rate
+                    && this.form.caregiver_rate == defaultRates.caregiver_rate;
+            }
+        },
     },
     
     methods: {
