@@ -46,6 +46,7 @@ class NoProspectContact extends BaseNotification
      */
     public function __construct($prospect)
     {
+        parent::__construct();
         $this->prospect = $prospect;
         $this->url = route('business.prospects.show', ['prospect' => $this->prospect]);
     }

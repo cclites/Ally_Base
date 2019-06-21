@@ -238,6 +238,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
             'message' => static::getMessage(),
             'action_url' => $this->url,
             'action' => $this->action,
+            'event_id' => $this->event_id,
         ], $data));
     }
 

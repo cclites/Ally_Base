@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\SystemNotification;
+use Log;
 
 class SystemNotificationController extends BaseController
 {
@@ -24,7 +25,7 @@ class SystemNotificationController extends BaseController
             ->get();
 
         if ($request->expectsJson() && $request->input('json')) {
-            return collection_only_values($notifications, ['id', 'title', 'message', 'created_at']);
+            return collection_only_values($notifications, ['id', 'title', 'message', 'created_at', '']);
         }
 
         $archived = (clone $query)->whereNotNull('acknowledged_at')
@@ -80,5 +81,21 @@ class SystemNotificationController extends BaseController
             ->update(['acknowledged_at' => Carbon::now()]);
 
         return new SuccessResponse('All notifications have been marked as acknowledged.', [], '.');
+    }
+
+    /**
+     * Mark unread notifications for chain as acknowledged.
+     *
+     * @param Request $request
+     * @param $eventId
+     * @return SuccessResponse
+     */
+    public function acknowledgeAllForChain(Request $request, $eventId)
+    {
+        SystemNotification::where('event_id', $eventId)
+            ->whereNull('acknowledged_at')
+            ->update(['acknowledged_at' => Carbon::now()]);
+
+        return new SuccessResponse('All notifications have been marked as acknowledged.', [], route('business.notifications.index'));
     }
 }
