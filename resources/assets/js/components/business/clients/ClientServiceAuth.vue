@@ -201,9 +201,10 @@
 
 <script>
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
-        mixins: [FormatsStrings],
+        mixins: [FormatsStrings, FormatsDates],
 
         props: ['auths', 'services', 'clientId'],
 
@@ -235,11 +236,17 @@
                         key: 'effective_start',
                         label: 'Start',
                         sortable: true,
+                        formatter: (val)=>{
+                            return this.prettyFormatDate(val);
+                        }
                     },
                     {
                         key: 'effective_end',
                         label: 'End',
                         sortable: true,
+                        formatter: (val)=>{
+                            return this.prettyFormatDate(val);
+                        }
                     },
                     {
                         key: 'units',
@@ -279,6 +286,12 @@
 
         mounted() {
             this.items = Object.keys(this.auths).map(x => this.auths[x]);
+        },
+
+        filters:{
+            prettyDate: function(val){
+                return prettyFormatDate(val);
+            }
         },
 
         computed: {
@@ -366,8 +379,9 @@
                     default:
                         return;
                 }
-                
-                this.form.effective_end = endDate.format('MM/DD/YYYY');
+
+                //this.form.effective_end = endDate;
+                this.form.effective_end = endDate.format('YYYY-MM-DD');
             },
 
             authSaved(data) {
@@ -409,6 +423,8 @@
                     service_auth_id: defaults.service_auth_id || '',
                     client_id: this.clientId,
                     service_id: defaults.service_id || null,
+                    //effective_start: defaults.effective_start || moment().format('YYYY-MM-DD'),
+                   // effective_end: defaults.effective_end || moment().add(1, 'years').format('YYYY-MM-DD'),
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
                     effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
                     units: defaults.units || 0,
@@ -436,6 +452,10 @@
                         this.showAuthModal = false;
                     })
                     .finally(() => this.loading = false)
+            },
+            prettyFormatDate(val){
+                let tuples = val.split("-");
+                return tuples[1] + "-" + tuples[2] + "-" + tuples[0];
             },
         }
     }
