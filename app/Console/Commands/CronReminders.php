@@ -175,4 +175,5 @@ class CronReminders extends Command
             }
         }
     }
+
 }

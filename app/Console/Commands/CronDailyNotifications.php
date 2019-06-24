@@ -53,6 +53,8 @@ class CronDailyNotifications extends Command
 
         $this->noProspectContact();
 
+        $this->failedCharge();
+
         // ======================================
         // CAREGIVER NOTIFICATIONS
         // ======================================
@@ -72,7 +74,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function clientBirthdays()
+    public function clientBirthdays() : void
     {
         $clients = Client::whereHas('user', function ($q) {
             $today = date('m-d');
@@ -98,10 +100,11 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function noProspectContact()
+    public function noProspectContact() : void
     {
         $prospects = Prospect::with('business')
                             ->where('last_contacted', '<=', Carbon::now()->subDays(NoProspectContact::THRESHOLD)->toDateTimeString())
+                            ->where('closed_loss', false)
                             ->get();
 
         $sent = collect([]);
@@ -121,7 +124,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function expiringCertifications()
+    public function expiringCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
             ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(CertificationExpiring::THRESHOLD)])
@@ -159,7 +162,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function expiredCertifications()
+    public function expiredCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
             ->whereBetween('expires_at', [Carbon::now()->subDays(30), Carbon::now()])
@@ -191,6 +194,11 @@ class CronDailyNotifications extends Command
 
             TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id, $license->expires_at->addDays(31));
         }
+    }
+
+    public function failedCharge() : void
+    {
+        //TODO
     }
 
 }
