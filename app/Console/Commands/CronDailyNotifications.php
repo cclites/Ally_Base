@@ -11,6 +11,7 @@ use App\Notifications\Caregiver\CertificationExpiring;
 use App\Notifications\Caregiver\CertificationExpired;
 use Illuminate\Support\Carbon;
 use App\TriggeredReminder;
+use App\Prospect;
 
 class CronDailyNotifications extends Command
 {
