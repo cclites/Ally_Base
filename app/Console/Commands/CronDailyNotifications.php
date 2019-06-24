@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Notifications\Business\NoProspectContact;
 use Illuminate\Console\Command;
 use App\Client;
 use App\Notifications\Business\ClientBirthday;
@@ -99,9 +100,20 @@ class CronDailyNotifications extends Command
      */
     public function noProspectContact()
     {
-        // TODO: pull prospects that have not been converted to 
-        // clients and do not have any record of notes in the past 
-        // 14 days
+        $prospects = Prospect::with('business')
+                            ->where('last_contacted', '<=', Carbon::now()->subDays(NoProspectContact::THRESHOLD)->toDateTimeString())
+                            ->get();
+
+        $sent = collect([]);
+        foreach($prospects as $prospect){
+            $users = $prospect->business->notifiableUsers();
+            $users = $users->diffAssoc($sent);
+            \Notification::send($users, new NoProspectContact($prospect));
+            $sent = $sent->merge($users);
+
+            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $prospect->id);
+        }
+
     }
 
     /**
@@ -180,4 +192,5 @@ class CronDailyNotifications extends Command
             TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id, $license->expires_at->addDays(31));
         }
     }
+
 }

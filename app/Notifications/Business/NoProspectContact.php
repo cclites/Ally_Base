@@ -5,24 +5,28 @@ namespace App\Notifications\Business;
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
 use App\Prospect;
+use phpDocumentor\Reflection\Types\Parent_;
 
 class NoProspectContact extends BaseNotification
 {
-    const DISABLED = true;
+    const DISABLED = false;
+
+    const THRESHOLD = 14;
     
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    const TITLE = 'A Prospect has no new prospect contact note for 14 days';
+    const TITLE = 'A Prospect has no new prospect contact note for #THRESHOLD# days';
+    //const TITLE = 'A Prospect has no new prospect contact note for 14 days';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    const MESSAGE = 'Prospect #PROSPECT# has not been contacted in over 14 days.';
+    const MESSAGE = 'Prospect #PROSPECT# has not been contacted in over #THRESHOLD# days.';
 
     /**
      * The action text.
@@ -58,7 +62,15 @@ class NoProspectContact extends BaseNotification
      */
     public function getMessage()
     {
-        return str_replace('#PROSPECT#', $this->prospect->name, static::MESSAGE);
+        $message = str_replace('#PROSPECT#', $this->prospect->name, static::MESSAGE);
+        $message = str_replace('#THRESHOLD#', NoProspectContact::THRESHOLD, $message);
+        return $message;
+
+        //$message = s
+    }
+
+    public static function getTitle(){
+        return str_replace('#THRESHOLD#',NoProspectContact::THRESHOLD, NoProspectContact::TITLE);
     }
 
     /**
