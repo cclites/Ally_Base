@@ -23,14 +23,14 @@
         .header-left,
         .footer-left {
             float: left;
-            width: 65%;
+            width: 55%;
             padding-left: 0;
         }
 
         .header-right,
         .footer-right {
             float: left;
-            width: 35%;
+            width: 45%;
             padding-right: 0;
         }
 
@@ -81,6 +81,9 @@
             padding-bottom: 4px !important;
         }
 
+        .clear {
+            clear: both;
+        }
     </style>
 @endpush
 
@@ -102,18 +105,8 @@
                 <br>
                 <table class="header-right-table">
                     <tr>
-                        <td>Invoice Date</td>
+                        <td>Invoice Date: </td>
                         <td>{{ $invoice->getDate() }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <strong>{{ $recipient->name() }}</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
-                        </td>
                     </tr>
                     <tr>
                         <td><strong>Invoice Status: </strong></td>
@@ -125,7 +118,56 @@
                             @endif
                         </td>
                     </tr>
+                    @if ($subject->name())
+                    <tr>
+                        <td colspan="2">
+                            <strong>Client:</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <strong>{{ $subject->name() }}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
+                        </td>
+                    </tr>
+                    @else
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $recipient->name() }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
+                            </td>
+                        </tr>
+                    @endif
                 </table>
+                @if ($subject->name())
+                <table class="header-right-table" style="margin-right: 2rem;">
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="2">
+                            <strong>Bill To:</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <strong>{{ $recipient->name() }}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
+                        </td>
+                    </tr>
+                </table>
+                @endif
             </div>
         </div>
 

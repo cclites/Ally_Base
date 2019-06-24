@@ -22,9 +22,10 @@ class HtmlInvoiceView implements InvoiceViewStrategy
         InvoiceInterface $invoice,
         ContactableInterface $sender,
         ContactableInterface $recipient,
+        ContactableInterface $subject,
         Collection $payments
     ) {
         $itemGroups = $invoice->getItemGroups();
-        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'payments', 'itemGroups')));
+        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups')));
     }
 }
