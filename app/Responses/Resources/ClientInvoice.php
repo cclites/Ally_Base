@@ -20,7 +20,7 @@ class ClientInvoice extends Resource
      */
     public function groupItems(Collection $items)
     {
-        return $items->sort('date')->groupBy('group');
+        return $items->sortBy('date')->groupBy('group');
     }
 
     /**
@@ -58,6 +58,9 @@ class ClientInvoice extends Resource
                     'ally_total' => $this->resource->getEstimates()->getAllyTotal(),
                     'provider_total' => $this->resource->getEstimates()->getProviderTotal(),
                 ];
+            }),
+            'was_split' => $this->whenLoaded('items', function() {
+                return $this->resource->getWasSplit();
             }),
         ];
     }
