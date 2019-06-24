@@ -40,6 +40,8 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 
+use Log;
+
 class ReportsController extends BaseController
 {
 
@@ -312,12 +314,6 @@ class ReportsController extends BaseController
 
     public function certificationExpirations(Request $request)
     {
-        $caregiverIds = Caregiver::forRequestedBusinesses()->pluck('id')->toArray();
-        $report = new CertificationExpirationReport();
-        $report->forRequestedBusinesses()->orderBy('expires_at');
-        $report->query()->whereIn('caregiver_id', $caregiverIds);
-        $certifications = $report->rows();
-
         return view('business.reports.certifications', compact('certifications'));
     }
 

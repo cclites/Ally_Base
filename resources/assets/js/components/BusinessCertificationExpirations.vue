@@ -1,7 +1,14 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="3">
+            <b-col md="2">
+                <business-location-form-group
+                        v-model="form.business_id"
+                        label="Office Location"
+                        :allow-all="true"
+                />
+            </b-col>
+            <b-col lg="2">
                 <b-form-group label="Caregiver">
                     <b-form-select v-model="form.caregiver_id">
                         <option value="">All</option>
@@ -37,9 +44,19 @@
                     <span class="ml-2">Days from today</span>
                 </b-form-group>
             </b-col>
+
             <b-col lg="3" class="vertical-center">
                 <b-form-checkbox v-model="form.show_expired">Show expired Licenses</b-form-checkbox>
             </b-col>
+            <b-col md="12" class="text-right">
+                <b-form-group label="&nbsp;">
+                    <b-button-group>
+                        <b-button @click="generateReport()" variant="info" :disabled="loading"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                        <!-- b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button -->
+                    </b-button-group>
+                </b-form-group>
+            </b-col>
+
         </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
@@ -79,6 +96,8 @@
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
+    import BusinessLocationSelect from "../components/business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../components/business/BusinessLocationFormGroup";
 
     export default {
         props: {
@@ -89,20 +108,22 @@
         },
 
         mixins: [FormatsDates],
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
 
         mounted() {
-            this.totalRows = this.items.length;
+            //this.totalRows = this.items.length;
         },
 
         data() {
             return {
-                form: {
+                form: new Form({
                     caregiver_id: '',
                     days_range: 30,
                     show_expired: false,
                     active: '',
                     name: '',
-                },
+                    business_id: ''
+                }),
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -111,6 +132,7 @@
                 editModalVisible: false,
                 filter: null,
                 sendingEmail: false,
+                loading: false,
                 fields: [
                     {
                         key: 'caregiver_name',
@@ -143,36 +165,9 @@
 
         computed: {
             items() {
-                const {caregiver_id, show_expired, days_range, active, name} = this.form;
-                let certifications = this.certifications.map(cert => {
-                    cert.sendingEmail = false;
-                    return cert;
-                });
 
-                if(caregiver_id) {
-                    certifications = certifications.filter(cert => cert.caregiver_id == caregiver_id);
-                }
 
-                if(name) {
-                    certifications = certifications.filter(cert => cert.name.match(new RegExp(name, 'i')));
-                }
-                
-                if(show_expired) {
-                    certifications = certifications.filter(cert => moment(cert.expiration_date).isSameOrBefore(moment()));
-                }
 
-                if(days_range >= 0 && !show_expired) {
-                    certifications = certifications.filter(cert => {
-                        const expirateAt = moment(cert.expiration_date, 'YYYY-MM-DD');
-                        return expirateAt.isBetween(moment(), moment().add(days_range, 'days'));
-                    });
-                }
-
-                if(active !== '') {
-                    certifications = certifications.filter(cert => cert.caregiver_active == active);   
-                }
-
-                return certifications;
             },
 
             caregivers() {
@@ -230,6 +225,73 @@
 
                 return moment(date).toNow(true);
             },
+
+            generateReport() {
+
+                this.form.get('/certification_expirations_filter/')
+                    .then(({data}) => {
+                        console.log(response.data);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+                    .finally(() => {
+                    });
+            },
+                /*
+                form.get('/certification_expirations')
+                    .then(response => {
+                        console.log(response.data);
+                    }).catch(error => {
+                    console.error(error.response);
+                });
+*/
+
+/*
+                axios.get(url, {params: {params}} )
+                    .then(response => {
+                        console.log(response.data);
+                        //window.alerts.addMessage('success', 'Reminder email sent.');
+                        //item.sendingEmail = false;
+                    }).catch(error => {
+                    console.error(error.response);
+                    //item.sendingEmail = false;
+                });*/
+                /*
+                const {business_id, caregiver_id, show_expired, days_range, active, name} = this.form;
+
+                let certifications = this.certifications.map(cert => {
+                    cert.sendingEmail = false;
+                    return cert;
+                });
+
+                if(caregiver_id) {
+                    certifications = certifications.filter(cert => cert.caregiver_id == caregiver_id);
+                }
+
+                if(name) {
+                    certifications = certifications.filter(cert => cert.name.match(new RegExp(name, 'i')));
+                }
+
+                if(show_expired) {
+                    certifications = certifications.filter(cert => moment(cert.expiration_date).isSameOrBefore(moment()));
+                }
+
+                if(days_range >= 0 && !show_expired) {
+                    certifications = certifications.filter(cert => {
+                        const expirateAt = moment(cert.expiration_date, 'YYYY-MM-DD');
+                        return expirateAt.isBetween(moment(), moment().add(days_range, 'days'));
+                    });
+                }
+
+                if(active !== '') {
+                    certifications = certifications.filter(cert => cert.caregiver_active == active);
+                }
+
+                return certifications;
+                */
+
+
         }
 
         ,
