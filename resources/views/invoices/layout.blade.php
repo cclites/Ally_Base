@@ -53,7 +53,7 @@
         }
 
         .bg-danger {
-            background-color: #FA3B49;
+            background-color: #808080!important;
             color: white;
         }
 
