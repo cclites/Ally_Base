@@ -24,8 +24,8 @@ class ClientAuthController extends BaseController
             $auth->load('service');
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
             $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
-            $auth['effective_start_sortable'] = Carbon::parse($auth['effective_start'])->format('Ymd');
-            $auth['effective_end_sortable'] = Carbon::parse($auth['effective_end'])->format('ymd');
+            $auth['effective_start_sortable'] = Carbon::parse($auth['effective_start'])->format('Y-m-d');
+            $auth['effective_end_sortable'] = Carbon::parse($auth['effective_end'])->format('Y-m-d');
             $auth['service_code'] = optional($auth['service'])->code;
             $auth['service_type'] = optional($auth['service'])->name;
         }

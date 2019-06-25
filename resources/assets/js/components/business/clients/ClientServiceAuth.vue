@@ -207,10 +207,9 @@
 
 <script>
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
-        mixins: [FormatsStrings, FormatsDates],
+        mixins: [FormatsStrings],
 
         props: ['auths', 'services', 'clientId'],
 
