@@ -417,8 +417,6 @@
                     service_auth_id: defaults.service_auth_id || '',
                     client_id: this.clientId,
                     service_id: defaults.service_id || null,
-                    //effective_start: defaults.effective_start || moment().format('YYYY-MM-DD'),
-                   // effective_end: defaults.effective_end || moment().add(1, 'years').format('YYYY-MM-DD'),
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
                     effective_end: defaults.effective_end || moment().add(1, 'years').format('MM/DD/YYYY'),
                     units: defaults.units || 0,
