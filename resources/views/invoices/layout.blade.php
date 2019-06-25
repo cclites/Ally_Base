@@ -52,6 +52,11 @@
             color: white;
         }
 
+        .bg-danger {
+            background-color: #FA3B49;
+            color: white;
+        }
+
         .header-right-table {
             float: right;
         }
