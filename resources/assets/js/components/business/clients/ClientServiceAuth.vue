@@ -25,7 +25,7 @@
                         {{ row.item.effective_end }}
                     </template>
                     <template slot="effective_start_sortable" scope="row">
-                        {{ row.item.effective_end }}
+                        {{ row.item.effective_start }}
                     </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
