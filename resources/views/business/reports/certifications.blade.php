@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <business-certification-expirations :certifications="{{ $certifications OR '[]' }}">
+            <business-certification-expirations :caregivers="{{ json_encode($caregivers) }}">
             </business-certification-expirations>
         </div>
     </div>

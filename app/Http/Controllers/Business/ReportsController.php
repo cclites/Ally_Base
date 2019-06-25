@@ -314,7 +314,17 @@ class ReportsController extends BaseController
 
     public function certificationExpirations(Request $request)
     {
-        return view('business.reports.certifications', compact('certifications'));
+        $caregivers = $this->businessChain()->caregivers;
+
+        $caregivers = $caregivers->map(function($cg) use ($caregivers){
+                         return [ 'id'=>$cg->id, 'name'=>$cg->nameLastFirst];
+                      })->toArray();
+
+        $name = array_column($caregivers, 'name');
+        array_multisort($name, SORT_ASC, $caregivers);
+        $caregivers = (object)$caregivers;
+
+        return view('business.reports.certifications', compact('caregivers'));
     }
 
     public function shifts(Request $request)
