@@ -90,6 +90,7 @@
                 <template slot="actions" scope="row">
                     <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
                     <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
                     <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
                         <span>Transmit Claim</span>
