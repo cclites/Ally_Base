@@ -163,8 +163,14 @@
             yesButton="Transmit"
             :yes-disabled="!selectedTransmissionMethod"
         >
-            <p>Private and Offline Payer types do not have a default transmission method.</p>
-            <p>Please select the method would you like to use to submit this invoice.</p>
+            <div v-if="transmissionPrivate">
+                <p>Private and Offline Payer types do not have a default transmission method.</p>
+                <p>Please select the method would you like to use to submit this invoice.</p>
+            </div>
+            <div v-else>
+                <p>A transmission method has not been set for this payer.  We recommend you go into the Payer record and assign a transmission method.</p>
+                <p>For now, please choose how you would like to send:</p>
+            </div>
             <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
                 <b-select v-model="selectedTransmissionMethod">
                     <option value="">-- Select Transmission Method --</option>
@@ -280,6 +286,7 @@
                 transmittingId: null,
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
+                transmissionPrivate: false,
             }
         },
 
@@ -315,6 +322,17 @@
                         // offline and private pay Payer objects have no transmission method set
                         // so we allow the user to select which method they would like to use
                         this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = true;
+                        this.$refs.confirmTransmissionMethod.confirm(() => {
+                            this.transmitClaim(invoice, true);
+                        });
+                        return;
+                    }
+
+                    if (invoice.payer && ! invoice.payer.transmission_method) {
+                        // if no transmission method set up for the payer, allow them to choose
+                        this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = false;
                         this.$refs.confirmTransmissionMethod.confirm(() => {
                             this.transmitClaim(invoice, true);
                         });
