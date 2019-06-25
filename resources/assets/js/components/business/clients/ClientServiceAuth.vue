@@ -21,6 +21,12 @@
                         <span v-if="row.item.period == 'specific_days'">N/A</span>
                         <span v-else>{{ row.item.units }}</span>
                     </template>
+                    <template slot="effective_end_sortable" scope="row">
+                        {{ row.item.effective_end }}
+                    </template>
+                    <template slot="effective_start_sortable" scope="row">
+                        {{ row.item.effective_end }}
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" @click="editAuth(row.item.id)">
@@ -236,17 +242,11 @@
                         key: 'effective_start',
                         label: 'Start',
                         sortable: true,
-                        formatter: (val)=>{
-                            return this.prettyFormatDate(val);
-                        }
                     },
                     {
                         key: 'effective_end',
                         label: 'End',
                         sortable: true,
-                        formatter: (val)=>{
-                            return this.prettyFormatDate(val);
-                        }
                     },
                     {
                         key: 'units',
@@ -286,12 +286,6 @@
 
         mounted() {
             this.items = Object.keys(this.auths).map(x => this.auths[x]);
-        },
-
-        filters:{
-            prettyDate: function(val){
-                return prettyFormatDate(val);
-            }
         },
 
         computed: {
@@ -452,10 +446,6 @@
                         this.showAuthModal = false;
                     })
                     .finally(() => this.loading = false)
-            },
-            prettyFormatDate(val){
-                let tuples = val.split("-");
-                return tuples[1] + "-" + tuples[2] + "-" + tuples[0];
             },
         }
     }
