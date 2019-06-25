@@ -3,6 +3,7 @@ namespace App\Billing\View;
 
 use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
+use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Payer;
@@ -48,6 +49,30 @@ class InvoiceViewGenerator
             $recipient,
             $subject,
             $clientInvoice,
+            $payments
+        );
+    }
+
+    function generateClaimInvoice(Claim $claim)
+    {
+        $client = $claim->invoice->client;
+        $clientPayer = $claim->invoice->getClientPayer();
+        $business = $client->business;
+        $payments = $claim->payments;
+
+        if ($clientPayer == null || $clientPayer->payer_id === Payer::PRIVATE_PAY_ID) {
+            $recipient = $client;
+            $subject = new NullContact();
+        } else {
+            $recipient = $clientPayer->payer;
+            $subject = $client;
+        }
+
+        return $this->generate(
+            $business,
+            $recipient,
+            $subject,
+            $claim,
             $payments
         );
     }

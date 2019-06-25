@@ -2,7 +2,7 @@
     <div class="col-md-12">
         <table class="table table-bordered items-table">
             <thead>
-            <tr class="bg-info">
+            <tr class="bg-{{ isset($table_variant) ? $table_variant : 'info' }}">
                 <th>Service Date</th>
                 <th>Service Name</th>
                 <th>Units</th>
@@ -48,7 +48,7 @@
             <tfoot>
             <tr>
                 <th colspan="4">Total</th>
-                <th class="text-nowrap">{{ number_format($invoice->items->sum('total'), 2) }}</th>
+                <th class="text-nowrap">{{ number_format($invoice->getItems()->sum('total'), 2) }}</th>
                 <th class="text-nowrap">{{ number_format($invoice->amount, 2) }}</th>
             </tr>
             </tfoot>
