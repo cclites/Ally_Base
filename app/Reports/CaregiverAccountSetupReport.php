@@ -63,7 +63,10 @@ class CaregiverAccountSetupReport extends BaseReport
     {
         switch ($this->statusFilter) {
             case 'scheduled':
-                $this->query()->active()->whereScheduled()->whereNotSetup();
+                $this->query()->active()->whereHasShiftsOrSchedules()->whereNotSetup();
+                break;
+            case 'no_bank':
+                $this->query()->active()->whereHasShiftsOrSchedules()->whereDoesntHave('bankAccount');
                 break;
             default:
                 $this->query()->active()->whereNotSetup();
