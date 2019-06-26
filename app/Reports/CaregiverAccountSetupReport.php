@@ -7,6 +7,9 @@ use App\PhoneNumber;
 
 class CaregiverAccountSetupReport extends BaseReport
 {
+    private $phoneFilter;
+    private $statusFilter;
+
     /**
      * constructor.
      */
@@ -26,13 +29,48 @@ class CaregiverAccountSetupReport extends BaseReport
     }
 
     /**
+     * Filter by account status.
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setStatusFilter($status) : self
+    {
+        $this->statusFilter = $status;
+
+        return $this;
+    }
+
+    /**
+     * Filter by phone type.
+     *
+     * @param $phone
+     * @return CaregiverAccountSetupReport
+     */
+    public function setPhoneFilter($phone) : self
+    {
+        $this->phoneFilter = $phone;
+
+        return $this;
+    }
+
+    /**
      * Return the collection of rows matching report criteria
      *
      * @return \Illuminate\Support\Collection
      */
     protected function results() : ?iterable
     {
-        return $this->query()
+        switch ($this->statusFilter) {
+            case 'scheduled':
+                $this->query()->active()->whereScheduled()->whereNotSetup();
+                break;
+            default:
+                $this->query()->active()->whereNotSetup();
+                break;
+        }
+
+        $data = $this->query()
             ->get()
             ->map(function (Caregiver $item) {
                 if (empty($item->user->setup_status)) {
@@ -54,5 +92,25 @@ class CaregiverAccountSetupReport extends BaseReport
             })
             ->sortBy('name')
             ->values();
+
+        switch ($this->phoneFilter) {
+            case 'has_mobile':
+                $data = $data->filter(function ($row) {
+                    return filled($row['mobile_phone']);
+                });
+                break;
+            case 'any':
+                $data = $data->filter(function ($row) {
+                    return filled($row['mobile_phone']) || filled($row['home_phone']);
+                });
+                break;
+            case 'none':
+                $data = $data->filter(function ($row) {
+                    return empty($row['mobile_phone']) && empty($row['home_phone']);
+                });
+                break;
+        }
+
+        return $data->values();
     }
 }
