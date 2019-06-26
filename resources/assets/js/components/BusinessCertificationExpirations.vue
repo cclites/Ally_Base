@@ -113,6 +113,7 @@
 
         mounted() {
             this.totalRows = this.items.length;
+            this.fetchCaregivers();
         },
 
         data() {
@@ -133,6 +134,7 @@
                 editModalVisible: false,
                 filter: null,
                 sendingEmail: false,
+                caregivers: [],
                 loading: false,
                 items: [],
                 fields: [
@@ -166,56 +168,6 @@
         },
 
         computed: {
-            /*
-            items() {
-
-
-                const {caregiver_id, show_expired, days_range, active, name} = this.form;
-                let certifications = this.certifications.map(cert => {
-                    cert.sendingEmail = false;
-                    return cert;
-                });
-
-                if(caregiver_id) {
-                    certifications = certifications.filter(cert => cert.caregiver_id == caregiver_id);
-                }
-
-                if(name) {
-                    certifications = certifications.filter(cert => cert.name.match(new RegExp(name, 'i')));
-                }
-
-                if(show_expired) {
-                    certifications = certifications.filter(cert => moment(cert.expiration_date).isSameOrBefore(moment()));
-                }
-
-                if(days_range >= 0 && !show_expired) {
-                    certifications = certifications.filter(cert => {
-                        const expirateAt = moment(cert.expiration_date, 'YYYY-MM-DD');
-                        return expirateAt.isBetween(moment(), moment().add(days_range, 'days'));
-                    });
-                }
-
-                if(active !== '') {
-                    certifications = certifications.filter(cert => cert.caregiver_active == active);
-                }
-
-                return certifications;
-
-
-            },
-
-             */
-
-            caregivers() {
-                let caregivers = _.map(this.certifications, (cert) => {
-                    return {
-                        'id': cert.caregiver_id,
-                        'name': cert.caregiver_name
-                    }
-                });
-
-                return _.uniqBy(caregivers, 'id');
-            }
         },
 
         methods: {
@@ -230,12 +182,6 @@
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
-            },
-
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
             },
 
             sendEmailReminder(item) {
@@ -266,12 +212,7 @@
 
                 this.form.get('/business/reports/certification_expirations_filter/')
                     .then(response => {
-
-                        //this.setCertifications(response.data);
                         this.items = response.data;
-                        // /console.log(response.data);
-
-                        console.dir(response.data);
                     })
                     .catch((e) => {
                         console.log(e);
@@ -279,16 +220,21 @@
                     .finally(() => {
                     });
             },
+
+            fetchCaregivers(){
+                let url = '/business/caregivers?json=1&active=null';
+
+                axios.get(url)
+                    .then(response => {
+                        console.log(response.data);
+                        this.caregivers = response.data;
+                    })
+                    .catch(() => {});
+            }
         }
 
         ,
         watch: {
-            /*
-            'form.show_expired': function(isShowingExpired) {
-                if(isShowingExpired) {
-                    this.form.days_range = 0;
-                }
-            }*/
         }
     }
 </script>
