@@ -488,7 +488,7 @@
                     {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
-                        description: 'Shows the list of caregivers\'s with incomplete account data.',
+                        description: 'Shows a list of caregivers with incomplete account data.',
                         category: 3,
                         allowed: ['office_user'],
                     },
