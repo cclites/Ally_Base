@@ -289,7 +289,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     function getSplitPercentage(): float
     {
-        return $this->isSplitType() ? $this->split_percentage : 1.0;
+        return (float) ($this->isSplitType() ? $this->split_percentage : 1.0);
     }
 
     /**
