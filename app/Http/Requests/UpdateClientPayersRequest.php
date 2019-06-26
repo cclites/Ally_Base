@@ -63,7 +63,7 @@ class UpdateClientPayersRequest extends FormRequest
                 $data = array_merge($payer, [
                     'effective_start' => (new Carbon($payer['effective_start']))->format('Y-m-d'),
                     'effective_end' => (new Carbon($payer['effective_end']))->format('Y-m-d'),
-                    'split_percentage' => empty($payer['split_percentage']) ? null : $payer['split_percentage'] / 100,
+                    'split_percentage' => empty($payer['split_percentage']) ? 0 : $payer['split_percentage'] / 100,
                 ]);
 
                 // clear allocation fields depending on which allocation method is selected

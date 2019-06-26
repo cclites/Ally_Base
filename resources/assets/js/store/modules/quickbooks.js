@@ -14,12 +14,21 @@ const getters = {
         return state.config;
     },
     businessId(state) {
+        if (! state.config) {
+            return null;
+        }
         return state.config.business_id;
     },
     isAuthorized(state) {
+        if (! state.config) {
+            return false;
+        }
         return !!state.config.access_token;
     },
     mapServiceFromShifts(state) {
+        if (! state.config) {
+            return false;
+        }
         return !!state.config.allow_shift_overrides;
     },
 };
@@ -44,7 +53,7 @@ const actions = {
             .catch(() => {});
     },
     async fetchServices({commit, state}) {
-        if (! state.config.business_id) {
+        if (! state.config || ! state.config.business_id) {
             // cannot run until config is fetched
             return;
         }

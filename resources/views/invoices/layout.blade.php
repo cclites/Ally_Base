@@ -52,6 +52,11 @@
             color: white;
         }
 
+        .bg-danger {
+            background-color: #808080!important;
+            color: white;
+        }
+
         .header-right-table {
             float: right;
         }
@@ -118,23 +123,7 @@
                             @endif
                         </td>
                     </tr>
-                    @if ($subject->name())
-                    <tr>
-                        <td colspan="2">
-                            <strong>Client:</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <strong>{{ $subject->name() }}</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
-                        </td>
-                    </tr>
-                    @else
+                    @if (! $subject->name())
                         <tr>
                             <td colspan="2">
                                 <strong>{{ $recipient->name() }}</strong>
@@ -147,29 +136,51 @@
                         </tr>
                     @endif
                 </table>
-                @if ($subject->name())
-                <table class="header-right-table" style="margin-right: 2rem;">
-                    <tr><td colspan="2">&nbsp;</td></tr>
-                    <tr><td colspan="2">&nbsp;</td></tr>
-                    <tr>
-                        <td colspan="2">
-                            <strong>Bill To:</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <strong>{{ $recipient->name() }}</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
-                        </td>
-                    </tr>
-                </table>
-                @endif
             </div>
         </div>
+
+        @if ($subject->name())
+            <div class="row print-header">
+                <div style="width: 50%; float:left">
+                    <table class="" style="margin-left: 3rem; margin: auto">
+                        <tr>
+                            <td colspan="2">
+                                <strong>Bill To:</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $recipient->name() }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="width: 50%; float:right">
+                    <table class="" style="margin-right: 3rem; margin: auto">
+                        <tr>
+                            <td colspan="2">
+                                <strong>Client:</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $subject->name() }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        @endif
 
         @yield('items')
         @yield('payments')

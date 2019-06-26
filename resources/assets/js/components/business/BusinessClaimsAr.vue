@@ -89,7 +89,8 @@
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn variant="secondary" class="mr-2" :href="invoiceUrl(row.item)" target="_blank">View Invoice</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
                     <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
                         <span>Transmit Claim</span>
@@ -163,8 +164,14 @@
             yesButton="Transmit"
             :yes-disabled="!selectedTransmissionMethod"
         >
-            <p>Private and Offline Payer types do not have a default transmission method.</p>
-            <p>Please select the method would you like to use to submit this invoice.</p>
+            <div v-if="transmissionPrivate">
+                <p>Private and Offline Payer types do not have a default transmission method.</p>
+                <p>Please select the method would you like to use to submit this invoice.</p>
+            </div>
+            <div v-else>
+                <p>A transmission method has not been set for this payer.  We recommend you go into the Payer record and assign a transmission method.</p>
+                <p>For now, please choose how you would like to send:</p>
+            </div>
             <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
                 <b-select v-model="selectedTransmissionMethod">
                     <option value="">-- Select Transmission Method --</option>
@@ -280,6 +287,7 @@
                 transmittingId: null,
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
+                transmissionPrivate: false,
             }
         },
 
@@ -315,6 +323,17 @@
                         // offline and private pay Payer objects have no transmission method set
                         // so we allow the user to select which method they would like to use
                         this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = true;
+                        this.$refs.confirmTransmissionMethod.confirm(() => {
+                            this.transmitClaim(invoice, true);
+                        });
+                        return;
+                    }
+
+                    if (invoice.payer && ! invoice.payer.transmission_method) {
+                        // if no transmission method set up for the payer, allow them to choose
+                        this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = false;
                         this.$refs.confirmTransmissionMethod.confirm(() => {
                             this.transmitClaim(invoice, true);
                         });
@@ -419,6 +438,14 @@
 
             invoiceUrl(invoice, view="") {
                 return `/business/client/invoices/${invoice.id}/${view}`;
+            },
+
+            claimInvoiceUrl(invoice, view="") {
+                if (! invoice.claim) {
+                    return;
+                }
+
+                return `/business/claims-ar/invoices/${invoice.claim.id}/${view}`;
             },
 
             updateFullBalance() {

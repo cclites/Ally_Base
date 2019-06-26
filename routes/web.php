@@ -449,6 +449,7 @@ Route::group([
     Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
     Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
+    Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
@@ -585,6 +586,7 @@ Route::group([
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
     Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
+    Route::get('invoices/claims/{claim}', 'Admin\ClainInvoiceController@show');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
