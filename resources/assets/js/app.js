@@ -227,6 +227,7 @@ Vue.component('business-offline-invoice-ar', require('./components/business/Busi
 Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
 Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 Vue.component('sales-people-commission-report', require('./components/business/reports/SalespersonCommissionReport'));
+Vue.component('business-account-setup-report', require('./components/business/reports/BusinessAccountSetupReport'));
 
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\BusinessChain;
-use App\Reports\CaregiverContactInfoReport;
+use App\Reports\CaregiverAccountSetupReport;
 use Illuminate\Console\Command;
 
 class DumpCaregiverContacts extends Command
@@ -48,7 +48,7 @@ class DumpCaregiverContacts extends Command
             'Active and Not Set Up but on the Schedule',
         ], 4);
 
-        $report = new CaregiverContactInfoReport();
+        $report = new CaregiverAccountSetupReport();
         $report->query()->forChains([$chain->id]);
 
         switch ($filter) {
