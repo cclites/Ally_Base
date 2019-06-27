@@ -221,8 +221,8 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'service_type',
-                sortDesc: false,
+                sortBy: 'effective_start_sortable',
+                sortDesc: true,
                 filter: null,
                 fields: [
                     {
@@ -238,12 +238,12 @@
                         formatter: x => x ? x : '-',
                     },
                     {
-                        key: 'effective_start',
+                        key: 'effective_start_sortable',
                         label: 'Start',
                         sortable: true,
                     },
                     {
-                        key: 'effective_end',
+                        key: 'effective_end_sortable',
                         label: 'End',
                         sortable: true,
                     },
@@ -373,8 +373,7 @@
                         return;
                 }
 
-                //this.form.effective_end = endDate;
-                this.form.effective_end = endDate.format('YYYY-MM-DD');
+                this.form.effective_end = endDate.format('MM/DD/YYYY');
             },
 
             authSaved(data) {
