@@ -27,7 +27,7 @@
                 </button>
             </div>
             <div class="landscape-warning" v-show="landscapeMode == false">
-                Please use landscape mode to provide your signature 
+                Turn your phone sideways (landscape mode) to add a signature
                 <i class="fa fa-refresh fa-lg"></i>
                 <!--<i class="fa fa-rotate-left fa-lg"></i>-->
                 <!--
