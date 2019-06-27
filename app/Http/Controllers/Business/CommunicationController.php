@@ -97,7 +97,8 @@ class CommunicationController extends Controller
     public function sendText(SendTextRequest $request)
     {
         if ($request->input('all')) {
-            $recipients = Caregiver::forRequestedBusinesses()
+            // filter to only the business selected
+            $recipients = Caregiver::forRequestedBusinesses([$request->business_id])
                 ->active()
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
@@ -108,10 +109,10 @@ class CommunicationController extends Controller
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
+        }
 
-            if ($recipients->count() == 0) {
-                return new ErrorResponse(422, 'You must have at least 1 recipient.');
-            }
+        if ($recipients->count() == 0) {
+            return new ErrorResponse(422, 'You must have at least 1 recipient.');
         }
 
         $business = $request->getBusiness();
