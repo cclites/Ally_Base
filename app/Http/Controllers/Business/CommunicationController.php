@@ -93,18 +93,19 @@ class CommunicationController extends Controller
      *
      * @param \App\Http\Requests\SendTextRequest $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function sendText(SendTextRequest $request)
     {
         if ($request->input('all')) {
-            // filter to only the business selected
-            $recipients = Caregiver::forRequestedBusinesses([$request->business_id])
+            // Filter to the selected business for 'all' or default to all locations.
+            $recipients = Caregiver::forRequestedBusinesses()
                 ->active()
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
         } else {
-            $recipients = Caregiver::forRequestedBusinesses()
+            $recipients = Caregiver::forRequestedBusinesses() // all allowed locations
                 ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
@@ -115,6 +116,7 @@ class CommunicationController extends Controller
             return new ErrorResponse(422, 'You must have at least 1 recipient.');
         }
 
+        // Get the business selection for which outgoing number to use.
         $business = $request->getBusiness();
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
