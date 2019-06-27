@@ -10,7 +10,7 @@
         >
             <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
                 <b-row>
-                    <b-col md="3">
+                    <b-col md="6" class="d-flex align-items-baseline">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
@@ -19,9 +19,7 @@
                             </label>
                             <input-help :form="form" field="accepted_terms" text=""></input-help>
                         </div>
-                    </b-col>
-                    <b-col md="3">
-                        <business-location-select v-model="form.businesses" :allow-all="true" name="businesses" :disabled="! form.all"/>
+                        <business-location-select class=" f-1" v-model="form.businesses" :allow-all="true" name="businesses" :disabled="! form.all"/>
                     </b-col>
                     <b-col md="6" class="d-flex">
                         <b-form-group class="ml-auto">
