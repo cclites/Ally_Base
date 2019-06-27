@@ -1,10 +1,5 @@
 <template>
-    <b-card
-        header="Detailed Client Care Needs"
-        header-text-variant="white"
-        header-bg-variant="info"
-        class="client-care-needs"
-    >
+    <b-card class="client-care-needs">
         <h2>General</h2>
         <b-row>
             <b-col lg="6">
@@ -206,7 +201,7 @@
         <b-btn variant="success" @click.prevent="save()" :disabled="busy">Save Changes</b-btn>
     </b-card>
 </template>
-3
+
 <script>
     export default {
         props: {

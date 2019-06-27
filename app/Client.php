@@ -487,6 +487,16 @@ class Client extends AuditableModel implements
     }
 
     /**
+     * Get the client's skilled nursing POC relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function skilledNursingPoc()
+    {
+        return $this->hasOne(SkilledNursingPoc::class, 'client_id', 'id');
+    }
+
+    /**
      * Get the ClientNarrative relation.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

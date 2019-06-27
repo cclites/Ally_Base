@@ -8,21 +8,21 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Client;
 
-class ClientCareDetailsController extends BaseController
+class SkilledNursingPocController extends BaseController
 {
     /**
      * Update the client care details.
      *
-     * @param UpdateClientCareDetailsRequest $request
+     * @param UpdateSkilledNursingPocRequest $request
      * @param Client $client
      * @return SuccessResponse|ErrorResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(UpdateClientCareDetailsRequest $request, Client $client)
+    public function update(UpdateSkilledNursingPocRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
-        if (empty($client->careDetails)) {
+        if (empty($client->ski)) {
             $client->careDetails()->create([]);
         }
 
