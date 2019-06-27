@@ -218,7 +218,6 @@ Route::group([
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
-    Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
     Route::patch('clients/{client}/exclude-caregiver/{clientExcludedCaregiver}', 'Business\ClientExcludedCaregiverController@update')->name('clients.exclude-caregiver');
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');

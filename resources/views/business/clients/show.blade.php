@@ -160,15 +160,8 @@
                 >
                     <client-narrative :client="{{ $client }}" mode="admin" />
             </b-card>
-
-            <b-tabs pills content-class="mt-3">
-              <b-tab title="Detailed Client Care Needs" active>
-                  <business-client-care-details :client="{{ $client }}" />
-              </b-tab>
-              <b-tab title="Skilled Nursing POC">
-                  <business-client-skilled-nursing-poc :client="{{ $client }}" />
-              </b-tab>
-            </b-tabs>
+            <business-client-care-details
+                :client="{{ $client }}" />
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
