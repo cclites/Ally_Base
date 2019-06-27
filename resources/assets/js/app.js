@@ -150,7 +150,7 @@ Vue.component('business-client-care-details', require('./components/business/cli
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
 Vue.component('business-caregiver-office-locations-tab', require('./components/business/caregivers/CaregiverOfficeLocationsTab'));
-Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
+Vue.component('business-caregiver-expirations-report', require('./components/BusinessCaregiverExpirationsReport.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));

@@ -18,7 +18,6 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Reports\CaregiverPaymentsReport;
-use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ProviderReconciliationReport;
@@ -310,21 +309,6 @@ class ReportsController extends BaseController
         $activities = $this->business()->allActivities();
 
         return view('business.reports.shifts', compact('activities'));
-    }
-
-    public function certificationExpirations(Request $request)
-    {
-        $caregivers = $this->businessChain()->caregivers;
-
-        $caregivers = $caregivers->map(function($cg) use ($caregivers){
-                         return [ 'id'=>$cg->id, 'name'=>$cg->nameLastFirst];
-                      })->toArray();
-
-        $name = array_column($caregivers, 'name');
-        array_multisort($name, SORT_ASC, $caregivers);
-        $caregivers = (object)$caregivers;
-
-        return view('business.reports.certifications', compact('caregivers'));
     }
 
     public function shifts(Request $request)
