@@ -151,6 +151,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'location',
+                        label: 'Office Location',
+                        sortable: true,
+                    },
+                    {
                         key: 'payer',
                         formatter: (val, key, item) => `${val ? val.name : '-'} (${item.payer_payment_type})`,
                         sortable: true,

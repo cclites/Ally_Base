@@ -62,6 +62,9 @@ class ClientInvoice extends Resource
             'was_split' => $this->whenLoaded('items', function() {
                 return $this->resource->getWasSplit();
             }),
+            'location' => $this->whenLoaded('client', function () {
+                return $this->resource->client->business->name;
+            }),
         ];
     }
 }
