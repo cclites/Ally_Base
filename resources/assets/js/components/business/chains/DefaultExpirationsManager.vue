@@ -1,30 +1,28 @@
 <template>
     <div>
         <b-list-group>
-            <b-list-group-item v-for="type in types" :key="type.id" class="d-flex">
-                    <div class="f-1">{{ type.type }}</div>
-                    <div class="ml-auto">
-                        <!--i class="fa fa-trash-alt"></i-->
-                        <a href="#"><i class="fa fa-trash" @click="showDestroy(type)"></i></a>
-                    </div>
+            <b-list-group-item v-for="type in sortedTypes" :key="type.id" class="d-flex">
+                <div class="f-1">{{ type.type }}</div>
+                <div class="ml-auto">
+                    <a href="#"><i class="fa fa-trash" @click="showDestroy(type)"></i></a>
+                </div>
             </b-list-group-item>
-            <b-list-group-item button @click="showNew()">
+            <b-list-group-item button @click="showModal = true">
                 <i class="fa fa-plus mr-2"></i>Add Expiration Type
             </b-list-group-item>
         </b-list-group>
 
-        <b-modal ref="addExpirationTypeModal" :title="`Add default expiration type`" @ok="addExpiration" @cancel="hideNew()" ok-variant="info">
+        <b-modal v-model="showModal" :title="`Add default expiration type`" @ok="add" @cancel="showModal = false" ok-variant="info">
             <b-form-group label="Default Expiration Type">
-                <b-form-input v-model="new_type"></b-form-input>
+                <b-form-input v-model="form.type"></b-form-input>
             </b-form-group>
         </b-modal>
 
-        <b-modal ref="destroyExpirationTypeModal" :title="`Remove default expiration type?`" @ok="destroyExpiration" @cancel="hideDestroy()" ok-variant="info">
+        <b-modal ref="destroyExpirationTypeModal" :title="`Remove default expiration type?`" @ok="destroy()" @cancel="hideDestroy()" ok-variant="info">
             <b-form-group>
                {{ type.type }}
             </b-form-group>
         </b-modal>
-
     </div>
 </template>
 
@@ -38,16 +36,32 @@
             return {
                 types: [],
                 type: '',
-                new_type: '',
                 form: new Form({
+                    type: '',
                 }),
                 busy: false,
+                showModal: false,
             }
         },
 
+        computed: {
+            sortedTypes() {
+                return this.types.sort((a, b) => {
+                    var typeA = a.type.toLowerCase(), typeB = b.type.toLowerCase();
+                    if (typeA < typeB) {
+                        return -1;
+                    }
+                    if (typeA > typeB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            },
+        },
+
         methods: {
-            async fetchChainExpirations() {
-                await axios.get(`/business/expiration-types?manage=true`)
+            async fetch() {
+                await axios.get(`/business/expiration-types`)
                     .then(({data}) => {
                         this.types = data;
                     })
@@ -55,57 +69,49 @@
                     });
             },
 
-            showNew(){
-                this.$refs.addExpirationTypeModal.show();
+            add() {
+                this.form.post(`/business/expiration-types`)
+                    .then(({data}) => {
+                        this.types.splice(0, 0, data.data);
+                        this.form.reset();
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                    });
             },
 
-            hideNew(){
-                this.$refs.addExpirationTypeModal.hide();
+            destroy() {
+                let form = new Form({});
+                form.submit('DELETE', `/business/expiration-types/${this.type.id}`)
+                    .then( ({ data }) => {
+                        this.types = this.types.filter(x => x.id != this.type.id);
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                    });
             },
 
-            showDestroy(type){
+            showDestroy(type) {
                 this.type = type;
                 this.$refs.destroyExpirationTypeModal.show();
             },
-            hideDestroy(){
+
+            hideDestroy() {
                 this.$refs.destroyExpirationTypeModal.hide();
-
             },
 
-            addExpiration(){
-
-                let url = `/business/expiration-types/store/` + this.new_type;
-
-                this.form.submit('POST', url)
-                    .then( ({ data }) => {
-                        this.setItems(data.data);
-                    })
-                    .catch(e => {})
-                    .finally(() => { this.busy = false; });
-
-            },
-            destroyExpiration(){
-
-                let url = '/business/expiration-types/destroy/' + this.type.id;
-
-                this.form.submit('DELETE', url)
-                    .then( ({ data }) => {
-                        this.setItems(data.data);
-                    })
-                    .catch(e => {})
-                    .finally(() => { this.busy = false; });
-            },
-            setItems(data){
+            setItems(data) {
                 this.types = data;
                 this.hide();
                 this.type = '';
-                this.new_type = '';
             }
         },
 
         async mounted() {
             this.loading = true;
-            await this.fetchChainExpirations();
+            await this.fetch();
             this.loading = false;
         },
     }

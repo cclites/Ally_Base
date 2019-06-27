@@ -15,6 +15,7 @@ use App\Billing\Deposit;
 use App\EmergencyContact;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
+use App\ExpirationType;
 use App\PhoneNumber;
 use App\Policies\ActivityPolicy;
 use App\Policies\BusinessChainPolicy;
@@ -25,6 +26,7 @@ use App\Policies\ClientInvoicePolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
 use App\Policies\EmergencyContactPolicy;
+use App\Policies\ExpirationTypePolicy;
 use App\Policies\GatewayTransactionPolicy;
 use App\Policies\PayerPolicy;
 use App\Policies\PaymentPolicy;
@@ -103,6 +105,7 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
+        ExpirationType::class => ExpirationTypePolicy::class,
     ];
 
     /**

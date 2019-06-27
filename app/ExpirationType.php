@@ -2,9 +2,10 @@
 
 namespace App;
 
+use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 
-class ExpirationType extends AuditableModel
+class ExpirationType extends AuditableModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;
 
