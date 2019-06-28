@@ -491,13 +491,21 @@
                         </b-col>
                     </b-row>
                 </b-tab>
+                <b-tab title="Expirations" href="#expirations">
+                    <b-row>
+                        <b-col lg="6">
+                            <h3>Add/Remove default expiration types</h3>
+                            <default-expirations-manager></default-expirations-manager>
+                        </b-col>
+                    </b-row>
+                </b-tab>
                 <b-tab title="Status Aliases" href="#status-aliases">
                     <business-status-alias-manager :business="this.business"></business-status-alias-manager>
                 </b-tab>
                 <b-tab title="Overtime" href="#overtime">
                     <business-overtime-settings :business="this.business"></business-overtime-settings>
                 </b-tab>
-                <b-tab title="Claims" href="#cliams">
+                <b-tab title="Claims" href="#claims">
                     <b-row>
                         <b-col lg="6">
                             <h4>HHAeXchange Credentials</h4>
@@ -584,9 +592,9 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
                 }
             },
         },
