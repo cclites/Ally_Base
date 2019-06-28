@@ -98,10 +98,22 @@ class CaregiverLicenseController extends BaseController
         return new ErrorResponse(500, 'The license could not be deleted.');
     }
 
+    /**
+     * Send notification about expiring license to the Caregiver.
+     *
+     * @param CaregiverLicense $license
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function expirationReminder(CaregiverLicense $license)
     {
         $this->authorize('read', $license->caregiver);
 
-        $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
+        // TODO: figure out which business is asking
+        $business = $license->caregiver->businesses->first();
+
+        $license->caregiver->user->notify(new LicenseExpirationReminder($business, $license));
+
+        return new SuccessResponse('A reminder email has been sent.');
     }
 }

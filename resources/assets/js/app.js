@@ -150,7 +150,7 @@ Vue.component('business-client-care-details', require('./components/business/cli
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
 Vue.component('business-caregiver-office-locations-tab', require('./components/business/caregivers/CaregiverOfficeLocationsTab'));
-Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
+Vue.component('business-caregiver-expirations-report', require('./components/BusinessCaregiverExpirationsReport.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));
@@ -227,6 +227,7 @@ Vue.component('business-offline-invoice-ar', require('./components/business/Busi
 Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
 Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 Vue.component('sales-people-commission-report', require('./components/business/reports/SalespersonCommissionReport'));
+Vue.component('business-account-setup-report', require('./components/business/reports/BusinessAccountSetupReport'));
 
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
@@ -359,6 +360,7 @@ Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'))
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
 Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ExpirationTypesAutocomplete"));
+Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

@@ -7,6 +7,8 @@ use App\Jobs\SendTextMessage;
 
 class VisitAccuracyCheck extends BaseNotification
 {
+    const DISABLED = true;
+
     /**
      * The label of the notification (used for preferences).
      *

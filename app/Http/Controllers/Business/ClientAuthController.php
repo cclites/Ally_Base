@@ -14,6 +14,8 @@ class ClientAuthController extends BaseController
 {
     /**
      * Display a list of authorizations
+     * @param $client_id
+     * @return \App\BaseModel[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     public function listByClient($client_id)
     {
@@ -24,6 +26,8 @@ class ClientAuthController extends BaseController
             $auth->load('service');
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
             $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+            $auth['effective_start_sortable'] = Carbon::parse($auth['effective_start'])->format('Y-m-d');
+            $auth['effective_end_sortable'] = Carbon::parse($auth['effective_end'])->format('Y-m-d');
             $auth['service_code'] = optional($auth['service'])->code;
             $auth['service_type'] = optional($auth['service'])->name;
         }
@@ -34,8 +38,9 @@ class ClientAuthController extends BaseController
     /**
      * Store a newly created authorization in storage.
      *
-     * @param  \App\Http\Requests\CreateClientAuthRequest  $request
+     * @param \App\Http\Requests\CreateClientAuthRequest $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(CreateClientAuthRequest $request)
     {
@@ -61,9 +66,10 @@ class ClientAuthController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CreateClientAuthRequest  $request
-     * @param  \App\Billing\ClientAuthorization  $auth
+     * @param \App\Http\Requests\CreateClientAuthRequest $request
+     * @param \App\Billing\ClientAuthorization $auth
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(CreateClientAuthRequest $request, ClientAuthorization $auth)
     {
@@ -84,8 +90,9 @@ class ClientAuthController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Billing\ClientAuthorization  $auth
+     * @param \App\Billing\ClientAuthorization $auth
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy(ClientAuthorization $auth)
     {

@@ -4,26 +4,46 @@ namespace App\Reports;
 
 use App\CaregiverLicense;
 use App\Contracts\BusinessReportInterface;
-use App\Contracts\Report;
 use App\User;
 use Carbon\Carbon;
 
 class CertificationExpirationReport extends BaseReport implements BusinessReportInterface
 {
-    /**
-     * @var bool
-     */
-    protected $generated = false;
+    protected $caregiverId;
+    protected $activeOnly;
+    protected $name;
+    protected $showExpired;
+    protected $days;
 
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    protected $rows;
+    public function setCaregiver(?int $id) : self
+    {
+        $this->caregiverId = $id;
+        return $this;
+    }
 
-    /**
-     * @var \Illuminate\Database\Eloquent\Builder
-     */
-    protected $query;
+    public function setActive(?bool $activeOnly) : self
+    {
+        $this->activeOnly = $activeOnly;
+        return $this;
+    }
+
+    public function setName(?string $name) : self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function setExpired(?bool $showExpired) : self
+    {
+        $this->showExpired = $showExpired;
+        return $this;
+    }
+
+    public function setDays(?int $days) : self
+    {
+        $this->days = $days;
+        return $this;
+    }
 
     /**
      * ScheduledPaymentsReport constructor.
@@ -31,59 +51,6 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     public function __construct()
     {
         $this->query = CaregiverLicense::with('caregiver');
-    }
-
-    /**
-     * Add a condition to limit report data
-     *
-     * @param $field
-     * @param $delimiter
-     * @param null $value
-     * @return $this
-     */
-    public function where($field, $delimiter, $value = null)
-    {
-        $this->query->where($field, $delimiter, $value);
-        return $this;
-    }
-
-    /**
-     * Limit rows between two dates
-     *
-     * @param string|\DateTime|null $start If null, leave starting period unlimited
-     * @param string|\DateTime|null $end If null, leave ending period unlimited
-     * @return $this
-     */
-    public function between($start = null, $end = null)
-    {
-        if ($start) {
-            $start = (new Carbon($start))->setTimezone('UTC');
-        }
-        if ($end) {
-            $end = (new Carbon($end))->setTimezone('UTC');
-        }
-
-        if ($start && $end) {
-            $this->query->whereBetween('expires_at', [$start, $end]);
-        } elseif ($start) {
-            $this->query->where('expires_at', '>=', $start);
-        } else {
-            $this->query->where('expires_at', '<=', $end);
-        }
-        return $this;
-    }
-
-    /**
-     * Specify the sort order for the report
-     *
-     * @param $column
-     * @param string $direction ASC | DESC
-     * @return $this
-     */
-    public function orderBy($column, $direction = 'ASC')
-    {
-        $this->query()->orderBy($column, $direction);
-        return $this;
     }
 
     /**
@@ -103,8 +70,33 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
      */
     protected function results()
     {
-        $licenses = $this->query->get();
-        $rows = $licenses->map(function (CaregiverLicense $license) {
+        $query = $this->query()->whereHas('caregiver', function ($q) {
+                        if ($this->activeOnly) {
+                            $q->where('active', 1);
+                        }
+                    });
+
+        if ($this->caregiverId) {
+            $query->where('caregiver_id', $this->caregiverId);
+        }
+
+        if (isset($this->name)) {
+            $query->where('name', 'LIKE', "%{$this->name}%");
+        }
+
+        if ($this->showExpired) {
+            $query->whereBetween('expires_at', [
+                Carbon::now()->subYears(10)->format('Y-m-d'),
+                Carbon::now()->format('Y-m-d'),
+            ]);
+        } else {
+            $query->whereBetween('expires_at', [
+                Carbon::now()->format('Y-m-d'),
+                Carbon::today()->addDays($this->days)->format('Y-m-d'),
+            ]);
+        }
+
+        return $query->get()->map(function (CaregiverLicense $license) {
             return [
                 'id' => $license->id,
                 'name' => $license->name,
@@ -114,7 +106,6 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
                 'caregiver_active' => $license->caregiver->active,
             ];
         });
-        return $rows;
     }
 
     public function forBusinesses(array $businessIds = null)

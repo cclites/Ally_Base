@@ -289,7 +289,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
      */
     function getSplitPercentage(): float
     {
-        return $this->isSplitType() ? $this->split_percentage : 1.0;
+        return (float) ($this->isSplitType() ? $this->split_percentage : 1.0);
     }
 
     /**
@@ -303,15 +303,16 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         $date = Carbon::parse($date);
 
         switch($this->payment_allocation) {
-            case 'daily':
+            case self::ALLOCATION_DAILY:
                 $start = $date->copy()->startOfDay();
                 $end = $date->copy()->endOfDay();
                 break;
-            case 'weekly':
-                $start = $date->copy()->startOfWeek()->addDays($this->getStartOfWeek() - 1);
-                $end = $date->copy()->endOfWeek()->addDays($this->getStartOfWeek() - 1);
+            case self::ALLOCATION_WEEKLY:
+                list($start, $end) = alterStartOfWeekDay((int) $this->payer->week_start, function() use ($date) {
+                    return [$date->copy()->startOfWeek(), $date->copy()->endOfWeek()];
+                });
                 break;
-            case 'monthly':
+            case self::ALLOCATION_MONTHLY:
                 $start = $date->copy()->startOfMonth();
                 $end = $date->copy()->endOfMonth();
                 break;
