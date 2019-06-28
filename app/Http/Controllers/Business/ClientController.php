@@ -212,14 +212,6 @@ class ClientController extends BaseController
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
 
-        /*
-        $invoices = $invoiceQuery->forClient($client->id, false)
-                    ->get();
-
-        foreach($invoices as $invoice){
-            $invoice->payer = $invoice->clientPayer->name();
-        }*/
-
         $invoiceQuery = new ClientInvoiceQuery();
         $invoices = $invoiceQuery->forClient($client->id, false)
             ->get()
