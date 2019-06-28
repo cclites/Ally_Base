@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers\Business\Report;
 
-use App\Billing\GatewayTransaction;
-use App\Billing\Payments\Methods\BankAccount;
-use App\Billing\Payments\Methods\CreditCard;
-use App\Business;
 use App\Http\Controllers\Business\BaseController;
 use App\Reports\ShiftHistoryReport;
 use App\Reports\ShiftsReport;
 use App\Responses\ErrorResponse;
-use App\Shift;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ShiftHistoryReportController extends BaseController
@@ -26,8 +20,10 @@ class ShiftHistoryReportController extends BaseController
      */
     public function index(Request $request, ShiftHistoryReport $report)
     {
+        $timezone = auth()->user()->role->getTimezone();
+
         if ($request->filled('json')) {
-            $report->setTimezone(auth()->user()->role->getTimezone())
+            $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start_date,
                     $request->end_date,
@@ -48,10 +44,10 @@ class ShiftHistoryReportController extends BaseController
             }
     
             if ($request->input('export')) {
-                return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone ?? 'America/New_York')
-                              ->download();
+                return $report->setDateFormat('m/d/Y g:i A', $timezone)
+                    ->download();
             }
-    
+
             return $report->rows();
         }
 

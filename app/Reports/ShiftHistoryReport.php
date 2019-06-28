@@ -27,12 +27,20 @@ class ShiftHistoryReport extends BusinessResourceReport
             'business',
             'caregiver',
             'client',
-            'statusHistory',
-            'goals',
-            'questions',
-            'costHistory',
-            'client.defaultPayment',
             'shiftFlags',
+            'statusHistory',
+            'costHistory',
+            'service',
+            'services',
+
+            // TODO: Need to clean this up.  This is all required to properly
+            // get the rates, and we still have n+1 issues with
+            // credit_card and bank_accounts being loaded.
+            'client.primaryPayer',
+            'client.primaryPayer.payer',
+            'client.primaryPayer.client',
+            'client.primaryPayer.client.business',
+            'client.primaryPayer.paymentMethod',
         ]);
     }
 
@@ -102,8 +110,6 @@ class ShiftHistoryReport extends BusinessResourceReport
                 // Send both verified and EVV for backwards compatibility
                 'verified' => $shift->verified,
                 'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
-                'goals' => $shift->goals,
-                'questions' => $shift->questions,
                 'flags' => $shift->flags,
                 'created_at' => optional($shift->created_at)->toDateTimeString(),
             ];
