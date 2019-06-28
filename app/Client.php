@@ -30,6 +30,7 @@ use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
+use App\BusinessCommunications;
 
 /**
  * App\Client

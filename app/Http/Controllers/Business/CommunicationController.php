@@ -221,7 +221,7 @@ class CommunicationController extends Controller
     public function saveRecipients(Request $request)
     {
         $request->session()->flash('sms.load-recipients', $request->ids);
-
         return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
+
 }
