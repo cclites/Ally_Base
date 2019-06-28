@@ -30,7 +30,7 @@
                     </b-textarea>
                     <input-help :form="form" field="notes" text=""></input-help>
                     <b-button v-show="! isTimesheet" variant="info" @click="acknowledge()">Acknowledge Notification</b-button>
-                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledgeAllForChain()">Acknowledge Notification For All</b-button>
+                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledgeAllForChain()">Acknowledge Notification For All Users</b-button>
                     <b-button variant="secondary" :href="notification.action_url">{{ referenceUrlTitle }}</b-button>
                 </b-form-group>
             </b-col>
@@ -70,7 +70,6 @@
             },
 
             acknowledgeAllForChain() {
-                console.log(this.notification.event_id);
                 this.form.post('/business/notifications/' + this.notification.event_id + '/acknowledge-all');
             }
         }

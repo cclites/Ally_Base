@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\SystemNotification;
-use Log;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class SystemNotificationController extends BaseController
 {
@@ -92,9 +92,18 @@ class SystemNotificationController extends BaseController
      */
     public function acknowledgeAllForChain(Request $request, $eventId)
     {
+        $chain = optional(\Auth::user()->officeUser)->businessChain;
+        if (! $chain) {
+            throw new AccessDeniedHttpException('A business chain was not found.');
+        }
+
         SystemNotification::where('event_id', $eventId)
             ->whereNull('acknowledged_at')
-            ->update(['acknowledged_at' => Carbon::now()]);
+            ->whereIn('user_id', $chain->users->pluck('id'))
+            ->update([
+                'acknowledged_at' => Carbon::now(),
+                'notes' => $request->input('notes', ''),
+            ]);
 
         return new SuccessResponse('All notifications have been marked as acknowledged.', [], route('business.notifications.index'));
     }

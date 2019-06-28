@@ -3,7 +3,6 @@
 namespace App\Channels;
 
 use Illuminate\Notifications\Notification;
-use Log;
 
 class SystemChannel
 {

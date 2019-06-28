@@ -11,7 +11,6 @@ use App\PhoneNumber;
 use App\Jobs\SendTextMessage;
 use App\SystemNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Str;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {
@@ -71,7 +70,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      *
      * @var string
      */
-    protected $event_id;
+    protected $event_id = null;
 
     /**
      * Used to set a unique event id
@@ -243,16 +242,12 @@ abstract class BaseNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * @return string
+     * Generate a unique event ID.
+     *
+     * @return void
      */
-    public function getEventIdAttribute(){
-        return $this->event_id;
-    }
-
-    /**
-     * generate a unique event id
-     */
-    public function setEventId(){
-        $this->event_id = Str::random(12);
+    public function setEventId() : void
+    {
+        $this->event_id = SystemNotification::generateUniqueEventId();
     }
 }

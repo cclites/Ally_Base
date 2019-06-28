@@ -14,7 +14,7 @@ class AlterAddEventIdToSystemNotifications extends Migration
     public function up()
     {
         Schema::table('system_notifications', function (Blueprint $table) {
-            $table->string('event_id', 12)->nullable();
+            $table->string('event_id', 12)->nullable()->index();
         });
     }
 
