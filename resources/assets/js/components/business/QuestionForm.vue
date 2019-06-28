@@ -10,11 +10,7 @@
                                 v-model="form.client_type"
                                 :disabled="busy"
                         >
-                            <option value="">All</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
+                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_type" text=""></input-help>
                     </b-form-group>
@@ -46,7 +42,12 @@
 </template>
 
 <script>
+
+    import Constants from '../../mixins/Constants';
+
     export default {
+
+        mixins: [Constants],
         props: {
             question: {
                 type: Object,

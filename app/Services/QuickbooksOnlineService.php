@@ -92,14 +92,18 @@ class QuickbooksOnlineService
     /**
      * Exchange authorization code for access token.
      *
-     * @param string $code
-     * @param string $realmId
+     * @param null|string $code
+     * @param null|string $realmId
      * @return \QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken|null
      * @throws \QuickBooksOnline\API\Exception\SdkException
      * @throws \QuickBooksOnline\API\Exception\ServiceException
      */
-    public function getAccessToken(string $code, string $realmId) : ?OAuth2AccessToken
+    public function getAccessToken(?string $code, ?string $realmId) : ?OAuth2AccessToken
     {
+        if (empty($code) || empty($realmId)) {
+            return null;
+        }
+
         return $this->service->getOAuth2LoginHelper()
             ->exchangeAuthorizationCodeForToken($code, $realmId);
     }

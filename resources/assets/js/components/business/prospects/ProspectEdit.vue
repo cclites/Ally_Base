@@ -35,11 +35,7 @@
                                 v-model="form.client_type"
                                 required
                         >
-                            <option value="">--Select--</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
+                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the prospect will use."></input-help>
                     </b-form-group>
@@ -185,9 +181,11 @@
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup},
+        mixins: [Constants],
 
         props: ['prospect', 'referralsources'],
 

@@ -36,7 +36,9 @@ class ScheduleEditor
 
         // Verify date format
         if (isset($data['starts_at'])) {
-            $data['starts_at'] = Carbon::parse($data['starts_at'])->toDateTimeString();
+            $startsAt = Carbon::parse($data['starts_at']);
+            $data['added_to_past'] = $startsAt->isPast();
+            $data['starts_at'] = $startsAt->toDateTimeString();
         }
 
         if ($schedule->update($data + ['group_id' => null])) {

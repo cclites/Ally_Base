@@ -20,6 +20,7 @@ class QuickbooksConnectionResource extends ClientInvoice
             'refund_service' => $this->resource->refund_service,
             'expense_service' => $this->resource->expense_service,
             'is_authenticated' => $this->resource->isAuthenticated(),
+            'allow_shift_overrides' => $this->resource->allow_shift_overrides,
             'created_at' => $this->resource->created_at->toDateTimeString(),
         ]);
     }

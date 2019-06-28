@@ -44,8 +44,10 @@ class CertificationExpired extends BaseNotification
      */
     public function __construct($license)
     {
+        parent::__construct();
         $this->license = $license;
         $this->url = route('business.caregivers.show', ['caregiver' => $this->license->caregiver]);
+
     }
 
     /**

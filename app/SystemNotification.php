@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use function Sentry\addBreadcrumb;
 
 
 class SystemNotification extends AuditableModel
@@ -87,5 +89,24 @@ class SystemNotification extends AuditableModel
             'acknowledged_at' => Carbon::now(),
             'notes' => $note,
         ]);
+    }
+
+    /**
+     * Generate a unique event ID.
+     *
+     * @return string
+     */
+    public static function generateUniqueEventId() : string
+    {
+        while (true) {
+            $id = Str::random(12);
+            if (SystemNotification::where('event_id', $id)->exists()) {
+                continue;
+            }
+
+            break;
+        }
+
+        return $id;
     }
 }

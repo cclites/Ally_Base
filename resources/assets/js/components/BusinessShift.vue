@@ -159,6 +159,7 @@
                                         <th>Ally Fee</th>
                                         <th width="12%">Total Rate</th>
                                         <th>Payer</th>
+                                        <th v-if="allowQuickbooksMapping">Quickbooks Service Mapping</th>
                                         <th class="service-actions"></th>
                                     </tr>
                                     </thead>
@@ -168,7 +169,7 @@
                                     <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                         <td>
                                             <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                                <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                                <option v-for="service in services" :value="service.id">{{ service.name }} {{ service.code }}</option>
                                             </b-form-select>
                                         </td>
                                         <td>
@@ -230,10 +231,16 @@
                                                     class="money-input"
                                             />
                                         </td>
-                                        <td colspan="2">
+                                        <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                             <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                 <option :value="null">(Auto)</option>
                                                 <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                            </b-form-select>
+                                        </td>
+                                        <td colspan="2" v-if="allowQuickbooksMapping">
+                                            <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                <option value="">--None--</option>
+                                                <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
                                             </b-form-select>
                                         </td>
                                     </tr>
@@ -242,7 +249,7 @@
                                     <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
                                         <td>
                                             <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                                <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
+                                                <option v-for="s in services" :value="s.id">{{ s.name }} {{ s.code }}</option>
                                             </b-form-select>
                                         </td>
                                         <td>
@@ -317,6 +324,12 @@
                                                 <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                             </b-form-select>
                                         </td>
+                                        <td v-if="allowQuickbooksMapping">
+                                            <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                <option value="">--None--</option>
+                                                <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                            </b-form-select>
+                                        </td>
                                         <td class="service-actions text-nowrap">
                                             <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
                                                 <i class="fa fa-times"></i>
@@ -331,15 +344,21 @@
                             </div>
 
                             <div v-if="billingType === 'services' && serviceHours != duration" class="alert alert-warning">
-                                Warning: The shift's actual hours ({{ duration }}) do not match the broken out service hours.
+                                Warning: The shift's actual hours ({{ numberFormat(duration) }}) do not match the broken out service hours.
                             </div>
                             <b-alert v-if="isUsingOvertime" variant="warning" show>
                                 Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                             </b-alert>
 
+                            <b-alert v-if="isUsingDefaultRates" variant="info" show>
+                                This shift is using the default rates.
+                            </b-alert>
+                            <b-alert v-else variant="warning" show>
+                                This shift is not using the default rates.
+                            </b-alert>
                             <label class="mt-1">
                                 <b-form-checkbox v-model="defaultRates">
-                                    Use Default Rates from Caregivers &amp; Rates Tab of Client Profile
+                                    Update with Default Rates from Caregivers &amp; Rates Tab of Client Profile on Save
                                 </b-form-checkbox>
                             </label>
                         </b-col>
@@ -535,6 +554,7 @@
     import ConfirmationModal from "./modals/ConfirmationModal";
     import ShiftServices from "../mixins/ShiftServices";
     import AuthUser from '../mixins/AuthUser';
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ConfirmationModal},
@@ -582,6 +602,7 @@
                 duplicateDate: '',
                 confirmModal: false,
                 loading: false,
+                loadingQuickbooksConfig: false,
             }
         },
         mounted() {
@@ -596,6 +617,13 @@
             this.fixDateTimes();
         },
         computed: {
+            ...mapGetters({
+                quickbooksServices: 'quickbooks/services',
+                quickbooksBusiness: 'quickbooks/businessId',
+                quickbooksIsAuthorized: 'quickbooks/isAuthorized',
+                quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
+            }),
+
             selectedClient() {
                 return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
             },
@@ -653,7 +681,15 @@
             },
             urlPrefix() {
                 return this.isClient ? `/unconfirmed-shifts/` : `/business/shifts/`;
-            }
+            },
+
+            allowQuickbooksMapping() {
+                return this.quickbooksAllowMapping && this.quickbooksIsAuthorized;
+            },
+
+            disableQuickbooksMapping() {
+                return !this.business || this.loadingQuickbooksConfig;
+            },
         },
         methods: {
             changedShift(shift) {
@@ -802,7 +838,8 @@
                         'caregiver_rate': null,
                         'provider_fee': null,
                         'ally_fee': null,
-                    }
+                    },
+                    quickbooks_service_id: shift.quickbooks_service_id || '',
                 };
             },
             createIssue() {
@@ -1057,9 +1094,20 @@
             shift(newVal, oldVal) {
                 if (newVal.id !== oldVal.id) this.changedShift(newVal);
             },
+
             allyPct() {
                 this.recalculateAllRates(this.form)
-            }
+            },
+
+            // Watch if the business changes and refresh the current quickbooks settings.
+            async business(newVal, oldVal) {
+                if (newVal && newVal.id != oldVal.id) {
+                    this.loadingQuickbooksConfig = true;
+                    await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
+                    await this.$store.dispatch('quickbooks/fetchServices');
+                    this.loadingQuickbooksConfig = false;
+                }
+            },
         },
     }
 </script>

@@ -37,6 +37,7 @@ class CreateClientAuthRequest extends FormRequest
             'unit_type' => 'required|string',
             'period' => 'required|string|in:' . implode(',', ClientAuthorization::allPeriods()),
             'notes' => 'nullable|string|max:255',
+            'week_start' => 'required_if:period,weekly|numeric|in:0,1,2,3,4,5,6',
             'sunday' => 'required_if:period,specific_days|numeric|min:0',
             'monday' => 'required_if:period,specific_days|numeric|min:0',
             'tuesday' => 'required_if:period,specific_days|numeric|min:0',

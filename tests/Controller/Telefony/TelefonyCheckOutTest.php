@@ -136,6 +136,17 @@ class TelefonyCheckOutTest extends TelefonyBase
         $response->assertSee('<Gather timeout="30" finishOnKey="#" action="' . route('telefony.check-out.confirm-mileage', [$shift]) . '">');
     }
 
+    /** @test */
+    function if_an_empty_value_is_submitted_for_mileage_it_should_ask_again()
+    {
+        $shift = $this->createShift();
+        $mileage = "string";
+        $response = $this->telefonyPost('check-out/confirm-mileage/' . $shift->id, ['Digits' => $mileage]);
+
+        $response->assertSee('<Redirect');
+        $response->assertSee(route('telefony.check-out.check-for-mileage', [$shift]));
+    }
+
     public function test_check_for_activities_response()
     {
         $shift = $this->createShift();

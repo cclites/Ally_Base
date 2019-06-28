@@ -287,7 +287,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 
     public function licenses()
     {
-        return $this->hasMany(CaregiverLicense::class);
+        return $this->hasMany(CaregiverLicense::class)
+                    ->orderBy("expires_at", 'ASC');
     }
 
     public function payments()
@@ -621,7 +622,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function ensureBusinessRelationship(Business $business) : bool
     {
-        if ($this->businesses->contains('id', $business->id)) {
+        if ($this->businesses()->where('business_id', $business->id)->exists()) {
             return true;
         }
 
@@ -648,6 +649,47 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
+
+    /**
+     * Filter only Caregivers that are on the schedule.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereScheduled($query)
+    {
+        return $query->whereHas('schedules');
+    }
+
+    /**
+     * Filter only Caregivers that have been on the schedule
+     * or have clocked in shifts
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereHasShiftsOrSchedules($query)
+    {
+        return $query->where(function($query) {
+            $query->whereHas('schedules')
+                ->orWhereHas('shifts');
+        });
+    }
+
+    /**
+     * Get only the users who have not completed
+     * the account setup wizard.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereNotSetup($query)
+    {
+        return $query->whereHas('user', function ($q) {
+            $q->where('setup_status', '<>', self::SETUP_ADDED_PAYMENT)
+                ->orWhereNull('setup_status');
+        });
+    }
 
     /**
      * Get the date of the last shift between the Caregiver and

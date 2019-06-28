@@ -1,9 +1,11 @@
 <?php
 namespace Tests\Feature;
 
+use App\Billing\ScheduleService;
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
+use App\QuickbooksService;
 use App\Schedule;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
@@ -164,5 +166,83 @@ class ScheduleCreatorTest extends TestCase
 
         $this->assertEquals('2019-03-06 12:00:00', $results[0]->starts_at->toDateTimeString());
         $this->assertEquals('2019-03-13 12:00:00', $results[1]->starts_at->toDateTimeString());
+    }
+
+    /** @test */
+    function creating_a_single_schedule_in_the_past_should_be_flagged_as_such()
+    {
+        $this->scheduleCreator->startsAt(Carbon::now()->subSecond(1))
+            ->duration(60)
+            ->assignments(1, 1);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(1, $schedules);
+        $this->assertTrue($schedules[0]->added_to_past);
+    }
+
+    /** @test */
+    function creating_a_single_schedule_after_the_current_time_is_not_added_to_past()
+    {
+        $this->scheduleCreator->startsAt(Carbon::now()->addSecond(1))
+            ->duration(60)
+            ->assignments(1, 1);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(1, $schedules);
+        $this->assertFalse($schedules[0]->added_to_past);
+    }
+
+    /** @test */
+    function creating_a_recurring_schedule_should_flag_any_past_times()
+    {
+        Carbon::setTestNow(Carbon::parse('2019-06-18 12:00:00')); // tuesday
+
+        $this->scheduleCreator->startsAt(Carbon::yesterday())
+                              ->duration(60)
+                              ->assignments(1, 1)
+                              ->interval('weekly', Carbon::today()->addWeeks(10), ['mo']);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(11, $schedules);
+
+        $this->assertTrue($schedules[0]->added_to_past);
+        $this->assertFalse($schedules[1]->added_to_past);
+        $this->assertFalse($schedules[10]->added_to_past);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_a_quickbooks_service_mapping()
+    {
+        $service = factory(QuickbooksService::class)->create();
+
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+                              ->duration(60)
+                              ->assignments(1, 1)
+                              ->attachQuickbooksService($service->id);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertEquals($service->id, $schedules->first()->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_quickbooks_service_mapping_per_service_breakout_entry()
+    {
+        $service1 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+        $service2 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+        $service3 = factory(ScheduleService::class)->raw(['quickbooks_service_id' => factory(QuickbooksService::class)->create()]);
+
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+            ->duration(60)
+            ->assignments(1, 1)
+            ->addServices([$service1, $service2, $service3]);
+
+        $schedules = $this->scheduleCreator->create();
+
+        $this->assertCount(3, $schedules->first()->services);
+        $this->assertTrue($schedules->first()->services()->where('quickbooks_service_id', $service1['quickbooks_service_id'])->exists());
     }
 }

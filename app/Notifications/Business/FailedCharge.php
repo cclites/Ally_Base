@@ -45,6 +45,7 @@ class FailedCharge extends BaseNotification
      */
     public function __construct($client)
     {
+        parent::__construct();
         $this->client = $client;
         $this->url = route('business.clients.show', ['client' => $this->client]);
     }

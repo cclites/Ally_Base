@@ -7,7 +7,9 @@ use App\Billing\Claims\HhaClaimTransmitter;
 use App\Billing\Claims\ManualClaimTransmitter;
 use App\Billing\Claims\TellusClaimTransmitter;
 use App\Billing\Contracts\ClaimTransmitterInterface;
+use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use Illuminate\Support\Collection;
 
 /**
  * \App\Billing\Claim
@@ -27,7 +29,7 @@ use App\Billing\Exceptions\ClaimTransmissionException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
-class Claim extends AuditableModel
+class Claim extends AuditableModel implements InvoiceInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -96,6 +98,29 @@ class Claim extends AuditableModel
     // OTHER FUNCTIONS
     // **********************************************************
 
+    /**
+     * @return \Illuminate\Support\Collection|\App\Billing\ClientInvoiceItem[]
+     */
+    function getItems(): Collection
+    {
+        return $this->invoice->items;
+    }
+
+    function getItemGroups(): Collection
+    {
+        return $this->getItems()->sortBy('date')->groupBy('group');
+    }
+
+    function getName(): string
+    {
+        return $this->invoice->name;
+    }
+
+    function getDate(): string
+    {
+        return $this->invoice->created_at->format('m/d/Y');
+    }
+
     function getAmount(): float
     {
         return (float) $this->amount;
@@ -160,7 +185,7 @@ class Claim extends AuditableModel
         if (empty($claim)) {
             $claim = Claim::create([
                 'client_invoice_id' => $invoice->id,
-                'amount' => $invoice->amount,
+                'amount' => $invoice->getAmount(),
                 'status' => ClaimStatus::CREATED(),
             ]);
 
@@ -186,7 +211,11 @@ class Claim extends AuditableModel
             case ClaimService::TELLUS():
                 return new TellusClaimTransmitter();
                 break;
-            case ClaimService::MANUAL():
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
                 return new ManualClaimTransmitter();
                 break;
             default:

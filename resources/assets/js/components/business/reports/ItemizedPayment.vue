@@ -176,7 +176,7 @@
                 fields: [
                     {
                         key: "date",
-                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-',
+                        formatter: val => val ? this.formatDateTime(val) : '-',
                         sortable: true,
                     },
                     {

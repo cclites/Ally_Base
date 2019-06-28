@@ -21,6 +21,12 @@
                         <span v-if="row.item.period == 'specific_days'">N/A</span>
                         <span v-else>{{ row.item.units }}</span>
                     </template>
+                    <template slot="effective_end_sortable" scope="row">
+                        {{ row.item.effective_end }}
+                    </template>
+                    <template slot="effective_start_sortable" scope="row">
+                        {{ row.item.effective_start }}
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" @click="editAuth(row.item.id)">
@@ -83,12 +89,12 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Units" label-class="required">
                                 <b-form-input type="number" step="any" v-model="form.units" :disabled="form.period == 'specific_days'" />
                             </b-form-group>
                         </b-col>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Unit Type" label-class="required">
                                 <b-form-select v-model="form.unit_type" class="mr-1 mb-1">
                                     <option value="15m">15 Minutes</option>
@@ -97,15 +103,37 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="4">
+                        <b-col lg="3">
                             <b-form-group label="Period" label-class="required">
-                                <b-form-select v-model="form.period" class="mr-1 mb-1">
+                                <b-form-select v-model="form.period" class="mr-1">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="monthly">Monthly</option>
                                     <option value="term">Term</option>
                                     <option value="specific_days">Specific Days of Week</option>
                                 </b-form-select>
+                            </b-form-group>
+                            <b-form-group v-if="form.period == 'weekly'" label="Start of Week" label-class="required">
+                                <b-form-select id="week_start" v-model="form.week_start" class="mr-1 mb-1">
+                                    <option value="0">Sunday</option>
+                                    <option value="1">Monday</option>
+                                    <option value="2">Tuesday</option>
+                                    <option value="3">Wednesday</option>
+                                    <option value="4">Thursday</option>
+                                    <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="# of Occurrences">
+                                <b-form-input
+                                    type="number"
+                                    step="any"
+                                    min="1"
+                                    v-model="form.occurrences"
+                                    :disabled="['specific_days', 'term'].includes(form.period)"
+                                />
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -193,8 +221,8 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'service_type',
-                sortDesc: false,
+                sortBy: 'effective_start_sortable',
+                sortDesc: true,
                 filter: null,
                 fields: [
                     {
@@ -210,12 +238,12 @@
                         formatter: x => x ? x : '-',
                     },
                     {
-                        key: 'effective_start',
+                        key: 'effective_start_sortable',
                         label: 'Start',
                         sortable: true,
                     },
                     {
-                        key: 'effective_end',
+                        key: 'effective_end_sortable',
                         label: 'End',
                         sortable: true,
                     },
@@ -250,7 +278,8 @@
                     }
                 ],
                 form: this.makeForm(this.auth),
-                loading: false
+                loading: false,
+                calculatingOccurrences: false,
             }
         },
 
@@ -270,11 +299,83 @@
                 if (service) {
                     return service.name;
                 }
-                return '';
+                return '-';
             },
         },
 
+        watch: {
+            'form.period'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.effective_end'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.effective_start'(newValue, oldValue) {
+                this.setOccurrences();
+            },
+            'form.occurrences'(newValue, oldValue) {
+                if (this.calculatingOccurrences) {
+                    return;
+                }
+                this.calculateEndDateFromOccurrences();
+            },
+        },
         methods: {
+            setOccurrences() {
+                this.calculatingOccurrences = true;
+                this.form.occurrences = this.getOccurrencesFromEndDate();
+                this.$nextTick(() => {
+                    this.calculatingOccurrences = false;
+                });
+            },
+
+            getOccurrencesFromEndDate() {
+                if (! ['daily', 'weekly', 'monthly'].includes(this.form.period)) {
+                    return '';
+                }
+
+                let start = moment(this.form.effective_start);
+                let end = moment(this.form.effective_end);
+
+                let between = moment.duration(end.diff(start));
+
+                switch (this.form.period)
+                {
+                    case 'daily':
+                        return Math.ceil(between.as('days'));
+                    case 'weekly':
+                        return Math.ceil(between.as('weeks'));
+                    case 'monthly':
+                        return Math.ceil(between.as('months'));
+                    default:
+                        return;
+                }
+            },
+
+            calculateEndDateFromOccurrences() {
+                if (! this.form.effective_start || ! this.form.occurrences) {
+                    return;
+                }
+
+                let endDate = moment(this.form.effective_start);
+                switch (this.form.period)
+                {
+                    case 'daily':
+                        endDate.add(this.form.occurrences, 'days');
+                        break;
+                    case 'weekly':
+                        endDate.add(this.form.occurrences, 'weeks');
+                        break;
+                    case 'monthly':
+                        endDate.add(this.form.occurrences, 'months');
+                        break;
+                    default:
+                        return;
+                }
+
+                this.form.effective_end = endDate.format('MM/DD/YYYY');
+            },
+
             authSaved(data) {
                 let item = this.items.find(x => x.id === data.id);
                 if (item) {
@@ -286,11 +387,13 @@
             addAuth() {
                 this.auth = {};
                 this.form = this.makeForm(this.auth);
+                this.setOccurrences();
                 this.showAuthModal = true;
             },
             editAuth(id) {
                 this.auth = this.items.find(x => x.id == id);
                 this.form = this.makeForm(this.auth);
+                this.setOccurrences();
                 this.showAuthModal = true;
             },
             deleteAuth(id) {
@@ -317,6 +420,8 @@
                     units: defaults.units || 0,
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
+                    week_start: defaults.week_start || 1,
+                    occurrences: '',
                     notes: defaults.notes || "",
                     sunday: defaults.sunday || 0,
                     monday: defaults.monday || 0,

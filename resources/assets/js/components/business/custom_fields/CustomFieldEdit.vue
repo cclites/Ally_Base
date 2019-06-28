@@ -60,7 +60,6 @@
                     <b-form-group v-if="form.required" label="The default value" label-for="default_value" label-class="required">
                         <b-form-input 
                             v-if="form.type == 'input'"
-                            id="default_value"
                             name="default_value"
                             type="text"
                             v-model="form.default_value"
@@ -69,7 +68,6 @@
 
                         <b-form-textarea
                             v-if="form.type == 'textarea'"
-                            id="default_value"
                             name="default_value"
                             v-model="form.default_value"
                             rows="5"
@@ -78,7 +76,6 @@
 
                         <b-form-select 
                             v-if="form.type == 'dropdown'"
-                            id="default_value"
                             name="default_value"
                             v-model="form.default_value"
                             :options="defaultOptions"
@@ -98,11 +95,11 @@
 
                     <div v-if="form.type == 'dropdown'">
                         <h3>Your list of options:</h3>
-                        <p v-if="options.length == 0">You haven't created any yet. Please add them using the input below.</p>
+                        <p v-if="form.options.length == 0">You haven't created any yet. Please add them using the input below.</p>
                         <b-row v-else>
                             <b-col lg="12">
                                 <b-btn 
-                                    v-for="(option, i) in options"
+                                    v-for="(option, i) in form.options"
                                     :key="i" 
                                     @click="deleteOption(i)"
                                     class="mr-2"
@@ -149,7 +146,6 @@
     import FormatsStrings from '../../../mixins/FormatsStrings';
     
     export default {
-
         props: {
             field: {
                 type: Object,
@@ -160,8 +156,8 @@
         mixins: [FormatsStrings],
 
         mounted() {
-            if(this.field && this.field.options.length > 0) {
-                this.options = this.field.options.map(field => field.label);
+            if (this.field && this.field.options && this.field.options.length > 0) {
+                this.form.options = this.field.options.map(field => field.label);
             }
         },
 
@@ -174,8 +170,8 @@
                     label: this.getOriginal('label'),
                     required: this.getOriginal('required', false),
                     default_value: this.getOriginal('default_value'),
+                    options: [],
                 }),
-                options: [],
                 optionInput: '',
             };
         },
@@ -187,7 +183,7 @@
 
             defaultOptions() {
                 const options = [{value: '', text: '--- Select ---'}];
-                this.options.forEach(text => options.push({ text, value: this.toSnakeCase(text) }));
+                this.form.options.forEach(text => options.push({ text, value: this.toSnakeCase(text) }));
 
                 return options;
             },
@@ -205,50 +201,40 @@
 
             addOption() {
                 const value = this.optionInput.trim();
-                const alreadyExist = this.options.some(option => option == value);
+                const alreadyExist = this.form.options.some(option => option == value);
 
                 if(!alreadyExist && value.length > 0) {
-                    this.options.push(value);
+                    this.form.options.push(value);
                     this.optionInput = '';
                 }
             },
 
             deleteOption(index) {
-                this.options = this.options.filter((opt, i) => i != index);
+                this.form.options = this.form.options.filter((opt, i) => i != index);
             },
 
             async save() {
                 this.submitting = true;
 
-                if(this.form.type == 'dropdown' && this.options.length < 1) {
-                    alert('You need more than 1 option for this list field to be valid.');
-                    this.submitting = false;
-                    return;
-                }
+                // determine store or update
+                let method = this.field ? 'put' : 'post';
+                let url = this.field ? `/business/custom-fields/${this.field.id}` : '/business/custom-fields';
 
-                try {
-                    // Create/update the custom field
-                    const {data} = this.field 
-                        ? await this.form.patch(`/business/custom-fields/${this.field.id}`)
-                        : await this.form.post('/business/custom-fields');
-
-                    // Create/update the custom dropdown field options
-                    if(this.form.type == 'dropdown') {
-                        const optionForm = new Form({ options: this.options.join(',') });
-                        const res = this.field 
-                            ? await optionForm.put(`/business/custom-fields/options/${this.field.id}`)
-                            : await optionForm.post(`/business/custom-fields/options/${data.data.id}`);
-                    }
-
-                    if (! this.field) {
-                        window.location.href = '/business/settings#custom-fields';
-                    }
-                } catch(error) {}
-                this.submitting = false;
+                this.form.submit(method, url)
+                    .then( ({ data }) => {
+                        if (! this.field) {
+                            window.location.href = '/business/settings#custom-fields';
+                        }
+                    })
+                    .catch(() => {
+                    })
+                    .finally(() => {
+                        this.submitting = false;
+                    });
             },
 
             destroy() {
-                if (!confirm(`Are you sure you wish to delete this field?`)) return;
+                if (!confirm(`Are you sure you wish to delete this field?  This will remove any data for this field that has been saved for related clients or caregivers.`)) return;
                 const form = new Form({});
                 form.submit('delete', `/business/custom-fields/${this.field.id}`);
             },
@@ -260,7 +246,7 @@
                     if(newer.type != old.type) {
                         this.form.default_value = '';
                         this.optionInput = '';
-                        this.options = [];
+                        this.form.options = [];
                     }
 
                     if(!newer.required) {

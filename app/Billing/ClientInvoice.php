@@ -114,6 +114,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->hasMany(QuickbooksClientInvoice::class, 'client_invoice_id', 'id');
     }
 
+    /**
+     * Get the offline payments relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function offlinePayments()
+    {
+        return $this->hasMany(OfflineInvoicePayment::class);
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
@@ -136,11 +146,15 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function getAmountPaid(): float
     {
         if ($this->isOffline()) {
-            if (!$this->claim) return 0.0;
-            return (float) $this->claim->getAmountPaid();
+            return $this->getOfflineAmountPaid();
         }
 
         return (float) $this->amount_paid;
+    }
+
+    function getOfflineAmountPaid() : float
+    {
+        return (float) $this->offline_amount_paid;
     }
 
     function getAmountDue(): float
@@ -234,5 +248,30 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function getEstimates(): ClientInvoiceEstimates
     {
         return new ClientInvoiceEstimates($this);
+    }
+
+    function addOfflinePayment(OfflineInvoicePayment $offlinePayment): bool
+    {
+        if ($this->offlinePayments()->save($offlinePayment)) {
+            return (bool) $this->increment('offline_amount_paid', $offlinePayment->amount);
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the invoice was a split invoice.
+     *
+     * @return bool
+     */
+    public function getWasSplit() : bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->total <> $item->amount_due) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

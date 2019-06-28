@@ -55,7 +55,7 @@ class PaymentMethodTest extends TestCase
             'business_id' => null
         ]);
         $data = collect($bank_account->toArray())->except('last_four', 'user_id', 'business_id')->toArray();
-        $data['routing_number'] = $this->faker->randomNumber(9);
+        $data['routing_number'] = $this->faker->randomNumber(9, true);
         $data['routing_number_confirmation'] = $data['routing_number'];
         $data['account_number'] = $this->faker->bankAccountNumber;
         $data['account_number_confirmation'] = $data['account_number'];

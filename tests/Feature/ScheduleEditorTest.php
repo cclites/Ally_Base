@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Billing\ScheduleService;
 use App\Business;
+use App\QuickbooksService;
 use App\Schedule;
 use App\ScheduleGroup;
 use App\Scheduling\ScheduleEditor;
 use App\Client;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -184,5 +187,52 @@ class ScheduleEditorTest extends TestCase
 
         $this->editor->updateGroup($group, $schedule1, ['starts_at' => '2019-03-06 12:00:00']);
         $this->assertEquals('12:00:00', $schedule3->fresh()->starts_at->toTimeString());
+    }
+
+    /** @test */
+    function editing_a_single_schedule_should_flag_when_start_date_added_to_past()
+    {
+        $schedule = factory(Schedule::class)->create();
+
+        $data = [
+            'starts_at' => Carbon::yesterday(),
+            'duration' => 60,
+        ];
+
+        $this->editor->updateSingle($schedule, $data, null);
+
+        $this->assertEquals($data['starts_at'], $schedule->fresh()->starts_at->toDateTimeString());
+        $this->assertEquals($data['duration'], $schedule->duration);
+        $this->assertTrue($schedule->fresh()->added_to_past);
+    }
+
+    /** @test */
+    function a_schedule_can_be_updated_with_a_quickbooks_service_mapping()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $schedule = factory(Schedule::class)->create(['quickbooks_service_id' => null]);
+
+        $this->editor->updateSingle($schedule, ['quickbooks_service_id' => $qbService->id], null);
+        $this->assertEquals($qbService->id, $schedule->fresh()->quickbooks_service_id);
+    }
+
+    /** @test */
+    function a_schedule_can_be_created_with_quickbooks_service_mapping_per_service_breakout_entry()
+    {
+        $qbService = factory(QuickbooksService::class)->create();
+
+        $schedule = factory(Schedule::class)->create([
+            'service_id' => null,
+            'quickbooks_service_id' => null,
+        ]);
+        $service1 = factory(ScheduleService::class)->create(['schedule_id' => $schedule->id]);
+        $service2 = factory(ScheduleService::class)->create(['schedule_id' => $schedule->id]);
+
+        $service1->quickbooks_service_id = $qbService->id;
+        $service2->quickbooks_service_id = $qbService->id;
+
+        $this->editor->updateSingle($schedule, [], null, [$service1->toArray(), $service2->toArray()]);
+        $this->assertEquals($qbService->id, $schedule->fresh()->services->first()->quickbooks_service_id);
     }
 }

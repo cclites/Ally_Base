@@ -17,6 +17,7 @@ use App\Data\ScheduledRates;
  * @property float $duration
  * @property float|null $client_rate
  * @property float|null $caregiver_rate
+ * @property int $quickbooks_service_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits

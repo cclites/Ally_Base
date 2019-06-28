@@ -73,6 +73,11 @@ class ScheduleCreator
     protected $ruleParser;
 
     /**
+     * @var int
+     */
+    protected $quickbooksServiceId;
+
+    /**
      * @var \App\Scheduling\ScheduleAggregator
      */
     protected $scheduleAggregator;
@@ -369,13 +374,17 @@ class ScheduleCreator
 
         try {
             foreach ($occurrences as $date) {
+                 $isPast = Carbon::parse($date->format('Y-m-d H:i:s'))->isPast();
+
                  $schedule = Schedule::create(
                     array_merge(
                         $this->data,
                         [
-                            'starts_at' => $date->format('Y-m-d H:i:s'), // keep in business timezone
-                            'weekday'   => $date->format('w'),
-                            'group_id'  => $group->id ?? null,
+                            'starts_at'             => $date->format('Y-m-d H:i:s'), // keep in business timezone
+                            'weekday'               => $date->format('w'),
+                            'group_id'              => $group->id ?? null,
+                            'added_to_past'         => $isPast,
+                            'quickbooks_service_id' => $this->quickbooksServiceId,
                         ]
                     )
                 );
@@ -401,4 +410,15 @@ class ScheduleCreator
             }
         }
     }
+
+    /**
+     * Assign quickbooks service mapping to the base service.
+     *
+     * @param int $quickbooksServiceId
+     */
+    public function attachQuickbooksService(int $quickbooksServiceId) : void
+    {
+        $this->quickbooksServiceId = $quickbooksServiceId;
+    }
 }
+

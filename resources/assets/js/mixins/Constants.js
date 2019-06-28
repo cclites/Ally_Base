@@ -1,6 +1,17 @@
 export default {
     data() {
         return {
+            PRIVATE_PAY_ID: 0,
+            OFFLINE_PAY_ID: 1,
+
+            CLAIM_SERVICE: {
+                HHA: 'HHA',
+                TELLUS: 'TELLUS',
+                CLEARINGHOUSE: 'CLEARINGHOUSE',
+                EMAIL: 'EMAIL',
+                FAX: 'FAX',
+            },
+
             ethnicityOptions: [
                 { value: 'american_indian', text: 'American Indian or Alaska Native' },
                 { value: 'asian', text: 'Asian' },
@@ -9,7 +20,15 @@ export default {
                 { value: 'hawaiian', text: 'Native Hawaiian or Other Pacific Islander' },
                 { value: 'white', text: 'White or Caucasian' },
             ],
-            smsLength: 160
-        };
-    }
-};
+            smsLength: 160,
+            clientTypes: [
+                {value:'', text: "All Client Types"},
+                {value:'private_pay', text:'Private Pay'},
+                {value:'medicaid', text:'Medicaid'},
+                {value:'LTCI', text:'LTCI'},
+                {value:'VA', text:'VA'},
+                {value:'lead_agency', text:'Lead Agency'},
+            ],
+        }
+    },
+}

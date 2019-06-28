@@ -69,6 +69,9 @@
                         :sort-by.sync="sortBy"
                         :sort-desc.sync="sortDesc"
                 >
+                    <template slot="id" scope="row">
+                        <a :href="`/admin/deposits/${row.item.id}/`" target="_blank">{{ row.item.id }}</a>
+                    </template>
                     <template slot="status" scope="data">
                         <span style="color: red; font-weight: bold" v-if="data.value == 'failed'">{{ data.value }}</span>
                         <span style="color: darkgreen" v-else>{{ data.value }}</span>

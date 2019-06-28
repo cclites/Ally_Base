@@ -24,6 +24,7 @@ use Illuminate\Support\Collection;
  * @property float|null $client_rate
  * @property float|null $caregiver_rate
  * @property float|null $ally_rate
+ * @property int $quickbooks_service_id
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits

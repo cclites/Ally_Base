@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\ExpirationType;
 use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -33,6 +34,10 @@ class CaregiverLicenseController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
+
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
@@ -58,6 +63,10 @@ class CaregiverLicenseController extends BaseController
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
         $this->authorize('update', $caregiver);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data = $request->validate([
             'name' => 'required|max:200',
@@ -89,10 +98,22 @@ class CaregiverLicenseController extends BaseController
         return new ErrorResponse(500, 'The license could not be deleted.');
     }
 
+    /**
+     * Send notification about expiring license to the Caregiver.
+     *
+     * @param CaregiverLicense $license
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function expirationReminder(CaregiverLicense $license)
     {
         $this->authorize('read', $license->caregiver);
 
-        $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
+        // TODO: figure out which business is asking
+        $business = $license->caregiver->businesses->first();
+
+        $license->caregiver->user->notify(new LicenseExpirationReminder($business, $license));
+
+        return new SuccessResponse('A reminder email has been sent.');
     }
 }

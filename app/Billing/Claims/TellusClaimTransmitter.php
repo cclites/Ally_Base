@@ -45,7 +45,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPI Number set for this office location.  You can edit this information under Settings > General > Medicaid.');
         }
 
-        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
+        if (filled($invoice->client->business->medicaid_npi_number) && empty($invoice->client->business->medicaid_npi_taxonomy)) {
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPM Taxonomy set for this office location.  You can edit this information under Settings > General > Medicaid.');
         }
 

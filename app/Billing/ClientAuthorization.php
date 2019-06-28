@@ -18,6 +18,7 @@ use App\Client;
  * @property float $units
  * @property string $unit_type
  * @property string $period
+ * @property int $week_start
  * @property float $sunday
  * @property float $monday
  * @property float $tuesday
@@ -167,11 +168,11 @@ class ClientAuthorization extends AuditableModel
                 return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
                 break;
             case self::PERIOD_WEEKLY:
-                return [$date->copy()->startOfWeek()->setTimezone($timezone), $date->copy()->endOfWeek()->setTimezone($timezone)];
-                break;
+                return alterStartOfWeekDay((int) $this->week_start, function() use ($date, $timezone) {
+                    return [$date->copy()->startOfWeek()->setTimezone($timezone), $date->copy()->endOfWeek()->setTimezone($timezone)];
+                });
             case self::PERIOD_MONTHLY:
                 return [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
-                break;
             case self::PERIOD_TERM:
                 return [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
             case self::PERIOD_SPECIFIC_DAYS:

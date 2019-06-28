@@ -188,9 +188,11 @@
                     });
                 } else {
                     // shift rates
+                    let service = this.services.find(x => x.id === this.shift.service_id);
+                    let defaultServiceName = this.defaultService && this.defaultService.name ? this.defaultService.name : 'General';
                     let rate = this.authRole == 'caregiver' ? this.shift.caregiver_rate : this.shift.client_rate;
                     return [{
-                        service: this.defaultService && this.defaultService.name ? this.defaultService.name : 'General',
+                        service: service ? service.name : defaultServiceName,
                         rate: rate,
                         hours_type: this.shift.hours_type,
                         hours: this.shift.hours,

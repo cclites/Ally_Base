@@ -111,9 +111,9 @@ class DepositsController extends Controller
 
         if ($request->caregiver_id) {
             $caregiver = Caregiver::findOrFail($request->caregiver_id);
-            if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
 
             if ($request->process) {
+                if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
                 $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
             } else {
                 $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice($caregiver, $amount, $request->notes);
@@ -121,9 +121,9 @@ class DepositsController extends Controller
         }
         else if ($request->business_id) {
             $business = Business::findOrFail($request->business_id);
-            if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
 
             if ($request->process) {
+                if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
                 $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
             } else {
                 $invoice = SingleDepositProcessor::generateBusinessAdjustmentInvoice($business, $amount, $request->notes);

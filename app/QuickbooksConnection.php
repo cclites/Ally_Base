@@ -4,10 +4,9 @@ namespace App;
 
 use App\Services\QuickbooksOnlineService;
 use Crypt;
-use Illuminate\Database\Eloquent\Model;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 
-class QuickbooksConnection extends Model
+class QuickbooksConnection extends BaseModel
 {
     /**
      * The attributes that aren't mass assignable.

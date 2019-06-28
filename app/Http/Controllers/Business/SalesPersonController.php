@@ -9,6 +9,8 @@ use App\SalesPerson;
 use Illuminate\Http\Request;
 use App\Client;
 
+use Log;
+
 class SalesPersonController extends BaseController
 {
     /**

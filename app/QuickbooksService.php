@@ -2,8 +2,12 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class QuickbooksService extends BaseModel
 {
+    use SoftDeletes;
+
     /**
      * The attributes that aren't mass assignable.
      *

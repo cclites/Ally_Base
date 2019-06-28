@@ -98,6 +98,7 @@
                          :sort-desc.sync="sortDesc">
                     <template slot="name" scope="row">
                         <a :href="invoiceUrl(row.item.id)" target="_blank">{{ row.value }}</a>
+                        <i v-if="row.item.was_split" class="fa fa-code-fork text-danger ml-2"></i>
                     </template>
                     <template slot="status" scope="row">
                         <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
@@ -150,8 +151,13 @@
                         sortable: true,
                     },
                     {
+                        key: 'location',
+                        label: 'Office Location',
+                        sortable: true,
+                    },
+                    {
                         key: 'payer',
-                        formatter: (val, key, item) => `${val.name} (${item.payer_payment_type})`,
+                        formatter: (val, key, item) => `${val ? val.name : '-'} (${item.payer_payment_type})`,
                         sortable: true,
                     },
                     {
@@ -214,9 +220,9 @@
             },
             totalEstimates() {
                 return this.invoices.reduce((carry, invoice) => ({
-                    caregiver_total: parseFloat(carry.caregiver_total || 0) + parseFloat(invoice.estimates.caregiver_total),
-                    ally_total: parseFloat(carry.ally_total || 0) + parseFloat(invoice.estimates.ally_total),
-                    provider_total: parseFloat(carry.provider_total || 0) + parseFloat(invoice.estimates.provider_total),
+                    caregiver_total: parseFloat(carry.caregiver_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.caregiver_total : 0),
+                    ally_total: parseFloat(carry.ally_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.ally_total : 0),
+                    provider_total: parseFloat(carry.provider_total || 0) + parseFloat(invoice.estimates ? invoice.estimates.provider_total : 0),
                 }), {});
             },
         },

@@ -27,10 +27,11 @@ class PdfInvoiceView implements InvoiceViewStrategy
         InvoiceInterface $invoice,
         ContactableInterface $sender,
         ContactableInterface $recipient,
+        ContactableInterface $subject,
         Collection $payments
     ) {
         $itemGroups = $invoice->getItemGroups();
-        $view = view($this->view, compact('invoice', 'sender', 'recipient', 'payments', 'itemGroups'));
+        $view = view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups'));
         $this->pdfWrapper->loadHTML($view->render());
         return $this->pdfWrapper->download($this->filename);
     }

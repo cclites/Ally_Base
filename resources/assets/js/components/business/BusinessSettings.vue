@@ -475,6 +475,7 @@
                     <business-salesperson-list :business-id="businessId"></business-salesperson-list>
                 </b-tab>
                 <b-tab title="Custom fields" href="#custom-fields">
+                    <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
                     <custom-field-list />
                 </b-tab>
                 <b-tab title="Deactivation Reasons" href="#deactivation-reasons">
@@ -487,6 +488,14 @@
                         <b-col lg="6">
                             <h3>Caregiver Reason Codes</h3>
                             <deactivation-reason-manager type="caregiver"></deactivation-reason-manager>
+                        </b-col>
+                    </b-row>
+                </b-tab>
+                <b-tab title="Expirations" href="#expirations">
+                    <b-row>
+                        <b-col lg="6">
+                            <h3>Add/Remove default expiration types</h3>
+                            <default-expirations-manager></default-expirations-manager>
                         </b-col>
                     </b-row>
                 </b-tab>
@@ -586,9 +595,9 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#communications'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#communications'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
                 }
             },
         },
