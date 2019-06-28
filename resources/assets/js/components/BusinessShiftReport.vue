@@ -263,7 +263,6 @@
                     client_type: '',
                 },
                 includeAllFlags: false,
-                filterDescription: '',
                 clients: [],
                 caregivers: [],
                 showSummary: false,
@@ -506,7 +505,6 @@
             },
 
             loadData() {
-                this.filterDescription = this.getFilterDescription();
                 this.loadingShifts = true;
 
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
@@ -531,47 +529,6 @@
                 if (this.showSummary) {
                     this.loadSummaries();
                 }
-            },
-
-            getFilterDescription() {
-                return `<strong>Current Filters:</strong> `
-                    + `Dates: ${this.getTextFromRefInput('startDate')} - ${this.getTextFromRefInput('endDate')}; `
-                    + `Caregiver: ${this.getTextFromRefInput('caregiverFilter')}; `
-                    + `Client: ${this.getTextFromRefInput('clientFilter')}; `
-                    + `Payment Method: ${this.getTextFromRefInput('paymentFilter')}; `
-                    + `Charge Status: ${this.getTextFromRefInput('chargeFilter')}; `
-                    + `Confirmed Status: ${this.getTextFromRefInput('confirmedFilter')}; `
-                    + this.getFlagFilterDescription();
-            },
-
-            getFlagFilterDescription() {
-                if (this.filters.flag_type === 'none') return 'No Flags';
-                if (this.filters.flag_type === 'selected') return `Flags: ${this.filters.flags.length === this.shiftFlags.length ? 'ALL' : this.getTextFromSelector($('.flag-checkbox > input:checked').closest('label'))}`;
-                return '';
-            },
-
-            getTextFromSelector($selector) {
-                if ($selector.length > 1) {
-                    let texts = [];
-                    for(let i = 0; i < $selector.length; i++) {
-                        texts.push(this.getTextFromSelector($($selector[i])));
-                    }
-                    return texts.join(', ');
-                }
-                switch($selector.prop('tagName')) {
-                    case 'LABEL':
-                        return $selector.text();
-                    case 'INPUT':
-                        return $selector.val();
-                    case 'SELECT':
-                        return $selector.find('option:selected').text();
-                }
-            },
-
-            getTextFromRefInput(refName)
-            {
-                const $selector = $(this.$refs[refName].$el);
-                return this.getTextFromSelector($selector);
             },
 
             async loadFiltersData() {
