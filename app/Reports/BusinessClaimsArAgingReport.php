@@ -106,6 +106,7 @@ class BusinessClaimsArAgingReport extends BaseReport
             /** @var \App\Billing\ClientInvoice $invoice  */
             $data = $invoice->toArray();
             $data['client_name'] = $invoice->client->name;
+            $data['payer'] = $invoice->clientPayer->name();
 
             foreach ($this->datePeriods as $period) {
                 $data[$period['period']] = 0.00;

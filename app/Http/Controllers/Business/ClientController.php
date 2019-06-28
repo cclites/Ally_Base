@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Business;
 
 use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\ClientInvoice;
 use App\Client;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
@@ -19,10 +21,14 @@ use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Billing\Service;
 use App\Billing\Payer;
+use App\Billing\ClientPayer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
+use DB;
+
+use Log;
 
 class ClientController extends BaseController
 {
@@ -208,7 +214,22 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id, false)->get();
+
+        /*
+        $invoices = $invoiceQuery->forClient($client->id, false)
+                    ->get();
+
+        foreach($invoices as $invoice){
+            $invoice->payer = $invoice->clientPayer->name();
+        }*/
+
+        $invoiceQuery = new ClientInvoiceQuery();
+        $invoices = $invoiceQuery->forClient($client->id, false)
+            ->get()
+            ->map(function (ClientInvoice $item) {
+                $item->payer = $item->clientPayer->name();
+                return $item;
+            });
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()
