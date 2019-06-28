@@ -83,8 +83,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'reply_option' => 'schedule',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
@@ -107,8 +106,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'reply_option' => 'schedule',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
@@ -124,8 +122,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'reply_option' => 'schedule',
             'weekend_start'=>'17:00', // 5PM
             'weekend_end'=>'08:00' // 8AM
         ]);
@@ -145,8 +142,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'reply_option' => 'schedule',
             'weekend_start'=>'17:00', // 5PM
             'weekend_end'=>'08:00' // 8AM
         ]);
@@ -162,8 +158,7 @@ class SmsAutoReplyTest extends TestCase{
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>false,
+            'reply_option' => 'schedule',
             'weekend_start'=>'00:00', // 12:01 AM
             'weekend_end'=>'00:00' // 12:01 AM
         ]);
@@ -187,13 +182,12 @@ class SmsAutoReplyTest extends TestCase{
     }
 
     /** @test */
-    function auto_reply_when_on_indefinitely_is_set()
+    function auto_reply_when_reply_option_is_on()
     {
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>true,
-            'auto_off'=>false,
+            'reply_option' => 'on',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);
@@ -208,13 +202,12 @@ class SmsAutoReplyTest extends TestCase{
     }
 
     /** @test */
-    function dont_auto_reply_when_auto_off_is_set()
+    function dont_auto_reply_when_reply_option_is_off()
     {
         Queue::fake();
 
         $config = factory('App\BusinessCommunications')->create([
-            'on_indefinitely'=>false,
-            'auto_off'=>true,
+            'reply_option' => 'off',
             'week_start'=>'17:00', // 5PM
             'week_end'=>'08:00' // 8AM
         ]);

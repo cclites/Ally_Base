@@ -214,9 +214,6 @@
         <div class="tab-pane" id="misc">
             <client-misc-tab :client="{{ $client }}"></client-misc-tab>
         </div>
-        <div class="tab-pane" id="communications">
-            <client-communications-tab :client="{{ $client }}"></client-communications-tab>
-        </div>
     </div>
 @endsection
 

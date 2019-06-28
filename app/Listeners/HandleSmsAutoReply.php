@@ -50,9 +50,9 @@ class HandleSmsAutoReply implements ShouldQueue
         $settings = $this->event->reply->business->communicationSettings;
         $timezone = $this->event->reply->business->timezone ?: 'America/New_York';
 
-        if ($settings->auto_off) {
+        if ($settings->reply_option === 'off') {
             return null;
-        } else if ($settings->on_indefinitely) {
+        } else if ($settings->reply_option === 'on') {
             return $settings->message;
         }
 

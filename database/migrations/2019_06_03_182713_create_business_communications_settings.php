@@ -17,13 +17,12 @@ class CreateBusinessCommunicationsSettings extends Migration
 
         Schema::create('business_communications_settings', function (Blueprint $table) {
             $table->increments('id');
-            $table->boolean('auto_off')->default(true);
-            $table->boolean('on_indefinitely')->default(false);
+            $table->string('reply_option');
             $table->time('week_start');
             $table->time('week_end');
             $table->time('weekend_start');
             $table->time('weekend_end');
-            $table->string('message');
+            $table->string('message')->nullable();
             $table->unsignedInteger('business_id');
         });
     }
