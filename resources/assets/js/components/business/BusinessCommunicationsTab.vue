@@ -12,7 +12,7 @@
 
                       <div class="col-lg-6">
                           <b-form-group label="Select an option">
-                              <b-form-radio-group v-model="form.reply_option" @change="setRadioOption">
+                              <b-form-radio-group v-model="form.reply_option">
                                   <b-form-radio name="reply_option_radio" value="off" stacked>Auto Reply Off</b-form-radio>
                                   <br>
                                   <b-form-radio name="reply_option_radio" value="on" stacked>Auto Reply Always On</b-form-radio>
@@ -22,7 +22,7 @@
                           </b-form-group>
                       </div>
 
-                      <div class="col-lg-6" v-if="show_settings">
+                      <div class="col-lg-6" v-if="showSettings">
                           <b-form-group label="Auto Reply Message" for="message" label-class="required">
                               <b-form-textarea
                                       id="message"
@@ -39,7 +39,7 @@
 
                     </div>
 
-                    <div class="col-md-4" v-if="show_settings">
+                    <div class="col-md-4" v-if="showSettings">
 
                         <h5>Week days (Monday-Friday) hours that auto reply is active:</h5>
 
@@ -66,7 +66,7 @@
 
                     </div>
 
-                    <div class="text-right"><button id="save_auto_response_configs" type="button" class="btn btn-success" @click="saveMessaging()" v-if="show_settings">Save Messaging Options</button></div>
+                    <div class="text-right"><button id="save_auto_response_configs" type="button" class="btn btn-success" @click="saveMessaging()">Save Messaging Options</button></div>
 
                 </form>
 
@@ -95,9 +95,14 @@
                     weekend_end: '',
                     message: '',
                 }),
-                show_settings: false,
             }
 
+        },
+
+        computed: {
+            showSettings() {
+                return this.form.reply_option != 'off';
+            }
         },
 
         methods: {
@@ -113,10 +118,6 @@
                                 this.form.week_end = this.formatMysqlTime(data.week_end);
                                 this.form.weekend_start = this.formatMysqlTime(data.weekend_start);
                                 this.form.weekend_end = this.formatMysqlTime(data.weekend_end);
-
-                                if(this.form.reply_option !== 'off'){
-                                    this.show_settings = true;
-                                }
 
                             }).catch(error => {
                             console.log("Logging error response");
@@ -136,10 +137,6 @@
             formatMysqlTime(time){
                 return time.slice(0,5);
             },
-
-            setRadioOption(val){
-                this.show_settings = (val !== "off") ? true : false;
-            }
         },
 
 

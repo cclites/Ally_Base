@@ -13,8 +13,6 @@ class CreateBusinessCommunicationsSettings extends Migration
      */
     public function up()
     {
-        $this->down();
-
         Schema::create('business_communications_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->string('reply_option');
@@ -24,6 +22,8 @@ class CreateBusinessCommunicationsSettings extends Migration
             $table->time('weekend_end');
             $table->string('message')->nullable();
             $table->unsignedInteger('business_id');
+
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

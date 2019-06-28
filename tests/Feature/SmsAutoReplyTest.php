@@ -20,9 +20,6 @@ class SmsAutoReplyTest extends TestCase{
     public $caregiver;
     public $business;
     public $officeUser;
-    public $smsAutoResponseSettings;
-    public $outgoingSmsNumber = '5614179272';
-    public $caregiverNumber = '2345678900';
 
     public function setUp()
     {
