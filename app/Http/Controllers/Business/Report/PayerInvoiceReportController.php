@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Business\Report;
 use App\Reports\PayerInvoiceReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Billing\Payer;
+use App\Http\Resources\PayersDropdownResource;
 
 class PayerInvoiceReportController extends Controller
 {
@@ -15,12 +17,14 @@ class PayerInvoiceReportController extends Controller
             $report->query()->forRequestedBusinesses();
 
             $report->forPayer($request->client_id ?? null)
-                ->forDates($request->payer_id ?? null);
+                   ->forDates($request->payer_id ?? null);
 
             return response()->json($report->rows());
         }
 
-        return view_component('payer-invoice-report', 'Payer Invoice Report', [], [
+        $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->ordered()->get());
+
+        return view_component('payer-invoice-report', 'Payer Invoice Report', compact['payers'], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
