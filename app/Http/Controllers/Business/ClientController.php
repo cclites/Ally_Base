@@ -21,20 +21,17 @@ use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Billing\Service;
 use App\Billing\Payer;
-use App\Billing\ClientPayer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
-use DB;
-
-use Log;
 
 class ClientController extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -280,8 +277,9 @@ class ClientController extends BaseController
     /**
      * Remove the specified client from the business.
      *
-     * @param  \App\Client  $client
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy(Client $client)
     {
@@ -316,6 +314,7 @@ class ClientController extends BaseController
      *
      * @param \App\Client $client
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function reactivate(Client $client)
     {
