@@ -641,7 +641,7 @@
                     .finally(() => {
                         this.shiftsLoaded = true;
                         this.loadingShifts = false;
-                    })
+                    });
 
                 if (this.showSummary) {
                     this.loadSummaries();
@@ -808,7 +808,9 @@
 
             async showHideSummary() {
                 this.showSummary = !this.showSummary;
-                await this.loadSummaries();
+                if (this.showSummary) {
+                    await this.loadSummaries();
+                }
             },
 
             onShiftUpdate(id) {
@@ -861,9 +863,6 @@
             },
             filteredFields(val) {
                 this.setLocalStorage('fields', val);
-            },
-            showSummary(val) {
-                this.setLocalStorage('showSummary', val);
             },
         }
     }
