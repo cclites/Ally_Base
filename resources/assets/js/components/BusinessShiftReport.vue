@@ -117,30 +117,32 @@
                 <b-col lg="12" class="text-right">
                     <!--<b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>-->
                     <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
-                    <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="loaded >= 3">{{ summaryButtonText }}</b-button>
+                    <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="shiftsLoaded">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
 
-            <div class="text-center text-muted" v-show="loaded == -1">
+            <div class="text-center text-muted" v-show="! shiftsLoaded">
                 Update filters and press Generate Report
             </div>
 
-            <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
-
         </b-card>
 
-        <shift-history-summaries v-show="showSummary && loaded >= 3"
+        <loading-card v-show="showSummary && loadingSummaries"></loading-card>
+
+        <shift-history-summaries v-show="showSummary && ! loadingSummaries"
                                  :client-charges="items.clientCharges"
                                  :caregiver-payments="items.caregiverPayments"
                                  :admin="admin"
         />
+
+        <loading-card v-show="loadingShifts"></loading-card>
 
         <b-card
                 header="Shift List for Date Range &amp; Filters"
                 header-text-variant="white"
                 header-bg-variant="info"
                 title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
-                v-show="loaded >= 3"
+                v-show="shiftsLoaded && ! loadingShifts"
                 ref="SHRCard"
         >
             <b-row class="mb-2">
@@ -390,7 +392,10 @@
                 columnsModal: false,
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
-                loaded: -1,
+                shiftsLoaded: false,
+                summaryLoaded: false,
+                loadingSummaries: false,
+                loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
             }
@@ -565,8 +570,6 @@
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
-                    let showSummary = this.getLocalStorage('showSummary');
-                    if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
             },
 
@@ -585,8 +588,9 @@
                     .catch(e => {})
             },
 
-            loadSummaries() {
-                axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
+            async loadSummaries() {
+                this.loadingSummaries = true;
+                await axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -594,9 +598,8 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
-                        this.loaded++;
                     });
-                axios.get(this.urlPrefix + 'client_charges' + this.queryString)
+                await axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -604,8 +607,8 @@
                         else {
                             this.items.clientCharges = [];
                         }
-                        this.loaded++;
                     });
+                this.loadingSummaries = false;
             },
 
             reloadData() {
@@ -618,8 +621,7 @@
             loadData() {
                 this.filtersModal = false;
                 this.filterDescription = this.getFilterDescription();
-                this.loaded = 0;
-                this.loadSummaries();
+                this.loadingShifts = true;
 
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
@@ -629,15 +631,21 @@
                         else {
                             this.items.shifts = [];
                         }
-                        this.loaded++;
                     })
                     .catch(error => {
                         if (error.response.data && error.response.data.message) {
                             alerts.addMessage('error', error.response.data.message);
                         }
-                        this.loaded++;
                         this.filtersModal = true;
-                    });
+                    })
+                    .finally(() => {
+                        this.shiftsLoaded = true;
+                        this.loadingShifts = false;
+                    })
+
+                if (this.showSummary) {
+                    this.loadSummaries();
+                }
             },
 
             getFilterDescription() {
@@ -798,8 +806,9 @@
                 this.filteredFields = this.availableFields.slice();
             },
 
-            showHideSummary() {
+            async showHideSummary() {
                 this.showSummary = !this.showSummary;
+                await this.loadSummaries();
             },
 
             onShiftUpdate(id) {
@@ -824,7 +833,9 @@
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
-                this.loadSummaries();
+                if (this.showSummary) {
+                    this.loadSummaries();
+                }
             },
 
             updateSavedFormFilters() {
