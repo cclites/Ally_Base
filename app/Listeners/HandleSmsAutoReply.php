@@ -48,6 +48,11 @@ class HandleSmsAutoReply implements ShouldQueue
     public function getAutoReply() : ?string
     {
         $settings = $this->event->reply->business->communicationSettings;
+        if (empty($settings)) {
+            // Ignore auto reply if business has never saved these settings.
+            return null;
+        }
+
         $timezone = $this->event->reply->business->timezone ?: 'America/New_York';
 
         if ($settings->reply_option === 'off') {
