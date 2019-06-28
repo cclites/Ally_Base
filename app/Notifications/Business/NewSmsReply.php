@@ -44,6 +44,7 @@ class NewSmsReply extends BaseNotification
      */
     public function __construct($reply)
     {
+        parent::__construct();
         $this->reply = $reply;
 
         if (empty($this->reply->thread)) {

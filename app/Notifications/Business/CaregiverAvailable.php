@@ -54,6 +54,7 @@ class CaregiverAvailable extends BaseNotification
      */
     public function __construct($caregiver, $schedule)
     {
+        parent::__construct();
         $this->caregiver = $caregiver;
         $this->schedule = $schedule;
 

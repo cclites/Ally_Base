@@ -388,6 +388,7 @@ Route::group([
     Route::get('notifications/{notification}', 'Business\SystemNotificationController@show')->name('notifications.show');
     Route::post('notifications/{notification}/acknowledge', 'Business\SystemNotificationController@acknowledge')->name('notifications.acknowledge');
     Route::post('notifications/acknowledge-all', 'Business\SystemNotificationController@acknowledgeAll')->name('notifications.acknowledge-all');
+    Route::post('notifications/{eventId}/acknowledge-all', 'Business\SystemNotificationController@acknowledgeAllForChain')->name('notifications.acknowledge-all-for-chain');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

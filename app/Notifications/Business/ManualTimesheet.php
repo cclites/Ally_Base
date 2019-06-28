@@ -44,6 +44,7 @@ class ManualTimesheet extends BaseNotification
      */
     public function __construct($timesheet)
     {
+        parent::__construct();
         $this->timesheet = $timesheet;
         $this->url = route('business.timesheet', ['timesheet' => $this->timesheet]);
     }
