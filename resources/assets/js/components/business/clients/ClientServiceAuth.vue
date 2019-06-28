@@ -21,6 +21,12 @@
                         <span v-if="row.item.period == 'specific_days'">N/A</span>
                         <span v-else>{{ row.item.units }}</span>
                     </template>
+                    <template slot="effective_end_sortable" scope="row">
+                        {{ row.item.effective_end }}
+                    </template>
+                    <template slot="effective_start_sortable" scope="row">
+                        {{ row.item.effective_start }}
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" @click="editAuth(row.item.id)">
@@ -215,8 +221,8 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'service_type',
-                sortDesc: false,
+                sortBy: 'effective_start_sortable',
+                sortDesc: true,
                 filter: null,
                 fields: [
                     {
@@ -232,12 +238,12 @@
                         formatter: x => x ? x : '-',
                     },
                     {
-                        key: 'effective_start',
+                        key: 'effective_start_sortable',
                         label: 'Start',
                         sortable: true,
                     },
                     {
-                        key: 'effective_end',
+                        key: 'effective_end_sortable',
                         label: 'End',
                         sortable: true,
                     },
@@ -366,7 +372,7 @@
                     default:
                         return;
                 }
-                
+
                 this.form.effective_end = endDate.format('MM/DD/YYYY');
             },
 
