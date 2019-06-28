@@ -190,7 +190,7 @@ Route::group([
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
     Route::put('caregivers/{caregiver}/preferences', 'Business\CaregiverController@preferences')->name("caregivers.update_preferences");
     Route::put('caregivers/{caregiver}/skills', 'Business\CaregiverController@skills')->name("caregivers.update_skills");
-    Route::get('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
+    Route::post('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
@@ -275,7 +275,7 @@ Route::group([
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
     Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
     Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');
-    Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
+    Route::get('reports/caregiver-expirations', 'Business\Report\BusinessCaregiverExpirationsReportController@index')->name('reports.caregiver-expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
     Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
