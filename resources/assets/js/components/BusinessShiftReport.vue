@@ -278,7 +278,7 @@
                 },
                 columnsModal: false,
                 filteredFields: [],
-                urlPrefix: '/business/reports/data/',
+                urlPrefix: '/business/reports/',
                 shiftsLoaded: false,
                 summaryLoaded: false,
                 loadingSummaries: false,
@@ -288,10 +288,10 @@
             }
         },
 
-        mounted() {
+        async mounted() {
             this.loadFiltersFromStorage();
             this.setInitialFields();
-            this.loadFiltersData();
+            await this.loadFiltersData();
             if (this.autoload) {
                 this.loadData();
             }
@@ -422,7 +422,7 @@
             },
             queryString() {
                 const filters = this.filters;
-                return '?start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
+                return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
                         + '&client_type=' + filters.client_type
@@ -574,9 +574,9 @@
                 return this.getTextFromSelector($selector);
             },
 
-            loadFiltersData() {
-                axios.get('/business/clients').then(response => this.clients = response.data);
-                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+            async loadFiltersData() {
+                await axios.get('/business/clients').then(response => this.clients = response.data);
+                await axios.get('/business/caregivers').then(response => this.caregivers = response.data);
             },
 
             details(item) {

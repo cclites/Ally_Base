@@ -288,7 +288,7 @@ Route::group([
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
     Route::post('reports/overtime', 'Business\ReportsController@overtimeData')->name('reports.overtime_data');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
-    Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
+    Route::get('reports/shifts', 'Business\Report\ShiftHistoryReportController@index')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
@@ -333,11 +333,10 @@ Route::group([
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
-    Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
-    Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
-    Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
+    Route::get('reports/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
     Route::get('reports/client-stats', 'Business\Report\ClientStatsController@index')->name('reports.client_stats');
     Route::post('reports/client-stats', 'Business\Report\ClientStatsController@reportData')->name('reports.client_stats.data');
     Route::get('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@index')->name('reports.caregiver_stats');
@@ -565,9 +564,8 @@ Route::group([
     Route::get('reports/emails/{type?}', 'Admin\ReportsController@emails')->name('reports.emails');
     Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
     Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
-    Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
-    Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
-    Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
+    Route::get('reports/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
     Route::get('audit-log', 'Admin\AuditLogController@index')->name('reports.audit-log');
 
     /*Nacha Ach*/
