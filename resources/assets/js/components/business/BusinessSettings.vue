@@ -541,6 +541,9 @@
                         </b-col>
                     </b-row>
                 </b-tab>
+                <b-tab title="Communications" href="#communications">
+                    <business-communications-tab :business-id="businessId"></business-communications-tab>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>

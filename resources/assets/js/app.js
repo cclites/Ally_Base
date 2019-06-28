@@ -223,6 +223,7 @@ Vue.component('business-payer-rates-table', require('./components/business/Payer
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
 Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
+Vue.component('business-communications-tab', require('./components/business/BusinessCommunicationsTab'));
 Vue.component('business-offline-invoice-ar', require('./components/business/BusinessOfflineInvoiceAr'));
 Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
 Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
@@ -251,21 +252,23 @@ Vue.component('clock-out', require('./components/ClockOut.vue'));
 Vue.component('clocked-in', require('./components/ClockedIn.vue'));
 Vue.component('adjoining-caregivers-card', require('./components/caregivers/AdjoiningCaregiversCard.vue'));
 
-Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
+
 Vue.component('caregiver-setup-wizard', require('./components/account-setup/CaregiverSetupWizard.vue'));
 
+Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
-Vue.component('client-list', require('./components/ClientList.vue'));
-Vue.component('client-profile', require('./components/ClientProfile.vue'));
-Vue.component('client-misc-tab', require('./components/business/clients/ClientMiscTab'));
-Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 Vue.component('client-insurance-service-auth', require('./components/business/clients/InsuranceServiceAuthTab'));
+Vue.component('client-list', require('./components/ClientList.vue'));
+Vue.component('client-misc-tab', require('./components/business/clients/ClientMiscTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
-Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-payers-tab', require('./components/business/clients/ClientPayersTab'));
 Vue.component('client-preferences-tab', require('./components/business/clients/ClientPreferencesTab'));
+Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
+Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
+Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
