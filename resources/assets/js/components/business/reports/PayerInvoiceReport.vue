@@ -149,6 +149,9 @@
         methods: {
             generateReport(){},
             print(){}
+        },
+        mounted (){
+
         }
     }
 </script>
