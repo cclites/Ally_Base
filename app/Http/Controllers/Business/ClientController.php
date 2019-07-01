@@ -216,7 +216,7 @@ class ClientController extends BaseController
         $invoices = $invoiceQuery->forClient($client->id, false)
             ->get()
             ->map(function (ClientInvoice $item) {
-                $item->payer = $item->clientPayer->name();
+                $item->payer = optional($item->clientPayer)->name();
                 return $item;
             });
 
