@@ -22,7 +22,7 @@
                           </b-form-group>
                       </div>
 
-                      <div class="col-lg-6" v-if="showSettings">
+                      <div class="col-lg-6" v-if="showMessage">
                           <b-form-group label="Auto Reply Message" for="message" label-class="required">
                               <b-form-textarea
                                       id="message"
@@ -101,6 +101,9 @@
 
         computed: {
             showSettings() {
+                return this.form.reply_option == 'schedule';
+            },
+            showMessage(){
                 return this.form.reply_option != 'off';
             }
         },
