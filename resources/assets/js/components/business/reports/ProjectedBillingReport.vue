@@ -113,8 +113,8 @@
                     caregiver: '',
                     client: '',
                     client_type: '',
-                    start_date: '', //moment().format('MM/DD/YYYY'),
-                    end_date: '', //moment().add(30, 'day').format('MM/DD/YYYY')
+                    start_date: '',
+                    end_date: '',
                 }),
                 clientStats: [],
                 clientTypeStats: [],
@@ -132,29 +132,11 @@
                     {
                         key: 'projected_billing',
                         formatter: (val) => this.moneyFormat(val)
-
-                    }
-                ],
-                typeFields: [
-                    {
-                        key: 'name',
-                        label: 'Name',
-                        formatter: (val) => _.startCase(val)
-                    },
-                    {
-                        key: 'projected_billing',
-                        formatter: (val) => this.moneyFormat(val)
                     }
                 ],
                 loading: false,
                 hasRun: false,
             }
-        },
-
-        async created() {
-            this.form.start_date = moment().format('MM/DD/YYYY');
-            this.form.end_date = moment().add(30, 'day').format('MM/DD/YYYY');
-            await this.fetchOptions();
         },
 
         methods: {
@@ -191,19 +173,15 @@
                 return _.startCase(text)
             },
 
-            generate() {
-                this.filters.print = true;
-                let url = `/business/reports/projected-billing/print?dates[start]=${this.form.dates.start}` +
-                    `&dates[end]=${this.form.dates.end}` +
-                    `&caregiver=${this.form.caregiver}` +
-                    `&client=${this.form.client}` +
-                    `&clientType=${this.form.client_ype}`;
-                window.location = url;
-            },
-
             print() {
                 $('#projected_billing_report').print();
-            }
+            },
+        },
+
+        async mounted() {
+            this.form.start_date = moment().format('MM/DD/YYYY');
+            this.form.end_date = moment().add(30, 'day').format('MM/DD/YYYY');
+            await this.fetchOptions();
         },
 
         watch: {
