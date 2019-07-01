@@ -70,7 +70,7 @@
                                 <tbody v-for="client in items" :key="client.id" class="mb-3">
                                     <tr>
                                         <td colspan="9">
-                                            <strong>{{ client.name }}</strong>
+                                            <strong><a :href="`/business/clients/${client.id}#insurance_service_auth`" target="_blank">{{ client.name }}</a></strong>
                                         </td>
                                     </tr>
                                     <tr v-for="auth in client.authorizations" :key="auth.id" class="striped">
@@ -91,8 +91,8 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div v-if="!busy && hasRun && items.length == 0" class="text-center mb-3 mt-4 text-muted">
-                                No Authorizations Found.
+                            <div v-if="!busy && items.length == 0" class="text-center mb-3 mt-4 text-muted">
+                                {{ emptyText }}
                             </div>
                         </div>
                     </b-col>
