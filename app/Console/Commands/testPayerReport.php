@@ -8,6 +8,10 @@ use App\Http\Controllers\Clients;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
 
+
+
+use App\Reports\PayerInvoiceReport;
+
 use Log;
 class testPayerReport extends Command
 {
@@ -24,6 +28,9 @@ class testPayerReport extends Command
      * @var string
      */
     protected $description = 'Command description';
+
+
+    protected $report;
 
     /**
      * Create a new command instance.
@@ -42,8 +49,31 @@ class testPayerReport extends Command
      */
     public function handle()
     {
-        $clientId = 13090;
-        $clientPayerId = 8851;
+
+        $start = '06/03/2019';
+        $end = '06/30/2019';
+        $confirmed = null;
+        $charged = null;
+        $payer = null;
+        $company = 55;
+
+        $params = [
+          'start'=>$start,
+          'end'=>$end,
+          'confirmed'=>$confirmed,
+          'charged'=>$charged,
+          'company'=>$company,
+          'payer'=>$payer,
+          'json'=>1
+        ];
+
+        $url="http://krioscare.test/business/reports/payer-invoice-report?start=$start&end=$end&confirmed=$confirmed&payer=$payer&company=$company&json=1";
+        //$url="reports.payer-invoice-report";
+        echo $url;
+        //return redirect()->route($url, $params);
+        //echo file_get_contents($url);
+        /*
+        $businessId = 55;
 
         $invoiceQuery = new ClientInvoiceQuery;
 
@@ -69,6 +99,6 @@ class testPayerReport extends Command
             }
 
 
-        }
+        }*/
     }
 }

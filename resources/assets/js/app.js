@@ -364,6 +364,7 @@ Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'))
 
 Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ExpirationTypesAutocomplete"));
 Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
+Vue.component('payer-invoice-report', require("./components/business/reports/PayerInvoiceReport"));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
