@@ -7,28 +7,67 @@ use App\Client;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
-
+use Illuminate\Http\Request;
 
 class ProjectedBillingReportController extends Controller
 {
-    public function index()
+    /**
+     * Get the report.
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function index(Request $request)
     {
-        $clientOptions = Client::forRequestedBusinesses()
+        if ($request->filled('json')) {
+            return response()->json($this->getData());
+        }
+
+        return view_component('projected-billing-report', 'Projected Billing Report', [], [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+    }
+
+    /**
+     * Get the filter options for the report.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function filterOptions()
+    {
+        $clients = Client::with('user')
+            ->forRequestedBusinesses()
+            ->active()
             ->select('id', 'client_type')
             ->get()
+            ->map(function (Client $client) {
+                return [
+                    'id' => $client->id,
+                    'name' => $client->nameLastFirst,
+                    'client_type' => $client->client_type,
+                ];
+            })
             ->sortBy('name')
             ->values();
 
-        $caregiverOptions = Caregiver::forRequestedBusinesses()
+        $caregivers = Caregiver::with('user')
+            ->forRequestedBusinesses()
+            ->active()
             ->select('id')
             ->get()
+            ->map(function (Caregiver $caregiver) {
+                return [
+                    'id' => $caregiver->id,
+                    'name' => $caregiver->nameLastFirst,
+                ];
+            })
             ->sortBy('name')
             ->values();
 
-        $clientTypeOptions = $clientOptions->pluck('client_type')
+        $clientTypes = $clients->pluck('client_type')
             ->unique()
             ->map(function ($item) {
                 return [
@@ -36,15 +75,10 @@ class ProjectedBillingReportController extends Controller
                     'name' => title_case(str_replace('_', ' ', $item)),
                 ];
             })
+            ->sortBy('name')
             ->values();
 
-        return view('business.reports.projected_billing', compact('clientOptions', 'caregiverOptions', 'clientTypeOptions'));
-    }
-
-    public function reportData()
-    {
-        $data = $this->getData();
-        return response()->json($data);
+        return response()->json(compact('clients', 'clientTypes', 'caregivers'));
     }
 
     public function print()
@@ -56,6 +90,7 @@ class ProjectedBillingReportController extends Controller
 
     protected function getData(): array
     {
+        dd('no');
         $dates = (object)request()->dates;
         $start = Carbon::parse($dates->start);
         $end = Carbon::parse($dates->end);
