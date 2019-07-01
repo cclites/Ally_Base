@@ -304,33 +304,6 @@ class ReportsController extends BaseController
         return view('business.reports.scheduled', $response);
     }
 
-    public function shiftsReport()
-    {
-        $activities = $this->business()->allActivities();
-
-        return view('business.reports.shifts', compact('activities'));
-    }
-
-    public function shifts(Request $request)
-    {
-        $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
-
-        $this->addShiftReportFilters($report, $request);
-
-        if ($report->count() > 1000) {
-            // Limit shift history to 1000 shifts for performance reasons
-            return new ErrorResponse(400, 'There are too many shifts to display.  Please adjust your filters and re-run.');
-        }
-
-        if ($request->input('export')) {
-            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone ?? 'America/New_York')
-                          ->download();
-        }
-
-        return $report->rows();
-    }
-
     public function shift(Request $request, $id)
     {
         $report = new ShiftsReport();

@@ -1,17 +1,19 @@
 <template>
     <b-select :disabled="disabled" v-model="selectedBusiness" v-show="!hidden" :name="name">
-        <option v-if="allowAll && businesses.length > 1" value="">All Office Locations</option>
+        <option v-if="allowAll && sortedBusinesses.length > 1" value="">All Office Locations</option>
         <option v-else value="">--Select an Office Location--</option>
-        <option v-for="business in businesses" :key="business.id" :value="business.id">
-            {{ business.short_name }}
+        <option v-for="business in sortedBusinesses" :key="business.id" :value="business.id">
+            {{ isOfficeUser ? business.short_name : business.name }}
         </option>
     </b-select>
 </template>
 
 <script>
     import { mapState } from 'vuex'
+    import AuthUser from '../../mixins/AuthUser';
 
     export default {
+        mixins: [AuthUser],
         name: "BusinessLocationSelect",
 
         props: {
@@ -46,6 +48,9 @@
             },
             hidden() {
                 return this.hideable && this.disabled;
+            },
+            sortedBusinesses() {
+                return this.isOfficeUser ? _.sortBy(this.businesses, 'short_name') : _.sortBy(this.businesses, 'name');
             },
         },
 

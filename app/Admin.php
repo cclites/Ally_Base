@@ -87,4 +87,14 @@ class Admin extends AuditableModel implements UserRole
     {
         return null;
     }
+
+    /**
+     * Get the admin user's timezone
+     *
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return 'America/New_York';
+    }
 }
