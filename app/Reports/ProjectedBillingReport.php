@@ -131,9 +131,9 @@ class ProjectedBillingReport extends BaseReport
                 }
 
                 if ($schedule->fixed_rates) {
-                    return $rates->caregiverRate();
+                    return $rates->clientRate();
                 }
-                return add((float) $carry, multiply($rates->caregiverRate(), (float)$service->duration));
+                return add((float) $carry, multiply($rates->clientRate(), (float)$service->duration));
 
             }, (float) 0.00);
 
@@ -146,9 +146,9 @@ class ProjectedBillingReport extends BaseReport
             }
 
             if ($schedule->fixed_rates) {
-                return $rates->caregiverRate();
+                return $rates->clientRate();
             }
-            return multiply($rates->caregiverRate(), divide($schedule->duration, 60));
+            return multiply($rates->clientRate(), divide($schedule->duration, 60));
 
         }
     }
