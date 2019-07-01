@@ -14,25 +14,26 @@
                     v-model="form.businesses"
                     label="For Office Location"
                     :allow-all="true"
+                    :disabled="loading"
                 />
             </b-col>
             <b-col md="4">
                 <b-row>
                     <b-col>
                         <b-form-group label="Start Date">
-                            <date-picker v-model="form.start_date" name="start_date"></date-picker>
+                            <date-picker v-model="form.start_date" :disabled="loading" />
                         </b-form-group>
                     </b-col>
                     <b-col>
                         <b-form-group label="End Date">
-                            <date-picker :value="form.end_date" name="end_date"></date-picker>
+                            <date-picker v-model="form.end_date" :disabled="loading" />
                         </b-form-group>
                     </b-col>
                 </b-row>
             </b-col>
             <b-col md="2">
                 <b-form-group label="Client">
-                    <b-form-select v-model="form.client" :disabled="loadingFilters">
+                    <b-form-select v-model="form.client" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in clientOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
@@ -40,7 +41,7 @@
             </b-col>
             <b-col md="2">
                 <b-form-group label="Client Type">
-                    <b-form-select v-model="form.clientType" :disabled="loadingFilters">
+                    <b-form-select v-model="form.client_type" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in clientTypeOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
@@ -48,7 +49,7 @@
             </b-col>
             <b-col md="2">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="form.caregiver" :disabled="loadingFilters">
+                    <b-form-select v-model="form.caregiver" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in caregiverOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
@@ -58,17 +59,16 @@
         <b-row>
             <b-col class="mb-3">
                 <b-button-group>
-                    <b-button @click="fetch()" variant="info" class="mr-2"><i class="fa mr-1"></i>Generate Report</b-button>
-                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                    <b-button @click="fetch()" variant="info" class="mr-2" :disabled="loading"><i class="fa mr-1"></i>Generate Report</b-button>
+                    <b-button @click="print()" :disabled="loading"><i class="fa fa-print mr-1"></i>Print</b-button>
                 </b-button-group>
             </b-col>
         </b-row>
-        <div class="d-flex justify-content-center" v-if="loading">
-            <div class="my-5">
-                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-            </div>
+        <loading-card v-if="loading" text="Loading Report"></loading-card>
+        <div v-else-if="! loading && ! hasRun" class="text-center m-4 text-muted">
+            Select filters and press Generate Report
         </div>
-        <div id="projected_billing_report" v-else>
+        <div v-else id="projected_billing_report">
             <b-row>
                 <b-col>
                     <div class="h4 my-3">Total hours scheduled: {{ numberFormat(stats.total_hours) }}</div>
@@ -112,9 +112,9 @@
                     businesses: '',
                     caregiver: '',
                     client: '',
-                    clientType: '',
-                    start_date: moment ().format ('MM/DD/YYYY'),
-                    end_date: moment ().add(30, 'day').format ('MM/DD/YYYY')
+                    client_type: '',
+                    start_date: '', //moment().format('MM/DD/YYYY'),
+                    end_date: '', //moment().add(30, 'day').format('MM/DD/YYYY')
                 }),
                 clientStats: [],
                 clientTypeStats: [],
@@ -147,10 +147,13 @@
                     }
                 ],
                 loading: false,
+                hasRun: false,
             }
         },
 
         async created() {
+            this.form.start_date = moment().format('MM/DD/YYYY');
+            this.form.end_date = moment().add(30, 'day').format('MM/DD/YYYY');
             await this.fetchOptions();
         },
 
@@ -173,13 +176,14 @@
                 this.loading = true;
                 this.form.get('/business/reports/projected-billing')
                     .then( ({ data }) => {
-                        this.stats = data.stats;
-                        this.clientStats = data.clientStats;
-                        this.clientTypeStats = data.clientTypeStats;
+                        this.stats = data.totals;
+                        this.clientStats = data.clients;
+                        this.clientTypeStats = data.client_type_totals;
                     })
                     .catch(() => {})
                     .finally(() => {
                         this.loading = false;
+                        this.hasRun = true;
                     });
             },
 
@@ -189,12 +193,11 @@
 
             generate() {
                 this.filters.print = true;
-                let url = `/business/reports/projected-billing/print?dates[start]=${this.filters.dates.start}` +
-                    `&dates[end]=${this.filters.dates.end}` +
-                    `&caregiver=${this.filters.caregiver}` +
-                    `&client=${this.filters.client}` +
-                    `&clientType=${this.filters.clientType}`;
-                console.log(url);
+                let url = `/business/reports/projected-billing/print?dates[start]=${this.form.dates.start}` +
+                    `&dates[end]=${this.form.dates.end}` +
+                    `&caregiver=${this.form.caregiver}` +
+                    `&client=${this.form.client}` +
+                    `&clientType=${this.form.client_ype}`;
                 window.location = url;
             },
 

@@ -438,7 +438,7 @@
                     {
                         name: 'Projected Billing',
                         url: 'reports/projected-billing',
-                        description: 'See forecasting billing amounts based on scheduled and completed visits',
+                        description: 'See forecasting billing amounts based on scheduled visits',
                         category: 5,
                         allowed: ['office_user'],
                     },
