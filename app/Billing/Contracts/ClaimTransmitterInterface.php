@@ -34,4 +34,21 @@ interface ClaimTransmitterInterface
      * @return array
      */
     public function mapShiftRecord(Claim $claim, Shift $shift) : array;
+
+    /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool;
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string;
 }

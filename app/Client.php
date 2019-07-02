@@ -275,6 +275,8 @@ class Client extends AuditableModel implements
         'ltci_fax',
         'medicaid_id',
         'medicaid_diagnosis_codes',
+        'medicaid_plan_id',
+        'medicaid_payer_id',
         'client_type_descriptor',
         'receive_summary_email',
         'onboarding_step',

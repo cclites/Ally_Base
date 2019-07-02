@@ -117,14 +117,22 @@ class ClaimsController extends BaseController
 
             $claim = Claim::getOrCreate($invoice);
 
-            $transmitter->send($claim);
-
-            $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
-                'service' => $service,
-            ]);
+            if ($transmitter->isTestMode($claim)) {
+                $testFile = $transmitter->test($claim);
+            } else {
+                $transmitter->send($claim);
+                $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
+                    'service' => $service,
+                ]);
+            }
 
             \DB::commit();
-            return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
+
+            $data = ['claim' => new ClaimResource($invoice->fresh())];
+            if (isset($testFile)) {
+                $data['test_result'] = $testFile;
+            }
+            return new SuccessResponse('Claim was transmitted successfully.', $data);
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {

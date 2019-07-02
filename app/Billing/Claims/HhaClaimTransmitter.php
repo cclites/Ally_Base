@@ -7,7 +7,6 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Service;
 use App\Services\HhaExchangeService;
 use App\Shift;
 use Illuminate\Support\Collection;
@@ -28,7 +27,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+        if (empty($invoice->getPayerCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is not MCO/Payer Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
@@ -65,6 +64,39 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     }
 
     /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return $claim->invoice->client->business->hha_username == "test";
+    }
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        $hha = new HhaExchangeService(
+            $claim->invoice->client->business->hha_username,
+            $claim->invoice->client->business->getHhaPassword(),
+            $claim->invoice->client->business->ein
+        );
+
+        $hha->addItems($this->getData($claim));
+        $csv = $hha->getCsv();
+        $filename = 'test-claims/hha_' . md5($claim->id . uniqid() . microtime()) . '.csv';
+        \Storage::disk('public')->put($filename, $csv);
+        return "/storage/$filename";
+    }
+
+    /**
      * Map a claim's shift into importable data for the service.
      *
      * @param \App\Billing\Claim $claim
@@ -78,7 +110,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         $hasEvv = $this->checkShiftForFullEVV($shift);
         $master = [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
-            optional($claim->invoice->clientPayer)->payer->getPayerCode(), //    "Payer ID",
+            $claim->invoice->getPayerCode(), //    "Payer ID",
             $claim->invoice->client->medicaid_id, //    "Medicaid Number",
             $shift->caregiver_id, //    "Caregiver Code",
             $shift->caregiver->firstname, //    "Caregiver First Name",

@@ -83,6 +83,18 @@
                         <b-form-input v-model="diagnosis_codes[2]"></b-form-input>
                     </b-form-group>
                 </b-col>
+                <b-col lg="6">
+                    <b-form-group label="MCO/Payer Identifier">
+                        <b-form-input v-model="form.medicaid_payer_id"></b-form-input>
+                        <input-help :form="form" field="medicaid_payer_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)"></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Plan Identifier">
+                        <b-form-input v-model="form.medicaid_plan_id"></b-form-input>
+                        <input-help :form="form" field="medicaid_plan_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)"></input-help>
+                    </b-form-group>
+                </b-col>
             </b-row>
             <b-row>
                 <b-col lg="12">
@@ -143,6 +155,8 @@
                     ltci_fax: this.client.ltci_fax,
                     medicaid_id: this.client.medicaid_id,
                     medicaid_diagnosis_codes: this.client.medicaid_diagnosis_codes || '',
+                    medicaid_payer_id: this.client.medicaid_payer_id,
+                    medicaid_plan_id: this.client.medicaid_plan_id,
                     max_weekly_hours: this.client.max_weekly_hours,
                 }),
                 diagnosis_codes: this.splitDiagnosisCodes(this.client.medicaid_diagnosis_codes || ''),

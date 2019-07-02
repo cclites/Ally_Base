@@ -6,7 +6,6 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Service;
 use App\Business;
 use App\Client;
 use App\Services\TellusService;
@@ -61,11 +60,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+        if (empty($invoice->getPayerCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is no Payer Organization identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPlanCode())) {
+        if (empty($invoice->getPlanCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is no Plan Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
@@ -107,6 +106,38 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     }
 
     /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return $claim->invoice->client->business->tellus_username == "test";
+    }
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        $tellus = new TellusService(
+            $claim->invoice->client->business->tellus_username,
+            $claim->invoice->client->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
+
+        $xml = $tellus->convertArrayToXML($this->getData($claim));
+        $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
+        \Storage::disk('public')->put($filename, $xml);
+        return "/storage/$filename";
+    }
+
+    /**
      * Map a claim's shift into importable data for the service.
      *
      * @param \App\Billing\Claim $claim
@@ -138,8 +169,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $master = [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
-            'Plan' => optional($clientInvoice->clientPayer)->payer->getPlanCode(),
+            'Payer' => $clientInvoice->getPayerCode(),
+            'Plan' => $clientInvoice->getPlanCode(),
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
