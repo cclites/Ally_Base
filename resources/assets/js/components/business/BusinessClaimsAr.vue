@@ -57,6 +57,13 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col>
+                <b-alert show variant="info">
+                    Once claims are submitted, you will need to follow up with the Payer or your Claims Portal for updates.
+                </b-alert>
+            </b-col>
+        </b-row>
         <b-row class="mb-2">
             <b-col lg="6">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -236,16 +243,16 @@
                     },
                     {
                         key: 'amount',
-                        label: 'Inv Total',
+                        label: 'Claim Total',
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
-                    {
-                        key: 'balance',
-                        label: 'Invoice Balance',
-                        formatter: (val) => this.moneyFormat(val),
-                        sortable: true,
-                    },
+                    // {
+                    //     key: 'balance',
+                    //     label: 'Invoice Balance',
+                    //     formatter: (val) => this.moneyFormat(val),
+                    //     sortable: true,
+                    // },
                     {
                         key: 'claim_status',
                         formatter: (x) => _.capitalize(_.startCase(x)),
