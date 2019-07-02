@@ -13,6 +13,8 @@ use Illuminate\Support\Collection;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
+    protected $timeFormat = 'Y-m-d H:i';
+
     /**
      * Validate an invoice has all the required parameters to
      * be transmitted as a claim.
@@ -105,10 +107,8 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      */
     public function mapShiftRecord(Claim $claim, Shift $shift): array
     {
-        $timeFormat = 'Y-m-d H:i';
-
         $hasEvv = $this->checkShiftForFullEVV($shift);
-        $master = [
+        return [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
             $claim->invoice->getPayerCode(), //    "Payer ID",
             $claim->invoice->client->medicaid_id, //    "Medicaid Number",
@@ -119,13 +119,13 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
             $shift->caregiver->ssn, //    "Caregiver SSN",
             $shift->id, //    "Schedule ID",
-            '', //    "Procedure Code",
-            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Schedule Start Time",
-            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Schedule End Time",
-            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Visit Start Time",
-            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Visit End Time",
-            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "EVV Start Time",
-            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "EVV End Time",
+            optional($shift->service)->code, //    "Procedure Code",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "Schedule Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "Schedule End Time",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "Visit Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "Visit End Time",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "EVV Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "EVV End Time",
             optional($shift->client->evvAddress)->full_address, //    "Service Location",
             $this->mapActivities($shift->activities), //    "Duties",
             $shift->checked_in_number, //    "Clock-In Phone Number",
@@ -153,34 +153,33 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
+    }
 
-        if ($shift->services->count()) {
-            // Map each individual service.
-            $services = [];
+    /**
+     * Map a claim's shift into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
+    {
+        // Get the base data from the related shift.
+        $data = $this->mapShiftRecord($claim, $shiftService->shift);
 
-            $visitStart = $shift->checked_in_time->setTimezone($shift->getTimezone())->copy();
-            $visitEnd = null;
+        // Schedule ID
+        $data[9] = $shiftService->shift->id . '-' . $shiftService->id;
+        // Procedure Code
+        $data[10] = optional($shiftService->service)->code;
 
-            /** @var ShiftService $service */
-            foreach ($shift->services as $service) {
-                $serviceEntry = $master;
-                $serviceEntry[9] = $shift->id . '-' . $service->id;
-                $serviceEntry[10] = optional($service->service)->code;
+        $timezone = $shiftService->shift->getTimezone();
+        list($start, $end) = $shiftService->getStartAndEndTime();
+        // Visit Start Time
+        $data[13] = $start->setTimezone($timezone)->format($this->timeFormat);
+        // Visit End Time
+        $data[14] = $end->setTimezone($timezone)->format($this->timeFormat);
 
-                // pro-rate visit start and end times
-                $visitEnd = $visitStart->copy()->addMinutes(($service->duration * 60));
-                $serviceEntry[13] = $visitStart->format($timeFormat);
-                $serviceEntry[14] = $visitEnd->format($timeFormat);
-                $visitStart = $visitEnd->copy()->addSecond(1);
-
-                $services[] = $serviceEntry;
-            }
-            return $services;
-        } else {
-            // Convert single service shift record.
-            $master[10] = optional($shift->service)->code;
-            return [$master];
-        }
+        return $data;
     }
 
     /**

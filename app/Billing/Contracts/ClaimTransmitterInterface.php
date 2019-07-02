@@ -3,6 +3,7 @@ namespace App\Billing\Contracts;
 
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
+use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 
 interface ClaimTransmitterInterface
@@ -34,6 +35,15 @@ interface ClaimTransmitterInterface
      * @return array
      */
     public function mapShiftRecord(Claim $claim, Shift $shift) : array;
+
+    /**
+     * Map a claim's shift into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array;
 
     /**
      * Check transmitter is in test mode.

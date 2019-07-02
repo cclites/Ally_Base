@@ -5,6 +5,7 @@ namespace App\Billing\Claims;
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
+use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 
 class ManualClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
@@ -40,6 +41,18 @@ class ManualClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @return array
      */
     public function mapShiftRecord(Claim $claim, Shift $shift): array
+    {
+        return [];
+    }
+
+    /**
+     * Map a claim's shift into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
     {
         return [];
     }

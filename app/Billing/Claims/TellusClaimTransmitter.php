@@ -80,16 +80,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      */
     public function send(Claim $claim) : bool
     {
-        try {
-            $tellus = new TellusService(
-                $claim->invoice->client->business->tellus_username,
-                $claim->invoice->client->business->getTellusPassword(),
-                config('services.tellus.endpoint')
-            );
-        } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
-            throw new ClaimTransmissionException('Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
-        }
+        $tellus = new TellusService(
+            $claim->invoice->client->business->tellus_username,
+            $claim->invoice->client->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
 
         try {
             $xml = $tellus->convertArrayToXML($this->getData($claim));
@@ -166,7 +161,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        $master = [
+        return [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
             'Payer' => $clientInvoice->getPayerCode(),
@@ -193,7 +188,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => '', //$this->mapActivities($shift->activities),
+            'ServiceCode' => optional($shift->service)->code,
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0],
@@ -236,22 +231,21 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'PaidAmount' => '', // N/A
             'CareDirectionType' => '', // N/A
         ];
+    }
 
-        if ($shift->services->count()) {
-            // Map each individual service.
-            $services = [];
-            /** @var ShiftService $service */
-            foreach ($shift->services as $service) {
-                $serviceEntry = $master;
-                $serviceEntry['ServiceCode'] = optional($service->service)->code;
-                $services[] = $serviceEntry;
-            }
-            return $services;
-        } else {
-            // Convert single service shift record.
-            $master['ServiceCode'] = optional($shift->service)->code;
-            return [$master];
-        }
+    /**
+     * Map a claim's shift service into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
+    {
+        // Get the base data from the related shift.
+        $data = $this->mapShiftRecord($claim, $shiftService->shift);
+        $data['ServiceCode'] = optional($shiftService->service)->code;
+        return $data;
     }
 
     /**
