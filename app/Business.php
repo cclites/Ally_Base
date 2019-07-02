@@ -847,7 +847,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getHhaPassword() : string
     {
-        return empty($this->attributes['hha_password']) ? null : Crypt::decrypt($this->attributes['hha_password']);
+        return empty($this->attributes['hha_password']) ? '' : Crypt::decrypt($this->attributes['hha_password']);
     }
 
     /**
@@ -867,7 +867,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getTellusPassword() : string
     {
-        return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
+        return empty($this->attributes['tellus_password']) ? '' : Crypt::decrypt($this->attributes['tellus_password']);
     }
 
     /**
