@@ -120,12 +120,12 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->caregiver->ssn, //    "Caregiver SSN",
             $shift->id, //    "Schedule ID",
             '', //    "Procedure Code",
-            $shift->checked_in_time->format($timeFormat), //    "Schedule Start Time",
-            $shift->checked_out_time->format($timeFormat), //    "Schedule End Time",
-            $shift->checked_in_time->format($timeFormat), //    "Visit Start Time",
-            $shift->checked_out_time->format($timeFormat), //    "Visit End Time",
-            $shift->checked_in_time->format($timeFormat), //    "EVV Start Time",
-            $shift->checked_out_time->format($timeFormat), //    "EVV End Time",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Schedule Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Schedule End Time",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Visit Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "Visit End Time",
+            $shift->checked_in_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "EVV Start Time",
+            $shift->checked_out_time->setTimezone($shift->getTimezone())->format($timeFormat), //    "EVV End Time",
             optional($shift->client->evvAddress)->full_address, //    "Service Location",
             $this->mapActivities($shift->activities), //    "Duties",
             $shift->checked_in_number, //    "Clock-In Phone Number",
@@ -158,7 +158,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // Map each individual service.
             $services = [];
 
-            $visitStart = $shift->checked_in_time->copy();
+            $visitStart = $shift->checked_in_time->setTimezone($shift->getTimezone())->copy();
             $visitEnd = null;
 
             /** @var ShiftService $service */
@@ -168,7 +168,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
                 $serviceEntry[10] = optional($service->service)->code;
 
                 // pro-rate visit start and end times
-                $visitEnd = $visitStart->copy()->addHours($service->duration);
+                $visitEnd = $visitStart->copy()->addMinutes(($service->duration * 60));
                 $serviceEntry[13] = $visitStart->format($timeFormat);
                 $serviceEntry[14] = $visitEnd->format($timeFormat);
                 $visitStart = $visitEnd->copy()->addSecond(1);
