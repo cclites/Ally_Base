@@ -133,8 +133,15 @@ class QuickbooksConnection extends BaseModel
     public function getApiService()
     {
         try {
-            return app(QuickbooksOnlineService::class)
+            $service = app(QuickbooksOnlineService::class)
                 ->setAccessToken($this->access_token);
+
+            // Automatically handle all token refreshes from this access point.
+            if ($service->autoRefreshToken()) {
+                $this->update(['access_token' => $service->accessToken]);
+            }
+
+            return $service;
         }
         catch (\Exception $ex) {
             return null;
