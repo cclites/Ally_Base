@@ -96,6 +96,29 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
     }
 
     /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return false;
+    }
+
+    /**
+     * Create and return the Claim file/data that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        return null;
+    }
+
+    /**
      * Submit the claim using the service.
      *
      * @param Claim $claim

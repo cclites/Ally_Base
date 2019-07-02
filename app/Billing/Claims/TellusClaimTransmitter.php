@@ -6,7 +6,6 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Service;
 use App\Business;
 use App\Client;
 use App\Services\TellusService;
@@ -104,6 +103,38 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
+    }
+
+    /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return $claim->invoice->client->business->tellus_username == "test";
+    }
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        $tellus = new TellusService(
+            $claim->invoice->client->business->tellus_username,
+            $claim->invoice->client->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
+
+        $xml = $tellus->convertArrayToXML($this->getData($claim));
+        $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
+        \Storage::disk('public')->put($filename, $xml);
+        return "/storage/$filename";
     }
 
     /**

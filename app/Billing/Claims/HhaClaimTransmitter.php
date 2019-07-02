@@ -7,7 +7,6 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Service;
 use App\Services\HhaExchangeService;
 use App\Shift;
 use Illuminate\Support\Collection;
@@ -62,6 +61,39 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
+    }
+
+    /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return $claim->invoice->client->business->hha_username == "test";
+    }
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        $hha = new HhaExchangeService(
+            $claim->invoice->client->business->hha_username,
+            $claim->invoice->client->business->getHhaPassword(),
+            $claim->invoice->client->business->ein
+        );
+
+        $hha->addItems($this->getData($claim));
+        $csv = $hha->getCsv();
+        $filename = 'test-claims/hha_' . md5($claim->id . uniqid() . microtime()) . '.csv';
+        \Storage::disk('public')->put($filename, $csv);
+        return "/storage/$filename";
     }
 
     /**
