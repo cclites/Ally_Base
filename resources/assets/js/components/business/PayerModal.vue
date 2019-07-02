@@ -35,7 +35,7 @@
                         </b-select>
                         <input-help :form="form" field="payment_method_type"></input-help>
                     </b-form-group>
-                    <b-form-group :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>EDI Code Guide</a>)`" label-for="payer_code">
+                    <b-form-group :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`" label-for="payer_code">
                         <b-form-input type="text" v-model="form.payer_code" />
                         <input-help :form="form" field="payer_code" text=""></input-help>
                     </b-form-group>
