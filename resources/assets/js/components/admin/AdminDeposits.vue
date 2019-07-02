@@ -133,6 +133,9 @@
                         key: 'status',
                     },
                     {
+                        key: 'flags',
+                    },
+                    {
                         key: 'actions',
                     }
                 ],
@@ -194,7 +197,15 @@
             async loadInvoices() {
                 this.chainLoaded = false;
                 const response = await axios.get(`/admin/invoices/deposits?json=1&paid=0&chain_id=${this.chainId}`);
-                this.invoices = response.data.data;
+                this.invoices = response.data.data.map(item => {
+                    let flags = [];
+                    if (item.caregiver_on_hold) flags.push("On Hold");
+                    if (item.business_on_hold) flags.push("On Hold");
+                    if (item.no_bank_account) flags.push("No Bank Account");
+
+                    item.flags = flags.join(' | ');
+                    return item;
+                });
                 this.chainLoaded = true;
             },
 

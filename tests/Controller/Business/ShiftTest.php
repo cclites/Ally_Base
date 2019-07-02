@@ -27,8 +27,8 @@ class ShiftTest extends TestCase
     {
         $office_user = factory(OfficeUser::class)->create();
         $business = factory(Business::class)->create();
-        $client = factory(Client::class)->create(['business_id' => $business->id]);
-        $caregiver = factory(Caregiver::class)->create();
+        $client = factory(Client::class)->create(['business_id' => $business->id, 'firstname' => 'Jane', 'lastname' => 'Smith']);
+        $caregiver = factory(Caregiver::class)->create(['firstname' => 'John', 'lastname' => 'Doe']);
 
         // attach users to the business
         $business->assignCaregiver($caregiver);
@@ -49,10 +49,8 @@ class ShiftTest extends TestCase
         $this->actingAs($office_user->user);
 
         $response = $this->get("/business/shifts/{$shift->id}/print");
-        $response->assertSeeText($client->firstname);
-        $response->assertSeeText($client->lastname);
-        $response->assertSeeText($caregiver->firstname);
-        $response->assertSeeText($caregiver->lastname);
+        $response->assertSeeText('Jane Smith');
+        $response->assertSeeText('John Doe');
         $response->assertSeeText($issue->comments);
         $response->assertSeeText($activity->name);
     }

@@ -209,6 +209,14 @@ class ClientPayerTest extends TestCase
         $this->assertNull($balancePayer->getAllowanceRange('2019-02-12'));
     }
 
+    /** @test */
+    function weekly_allowance_payers_should_use_the_weekly_start_value_for_date_ranges()
+    {
+        $weeklyPayer = $this->createPayer('weekly', ['effective_start' => '2019-01-01'], ['week_start' => 2]);
+        $this->assertEquals('2019-02-12 00:00:00', $weeklyPayer->getAllowanceRange('2019-02-13')->start()->toDateTimeString());
+        $this->assertEquals('2019-02-18 23:59:59', $weeklyPayer->getAllowanceRange('2019-02-13')->end()->toDateTimeString());
+    }
+
     /**
      * @test
      */

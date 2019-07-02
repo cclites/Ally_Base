@@ -18,7 +18,6 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Reports\CaregiverPaymentsReport;
-use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ProviderReconciliationReport;
@@ -39,6 +38,8 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
+
+use Log;
 
 class ReportsController extends BaseController
 {
@@ -301,44 +302,6 @@ class ReportsController extends BaseController
         }
 
         return view('business.reports.scheduled', $response);
-    }
-
-    public function shiftsReport()
-    {
-        $activities = $this->business()->allActivities();
-
-        return view('business.reports.shifts', compact('activities'));
-    }
-
-    public function certificationExpirations(Request $request)
-    {
-        $caregiverIds = Caregiver::forRequestedBusinesses()->pluck('id')->toArray();
-        $report = new CertificationExpirationReport();
-        $report->forRequestedBusinesses()->orderBy('expires_at');
-        $report->query()->whereIn('caregiver_id', $caregiverIds);
-        $certifications = $report->rows();
-
-        return view('business.reports.certifications', compact('certifications'));
-    }
-
-    public function shifts(Request $request)
-    {
-        $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
-
-        $this->addShiftReportFilters($report, $request);
-
-        if ($report->count() > 1000) {
-            // Limit shift history to 1000 shifts for performance reasons
-            return new ErrorResponse(400, 'There are too many shifts to display.  Please adjust your filters and re-run.');
-        }
-
-        if ($request->input('export')) {
-            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone ?? 'America/New_York')
-                          ->download();
-        }
-
-        return $report->rows();
     }
 
     public function shift(Request $request, $id)

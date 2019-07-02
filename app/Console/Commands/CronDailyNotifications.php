@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Notifications\Business\NoProspectContact;
 use Illuminate\Console\Command;
 use App\Client;
 use App\Notifications\Business\ClientBirthday;
@@ -10,6 +11,7 @@ use App\Notifications\Caregiver\CertificationExpiring;
 use App\Notifications\Caregiver\CertificationExpired;
 use Illuminate\Support\Carbon;
 use App\TriggeredReminder;
+use App\Prospect;
 
 class CronDailyNotifications extends Command
 {
@@ -52,6 +54,8 @@ class CronDailyNotifications extends Command
 
         $this->noProspectContact();
 
+        $this->failedCharge();
+
         // ======================================
         // CAREGIVER NOTIFICATIONS
         // ======================================
@@ -71,7 +75,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function clientBirthdays()
+    public function clientBirthdays() : void
     {
         $clients = Client::whereHas('user', function ($q) {
             $today = date('m-d');
@@ -97,11 +101,23 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function noProspectContact()
+    public function noProspectContact() : void
     {
-        // TODO: pull prospects that have not been converted to 
-        // clients and do not have any record of notes in the past 
-        // 14 days
+        $prospects = Prospect::with('business')
+                            ->where('last_contacted', '<=', Carbon::now()->subDays(NoProspectContact::THRESHOLD)->toDateTimeString())
+                            ->where('closed_loss', false)
+                            ->get();
+
+        $sent = collect([]);
+        foreach($prospects as $prospect){
+            $users = $prospect->business->notifiableUsers();
+            $users = $users->diffAssoc($sent);
+            \Notification::send($users, new NoProspectContact($prospect));
+            $sent = $sent->merge($users);
+
+            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $prospect->id);
+        }
+
     }
 
     /**
@@ -109,7 +125,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function expiringCertifications()
+    public function expiringCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
             ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(CertificationExpiring::THRESHOLD)])
@@ -147,7 +163,7 @@ class CronDailyNotifications extends Command
      *
      * @return void
      */
-    public function expiredCertifications()
+    public function expiredCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
             ->whereBetween('expires_at', [Carbon::now()->subDays(30), Carbon::now()])
@@ -180,4 +196,10 @@ class CronDailyNotifications extends Command
             TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id, $license->expires_at->addDays(31));
         }
     }
+
+    public function failedCharge() : void
+    {
+        //TODO
+    }
+
 }

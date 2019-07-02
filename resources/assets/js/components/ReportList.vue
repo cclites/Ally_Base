@@ -290,7 +290,7 @@
                     },
                     {
                         name: 'Caregiver Expirations',
-                        url: 'reports/certification_expirations',
+                        url: 'reports/caregiver-expirations',
                         description: 'See a list of caregivers with an expiring certification or license',
                         category: 3,
                         allowed: ['office_user'],
@@ -483,6 +483,13 @@
                         url: 'reports/sales-people-commission',
                         description: 'Salesperson Commission Report',
                         category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Account Setup Status',
+                        url: 'reports/account-setup',
+                        description: 'Shows a list of caregivers with incomplete account data.',
+                        category: 3,
                         allowed: ['office_user'],
                     },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },

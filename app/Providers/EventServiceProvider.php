@@ -48,6 +48,7 @@ use App\Events\ShiftFlagsCouldChange;
 use App\Listeners\GenerateShiftFlags;
 use App\Events\ShiftDeleted;
 use App\Listeners\RecalculateDuplicateShiftFlags;
+use App\Listeners\HandleSmsAutoReply;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -110,6 +111,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         SmsThreadReplyCreated::class => [
             SendNewSmsReplyNotification::class,
+            HandleSmsAutoReply::class,
         ],
         TaskAssigned::class => [
 //            SendAssignedTaskEmail::class,

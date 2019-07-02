@@ -3,6 +3,7 @@ namespace App\Billing\View;
 
 use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
+use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\View\Html\HtmlInvoiceView;
@@ -23,7 +24,8 @@ class InvoiceViewFactory
     private static $invoiceTypes = [
         CaregiverInvoice::class,
         ClientInvoice::class,
-        BusinessInvoice::class
+        BusinessInvoice::class,
+        Claim::class,
     ];
 
     private static $viewTypes = [
@@ -47,6 +49,9 @@ class InvoiceViewFactory
                 break;
             case CaregiverInvoice::class:
                 $view = 'invoices.caregiver_invoice';
+                break;
+            case Claim::class:
+                $view = 'invoices.claim_invoice';
                 break;
             default:
                 $view = 'invoices.client_invoice';

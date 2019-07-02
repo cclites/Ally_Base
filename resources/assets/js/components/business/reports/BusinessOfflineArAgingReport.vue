@@ -108,6 +108,7 @@
                 fields: {
                     name: { sortable: true, label: "Invoice" },
                     client_name: { sortable: true, label: "Client" },
+                    payer: {sortable: true, label: "Payers"},
                     current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
                     period_30_45: { sortable: true, label: '30-45', formatter: x => this.moneyFormat(x) },
                     period_46_60: { sortable: true, label: '46-60', formatter: x => this.moneyFormat(x) },

@@ -662,6 +662,21 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     }
 
     /**
+     * Filter only Caregivers that have been on the schedule
+     * or have clocked in shifts
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereHasShiftsOrSchedules($query)
+    {
+        return $query->where(function($query) {
+            $query->whereHas('schedules')
+                ->orWhereHas('shifts');
+        });
+    }
+
+    /**
      * Get only the users who have not completed
      * the account setup wizard.
      *

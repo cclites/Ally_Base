@@ -48,8 +48,8 @@ class DeclinedVisit extends BaseNotification
      */
     public function __construct($schedule)
     {
+        parent::__construct();
         $this->schedule = $schedule;
-
         $this->url = route('business.clients.schedule', ['client' => $this->schedule->client]);
     }
 

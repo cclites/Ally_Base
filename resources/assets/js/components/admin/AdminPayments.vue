@@ -98,6 +98,7 @@
                          :sort-desc.sync="sortDesc">
                     <template slot="name" scope="row">
                         <a :href="invoiceUrl(row.item.id)" target="_blank">{{ row.value }}</a>
+                        <i v-if="row.item.was_split" class="fa fa-code-fork text-danger ml-2"></i>
                     </template>
                     <template slot="status" scope="row">
                         <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
@@ -147,6 +148,11 @@
                     {
                         key: 'client',
                         formatter: (val) => val.name,
+                        sortable: true,
+                    },
+                    {
+                        key: 'location',
+                        label: 'Office Location',
                         sortable: true,
                     },
                     {

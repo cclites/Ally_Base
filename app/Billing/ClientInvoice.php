@@ -258,4 +258,20 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
         return false;
     }
+
+    /**
+     * Determine if the invoice was a split invoice.
+     *
+     * @return bool
+     */
+    public function getWasSplit() : bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->total <> $item->amount_due) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

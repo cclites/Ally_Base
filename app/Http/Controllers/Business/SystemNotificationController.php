@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\SystemNotification;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class SystemNotificationController extends BaseController
 {
@@ -24,7 +25,7 @@ class SystemNotificationController extends BaseController
             ->get();
 
         if ($request->expectsJson() && $request->input('json')) {
-            return collection_only_values($notifications, ['id', 'title', 'message', 'created_at']);
+            return collection_only_values($notifications, ['id', 'title', 'message', 'created_at', '']);
         }
 
         $archived = (clone $query)->whereNotNull('acknowledged_at')
@@ -61,7 +62,7 @@ class SystemNotificationController extends BaseController
         $this->authorize('update', $notification);
 
         if ($notification->acknowledge($request->input('notes', ''))) {
-            return new SuccessResponse('You have successfully acknowlegded the notification.', [], route('business.notifications.index'));
+            return new SuccessResponse('You have successfully acknowledged the notification.', [], route('business.notifications.index'));
         }
 
         return new ErrorResponse(500, 'Error updating notification.');
@@ -80,5 +81,30 @@ class SystemNotificationController extends BaseController
             ->update(['acknowledged_at' => Carbon::now()]);
 
         return new SuccessResponse('All notifications have been marked as acknowledged.', [], '.');
+    }
+
+    /**
+     * Mark unread notifications for chain as acknowledged.
+     *
+     * @param Request $request
+     * @param $eventId
+     * @return SuccessResponse
+     */
+    public function acknowledgeAllForChain(Request $request, $eventId)
+    {
+        $chain = optional(\Auth::user()->officeUser)->businessChain;
+        if (! $chain) {
+            throw new AccessDeniedHttpException('A business chain was not found.');
+        }
+
+        SystemNotification::where('event_id', $eventId)
+            ->whereNull('acknowledged_at')
+            ->whereIn('user_id', $chain->users->pluck('id'))
+            ->update([
+                'acknowledged_at' => Carbon::now(),
+                'notes' => $request->input('notes', ''),
+            ]);
+
+        return new SuccessResponse('All notifications have been marked as acknowledged.', [], route('business.notifications.index'));
     }
 }
