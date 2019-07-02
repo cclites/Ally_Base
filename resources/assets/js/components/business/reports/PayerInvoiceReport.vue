@@ -9,7 +9,7 @@
                 >
                     <b-row>
                         <business-location-form-group
-                                v-model="form.business"
+                                v-model="form.business_id"
                                 label="Office Location"
                                 class="col-md-3"
                                 :allow-all="false"
@@ -20,25 +20,25 @@
                         <b-form-group label="End Date" class="col-md-2">
                             <date-picker v-model="form.end_date" name="end_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="Payers" class="col-md-2">
-                            <b-form-select v-model="payers">
-                                <option value=''>-- Select a Payer --</option>
-                                <option v-model="form.payer" v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
+                        <b-form-group label="Payers" class="col-md-2" :payers="payers">
+                            <b-form-select v-model="form.payer_id" label="Payers" class="col-md-2" :payers="payers">
+                                <option :value="null" selected>All</option>
+                                <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
                                 </option>
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Shift Type" class="col-md-2">
                             <b-form-select v-model="form.confirmed">
                                 <option value="">All</option>
-                                <option value="1">Confirmed</option>
-                                <option value="0">Unconfirmed</option>
+                                <option value="true">Confirmed</option>
+                                <option value="false">Unconfirmed</option>
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Shift Charged" class="col-md-2">
                             <b-form-select v-model="form.charged">
                                 <option value="">All</option>
-                                <option value="1">Charged</option>
-                                <option value="0">Uncharged</option>
+                                <option value="true">Charged</option>
+                                <option value="false">Uncharged</option>
                             </b-form-select>
                         </b-form-group>
                         <b-col md="2">
@@ -60,10 +60,10 @@
                         <b-row>
                             <b-col>
                                 <b-table
-                                        class="sales-commission-table"
-                                        :items="salespersons"
+                                        class="payers-invoice-table"
+                                        :items="shifts"
                                         :fields="fields"
-                                        sort-by="name"
+                                        sort-by="client"
                                         empty-text="No Results"
                                         :busy="loading"
                                 />
@@ -84,17 +84,22 @@
     export default {
         name: "PayerInvoiceReport",
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
+        props: {
+            payers: '',
+        },
         data() {
             return {
                 form: new Form({
                     start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
-                    business: '',
-                    payer: '',
+                    business_id: '',
+                    payer_id: null,
                     confirmed: '',
                     charged: ''
                 }),
-                payers: '',
+
+                shifts: [],
+                payer: '',
                 fields: [
                     {
                         key: 'date',
@@ -147,7 +152,19 @@
             }
         },
         methods: {
-            generateReport(){},
+            generateReport(){
+
+                this.loading = true;
+                this.form.get('/business/reports/payer-invoice-report?json=1')
+                    .then(response => {
+                        console.log(response);
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                    });
+
+            },
             print(){}
         },
         mounted (){

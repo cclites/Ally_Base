@@ -14,17 +14,26 @@ use Log;
 class PayerInvoiceReportController extends Controller
 {
     public function index(Request $request, PayerInvoiceReport $report){
-        //krioscare.test/business/reports/payer-invoice-report?start=06/20/2019&end=06/30/2019&confirmed=&charged=&payer=267&chain=11&json=1
+
+        Log::info(json_encode($request->all()));
 
         if ($request->filled('json')) {
 
-            $report->isCharged($request->charged);
-            $report->isConfirmed($request->confirmed);
+            $timezone = auth()->user()->role->getTimezone();
 
-            $report = $report->forDates($request->start, $request->end)
-                      ->forPayer($request->payer);
+            $report->setTimezone($timezone)
+                    ->applyFilters(
+                        $request->start_date,
+                        $request->end_date,
+                        intval($request->payer_id),
+                        intval($request->business_id),
+                        $request->confirmed,
+                        $request->charged
+                    );
 
-            return response()->json($report);
+            Log::info($report->rows());
+
+            return $report->rows();
         }
 
         $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->ordered()->get());

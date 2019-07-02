@@ -5,15 +5,16 @@ namespace App\Reports;
 
 
 use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Payer;
 use App\Billing\Queries\ClientInvoiceQuery;
-use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use App\ShiftConfirmation;
+use App\Shift;
+use App\Client;
 
+use Illuminate\Database\Eloquent\Builder;
 use Log;
-
-//$payers = Payer::forAuthorizedChain()->ordered()->get();
 
 /**
  * Class PayerInvoiceReport
@@ -21,164 +22,90 @@ use Log;
  */
 class PayerInvoiceReport extends BaseReport
 {
-    use BelongsToOneBusiness;
-
-    /**
-     * @var object
-     */
-    protected $query;
-
-    /**
-     * @var int
-     */
-    protected $payer;
-
-    /**
-     * @var boolean
-     */
-    protected $isConfirmed;
-
-    /**
-     * @var boolean
-     */
-    protected $isCharged;
-
     /**
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
      */
-
     public function __construct()
     {
-        $this->query = new ClientInvoiceQuery();
+        $this->query = ClientInvoice::with([
+            'client',
+            'items',
+            'clientPayer',
+        ]);
+
     }
 
-    public function query()
+    public function setTimezone(string $timezone) : self
+    {
+        $this->timezone = $timezone;
+        return $this;
+    }
+
+
+    /**
+     * @return Builder
+     */
+    public function query() :\Illuminate\Database\Eloquent\Builder
     {
         return $this->query;
     }
 
     /**
-     * get invoices for data
-     *
-     * @param string $start
-     * @param string $end
-     * @param string|null $timezone
+     * @param string $startDate
+     * @param string $endDate
+     * @param int|null $payerId
+     * @param int|null $businessId
+     * @param string|null $confirmed
+     * @param string|null $charged
      * @return PayerInvoiceReport
      */
-    public function forDates(string $start, string $end, ?string $timezone = null) : self
+    public function applyFilters(string $startDate, string $endDate, ?int $payerId, int $businessId, ?string $confirmed, ?string $charged) : self
     {
-        if (empty($timezone)) {
-            $timezone = 'America/New_York';
+
+
+        $this->query->whereHas('client', function($q) use($businessId){
+            return $q->where('business_id', $businessId);
+        });
+
+        $start = (new Carbon($startDate . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($endDate . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+        $this->query->whereBetween('created_at', [$start, $end]);
+
+
+        if (filled($payerId)) {
+            $this->query->whereHas('clientPayer', function($q) use($payerId){
+               return $q->where('payer_id', $payerId);
+            });
         }
 
-        $startDate = new Carbon($start . ' 00:00:00', $timezone);
-        $endDate = new Carbon($end . ' 23:59:59', $timezone);
-        $this->query->whereBetween('created_at', [$startDate, $endDate]);
-        //$this->between($startDate, $endDate);
-
-
-        return $this;
-    }
-
-    /**
-     * Set payer id
-     *
-     * @param int|null $id
-     * @return void
-     */
-    public function forPayer(?int $id = null)
-    {
-        $this->query->where('client_payer_id', $id);
-
-        return $this;
-    }
-
-    /**
-     * Set shift is confirmed
-     *
-     * @param boolean|null $confirmed
-     * @return void
-     */
-    public function isConfirmed(?string $confirmed = null)
-    {
-        $this->confirmed = $confirmed;
-    }
-
-    /**
-     * get confirmed shifts
-     *
-     * @return array
-     */
-    public function getConfirmed($invoices)
-    {
-        $collection = collect();
-
-        Log::info("GetConfirmed");
-
-        foreach($invoices as $item){
-
-            //$invoice->
-
-            if($this->isConfirmed == "true"){
-                $item->whereHas(ShiftConfirmation::class, function($q) use ($item, $collection){
-                    if( $q->where($q->shift_id, $item->shift_id) ){
-                        $collection->push($item);
-                    }
+        if (filled($charged)) {
+            if ($charged === 'true') {
+                $this->query->whereHas('items', function($q){
+                    return $q->getShift()->whereReadOnly();
                 });
-            }elseif($this->isConfirmed == "false"){
-                $item->whereHas(ShiftConfirmation::class, function($q) use ($item, $collection){
-                    if( !$q->where($q->shift_id, $item->shift_id) ){
-                        $collection->push($item);
-                    }
+            } elseif ($charged === 'false') {
+                $this->query->whereHas('items', function($q){
+                    return $q->getShift()->wherePending();
                 });
-            }else{
-                $collection->push($item);
             }
         }
 
-        return $collection;
-    }
+        if (filled($confirmed)) {
+            if ($confirmed === 'false') {
 
-    /**
-     * set shift is charged
-     *
-     * @param boolean|null $charged
-     * @return void
-     */
-    public function isCharged(?string $charged = null)
-    {
-        $this->charged = $charged;
-    }
-
-    /**
-     * get charged shifts
-     *
-     * @return array
-     */
-    public function getCharged($invoices){
-
-        Log::info("GetCharged");
-
-        $collection = collect();
-
-        foreach($invoices as $item){
-
-            Log::info($item);
-
-            /*
-            if($this->charged == "true" && $item->getAmountCharged() > 0){
-                $collection->push($item);
-            }elseif($this->charged == 'false' && $item->getAmountCharged() == 0){
-                $collection->push($item);
+                $this->query->whereHas('items', function($q){
+                    return $q->getShift()->where('status', Shift::WAITING_FOR_CONFIRMATION);
+                });
             }
-            else{
-                $collection->push($item);
-            }*/
+            elseif($confirmed === 'true') {
+                $this->query->whereHas('items', function($q){
+                    return $q->getShift()->whereNotIn('status',  [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
+                });
+            }
         }
 
-        $collection->push($item);
+        return $this;
 
-        return $collection;
 
     }
 
@@ -189,14 +116,16 @@ class PayerInvoiceReport extends BaseReport
      */
     protected function results() : ?iterable
     {
-        $query = clone $this->query;
+        $items = $this->query->get();
 
-        $invoices = $query->get()->toArray();
-        $invoices = $this->getConfirmed($invoices);
-        $invoices = $this->getCharged($invoices);
+        foreach ($items as $item) {
+            Log::info($item);
+            Log::info("\n\n");
+        }
+
+        return $items;
 
 
-        return $this->rows;
     }
 
 }
