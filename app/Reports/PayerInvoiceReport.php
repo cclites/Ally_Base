@@ -3,18 +3,10 @@
 
 namespace App\Reports;
 
-
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\Payer;
-use App\Billing\Queries\ClientInvoiceQuery;
 use Carbon\Carbon;
-use App\ShiftConfirmation;
-use App\Shift;
-use App\Client;
-
 use Illuminate\Database\Eloquent\Builder;
-use Log;
 
 /**
  * Class PayerInvoiceReport
@@ -35,12 +27,15 @@ class PayerInvoiceReport extends BaseReport
 
     }
 
+    /**
+     * @param string $timezone
+     * @return PayerInvoiceReport
+     */
     public function setTimezone(string $timezone) : self
     {
         $this->timezone = $timezone;
         return $this;
     }
-
 
     /**
      * @return Builder
@@ -51,6 +46,8 @@ class PayerInvoiceReport extends BaseReport
     }
 
     /**
+     * Apply filters to report
+     *
      * @param string $startDate
      * @param string $endDate
      * @param int|null $payerId
@@ -61,8 +58,6 @@ class PayerInvoiceReport extends BaseReport
      */
     public function applyFilters(string $startDate, string $endDate, ?int $payerId, int $businessId, ?string $confirmed, ?string $charged) : self
     {
-
-
         $this->query->whereHas('client', function($q) use($businessId){
             return $q->where('business_id', $businessId);
         });
@@ -77,54 +72,47 @@ class PayerInvoiceReport extends BaseReport
                return $q->where('payer_id', $payerId);
             });
         }
-
-        if (filled($charged)) {
-            if ($charged === 'true') {
-                $this->query->whereHas('items', function($q){
-                    return $q->getShift()->whereReadOnly();
-                });
-            } elseif ($charged === 'false') {
-                $this->query->whereHas('items', function($q){
-                    return $q->getShift()->wherePending();
-                });
-            }
-        }
-
-        if (filled($confirmed)) {
-            if ($confirmed === 'false') {
-
-                $this->query->whereHas('items', function($q){
-                    return $q->getShift()->where('status', Shift::WAITING_FOR_CONFIRMATION);
-                });
-            }
-            elseif($confirmed === 'true') {
-                $this->query->whereHas('items', function($q){
-                    return $q->getShift()->whereNotIn('status',  [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
-                });
-            }
-        }
-
         return $this;
-
-
     }
 
 
-
     /**
+     * Returns a collection based on selected criteria
+     *
      * @return Collection
      */
     protected function results() : ?iterable
     {
-        $items = $this->query->get();
+        $rowItems = collect();
 
-        foreach ($items as $item) {
-            Log::info($item);
-            Log::info("\n\n");
-        }
+        $this->query->get()->map(function(ClientInvoice $clientInvoice) use ($rowItems) {
 
-        return $items;
+            $clientInvoice->items->map(function(ClientInvoiceItem $item) use($clientInvoice, $rowItems){
 
+                $group = $item->group;
+                $tuples = explode(":", $group);
+                $hrs = $tuples[0] . ":" . $tuples[1] . ":" . $tuples[2];
+                $hrsTuples = explode(" ", $hrs);
+
+                $rowItem = [
+                    'payer'=>$clientInvoice->clientPayer->payer_name,
+                    'client'=>$clientInvoice->client->nameLastFirst(),
+                    'caregiver'=>$tuples[3],
+                    'hours'=>$hrsTuples[2],
+                    'service'=>$item->name,
+                    'units'=>$item->units,
+                    'date'=>$item->date,
+                    'rate'=>$item->rate,
+                    'total'=>$item->total,
+                    'due'=>$item->amount_due,
+                    'charges'=>$item->total,
+                ];
+
+                $rowItems->push($rowItem);
+            });
+         });
+
+         return $rowItems;
 
     }
 

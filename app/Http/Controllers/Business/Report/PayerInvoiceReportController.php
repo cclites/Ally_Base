@@ -9,13 +9,18 @@ use App\Http\Controllers\Controller;
 use App\Billing\Payer;
 use App\Http\Resources\PayersDropdownResource;
 
-use Log;
-
+/**
+ * Class PayerInvoiceReportController
+ * @package App\Http\Controllers\Business\Report
+ */
 class PayerInvoiceReportController extends Controller
 {
+    /**
+     * @param Request $request
+     * @param PayerInvoiceReport $report
+     * @return PayerInvoiceReport|\Illuminate\Contracts\View\Factory|\Illuminate\Support\Collection|\Illuminate\View\View
+     */
     public function index(Request $request, PayerInvoiceReport $report){
-
-        Log::info(json_encode($request->all()));
 
         if ($request->filled('json')) {
 
@@ -30,9 +35,6 @@ class PayerInvoiceReportController extends Controller
                         $request->confirmed,
                         $request->charged
                     );
-
-            Log::info($report->rows());
-
             return $report->rows();
         }
 

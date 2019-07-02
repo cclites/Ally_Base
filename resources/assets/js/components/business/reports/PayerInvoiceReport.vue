@@ -27,7 +27,7 @@
                                 </option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Shift Type" class="col-md-2">
+                        <!--b-form-group label="Shift Type" class="col-md-2">
                             <b-form-select v-model="form.confirmed">
                                 <option value="">All</option>
                                 <option value="true">Confirmed</option>
@@ -40,7 +40,7 @@
                                 <option value="true">Charged</option>
                                 <option value="false">Uncharged</option>
                             </b-form-select>
-                        </b-form-group>
+                        </b-form-group-->
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
@@ -61,15 +61,26 @@
                             <b-col>
                                 <b-table
                                         class="payers-invoice-table"
-                                        :items="shifts"
+                                        :items="items"
                                         :fields="fields"
-                                        sort-by="client"
+                                        sort-by="payer"
                                         empty-text="No Results"
                                         :busy="loading"
+                                        :current-page="currentPage"
+                                        :per-page="perPage"
                                 />
                             </b-col>
                         </b-row>
                     </div>
+
+                    <b-row v-if="this.items.length > 0">
+                        <b-col lg="6" >
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                        </b-col>
+                        <b-col lg="6" class="text-right">
+                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                        </b-col>
+                    </b-row>
 
                 </b-card>
             </b-col>
@@ -98,7 +109,7 @@
                     charged: ''
                 }),
 
-                shifts: [],
+                items: [],
                 payer: '',
                 fields: [
                     {
@@ -109,6 +120,11 @@
                     {
                         key: 'service',
                         label: 'Service',
+                        sortable: true,
+                    },
+                    {
+                        key: 'payer',
+                        label: 'Payer',
                         sortable: true,
                     },
                     {
@@ -148,6 +164,9 @@
                     },
                 ],
                 loading: false,
+                totalRows: 0,
+                perPage: 15,
+                currentPage: 1,
 
             }
         },
@@ -157,7 +176,8 @@
                 this.loading = true;
                 this.form.get('/business/reports/payer-invoice-report?json=1')
                     .then(response => {
-                        console.log(response);
+                        this.items=response.data;
+                        this.totalRows = this.items.length;
                     })
                     .catch(() => {})
                     .finally(() => {
@@ -165,11 +185,10 @@
                     });
 
             },
-            print(){}
+            print(){
+                $(".payers-invoice-table").print();
+            }
         },
-        mounted (){
-
-        }
     }
 </script>
 
