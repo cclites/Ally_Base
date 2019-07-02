@@ -274,4 +274,40 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
         return false;
     }
+
+    /**
+     * Get plan code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPlanCode() : ?string
+    {
+        if (empty($this->clientPayer)) {
+            return null;
+        }
+
+        if ($this->clientPayer->isPrivatePay()) {
+            return $this->clientPayer->client->medicaid_plan_id;
+        }
+
+        return $this->clientPayer->payer->getPlanCode();
+    }
+
+    /**
+     * Get payer code for claim transmissions.
+     *
+     * @return string|null
+     */
+    public function getPayerCode() : ?string
+    {
+        if (empty($this->clientPayer)) {
+            return null;
+        }
+
+        if ($this->clientPayer->isPrivatePay()) {
+            return $this->clientPayer->client->medicaid_payer_id;
+        }
+
+        return $this->clientPayer->payer->getPayerCode();
+    }
 }

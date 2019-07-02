@@ -60,11 +60,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+        if (empty($invoice->getPayerCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is no Payer Organization identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPlanCode())) {
+        if (empty($invoice->getPlanCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is no Plan Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
@@ -169,8 +169,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $master = [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
-            'Plan' => optional($clientInvoice->clientPayer)->payer->getPlanCode(),
+            'Payer' => $clientInvoice->getPayerCode(),
+            'Plan' => $clientInvoice->getPlanCode(),
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,

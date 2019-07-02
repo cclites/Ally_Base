@@ -27,7 +27,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
+        if (empty($invoice->getPayerCode())) {
             throw new ClaimTransmissionException('You cannot submit a claim because there is not MCO/Payer Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
         }
 
@@ -110,7 +110,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         $hasEvv = $this->checkShiftForFullEVV($shift);
         $master = [
             $claim->invoice->client->business->ein ? str_replace('-', '', $claim->invoice->client->business->ein) : '', //    "Agency Tax ID",
-            optional($claim->invoice->clientPayer)->payer->getPayerCode(), //    "Payer ID",
+            $claim->invoice->getPayerCode(), //    "Payer ID",
             $claim->invoice->client->medicaid_id, //    "Medicaid Number",
             $shift->caregiver_id, //    "Caregiver Code",
             $shift->caregiver->firstname, //    "Caregiver First Name",
