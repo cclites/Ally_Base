@@ -28,6 +28,8 @@ export default {
                 {value:'VA', text:'VA'},
                 {value:'lead_agency', text:'Lead Agency'},
             ],
+
+            EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',
         }
     },
 }

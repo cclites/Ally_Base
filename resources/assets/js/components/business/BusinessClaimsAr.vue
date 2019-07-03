@@ -279,7 +279,7 @@
                     />
                     <input-help :form="missingForm" field="client_medicaid_id" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`">
+                <b-form-group v-if="missingField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`">
                     <b-form-input
                         name="client_medicaid_payer_id"
                         type="text"
@@ -313,7 +313,7 @@
 
             <div v-if="missingFieldGroup(['payer'])" class="mb-4">
                 <h4>Payer Settings</h4>
-                <b-form-group v-if="missingField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`">
+                <b-form-group v-if="missingField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`">
                     <b-form-input
                         name="payer_payer_code"
                         type="text"
