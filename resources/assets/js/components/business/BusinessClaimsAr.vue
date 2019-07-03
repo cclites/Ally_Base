@@ -205,7 +205,7 @@
         >
             <div v-if="missingFieldGroup(['business'])" class="mb-4">
                 <h4>Business Settings</h4>
-                <b-form-group v-if="missingField('business_ein')" label="Business EIN">
+                <b-form-group v-if="missingField('business_ein')" label="Business EIN" label-class="required">
                     <b-form-input
                         name="business_ein"
                         type="text"
@@ -215,7 +215,7 @@
                     />
                     <input-help :form="missingForm" field="business_ein" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('business_zip')" label="Business Zipcode">
+                <b-form-group v-if="missingField('business_zip')" label="Business Zipcode" label-class="required">
                     <b-form-input
                         name="business_zip"
                         type="text"
@@ -225,7 +225,7 @@
                     />
                     <input-help :form="missingForm" field="business_zip" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('business_medicaid_id')" label="Medicaid ID">
+                <b-form-group v-if="missingField('business_medicaid_id')" label="Medicaid ID" label-class="required">
                     <b-form-input
                         name="business_medicaid_id"
                         type="text"
@@ -235,7 +235,7 @@
                     />
                     <input-help :form="missingForm" field="business_medicaid_id" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('business_medicaid_npi_number')" label="Medicaid NPI Number">
+                <b-form-group v-if="missingField('business_medicaid_npi_number')" label="Medicaid NPI Number" label-class="required">
                     <b-form-input
                         name="business_medicaid_npi_number"
                         type="text"
@@ -245,7 +245,7 @@
                     />
                     <input-help :form="missingForm" field="business_medicaid_npi_number" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('business_medicaid_npi_taxonomy')" label="Medicaid NPI Taxonomy">
+                <b-form-group v-if="missingField('business_medicaid_npi_taxonomy')" label="Medicaid NPI Taxonomy" label-class="required">
                     <b-form-input
                         name="business_medicaid_npi_taxonomy"
                         type="text"
@@ -259,7 +259,7 @@
 
             <div v-if="missingFieldGroup(['client'])" class="mb-4">
                 <h4>Client Settings</h4>
-                <b-form-group v-if="missingField('client_date_of_birth')" label="Date of Birth">
+                <b-form-group v-if="missingField('client_date_of_birth')" label="Date of Birth" label-class="required">
                     <b-form-input
                         name="client_date_of_birth"
                         type="text"
@@ -269,7 +269,7 @@
                     />
                     <input-help :form="missingForm" field="client_date_of_birth" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('client_medicaid_id')" label="Medicaid ID">
+                <b-form-group v-if="missingField('client_medicaid_id')" label="Medicaid ID" label-class="required">
                     <b-form-input
                         name="client_medicaid_id"
                         type="text"
@@ -279,7 +279,7 @@
                     />
                     <input-help :form="missingForm" field="client_medicaid_id" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`">
+                <b-form-group v-if="missingField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-class="required">
                     <b-form-input
                         name="client_medicaid_payer_id"
                         type="text"
@@ -289,7 +289,7 @@
                     />
                     <input-help :form="missingForm" field="client_medicaid_payer_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)" />
                 </b-form-group>
-                <b-form-group v-if="missingField('client_medicaid_plan_id')" label="Plan Identifier">
+                <b-form-group v-if="missingField('client_medicaid_plan_id')" label="Plan Identifier" label-class="required">
                     <b-form-input
                         name="client_medicaid_plan_id"
                         type="text"
@@ -299,7 +299,7 @@
                     />
                     <input-help :form="missingForm" field="client_medicaid_plan_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)" />
                 </b-form-group>
-                <b-form-group v-if="missingField('client_medicaid_diagnosis_codes')" label="Medicaid Diagnosis Codes">
+                <b-form-group v-if="missingField('client_medicaid_diagnosis_codes')" label="Medicaid Diagnosis Codes" label-class="required">
                     <b-form-input
                         name="client_medicaid_diagnosis_codes"
                         type="text"
@@ -313,7 +313,7 @@
 
             <div v-if="missingFieldGroup(['payer'])" class="mb-4">
                 <h4>Payer Settings</h4>
-                <b-form-group v-if="missingField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`">
+                <b-form-group v-if="missingField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-class="required">
                     <b-form-input
                         name="payer_payer_code"
                         type="text"
@@ -323,7 +323,7 @@
                     />
                     <input-help :form="missingForm" field="payer_payer_code" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('payer_plan_code')" label="Plan Identifier">
+                <b-form-group v-if="missingField('payer_plan_code')" label="Plan Identifier" label-class="required">
                     <b-form-input
                         name="payer_plan_code"
                         type="text"
@@ -337,7 +337,7 @@
 
             <div v-if="missingFieldGroup(['credentials'])" class="mb-4">
                 <h4>Transmission Credentials</h4>
-                <b-form-group v-if="missingField('credentials_hha_username')" label="HHA Username">
+                <b-form-group v-if="missingField('credentials_hha_username')" label="HHA Username" label-class="required">
                     <b-form-input
                         name="credentials_hha_username"
                         type="text"
@@ -347,7 +347,7 @@
                     />
                     <input-help :form="missingForm" field="credentials_hha_username" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('credentials_hha_password')" label="HHA Password">
+                <b-form-group v-if="missingField('credentials_hha_password')" label="HHA Password" label-class="required">
                     <b-form-input
                         name="credentials_hha_password"
                         type="text"
@@ -357,7 +357,7 @@
                     />
                     <input-help :form="missingForm" field="credentials_hha_password" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('credentials_tellus_username')" label="Tellus Username">
+                <b-form-group v-if="missingField('credentials_tellus_username')" label="Tellus Username" label-class="required">
                     <b-form-input
                         name="credentials_tellus_username"
                         type="text"
@@ -367,7 +367,7 @@
                     />
                     <input-help :form="missingForm" field="credentials_tellus_username" text="" />
                 </b-form-group>
-                <b-form-group v-if="missingField('credentials_tellus_password')" label="Tellus Password">
+                <b-form-group v-if="missingField('credentials_tellus_password')" label="Tellus Password" label-class="required">
                     <b-form-input
                         name="credentials_tellus_password"
                         type="text"

@@ -47,6 +47,31 @@ class UpdateMissingClaimsFieldsRequest extends FormRequest
         ];
     }
 
+    public function messages()
+    {
+        return [
+            'business_ein.*' => 'This field is required.',
+            'business_zip.*' => 'This field is required.',
+            'business_medicaid_id.*' => 'This field is required.',
+            'business_medicaid_npi_number.*' => 'This field is required.',
+            'business_medicaid_npi_taxonomy.*' => 'This field is required.',
+
+            'client_medicaid_id.*' => 'This field is required.',
+            'client_medicaid_payer_id.*' => 'This field is required.',
+            'client_medicaid_plan_id.*' => 'This field is required.',
+            'client_medicaid_diagnosis_codes.*' => 'This field is required.',
+            'client_date_of_birth.*' => 'This field is required.',
+
+            'payer_payer_code.*' => 'This field is required.',
+            'payer_plan_code.*' => 'This field is required.',
+
+            'credentials_hha_username.*' => 'This field is required.',
+            'credentials_hha_password.*' => 'This field is required.',
+            'credentials_tellus_username.*' => 'This field is required.',
+            'credentials_tellus_password.*' => 'This field is required.',
+        ];
+    }
+
     /**
      * Filter the request data for processing.
      *
