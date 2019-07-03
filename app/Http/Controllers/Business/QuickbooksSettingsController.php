@@ -107,6 +107,7 @@ class QuickbooksSettingsController extends BaseController
             }
 
             $connection = $business->fresh()->quickbooksConnection;
+            /** @var \App\Services\QuickbooksOnlineService $api */
             $api = $connection->getApiService();
             $connection->update(['company_name' => $api->getCompanyName()]);
 
@@ -204,6 +205,7 @@ class QuickbooksSettingsController extends BaseController
             return new ErrorResponse(401, 'Not connected to the Quickbooks API.');
         }
 
+        /** @var \App\Services\QuickbooksOnlineService $api */
         $api = $business->quickbooksConnection->getApiService();
         if (empty($api)) {
             return new ErrorResponse(401, 'Error connecting to the Quickbooks API.  Please try again.');
