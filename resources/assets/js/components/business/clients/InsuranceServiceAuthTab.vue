@@ -84,7 +84,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`" label-for="payer_code">
+                    <b-form-group :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-for="payer_code">
                         <b-form-input v-model="form.medicaid_payer_id"></b-form-input>
                         <input-help :form="form" field="medicaid_payer_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)"></input-help>
                     </b-form-group>
@@ -135,11 +135,13 @@
 
 <script>
     import ClientServiceAuth from './ClientServiceAuth';
+    import Constants from '../../../mixins/Constants';
 
     export default {
         props: ['client', 'auths', 'payers', 'services'],
 
         components: {ClientServiceAuth},
+        mixins: [Constants],
 
         data() {
             return {

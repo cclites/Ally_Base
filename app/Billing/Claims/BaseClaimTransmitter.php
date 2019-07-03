@@ -3,12 +3,10 @@ namespace App\Billing\Claims;
 
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
-use App\Billing\ClientInvoiceItem;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
-use Illuminate\Support\Collection;
 
 abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -17,30 +15,27 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
      * be transmitted as a claim.
      *
      * @param \App\Billing\ClientInvoice $invoice
-     * @return bool
+     * @return null|array
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice) : bool
+    public function validateInvoice(ClientInvoice $invoice) : ?array
     {
+        $errors = ['business' => [], 'payer' => [], 'client' => [], 'credentials' => []];
         if (empty($invoice->client->business->ein)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an EIN set.  You can edit this information under Settings > General > Medicaid.');
+            array_push($errors['business'], 'ein');
         }
 
         if (empty($invoice->client->medicaid_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid ID set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+            array_push($errors['client'], 'medicaid_id');
         }
 
-        $invoiceableShifts = $invoice->items->where('invoiceable_type', 'shifts')
-            ->count();
-
-        $invoiceableServices = $invoice->items->where('invoiceable_type', 'shift_services')
-            ->count();
-
+        $invoiceableShifts = $this->getInvoicedShiftsQuery($invoice)->count();
+        $invoiceableServices = $this->getInvoicedServicesQuery($invoice)->count();
         if ($invoiceableShifts === 0 && $invoiceableServices === 0) {
-            throw new ClaimTransmissionException('You cannot create a claim because there are no shifts attached to this invoice.');
+            throw new ClaimTransmissionException('You cannot create a claim because there are no services attached to this invoice with a billable amount.');
         }
 
-        return true;
+        return $errors;
     }
 
     /**
@@ -51,48 +46,54 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
      */
     protected function getData(Claim $claim) : array
     {
-        return $this->getInvoicedShifts($claim->invoice)
-            ->merge($this->getShiftsFromInvoicedServices($claim->invoice))
-            ->map(function ($shift) use ($claim) {
+        $shifts = $this->getInvoicedShiftsQuery($claim->invoice)
+            ->get()
+            ->map(function (Shift $shift) use ($claim) {
                 return $this->mapShiftRecord($claim, $shift);
             })
-            ->flatten(1)
             ->toArray();
+
+        $services = $this->getInvoicedServicesQuery($claim->invoice)
+            ->get()
+            ->map(function (ShiftService $service) use ($claim) {
+                return $this->mapServiceRecord($claim, $service);
+            })
+            ->toArray();
+
+        return array_merge($shifts, $services);
     }
 
     /**
-     * Get the shifts that are directly attached to a client invoice.
+     * Get the eligible shifts that are directly attached
+     * to a client invoice.  (only ones with a balance due)
      *
      * @param ClientInvoice $invoice
-     * @return Shift[]|\Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function getInvoicedShifts(ClientInvoice $invoice)
+    protected function getInvoicedShiftsQuery(ClientInvoice $invoice) : \Illuminate\Database\Eloquent\Builder
     {
         $shiftLineItems = $invoice->items->where('invoiceable_type', 'shifts')
+            ->where('amount_due', '>', 0.0)
             ->pluck('invoiceable_id');
 
-        return Shift::whereIn('id', $shiftLineItems)
-            ->get();
+        return Shift::whereIn('id', $shiftLineItems);
     }
 
     /**
-     * Get the parent shifts of the services that are directly
-     * attached to a client invoice.
+     * Get the eligible shift services that are directly attached
+     * to a client invoice.  (only ones with a balance due)
      *
      * @param ClientInvoice $invoice
-     * @return Shift[]|\Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function getShiftsFromInvoicedServices(ClientInvoice $invoice)
+    protected function getInvoicedServicesQuery(ClientInvoice $invoice) : \Illuminate\Database\Eloquent\Builder
     {
         $serviceLineItems = $invoice->items->where('invoiceable_type', 'shift_services')
+            ->where('amount_due', '>', 0.0)
             ->pluck('invoiceable_id');
 
-        $serviceShiftIds = ShiftService::whereIn('id', $serviceLineItems)
-            ->get()
-            ->unique('shift_id')
-            ->pluck('shift_id');
-
-        return Shift::whereIn('id', $serviceShiftIds)->get();
+        return ShiftService::with('shift')
+            ->whereIn('id', $serviceLineItems);
     }
 
     /**
@@ -135,4 +136,13 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
      * @return array
      */
     abstract public function mapShiftRecord(Claim $claim, Shift $shift) : array;
+
+    /**
+     * Map a claim's shift into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    abstract public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array;
 }

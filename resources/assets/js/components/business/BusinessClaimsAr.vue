@@ -198,6 +198,19 @@
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
 
+        <b-modal id="missingFieldsModal"
+                 title="Missing Data Requirements"
+                 v-model="missingFieldsModal"
+                 no-close-on-backdrop
+                 size="lg"
+        >
+            <claims-missing-fields-form ref="missingFieldsForm" :invoice="selectedInvoice" @close="missingFieldsModal = false" />
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="missingFieldsModal = false" :disabled="$refs.missingFieldsForm ? $refs.missingFieldsForm.busy : false">Cancel</b-btn>
+                <b-btn variant="info" @click="$refs.missingFieldsForm.submit()" :disabled="$refs.missingFieldsForm ? $refs.missingFieldsForm.busy : false">Save Changes</b-btn>
+            </div>
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -207,9 +220,10 @@
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import Constants from '../../mixins/Constants';
+    import ClaimsMissingFieldsForm from "./ClaimsMissingFieldsForm";
 
     export default {
-        components: { BusinessLocationFormGroup },
+        components: { BusinessLocationFormGroup, ClaimsMissingFieldsForm },
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -297,6 +311,7 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
+                missingFieldsModal: false,
             }
         },
 
@@ -314,6 +329,12 @@
         },
 
         methods: {
+            showMissingFieldsModal(errors, invoice) {
+                this.selectedInvoice = invoice;
+                this.$refs.missingFieldsForm.createForm(errors);
+                this.missingFieldsModal = true;
+            },
+
             serviceLabel(serviceValue) {
                 switch (serviceValue) {
                     case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
@@ -375,7 +396,12 @@
                             this.items.splice(index, 1, data.data.claim);
                         }
                     })
-                    .catch(e => {})
+                    .catch(e => {
+                        if (e.response.status == 412) {
+                            // Required fields are missing.
+                            this.showMissingFieldsModal(e.response.data.data, invoice);
+                        }
+                    })
                     .finally(() => {
                         this.busy = false;
                         this.transmittingId = null;
