@@ -13,10 +13,10 @@ interface ClaimTransmitterInterface
      * be transmitted as a claim.
      *
      * @param \App\Billing\ClientInvoice $invoice
-     * @return bool
+     * @return null|array
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice) : bool;
+    public function validateInvoice(ClientInvoice $invoice) : ?array;
 
     /**
      * Submit the claim using the service.

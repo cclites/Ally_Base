@@ -198,6 +198,193 @@
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
 
+        <b-modal id="missingFieldsModal"
+                 title="Missing Data Requirements"
+                 v-model="missingFieldsModal"
+                 no-close-on-backdrop
+        >
+            <div v-if="missingFieldGroup(['business'])" class="mb-4">
+                <h4>Business Settings</h4>
+                <b-form-group v-if="missingField('business_ein')" label="Business EIN">
+                    <b-form-input
+                        name="business_ein"
+                        type="text"
+                        v-model="missingForm.business_ein"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="business_ein" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('business_zip')" label="Business Zipcode">
+                    <b-form-input
+                        name="business_zip"
+                        type="text"
+                        v-model="missingForm.business_zip"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="business_zip" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('business_medicaid_id')" label="Medicaid ID">
+                    <b-form-input
+                        name="business_medicaid_id"
+                        type="text"
+                        v-model="missingForm.business_medicaid_id"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="business_medicaid_id" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('business_medicaid_npi_number')" label="Medicaid NPI Number">
+                    <b-form-input
+                        name="business_medicaid_npi_number"
+                        type="text"
+                        v-model="missingForm.business_medicaid_npi_number"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="business_medicaid_npi_number" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('business_medicaid_npi_taxonomy')" label="Medicaid NPI Taxonomy">
+                    <b-form-input
+                        name="business_medicaid_npi_taxonomy"
+                        type="text"
+                        v-model="missingForm.business_medicaid_npi_taxonomy"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="business_medicaid_npi_taxonomy" text="" />
+                </b-form-group>
+            </div>
+
+            <div v-if="missingFieldGroup(['client'])" class="mb-4">
+                <h4>Client Settings</h4>
+                <b-form-group v-if="missingField('client_date_of_birth')" label="Date of Birth">
+                    <b-form-input
+                        name="client_date_of_birth"
+                        type="text"
+                        v-model="missingForm.client_date_of_birth"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="client_date_of_birth" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('client_medicaid_id')" label="Medicaid ID">
+                    <b-form-input
+                        name="client_medicaid_id"
+                        type="text"
+                        v-model="missingForm.client_medicaid_id"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="client_medicaid_id" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`">
+                    <b-form-input
+                        name="client_medicaid_payer_id"
+                        type="text"
+                        v-model="missingForm.client_medicaid_payer_id"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="client_medicaid_payer_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)" />
+                </b-form-group>
+                <b-form-group v-if="missingField('client_medicaid_plan_id')" label="Plan Identifier">
+                    <b-form-input
+                        name="client_medicaid_plan_id"
+                        type="text"
+                        v-model="missingForm.client_medicaid_plan_id"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="client_medicaid_plan_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)" />
+                </b-form-group>
+                <b-form-group v-if="missingField('client_medicaid_diagnosis_codes')" label="Medicaid Diagnosis Codes">
+                    <b-form-input
+                        name="client_medicaid_diagnosis_codes"
+                        type="text"
+                        v-model="missingForm.client_medicaid_diagnosis_codes"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="client_medicaid_diagnosis_codes" text="Note: Supports multiple using commas" />
+                </b-form-group>
+            </div>
+
+            <div v-if="missingFieldGroup(['payer'])" class="mb-4">
+                <h4>Payer Settings</h4>
+                <b-form-group v-if="missingField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf' target='_blank'>Code Guides: HHA</a>)`">
+                    <b-form-input
+                        name="payer_payer_code"
+                        type="text"
+                        v-model="missingForm.payer_payer_code"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="payer_payer_code" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('payer_plan_code')" label="Plan Identifier">
+                    <b-form-input
+                        name="payer_plan_code"
+                        type="text"
+                        v-model="missingForm.payer_plan_code"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="payer_plan_code" text="" />
+                </b-form-group>
+            </div>
+
+            <div v-if="missingFieldGroup(['credentials'])" class="mb-4">
+                <h4>Transmission Credentials</h4>
+                <b-form-group v-if="missingField('credentials_hha_username')" label="HHA Username">
+                    <b-form-input
+                        name="credentials_hha_username"
+                        type="text"
+                        v-model="missingForm.credentials_hha_username"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="credentials_hha_username" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('credentials_hha_password')" label="HHA Password">
+                    <b-form-input
+                        name="credentials_hha_password"
+                        type="text"
+                        v-model="missingForm.credentials_hha_password"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="credentials_hha_password" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('credentials_tellus_username')" label="Tellus Username">
+                    <b-form-input
+                        name="credentials_tellus_username"
+                        type="text"
+                        v-model="missingForm.credentials_tellus_username"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="credentials_tellus_username" text="" />
+                </b-form-group>
+                <b-form-group v-if="missingField('credentials_tellus_password')" label="Tellus Password">
+                    <b-form-input
+                        name="credentials_tellus_password"
+                        type="text"
+                        v-model="missingForm.credentials_tellus_password"
+                        max="255"
+                        :disabled="missingForm.busy"
+                    />
+                    <input-help :form="missingForm" field="credentials_tellus_password" text="" />
+                </b-form-group>
+            </div>
+
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="missingFieldsModal = false" :disabled="missingForm.busy">Cancel</b-btn>
+                <b-btn variant="info" @click="updateMissingFields()" :disabled="missingForm.busy">Save Changes</b-btn>
+            </div>
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -297,6 +484,8 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
+                missingFieldsModal: false,
+                missingForm: new Form({}),
             }
         },
 
@@ -314,6 +503,59 @@
         },
 
         methods: {
+            missingFieldGroup(group) {
+                for (let field of Object.keys(this.missingForm.originalData)) {
+                    if (field.startsWith(group + '_')) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            missingField(field) {
+                return this.missingForm.originalData.hasOwnProperty(field)
+            },
+
+            showMissingFieldsModal(errors, invoice) {
+                let fields = {invoice: invoice.id};
+
+                if (errors.hasOwnProperty('business')) {
+                    for (let field of errors.business) {
+                        fields['business_' + field] = '';
+                    }
+                }
+
+                if (errors.hasOwnProperty('client')) {
+                    for (let field of errors.client) {
+                        fields['client_' + field] = '';
+                    }
+                }
+
+                if (errors.hasOwnProperty('payer')) {
+                    for (let field of errors.payer) {
+                        fields['payer_' + field] = '';
+                    }
+                }
+
+                if (errors.hasOwnProperty('credentials')) {
+                    for (let field of errors.credentials) {
+                        fields['credentials_' + field] = '';
+                    }
+                }
+
+                this.missingForm = new Form(fields);
+                this.missingFieldsModal = true;
+            },
+
+            updateMissingFields() {
+                this.missingForm.patch(`claims-ar/${this.missingForm.invoice}/update-missing-fields`)
+                    .then( ({ data }) => {
+                        this.missingFieldsModal = false;
+                    })
+                    .catch(e => {})
+                    .finally(() => {});
+            },
+
             serviceLabel(serviceValue) {
                 switch (serviceValue) {
                     case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
@@ -375,7 +617,12 @@
                             this.items.splice(index, 1, data.data.claim);
                         }
                     })
-                    .catch(e => {})
+                    .catch(e => {
+                        if (e.response.status == 412) {
+                            // Required fields are missing.
+                            this.showMissingFieldsModal(e.response.data.data, invoice);
+                        }
+                    })
                     .finally(() => {
                         this.busy = false;
                         this.transmittingId = null;

@@ -13,6 +13,11 @@ use Illuminate\Support\Collection;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
+    /**
+     * Timestamp format string.
+     *
+     * @var string
+     */
     protected $timeFormat = 'Y-m-d H:i';
 
     /**
@@ -20,20 +25,31 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * be transmitted as a claim.
      *
      * @param \App\Billing\ClientInvoice $invoice
-     * @return bool
+     * @return null|array
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice): bool
+    public function validateInvoice(ClientInvoice $invoice): ?array
     {
+        $errors = parent::validateInvoice($invoice);
+
         if (empty($invoice->client->business->hha_username) || empty($invoice->client->business->getHhaPassword())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have your HHAeXchange credentials set.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
+            array_push($errors['credentials'], 'hha_username');
+            array_push($errors['credentials'], 'hha_password');
         }
 
         if (empty($invoice->getPayerCode())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because there is not MCO/Payer Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
+            if (optional($invoice->clientPayer)->isPrivatePay()) {
+                array_push($errors['client'], 'medicaid_payer_id');
+            } else {
+                array_push($errors['payer'], 'payer_code');
+            }
         }
 
-        return parent::validateInvoice($invoice);
+        if (collect($errors)->flatten(1)->isEmpty()) {
+            return null;
+        }
+
+        return $errors;
     }
 
     /**

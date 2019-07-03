@@ -15,11 +15,11 @@ class ManualClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * be transmitted as a claim.
      *
      * @param \App\Billing\ClientInvoice $invoice
-     * @return bool
+     * @return null|array
      */
-    public function validateInvoice(ClientInvoice $invoice): bool
+    public function validateInvoice(ClientInvoice $invoice): ?array
     {
-        return true;
+        return null;
     }
 
     /**
