@@ -9,15 +9,22 @@ use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
 
-use Log;
-
 class CaregiverOvertimeReport extends BaseReport
 {
 
+    /**
+     * @var string
+     */
     protected $timezone;
 
+    /**
+     * @var int
+     */
     protected $caregiver_id;
 
+    /**
+     * @var date
+     */
     protected $end;
 
     /**
@@ -45,6 +52,15 @@ class CaregiverOvertimeReport extends BaseReport
     }
 
 
+    /**
+     * Build the query
+     *
+     * @param string $start
+     * @param string $end
+     * @param int|null $caregiver_id
+     * @param string|null $active
+     * @return CaregiverOvertimeReport
+     */
     public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $active) : self
     {
         $this->end = $end;
@@ -67,9 +83,11 @@ class CaregiverOvertimeReport extends BaseReport
         return $this;
     }
     /**
+     * process the results
+     *
      * @return Collection
      */
-    protected function results()
+    protected function results() : iterable
     {
         $record = $this->query
                     ->groupBy('caregivers.id')
@@ -96,8 +114,6 @@ class CaregiverOvertimeReport extends BaseReport
 
                     $scheduled += $scheduledHrs;
 
-                    Log::info($scheduledHrs);
-
                     $worked = round($worked / 60, 2);
                     $scheduled = round($scheduled / 60, 2);
                     $total = round($worked - $scheduled, 2);
@@ -109,7 +125,6 @@ class CaregiverOvertimeReport extends BaseReport
                         'worked' => $worked,
                         'scheduled' => $scheduled,
                         'total' => $total
-
                     ];
 
             });
