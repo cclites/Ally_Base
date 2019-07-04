@@ -39,8 +39,6 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 
-use Log;
-
 class ReportsController extends BaseController
 {
 
@@ -112,87 +110,6 @@ class ReportsController extends BaseController
         return compact('totals', 'shifts', 'dates');
     }
 
-    public function overtime()
-    {
-        return view('business.reports.overtime');
-    }
-
-    public function overtimeData(Request $request)
-    {
-        $timezone = $this->business()->timezone;
-
-        if (!$week = $request->input('week')) {
-            $week = Carbon::now($timezone)->weekOfYear;
-        }
-
-        if (!$year = $request->input('year')) {
-            $year = Carbon::now($timezone)->year;
-        }
-
-        // Define the date range for results
-        $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
-        $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
-        if ($request->filled('start') && $request->filled('end')) {
-            $weekStart = Carbon::parse($request->start, $timezone)->setTime(0, 0, 0);
-            $weekEnd = Carbon::parse($request->end, $timezone)->setTime(23, 59, 59);
-        }
-
-        // Set date range to UTC for database interaction
-        $weekStartUTC = $weekStart->copy()->setTimezone('UTC');
-        $weekEndUTC = $weekEnd->copy()->setTimezone('UTC');
-
-        // Pull the list of relevant caregivers to loop through
-        $caregivers = Caregiver::forRequestedBusinesses()
-            ->with('shifts')
-            ->ordered()
-            ->whereHas('shifts', function ($query) use ($weekStartUTC, $weekEndUTC) {
-                $query->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC]);
-            })
-            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
-                $query->where('caregiver_id', $request->caregiver_id);
-            })
-            ->get();
-
-        // Loop through caregivers, calculate hours, add to $results
-        $results = [];
-        foreach ($caregivers as $caregiver) {
-            // Create a new result template
-            $hours = [
-                'worked' => 0,
-                'scheduled' => 0,
-                'total' => 0
-            ];
-
-            // Calculate total number of hours in finished shifts
-            foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
-                $hours['worked'] += $shift->duration();
-            }
-
-            // Calculate number of hours in current shift
-            foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
-                $hours['worked'] += $shift->duration();
-                $hours['scheduled'] += $shift->remaining();
-            }
-
-            // Calculate number of hours in future shifts
-            $schedules = Schedule::future($timezone)
-                ->where('caregiver_id', $caregiver->id)
-                ->where('starts_at', '<=', $weekEndUTC)
-                ->sum('duration');
-            $hours['scheduled'] += $schedules;
-            $hours['worked'] = round($hours['worked'] / 60, 2);
-            $hours['scheduled'] = round($hours['scheduled'] / 60, 2);
-
-            // Calculate total expected hours (still scheduled + already worked)
-            $hours['total'] = $hours['worked'] - $hours['scheduled'];
-
-            // Aggregate results
-            $results[] = array_merge($caregiver->only('id', 'firstname', 'lastname'), $hours);
-        }
-
-        $date_range = [$weekStart->toDateString(), $weekEnd->toDateString()];
-        return response()->json(compact('results', 'date_range'));
-    }
 
     public function reconciliation(Request $request, ProviderReconciliationReport $report)
     {

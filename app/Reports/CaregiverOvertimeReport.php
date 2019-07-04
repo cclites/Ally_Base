@@ -1,0 +1,119 @@
+<?php
+
+
+namespace App\Reports;
+
+
+use App\Caregiver;
+use App\Schedule;
+use App\Shift;
+use Carbon\Carbon;
+
+use Log;
+
+class CaregiverOvertimeReport extends BaseReport
+{
+
+    protected $timezone;
+
+    protected $caregiver_id;
+
+    protected $end;
+
+    /**
+     * CaregiverOvertimeReport constructor.
+     */
+    public function __construct()
+    {
+        $this->query = Caregiver::forRequestedBusinesses()
+                        ->with('shifts')
+                        ->ordered();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     */
+    public function query() : self
+    {
+        return $this->query;
+    }
+
+    public function setTimezone(string $timezone) : self
+    {
+        $this->timezone = $timezone;
+        return $this;
+    }
+
+
+    public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $active) : self
+    {
+        $this->end = $end;
+
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+
+        $this->query->whereHas('shifts', function ($q) use ($start, $end) {
+            $q->whereBetween('shifts.checked_in_time', [$start, $end]);
+        });
+
+        if(filled($caregiver_id)){
+            $this->query->where('caregivers.id', $caregiver_id);
+        }
+
+        if (filled($active)) {
+            $this->query->where('user.active', $active === "active" ? true : false);
+        }
+
+        return $this;
+    }
+    /**
+     * @return Collection
+     */
+    protected function results()
+    {
+        $record = $this->query
+                    ->groupBy('caregivers.id')
+                    ->get()->map(function(Caregiver $caregiver){
+
+                    $worked = 0;
+                    $scheduled = 0;
+                    $total = 0;
+
+
+                    foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
+                        $worked += $shift->duration();
+                    }
+
+                    foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
+                        $worked += $shift->duration();
+                        $scheduled += $shift->remaining();
+                    }
+
+                    $scheduledHrs =  Schedule::future($this->timezone)
+                            ->where('caregiver_id', $caregiver->id)
+                            ->where('starts_at', '<=', $this->end)
+                            ->sum('duration');
+
+                    $scheduled += $scheduledHrs;
+
+                    Log::info($scheduledHrs);
+
+                    $worked = round($worked / 60, 2);
+                    $scheduled = round($scheduled / 60, 2);
+                    $total = round($worked - $scheduled, 2);
+
+
+                    return [
+                        'firstname'=>$caregiver->first_name,
+                        'lastname'=>$caregiver->last_name,
+                        'worked' => $worked,
+                        'scheduled' => $scheduled,
+                        'total' => $total
+
+                    ];
+
+            });
+
+             return $record->values();
+    }
+}
