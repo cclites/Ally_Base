@@ -18,7 +18,7 @@ use App\Billing\View\PaymentViewGenerator;
 use App\Billing\View\Pdf\PdfDepositView;
 use App\Billing\View\Pdf\PdfPaymentView;
 use Illuminate\Support\Collection;
-use Log;
+
 class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
@@ -36,7 +36,7 @@ class StatementController extends BaseController
         }, new Collection());
 
         foreach($items as $item){
-            
+
             $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
 
             if(filled($payerId)){

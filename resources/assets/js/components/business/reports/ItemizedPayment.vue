@@ -77,12 +77,11 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import Constants from '../../../mixins/Constants';
 
     export default {
         name: "ItemizedPayment",
 
-        mixins: [FormatsNumbers, FormatsDates, Constants],
+        mixins: [FormatsNumbers, FormatsDates],
 
         props: {
             payment: {
