@@ -160,19 +160,11 @@
                 axios.post('/business/reports/overtime', this.search)
                     .then(response => {
 
-
-                        console.log(response.data);
-
                         this.items = response.data.map(function(item) {
-
-                            console.log(item.firstname);
-
                             item['_rowVariant'] = (item.total >= 36) ? (item.total > 40 ? 'danger' : 'warning') : '';
                             return item;
                         });
                         this.totalRows = this.items.length;
-                        //this.search.start = moment(response.data.date_range[0]).format('L');
-                        //this.search.end = moment(response.data.date_range[1]).format('L');
                         this.loading = false;
                     }).catch(error => {
                         console.error(error);

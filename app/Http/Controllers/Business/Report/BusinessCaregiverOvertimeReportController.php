@@ -21,7 +21,7 @@ class BusinessCaregiverOvertimeReportController extends Controller
                         $request->start,
                         $request->end,
                         $request->caregiver_id,
-                        $request->active
+                        $request->status
                     );
 
             return response()->json($report->rows());
@@ -29,8 +29,5 @@ class BusinessCaregiverOvertimeReportController extends Controller
         }
 
         return view('business.reports.overtime');
-
-
     }
-
 }

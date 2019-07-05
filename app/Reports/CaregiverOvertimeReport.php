@@ -3,7 +3,6 @@
 
 namespace App\Reports;
 
-
 use App\Caregiver;
 use App\Schedule;
 use App\Shift;
@@ -51,7 +50,6 @@ class CaregiverOvertimeReport extends BaseReport
         return $this;
     }
 
-
     /**
      * Build the query
      *
@@ -61,7 +59,7 @@ class CaregiverOvertimeReport extends BaseReport
      * @param string|null $active
      * @return CaregiverOvertimeReport
      */
-    public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $active) : self
+    public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $status) : self
     {
         $this->end = $end;
 
@@ -76,8 +74,8 @@ class CaregiverOvertimeReport extends BaseReport
             $this->query->where('caregivers.id', $caregiver_id);
         }
 
-        if (filled($active)) {
-            $this->query->where('user.active', $active === "active" ? true : false);
+        if (filled($status)) {
+            $this->query->where('active', $status === "active" ? true : false);
         }
 
         return $this;
@@ -96,7 +94,6 @@ class CaregiverOvertimeReport extends BaseReport
                     $worked = 0;
                     $scheduled = 0;
                     $total = 0;
-
 
                     foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
                         $worked += $shift->duration();
