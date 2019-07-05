@@ -53,6 +53,12 @@
                         <option :value="null">All Caregivers</option>
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
+                    <business-location-form-group
+                            v-model="business"
+                            :allow-all="true"
+                            :label="null"
+                            :name="business"
+                    />
                 </b-form>
             </b-col>
             <b-col lg="4" class="text-right">
@@ -77,11 +83,14 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import BusinessLocationSelect from '../../../components/business/BusinessLocationSelect';
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
 
     export default {
         name: "ItemizedPayment",
 
         mixins: [FormatsNumbers, FormatsDates],
+        components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         props: {
             payment: {
@@ -110,6 +119,10 @@
                     if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
+
+                    console.log(this.business);
+                    console.log(item.business.name);
+
                     return true;
                 };
 
@@ -168,6 +181,8 @@
             return {
                 caregivers: [],
                 clients: [],
+                businesses: [],
+                business: null,
                 clientId: null,
                 caregiverId: null,
                 clientSummaryTotal: 0,
@@ -202,6 +217,11 @@
                     {
                         key: "payer",
                         label: "Payer",
+                        sortable: true,
+                    },
+                    {
+                        key: "business",
+                        label: "Business",
                         sortable: true,
                     },
                     {

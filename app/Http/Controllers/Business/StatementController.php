@@ -17,8 +17,10 @@ use App\Billing\View\Html\HtmlPaymentView;
 use App\Billing\View\PaymentViewGenerator;
 use App\Billing\View\Pdf\PdfDepositView;
 use App\Billing\View\Pdf\PdfPaymentView;
+use App\Business;
 use Illuminate\Support\Collection;
 
+use Log;
 class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
@@ -40,12 +42,12 @@ class StatementController extends BaseController
             $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
 
             if(filled($payerId)){
-                $payerName = Payer::where('id', $payerId)->pluck('name')->first();
-                $item->payer = $payerName;
+                $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
             }
 
             $clientType = $item->client["client_type"];
             $item->client_type = ucfirst(str_replace("_", " ", $clientType));
+            $item->businesses = Business::where('id', $item->client["business_id"])->get();
         }
 
 
@@ -68,6 +70,20 @@ class StatementController extends BaseController
                 return $collection->push(DepositItemData::fromBusinessItem($item));
             }, $collection);
         }, new Collection());
+
+        foreach($items as $item){
+
+            /*
+            $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
+            if(filled($payerId)){
+                $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
+            }
+            */
+
+            $clientType = $item->client["client_type"];
+            $item->client_type = ucfirst(str_replace("_", " ", $clientType));
+            $item->business = Business::where('id', $item->client["business_id"])->pluck('name')->first();
+        }
 
         return view_component(
             'itemized-deposit',

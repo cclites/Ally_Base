@@ -71,6 +71,12 @@
                         <option :value="null">All Caregivers</option>
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
+                    <business-location-form-group
+                            @change="getBusinessName($event)"
+                            v-model="businessId"
+                            :allow-all="true"
+                            :label="null"
+                    />
                 </b-form>
             </b-col>
             <b-col lg="4" class="text-right">
@@ -97,11 +103,14 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
     import {Decimal} from 'decimal.js';
+    import BusinessLocationSelect from '../../../components/business/BusinessLocationSelect';
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
 
     export default {
         name: "ItemizedPayment",
 
         mixins: [FormatsNumbers, FormatsDates],
+        components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         props: {
             deposit: {
@@ -130,6 +139,7 @@
                     if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
+
                     return true;
                 };
 
@@ -218,6 +228,11 @@
             return {
                 caregivers: [],
                 clients: [],
+                business: {
+                    id: '',
+                    name: ''
+                },
+                businessId: null,
                 clientId: null,
                 caregiverId: null,
                 clientSummaryTotal: {},
@@ -239,6 +254,23 @@
                         label: "Caregiver",
                         sortable: true,
                     },
+                    {
+                        key: "client_type",
+                        label: "Client Type",
+                        sortable: true,
+                    },
+                    {
+                        key: "business",
+                        label: "Business",
+                        sortable: true,
+                    },
+                    /*
+                    {
+                        key: "payer",
+                        label: "Payer",
+                        sortable: true,
+                    },
+                     */
                     {
                         key: "name",
                         label: "Service Name",
@@ -311,12 +343,17 @@
             },
             calcTotal(rate, units) {
                 return new Decimal(rate || 0).mul(parseFloat(units || 0)).toDecimalPlaces(2).toNumber();
-            }
+            },
+             getBusinessName($e){
+
+             },
         },
 
         mounted() {
             this.loadClients();
             this.loadCaregivers();
+
+            console.log(this.businesses);
         }
     }
 </script>
