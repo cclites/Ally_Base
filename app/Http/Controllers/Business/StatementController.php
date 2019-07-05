@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Business;
 use App\Billing\BusinessInvoice;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\ClientInvoice;
+use App\Billing\ClientPayer;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Payer;
 use App\Billing\Deposit;
 use App\Billing\Payment;
 use App\Billing\View\DepositViewGenerator;
@@ -16,7 +18,7 @@ use App\Billing\View\PaymentViewGenerator;
 use App\Billing\View\Pdf\PdfDepositView;
 use App\Billing\View\Pdf\PdfPaymentView;
 use Illuminate\Support\Collection;
-
+use Log;
 class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
@@ -26,11 +28,25 @@ class StatementController extends BaseController
             'items',
             'items.invoiceable',
         ])->get();
+
         $items = $invoices->reduce(function(Collection $collection, ClientInvoice $invoice) {
             return $invoice->items->reduce(function(Collection $collection, ClientInvoiceItem $item) use ($invoice) {
                 return $collection->push(PaymentItemData::fromInvoiceItem($invoice, $item));
             }, $collection);
         }, new Collection());
+
+        foreach($items as $item){
+            
+            $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
+
+            if(filled($payerId)){
+                $payerName = Payer::where('id', $payerId)->pluck('name')->first();
+                $item->payer = $payerName;
+            }
+
+            $clientType = $item->client["client_type"];
+            $item->client_type = ucfirst(str_replace("_", " ", $clientType));
+        }
 
 
         return view_component(

@@ -77,11 +77,12 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from '../../../mixins/Constants';
 
     export default {
         name: "ItemizedPayment",
 
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, Constants],
 
         props: {
             payment: {
@@ -195,6 +196,16 @@
                         sortable: true,
                     },
                     {
+                        key: "client_type",
+                        label: "Client Type",
+                        sortable: true,
+                    },
+                    {
+                        key: "payer",
+                        label: "Payer",
+                        sortable: true,
+                    },
+                    {
                         key: "name",
                         label: "Service Name",
                         sortable: true,
@@ -240,6 +251,8 @@
         mounted() {
             this.loadClients();
             this.loadCaregivers();
+
+            console.table(this.invoices);
         }
     }
 </script>
