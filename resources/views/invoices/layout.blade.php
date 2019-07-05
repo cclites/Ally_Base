@@ -134,6 +134,22 @@
                                 @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                             </td>
                         </tr>
+                        @if( filled($recipient->date_of_birth))
+                            <tr>
+                                <td colspan="2">
+                                   {{
+                                        $recipient->date_of_birth
+                                   }}
+                                </td>
+                            </tr>
+                        @endif
+                        @if( filled($recipient->hic))
+                            <tr>
+                                <td colspan="2">
+                                    {{ $recipient->hic }}
+                                </td>
+                            </tr>
+                        @endif
                     @endif
                 </table>
             </div>
@@ -158,6 +174,20 @@
                                 @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                             </td>
                         </tr>
+                        @if( filled($subject->date_of_birth))
+                            <tr>
+                                <td colspan="2">
+                                    <strong>{{ $subject->date_of_birth }}</strong>
+                                </td>
+                            </tr>
+                        @endif
+                        @if( filled($subject->user->hic))
+                            <tr>
+                                <td colspan="2">
+                                    <strong>{{ $subject->user->hic }}</strong>
+                                </td>
+                            </tr>
+                        @endif
                     </table>
                 </div>
                 <div style="width: 50%; float:right">
@@ -177,6 +207,20 @@
                                 @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
                             </td>
                         </tr>
+                        @if( filled($subject->user->date_of_birth))
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $subject->user->date_of_birth }}</strong>
+                            </td>
+                        </tr>
+                        @endif
+                        @if( filled($subject->user->hic))
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $subject->user->hic }}</strong>
+                            </td>
+                        </tr>
+                        @endif
                     </table>
                 </div>
             </div>
