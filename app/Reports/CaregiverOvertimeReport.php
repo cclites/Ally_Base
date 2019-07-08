@@ -75,7 +75,9 @@ class CaregiverOvertimeReport extends BaseReport
         }
 
         if (filled($status)) {
-            $this->query->where('active', $status === "active" ? true : false);
+            $this->query->whereHas('user', function($q) use ($status) {
+                $q->where('active', $status == 'active');
+            });
         }
 
         return $this;
