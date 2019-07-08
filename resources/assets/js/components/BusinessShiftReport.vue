@@ -67,11 +67,12 @@
                             <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <!-- ADMIN ONLY DROPDOWN -->
-                            <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
-                                <b-form-select v-model="filters.import_id">
-                                    <option value="">--Filter by Import--</option>
-                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                            <b-form-group label="Service" class="form-inline">
+                                <b-form-select v-model="filters.service_id">
+                                    <option value="">All Services</option>
+                                    <option v-for="item in services" :value="item.id" :key="item.id">
+                                        {{ item.name }} {{ item.code ? `(${item.code})` : '' }}
+                                    </option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -79,6 +80,16 @@
                             <b-form-group label="Client Type" class="form-inline">
                                 <b-form-select v-model="filters.client_type" ref="clientTypeFilter">
                                     <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="admin"> <!-- ADMIN ONLY DROPDOWN -->
+                        <b-col>
+                            <b-form-group label="Admin Imports" class="form-inline">
+                                <b-form-select v-model="filters.import_id">
+                                    <option value="">--Filter by Import--</option>
+                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -263,6 +274,7 @@
                     flag_type: "any",
                     flags: [],
                     client_type: '',
+                    service_id: '',
                 },
                 includeAllFlags: false,
                 clients: [],
@@ -286,6 +298,7 @@
                 loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
+                services: [],
             }
         },
 
@@ -305,6 +318,7 @@
                     'Day',
                     'Time',
                     'Hours',
+                    'Services',
                     'Client',
                     'Caregiver',
                     'EVV',
@@ -374,6 +388,7 @@
                         'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
+                        'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
                         '_rowVariant': this.getRowVariant(item),
@@ -426,7 +441,7 @@
                 return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
-                        + '&client_type=' + filters.client_type
+                        + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             }
         },
@@ -536,6 +551,7 @@
             async loadFiltersData() {
                 await axios.get('/business/clients').then(response => this.clients = response.data);
                 await axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+                await axios.get('/business/services?json=1').then(response => this.services = response.data);
             },
 
             details(item) {
