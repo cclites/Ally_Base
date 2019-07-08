@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\ExpirationType;
-use App\Responses\ErrorResponse;
 use Illuminate\Http\Request;
 use App\Responses\SuccessResponse;
-
 
 class ExpirationTypesController extends BaseController
 {
@@ -15,43 +13,49 @@ class ExpirationTypesController extends BaseController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = ExpirationType::where('chain_id', $this->businessChain()->id);
+
+        if(!$request->has('manage')){
+            $query->orWhereNull('chain_id');
+        }
+
         return response()->json(
-            $this->businessChain()->expirationTypes()->get()
+            $query->orderBy('type')
+                ->get()
+                ->values()
         );
     }
 
     /**
      * Store a new expiration type and return an updated list in the response
-     * @param Request $request
+     * @param $type
      * @return SuccessResponse
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate(['type' => 'required|max:255']);
+    public function store($type){
+        $chainId = $this->businessChain()->id;
+        $expirationType = new ExpirationType;
+        $expirationType->type = $type;
+        $expirationType->chain_id = $chainId;
+        $expirationType->save();
 
-        if ($expirationType = $this->businessChain()->expirationTypes()->create($data)) {
-            return new SuccessResponse('Added default expiration type', $expirationType);
-        }
-
-        return new ErrorResponse(500, 'An error occurred while trying to create a new expiration type.  Please try again.');
+        $types = ExpirationType::where('chain_id', $chainId)->get();
+        return new SuccessResponse('Added default expiration type', $types);
+        //return response()->json($types);
     }
 
     /**
      * Destroy a default type and return an updated list in the response
      *
-     * @param ExpirationType $expirationType
+     * @param $typeId
      * @return SuccessResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Exception
      */
-    public function destroy(ExpirationType $expirationType)
-    {
-        $this->authorize('delete', $expirationType);
-
-        $expirationType->delete();
-
-        return new SuccessResponse('Removed default expiration type');
+    public function destroy($id){
+        $chainId = $this->businessChain()->id;
+        ExpirationType::destroy($id);
+        $types = ExpirationType::where('chain_id', $chainId)->get();
+        return new SuccessResponse('Removed default expiration type', $types);
+        //return response()->json($types);
     }
 }
