@@ -54,10 +54,9 @@
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                     <business-location-form-group
-                            v-model="business"
+                            v-model="business_name"
                             :allow-all="true"
                             :label="null"
-                            :name="business"
                     />
                 </b-form>
             </b-col>
@@ -110,6 +109,7 @@
         computed: {
             filteredItems() {
                 let filterFn = (item) => {
+
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
@@ -120,8 +120,9 @@
                         return false;
                     }
 
-                    console.log(this.business);
-                    console.log(item.business.name);
+                    if(parseInt(this.business_name) !== parseInt(item.business_id)){
+                        return false;
+                    }
 
                     return true;
                 };
@@ -181,8 +182,8 @@
             return {
                 caregivers: [],
                 clients: [],
-                businesses: [],
-                business: null,
+                business_name: null,
+                business_id: null,
                 clientId: null,
                 caregiverId: null,
                 clientSummaryTotal: 0,
@@ -220,7 +221,7 @@
                         sortable: true,
                     },
                     {
-                        key: "business",
+                        key: "business_name",
                         label: "Business",
                         sortable: true,
                     },
@@ -270,8 +271,6 @@
         mounted() {
             this.loadClients();
             this.loadCaregivers();
-
-            console.table(this.invoices);
         }
     }
 </script>

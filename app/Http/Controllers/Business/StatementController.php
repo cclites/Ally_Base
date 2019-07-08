@@ -45,9 +45,10 @@ class StatementController extends BaseController
                 $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
             }
 
-            $clientType = $item->client["client_type"];
-            $item->client_type = ucfirst(str_replace("_", " ", $clientType));
-            $item->businesses = Business::where('id', $item->client["business_id"])->get();
+            $item->client_type = ucfirst(str_replace("_", " ", $item->client["client_type"]));
+            $item->business_name = Business::where('id', $item->client["business_id"])->pluck('name')->first();
+            $item->business_id = $item->client["business_id"];
+
         }
 
 
@@ -69,20 +70,12 @@ class StatementController extends BaseController
             return $invoice->items->reduce(function(Collection $collection, BusinessInvoiceItem $item) {
                 return $collection->push(DepositItemData::fromBusinessItem($item));
             }, $collection);
-        }, new Collection());
+        }, new Collection()) ;
 
         foreach($items as $item){
-
-            /*
-            $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
-            if(filled($payerId)){
-                $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
-            }
-            */
-
-            $clientType = $item->client["client_type"];
-            $item->client_type = ucfirst(str_replace("_", " ", $clientType));
-            $item->business = Business::where('id', $item->client["business_id"])->pluck('name')->first();
+            $item->client_type = ucfirst(str_replace("_", " ", $item->client["client_type"]));
+            $item->business_name = Business::where('id', $item->client["business_id"])->pluck('name')->first();
+            $item->business_id = $item->client["business_id"];
         }
 
         return view_component(
