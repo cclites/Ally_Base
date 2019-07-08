@@ -1,5 +1,5 @@
 <template>
-    <b-container fluid>
+    <b-card>
         <b-row>
             <b-col>
 
@@ -35,7 +35,7 @@
             </b-col>
             <b-col>
                 <business-location-form-group
-                        v-model="search.business_id"
+                        v-model="search.businesses"
                         :allow-all="true"
                         class="mb-2 mr-2"
                         :label="null"
@@ -79,12 +79,11 @@
             </b-row>
         </div>
 
-    </b-container>
+    </b-card>
 
 </template>
 
 <script>
-    import Form from "../classes/Form";
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from '../components/business/BusinessLocationSelect';
     import BusinessLocationFormGroup from '../components/business/BusinessLocationFormGroup';
@@ -140,7 +139,7 @@
                     start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().format('MM/DD/YYYY'),
                     caregiver_id: '',
-                    business_id: '',
+                    businesses: '',
                     status: '',
                     json: 1,
                 },
@@ -174,11 +173,13 @@
 
             reset() {
                 this.search = {
-                    start: '',
-                    end: '',
-                    caregiver_id: ''
+                    start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().format('MM/DD/YYYY'),
+                    caregiver_id: '',
+                    businesses: '',
+                    status: '',
                 };
-                this.fetchData();
+                this.items = [];
             },
 
             onFiltered(filteredItems) {
