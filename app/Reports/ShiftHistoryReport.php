@@ -159,9 +159,10 @@ class ShiftHistoryReport extends BusinessResourceReport
      * @param string|null $clientType
      * @param string|null $flagType
      * @param array|null $flags
+     * @param string|null $serviceId
      * @return ShiftHistoryReport
      */
-    public function applyFilters(string $startDate, string $endDate, ?string $importId, ?int $clientId, ?int $caregiverId, ?string $paymentMethod, ?string $status, ?string $confirmed, ?string $clientType, ?string $flagType, ?array $flags) : self
+    public function applyFilters(string $startDate, string $endDate, ?string $importId, ?int $clientId, ?int $caregiverId, ?string $paymentMethod, ?string $status, ?string $confirmed, ?string $clientType, ?string $flagType, ?array $flags, ?string $serviceId) : self
     {
         // Restrict businesses
         $this->query->forRequestedBusinesses();
@@ -242,6 +243,15 @@ class ShiftHistoryReport extends BusinessResourceReport
                     $this->query->whereFlagsIn($flags);
                 }
             }
+        }
+
+        if (filled($serviceId)) {
+            $this->query->where(function ($q) use ($serviceId) {
+                $q->where('service_id', $serviceId)
+                    ->orWhereHas('services', function ($q2) use ($serviceId) {
+                        $q2->where('service_id', $serviceId);
+                    });
+            });
         }
 
         return $this;

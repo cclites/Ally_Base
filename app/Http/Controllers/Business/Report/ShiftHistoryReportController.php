@@ -35,7 +35,8 @@ class ShiftHistoryReportController extends BaseController
                     $request->confirmed,
                     $request->client_type,
                     $request->flag_type,
-                    $request->flags
+                    $request->flags,
+                    $request->service_id
                 );
 
             if ($report->count() > 1000) {
