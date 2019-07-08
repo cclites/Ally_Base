@@ -181,6 +181,7 @@
                     business_id: this.value.business_id || "",
                     password: this.value.password || null,
                     password_confirmation: this.value.password_confirmation || null,
+                    business_id : this.value.business_id,
                 }),
             }
         },
