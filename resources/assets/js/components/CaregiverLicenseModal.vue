@@ -13,6 +13,15 @@
                             >
                         </chain-expirations-autocomplete>
                     </b-form-group>
+                    <b-form-group label="Select Default Expiration Type" label-for="expirations">
+                        <b-form-select
+                                name="expirations"
+                                id="expirations"
+                                v-model="expiration"
+                        >
+                            <option v-for="item in expirations" v-on:click.stop="updateSelectedType(item.type)" value="item.type">{{ item.type }}</option>
+                        </b-form-select>
+                    </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
                             id="description"
@@ -48,12 +57,14 @@
                 }
             },
             items: {},
-            //filterBy:'',
             caregiverId: {},
         },
         data() {
             return {
                 form: new Form(),
+                expirations: [],
+                selected: '',
+                expiration: '',
             }
         },
         computed: {
@@ -118,12 +129,19 @@
                 }
 
             },
-/*
-            filterType(){
-                this.filter=this.form.name;
-            }
 
- */
+            async fetchChainExpirations() {
+                await axios.get(`/business/expiration-types`)
+                    .then(({data}) => {
+                        this.expirations = data;
+                    })
+                    .catch(e => {
+                    });
+            },
+
+            async mounted() {
+                await this.fetchChainExpirations();
+            },
         },
 
         watch: {
