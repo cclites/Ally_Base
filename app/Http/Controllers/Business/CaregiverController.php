@@ -99,8 +99,12 @@ class CaregiverController extends BaseController
         try{
             $businessChain = $this->businessChain();
         }catch(\Exception $e){
-            $chainId = Business::where('id', $request->business_id)->pluck('chain_id')->first();
-            $businessChain = BusinessChain::where('id', $chainId)->first();
+            if (auth()->user()->role_type == 'admin') {
+                $chainId = Business::where('id', $request->business_id)->pluck('chain_id')->first();
+                $businessChain = BusinessChain::where('id', $chainId)->first();
+            } else {
+                throw $e;
+            }
         }
 
         // Look for duplicates
