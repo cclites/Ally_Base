@@ -45,8 +45,8 @@ class ApplicationSubmitted extends BaseNotification
      */
     public function __construct($application)
     {
+        parent::__construct();
         $this->application = $application;
-
         $this->url = route('business.caregivers.applications.show', ['application' => $this->application]);
     }
 

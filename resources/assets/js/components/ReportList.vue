@@ -290,7 +290,7 @@
                     },
                     {
                         name: 'Caregiver Expirations',
-                        url: 'reports/certification_expirations',
+                        url: 'reports/caregiver-expirations',
                         description: 'See a list of caregivers with an expiring certification or license',
                         category: 3,
                         allowed: ['office_user'],

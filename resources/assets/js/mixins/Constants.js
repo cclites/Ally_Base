@@ -20,6 +20,7 @@ export default {
                 { value: 'hawaiian', text: 'Native Hawaiian or Other Pacific Islander' },
                 { value: 'white', text: 'White or Caucasian' },
             ],
+            smsLength: 160,
             clientTypes: [
                 {value:'', text: "All Client Types"},
                 {value:'private_pay', text:'Private Pay'},

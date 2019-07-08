@@ -6,7 +6,7 @@
         >
         <div class="d-flex mb-2">
             <div class="ml-auto">
-                <b-button variant="primary" @click="acknowledgeAll()">Acknowledge All Notifications</b-button>
+                <b-button variant="primary" @click="acknowledgeAll()">Acknowledge All My Notifications</b-button>
             </div>
         </div>
         <div class="table-responsive">

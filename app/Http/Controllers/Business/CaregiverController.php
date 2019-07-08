@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Business;
 use App\Caregiver;
+use App\BusinessChain;
 use App\CaregiverApplication;
 use App\Billing\Deposit;
 use App\Http\Controllers\AddressController;
@@ -42,6 +43,7 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
+
         if ($request->expectsJson()) {
             $query = Caregiver::with('businesses')
                 ->forRequestedBusinesses()
@@ -93,7 +95,17 @@ class CaregiverController extends BaseController
     public function store(CreateCaregiverRequest $request, CreateCaregiver $action)
     {
         $data = $request->filtered();
-        // No authorization needed at this time, the caregiver is saved to the business chain.
+
+        try{
+            $businessChain = $this->businessChain();
+        }catch(\Exception $e){
+            if (auth()->user()->role_type == 'admin') {
+                $chainId = Business::where('id', $request->business_id)->pluck('chain_id')->first();
+                $businessChain = BusinessChain::where('id', $chainId)->first();
+            } else {
+                throw $e;
+            }
+        }
 
         // Look for duplicates
         if (!$request->override) {
@@ -105,7 +117,8 @@ class CaregiverController extends BaseController
             }
         }
 
-        if ($caregiver = $action->create($data, $this->businessChain())) {
+
+        if ($caregiver = $action->create($data, $businessChain)){
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id, 'url' => route('business.caregivers.show', [$caregiver->id])]);
         }
 

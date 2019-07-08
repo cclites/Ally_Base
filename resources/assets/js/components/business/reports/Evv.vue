@@ -17,6 +17,7 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
+                        <business-location-select v-model="business_id" :allow-all="true" :hideable="false" class=""></business-location-select>
                         <b-form-select
                                 id="caregiver_id"
                                 name="caregiver_id"
@@ -94,12 +95,15 @@
 <script>
     import FormatsDistance from "../../../mixins/FormatsDistance"
     import FormatsDates from '../../../mixins/FormatsDates'
+    import BusinessLocationSelect from "../BusinessLocationSelect";
 
     export default {
         mixins: [
             FormatsDistance,
             FormatsDates
         ],
+
+        components: { BusinessLocationSelect },
 
         data() {
             return {
@@ -210,7 +214,7 @@
             loadItems() {
                 this.loaded = 0;
                 let url = '/business/reports/evv?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&business_id=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
+                    '&businesses=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
                     '&method=' + this.filter_method + '&verified=' + this.filter_verified;
                 axios.get(url)
                     .then(response => {

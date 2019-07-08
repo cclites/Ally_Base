@@ -16,6 +16,7 @@ use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
+use App\BusinessCommunications;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -893,6 +894,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         }
 
         return true;
+    }
+
+    public function communicationSettings(){
+        return $this->hasOne(BusinessCommunications::class);
     }
 
     ////////////////////////////////////

@@ -100,28 +100,32 @@ class SalespersonCommissionReport extends BaseReport
      */
     protected function results(): iterable
     {
-        // Get all sales people for the requested businesses.
+
         $salesPeople = SalesPerson::select(['id', 'firstname', 'lastname'])
             ->whereIn('business_id', $this->businesses)
             ->get();
 
-        // Get the number of clients matching the salespersonId and date range filters.
-        $clients = Client::select(['sales_person_id', \DB::raw('COUNT(id) as client_count')])
-            ->forBusinesses($this->businesses)
-            ->whereIn('sales_person_id', $this->salespersonId ? [$this->salespersonId] : $salesPeople->pluck('id'))
-            ->whereHas('user', function ($q) {
-                $q->whereBetween('created_at', [$this->startDate, $this->endDate]);
-            })
-            ->groupBy('sales_person_id')
-            ->get();
+        $clientList = Client::forBusinesses($this->businesses)
+                    ->whereIn('sales_person_id', $this->salespersonId ? [$this->salespersonId] : $salesPeople->pluck('id'))
+                    ->whereHas('user', function ($q) {
+                        $q->whereBetween('created_at', [$this->startDate, $this->endDate]);
+                    })
+                    ->get();
 
-        // Combine the results.
-        return $salesPeople->map(function (SalesPerson $item) use ($clients) {
-            $count = $clients->where('sales_person_id', $item->id)->first()['client_count'];
+        return $salesPeople->map(function (SalesPerson $item) use ($clientList) {
+
+            $clients = $clientList->where('sales_person_id', $item->id)
+                        ->map(function(Client $client){
+                            return [
+                                'date'=>$client->created_at->format('m/d/Y'),
+                                'name'=>$client->name,
+                            ];
+                        });
             return [
                 'name' => $item->fullname(),
-                'clients' => empty($count) ? 0 : (int) $count,
+                'clients' => $clients,
+                'count'=>$clients->count()
             ];
-        });
+        })->values();
     }
 }

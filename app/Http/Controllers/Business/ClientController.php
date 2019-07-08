@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Business;
 
 use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\ClientInvoice;
 use App\Client;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
@@ -29,6 +31,7 @@ class ClientController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -208,7 +211,14 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id, false)->get();
+
+        $invoiceQuery = new ClientInvoiceQuery();
+        $invoices = $invoiceQuery->forClient($client->id, false)
+            ->get()
+            ->map(function (ClientInvoice $item) {
+                $item->payer = optional($item->clientPayer)->name();
+                return $item;
+            });
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()
@@ -259,8 +269,9 @@ class ClientController extends BaseController
     /**
      * Remove the specified client from the business.
      *
-     * @param  \App\Client  $client
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy(Client $client)
     {
@@ -295,6 +306,7 @@ class ClientController extends BaseController
      *
      * @param \App\Client $client
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function reactivate(Client $client)
     {
