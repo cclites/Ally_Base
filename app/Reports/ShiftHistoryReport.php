@@ -77,7 +77,7 @@ class ShiftHistoryReport extends BusinessResourceReport
     protected function results() : ?iterable
     {
         return $this->query->get()->map(function (Shift $shift) {
-            return new ShiftHistoryItemResource($shift);
+            return (new ShiftHistoryItemResource($shift))->toArray(null);
         })->sortBy('checked_in_time')
             ->values();
     }
