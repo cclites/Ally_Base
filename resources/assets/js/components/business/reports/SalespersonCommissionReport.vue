@@ -26,10 +26,10 @@
             </b-col>
             <b-col md="2">
                 <business-location-form-group
-                    v-model="filters.business"
-                    label="Office Location"
-                    :allow-all="true"
-            />
+                        v-model="filters.business"
+                        label="Office Location"
+                        :allow-all="true"
+                />
             </b-col>
             <b-col md="2">
                 <b-form-group label="Salesperson">
@@ -58,13 +58,37 @@
             <b-row>
                 <b-col>
                     <b-table
-                        class="sales-commission-table"
-                        :items="salespersons"
-                        :fields="fields"
-                        sort-by="name"
-                        empty-text="No Results"
-                        :busy="loading"
-                    />
+                            class="sales-commission-table"
+                            :items="salespersons"
+                            :fields="fields"
+                            sort-by="name"
+                            empty-text="No Results"
+                            :busy="loading"
+                    >
+                        <template slot="show_details" scope="row">
+                            <b-btn v-if="row.item.count > 0" @click.stop="row.toggleDetails" size="sm">
+                                Client Details
+                            </b-btn>
+                        </template>
+                        <template slot="row-details" scope="row">
+                            <div class="table-responsive">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="client in row.item.clients">
+                                        <td>{{ client.date }}</td>
+                                        <td>{{ client.name }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </b-table>
                 </b-col>
             </b-row>
         </div>
@@ -84,22 +108,21 @@
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsNumbers, FormatsDates, FormatsListData],
 
-        props: {
-        },
-
         data () {
             return {
                 filters: {
                     salesperson: '',
                     dates: {
-                        start: moment ().format ('MM/DD/YYYY'),
-                        end: moment ().add(30, 'day').format ('MM/DD/YYYY')
+                        start: moment ().subtract(30, 'day').format ('MM/DD/YYYY'),
+                        end: moment ().format ('MM/DD/YYYY')
                     },
                     business: '',
                 },
                 salespersons: [],
                 allSalespersons: [],
+                items: [],
                 stats: {},
+                row: '',
                 fields: [
                     {
                         key: 'name',
@@ -107,10 +130,11 @@
                         sortable: true,
                     },
                     {
-                        key: 'clients',
+                        key: 'count',
                         label: 'Total Number of Clients',
                         sortable: true,
                     },
+                    'show_details',
                 ],
                 loading: false,
             }

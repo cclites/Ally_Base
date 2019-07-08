@@ -9,12 +9,15 @@ use App\ClientAgreementStatusHistory;
 use App\Caregiver;
 use App\BusinessChain;
 
+use Log;
+
 class CreateCaregiver
 {
     const AUTO_EMAIL = "tmp";
 
     public function create(array $data, BusinessChain $chain): ?Caregiver
     {
+
         if (empty($data['email'])) {
             $data['email'] = self::AUTO_EMAIL;
         }
