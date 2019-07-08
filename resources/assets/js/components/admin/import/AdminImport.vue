@@ -317,11 +317,13 @@
             loadCreateClient(name)
             {
                 this.createClientName = name;
+                let business_id = this.getBusinessId();
                 this.createClientForm = new Form({
                     'firstname': name.split(',')[1],
                     'lastname': name.split(',')[0],
                     'no_email': 1,
                     'username': moment().unix(),
+                    'business_id': business_id
                 });
                 this.createClientModal = true;
             },
@@ -330,6 +332,7 @@
             {
                 this.createCaregiverName = name;
                 let password = _(12).range().map(_.partial(_.random, 33, 126, false)).map(_.ary(String.fromCharCode)).join('');
+                let business_id = this.getBusinessId();
                 this.createCaregiverForm = new Form({
                     'firstname': name.split(',')[1],
                     'lastname': name.split(',')[0],
@@ -337,6 +340,7 @@
                     'username': moment().unix(),
                     'password': password,
                     'password_confirmation': password,
+                    'business_id': business_id,
                 });
                 this.createCaregiverModal = true;
             },
