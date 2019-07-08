@@ -318,6 +318,7 @@
                     'Day',
                     'Time',
                     'Hours',
+                    'Services',
                     'Client',
                     'Caregiver',
                     'EVV',
@@ -335,7 +336,6 @@
                     'Type',
                     'Confirmed',
                     'Charged',
-                    'Services',
                 ];
 
                 return fields;
