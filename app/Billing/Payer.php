@@ -292,6 +292,6 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
      */
     public function getPlanCode() : ?string
     {
-        return $this->payer_code;
+        return $this->plan_code;
     }
 }

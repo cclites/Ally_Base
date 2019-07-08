@@ -9,6 +9,7 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Queries\OfflineClientInvoiceQuery;
 use App\Business;
+use App\Http\Resources\ShiftHistoryItemResource;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -34,6 +35,7 @@ class ShiftHistoryReport extends BusinessResourceReport
             'costHistory',
             'service',
             'services',
+            'services.service',
 
             // TODO: Need to clean this up.  This is all required to properly
             // get the rates, and we still have n+1 issues with
@@ -77,72 +79,9 @@ class ShiftHistoryReport extends BusinessResourceReport
     protected function results() : ?iterable
     {
         return $this->query->get()->map(function (Shift $shift) {
-            $hourlyRates = $shift->costs()->getHourlyRates();
-            $totalRates = $shift->costs()->getTotalRates();
-            return [
-                'id' => $shift->id,
-                'checked_in_time' => $shift->checked_in_time->format('c'),
-                'checked_out_time' => optional($shift->checked_out_time)->format('c'),
-                'hours' => $shift->duration(),
-                'client_id' => $shift->client_id,
-                'business_id' => $shift->business_id,
-                'client_name' => optional($shift->client)->nameLastFirst(),
-                'caregiver_id' => $shift->caregiver_id,
-                'caregiver_name' => optional($shift->caregiver)->nameLastFirst(),
-                'fixed_rates' => $shift->fixed_rates,
-                'caregiver_rate' => number_format($hourlyRates->caregiver_rate, 2),
-                'provider_fee' => number_format($hourlyRates->provider_fee, 2),
-                'ally_fee' => number_format($hourlyRates->ally_fee, 2),
-                'hourly_total' => number_format($hourlyRates->client_rate, 2),
-                'other_expenses' => number_format($shift->other_expenses, 2),
-                'mileage' => number_format($shift->mileage, 2),
-                'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
-                'caregiver_total' => number_format($totalRates->caregiver_rate, 2),
-                'provider_total' => number_format($totalRates->provider_fee, 2),
-                'ally_total' => number_format($totalRates->ally_fee, 2),
-                'ally_pct' => $shift->getAllyPercentage(),
-                'shift_total' => number_format($totalRates->client_rate, 2),
-                'hours_type' => $shift->hours_type,
-                'confirmed' => $shift->statusManager()->isConfirmed(),
-                'confirmed_at' => $shift->confirmed_at,
-                'client_confirmed' => $shift->client_confirmed,
-                'charged' => !($shift->statusManager()->isPending()),
-                'charged_at' => $shift->charged_at,
-                'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
-                // Send both verified and EVV for backwards compatibility
-                'verified' => $shift->verified,
-                'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
-                'flags' => $shift->flags,
-                'created_at' => optional($shift->created_at)->toDateTimeString(),
-                'services' => $this->mapServices($shift),
-            ];
+            return new ShiftHistoryItemResource($shift);
         })->sortBy('checked_in_time')
             ->values();
-    }
-
-    private function mapServices(Shift $shift) : ?iterable
-    {
-        if ($shift->service) {
-//            return [
-//                'id' => $shift->service->id,
-//                'code' => $shift->service->code,
-//                'name' => $shift->service->name,
-//                'duration' => $shift->duration,
-//            ];
-            return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->duration . ')'];
-        } else if ($shift->services->count()) {
-            return $shift->services->map(function (ShiftService $shiftService) {
-//                return [
-//                    'id' => $shiftService->service->id,
-//                    'code' => $shiftService->service->code,
-//                    'name' => $shiftService->service->name,
-//                    'duration' => $shiftService->duration,
-//                ];
-                return $shiftService->service->code . '-' . Str::limit($shiftService->service->name, 8) . '(' . $shiftService->duration . ')';
-            });
-        }
-
-        return null;
     }
 
     /**

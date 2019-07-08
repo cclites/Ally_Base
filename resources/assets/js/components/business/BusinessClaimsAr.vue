@@ -57,6 +57,13 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col>
+                <b-alert show variant="info">
+                    Once claims are submitted, you will need to follow up with the Payer or your Claims Portal for updates.
+                </b-alert>
+            </b-col>
+        </b-row>
         <b-row class="mb-2">
             <b-col lg="6">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -88,13 +95,13 @@
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn v-if="row.item.claim" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
-                    <b-btn v-if="!row.item.claim" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
+                    <b-btn v-if="!row.item.claim || row.item.claim.status == 'CREATED'" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
                         <span>Transmit Claim</span>
                     </b-btn>
+                    <b-btn v-if="row.item.claim && row.item.claim.status != 'CREATED'" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
                 </template>
             </b-table>
         </div>
@@ -178,7 +185,7 @@
                     <option value="-" disabled>Direct Transmission:</option>
                     <option :value="CLAIM_SERVICE.HHA">{{ serviceLabel(CLAIM_SERVICE.HHA) }}</option>
                     <option :value="CLAIM_SERVICE.TELLUS">{{ serviceLabel(CLAIM_SERVICE.TELLUS) }}</option>
-                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>
+<!--                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>-->
                     <option value="-" disabled>-</option>
                     <option value="-" disabled>Offline:</option>
                     <option :value="CLAIM_SERVICE.EMAIL">{{ serviceLabel(CLAIM_SERVICE.EMAIL) }}</option>
@@ -190,6 +197,21 @@
         <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
+
+        <b-modal id="missingFieldsModal"
+                 title="Missing Data Requirements"
+                 v-model="missingFieldsModal"
+                 no-close-on-backdrop
+                 size="lg"
+        >
+            <claims-missing-fields-form ref="missingFieldsForm" :invoice="selectedInvoice" @close="missingFieldsModal = false" />
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="missingFieldsModal = false" :disabled="$refs.missingFieldsForm ? $refs.missingFieldsForm.busy : false">Cancel</b-btn>
+                <b-btn variant="info" @click="$refs.missingFieldsForm.submit()" :disabled="$refs.missingFieldsForm ? $refs.missingFieldsForm.busy : false">Save Changes</b-btn>
+            </div>
+        </b-modal>
+
+        <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
 
@@ -198,9 +220,10 @@
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
     import Constants from '../../mixins/Constants';
+    import ClaimsMissingFieldsForm from "./ClaimsMissingFieldsForm";
 
     export default {
-        components: { BusinessLocationFormGroup },
+        components: { BusinessLocationFormGroup, ClaimsMissingFieldsForm },
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -236,16 +259,16 @@
                     },
                     {
                         key: 'amount',
-                        label: 'Inv Total',
+                        label: 'Claim Total',
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
-                    {
-                        key: 'balance',
-                        label: 'Invoice Balance',
-                        formatter: (val) => this.moneyFormat(val),
-                        sortable: true,
-                    },
+                    // {
+                    //     key: 'balance',
+                    //     label: 'Invoice Balance',
+                    //     formatter: (val) => this.moneyFormat(val),
+                    //     sortable: true,
+                    // },
                     {
                         key: 'claim_status',
                         formatter: (x) => _.capitalize(_.startCase(x)),
@@ -288,6 +311,7 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
+                missingFieldsModal: false,
             }
         },
 
@@ -305,6 +329,12 @@
         },
 
         methods: {
+            showMissingFieldsModal(errors, invoice) {
+                this.selectedInvoice = invoice;
+                this.$refs.missingFieldsForm.createForm(errors);
+                this.missingFieldsModal = true;
+            },
+
             serviceLabel(serviceValue) {
                 switch (serviceValue) {
                     case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
@@ -356,12 +386,22 @@
                 form.post(`/business/claims-ar/${invoice.id}/transmit`)
                     .then( ({ data }) => {
                         // success
+                        if (data.data.test_result) {
+                            // test mode
+                            this.$refs.open_test_link.href = data.data.test_result;
+                            this.$refs.open_test_link.click();
+                        }
                         let index = this.items.findIndex(x => x.id == invoice.id);
                         if (index >= 0) {
-                            this.items.splice(index, 1, data.data);
+                            this.items.splice(index, 1, data.data.claim);
                         }
                     })
-                    .catch(e => {})
+                    .catch(e => {
+                        if (e.response.status == 412) {
+                            // Required fields are missing.
+                            this.showMissingFieldsModal(e.response.data.data, invoice);
+                        }
+                    })
                     .finally(() => {
                         this.busy = false;
                         this.transmittingId = null;

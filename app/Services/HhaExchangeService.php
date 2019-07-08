@@ -46,9 +46,13 @@ class HhaExchangeService
         $this->username = $username;
         $this->password = $password;
 
+        if ($this->username == 'test') {
+            return;
+        }
+
         $this->sftp = app(SFTPWriterInterface::class, ['host' => config('services.hha-exchange.sftp_host'), 'port' => config('services.hha-exchange.sftp_port')]);
         if (! $this->login()) {
-            throw new \Exception('Unable to login to HHAeXchange SFTP server.');
+            throw new \Exception('Your HHA username and password was not accepted.  Please contact HHA and let them know you are unable to login to their SFTP server.');
         }
     }
 
