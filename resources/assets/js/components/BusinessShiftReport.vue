@@ -7,10 +7,12 @@
                         <b-col xl="4" lg="6">
                             <b-form-group label="Date Range" class="form-inline">
                                 <date-picker ref="startDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.start_date"
                                              placeholder="Start Date">
                                 </date-picker> &nbsp;to&nbsp;
                                 <date-picker ref="endDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.end_date"
                                              placeholder="End Date">
                                 </date-picker>
@@ -375,7 +377,7 @@
                         'status': item.status,
                         'business_id': item.business_id,
                         '_rowVariant': this.getRowVariant(item),
-                    }
+                    };
                 });
                 items.push({
                     '_rowVariant': 'info',
@@ -461,11 +463,11 @@
 
             reloadShift(id) {
                 console.log(`Reloading shift #${id}`);
-                axios.get(`${this.urlPrefix}shift/${id}`)
+                axios.get(this.urlPrefix + `shifts/reload/${id}`)
                     .then( ({ data }) => {
                         let index = this.items.shifts.findIndex(x => x.id === id);
                         if (index >= 0) {
-                            this.items.shifts.splice(index, 1, data)
+                            this.items.shifts.splice(index, 1, data.data);
                         } else {
                             console.log(`Could not reload shift #${id}`, data);
                         }
