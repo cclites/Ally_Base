@@ -7,10 +7,12 @@
                         <b-col xl="4" lg="6">
                             <b-form-group label="Date Range" class="form-inline">
                                 <date-picker ref="startDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.start_date"
                                              placeholder="Start Date">
                                 </date-picker> &nbsp;to&nbsp;
                                 <date-picker ref="endDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.end_date"
                                              placeholder="End Date">
                                 </date-picker>
