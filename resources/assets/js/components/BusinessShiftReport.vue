@@ -320,6 +320,7 @@
                     'Type',
                     'Confirmed',
                     'Charged',
+                    'Services',
                 ];
 
                 return fields;
@@ -372,6 +373,7 @@
                         'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
+                        'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
                         '_rowVariant': this.getRowVariant(item),

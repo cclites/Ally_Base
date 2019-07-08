@@ -3,6 +3,7 @@
 namespace App\Reports;
 
 use App\Billing\GatewayTransaction;
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
@@ -10,6 +11,7 @@ use App\Billing\Queries\OfflineClientInvoiceQuery;
 use App\Business;
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ShiftHistoryReport extends BusinessResourceReport
 {
@@ -112,9 +114,35 @@ class ShiftHistoryReport extends BusinessResourceReport
                 'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
                 'flags' => $shift->flags,
                 'created_at' => optional($shift->created_at)->toDateTimeString(),
+                'services' => $this->mapServices($shift),
             ];
         })->sortBy('checked_in_time')
             ->values();
+    }
+
+    private function mapServices(Shift $shift) : ?iterable
+    {
+        if ($shift->service) {
+//            return [
+//                'id' => $shift->service->id,
+//                'code' => $shift->service->code,
+//                'name' => $shift->service->name,
+//                'duration' => $shift->duration,
+//            ];
+            return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->duration . ')'];
+        } else if ($shift->services->count()) {
+            return $shift->services->map(function (ShiftService $shiftService) {
+//                return [
+//                    'id' => $shiftService->service->id,
+//                    'code' => $shiftService->service->code,
+//                    'name' => $shiftService->service->name,
+//                    'duration' => $shiftService->duration,
+//                ];
+                return $shiftService->service->code . '-' . Str::limit($shiftService->service->name, 8) . '(' . $shiftService->duration . ')';
+            });
+        }
+
+        return null;
     }
 
     /**
