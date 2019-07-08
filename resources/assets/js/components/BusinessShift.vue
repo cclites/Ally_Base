@@ -955,6 +955,7 @@
                     form.post('/business/shifts/' + this.shift.id + '/unconfirm')
                         .then(response => {
                             this.status = response.data.data.status;
+                            this.$emit('shift-updated', this.shift.id);
                         });
                 }
             },

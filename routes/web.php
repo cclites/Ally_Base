@@ -290,6 +290,7 @@ Route::group([
     //Route::post('reports/overtime', 'Business\ReportsController@overtimeData')->name('reports.overtime_data');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
     Route::get('reports/shifts', 'Business\Report\ShiftHistoryReportController@index')->name('reports.shifts');
+    Route::get('reports/shifts/reload/{shift}', 'Business\Report\ShiftHistoryReportController@reloadShift')->name('reports.shifts.reload');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');

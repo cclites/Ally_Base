@@ -377,7 +377,7 @@
                         'status': item.status,
                         'business_id': item.business_id,
                         '_rowVariant': this.getRowVariant(item),
-                    }
+                    };
                 });
                 items.push({
                     '_rowVariant': 'info',
@@ -463,11 +463,11 @@
 
             reloadShift(id) {
                 console.log(`Reloading shift #${id}`);
-                axios.get(`${this.urlPrefix}shift/${id}`)
+                axios.get(this.urlPrefix + `shifts/reload/${id}`)
                     .then( ({ data }) => {
                         let index = this.items.shifts.findIndex(x => x.id === id);
                         if (index >= 0) {
-                            this.items.shifts.splice(index, 1, data)
+                            this.items.shifts.splice(index, 1, data.data);
                         } else {
                             console.log(`Could not reload shift #${id}`, data);
                         }
