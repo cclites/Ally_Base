@@ -20,7 +20,6 @@ use App\Billing\View\Pdf\PdfPaymentView;
 use App\Business;
 use Illuminate\Support\Collection;
 
-use Log;
 class StatementController extends BaseController
 {
     public function itemizePayment(Payment $payment)
@@ -48,7 +47,6 @@ class StatementController extends BaseController
             $item->client_type = ucfirst(str_replace("_", " ", $item->client["client_type"]));
             $item->business_name = Business::where('id', $item->client["business_id"])->pluck('name')->first();
             $item->business_id = $item->client["business_id"];
-
         }
 
 
@@ -66,6 +64,7 @@ class StatementController extends BaseController
             'items',
             'items.invoiceable',
         ])->get();
+
         $items = $invoices->reduce(function(Collection $collection, BusinessInvoice $invoice) {
             return $invoice->items->reduce(function(Collection $collection, BusinessInvoiceItem $item) {
                 return $collection->push(DepositItemData::fromBusinessItem($item));

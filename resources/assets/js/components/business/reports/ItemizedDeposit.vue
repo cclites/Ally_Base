@@ -265,13 +265,6 @@
                         label: "Business",
                         sortable: true,
                     },
-                    /*
-                    {
-                        key: "payer",
-                        label: "Payer",
-                        sortable: true,
-                    },
-                     */
                     {
                         key: "name",
                         label: "Service Name",
