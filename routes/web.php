@@ -355,6 +355,8 @@ Route::group([
     Route::get('reports/account-setup', 'Business\Report\BusinessAccountSetupReportController@index')->name('reports.account-setup');
     Route::get('reports/service-auth-ending', 'Business\Report\BusinessServiceAuthEndingReport@index')->name('reports.service-auth-ending');
     Route::get('reports/service-auth-ending/clients', 'Business\Report\BusinessServiceAuthEndingReport@clients')->name('reports.service-auth-ending.clients');
+    Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReport@index')->name('reports.service-auth-usage');
+    Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReport@clients')->name('reports.service-auth-usage.clients');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
