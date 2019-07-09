@@ -133,7 +133,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $shift->caregiver->lastname, //    "Caregiver Last Name",
             $shift->caregiver->gender ? strtoupper($shift->caregiver->gender) : '', //    "Caregiver Gender",
             $shift->caregiver->date_of_birth ?? '', //    "Caregiver Date of Birth",
-            $shift->caregiver->ssn, //    "Caregiver SSN",
+            $this->cleanSsn($shift->caregiver->ssn), //    "Caregiver SSN",
             $shift->id, //    "Schedule ID",
             optional($shift->service)->code, //    "Procedure Code",
             $shift->checked_in_time->setTimezone($shift->getTimezone())->format($this->timeFormat), //    "Schedule Start Time",
@@ -294,5 +294,28 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         });
 
         return implode('|', $duties->toArray());
+    }
+
+    /**
+     * Format the SSN.
+     *
+     * @param string|null $ssn
+     * @return string
+     */
+    private function cleanSsn(?string $ssn) : string
+    {
+        if (empty($ssn)) {
+            return null;
+        }
+
+        if (strpos($ssn, '-') >= 0) {
+            $ssn = str_replace('-', '', $ssn);
+        }
+
+        if (strpos($ssn, '*') >= 0) {
+            $ssn = str_replace('*', '0', $ssn);
+        }
+
+        return $ssn;
     }
 }
