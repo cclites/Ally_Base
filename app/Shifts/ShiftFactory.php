@@ -234,8 +234,10 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
+            // If there is no general rate but there is a fixed rate, always used fixed.
+            // If there are no fixed rates either, just default to 0 not fixed.
             if ($rates->caregiver_rate == 0 && $rates->client_rate == 0) {
-                $rates = $rateFactory->findMatchingRate(
+                $fixedRates = $rateFactory->findMatchingRate(
                     $client,
                     $effectiveDate,
                     true,
@@ -243,6 +245,9 @@ class ShiftFactory implements Arrayable
                     $payerId,
                     $caregiverId
                 );
+                if ($fixedRates->caregiver_rate > 0 && $fixedRates->client_rate > 0) {
+                    $rates = $fixedRates;
+                }
             }
 
             if ($scheduledRates) {
