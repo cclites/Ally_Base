@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Support\Str;
 
 class ShiftHistoryItemResource extends Resource
 {
@@ -56,6 +58,26 @@ class ShiftHistoryItemResource extends Resource
             'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
             'flags' => $shift->flags,
             'created_at' => optional($shift->created_at)->toDateTimeString(),
+            'services' => $this->mapServices($shift),
         ];
+    }
+
+    /**
+     * Map shift services into string values.
+     *
+     * @param Shift $shift
+     * @return iterable|null
+     */
+    private function mapServices(Shift $shift) : ?iterable
+    {
+        if ($shift->service) {
+            return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->duration . ')'];
+        } else if ($shift->services->count()) {
+            return $shift->services->map(function (ShiftService $shiftService) {
+                return $shiftService->service->code . '-' . Str::limit($shiftService->service->name, 8) . '(' . $shiftService->duration . ')';
+            });
+        }
+
+        return null;
     }
 }
