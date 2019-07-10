@@ -53,6 +53,11 @@
                         <option :value="null">All Caregivers</option>
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
+                    <business-location-form-group
+                            v-model="business_name"
+                            :allow-all="true"
+                            :label="null"
+                    />
                 </b-form>
             </b-col>
             <b-col lg="4" class="text-right">
@@ -77,11 +82,14 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import BusinessLocationSelect from '../../../components/business/BusinessLocationSelect';
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
 
     export default {
         name: "ItemizedPayment",
 
         mixins: [FormatsNumbers, FormatsDates],
+        components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         props: {
             payment: {
@@ -101,6 +109,9 @@
         computed: {
             filteredItems() {
                 let filterFn = (item) => {
+                    if (this.business_name && (parseInt(this.business_name) !== parseInt(item.business_id))) {
+                        return false;
+                    }
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
@@ -110,6 +121,7 @@
                     if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
                         return false;
                     }
+
                     return true;
                 };
 
@@ -168,6 +180,8 @@
             return {
                 caregivers: [],
                 clients: [],
+                business_name: null,
+                business_id: null,
                 clientId: null,
                 caregiverId: null,
                 clientSummaryTotal: 0,
@@ -192,6 +206,21 @@
                     {
                         key: "caregiver_name",
                         label: "Caregiver",
+                        sortable: true,
+                    },
+                    {
+                        key: "client_type",
+                        label: "Client Type",
+                        sortable: true,
+                    },
+                    {
+                        key: "payer",
+                        label: "Payer",
+                        sortable: true,
+                    },
+                    {
+                        key: "business_name",
+                        label: "Business",
                         sortable: true,
                     },
                     {
