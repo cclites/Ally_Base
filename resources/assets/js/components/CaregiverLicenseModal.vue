@@ -3,23 +3,32 @@
         <b-container fluid>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Expiration Type" label-for="type">
-                        <chain-expirations-autocomplete
-                            id="type"
-                            name="type"
-                            :caregiverId="this.caregiverId"
-                            :selectedItem="this.selectedItem"
-                            @updateSelectedType="updateSelectedType"
-                            >
-                        </chain-expirations-autocomplete>
+                    <b-form-group label="Select Expiration Type" label-for="expirations">
+                        <b-form-select
+                                name="expirations"
+                                id="expirations"
+                                v-model="expiration"
+                        >
+                            <option value="">-- Use Custom Name --</option>
+                            <option v-for="item in expirations" :value="item.type">{{ item.type }}</option>
+                        </b-form-select>
+                    </b-form-group>
+                    <b-form-group label="Name" label-for="selectedType">
+                        <b-form-input
+                                id="selectedType"
+                                name="selectedType"
+                                v-model="form.name"
+                                :disabled="expiration != ''"
+                        >
+                        </b-form-input>
                     </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
-                            id="description"
-                            name="description"
-                            :rows="2"
-                            v-model="form.description"
-                            >
+                                id="description"
+                                name="description"
+                                :rows="2"
+                                v-model="form.description"
+                        >
                         </b-textarea>
                         <input-help :form="form" field="description" text="Enter an optional description or notes"></input-help>
                     </b-form-group>
@@ -48,20 +57,33 @@
                 }
             },
             items: {},
-            //filterBy:'',
             caregiverId: {},
         },
         data() {
             return {
-                form: new Form(),
+                form : new Form({
+                    name: '',
+                    description: '',
+                    expires_at: '',
+                    business_id: (this.officeUserSettings) ? this.officeUserSettings.default_business_id : '',
+                }),
+                expirations: [],
+                selected: '',
+                expiration: '',
             }
         },
         computed: {
             showModal: {
                 get() {
+                    this.form.name = (this.selectedItem) ? this.selectedItem.name : '';
+                    this.form.description = (this.selectedItem) ? this.selectedItem.description : '';
+                    this.form.expires_at =  (this.selectedItem) ? this.selectedItem.expires_at : '';
+
                     return this.value;
                 },
                 set(value) {
+
+                    console.log("Setting modal");
                     this.$emit('input', value);
                 }
             },
@@ -71,15 +93,6 @@
         },
 
         methods: {
-            makeForm() {
-                this.form = new Form({
-                    name: (this.selectedItem) ? this.selectedItem.name : '',
-                    description: (this.selectedItem) ? this.selectedItem.description : '',
-                    expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
-                    business_id: this.officeUserSettings.default_business_id,
-                });
-            },
-
             save() {
                 let method = 'post';
                 let url = '/business/caregivers/' + this.caregiverId + '/licenses';
@@ -90,7 +103,6 @@
 
                 this.form.submit(method, url)
                     .then(response => {
-
                         // Push the newly created item without mutating the prop, requires the sync modifier
                         let newItems = this.items;
 
@@ -104,32 +116,31 @@
                         this.$emit('update:items', newItems);
                         this.$parent.$forceUpdate();
 
+                        this.form.reset();
+                        this.expiration = '';
                         this.showModal = false;
+                    })
+                    .catch(() => {});
+            },
+
+            async fetchChainExpirations() {
+                await axios.get(`/business/expiration-types`)
+                    .then(({data}) => {
+                        this.expirations = data;
+                    })
+                    .catch(e => {
                     });
             },
+        },
 
-            updateBusinessId(){
-                let businessId = this.officeUserSettings.default_business_id;
-            },
-
-            updateSelectedType(type){
-                if(type){
-                    this.form.name=type;
-                }
-
-            },
-/*
-            filterType(){
-                this.filter=this.form.name;
-            }
-
- */
+        async mounted() {
+            await this.fetchChainExpirations();
         },
 
         watch: {
-            selectedItem() {
-                this.makeForm();
-            },
+            expiration(newVal, oldVal) {
+                this.form.name = newVal;
+            }
         },
     }
 </script>

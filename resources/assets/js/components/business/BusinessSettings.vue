@@ -494,7 +494,7 @@
                 <b-tab title="Expirations" href="#expirations">
                     <b-row>
                         <b-col lg="6">
-                            <h3>Add/Remove default expiration types</h3>
+                            <h3>Add/Remove default Caregiver Expiration</h3>
                             <default-expirations-manager></default-expirations-manager>
                         </b-col>
                     </b-row>
