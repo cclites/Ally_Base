@@ -11,6 +11,7 @@ use App\Billing\Payer;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Shift;
 use Carbon\Carbon;
+use http\Client;
 use Illuminate\Support\Collection;
 
 use Log;
@@ -78,72 +79,52 @@ class ThirdPartyPayerReport extends BaseReport
      */
     protected function results() : ?iterable
     {
-        $invoices = $this->query
-                    ->with(['client', 'payments'])
+        return $this->query
+                    ->with(['client'])
                     ->take(1)
                     ->get()
+                    ->map(function (ClientInvoice $invoice){
+
+                        $items = $invoice->getItems();
+
+                        $client_name = $invoice->client->nameLastFirst;
+                        $hic = $invoice->client->hic;
+                        $dob = $invoice->client->user->date_of_birth;
+                        $payer = $invoice->clientPayer->payer_name;
+
+
+                        return $items->map(function(ClientInvoiceItem $item) use($client_name, $hic, $dob, $payer)
+                        {
+                            $shift = $item->getShift();
+                            $caregiver = $shift->caregiver->name;
+
+                            //Log::info("SHIFT");
+                            //Log::info(json_encode($shift));
+                            //Log::info("\n");
+
+                            return [
+                                'client_name' => $client_name,
+                                'hic' => (filled($hic) ? $ $hic : "-"),
+                                'dob' => $dob,
+                                'caregiver' => $caregiver,
+                                'payer' => $payer,
+                                'date' => $item->date,
+                                'expiration_date' => (new Carbon( $item->date))->format('m/d/y'),
+                                'units' => $item->units,
+                                'rate' => $item->rate,
+                                'billable' => $item->amount_due,
+                                'start' => (new Carbon( $shift->checked_in_time ))->format('m/d/Y'),
+                                'end' => (new Carbon( $shift->checked_out_time ))->format('m/d/Y'),
+                                'hours' => $shift->hours,
+                            ];
+
+                        });
+
+
+
+                    })
                     ->values();
 
-        foreach ($invoices as $invoice){
 
-            //$items = $invoice->items;
-
-            $payer = $invoice->clientPayer;
-
-            //Log:info(json_encode($payer));
-
-            Log::info($payer->payer_name);
-
-            //foreach ($items as $item){
-
-
-
-                /*
-                $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
-
-                if(filled($payerId)){
-                    $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
-                }
-
-                //$s = print_r($shift, true);
-                //Log::info($s);
-
-                Log::info(json_encode($item->payer));
-                Log::info("\n");
-                */
-            //}
-
-
-            //Log::info(json_encode($shifts));
-            //Log::info("\n");
-
-            //$client = $invoice->client;
-            //$clientPayer = $invoice->getClientPayer();
-            //$business = $client->business;
-            //$payments = $invoice->payments;
-
-
-
-            /*
-            Log::info(json_encode($items->getShiftServices()));
-            Log::info("\n");
-            */
-
-            //$invoiceableServices = $this->getInvoicedServicesQuery($invoice);
-
-            //Log::info(json_encode($invoiceableServices));
-            //Log::info("\n");
-
-            //$invoiceableShifts = $this->getInvoicedShiftsQuery($invoice);
-            //Log::info(json_encode($invoiceableShifts));
-            //Log::info("\n");
-
-        }
-
-        return $invoices;
     }
-
-
-
-
 }

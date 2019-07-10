@@ -162,7 +162,7 @@
                     { key: 'client_name', label: 'Client', sortable: true, },
                     { key: 'hic', label: 'HIC#', sortable: true, },
                     { key: 'dob', label: 'Client DOB', sortable: true, },
-                    { key: 'caregiver_name', label: 'Caregiver', sortable: true, },
+                    { key: 'caregiver', label: 'Caregiver', sortable: true, },
                     { key: 'payer', label: 'Payer', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
@@ -175,7 +175,7 @@
                     { key: 'evv', label: 'EVV', sortable: true },
                     { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
-                items: [],
+                items: null,
                 item:'',
                 hasRun: false,
                 businesses: [],
@@ -187,6 +187,9 @@
                 this.busy = true;
                 this.form.get('/business/reports/third-party-payer')
                     .then( ({ data }) => {
+
+                        console.table(data);
+
                         this.items = data;
                         this.totalRows = this.items.length;
                     })

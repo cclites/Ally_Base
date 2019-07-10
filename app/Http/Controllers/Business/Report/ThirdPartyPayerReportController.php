@@ -41,15 +41,9 @@ class ThirdPartyPayerReportController extends Controller
                     $request->payer
                 );
 
-            $items = $report->rows();
+            $results = $report->rows();
 
-            foreach($items as $item){
-                //Log::info(json_encode($item));
-                //Log::info("\n");
-            }
-
-            return response()->json($items);
-
+            return response()->json($results[0]);
         }
 
         $clients = new ClientDropdownResource(Client::forRequestedBusinesses()->active()->get());
