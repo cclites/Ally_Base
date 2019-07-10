@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Caregiver;
 use App\Client;
+use App\Billing\Payer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CaregiverDropdownResource;
-use App\Http\Resources\ClientDropdown;
 use App\Http\Resources\ClientDropdownResource;
+use App\Http\Resources\PayersDropdownResource;
 use App\Reports\MedicaidBillingReport;
 use App\Reports\ThirdPartyPayerReport;
 use Illuminate\Http\Request;
@@ -24,16 +25,25 @@ class ThirdPartyPayerReportController extends Controller
     public function index(Request $request, ThirdPartyPayerReport $report)
     {
         if ($request->filled('json')) {
-            $report = $report->forDates($request->start, $request->end, auth()->user()->role->getTimezone())
-                ->forClientType($request->client_type)
-                ->forClient($request->client)
-                ->forCaregiver($request->caregiver);
+
+
+            $timezone = auth()->user()->role->getTimezone();
+
+            $report->setTimezone($timezone)
+                ->applyFilters(
+                    $request->start,
+                    $request->end,
+                    $request->caregiver_id,
+                    $request->status
+                );
 
             return response()->json($report->rows());
+
         }
 
         $clients = new ClientDropdownResource(Client::forRequestedBusinesses()->active()->get());
         $caregivers = new CaregiverDropdownResource(Caregiver::forRequestedBusinesses()->active()->get());
+        $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->get());
 
         return view_component(
             'business-medicaid-billing-report',
