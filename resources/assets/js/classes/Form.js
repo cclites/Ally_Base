@@ -19,6 +19,7 @@ class Form {
         this.alertOnSucess = true;
         this.errorMods = 0;
         this.hideErrors = [];
+        this.busy = false;
     }
 
     disableRedirects() {
@@ -140,12 +141,14 @@ class Form {
      *
      * @param {string} method
      * @param {string} url
+     * @param multipart
      */
     submit(method, url, multipart = false) {
-        method = method.toLowerCase();
+        this.busy = true;
+        const verb = method.toLowerCase();
         let Form = this;
         return new Promise((resolve, reject) => {
-            axios[method](url, this.data(multipart))
+            axios[verb](url, this.data(multipart))
                 .then(response => {
                     console.log('Axios success');
                     this.handler = new AxiosResponseHandler();
@@ -158,6 +161,9 @@ class Form {
                     this.handler = new AxiosResponseHandler();
                     this.handler.handleError(error, this.alertFromResponse, this.hideErrors);
                     reject(error);
+                })
+                .finally(() => {
+                    this.busy = false;
                 });
         });
     }

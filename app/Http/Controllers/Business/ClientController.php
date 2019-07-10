@@ -371,6 +371,8 @@ class ClientController extends BaseController
             'ltci_fax',
             'medicaid_id',
             'medicaid_diagnosis_codes',
+            'medicaid_payer_id',
+            'medicaid_plan_id',
             'max_weekly_hours'
         ]);
 

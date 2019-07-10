@@ -9,24 +9,31 @@
             </b-col>
         </b-row>
         <b-row>
-            <b-col md="3">
+            <b-col md="2">
+                <business-location-form-group
+                    v-model="form.businesses"
+                    label="For Office Location"
+                    :allow-all="true"
+                    :disabled="loading"
+                />
+            </b-col>
+            <b-col md="4">
                 <b-row>
                     <b-col>
                         <b-form-group label="Start Date">
-                            <date-picker v-model="filters.dates.start" name="start_date"
-                                         @input="filterDates($event, 'start')"></date-picker>
+                            <date-picker v-model="form.start_date" :disabled="loading" />
                         </b-form-group>
                     </b-col>
                     <b-col>
                         <b-form-group label="End Date">
-                            <date-picker :value="filters.dates.end" name="end_date" @input="filterDates($event, 'end')"></date-picker>
+                            <date-picker v-model="form.end_date" :disabled="loading" />
                         </b-form-group>
                     </b-col>
                 </b-row>
             </b-col>
             <b-col md="2">
                 <b-form-group label="Client">
-                    <b-form-select v-model="filters.client" @change="filterItems($event, 'client')">
+                    <b-form-select v-model="form.client" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in clientOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
@@ -34,7 +41,7 @@
             </b-col>
             <b-col md="2">
                 <b-form-group label="Client Type">
-                    <b-form-select v-model="filters.clientType" @change="filterItems($event, 'clientType')">
+                    <b-form-select v-model="form.client_type" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in clientTypeOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
@@ -42,27 +49,26 @@
             </b-col>
             <b-col md="2">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="filters.caregiver" @change="filterItems($event, 'caregiver')">
+                    <b-form-select v-model="form.caregiver" :disabled="loadingFilters || loading">
                         <option value="">All</option>
                         <option v-for="item in caregiverOptions" :value="item.id">{{ item.name }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col md="2">
-                <b-form-group label="&nbsp;">
-                    <b-button-group>
-                        <b-button @click="generatePdf()"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                        <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
-                    </b-button-group>
-                </b-form-group>
+        </b-row>
+        <b-row>
+            <b-col class="mb-3">
+                <b-button-group>
+                    <b-button @click="fetch()" variant="info" class="mr-2" :disabled="loading"><i class="fa mr-1"></i>Generate Report</b-button>
+                    <b-button @click="print()" :disabled="loading"><i class="fa fa-print mr-1"></i>Print</b-button>
+                </b-button-group>
             </b-col>
         </b-row>
-        <div class="d-flex justify-content-center" v-if="loading">
-            <div class="my-5">
-                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-            </div>
+        <loading-card v-if="loading" text="Loading Report"></loading-card>
+        <div v-else-if="! loading && ! hasRun" class="text-center m-4 text-muted">
+            Select filters and press Generate Report
         </div>
-        <div id="projected_billing_report" v-else>
+        <div v-else id="projected_billing_report">
             <b-row>
                 <b-col>
                     <div class="h4 my-3">Total hours scheduled: {{ numberFormat(stats.total_hours) }}</div>
@@ -90,35 +96,26 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     export default {
-        props: {
-            clientOptions: {
-                type: Array,
-                required: true
-            },
-            clientTypeOptions: {
-                type: Array,
-                required: true,
-            },
-            caregiverOptions: {
-                type: Array,
-                required: true
-            }
-        },
-
         mixins: [FormatsNumbers],
+        components: { BusinessLocationFormGroup },
 
         data () {
             return {
-                filters: {
+                clientOptions: [],
+                clientTypeOptions: [],
+                caregiverOptions: [],
+                loadingFilters: false,
+                form: new Form({
+                    json: 1,
+                    businesses: '',
                     caregiver: '',
                     client: '',
-                    clientType: '',
-                    dates: {
-                        start: moment ().format ('MM/DD/YYYY'),
-                        end: moment ().add(30, 'day').format ('MM/DD/YYYY')
-                    },
-                },
+                    client_type: '',
+                    start_date: '',
+                    end_date: '',
+                }),
                 clientStats: [],
                 clientTypeStats: [],
                 stats: {},
@@ -135,67 +132,64 @@
                     {
                         key: 'projected_billing',
                         formatter: (val) => this.moneyFormat(val)
-
                     }
                 ],
-                typeFields: [
-                    {
-                        key: 'name',
-                        label: 'Name',
-                        formatter: (val) => _.startCase(val)
-                    },
-                    {
-                        key: 'projected_billing',
-                        formatter: (val) => this.moneyFormat(val)
-                    }
-                ],
-                loading: false
+                loading: false,
+                hasRun: false,
             }
         },
 
-        created () {
-            this.fetchData()
-        },
-
         methods: {
-            filterDates(value, key) {
-                this.filters.dates[key] = value;
-                this.fetchData()
+            async fetchOptions() {
+                this.loadingFilters = true;
+                await axios.get(`/business/reports/projected-billing/filters?businesses=${this.form.businesses}`)
+                    .then( ({ data }) => {
+                        this.caregiverOptions = data.caregivers;
+                        this.clientOptions = data.clients;
+                        this.clientTypeOptions = data.clientTypes;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loadingFilters = false;
+                    })
             },
 
-            filterItems(value, key) {
-                this.filters[key] = value;
-                this.fetchData();
-            },
-
-            async fetchData() {
+            async fetch() {
                 this.loading = true;
-                let form = new Form(this.filters);
-                let response = await form.post('/business/reports/projected-billing').catch(err => console.error(err))
-                this.stats = response.data.stats;
-                this.clientStats = response.data.clientStats;
-                this.clientTypeStats = response.data.clientTypeStats;
-                this.loading = false;
+                this.form.get('/business/reports/projected-billing')
+                    .then( ({ data }) => {
+                        this.stats = data.totals;
+                        this.clientStats = data.clients;
+                        this.clientTypeStats = data.client_type_totals;
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.loading = false;
+                        this.hasRun = true;
+                    });
             },
 
             startCase(text) {
                 return _.startCase(text)
             },
 
-            generatePdf() {
-                this.filters.print = true;
-                let url = `/business/reports/projected-billing/print?dates[start]=${this.filters.dates.start}` +
-                    `&dates[end]=${this.filters.dates.end}` +
-                    `&caregiver=${this.filters.caregiver}` +
-                    `&client=${this.filters.client}` +
-                    `&clientType=${this.filters.clientType}`;
-                console.log(url);
-                window.location = url;
-            },
-
             print() {
                 $('#projected_billing_report').print();
+            },
+        },
+
+        async mounted() {
+            this.form.start_date = moment().format('MM/DD/YYYY');
+            this.form.end_date = moment().add(30, 'day').format('MM/DD/YYYY');
+            await this.fetchOptions();
+        },
+
+        watch: {
+            async 'form.businesses'(newValue, oldValue) {
+                if (newValue != oldValue) {
+                    await this.fetchOptions();
+                }
             }
-        }
+        },
     }
 </script>

@@ -37,6 +37,11 @@
                 <span v-if="row.item.Charged" v-tooltip:left="formatDateTimeFromUTC(row.item.charged_at)">Yes</span>
                 <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>
             </template>
+            <template slot="Services" scope="row">
+                <div v-for="service in row.item.Services" :key="service">
+                    {{ service }}
+                </div>
+            </template>
             <template slot="actions" scope="row">
                 <slot name="actions" :item="row.item"></slot>
             </template>
