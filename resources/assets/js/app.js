@@ -229,6 +229,8 @@ Vue.component('business-offline-ar-aging-report', require('./components/business
 Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 Vue.component('sales-people-commission-report', require('./components/business/reports/SalespersonCommissionReport'));
 Vue.component('business-account-setup-report', require('./components/business/reports/BusinessAccountSetupReport'));
+Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
+Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
 
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
@@ -362,7 +364,6 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
-Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ExpirationTypesAutocomplete"));
 Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
 
 Vue.filter('date', value => {

@@ -35,7 +35,7 @@
                         </b-select>
                         <input-help :form="form" field="payment_method_type"></input-help>
                     </b-form-group>
-                    <b-form-group label="MCO / Payer Identifier" label-for="payer_code">
+                    <b-form-group :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-for="payer_code">
                         <b-form-input type="text" v-model="form.payer_code" />
                         <input-help :form="form" field="payer_code" text=""></input-help>
                     </b-form-group>
@@ -58,7 +58,7 @@
                             <option value="-" disabled>Direct Transmission:</option>
                             <option :value="CLAIM_SERVICE.HHA">HHAeXchange</option>
                             <option :value="CLAIM_SERVICE.TELLUS">Tellus</option>
-                            <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>
+<!--                            <option :value="CLAIM_SERVICE.CLEARINGHOUSE">CareExchange LTC Clearinghouse</option>-->
                             <option value="-" disabled>-</option>
                             <option value="-" disabled>Offline:</option>
                             <option :value="CLAIM_SERVICE.EMAIL">Email</option>

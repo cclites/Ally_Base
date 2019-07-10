@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Business\Report;
 
 use App\Http\Controllers\Business\BaseController;
+use App\Http\Resources\ShiftHistoryItemResource;
 use App\Reports\ShiftHistoryReport;
 use App\Reports\ShiftsReport;
 use App\Responses\ErrorResponse;
+use App\Shift;
 use Illuminate\Http\Request;
 
 class ShiftHistoryReportController extends BaseController
@@ -35,7 +37,8 @@ class ShiftHistoryReportController extends BaseController
                     $request->confirmed,
                     $request->client_type,
                     $request->flag_type,
-                    $request->flags
+                    $request->flags,
+                    $request->service_id
                 );
 
             if ($report->count() > 1000) {
@@ -60,5 +63,16 @@ class ShiftHistoryReportController extends BaseController
             'Home' => route('home'),
             'Reports' => route('business.reports.index'),
         ]);
+    }
+
+    /**
+     * Re-load single shift for the shift history report.
+     *
+     * @param Shift $shift
+     * @return ShiftHistoryItemResource
+     */
+    public function reloadShift(Shift $shift)
+    {
+        return new ShiftHistoryItemResource($shift);
     }
 }

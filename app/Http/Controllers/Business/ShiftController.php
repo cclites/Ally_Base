@@ -74,7 +74,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions', 'address']);
+        $shift->load(['service', 'services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions', 'address']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
@@ -191,6 +191,10 @@ class ShiftController extends BaseController
     public function confirm(Shift $shift)
     {
         $this->authorize('update', $shift);
+
+        if ($shift->flagManager()->isDurationMismatch()) {
+            return new ErrorResponse(412, 'This shift cannot be confirmed due to a time duration mismatch.');
+        }
 
         if ($shift->statusManager()->ackConfirmation()) {
             if (!$shift->isVerified()) {

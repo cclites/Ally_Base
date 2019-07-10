@@ -173,7 +173,7 @@
                     'Confirmed',
                 ],
                 filteredFields: [],
-                urlPrefix: '/admin/reports/data/',
+                urlPrefix: '/business/reports/',
                 loading: 0,
             }
         },
@@ -272,7 +272,7 @@
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
             queryString() {
-                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
+                return '?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
                         + '&client_id=' + this.client_id + '&payment_method='
                         + '&import_id=' + this.selectedImport.id;
             },
