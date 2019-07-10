@@ -234,8 +234,11 @@ class ShiftFactory implements Arrayable
                 $caregiverId
             );
 
-            if ($rates->caregiver_rate == 0 && $rates->client_rate == 0) {
-                $rates = $rateFactory->findMatchingRate(
+            // For shifts that are unscheduled, we check if the hourly rate assigned
+            // to the caregiver is 0, in which case we check if they have a fixed rate
+            // assigned.  If there are no fixed rates either, we default to 0.
+            if ($scheduledRates == null && $rates->caregiver_rate == 0 && $rates->client_rate == 0) {
+                $fixedRates = $rateFactory->findMatchingRate(
                     $client,
                     $effectiveDate,
                     true,
@@ -243,6 +246,9 @@ class ShiftFactory implements Arrayable
                     $payerId,
                     $caregiverId
                 );
+                if ($fixedRates->caregiver_rate > 0 && $fixedRates->client_rate > 0) {
+                    $rates = $fixedRates;
+                }
             }
 
             if ($scheduledRates) {
