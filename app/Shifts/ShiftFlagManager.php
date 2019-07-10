@@ -3,8 +3,6 @@ namespace App\Shifts;
 
 use App\Shift;
 use App\ShiftFlag;
-use Carbon\Carbon;
-use App\Billing\ClientAuthorization;
 
 class ShiftFlagManager
 {

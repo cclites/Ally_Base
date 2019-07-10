@@ -934,7 +934,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         if ($service = $this->service) {
             /** @var Service $service */
-            return $service->name;
+            return $service->name . ' ' . $service->code;
         }
 
         // Fallback
