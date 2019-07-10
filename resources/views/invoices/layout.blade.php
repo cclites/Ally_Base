@@ -180,7 +180,7 @@
                         @if( filled($subject->user->date_of_birth))
                         <tr>
                             <td colspan="2">
-                                <strong>{{ $subject->user->date_of_birth }}</strong>
+                                {{ \Carbon\Carbon::parse($subject->user->date_of_birth)->format('m/d/Y') }}
                             </td>
                         </tr>
                         @endif
