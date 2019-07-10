@@ -4,7 +4,6 @@
             <b-list-group-item v-for="type in types" :key="type.id" class="d-flex">
                 <div class="f-1">{{ type.type }}</div>
                 <div class="ml-auto">
-                    <!--i class="fa fa-trash-alt"></i-->
                     <a href="#"><i class="fa fa-trash" @click="showDestroy(type)"></i></a>
                 </div>
             </b-list-group-item>
@@ -13,9 +12,9 @@
             </b-list-group-item>
         </b-list-group>
 
-        <b-modal ref="addExpirationTypeModal" :title="`Expiration type`" @ok="addExpiration" @cancel="hideNew()" @shown="focus" ok-variant="info">
-            <b-form-group label="Default Expiration Type">
-                <b-form-input id="newType" ref="newType" v-model="new_type"></b-form-input>
+        <b-modal ref="addExpirationTypeModal" :title="`Add Expiration Type`" @ok="addExpiration" @cancel="hideNew()" @shown="focus" ok-variant="info">
+            <b-form-group label="Expiration Type">
+                <b-form-input id="newType" ref="newType" v-model="form.type"></b-form-input>
             </b-form-group>
         </b-modal>
 
@@ -24,7 +23,6 @@
                 {{ type.type }}
             </b-form-group>
         </b-modal>
-
     </div>
 </template>
 
@@ -38,8 +36,8 @@
             return {
                 types: [],
                 type: '',
-                new_type: '',
                 form: new Form({
+                    type: '',
                 }),
                 busy: false,
             }
@@ -55,69 +53,66 @@
                     });
             },
 
-            showNew(){
+            showNew() {
                 this.$refs.addExpirationTypeModal.show();
             },
 
-            focus(e){
+            focus(e) {
                 this.$refs.newType.$el.focus();
             },
 
-            hideNew(){
+            hideNew() {
                 this.$refs.addExpirationTypeModal.hide();
             },
 
-            showDestroy(type){
+            showDestroy(type) {
                 this.type = type;
                 this.$refs.destroyExpirationTypeModal.show();
             },
-            hideDestroy(){
+            hideDestroy() {
                 this.$refs.destroyExpirationTypeModal.hide();
 
             },
 
-
-
-            addExpiration(){
-
-                let url = `/business/expiration-types/store/` + this.new_type;
-
-                this.form.submit('POST', url)
-                    .then( ({ data }) => {
+            addExpiration() {
+                this.busy = true;
+                this.form.post(`/business/expiration-types`)
+                    .then(({data}) => {
+                        this.form.type = '';
                         this.setItems(data.data);
                     })
                     .catch(e => {})
-                    .finally(() => { this.busy = false; });
-
+                    .finally(() => {
+                        this.busy = false;
+                    });
             },
-            destroyExpiration(){
 
-                let url = '/business/expiration-types/destroy/' + this.type.id;
-
+            destroyExpiration() {
+                this.busy = true;
+                let url = '/business/expiration-types/' + this.type.id;
                 this.form.submit('DELETE', url)
-                    .then( ({ data }) => {
-                        this.setItems(data.data);
+                    .then(({data}) => {
+                        let index = this.types.findIndex(x => x.id == this.type.id);
+                        Vue.delete(this.types, index);
                     })
-                    .catch(e => {})
-                    .finally(() => { this.busy = false; });
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                        this.busy = false;
+                    });
             },
-            setItems(data){
+
+            setItems(data) {
                 this.types = data;
                 this.hide();
                 this.type = '';
-                this.new_type = '';
             }
         },
 
         async mounted() {
             this.loading = true;
             await this.fetchChainExpirations();
-
             this.loading = false;
         },
     }
 </script>
-
-<style scoped>
-
-</style>

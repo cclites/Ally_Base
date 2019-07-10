@@ -3,26 +3,25 @@
         <b-container fluid>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Add New Expiration Type" label-for="selectedType">
-
-                        <b-form-input
-                                id="selectedType"
-                                name="selectedType"
-                                v-model="form.name"
-                        >
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Select Default Expiration Type" label-for="expirations">
+                    <b-form-group label="Select Expiration Type" label-for="expirations">
                         <b-form-select
                                 name="expirations"
                                 id="expirations"
                                 v-model="expiration"
                         >
-                            <option v-for="item in expirations" v-on:click.stop="updateSelectedType(item.type)" value="item.type">{{ item.type }}</option>
+                            <option value="">-- Use Custom Name --</option>
+                            <option v-for="item in expirations" :value="item.type">{{ item.type }}</option>
                         </b-form-select>
-
                     </b-form-group>
-
+                    <b-form-group label="Name" label-for="selectedType">
+                        <b-form-input
+                                id="selectedType"
+                                name="selectedType"
+                                v-model="form.name"
+                                :disabled="expiration != ''"
+                        >
+                        </b-form-input>
+                    </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
                                 id="description"
@@ -94,7 +93,6 @@
         },
 
         methods: {
-
             save() {
                 let method = 'post';
                 let url = '/business/caregivers/' + this.caregiverId + '/licenses';
@@ -105,7 +103,6 @@
 
                 this.form.submit(method, url)
                     .then(response => {
-
                         // Push the newly created item without mutating the prop, requires the sync modifier
                         let newItems = this.items;
 
@@ -119,17 +116,11 @@
                         this.$emit('update:items', newItems);
                         this.$parent.$forceUpdate();
 
+                        this.form.reset();
+                        this.expiration = '';
                         this.showModal = false;
-                    });
-            },
-
-            updateBusinessId(){
-                let businessId = this.officeUserSettings.default_business_id;
-            },
-
-            updateSelectedType(itemType){
-                this.form.name=itemType;
-                this.form.expiration=itemType;
+                    })
+                    .catch(() => {});
             },
 
             async fetchChainExpirations() {
@@ -147,6 +138,9 @@
         },
 
         watch: {
+            expiration(newVal, oldVal) {
+                this.form.name = newVal;
+            }
         },
     }
 </script>

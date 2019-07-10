@@ -3,7 +3,6 @@ namespace App;
 
 use App\Billing\Payer;
 use App\Billing\Service;
-use App\ExpirationType;
 
 
 /**
