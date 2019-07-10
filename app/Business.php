@@ -915,4 +915,14 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         $builder->whereIn('id', $businessIds);
     }
+
+    function getHic(): ?string
+    {
+        return null;
+    }
+
+    function getBirthdate(): ?string
+    {
+        return null;
+    }
 }

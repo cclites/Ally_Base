@@ -268,6 +268,23 @@ trait IsUserRole
         return $this->user ? $this->user->setup_status : null;
     }
 
+    function getHic(): ?string
+    {
+        if ($this->getRoleType() === 'client') {
+            return $this->hic;
+        }
+
+        return null;
+    }
+
+    function getBirthdate(): ?string
+    {
+        if ($this->getRoleType() === 'client') {
+            return $this->date_of_birth;
+        }
+
+        return null;
+    }
     ///////////////////////////////////////////
     /// Attribute Input Handling
     ///////////////////////////////////////////
