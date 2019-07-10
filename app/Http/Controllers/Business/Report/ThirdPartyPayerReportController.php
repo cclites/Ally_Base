@@ -13,10 +13,12 @@ use App\Reports\MedicaidBillingReport;
 use App\Reports\ThirdPartyPayerReport;
 use Illuminate\Http\Request;
 
+use Log;
+
 class ThirdPartyPayerReportController extends Controller
 {
     /**
-     * Get the Payroll Export Report
+     * Get the Third Party Payer Report
      *
      * @param Request $request
      * @param MedicaidBillingReport $report
@@ -26,18 +28,27 @@ class ThirdPartyPayerReportController extends Controller
     {
         if ($request->filled('json')) {
 
-
             $timezone = auth()->user()->role->getTimezone();
 
             $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
                     $request->end,
-                    $request->caregiver_id,
-                    $request->status
+                    $request->business,
+                    $request->type,
+                    $request->client,
+                    $request->caregiver,
+                    $request->payer
                 );
 
-            return response()->json($report->rows());
+            $items = $report->rows();
+
+            foreach($items as $item){
+                //Log::info(json_encode($item));
+                //Log::info("\n");
+            }
+
+            return response()->json($items);
 
         }
 
@@ -46,9 +57,9 @@ class ThirdPartyPayerReportController extends Controller
         $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->get());
 
         return view_component(
-            'business-medicaid-billing-report',
-            'Medicaid Billing Report',
-            compact(['clients', 'caregivers']),
+            'third-party-payer',
+            'Third Party Payer Report',
+            compact(['clients', 'caregivers', 'payers']),
             [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')

@@ -463,6 +463,15 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: '3rd Party Payer',
+                        url: 'reports/third-party-payer',
+                        description: '3rd Party Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
                     {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',

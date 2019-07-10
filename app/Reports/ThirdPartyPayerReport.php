@@ -3,36 +3,37 @@
 namespace App\Reports;
 
 use App\Billing\ClientAuthorization;
+use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payer;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
+use Log;
+
 class ThirdPartyPayerReport extends BaseReport
 {
     /**
-     * @var int
+     * @var \Eloquent
      */
-    protected $client;
-
-    /**
-     * @var int
-     */
-    protected $caregiver;
+    protected $query;
 
     /**
      * @var string
      */
-    protected $clientType;
+    protected $timezone;
 
     /**
-     * constructor.
+     * ThirdPartyPayerReport constructor.
+     * @param ClientInvoiceQuery $query
      */
-    public function __construct()
+    public function __construct(ClientInvoiceQuery $query)
     {
-        $this->query = Shift::with(['caregiver', 'client', 'services', 'service', 'services.service', 'client.serviceAuthorizations'])
-            ->forRequestedBusinesses()
-            ->whereConfirmed();
+        $this->query = $query->with('client');
     }
 
     /**
@@ -46,60 +47,26 @@ class ThirdPartyPayerReport extends BaseReport
     }
 
     /**
-     * Filter the results to between two dates.
+     * Set instance timezone
      *
-     * @param string $start
-     * @param string $end
      * @param string $timezone
-     * @return $this
+     * @return ThirdPartyPayerReport
      */
-    public function forDates(string $start, string $end, ?string $timezone = null) : self
+    public function setTimezone(string $timezone): self
     {
-        if (empty($timezone)) {
-            $timezone = 'America/New_York';
-        }
-        $startDate = new Carbon($start . ' 00:00:00', $timezone);
-        $endDate = new Carbon($end . ' 23:59:59', $timezone);
-        $this->between($startDate, $endDate);
+        $this->timezone = $timezone;
 
         return $this;
     }
 
-    /**
-     * Filter the results for a certain client type.
-     *
-     * @param string|null $clientType
-     * @return $this
-     */
-    public function forClientType(?string $clientType = null) : self
+
+    public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $caregiver, ?int $payer): self
     {
-        $this->clientType = $clientType;
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+        $this->query->whereBetween('created_at', [$start, $end]);
 
-        return $this;
-    }
-
-    /**
-     * Filter the results for a certain client.
-     *
-     * @param string|null $id
-     * @return $this
-     */
-    public function forClient(?string $id = null) : self
-    {
-        $this->client = $id;
-
-        return $this;
-    }
-
-    /**
-     * Filter the results for a certain caregiver.
-     *
-     * @param string|null $id
-     * @return $this
-     */
-    public function forCaregiver(?string $id = null) : self
-    {
-        $this->caregiver = $id;
+        $this->query->forBusiness($business);
 
         return $this;
     }
@@ -111,144 +78,72 @@ class ThirdPartyPayerReport extends BaseReport
      */
     protected function results() : ?iterable
     {
-        $query = $this->query();
+        $invoices = $this->query
+                    ->with(['client', 'payments'])
+                    ->take(1)
+                    ->get()
+                    ->values();
 
-        if (filled($this->client)) {
-            $query->where('client_id', $this->client);
-        }
+        foreach ($invoices as $invoice){
 
-        if (filled($this->caregiver)) {
-            $query->where('caregiver_id', $this->caregiver);
-        }
+            //$items = $invoice->items;
 
-        if (filled($this->clientType)) {
-            $query->whereHas('client', function ($q) {
-                $q->where('client_type', $this->clientType);
-            });
-        }
+            $payer = $invoice->clientPayer;
 
-        $shifts = $query->get();
-        $services = collect([]);
-        foreach ($shifts as $shift) {
-            if (filled($shift->service_id)) {
+            //Log:info(json_encode($payer));
 
-                $services->push($this->mapShiftRecord($shift));
+            Log::info($payer->payer_name);
 
-            } else if ($shift->services->isNotEmpty()) {
+            //foreach ($items as $item){
 
-                $start = $shift->checked_in_time;
-                foreach ($shift->services as $shiftService) {
-                    $end = $start->copy()->addHours($shiftService->duration);
-                    $services->push($this->mapShiftServiceRecord($shift, $shiftService, $start, $end));
-                    $start = $end->copy()->addSeconds(1);
+
+
+                /*
+                $payerId = ClientPayer::where('id', $item->invoice["client_payer_id"])->pluck('payer_id');
+
+                if(filled($payerId)){
+                    $item->payer = Payer::where('id', $payerId)->pluck('name')->first();
                 }
 
-            }
+                //$s = print_r($shift, true);
+                //Log::info($s);
+
+                Log::info(json_encode($item->payer));
+                Log::info("\n");
+                */
+            //}
+
+
+            //Log::info(json_encode($shifts));
+            //Log::info("\n");
+
+            //$client = $invoice->client;
+            //$clientPayer = $invoice->getClientPayer();
+            //$business = $client->business;
+            //$payments = $invoice->payments;
+
+
+
+            /*
+            Log::info(json_encode($items->getShiftServices()));
+            Log::info("\n");
+            */
+
+            //$invoiceableServices = $this->getInvoicedServicesQuery($invoice);
+
+            //Log::info(json_encode($invoiceableServices));
+            //Log::info("\n");
+
+            //$invoiceableShifts = $this->getInvoicedShiftsQuery($invoice);
+            //Log::info(json_encode($invoiceableShifts));
+            //Log::info("\n");
+
         }
 
-        return $services->map(function ($service) {
-            $serviceAuth = $this->findServiceAuth($service['date'], $service['service_id'], $service['client']->serviceAuthorizations);
-            return array_merge($service, [
-                'service_auth' => optional($serviceAuth)->service_auth_id,
-                'unit_type' => optional($serviceAuth)->unit_type,
-                'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $service['hours'])
-            ]);
-        });
+        return $invoices;
     }
 
-    /**
-     * Map a Shift to a report row.
-     *
-     * @param Shift $shift
-     * @return array
-     */
-    protected function mapShiftRecord(Shift $shift) : array
-    {
-        return [
-            'caregiver_id' => $shift->caregiver_id,
-            'caregiver_name' => $shift->caregiver->nameLastFirst,
-            'client' => $shift->client,
-            'client_id' => $shift->client_id,
-            'client_name' => $shift->client->nameLastFirst,
-            'service_id' => $shift->service->id,
-            'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'hours' => $shift->duration(),
-            'rate' => $shift->getClientRate(),
-            'evv' => $shift->isVerified(),
-            'billable' => $shift->costs()->getClientCost(false),
-            'date' => $shift->checked_in_time->toDateString(),
-            'start' => $shift->checked_in_time->toDateTimeString(),
-            'end' => $shift->checked_out_time->toDateTimeString(),
-        ];
-    }
 
-    /**
-     * Map a ShiftService to a report row.
-     *
-     * @param Shift $shift
-     * @param ShiftService $shiftService
-     * @param Carbon $start
-     * @param Carbon $end
-     * @return array
-     */
-    protected function mapShiftServiceRecord(Shift $shift, ShiftService $shiftService, Carbon $start, Carbon $end) : array
-    {
-        return [
-            'caregiver_id' => $shift->caregiver_id,
-            'caregiver_name' => $shift->caregiver->nameLastFirst,
-            'client' => $shift->client,
-            'client_id' => $shift->client_id,
-            'client_name' => $shift->client->nameLastFirst,
-            'service_id' => $shiftService->service->id,
-            'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'hours' => $shiftService->duration,
-            'rate' => $shiftService->client_rate,
-            'evv' => $shift->isVerified(),
-            'billable' => $shiftService->getAmountInvoiced(), // TODO: this isn't correct?
-            'date' => $start->toDateString(),
-            'start' => $start->toDateTimeString(),
-            'end' => $end->toDateTimeString(),
-        ];
-    }
 
-    /**
-     * Map service auth units based on duration.
-     *
-     * @param null|string $unitType
-     * @param float $hours
-     * @return string
-     */
-    protected function mapUnits(?string $unitType, float $hours) : string
-    {
-        switch ($unitType) {
-            case '15m':
-                return (string) (floatval($hours) * floatval(60)) / floatval(15);
-            case 'fixed':
-                return 1;
-            case 'hourly':
-                return $hours;
-            default:
-                return '-';
-        }
-    }
 
-    /**
-     * Get the matching service authorization for the given service and date.
-     *
-     * @param string $date
-     * @param int $serviceId,
-     * @param Collection|null $serviceAuths
-     * @return ClientAuthorization|null
-     */
-    protected function findServiceAuth(string $date, int $serviceId, ?Collection $serviceAuths) : ?ClientAuthorization
-    {
-        if (empty($serviceAuths) || $serviceAuths->isEmpty()) {
-            return null;
-        }
-
-        return $serviceAuths->where('service_id', $serviceId)
-            ->where('effective_start', '<=', $date)
-            ->where('effective_end', '>=', $date)
-            ->first();
-    }
 }
