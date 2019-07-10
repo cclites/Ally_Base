@@ -13,7 +13,6 @@
             </thead>
             <tbody>
             @foreach($itemGroups as $group => $items)
-
                 @if($group)
                     <tr>
                         <td colspan="6" class="item-group">
@@ -29,7 +28,6 @@
                 @endif
                 @foreach($items as $item)
                     <?php /** @var \App\Billing\ClientInvoiceItem $item */ ?>
-
                     <tr>
                         <td class="text-nowrap">{{ local_date($item->date) }}</td>
                         <td>

@@ -10,7 +10,6 @@ use App\Billing\Payer;
 use App\Businesses\NullContact;
 use App\Contracts\ViewStrategy;
 use App\Contracts\ContactableInterface;
-use App\User;
 use Illuminate\Support\Collection;
 
 class InvoiceViewGenerator
