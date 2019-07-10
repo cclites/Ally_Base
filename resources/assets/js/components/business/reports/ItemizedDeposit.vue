@@ -129,7 +129,9 @@
         computed: {
             filteredItems() {
                 let filterFn = (item) => {
-
+                    if (this.business_name && (parseInt(this.business_name) !== parseInt(item.business_id))) {
+                        return false;
+                    }
                     if (!this.caregiverId && !this.clientId) {
                         return true;
                     }
@@ -137,10 +139,6 @@
                         return false;
                     }
                     if (this.clientId && parseInt(item.client.id) !== parseInt(this.clientId)) {
-                        return false;
-                    }
-
-                    if(parseInt(this.business_name) !== parseInt(item.business_id)){
                         return false;
                     }
 
@@ -232,7 +230,7 @@
             return {
                 caregivers: [],
                 clients: [],
-                business_name: null,
+                business_name: this.deposit.business_id,
                 business: null,
                 clientId: null,
                 caregiverId: null,
