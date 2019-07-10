@@ -52,9 +52,12 @@
         {
             page-break-after: avoid;
         }
-        table, tr, td, th, tbody, thead, tfoot {
-            page-break-inside: avoid !important;
-        }
+
+        table { page-break-inside:auto }
+        tr    { page-break-inside:avoid; page-break-after:auto }
+        thead { display:table-header-group }
+        tfoot { display:table-footer-group }
+
         .print-controls {
             padding: 20px 10px;
         }
