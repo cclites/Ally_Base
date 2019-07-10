@@ -61,7 +61,6 @@ class BulkInvoiceReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?int $client, ?string $type, ?int $active): self
     {
-
         $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
         $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
         $this->query->whereBetween('created_at', [$start, $end]);
@@ -99,6 +98,7 @@ class BulkInvoiceReport extends BaseReport
             ->map(function (ClientInvoice $invoice) {
                 return [
                     'invoice_id' => $invoice->id,
+                    'invoice_name' => $invoice->name,
                     'client' => $invoice->client->nameLastFirst(),
                     'created_at' => $invoice->created_at->format('m/d/Y'),
                     'amount' => $invoice->amount

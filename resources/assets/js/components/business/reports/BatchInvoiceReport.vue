@@ -93,7 +93,7 @@
                 loading: false,
                 fields: [
                     {
-                        key: 'invoice_id',
+                        key: 'invoice_name',
                         label: 'Invoice #',
                     },
                     {
