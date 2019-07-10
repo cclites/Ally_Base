@@ -7,6 +7,20 @@
             >
                 <div class="form-inline mb-3">
                     <b-col lg="3">
+                        <b-form-group label="Effective During Dates:" class="form-inline">
+                            <date-picker ref="startDate"
+                                         style="max-width: 8rem;"
+                                         v-model="form.start_date"
+                                         placeholder="Start Date">
+                            </date-picker> &nbsp;to&nbsp;
+                            <date-picker ref="endDate"
+                                         style="max-width: 8rem;"
+                                         v-model="form.end_date"
+                                         placeholder="End Date">
+                            </date-picker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="3">
                         <b-form-group label="For Office Location:">
                             <business-location-form-group
                                 v-model="form.businesses"
@@ -20,6 +34,7 @@
                     <b-col lg="3">
                         <b-form-group label="For Client:">
                             <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loading || loadingClients">
+                                <option value="">-- Select a Client --</option>
                                 <option v-for="item in clients" :key="item.id" :value="item.id">
                                     {{ item.nameLastFirst }}
                                 </option>
@@ -113,6 +128,8 @@
                 payers: [],
                 form: new Form({
                     businesses: '',
+                    start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
+                    end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                     client_id: '',
                     days: 30,
                     json: 1,
@@ -126,6 +143,11 @@
 
         methods: {
             fetch() {
+                if (! this.form.client_id) {
+                    alert('You must select a client first.');
+                    return;
+                }
+
                 this.busy = true;
                 this.form.get('/business/reports/service-auth-usage')
                     .then( ({ data }) => {

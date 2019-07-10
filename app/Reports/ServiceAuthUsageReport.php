@@ -3,22 +3,33 @@
 namespace App\Reports;
 
 use App\Billing\ClientAuthorization;
+use App\Client;
+use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 
 class ServiceAuthUsageReport extends BaseReport
 {
     /**
-     * @var bool
+     * @var \Carbon\Carbon
      */
-    private $isPast = false;
+    protected $start;
+
+    /**
+     * @var \Carbon\Carbon
+     */
+    protected $end;
+
+    /***
+     * @var \App\Client
+     */
+    protected $client;
 
     /**
      * ServiceAuthEndingReport constructor.
      */
     public function __construct()
     {
-        $this->query = ClientAuthorization::with('client', 'client.user', 'service')
-            ->effectiveOn(Carbon::today());
+        $this->query = ClientAuthorization::with('client', 'client.user', 'service');
     }
 
     /**
@@ -32,6 +43,51 @@ class ServiceAuthUsageReport extends BaseReport
     }
 
     /**
+     * Set the client filter.
+     *
+     * @param Client $client
+     * @return ServiceAuthUsageReport
+     */
+    public function setClient(Client $client) : self
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * Set the date range of service.
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return self
+     */
+    public function setDateRange(string $startDate, string $endDate) : self
+    {
+        $this->start = Carbon::parse($startDate);
+        $this->end = Carbon::parse($endDate);
+
+        return $this;
+    }
+
+    protected function mapPeriodStats(ClientAuthorization $auth, array $periods) : iterable
+    {
+        return collect($periods)->map(function ($period) use ($auth) {
+            /** @var \Carbon\Carbon $start */
+            $start = $period[0];
+            /** @var \Carbon\Carbon $end */
+            $end = $period[1];
+
+            $calculator = new ServiceAuthCalculator($auth);
+
+            return [
+                'allowed' => $auth->getUnits(),
+            ];
+//            dd($calculator->get());
+        });
+    }
+
+    /**
      * Return the collection of rows matching report criteria
      *
      * @return \Illuminate\Support\Collection
@@ -39,53 +95,41 @@ class ServiceAuthUsageReport extends BaseReport
     protected function results() : ?iterable
     {
         return $this->query
+            ->where('client_id', $this->client->id)
+            ->effectiveDuringRange($this->start, $this->end)
             ->get()
-            ->groupBy('client_id')
-            ->map(function ($items) {
+            ->map(function (ClientAuthorization $auth) {
                 return [
-                    'id' => $items[0]->client->id,
-                    'name' => $items[0]->client->nameLastFirst,
-                    'total' => count($items),
-                    'authorizations' => $items->map(function (ClientAuthorization $auth) {
-                        return array_merge($auth->toArray(), [
-                            'days_until_end' => ($this->isPast ? '-' : '') . Carbon::today()->diffInDays(Carbon::parse($auth->effective_end)),
-                        ]);
-                    }),
+                    // service auth data
+                    'auth_id' => $auth->id,
+                    'effective_start' => $auth->effective_start,
+                    'effective_end' => $auth->effective_end,
+                    'units' => $auth->units,
+                    'unit_type' => $auth->unit_type,
+                    'period' => $auth->period,
+                    'name' => $auth->service_auth_id,
+                    // client data
+                    'client_id' => $auth->client->id,
+                    'client_name' => $auth->client->name,
+                    // service data
+                    'service_id' => $auth->service->id,
+                    'service_name' => $auth->service->name,
+                    'service_code' => $auth->service->code,
+                    // period stats
+                    'periods' => $this->mapPeriodStats($auth, $auth->getPeriodsForRange($this->start, $this->end)),
                 ];
             })
-            ->sortBy('name')
+            ->sortBy('service_name')
             ->values();
     }
 
     /**
-     * Apply filters to the query.
+     * Get the timezone to use for the report.
      *
-     * @param iterable $clientIds
-     * @param string|null $days
-     * @param string $timezone
-     * @return ServiceAuthEndingReport
+     * @return string
      */
-    public function applyFilters(iterable $clientIds, ?string $days, string $timezone) : self
+    protected function getTimezone() : string
     {
-        $this->query->whereHas('client', function($q) use ($clientIds) {
-            $q->active()->whereIn('id', $clientIds);
-        });
-
-        if ($days === null || !is_numeric($days)) {
-            $days = 30;
-        }
-
-        $days = (int) $days;
-
-        $today = Carbon::today();
-        if ($days < 0) {
-            $this->isPast = true;
-            $range = [$today->copy()->addDays($days)->format('Y-m-d'), $today->copy()->format('Y-m-d')];
-        } else {
-            $range = [$today->copy()->format('Y-m-d'), $today->copy()->addDays($days)->format('Y-m-d')];
-        }
-        $this->query->whereBetween('effective_end', $range);
-
-        return $this;
+        return $this->client->getTimezone();
     }
 }

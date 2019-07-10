@@ -5,6 +5,7 @@ namespace App\Billing;
 use App\AuditableModel;
 use Carbon\Carbon;
 use App\Client;
+use Carbon\CarbonPeriod;
 
 /**
  * App\Billing\ClientAuthorization
@@ -182,6 +183,20 @@ class ClientAuthorization extends AuditableModel
         }
     }
 
+    public function getPeriodsForRange(Carbon $start, Carbon $end) : array
+    {
+        $periods = collect([]);
+
+        foreach (CarbonPeriod::create($start, $end) as $date) {
+            list($start, $end) = $this->getPeriodDates($date);
+
+            $periods->push([$start, $end]);
+//            $periods->push($start->toDateString() . ' - ' . $end->toDateString());
+        }
+
+        return $periods->unique()->toArray();
+    }
+
     /**
      * Get the units for the day of the week based on
      * the daily settings on the model.
@@ -214,5 +229,28 @@ class ClientAuthorization extends AuditableModel
     {
         return $query->where('effective_start', '<=', $date->toDateString())
             ->where('effective_end', '>=', $date->toDateString());
+    }
+
+    /**
+     * Get authorizations that were effective anywhere during
+     * the given date range.
+     *
+     * @param $query
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return mixed
+     */
+    public function scopeEffectiveDuringRange($query, Carbon $start, Carbon $end)
+    {
+        return $query->where(function ($q) use ($start, $end) {
+            $q->where(function ($q) use ($start, $end) {
+                $q->where('effective_start', '<=', $start->toDateString())
+                    ->orWhere('effective_start', '<=', $end->toDateString());
+            })
+            ->where(function ($q) use ($start, $end) {
+                $q->where('effective_end', '>=', $start->toDateString())
+                    ->orWhere('effective_end', '>=', $end->toDateString());
+            });
+        });
     }
 }

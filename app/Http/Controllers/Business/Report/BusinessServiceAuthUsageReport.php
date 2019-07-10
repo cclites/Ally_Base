@@ -16,20 +16,17 @@ class BusinessServiceAuthUsageReport extends Controller
      * @param Request $request
      * @param ServiceAuthUsageReport $report
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Request $request, ServiceAuthUsageReport $report)
     {
         if ($request->filled('json')) {
-            $clientQuery = Client::forRequestedBusinesses();
-            if (filled($request->client_id)) {
-                $clientQuery->where('id', $request->client_id);
-            }
+            $client = Client::findOrFail($request->client_id);
+            $this->authorize('read', $client);
 
-            $results = $report->applyFilters(
-                $clientQuery->pluck('id'),
-                $request->days,
-                auth()->user()->role->getTimezone()
-            )->rows();
+            $results = $report->setClient($client)
+                ->setDateRange($request->start_date, $request->end_date)
+                ->rows();
 
             return response()->json($results);
         }

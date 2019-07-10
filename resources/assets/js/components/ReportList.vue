@@ -500,6 +500,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Service Authorizations Usage Report',
+                        url: 'reports/service-auth-usage',
+                        description: 'Shows usage report for clients service auths',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Batch Invoice',
                         url: 'reports/batch-invoice',
                         description: 'Print Batch invoices to PDF',
