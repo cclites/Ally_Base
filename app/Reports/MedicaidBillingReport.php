@@ -130,7 +130,7 @@ class MedicaidBillingReport extends BaseReport
         $shifts = $query->get();
         $services = collect([]);
         foreach ($shifts as $shift) {
-            if ($shift->fixed_rates || filled($shift->service_id)) {
+            if (filled($shift->service_id)) {
 
                 $services->push($this->mapShiftRecord($shift));
 

@@ -107,6 +107,8 @@
                     </template>
                     <template slot="actions" scope="row">
                         <b-button @click="uninvoice(row.item.id)" variant="danger">Uninvoice</b-button>
+                        <b-button v-if="! row.item.client.user.payment_hold" @click="addHold(row.item)" variant="danger">Add Hold</b-button>
+                        <b-button v-if="row.item.client.user.payment_hold" @click="removeHold(row.item)" variant="primary">Remove Hold</b-button>
                     </template>
                 </b-table>
             </div>
@@ -228,6 +230,24 @@
         },
 
         methods: {
+            addHold(invoice) {
+                let form = new Form();
+                form.submit('post', '/admin/users/' + invoice.client_id + '/hold')
+                    .then(response => {
+                        invoice.client.user.payment_hold = true;
+                    })
+                    .catch(e => {});
+            },
+
+            removeHold(invoice) {
+                let form = new Form();
+                form.submit('delete', '/admin/users/' + invoice.client_id + '/hold')
+                    .then(response => {
+                        invoice.client.user.payment_hold = null;
+                    })
+                    .catch(e => {});
+            },
+
             async generateInvoices() {
                 if (this.chainLoaded && this.chainId) {
                     let form = new Form({chain_id: this.chainId});

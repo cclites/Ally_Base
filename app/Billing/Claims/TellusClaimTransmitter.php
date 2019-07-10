@@ -6,7 +6,6 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Service;
 use App\Business;
 use App\Client;
 use App\Services\TellusService;
@@ -28,48 +27,63 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * be transmitted as a claim.
      *
      * @param \App\Billing\ClientInvoice $invoice
-     * @return bool
+     * @return null|array
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
      */
-    public function validateInvoice(ClientInvoice $invoice) : bool
+    public function validateInvoice(ClientInvoice $invoice) : ?array
     {
+        $errors = parent::validateInvoice($invoice);
+
         if (empty($invoice->client->business->tellus_username) || empty($invoice->client->business->getTellusPassword())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have your Tellus credentials set for this office location.  You can edit this information under Settings > General > Claims, or contact Ally for assistance.');
+            array_push($errors['credentials'], 'tellus_username');
+            array_push($errors['credentials'], 'tellus_password');
         }
 
         if (empty($invoice->client->business->medicaid_id)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid ID set for this office location.  You can edit this information under Settings > General > Medicaid.');
+            array_push($errors['business'], 'medicaid_id');
         }
 
         if (empty($invoice->client->business->medicaid_npi_number)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPI Number set for this office location.  You can edit this information under Settings > General > Medicaid.');
+            array_push($errors['business'], 'medicaid_npi_number');
         }
 
-        if (filled($invoice->client->business->medicaid_npi_number) && empty($invoice->client->business->medicaid_npi_taxonomy)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have an Medicaid NPM Taxonomy set for this office location.  You can edit this information under Settings > General > Medicaid.');
+        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
+            array_push($errors['business'], 'medicaid_npi_taxonomy');
         }
 
-        if (empty($invoice->client->business->getAddress()->zip)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because you do not have a zipcode set for this office location\'s address.  You can edit this information under Settings > General > Phone & Address.');
+        if (empty($invoice->client->business->zip)) {
+            array_push($errors['business'], 'zip');
         }
 
         if (empty($invoice->client->date_of_birth)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a date of birth set.  You can edit this information under the Client\'s profile.');
+            array_push($errors['client'], 'date_of_birth');
         }
 
         if (empty($invoice->client->medicaid_diagnosis_codes)) {
-            throw new ClaimTransmissionException('You cannot submit a claim because the client does not have a Medicaid Diagnosis Code set.  You can edit this information under the Insurance & Service Auths section of the Client\'s profile.');
+            array_push($errors['client'], 'medicaid_diagnosis_codes');
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPayerCode())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because there is no Payer Organization identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
+        if (empty($invoice->getPayerCode())) {
+            if (optional($invoice->clientPayer)->isPrivatePay()) {
+                array_push($errors['client'], 'medicaid_payer_id');
+            } else {
+                array_push($errors['payer'], 'payer_code');
+            }
         }
 
-        if (empty(optional($invoice->clientPayer)->payer->getPlanCode())) {
-            throw new ClaimTransmissionException('You cannot submit a claim because there is no Plan Identifier set for the Payer of this invoice.  You can edit this information under Billing > Payers, or contact Ally for assistance.');
+        if (empty($invoice->getPlanCode())) {
+            if (optional($invoice->clientPayer)->isPrivatePay()) {
+                array_push($errors['client'], 'medicaid_plan_id');
+            } else {
+                array_push($errors['payer'], 'plan_code');
+            }
         }
 
-        return parent::validateInvoice($invoice);
+        if (collect($errors)->flatten(1)->isEmpty()) {
+            return null;
+        }
+
+        return $errors;
     }
 
     /**
@@ -81,16 +95,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      */
     public function send(Claim $claim) : bool
     {
-        try {
-            $tellus = new TellusService(
-                $claim->invoice->client->business->tellus_username,
-                $claim->invoice->client->business->getTellusPassword(),
-                config('services.tellus.endpoint')
-            );
-        } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
-            throw new ClaimTransmissionException('Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
-        }
+        $tellus = new TellusService(
+            $claim->invoice->client->business->tellus_username,
+            $claim->invoice->client->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
 
         try {
             $xml = $tellus->convertArrayToXML($this->getData($claim));
@@ -104,6 +113,38 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
+    }
+
+    /**
+     * Check transmitter is in test mode.
+     *
+     * @param Claim $claim
+     * @return bool
+     */
+    public function isTestMode(Claim $claim) : bool
+    {
+        return $claim->invoice->client->business->tellus_username == "test";
+    }
+
+    /**
+     * Create and return the Claim path of the file that would be transmitted.
+     *
+     * @param Claim $claim
+     * @return null|string
+     * @throws \Exception
+     */
+    public function test(Claim $claim) : ?string
+    {
+        $tellus = new TellusService(
+            $claim->invoice->client->business->tellus_username,
+            $claim->invoice->client->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
+
+        $xml = $tellus->convertArrayToXML($this->getData($claim));
+        $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
+        \Storage::disk('public')->put($filename, $xml);
+        return "/storage/$filename";
     }
 
     /**
@@ -135,18 +176,18 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        $master = [
+        return [
             'SourceSystem' => 'ALLY',
             'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => optional($clientInvoice->clientPayer)->payer->getPayerCode(),
-            'Plan' => optional($clientInvoice->clientPayer)->payer->getPlanCode(),
+            'Payer' => $clientInvoice->getPayerCode(),
+            'Plan' => $clientInvoice->getPlanCode(),
             'Program' => '', // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
             'ProviderMedicaidId' => $business->medicaid_id,
             'ProviderNpi' => $business->medicaid_npi_number,
             'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy,
-            'ProviderNPIZipCode' => $business->getAddress()->zip,
+            'ProviderNPIZipCode' => $business->zip,
             'ProviderEin' => $business->ein,
             'CaregiverFirstName' => $caregiver->firstname,
             'CaregiverLastName' => $caregiver->lastname,
@@ -162,7 +203,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => '', //$this->mapActivities($shift->activities),
+            'ServiceCode' => optional($shift->service)->code,
             'ServiceCodeMod1' => '', // N/A
             'ServiceCodeMod2' => '', // N/A
             'DiagnosisCode1' => $diagnosisCodes[0],
@@ -205,22 +246,21 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'PaidAmount' => '', // N/A
             'CareDirectionType' => '', // N/A
         ];
+    }
 
-        if ($shift->services->count()) {
-            // Map each individual service.
-            $services = [];
-            /** @var ShiftService $service */
-            foreach ($shift->services as $service) {
-                $serviceEntry = $master;
-                $serviceEntry['ServiceCode'] = optional($service->service)->code;
-                $services[] = $serviceEntry;
-            }
-            return $services;
-        } else {
-            // Convert single service shift record.
-            $master['ServiceCode'] = optional($shift->service)->code;
-            return [$master];
-        }
+    /**
+     * Map a claim's shift service into importable data for the service.
+     *
+     * @param \App\Billing\Claim $claim
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
+    {
+        // Get the base data from the related shift.
+        $data = $this->mapShiftRecord($claim, $shiftService->shift);
+        $data['ServiceCode'] = optional($shiftService->service)->code;
+        return $data;
     }
 
     /**

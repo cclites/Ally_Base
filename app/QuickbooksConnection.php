@@ -144,6 +144,7 @@ class QuickbooksConnection extends BaseModel
             return $service;
         }
         catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
             return null;
         }
     }
