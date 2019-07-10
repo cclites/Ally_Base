@@ -41,4 +41,14 @@ class NullContact implements ContactableInterface
     {
         return null;
     }
+
+    function getHic(): ?string
+    {
+        return null;
+    }
+
+    function getBirthdate(): ?string
+    {
+        return null;
+    }
 }

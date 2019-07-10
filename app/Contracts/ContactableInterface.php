@@ -10,4 +10,6 @@ interface ContactableInterface
     function name(): string;
     function getAddress(): ?Address;
     function getPhoneNumber(): ?PhoneNumber;
+    function getHic(): ?string;
+    function getBirthdate(): ?string;
 }
