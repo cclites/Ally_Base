@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AchOfflineChargeCommand;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
 use App\Console\Commands\ImportGenerationsCaregivers;
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         CronDailyNotifications::class,
         CronReminders::class,
         CronFlushTriggeredReminders::class,
+        AchOfflineChargeCommand::class,
     ];
 
     /**
