@@ -1,15 +1,10 @@
 <?php
-
-
 namespace App\Reports;
 
 use Illuminate\Database\Eloquent\Builder;
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
-use App\User;
 use Carbon\Carbon;
-
-
 
 class BulkInvoiceReport extends BaseReport
 {
@@ -44,9 +39,9 @@ class BulkInvoiceReport extends BaseReport
      * Set the timezone of the report.
      *
      * @param string $timezone
-     * @return ShiftHistoryReport
+     * @return BulkInvoiceReport
      */
-    public function setTimezone(string $timezone) : self
+    public function setTimezone(string $timezone): self
     {
         $this->timezone = $timezone;
 
@@ -73,19 +68,19 @@ class BulkInvoiceReport extends BaseReport
 
         $this->query->forBusiness($business);
 
-        if(filled($client)){
+        if (filled($client)) {
             $this->query->where('client_id', $client);
         }
 
-        if(filled($type)){
-            $this->query->whereHas('client', function($q) use($type){
+        if (filled($type)) {
+            $this->query->whereHas('client', function ($q) use ($type) {
                 $q->where('client_type', $type);
             });
         }
 
-        if(filled($active)){
-            $this->query->whereHas('client', function($q) use($active){
-                $q->whereHas('user', function($q) use($active){
+        if (filled($active)) {
+            $this->query->whereHas('client', function ($q) use ($active) {
+                $q->whereHas('user', function ($q) use ($active) {
                     $q->where('active', $active);
                 });
             });
@@ -99,23 +94,22 @@ class BulkInvoiceReport extends BaseReport
      */
     public function results()
     {
-       return $this->query
-                    ->get()
-                    ->map(function(ClientInvoice $invoice) {
-                        return [
-                            'invoice_id' => $invoice->id,
-                            'client' => $invoice->client->nameLastFirst(),
-                            'created_at' => $invoice->created_at->format('m/d/Y'),
-                            'amount'=> $invoice->amount
-                        ];
-                    })
-                    ->sort(function($a, $b){
-                      if($a["client"] == $b["client"]){
-                          return 0;
-                      }
-                      return ($a["client"] < $b["client"]) ? -1 : 1;
-                    })
-                    ->values();
-
+        return $this->query
+            ->get()
+            ->map(function (ClientInvoice $invoice) {
+                return [
+                    'invoice_id' => $invoice->id,
+                    'client' => $invoice->client->nameLastFirst(),
+                    'created_at' => $invoice->created_at->format('m/d/Y'),
+                    'amount' => $invoice->amount
+                ];
+            })
+            ->sort(function ($a, $b) {
+                if ($a["client"] == $b["client"]) {
+                    return 0;
+                }
+                return ($a["client"] < $b["client"]) ? -1 : 1;
+            })
+            ->values();
     }
 }

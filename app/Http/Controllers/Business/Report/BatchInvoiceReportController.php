@@ -1,6 +1,4 @@
 <?php
-
-
 namespace App\Http\Controllers\Business\Report;
 
 use App\Billing\ClientInvoice;
@@ -14,13 +12,11 @@ use App\Client;
 use Illuminate\Support\Facades\App;
 use Illuminate\Http\Response;
 
-use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
-
-use Log;
-
 class BatchInvoiceReportController extends Controller
 {
     /**
+     * Get the Batch Invoice Report.
+     *
      * @param Request $request
      * @param BulkInvoiceReport $report
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
@@ -52,13 +48,19 @@ class BatchInvoiceReportController extends Controller
         ]);
     }
 
-    public function print(Request $request){
-
+    /**
+     * Download PDF of all invoices.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function print(Request $request)
+    {
         $invoiceIds = explode(",", $request->ids);
         $view = InvoiceViewFactory::HTML_VIEW;
         $html = "";
 
-        foreach($invoiceIds as $id){
+        foreach ($invoiceIds as $id) {
             $invoice = ClientInvoice::find($id);
             $strategy = InvoiceViewFactory::create($invoice, $view);
             $viewGenerator = new InvoiceViewGenerator($strategy);
@@ -71,11 +73,9 @@ class BatchInvoiceReportController extends Controller
             $snappy->getOutputFromHtml($html),
             200,
             array(
-                'Content-Type'          => 'application/pdf',
-                'Content-Disposition'   => 'attachment; filename="invoices.pdf"'
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="invoices.pdf"'
             )
         );
-
     }
-
 }

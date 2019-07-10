@@ -1,5 +1,4 @@
 <template>
-
     <b-card header="Batch Invoice Report"
             header-text-variant="white"
             header-bg-variant="info"
@@ -49,7 +48,6 @@
                 </b-form>
             </div>
         </div>
-
         <div class="row">
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -60,16 +58,10 @@
                 </b-table>
             </div>
         </div>
-
     </b-card>
-
-
-
-
 </template>
 
 <script>
-
     import BusinessLocationFormGroup from '../../business/BusinessLocationFormGroup';
     import Constants from '../../../mixins/Constants';
     import DatePicker from '../../DatePicker';
@@ -125,21 +117,20 @@
         },
 
         methods: {
-
             async generateReport() {
-
                 this.loading = true;
                 this.form.get('/business/reports/batch-invoice')
-                    .then( ({ data }) => {
+                    .then(({data}) => {
                         this.items = data;
                     })
-                    .catch(() => {})
+                    .catch(() => {
+                    })
                     .finally(() => {
                         this.loading = false;
                     });
             },
 
-            printInvoices(){
+            printInvoices() {
                 let invoiceIds = [];
 
                 for (const [key, value] of Object.entries(this.items)) {
@@ -148,21 +139,10 @@
 
                 let url = '/business/reports/batch-invoice/print/?ids=' + invoiceIds;
 
-                var link=document.createElement('a');
+                var link = document.createElement('a');
                 document.body.appendChild(link);
-                link.href=url ;
+                link.href = url;
                 link.click();
-
-                /*
-                axios.get('/business/reports/batch-invoice/print/?ids=' + invoiceIds)
-                    .then( ({ data }) => {
-
-                    })
-                    .catch(() => {})
-                    .finally(() => {
-                        this.loading = false;
-                    });
-                 */
             }
         },
     }
