@@ -73,10 +73,11 @@
     import BusinessLocationFormGroup from '../../business/BusinessLocationFormGroup';
     import Constants from '../../../mixins/Constants';
     import DatePicker from '../../DatePicker';
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
         components: { BusinessLocationFormGroup, DatePicker },
-        mixins: [Constants],
+        mixins: [Constants, FormatsNumbers],
 
         props: {
             clients: {
@@ -116,6 +117,7 @@
                         key: 'amount',
                         label: 'Amount',
                         sortable: true,
+                        formatter: x => this.moneyFormat(x),
                     },
                 ],
                 items: null,
