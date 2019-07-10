@@ -192,6 +192,10 @@ class ShiftController extends BaseController
     {
         $this->authorize('update', $shift);
 
+        if ($shift->flagManager()->isDurationMismatch()) {
+            return new ErrorResponse(412, 'This shift cannot be confirmed due to a time duration mismatch.');
+        }
+
         if ($shift->statusManager()->ackConfirmation()) {
             if (!$shift->isVerified()) {
                 event(new UnverifiedShiftConfirmed($shift));

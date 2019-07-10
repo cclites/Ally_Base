@@ -183,4 +183,19 @@ class ClockInTest extends TestCase
         $this->assertEquals(50, $shift->caregiver_rate);
         $this->assertEquals(60, $shift->client_rate);
     }
+
+    /** @test */
+    function if_a_caregiver_has_neither_fixed_nor_regular_rates_it_should_default_to_general_0()
+    {
+        ClientRate::whereRaw(1)->delete();
+
+        $this->assertCount(0, ClientRate::all());
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->clockInWithoutSchedule($this->client);
+
+        $this->assertFalse($shift->fixed_rates);
+        $this->assertEquals(0, $shift->caregiver_rate);
+        $this->assertEquals(0, $shift->client_rate);
+    }
 }
