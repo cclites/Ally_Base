@@ -215,9 +215,10 @@
 
         <div class="row">
             <div class="footer-left">
+                &nbsp;
                 {{--<p>This is a statement. Your payment was processed on {{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }} using your payment information on file.</p>--}}
             </div>
-            <div class="footer-right">
+            <div class="footer-right" style="padding-right: 15px;">
                 <table class="table">
                     <tbody>
                     <tr>
