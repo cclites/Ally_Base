@@ -134,6 +134,20 @@
                                 @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                             </td>
                         </tr>
+                        @if( filled($recipient->getBirthdate()))
+                        <tr>
+                            <td colspan="2">
+                                {{ \Carbon\Carbon::parse($recipient->getBirthdate())->format('m/d/Y') }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if( filled($recipient->getHic()))
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $recipient->getHic() }}</strong>
+                            </td>
+                        </tr>
+                        @endif
                     @endif
                 </table>
             </div>
@@ -177,6 +191,20 @@
                                 @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
                             </td>
                         </tr>
+                        @if( filled($subject->getBirthdate()))
+                        <tr>
+                            <td colspan="2">
+                                {{ \Carbon\Carbon::parse($subject->getBirthdate())->format('m/d/Y') }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if( filled($subject->getHic()))
+                        <tr>
+                            <td colspan="2">
+                                <strong>{{ $subject->getHic() }}</strong>
+                            </td>
+                        </tr>
+                        @endif
                     </table>
                 </div>
             </div>
