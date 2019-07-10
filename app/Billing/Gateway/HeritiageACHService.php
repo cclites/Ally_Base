@@ -9,11 +9,11 @@ use App\Billing\Payments\Methods\BankAccount;
 class HeritiageACHService implements ACHDepositInterface
 {
     /**
-     * @var \App\Billing\Gateway\HeritageACHFile
+     * @var \App\Billing\Gateway\AchExportFile
      */
     protected $ACHFile;
 
-    public function __construct(HeritageACHFile $ACHFile)
+    public function __construct(AchExportFile $ACHFile)
     {
         $this->ACHFile = $ACHFile;
     }

@@ -11,7 +11,7 @@ use App\PhoneNumber;
 class OfflineAchFileGateway implements ACHPaymentInterface
 {
     /**
-     * @var \App\Billing\Gateway\HeritageACHFile
+     * @var \App\Billing\Gateway\AchExportFile
      */
     protected $ACHFile;
 
@@ -20,7 +20,7 @@ class OfflineAchFileGateway implements ACHPaymentInterface
      */
     public $billing = [];
 
-    public function __construct(HeritageACHFile $ACHFile)
+    public function __construct(AchExportFile $ACHFile)
     {
         $this->ACHFile = $ACHFile;
     }
@@ -52,7 +52,7 @@ class OfflineAchFileGateway implements ACHPaymentInterface
     public function depositFunds(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
         $transaction = new GatewayTransaction([
-            'gateway_id' => 'heritage',
+            'gateway_id' => $this->ACHFile->getBankName(),
             'transaction_id' => $this->generateId(),
             'transaction_type' => 'credit',
             'amount' => $amount,
@@ -83,7 +83,7 @@ class OfflineAchFileGateway implements ACHPaymentInterface
      */
     private function generateId()
     {
-        return 'heritage-' . base_convert(bcmul(microtime(true), 1000), 10, 36);
+        return $this->ACHFile->getBankName() . '-' . base_convert(bcmul(microtime(true), 1000), 10, 36);
     }
 
     /**
@@ -116,7 +116,7 @@ class OfflineAchFileGateway implements ACHPaymentInterface
     public function chargeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
         $transaction = new GatewayTransaction([
-            'gateway_id' => 'heritage',
+            'gateway_id' => $this->ACHFile->getBankName(),
             'transaction_id' => $this->generateId(),
             'transaction_type' => 'sale',
             'amount' => $amount,

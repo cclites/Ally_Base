@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Billing\Actions\ProcessChainDeposits;
 use App\Billing\Actions\ProcessChainPayments;
-use App\Billing\Gateway\HeritageACHFile;
+use App\Billing\Gateway\AchExportFile;
 use App\Billing\Gateway\HeritiageACHService;
 use App\Billing\Gateway\OfflineAchFileGateway;
 use App\Billing\Payments\DepositMethodFactory;
@@ -57,22 +57,30 @@ class AchOfflineChargeCommand extends Command
 
         $bank = $this->choice("Which bank would you like use to process ACH payments?", ["Heritage", "KeyBank"], 0);
 
-        if (! $this->confirm("You are about to process outstanding payment invoices for {$chain->name} with {$bank} Bank.  Do you wish to continue?")) {
+        if (! $this->confirm("You are about to process all outstanding ACH and ACH-P client invoices for {$chain->name} using a {$bank} Bank export file.  Do you wish to continue?")) {
             $this->error('Operation canceled');
             return false;
         }
 
-        $achFile = new HeritageACHFile();
+        $achFile = new AchExportFile(null, strtolower($bank));
         $achGateway = new OfflineAchFileGateway($achFile);
         $methodFactory = new PaymentMethodFactory($achGateway, null);
         $action = new ProcessChainPayments($methodFactory);
 
-//        \DB::beginTransaction();
+        \DB::beginTransaction();
         $results = $action->processPayments($chain, [Business::class, BankAccount::class]);
         $collection = PaymentLog::collection($results)->toArray(null);
         $filepath = $achFile->write();
-//        \DB::commit();
+        \DB::commit();
         $this->info("ACH export file written to $filepath.");
+
+        $headers = ['log_id', 'batch_id', 'payment_id', 'payment_method', 'amount', 'success', 'exception', 'error_message', 'invoice ids'];
+        $collection = collect($collection)->map(function ($item) {
+            $item['invoices'] = collect($item['invoices'])->pluck('id')->implode(', ');
+            return $item;
+        });
+        $this->info("Results:");
+        $this->table($headers, $collection);
 
         return true;
     }
