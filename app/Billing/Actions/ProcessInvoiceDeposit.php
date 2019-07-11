@@ -77,11 +77,23 @@ class ProcessInvoiceDeposit
     public function payInvoices(iterable $invoices, DepositMethodFactory $methodFactory): Deposit
     {
         $amount = 0.0;
+        $allowZeroBalanceTransaction = false;
+
         foreach($invoices as $invoice) {
             $amount = add($amount, $invoice->getAmountDue());
         }
         if ($amount <= 0) {
-            throw new PaymentAmountError("The invoices had less than or equal to $0 due.");
+            if (floatval($amount) === floatval(0)
+                && $invoices->where('amount', '<', '0')->count() > 0) {
+                // There is a zero balance amount but the invoices list contains a
+                // negative adjustment, which means there must also be a positive
+                // invoice that it cancels out.  We allow the system to continue,
+                // because ProcessDeposit->deposit() will catch this and create
+                // a dummy deposit entry and it will never hit the gateway.
+                $allowZeroBalanceTransaction = true;
+            } else {
+                throw new PaymentAmountError("The invoices had less than or equal to $0 due.");
+            }
         }
 
         $recipient = null;
@@ -95,10 +107,10 @@ class ProcessInvoiceDeposit
 
         $deposit = null;
         if ($recipient instanceof Caregiver) {
-            $deposit = $this->depositProcessor->depositToCaregiver($recipient, $methodFactory, $amount);
+            $deposit = $this->depositProcessor->depositToCaregiver($recipient, $methodFactory, $amount, 'USD', $allowZeroBalanceTransaction);
         }
         else if ($recipient instanceof Business) {
-            $deposit = $this->depositProcessor->depositToBusiness($recipient, $methodFactory, $amount);
+            $deposit = $this->depositProcessor->depositToBusiness($recipient, $methodFactory, $amount, 'USD', $allowZeroBalanceTransaction);
         }
 
         if (!$deposit) {
