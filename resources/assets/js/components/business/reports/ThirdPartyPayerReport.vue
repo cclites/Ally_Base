@@ -2,7 +2,7 @@
     <b-container fluid>
         <b-row>
             <b-col>
-                <b-card header="Select Date Range"
+                <b-card header="Third party payer report for invoiced shifts"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -152,6 +152,7 @@
                     { key: 'client_name', label: 'Client', sortable: true, },
                     { key: 'hic', label: 'HIC#', sortable: true, },
                     { key: 'dob', label: 'Client DOB', sortable: true, },
+                    { key: 'code', label: 'Diagnosis Code', sortable: true, },
                     { key: 'caregiver', label: 'Caregiver', sortable: true, },
                     { key: 'payer', label: 'Payer', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },

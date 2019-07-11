@@ -142,7 +142,7 @@ class ThirdPartyPayerReport extends BaseReport
 
                     $serviceAuth = '';
                     if(filled($shift->schedule)){
-                        $serviceAuth = $this->findServiceAuth($shift->schedule->getStartDateTime(), $shift->service->id, $invoice->client->serviceAuthorizations);
+                        $serviceAuth = $this->findServiceAuth($shift->checked_in_time, $shift->service->id, $invoice->client->serviceAuthorizations);
                     }
 
                     $data =  [
@@ -161,6 +161,7 @@ class ThirdPartyPayerReport extends BaseReport
                         'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
                         'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
                         'service_auth' => optional($serviceAuth)->service_auth_id,
+                        'code' => $invoice->client->medicaid_diagnosis_codes,
                     ];
 
                     $itemsArray->push($data);
