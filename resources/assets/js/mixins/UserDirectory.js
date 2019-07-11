@@ -80,7 +80,7 @@ export default {
                 let value = this.filters[key];
                 value = typeof value  == 'boolean' ? Number(value) : value;
 
-                return (value === null || value === '') ? undefined : `${key}=${value}`;
+                return (value === null || value === '') ? undefined : `filter_${key}=${value}`;
             });
     
             filtersToApply = filtersToApply.filter(value => typeof value !== 'undefined'); // Remove all non applied filters
