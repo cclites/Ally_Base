@@ -55,7 +55,13 @@
                          :items="items"
                          class="report-table"
                 >
+                    <template slot="invoice_name" scope="row">
+                        <a :href="'/business/client/invoices/' + row.item.invoice_id" target="_blank">
+                            {{ row.item.invoice_name }}
+                        </a>
+                    </template>
                 </b-table>
+
             </div>
         </div>
     </b-card>
