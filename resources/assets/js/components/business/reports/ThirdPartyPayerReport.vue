@@ -37,11 +37,6 @@
                             <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
                         </b-select>
 
-                        <b-select v-model="form.caregiver" class="mb-2 mr-2">
-                            <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                        </b-select>
-
                         <b-form-select v-model="form.payer" class="mb-2 mr-2" name="payer">
                             <option value="">All Payers</option>
                             <option v-for="p in payers" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -121,10 +116,6 @@
                 type: [Array, Object],
                 default: () => { return []; },
             },
-            caregivers: {
-                type: [Array, Object],
-                default: () => { return []; },
-            },
             payers: {
                 type: [Array, Object],
                 default: () => { return []; },
@@ -148,7 +139,6 @@
                     end: moment().format('MM/DD/YYYY'),
                     type: '',
                     client: '',
-                    caregiver: '',
                     payer:'',
                     json: 1
                 }),
@@ -175,7 +165,8 @@
                     { key: 'evv', label: 'EVV', sortable: true },
                     { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
-                items: null,
+
+                items: [],
                 item:'',
                 hasRun: false,
                 businesses: [],
@@ -187,8 +178,6 @@
                 this.busy = true;
                 this.form.get('/business/reports/third-party-payer')
                     .then( ({ data }) => {
-
-                        console.table(data);
 
                         this.items = data;
                         this.totalRows = this.items.length;

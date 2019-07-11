@@ -37,23 +37,19 @@ class ThirdPartyPayerReportController extends Controller
                     $request->business,
                     $request->type,
                     $request->client,
-                    $request->caregiver,
                     $request->payer
                 );
 
-            $results = $report->rows();
-
-            return response()->json($results[0]);
+            return response($report->rows());
         }
 
         $clients = new ClientDropdownResource(Client::forRequestedBusinesses()->active()->get());
-        $caregivers = new CaregiverDropdownResource(Caregiver::forRequestedBusinesses()->active()->get());
         $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->get());
 
         return view_component(
             'third-party-payer',
             'Third Party Payer Report',
-            compact(['clients', 'caregivers', 'payers']),
+            compact(['clients', 'payers']),
             [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
