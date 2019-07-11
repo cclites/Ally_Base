@@ -1,10 +1,13 @@
 <template>
     <b-card title="Admin Pending Deposits">
         <b-form-group>
-            <b-form-select v-model="chainId">
-                <option value="">--Select a Chain--</option>
-                <option v-for="chain in chains" :value="chain.id">{{ chain.name }} ({{ chain.id }})</option>
-            </b-form-select>
+            <div class="d-flex">
+                <b-form-select v-model="chainId">
+                    <option value="">--Select a Chain--</option>
+                    <option v-for="chain in chains" :value="chain.id">{{ chain.name }} ({{ chain.id }})</option>
+                </b-form-select>
+                <b-btn variant="secondary" :disabled="!chainId" @click="loadInvoices()">Refresh</b-btn>
+            </div>
             <b-btn variant="primary" v-if="chainLoaded" @click="generateInvoices()">Generate Invoices (1st)</b-btn>
             <b-btn variant="info" v-if="chainLoaded && invoices.length > 0" @click="deposit()">Process Deposits (2nd)</b-btn>
         </b-form-group>
