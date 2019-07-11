@@ -73,18 +73,24 @@ class ServiceAuthUsageReport extends BaseReport
     protected function mapPeriodStats(ClientAuthorization $auth, array $periods) : iterable
     {
         return collect($periods)->map(function ($period) use ($auth) {
-            /** @var \Carbon\Carbon $start */
-            $start = $period[0];
-            /** @var \Carbon\Carbon $end */
-            $end = $period[1];
-
             $calculator = new ServiceAuthCalculator($auth);
 
+            $allowedHours = $auth->getUnits();
+            $confirmed = $calculator->getConfirmedUsage($period);
+            $unconfirmed = $calculator->getUnconfirmedUsage($period);
+            $scheduled = $calculator->getScheduledUsage($period);
+
             return [
-                'allowed' => $auth->getUnits(),
+                'period_display' => $period[0]->toDateString() . ' - ' . $period[1]->toDateString(),
+                'period' => [$period[0]->toDateString(), $period[1]->toDateString()],
+                'allowed_units' => $auth->units,
+                'allowed_hours' => $allowedHours,
+                'confirmed_shift_hours' => $confirmed,
+                'unconfirmed_shift_hours' => $unconfirmed,
+                'scheduled_hours' => $scheduled,
+                'remaining_hours' => subtract($allowedHours, add($confirmed, $scheduled)),
             ];
-//            dd($calculator->get());
-        });
+        })->values();
     }
 
     /**

@@ -24,6 +24,43 @@ class ServiceAuthCalculator
         $this->auth = $clientAuthorization;
     }
 
+    public function getConfirmedUsage(array $forPeriod) : float
+    {
+        $query = $this->getMatchingShiftsQuery($forPeriod)
+            ->whereConfirmed();
+
+        return $this->getUtilizationFromQuery($query);
+    }
+
+    public function getUnconfirmedUsage(array $forPeriod) : float
+    {
+        $query = $this->getMatchingShiftsQuery($forPeriod)
+            ->whereUnconfirmed();
+
+        return $this->getUtilizationFromQuery($query);
+    }
+
+    public function getScheduledUsage(array $forPeriod) : float
+    {
+        $query = $this->getMatchingSchedulesQuery($forPeriod);
+
+        return $this->getUtilizationFromQuery($query);
+    }
+
+    public function getUtilizationFromQuery($query) : float
+    {
+        if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+            // If fixed limit then just check the count of the fixed shifts
+            return floatval($query->count());
+        } else {
+            // Get total hours billed for each shift on this date only
+            return $query->get()
+                ->reduce(function (float $carry, $item) {
+                    return add($carry, $item->getBillableHours($this->auth->service_id));
+                }, floatval(0.0));
+        }
+    }
+
     /**
      * Check if the shift exceeds any client service authorizations that
      * were active during the time of the shift and return the
@@ -114,32 +151,34 @@ class ServiceAuthCalculator
      * Build query to get the shifts that match the attributes of the
      * specified ClientAuthorization.
      *
-     * @param ClientAuthorization $auth
      * @param array $authPeriodDates
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function getMatchingShiftsQuery(ClientAuthorization $auth, array $authPeriodDates) : Builder
+    protected function getMatchingShiftsQuery(array $authPeriodDates) : Builder
     {
-        $query = Shift::where('client_id', $this->client->id)
+        $query = Shift::with('services', 'service')
+            ->where('client_id', $this->auth->client_id)
             ->whereNotNull('checked_out_time')
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
                     ->whereBetween('checked_out_time', $authPeriodDates, 'OR');
             });
 
-        if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+        if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
+        } else {
+            $query->where('fixed_rates', 0);
         }
 
         // Must match service
-        $query->where(function($q) use ($auth) {
-            $q->where(function($q3) use ($auth) {
-                $q3->where('service_id', $auth->service_id);
-            })->orWhereHas('services', function ($q2) use ($auth) {
-                    $q2->where('service_id', $auth->service_id);
-                });
+        $query->where(function($q) {
+            $q->where(function($q3) {
+                $q3->where('service_id', $this->auth->service_id);
+            })->orWhereHas('services', function ($q2) {
+                $q2->where('service_id', $this->auth->service_id);
+            });
         });
 
         return $query;
@@ -149,15 +188,11 @@ class ServiceAuthCalculator
      * Build query to get the schedules that match the attributes of the
      * specified ClientAuthorization.
      *
-     * @param ClientAuthorization $auth
-     * @param Carbon $date
-     * @param int|null $ignoreId
+     * @param array $authPeriodDates
      * @return Builder
      */
-    protected function getMatchingSchedulesQuery(ClientAuthorization $auth, Carbon $date, ?int $ignoreId = null) : Builder
+    protected function getMatchingSchedulesQuery(array $authPeriodDates) : Builder
     {
-        $authPeriodDates = $auth->getPeriodDates($date, $this->client->getTimezone());
-
         // get the proper "ends_at" SQL syntax depending on the database type (MySQL/SQLite)
         if (config('app.env') === 'testing') {
             $endsAt = \DB::raw("DATETIME(starts_at, printf('+%s minute', duration))");
@@ -165,31 +200,29 @@ class ServiceAuthCalculator
             $endsAt = \DB::raw('DATE_ADD(starts_at, INTERVAL duration MINUTE)');
         }
 
-        $query = Schedule::where('client_id', $this->client->id)
+        $query = Schedule::where('client_id', $this->auth->client_id)
             ->whereDoesntHave('shifts')
             ->where(function ($q) use ($authPeriodDates, $endsAt) {
                 return $q->whereBetween('starts_at', $authPeriodDates)
                     ->whereBetween($endsAt, $authPeriodDates, 'OR');
             });
 
-        if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
+        if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
+        } else {
+            $query->where('fixed_rates', 0);
         }
 
         // Must match service
-        $query->where(function($q) use ($auth) {
-            $q->where(function($q3) use ($auth) {
-                $q3->where('service_id', $auth->service_id);
-            })->orWhereHas('services', function ($q2) use ($auth) {
-                    $q2->where('service_id', $auth->service_id);
+        $query->where(function($q) {
+            $q->where(function($q3) {
+                $q3->where('service_id', $this->auth->service_id);
+            })->orWhereHas('services', function ($q2) {
+                    $q2->where('service_id', $this->auth->service_id);
                 });
         });
-
-        if (! empty($ignoreId)) {
-            $query->whereNotIn('id', [$ignoreId]);
-        }
 
         return $query;
     }

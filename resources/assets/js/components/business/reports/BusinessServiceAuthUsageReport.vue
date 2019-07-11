@@ -55,42 +55,22 @@
                     <b-col>
                         <loading-card v-if="busy" />
                         <div v-else class="table-responsive">
-                            <table class="table" id="auths-table">
-                                <thead>
-                                    <th>Auth ID</th>
-                                    <th>Auth Begin</th>
-                                    <th>Auth End</th>
-                                    <th>Service</th>
-                                    <th>Unit Type</th>
-    <!--                                <th>Payer</th>-->
-                                    <th style="width: 200px">Code</th>
-                                    <th style="width: 250px">Notes</th>
-                                    <th>Days Until End</th>
-                                </thead>
-                                <tbody v-for="client in items" :key="client.id" class="mb-3">
-                                    <tr>
-                                        <td colspan="9">
-                                            <strong><a :href="`/business/clients/${client.id}#insurance_service_auth`" target="_blank">{{ client.name }}</a></strong>
-                                        </td>
-                                    </tr>
-                                    <tr v-for="auth in client.authorizations" :key="auth.id" class="striped">
-                                        <td>{{ auth.id }}</td>
-                                        <td>{{ formatDate(auth.effective_start) }}</td>
-                                        <td>{{ formatDate(auth.effective_end) }}</td>
-                                        <td>{{ auth.service ? auth.service.name : '-' }}</td>
-                                        <td>{{ formatUnitType(auth.unit_type) }}</td>
-    <!--                                    <td>{{ auth.payer_id }}</td>-->
-                                        <td>{{ auth.service_auth_id }}</td>
-                                        <td>{{ auth.notes }}</td>
-                                        <td>{{ auth.days_until_end }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="9">
-                                            Total Authorizations Ending for {{ client.name }}: {{ client.total }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div v-for="auth in items" :key="auth.id" class="mb-4">
+                                <div class="mb-2">
+                                    <strong>
+                                        {{ auth.service_name }} - {{ auth.service_code }}
+                                        <span v-if="auth.name">
+                                         (Auth: <a :href="`/business/clients/${auth.client_id}#insurance_service_auth`" target="_blank">{{ auth.name }}</a>)
+                                        </span>
+                                    </strong>
+                                </div>
+                                <b-table bordered striped hover show-empty
+                                    :items="auth.periods"
+                                    :fields="fields"
+                                    sort-by="period"
+                                >
+                                </b-table>
+                            </div>
                             <div v-if="!busy && items.length == 0" class="text-center mb-3 mt-4 text-muted">
                                 {{ emptyText }}
                             </div>
@@ -130,7 +110,7 @@
                     businesses: '',
                     start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                     end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
-                    client_id: '',
+                    client_id: '1',
                     days: 30,
                     json: 1,
                 }),
@@ -138,6 +118,15 @@
                 items: [],
                 hasRun: false,
                 loadingClients: false,
+                fields: {
+                    period_display: { label: 'Period', sortable: true },
+                    // allowed_units: { label: '', sortable: true },
+                    confirmed_shift_hours: { label: 'Confirmed', sortable: true },
+                    // unconfirmed_shift_hours: { label: '', sortable: true },
+                    scheduled_hours: { label: 'Scheduled', sortable: true },
+                    allowed_hours: { label: 'Allowed (Hours)', sortable: true },
+                    remaining_hours: { label: 'Remaining', sortable: true },
+                },
             }
         },
 

@@ -191,7 +191,6 @@ class ClientAuthorization extends AuditableModel
             list($start, $end) = $this->getPeriodDates($date);
 
             $periods->push([$start, $end]);
-//            $periods->push($start->toDateString() . ' - ' . $end->toDateString());
         }
 
         return $periods->unique()->toArray();
