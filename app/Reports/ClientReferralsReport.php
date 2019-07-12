@@ -6,9 +6,6 @@ use App\Client;
 use App\Business\Payer;
 use Carbon\Carbon;
 
-//TODO: remember to remove log import before committing.
-use Log;
-
 class ClientReferralsReport extends BaseReport
 {
     /**

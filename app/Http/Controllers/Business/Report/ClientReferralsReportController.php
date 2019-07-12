@@ -9,9 +9,6 @@ use App\Reports\ClientReferralsReport;
 use App\Http\Resources\ClientDropdownResource;
 use App\Client;
 
-//TODO: Remove logging import before committing
-use Log;
-
 /**
  *
  * @package App\Http\Controllers\Business\Report
