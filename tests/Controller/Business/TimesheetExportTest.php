@@ -30,8 +30,8 @@ class TimesheetExportTest extends TestCase
     public function testAnOfficeUserCanExportTimesheets()
     {
         $business = factory(Business::class)->create();
-        $client = factory(Client::class)->create(['business_id' => $business->id]);
-        $caregiver = factory(Caregiver::class)->create();
+        $client = factory(Client::class)->create(['business_id' => $business->id, 'firstname' => 'John', 'lastname' => 'Doe']);
+        $caregiver = factory(Caregiver::class)->create(['firstname' => 'Jane', 'lastname' => 'Doe']);
         $office_user = factory(OfficeUser::class)->create();
 
         $business->users()->attach($office_user->id);
@@ -42,7 +42,8 @@ class TimesheetExportTest extends TestCase
             'business_id' => $business->id,
             'caregiver_id' => $caregiver->id,
             'checked_in_time' => Carbon::now()->subDay(),
-            'checked_out_time' => Carbon::now()->subDay()->addHours(2)
+            'checked_out_time' => Carbon::now()->subDay()->addHours(2),
+            'caregiver_comments' => 'Test comments',
         ]);
 
         $this->actingAs($office_user->user);
@@ -55,8 +56,8 @@ class TimesheetExportTest extends TestCase
             'export_type' => 'text'
         ]);
 
-        $response->assertSeeText($client->name);
-        $response->assertSeeText($caregiver->name);
+        $response->assertSeeText('John Doe');
+        $response->assertSeeText('Jane Doe');
         $response->assertSeeText($shift->caregiver_comments);
 
     }
