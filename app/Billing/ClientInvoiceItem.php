@@ -81,14 +81,18 @@ class ClientInvoiceItem extends BaseInvoiceItem
     /**
      * Get the related invoiceable ShiftService.
      *
+     * @param bool $loadShift
      * @return ShiftService|null
      */
-    public function getShiftService() : ?ShiftService
+    public function getShiftService(bool $loadShift = false) : ?ShiftService
     {
         if ($this->invoiceable_type != 'shift_services') {
             return null;
         }
 
+        if ($loadShift) {
+            return ShiftService::with('shift')->find($this->invoiceable_id);
+        }
         return ShiftService::find($this->invoiceable_id);
     }
 }

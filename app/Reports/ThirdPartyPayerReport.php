@@ -5,7 +5,9 @@ namespace App\Reports;
 use App\Billing\ClientAuthorization;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -80,20 +82,119 @@ class ThirdPartyPayerReport extends BaseReport
         }
 
         if(filled($client)){
-            $this->query->whereHas('client', function($q) use($client){
-                $q->where('id', $client);
-            });
+            $this->query->where('client_id', $client);
         }
 
         if(filled($payer)){
-            $this->query->whereHas('client', function($q) use($payer){
-                $q->whereHas('payers', function($q1) use($payer){
-                    $q1->where('id', $payer);
-                });
-            });
+            $this->query->forPayer($payer);
         }
 
         return $this;
+    }
+
+    /**
+     * Return the collection of rows matching report criteria.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function results() : ?iterable
+    {
+        return $this->query->get()->map(function (ClientInvoice $invoice) {
+            return $invoice->getItems()->map(function (ClientInvoiceItem $item) use ($invoice) {
+                $data = [];
+                if ($shift = $item->getShift()) {
+                    $data = $this->mapShiftRecord($invoice, $shift);
+                } else if ($shiftService = $item->getShiftService(true)) {
+                    $data = $this->mapShiftServiceRecord($invoice, $shiftService);
+                } else {
+                    return null;
+                }
+
+                $serviceAuth = $this->findServiceAuth($data['date'], $data['service_id'], $invoice->client->serviceAuthorizations);
+                return array_merge($data, [
+                    'service_auth' => optional($serviceAuth)->service_auth_id,
+                    'unit_type' => optional($serviceAuth)->unit_type,
+                    'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $data['hours'])
+                ]);
+            })->values()->filter();
+        })->values()->flatten(1);
+    }
+
+    /**
+     * Map a Shift to a report row.
+     *
+     * @param ClientInvoice $invoice
+     * @param Shift $shift
+     * @return array
+     */
+    protected function mapShiftRecord(ClientInvoice $invoice, Shift $shift) : array
+    {
+        return [
+            'client_name' => $invoice->client->nameLastFirst,
+            'hic' => $invoice->client->hic,
+            'dob' => (new Carbon($invoice->client->user->date_of_birth))->format('m/d/Y'),
+            'caregiver' => optional($shift->caregiver)->nameLastFirst,
+            'payer' => $invoice->clientPayer->payer_name,
+            'rate' => $shift->getClientRate(),
+            'hours' => $shift->duration(),
+            'evv' => $shift->isVerified(),
+            'service_id' => $shift->service->id,
+            'service' => trim("{$shift->service->code} {$shift->service->name}"),
+            'billable' => $shift->getAmountInvoiced(),
+            'date' => $shift->checked_in_time->toDateString(),
+            'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
+            'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
+            'code' => $invoice->client->medicaid_diagnosis_codes,
+        ];
+    }
+
+    /**
+     * Map a ShiftService to a report row.
+     *
+     * @param ClientInvoice $invoice
+     * @param ShiftService $shiftService
+     * @return array
+     */
+    protected function mapShiftServiceRecord(ClientInvoice $invoice, ShiftService $shiftService) : array
+    {
+        return [
+            'client_name' => $invoice->client->nameLastFirst,
+            'hic' => $invoice->client->hic,
+            'dob' => (new Carbon($invoice->client->user->date_of_birth))->format('m/d/Y'),
+            'caregiver' => optional($shiftService->shift->caregiver)->nameLastFirst,
+            'payer' => $invoice->clientPayer->payer_name,
+            'rate' => $shiftService->getClientRate(),
+            'hours' => $shiftService->duration,
+            'evv' => $shiftService->shift->isVerified(),
+            'service_id' => $shiftService->service->id,
+            'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
+            'billable' => $shiftService->getAmountInvoiced(),
+            'date' => $shiftService->shift->checked_in_time->toDateString(),
+            'start' => (new Carbon($shiftService->shift->checked_in_time))->toDateTimeString(),
+            'end' => (new Carbon($shiftService->shift->checked_out_time))->toDateTimeString(),
+            'code' => $invoice->client->medicaid_diagnosis_codes,
+        ];
+    }
+
+    /**
+     * Map service auth units based on duration.
+     *
+     * @param null|string $unitType
+     * @param float $hours
+     * @return string
+     */
+    protected function mapUnits(?string $unitType, float $hours) : string
+    {
+        switch ($unitType) {
+            case '15m':
+                return (string) (floatval($hours) * floatval(60)) / floatval(15);
+            case 'fixed':
+                return 1;
+            case 'hourly':
+                return $hours;
+            default:
+                return '-';
+        }
     }
 
     /**
@@ -114,63 +215,5 @@ class ThirdPartyPayerReport extends BaseReport
             ->where('effective_start', '<=', $date)
             ->where('effective_end', '>=', $date)
             ->first();
-    }
-
-    /**
-     * Return the collection of rows matching report criteria.
-     *
-     * @return \Illuminate\Support\Collection
-     */
-    protected function results() : ?iterable
-    {
-        $itemsArray = collect();
-
-        $this->query
-            ->with(['client'])
-            ->get()
-            ->map(function (ClientInvoice $invoice) use($itemsArray){
-
-                $items = $invoice->getItems();
-
-                $items->map(function(ClientInvoiceItem $item) use($invoice, $itemsArray)
-                {
-                    $shift = ($item->getShift()) ? $item->getShift() : $item->getShiftService();
-
-                    if(!filled($shift)){
-                        return $item; //Can't continue, so return the item.
-                    }
-
-                    $serviceAuth = '';
-                    if(filled($shift->schedule)){
-                        $serviceAuth = $this->findServiceAuth($shift->checked_in_time, $shift->service->id, $invoice->client->serviceAuthorizations);
-                    }
-
-                    $data =  [
-                        'client_name' => $invoice->client->nameLastFirst,
-                        'hic' => $invoice->client->hic,
-                        'dob' => (new Carbon($invoice->client->user->date_of_birth))->format('m/d/Y'),
-                        'caregiver' => $shift->caregiver->name,
-                        'payer' => $invoice->clientPayer->payer_name,
-                        'units' => $item->units,
-                        'rate' => $shift->getClientRate(),
-                        'hours' => $shift->duration(),
-                        'evv' => $shift->isVerified(),
-                        'service' => $shift->service->name . " " . $shift->service->code,
-                        'billable' => $shift->costs()->getClientCost(false),
-                        'date' => $shift->checked_in_time->toDateString(),
-                        'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
-                        'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
-                        'service_auth' => optional($serviceAuth)->service_auth_id,
-                        'code' => $invoice->client->medicaid_diagnosis_codes,
-                    ];
-
-                    $itemsArray->push($data);
-
-                });
-
-            })
-            ->values();
-
-        return $itemsArray;
     }
 }
