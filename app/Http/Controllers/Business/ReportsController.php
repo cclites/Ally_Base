@@ -849,17 +849,17 @@ class ReportsController extends BaseController
         $report->forRequestedBusinesses();
         $report->query()->join('users','caregivers.id','=','users.id');
 
-        if($request->start_date && $request->end_date) {
-            $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
-            $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+        if($request->filter_start_date && $request->filter_end_date) {
+            $report->where('users.created_at', '>', (new Carbon($request->filter_start_date))->setTimezone('UTC')->setTime(0, 0, 0));
+            $report->where('users.created_at', '<', (new Carbon($request->filter_end_date))->setTimezone('UTC')->setTime(23, 59, 59));
             $report->query()->with('meta');
         }
 
-        if($request->has('active')) {
-            $report->where('users.active', $request->active);
+        if($request->has('filter_active')) {
+            $report->where('users.active', $request->filter_active);
         }
 
-        $report->applyColumnFilters($request->except(['start_date','end_date','active']));
+        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
 
         if ($report->count() > 1000) {
             // Limit to 1K caregivers for performance reasons
@@ -883,23 +883,23 @@ class ReportsController extends BaseController
     {
         $report = new ClientDirectoryReport();
         $report->forRequestedBusinesses();
-        $report->query()->join('users','clients.id','=','users.id');
+        $report->query()->join('users', 'clients.id', '=', 'users.id');
 
-        if($request->start_date && $request->end_date) {
-            $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
-            $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+        if ($request->filter_start_date && $request->filter_end_date) {
+            $report->where('users.created_at', '>', (new Carbon($request->filter_start_date))->setTimezone('UTC')->setTime(0, 0, 0));
+            $report->where('users.created_at', '<', (new Carbon($request->filter_end_date))->setTimezone('UTC')->setTime(23, 59, 59));
             $report->query()->with('meta');
         }
 
-        if($request->filled('active')) {
-            $report->where('users.active', $request->active);
+        if ($request->filled('filter_active')) {
+            $report->where('users.active', $request->filter_active);
         }
 
-        if($request->filled('client_type')) {
-            $report->where('client_type', $request->client_type);
+        if($request->filled('filter_client_type')) {
+            $report->where('client_type', $request->filter_client_type);
         }
 
-        $report->applyColumnFilters($request->except(['start_date','end_date','active']));
+        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active','filter_client_type']));
 
         if ($report->count() > 1000) {
             // Limit to 1K clients for performance reasons

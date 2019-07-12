@@ -44,7 +44,10 @@ export default {
             let items = this.data;
 
             if(start_date && end_date) {
-                items = items.filter(({user}) => moment(user.created_at).isBetween(start_date, end_date));
+                // Use first second and last second of the day to calculate between.
+                let startDateTime = moment(start_date).set({'hour': 0, 'minute': 0, 'seconds': 1});
+                let endDateTime = moment(end_date).set({'hour': 23, 'minute': 59, 'seconds': 59});
+                items = items.filter(({user}) => moment(user.created_at).isBetween(startDateTime, endDateTime));
             }
 
             if(typeof active == 'boolean') {
@@ -80,7 +83,7 @@ export default {
                 let value = this.filters[key];
                 value = typeof value  == 'boolean' ? Number(value) : value;
 
-                return (value === null || value === '') ? undefined : `${key}=${value}`;
+                return (value === null || value === '') ? undefined : `filter_${key}=${value}`;
             });
     
             filtersToApply = filtersToApply.filter(value => typeof value !== 'undefined'); // Remove all non applied filters
