@@ -124,8 +124,23 @@ class BatchInvoiceReport extends BaseReport
     public function print() : \Illuminate\Http\Response
     {
         $html = '';
+
+        $invoices = $this->query->with([
+            'payments',
+            'items',
+            'client',
+            'client.addresses',
+            'client.phoneNumbers',
+            'client.user',
+            'client.user.addresses',
+            'client.user.phoneNumbers',
+            'clientPayer',
+            'clientPayer.payer',
+            'client.business',
+        ])->get();
+
         // TODO: convert this to a reduce() function
-        foreach ($this->query->get() as $invoice) {
+        foreach ($invoices as $invoice) {
             $strategy = InvoiceViewFactory::create($invoice, InvoiceViewFactory::HTML_VIEW, true);
             $viewGenerator = new InvoiceViewGenerator($strategy);
             $html .= $viewGenerator->generateClientInvoice($invoice)->getContent();
