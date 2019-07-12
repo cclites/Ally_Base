@@ -140,11 +140,12 @@ class ThirdPartyPayerReport extends BaseReport
                     return Carbon::parse($item->date)->between($this->start, $this->end);
                 })
                 ->map(function (ClientInvoiceItem $item) use ($invoice) {
-                    $data = [];
+                    $data = ['billable' => $item->amount_due];
+
                     if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
-                        $data = $this->mapShiftRecord($invoice, $item->shift);
+                        $data += $this->mapShiftRecord($invoice, $item->shift);
                     } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
-                        $data = $this->mapShiftServiceRecord($invoice, $item->shiftService);
+                        $data += $this->mapShiftServiceRecord($invoice, $item->shiftService);
                     } else {
                         return null;
                     }
@@ -185,7 +186,6 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shift->isVerified(),
             'service_id' => $shift->service->id,
             'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'billable' => $shift->getAmountInvoiced(),
             'date' => $shift->checked_in_time->toDateString(),
             'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
             'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
@@ -215,7 +215,6 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shiftService->shift->isVerified(),
             'service_id' => $shiftService->service->id,
             'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'billable' => $shiftService->getAmountInvoiced(),
             'date' => $shiftService->shift->checked_in_time->toDateString(),
             'start' => (new Carbon($shiftService->shift->checked_in_time))->toDateTimeString(),
             'end' => (new Carbon($shiftService->shift->checked_out_time))->toDateTimeString(),
