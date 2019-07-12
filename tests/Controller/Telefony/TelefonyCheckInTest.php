@@ -2,6 +2,7 @@
 namespace Tests\Controller\Telefony;
 
 use App\Caregiver;
+use App\Http\Controllers\Api\Telefony\TelefonyCheckInController;
 use App\PhoneNumber;
 use App\Shift;
 
@@ -20,15 +21,15 @@ class TelefonyCheckInTest extends TelefonyBase
     {
         $response = $this->telefonyPost('check-in/response');
         $response->assertSee('<Say');
-        $response->assertSee('Please enter the last 4 digits of your phone number for identification');
-        $response->assertSee('<Gather numDigits="4" action="' . route('telefony.check-in.accept-digits') . '">');
+        $response->assertSee(TelefonyCheckInController::PromptForCaregiverPhone);
+        $response->assertSee('<Gather numDigits="10" action="' . route('telefony.check-in.accept-digits') . '">');
     }
 
     public function test_accept_caregiver_phone_number_digits()
     {
-        $phone = factory(PhoneNumber::class)->make(['national_number' => '5555551000']);
+        $phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $this->caregiver->phoneNumbers()->save($phone);
-        $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 1000]);
+        $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 1234567890]);
         $response->assertSee('<Say');
         $response->assertSee('If this is ' . $this->caregiver->firstname . ', press 1 to finish clocking in');
         $response->assertSee('<Gather numDigits="1" action="' . route('telefony.check-in', [$this->caregiver]) . '">');
@@ -39,9 +40,9 @@ class TelefonyCheckInTest extends TelefonyBase
         // Tests a caregiver of the same business but not assigned to the client
         $caregiver = factory(Caregiver::class)->create();
         $this->business->assignCaregiver($caregiver);
-        $phone = factory(PhoneNumber::class)->make(['national_number' => '5555552000']);
+        $phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $caregiver->phoneNumbers()->save($phone);
-        $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 2000]);
+        $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 1234567890]);
         $response->assertSee('<Say');
         $response->assertSee('If this is ' . $caregiver->firstname . ', press 1 to finish clocking in');
         $response->assertSee('<Gather numDigits="1" action="' . route('telefony.check-in', [$caregiver]) . '">');

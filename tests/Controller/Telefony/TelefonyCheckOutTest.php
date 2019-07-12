@@ -20,16 +20,16 @@ class TelefonyCheckOutTest extends TelefonyBase
     {
         $response = $this->telefonyPost('check-out/response');
         $response->assertSee('<Say');
-        $response->assertSee('Please enter the last 4 digits of your phone number for identification');
-        $response->assertSee('<Gather numDigits="4" action="' . route('telefony.check-out.accept-digits') . '">');
+        $response->assertSee(TelefonyCheckOutController::PromptForCaregiverPhone);
+        $response->assertSee('<Gather numDigits="10" action="' . route('telefony.check-out.accept-digits') . '">');
     }
 
     public function test_accept_caregiver_phone_number_digits_with_shift()
     {
         $shift = $this->createShift();
-        $phone = factory(PhoneNumber::class)->make(['national_number' => '5555551000']);
+        $phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $this->caregiver->phoneNumbers()->save($phone);
-        $response = $this->telefonyPost('check-out/accept-digits', ['Digits' => 1000]);
+        $response = $this->telefonyPost('check-out/accept-digits', ['Digits' => 1234567890]);
         $response->assertSee('<Say');
         $response->assertSee('If this is ' . $this->caregiver->firstname . ', press 2 to continue clocking out');
         $response->assertSee('<Gather numDigits="1" action="' . route('telefony.check-out', [$shift]) . '">');
@@ -37,11 +37,11 @@ class TelefonyCheckOutTest extends TelefonyBase
 
     public function test_accept_caregiver_phone_number_digits_without_shift()
     {
-        $phone = factory(PhoneNumber::class)->make(['national_number' => '5555551000']);
+        $phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $this->caregiver->phoneNumbers()->save($phone);
-        $response = $this->telefonyPost('check-out/accept-digits', ['Digits' => 1000]);
+        $response = $this->telefonyPost('check-out/accept-digits', ['Digits' => 1234567890]);
         $response->assertSee('<Say');
-        $response->assertSee('You entered, 1,,0,,0,,0, but ' . $this->caregiver->firstname . ' is not clocked in');
+        $response->assertSee('You entered, 1,,2,,3,,4,,5,,6,,7,,8,,9,,0, but ' . $this->caregiver->firstname . ' is not clocked in');
     }
 
     public function test_check_out_on_a_shift_asks_about_mileage()
