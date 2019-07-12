@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Billing\Actions\ProcessChainDeposits;
-use App\Billing\Gateway\HeritageACHFile;
+use App\Billing\Gateway\AchExportFile;
 use App\Billing\Gateway\HeritiageACHService;
 use App\Billing\Payments\DepositMethodFactory;
 use App\BusinessChain;
@@ -50,7 +50,7 @@ class ACHHeritageDeposit extends Command
         $this->output->writeln("You are about to process outstanding deposit invoices for {$chain->name}.");
 
         if ($this->confirm('Do you wish to continue?')) {
-            $achFile = new HeritageACHFile();
+            $achFile = new AchExportFile();
             $achProcessor = new HeritiageACHService($achFile);
             $methodFactory = new DepositMethodFactory($achProcessor);
             $processChainDeposits = new ProcessChainDeposits($methodFactory);
