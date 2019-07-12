@@ -464,13 +464,6 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Pre-Check Billing',
-                        url: 'reports/pre-check-billing',
-                        description: 'Pre-Check Billing Report',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-                    {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
                         description: 'Claims AR Aging Report',

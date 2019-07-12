@@ -160,7 +160,6 @@ Vue.component('business-deposit-history', require('./components/BusinessDepositH
 Vue.component('business-notification', require('./components/BusinessNotification.vue'));
 Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
-Vue.component('business-pre-check-billing-report', require('./components/business/reports/BusinessPreCheckBillingReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
