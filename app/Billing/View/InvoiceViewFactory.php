@@ -33,7 +33,7 @@ class InvoiceViewFactory
         self::PDF_VIEW,
     ];
 
-    public static function create(InvoiceInterface $invoice, string $viewType = 'html'): InvoiceViewStrategy
+    public static function create(InvoiceInterface $invoice, string $viewType = 'html', bool $batch = false): InvoiceViewStrategy
     {
         if (!in_array(get_class($invoice), self::$invoiceTypes)) {
             throw new \InvalidArgumentException("The provided invoice type is invalid.");
@@ -54,7 +54,7 @@ class InvoiceViewFactory
                 $view = 'invoices.claim_invoice';
                 break;
             default:
-                $view = 'invoices.client_invoice';
+                $view = 'invoices.client_invoice' . ($batch ? '_nude' : '');
         }
 
         switch($viewType) {
