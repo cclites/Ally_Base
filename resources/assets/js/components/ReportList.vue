@@ -503,6 +503,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Client Referrals',
+                        url: 'reports/client-referrals',
+                        description: 'Client Referrals Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
                         description: 'Shows a list of caregivers with incomplete account data.',
