@@ -128,6 +128,9 @@ class ClientAuthorization extends AuditableModel
     public function getUnits(?Carbon $date = null): ?float
     {
         if ($this->period == self::PERIOD_SPECIFIC_DAYS) {
+            if (empty($date)) {
+                return floatval(0);
+            }
             return $this->unitsForDay(strtolower($date->format('l')));
         }
 
