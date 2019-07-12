@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Billing\Payer;
@@ -13,22 +14,23 @@ use App\Reports\MedicaidBillingReport;
 use App\Reports\ThirdPartyPayerReport;
 use Illuminate\Http\Request;
 
-use Log;
-
 class ThirdPartyPayerReportController extends Controller
 {
     /**
      * Get the Third Party Payer Report
      *
      * @param Request $request
-     * @param MedicaidBillingReport $report
+     * @param ThirdPartyPayerReport $report
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Request $request, ThirdPartyPayerReport $report)
     {
         if ($request->filled('json')) {
 
             $timezone = auth()->user()->role->getTimezone();
+
+            $this->authorize('read', Business::find($request->business));
 
             $report->setTimezone($timezone)
                 ->applyFilters(

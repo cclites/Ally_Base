@@ -137,8 +137,8 @@
             return {
                 form: new Form({
                     business: '',
-                    start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
-                    end: moment().format('MM/DD/YYYY'),
+                    start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     type: '',
                     client: '',
                     payer:'',
@@ -159,9 +159,9 @@
                     { key: 'payer', label: 'Payer', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
-                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
-                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
-                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
+                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x) },
+                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTime(x) },
+                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTime(x) },
                     { key: 'units', label: 'Units', sortable: true },
                     { key: 'hours', label: 'Hours', sortable: true },
                     { key: 'rate', label: 'Cost/Hour', sortable: true, formatter: x => this.moneyFormat(x) },

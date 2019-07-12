@@ -24,12 +24,22 @@ class ThirdPartyPayerReport extends BaseReport
     protected $timezone;
 
     /**
+     * @var \Carbon\Carbon
+     */
+    protected $start;
+
+    /**
+     * @var \Carbon\Carbon
+     */
+    protected $end;
+
+    /**
      * ThirdPartyPayerReport constructor.
      * @param ClientInvoiceQuery $query
      */
     public function __construct(ClientInvoiceQuery $query)
     {
-        $this->query = $query->with(['client', 'client.payers']);
+        $this->query = $query->with(['items', 'client', 'clientPayer']);
     }
 
     /**
@@ -55,7 +65,6 @@ class ThirdPartyPayerReport extends BaseReport
         return $this;
     }
 
-
     /**
      * Create the query chain
      *
@@ -69,23 +78,27 @@ class ThirdPartyPayerReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $payer): self
     {
-        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
-        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
-        $this->query->whereBetween('created_at', [$start, $end]);
+        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
+        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+
+        $this->query->whereHas('items', function ($q) {
+            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
+                ->whereBetween('date', [$this->start, $this->end]);
+        });
 
         $this->query->forBusiness($business);
 
-        if(filled($type)){
-            $this->query->whereHas('client', function($q) use($type){
+        if (filled($type)) {
+            $this->query->whereHas('client', function ($q) use ($type) {
                 $q->where('client_type', $type);
             });
         }
 
-        if(filled($client)){
+        if (filled($client)) {
             $this->query->where('client_id', $client);
         }
 
-        if(filled($payer)){
+        if (filled($payer)) {
             $this->query->forPayer($payer);
         }
 
@@ -100,24 +113,33 @@ class ThirdPartyPayerReport extends BaseReport
     protected function results() : ?iterable
     {
         return $this->query->get()->map(function (ClientInvoice $invoice) {
-            return $invoice->getItems()->map(function (ClientInvoiceItem $item) use ($invoice) {
-                $data = [];
-                if ($shift = $item->getShift()) {
-                    $data = $this->mapShiftRecord($invoice, $shift);
-                } else if ($shiftService = $item->getShiftService(true)) {
-                    $data = $this->mapShiftServiceRecord($invoice, $shiftService);
-                } else {
-                    return null;
-                }
+            return $invoice->items
+                ->whereIn('invoiceable_type', ['shifts', 'shift_services'])
+                ->filter(function (ClientInvoiceItem $item) {
+                    return Carbon::parse($item->date)->between($this->start, $this->end);
+                })
+                ->map(function (ClientInvoiceItem $item) use ($invoice) {
+                    $data = [];
+                    if ($shift = $item->getShift()) {
+                        $data = $this->mapShiftRecord($invoice, $shift);
+                    } else if ($shiftService = $item->getShiftService(true)) {
+                        $data = $this->mapShiftServiceRecord($invoice, $shiftService);
+                    } else {
+                        return null;
+                    }
 
-                $serviceAuth = $this->findServiceAuth($data['date'], $data['service_id'], $invoice->client->serviceAuthorizations);
-                return array_merge($data, [
-                    'service_auth' => optional($serviceAuth)->service_auth_id,
-                    'unit_type' => optional($serviceAuth)->unit_type,
-                    'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $data['hours'])
-                ]);
-            })->values()->filter();
-        })->values()->flatten(1);
+                    $serviceAuth = $this->findServiceAuth($data['date'], $data['service_id'], $invoice->client->serviceAuthorizations);
+                    return array_merge($data, [
+                        'service_auth' => optional($serviceAuth)->service_auth_id,
+                        'unit_type' => optional($serviceAuth)->unit_type,
+                        'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $data['hours'])
+                    ]);
+                })
+                ->values()
+                ->filter();
+        })
+        ->values()
+        ->flatten(1);
     }
 
     /**
@@ -130,7 +152,9 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftRecord(ClientInvoice $invoice, Shift $shift) : array
     {
         return [
+            'shift_id' => $shift->id,
             'client_name' => $invoice->client->nameLastFirst,
+            'client_id' => $invoice->client_id,
             'hic' => $invoice->client->hic,
             'dob' => (new Carbon($invoice->client->user->date_of_birth))->format('m/d/Y'),
             'caregiver' => optional($shift->caregiver)->nameLastFirst,
@@ -158,7 +182,9 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftServiceRecord(ClientInvoice $invoice, ShiftService $shiftService) : array
     {
         return [
+            'shift_id' => $shiftService->shift->id,
             'client_name' => $invoice->client->nameLastFirst,
+            'client_id' => $invoice->client_id,
             'hic' => $invoice->client->hic,
             'dob' => (new Carbon($invoice->client->user->date_of_birth))->format('m/d/Y'),
             'caregiver' => optional($shiftService->shift->caregiver)->nameLastFirst,
