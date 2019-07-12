@@ -59,7 +59,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             ->limit(1)
             ->value('name');
 
-
         $minId = 1000;
         if (!$lastName) {
             $nextId = $minId;

@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers\Business\Report;
+
+use App\Reports\PayerInvoiceReport;
+use http\Env\Response;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Billing\Payer;
+use App\Http\Resources\PayersDropdownResource;
+
+/**
+ * Class PayerInvoiceReportController
+ * @package App\Http\Controllers\Business\Report
+ */
+class PayerInvoiceReportController extends Controller
+{
+    /**
+     * @param Request $request
+     * @param PayerInvoiceReport $report
+     * @return PayerInvoiceReport|\Illuminate\Contracts\View\Factory|\Illuminate\Support\Collection|\Illuminate\View\View
+     */
+    public function index(Request $request, PayerInvoiceReport $report){
+
+        if ($request->filled('json')) {
+
+            $timezone = auth()->user()->role->getTimezone();
+
+            $report->setTimezone($timezone)
+                    ->applyFilters(
+                        $request->start_date,
+                        $request->end_date,
+                        intval($request->business_id),
+                        intval($request->payer_id)
+
+                    );
+            return $report->rows();
+        }
+
+        $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->ordered()->get());
+
+        return view_component('payer-invoice-report', 'Payer Invoice Report', compact('payers'), [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+    }
+}

@@ -38,6 +38,8 @@ Route::post('/account-setup/caregivers/{token}/step3', 'CaregiverSetupController
 Route::get('/account-setup/caregivers/{token}/terms', 'CaregiverSetupController@terms');
 Route::get('/account-setup/caregivers/{token}/check', 'CaregiverSetupController@checkStep');
 
+
+
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
 
@@ -347,6 +349,7 @@ Route::group([
     Route::get('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@index')->name('reports.caregiver_stats');
     Route::post('reports/caregiver-stats', 'Business\Report\CaregiverStatsController@reportData')->name('reports.caregiver_stats.data');
 
+    Route::get('reports/payer-invoice-report', 'Business\Report\PayerInvoiceReportController@index')->name('reports.payer-invoice-report');
     Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
     Route::get('reports/projected-billing/filters', 'Business\Report\ProjectedBillingReportController@filterOptions')->name('reports.projected-billing.filters');
     Route::get('reports/projected-billing/print', 'Business\Report\ProjectedBillingReportController@print')->name('reports.projected-billing.print');

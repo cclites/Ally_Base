@@ -496,6 +496,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Payers Invoices',
+                        url: 'reports/payer-invoice-report',
+                        description: 'Payers Invoices Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
                         description: 'Shows a list of caregivers with incomplete account data.',
