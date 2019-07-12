@@ -91,10 +91,13 @@
 <script>
     import BusinessLocationSelect from "../../business/BusinessLocationSelect";
     import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
         name: "PayerInvoiceReport",
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
+        mixins: [FormatsDates, FormatsNumbers],
         props: {
             payers: '',
         },
@@ -116,6 +119,7 @@
                         key: 'date',
                         label: 'Date',
                         sortable: true,
+                        formatter: (value) => { return this.formatDate(value) }
                     },
                     {
                         key: 'service',
@@ -151,16 +155,19 @@
                         key: 'rate',
                         label: 'Rate',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'charges',
                         label: 'Charges',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'due',
                         label: 'Due From Payer',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                 ],
                 loading: false,
@@ -183,7 +190,6 @@
                     .finally(() => {
                         this.loading = false;
                     });
-
             },
             print(){
                 $(".payers-invoice-table").print();

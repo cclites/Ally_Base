@@ -56,7 +56,7 @@ class PayerInvoiceReport extends BaseReport
      * @param string|null $charged
      * @return PayerInvoiceReport
      */
-    public function applyFilters(string $startDate, string $endDate, ?int $payerId, int $businessId, ?string $confirmed, ?string $charged) : self
+    public function applyFilters(string $startDate, string $endDate, int $businessId, ?int $payerId) : self
     {
         $this->query->whereHas('client', function($q) use($businessId){
             return $q->where('business_id', $businessId);
@@ -72,6 +72,7 @@ class PayerInvoiceReport extends BaseReport
                return $q->where('payer_id', $payerId);
             });
         }
+
         return $this;
     }
 

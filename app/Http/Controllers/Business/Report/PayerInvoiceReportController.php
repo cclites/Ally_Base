@@ -30,10 +30,9 @@ class PayerInvoiceReportController extends Controller
                     ->applyFilters(
                         $request->start_date,
                         $request->end_date,
-                        intval($request->payer_id),
                         intval($request->business_id),
-                        $request->confirmed,
-                        $request->charged
+                        intval($request->payer_id)
+
                     );
             return $report->rows();
         }
