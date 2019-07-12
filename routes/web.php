@@ -293,6 +293,9 @@ Route::group([
     Route::get('reports/shifts/reload/{shift}', 'Business\Report\ShiftHistoryReportController@reloadShift')->name('reports.shifts.reload');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
+
+    Route::get('reports/third-party-payer', 'Business\Report\ThirdPartyPayerReportController@index')->name('reports.third-party');
+
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
     Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');
     Route::get('reports/reconciliation', 'Business\ReportsController@reconciliation')->name('reports.reconciliation');

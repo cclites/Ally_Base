@@ -456,13 +456,23 @@
                         category: 2,
                         allowed: ['office_user'],
                     },
+                    /*
+                    Chad Note: Leaving this for now in case they want it back
                     {
                         name: 'Medicaid Billing',
                         url: 'reports/medicaid-billing',
                         description: 'Medicaid Billing Report',
                         category: 5,
                         allowed: ['office_user'],
+                    },*/
+                    {
+                        name: '3rd Party Payer',
+                        url: 'reports/third-party-payer',
+                        description: '3rd Party Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
                     },
+
                     {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',

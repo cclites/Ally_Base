@@ -87,6 +87,15 @@ class ClientInvoiceQuery extends BaseQuery
         return $this;
     }
 
+    function forPayer(int $payerId) : self
+    {
+        $this->whereHas('clientPayer', function ($q) use ($payerId) {
+            $q->where('payer_id', $payerId);
+        });
+
+        return $this;
+    }
+
     function onlineOnly(): self
     {
         $this->where('offline', false);
