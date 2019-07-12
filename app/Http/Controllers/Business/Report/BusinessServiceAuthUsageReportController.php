@@ -8,7 +8,7 @@ use App\Http\Resources\ClientDropdownResource;
 use App\Reports\ServiceAuthUsageReport;
 use Illuminate\Http\Request;
 
-class BusinessServiceAuthUsageReport extends Controller
+class BusinessServiceAuthUsageReportController extends Controller
 {
     /**
      * Get the Service Authorizations Usage Report
@@ -31,7 +31,7 @@ class BusinessServiceAuthUsageReport extends Controller
             return response()->json($results);
         }
 
-        return view_component('business-service-auth-usage-report', 'Service Authorizations Usage Report', [], [
+        return view_component('business-service-auth-usage-report', 'Service Authorization Usage Report', [], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
