@@ -29,8 +29,8 @@ class SavePhoneNumberRequest extends FormRequest
             'number' => ['required', new PhonePossible()],
             'extension' => 'nullable|numeric',
             'type' => 'required',
-            'user_id' => 'sometimes|exists:users,id',
-            'notes' =>'nullable|string'// Only for office users or admins
+            'user_id' => 'sometimes|exists:users,id', // Only for office users or admins
+            'notes' =>'nullable|string'
         ];
     }
 }
