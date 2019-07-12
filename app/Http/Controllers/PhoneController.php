@@ -28,6 +28,7 @@ class PhoneController extends Controller
         $this->authorize('create', [PhoneNumber::class, $data]);
 
         $phone = new PhoneNumber($data);
+
         $phone->input($data['number'], $data['extension']);
         if ($phone->save()) {
             return response()->json($phone);
