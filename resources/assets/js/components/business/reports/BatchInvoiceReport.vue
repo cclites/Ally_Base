@@ -137,17 +137,9 @@
             },
 
             printInvoices() {
-                let invoiceIds = [];
-
-                for (const [key, value] of Object.entries(this.items)) {
-                    invoiceIds.push(value.invoice_id);
-                }
-
-                let url = '/business/reports/batch-invoice/print/?ids=' + invoiceIds;
-
                 var link = document.createElement('a');
                 document.body.appendChild(link);
-                link.href = url;
+                link.href = this.form.toQueryString('/business/reports/batch-invoice?print=1');
                 link.click();
             }
         },

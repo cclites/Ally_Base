@@ -7,12 +7,9 @@
  * @var \Illuminate\Support\Collection|App\Billing\Payment[] $payments
  */
 ?>
-@extends('invoices.layout')
-
-@section('items')
+<div class="" style="page-break-after: always;">
+    @include('invoices.partials.header')
     @include('invoices.partials.items_table')
-@endsection
-
-@section('payments')
     @include('invoices.partials.client_payments_table')
-@endsection
+    @include('invoices.partials.footer')
+</div>
