@@ -39,8 +39,8 @@
 
                         <b-form-select v-model="form.payer" class="mb-2 mr-2" name="payer">
                             <option value="">All Payers</option>
-                            <option value="0">OFFLINE</option>
-                            <option value="1">PRIVATE PAY</option>
+                            <option :value="PRIVATE_PAY_ID">PRIVATE PAY</option>
+                            <option :value="OFFLINE_PAY_ID">OFFLINE</option>
                             <option v-for="p in payers" :key="p.id" :value="p.id">{{ p.name }}</option>
                         </b-form-select>
 
