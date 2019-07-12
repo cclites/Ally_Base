@@ -3,8 +3,10 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 use App\Client;
+use Carbon\CarbonPeriod;
 
 /**
  * App\Billing\ClientAuthorization
@@ -182,6 +184,22 @@ class ClientAuthorization extends AuditableModel
         }
     }
 
+    public function getPeriodsForRange(Carbon $start, Carbon $end) : array
+    {
+        $periods = collect([]);
+        foreach (CarbonPeriod::create($start, $end) as $date) {
+            if (! $this->isEffectiveOn($date)) {
+                continue;
+            }
+
+            list($start, $end) = $this->getPeriodDates($date);
+
+            $periods->push([$start, $end]);
+        }
+
+        return $periods->unique()->toArray();
+    }
+
     /**
      * Get the units for the day of the week based on
      * the daily settings on the model.
@@ -196,6 +214,65 @@ class ClientAuthorization extends AuditableModel
         }
 
         return $this->attributes[$dayOfTheWeek];
+    }
+
+    /**
+     * Get the number of used units from total number of hours.
+     *
+     * @param float $hours
+     * @return float
+     */
+    public function getUnitsFromHours(float $hours) : float
+    {
+        if ($this->unit_type == self::UNIT_TYPE_FIFTEEN) {
+            return multiply($hours,4);
+        }
+
+        // Otherwise units are hourly units.
+        return $hours;
+    }
+
+    /**
+     * Get the number of used hours from total number of units.
+     *
+     * @param float $units
+     * @return float
+     */
+    public function getHoursFromUnits(float $units) : float
+    {
+        if ($units === floatval(0)) {
+            return floatval(0);
+        }
+
+        if ($this->unit_type == self::UNIT_TYPE_FIFTEEN) {
+            return divide(multiply($units,15), 60);
+        }
+
+        // Otherwise units are hourly units.
+        return $units;
+    }
+
+    /**
+     * Get an instance of the Authorization's ServiceAuthCalculator.
+     *
+     * @return ServiceAuthCalculator
+     */
+    public function getCalculator() : ServiceAuthCalculator
+    {
+        return new ServiceAuthCalculator($this);
+    }
+
+    /**
+     * Check if this auth is effective for a given date.
+     *
+     * @param Carbon $date
+     * @return bool
+     */
+    public function isEffectiveOn(Carbon $date) : bool
+    {
+        $start = Carbon::parse($this->effective_start)->setTime(0, 0, 0);
+        $end = Carbon::parse($this->effective_end)->setTime(23, 59, 59);
+        return $date->between($start, $end);
     }
 
     // **********************************************************
@@ -214,5 +291,28 @@ class ClientAuthorization extends AuditableModel
     {
         return $query->where('effective_start', '<=', $date->toDateString())
             ->where('effective_end', '>=', $date->toDateString());
+    }
+
+    /**
+     * Get authorizations that were effective anywhere during
+     * the given date range.
+     *
+     * @param $query
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return mixed
+     */
+    public function scopeEffectiveDuringRange($query, Carbon $start, Carbon $end)
+    {
+        return $query->where(function ($q) use ($start, $end) {
+            $q->where(function ($q) use ($start, $end) {
+                $q->where('effective_start', '<=', $start->toDateString())
+                    ->orWhere('effective_start', '<=', $end->toDateString());
+            })
+            ->where(function ($q) use ($start, $end) {
+                $q->where('effective_end', '>=', $start->toDateString())
+                    ->orWhere('effective_end', '>=', $end->toDateString());
+            });
+        });
     }
 }

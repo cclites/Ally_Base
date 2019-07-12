@@ -8,7 +8,7 @@
                         <b-form-input v-model="form.name" type="text" required />
                         <input-help :form="form" field="name"></input-help>
                     </b-form-group>
-                    <b-form-group label="HSPCS Code" label-for="code">
+                    <b-form-group label="HCPCS Code" label-for="code">
                         <b-form-input v-model="form.code" type="text" />
                         <input-help :form="form" field="code"></input-help>
                     </b-form-group>
@@ -22,14 +22,21 @@
                 </b-col>
             </b-row>
         </b-container>
-        <div slot="modal-footer">
-            <b-button variant="success"
-                      type="submit"
-                      :disabled="loading"
-            >
-                {{ buttonText }}
-            </b-button>
-            <b-btn variant="default" @click="showModal=false">Close</b-btn>
+        <div slot="modal-footer" class="w-100">
+            <div class="d-flex">
+                <div class="f-1 text-left">
+                    <a href="https://hcpcscodes.org/" target="_blank">HCPCS Code Lookup</a>
+                </div>
+                <div class="ml-auto">
+                    <b-button variant="success"
+                              type="submit"
+                              :disabled="loading"
+                    >
+                        {{ buttonText }}
+                    </b-button>
+                    <b-btn variant="default" @click="showModal=false">Close</b-btn>
+                </div>
+            </div>
         </div>
     </b-modal>
     </form>

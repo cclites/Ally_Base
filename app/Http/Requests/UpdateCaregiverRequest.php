@@ -67,6 +67,9 @@ class UpdateCaregiverRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
+        if (isset($data['ssn'])) {
+            if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
+        }
         if (isset($data['date_of_birth'])) {
             $data['date_of_birth'] = filter_date($data['date_of_birth']);
         }

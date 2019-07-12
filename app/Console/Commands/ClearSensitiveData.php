@@ -89,6 +89,7 @@ class ClearSensitiveData extends Command
         $this->cleanClients();
         $this->cleanClientMedication();
         $this->clean3rdPartyCredentials();
+        $this->cleanFinancialAccounts();
 
         if (! $this->option('fix-only')) {
             // Only execute these options if fix-only if OFF
@@ -97,7 +98,6 @@ class ClearSensitiveData extends Command
             $this->cleanAddresses();
             $this->cleanPhoneNumbers();
             $this->cleanEmergencyContacts();
-            $this->cleanFinancialAccounts();
             $this->cleanNotes();
             $this->cleanShifts();
             $this->cleanSmsData();

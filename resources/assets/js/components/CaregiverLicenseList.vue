@@ -3,8 +3,8 @@
         header="Expirations"
         header-text-variant="white"
         header-bg-variant="info"
-        >
-        <b-btn @click="createLicense()" variant="info">Add Expiration</b-btn>
+    >
+        <b-btn @click="createLicense()" variant="info" class="mb-2">Add Expiration</b-btn>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -123,7 +123,8 @@
                         .then(function(response) {
                             let index = component.licenseItems.findIndex(item => item.id === license.id);
                             Vue.delete(component.licenseItems, index);
-                        });
+                        })
+                        .catch(() => {});
                 }
             }
         }

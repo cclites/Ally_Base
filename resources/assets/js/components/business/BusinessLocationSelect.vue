@@ -33,11 +33,15 @@
                         return this.value;
                     }
 
-                    if (this.officeUserSettings) {
-                        return this.officeUserSettings.default_business_id;
+                    if (! this.loaded) {
+                        if (this.officeUserSettings) {
+                            return this.officeUserSettings.default_business_id;
+                        }
+                        
+                        return this.$store.getters.defaultBusiness.id || '';
                     }
 
-                    return this.$store.getters.defaultBusiness.id || "";
+                    return '';
                 },
                 set(value) {
                     this.$emit('input', value);
@@ -56,7 +60,8 @@
 
         data() {
             return {
-            }
+                loaded: false,
+            };
         },
 
         methods: {
@@ -69,6 +74,7 @@
         mounted() {
             this.emitLocationCount();
             this.$emit('input', this.selectedBusiness);
+            this.loaded = true;
         },
 
         watch: {

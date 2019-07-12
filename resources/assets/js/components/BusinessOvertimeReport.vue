@@ -1,28 +1,51 @@
 <template>
     <b-card>
-        <b-row class="mb-2">
+        <b-row>
             <b-col>
-                <b-button-toolbar>
 
-                    <div class="d-flex">
-                        <date-picker v-model="search.start" class="mr-2"></date-picker>
-
-                        <date-picker v-model="search.end" class="mr-2"></date-picker>
-                    </div>
-                    <b-input-group class="w-25 mr-2">
-                        <b-form-select v-model="search.caregiver_id">
-                            <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">
-                                {{ caregiver.nameLastFirst }}
-                            </option>
-                        </b-form-select>
-                    </b-input-group>
-
-                    <b-button-group size="sm">
-                        <b-btn variant="info" @click="fetchData()" :disabled="loading">Search</b-btn>
-                        <b-btn @click="reset()">Reset</b-btn>
-                    </b-button-group>
-                </b-button-toolbar>
+                <date-picker v-model="search.start"
+                             placeholder="Start Date"
+                             weekStart="1"
+                             class="mb-2 mr-2"
+                >
+                </date-picker>
+            </b-col>
+            <b-col>
+                <date-picker v-model="search.end"
+                             placeholder="End Date"
+                             class="mb-2 mr-2"
+                ></date-picker>
+            </b-col>
+            <b-col>
+                <b-form-group>
+                    <select v-model="search.caregiver_id" class="mb-2 mr-2 form-control">
+                        <option value="">All Caregivers</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">
+                            {{ caregiver.nameLastFirst }}
+                        </option>
+                    </select>
+                </b-form-group>
+            </b-col>
+            <b-col>
+                <select v-model="search.status" class="mb-2 mr-2 form-control">
+                    <option value="">All Active/Inactive</option>
+                    <option value="active">Active Caregivers</option>
+                    <option value="inactive">Inactive Caregivers</option>
+                </select>
+            </b-col>
+            <b-col>
+                <business-location-form-group
+                        v-model="search.businesses"
+                        :allow-all="true"
+                        class="mb-2 mr-2"
+                        :label="null"
+                />
+            </b-col>
+            <b-col>
+                <b-button-group size="sm">
+                    <b-btn variant="info" @click="fetchData()" :disabled="loading">Search</b-btn>
+                    <b-btn @click="reset()">Reset</b-btn>
+                </b-button-group>
             </b-col>
         </b-row>
 
@@ -31,14 +54,14 @@
         <div v-show="! loading">
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
-                        :items="items"
-                        :fields="fields"
-                        :current-page="currentPage"
-                        :per-page="perPage"
-                        :filter="filter"
-                        :sort-by.sync="sortBy"
-                        :sort-desc.sync="sortDesc"
-                        @filtered="onFiltered"
+                         :items="items"
+                         :fields="fields"
+                         :current-page="currentPage"
+                         :per-page="perPage"
+                         :filter="filter"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                         @filtered="onFiltered"
                 >
                     <template scope="total">
 
@@ -55,15 +78,19 @@
                 </b-col>
             </b-row>
         </div>
+
     </b-card>
+
 </template>
 
 <script>
-    import Form from "../classes/Form";
-    import FormatsDates from '../mixins/FormatsDates'
+    import FormatsDates from '../mixins/FormatsDates';
+    import BusinessLocationSelect from '../components/business/BusinessLocationSelect';
+    import BusinessLocationFormGroup from '../components/business/BusinessLocationFormGroup';
 
     export default {
         mixins: [FormatsDates],
+        components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         created() {
             this.loadCaregivers();
@@ -109,9 +136,12 @@
                 items: [],
                 caregivers: [],
                 search: {
-                    start: '',
-                    end: '',
-                    caregiver_id: ''
+                    start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().format('MM/DD/YYYY'),
+                    caregiver_id: '',
+                    businesses: '',
+                    status: '',
+                    json: 1,
                 },
                 loading: false,
             }
@@ -128,27 +158,28 @@
                 this.loading = true;
                 axios.post('/business/reports/overtime', this.search)
                     .then(response => {
-                        this.items = response.data.results.map(function(item) {
+
+                        this.items = response.data.map(function(item) {
                             item['_rowVariant'] = (item.total >= 36) ? (item.total > 40 ? 'danger' : 'warning') : '';
                             return item;
                         });
                         this.totalRows = this.items.length;
-                        this.search.start = moment(response.data.date_range[0]).format('L');
-                        this.search.end = moment(response.data.date_range[1]).format('L');
                         this.loading = false;
                     }).catch(error => {
-                        console.error(error.response);
+                        console.error(error);
                         this.loading = false;
                     });
             },
 
             reset() {
                 this.search = {
-                    start: '',
-                    end: '',
-                    caregiver_id: ''
+                    start: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().format('MM/DD/YYYY'),
+                    caregiver_id: '',
+                    businesses: '',
+                    status: '',
                 };
-                this.fetchData();
+                this.items = [];
             },
 
             onFiltered(filteredItems) {
