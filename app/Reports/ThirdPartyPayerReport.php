@@ -39,7 +39,28 @@ class ThirdPartyPayerReport extends BaseReport
      */
     public function __construct(ClientInvoiceQuery $query)
     {
-        $this->query = $query->with(['items', 'client', 'clientPayer']);
+        $this->query = $query->with([
+            'items',
+
+            'items.shift',
+            'items.shift.service',
+            'items.shift.services',
+            'items.shift.shiftFlags',
+            'items.shift.caregiver',
+            'items.shift.caregiver.user',
+
+            'items.shiftService',
+            'items.shiftService.service',
+            'items.shiftService.shift',
+            'items.shiftService.shift.caregiver',
+            'items.shiftService.shift.shiftFlags',
+            'items.shiftService.shift.caregiver.user',
+
+            'client',
+            'client.user',
+            'clientPayer',
+            'client.serviceAuthorizations'
+        ]);
     }
 
     /**
@@ -120,10 +141,10 @@ class ThirdPartyPayerReport extends BaseReport
                 })
                 ->map(function (ClientInvoiceItem $item) use ($invoice) {
                     $data = [];
-                    if ($shift = $item->getShift()) {
-                        $data = $this->mapShiftRecord($invoice, $shift);
-                    } else if ($shiftService = $item->getShiftService(true)) {
-                        $data = $this->mapShiftServiceRecord($invoice, $shiftService);
+                    if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
+                        $data = $this->mapShiftRecord($invoice, $item->shift);
+                    } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
+                        $data = $this->mapShiftServiceRecord($invoice, $item->shiftService);
                     } else {
                         return null;
                     }
