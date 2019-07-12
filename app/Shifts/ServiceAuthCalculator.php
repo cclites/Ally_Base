@@ -1,10 +1,8 @@
 <?php
 namespace App\Shifts;
 
-use App\Client;
 use App\Schedule;
 use App\Shift;
-use Carbon\Carbon;
 use App\Billing\ClientAuthorization;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -47,17 +45,27 @@ class ServiceAuthCalculator
         return $this->getUtilizationFromQuery($query);
     }
 
-    public function getUtilizationFromQuery($query) : float
+    /**
+     * Query the matching shifts or schedules and get the number
+     * of units used for this service authorization.
+     *
+     * @param Builder $query
+     * @return float
+     */
+    public function getUtilizationFromQuery(Builder $query) : float
     {
         if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
             // If fixed limit then just check the count of the fixed shifts
             return floatval($query->count());
         } else {
             // Get total hours billed for each shift on this date only
-            return $query->get()
+            $hours = $query->get()
                 ->reduce(function (float $carry, $item) {
+                    // TODO: Create an interface for this that contains the getBillableHours method
                     return add($carry, $item->getBillableHours($this->auth->service_id));
                 }, floatval(0.0));
+
+            return $this->auth->getUnitsFromHours($hours);
         }
     }
 
@@ -175,9 +183,9 @@ class ServiceAuthCalculator
         // Must match service
         $query->where(function($q) {
             $q->where(function($q3) {
-                $q3->where('service_id', $this->auth->service_id);
+                $q3->where('service_id', '=', $this->auth->service_id);
             })->orWhereHas('services', function ($q2) {
-                $q2->where('service_id', $this->auth->service_id);
+                $q2->where('service_id', '=', $this->auth->service_id);
             });
         });
 

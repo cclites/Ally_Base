@@ -64,12 +64,63 @@
                                         </span>
                                     </strong>
                                 </div>
-                                <b-table bordered striped hover show-empty
-                                    :items="auth.periods"
-                                    :fields="fields"
-                                    sort-by="period"
-                                >
-                                </b-table>
+<!--                                <b-table bordered striped hover show-empty-->
+<!--                                    :items="auth.periods"-->
+<!--                                    :fields="fields"-->
+<!--                                    sort-by="period"-->
+<!--                                >-->
+<!--                                </b-table>-->
+                                <table class="table-fit-more table b-table table-striped table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" colspan="1"></th>
+                                            <th scope="col" colspan="2" class="bl bt br text-center p-0">Confirmed</th>
+                                            <th scope="col" colspan="2" class="bt br text-center p-0">Unconfirmed</th>
+                                            <th scope="col" colspan="2" class="bt br text-center p-0">Scheduled</th>
+                                            <th scope="col" colspan="2" class="bt br text-center p-0">Auth Limits</th>
+                                            <th scope="col" colspan="2" class="bt br text-center p-0">Remaining</th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="col">Period</th>
+                                            <!-- Confirmed -->
+                                            <th scope="col" class="bl">Units</th>
+                                            <th scope="col" class="br">Hours</th>
+                                            <!-- Unconfirmed -->
+                                            <th scope="col">Units</th>
+                                            <th scope="col" class="br">Hours</th>
+                                            <!-- Scheduled -->
+                                            <th scope="col">Units</th>
+                                            <th scope="col" class="br">Hours</th>
+                                            <!-- Auth Limits -->
+                                            <th scope="col">Units</th>
+                                            <th scope="col" class="br">Hours</th>
+                                            <!-- Remaining -->
+                                            <th scope="col">Units</th>
+                                            <th scope="col" class="br">Hours</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in auth.periods" :key="item.period_display" :class="item.is_exceeded ? 'table-danger' : ''">
+                                            <!-- Period -->
+                                            <td class="br">{{ item.period_display }}</td>
+                                            <!-- Confirmed -->
+                                            <td class="bl">{{ item.confirmed_units }}</td>
+                                            <td class="br">{{ item.confirmed_hours }}</td>
+                                            <!-- Unconfirmed -->
+                                            <td class="bl">{{ item.unconfirmed_units }}</td>
+                                            <td class="br">{{ item.unconfirmed_hours }}</td>
+                                            <!-- Scheduled -->
+                                            <td class="bl">{{ item.scheduled_units }}</td>
+                                            <td class="br">{{ item.scheduled_hours }}</td>
+                                            <!-- Auth Limits -->
+                                            <td class="bl">{{ item.allowed_units }}</td>
+                                            <td class="br">{{ item.allowed_hours }}</td>
+                                            <!-- Remaining -->
+                                            <td class="bl">{{ item.remaining_units }}</td>
+                                            <td class="br">{{ item.remaining_hours }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                             <div v-if="!busy && items.length == 0" class="text-center mb-3 mt-4 text-muted">
                                 {{ emptyText }}
@@ -200,4 +251,8 @@
     .table tbody tr.striped:nth-of-type(even) {
         background: #f2f4f8;
     }
+    .bt { border-top: 1px solid #e9ecef!important; }
+    .bl { border-left: 1px solid #e9ecef!important; }
+    .br { border-right: 1px solid #e9ecef!important; }
+    .bb { border-bottom: 1px solid #e9ecef!important; }
 </style>

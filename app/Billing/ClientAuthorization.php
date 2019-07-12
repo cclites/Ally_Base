@@ -3,6 +3,7 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 use App\Client;
 use Carbon\CarbonPeriod;
@@ -186,8 +187,11 @@ class ClientAuthorization extends AuditableModel
     public function getPeriodsForRange(Carbon $start, Carbon $end) : array
     {
         $periods = collect([]);
-
         foreach (CarbonPeriod::create($start, $end) as $date) {
+            if (! $this->isEffectiveOn($date)) {
+                continue;
+            }
+
             list($start, $end) = $this->getPeriodDates($date);
 
             $periods->push([$start, $end]);
@@ -210,6 +214,65 @@ class ClientAuthorization extends AuditableModel
         }
 
         return $this->attributes[$dayOfTheWeek];
+    }
+
+    /**
+     * Get the number of used units from total number of hours.
+     *
+     * @param float $hours
+     * @return float
+     */
+    public function getUnitsFromHours(float $hours) : float
+    {
+        if ($this->unit_type == self::UNIT_TYPE_FIFTEEN) {
+            return multiply($hours,4);
+        }
+
+        // Otherwise units are hourly units.
+        return $hours;
+    }
+
+    /**
+     * Get the number of used hours from total number of units.
+     *
+     * @param float $units
+     * @return float
+     */
+    public function getHoursFromUnits(float $units) : float
+    {
+        if ($units === floatval(0)) {
+            return floatval(0);
+        }
+
+        if ($this->unit_type == self::UNIT_TYPE_FIFTEEN) {
+            return divide(multiply($units,15), 60);
+        }
+
+        // Otherwise units are hourly units.
+        return $units;
+    }
+
+    /**
+     * Get an instance of the Authorization's ServiceAuthCalculator.
+     *
+     * @return ServiceAuthCalculator
+     */
+    public function getCalculator() : ServiceAuthCalculator
+    {
+        return new ServiceAuthCalculator($this);
+    }
+
+    /**
+     * Check if this auth is effective for a given date.
+     *
+     * @param Carbon $date
+     * @return bool
+     */
+    public function isEffectiveOn(Carbon $date) : bool
+    {
+        $start = Carbon::parse($this->effective_start)->setTime(0, 0, 0);
+        $end = Carbon::parse($this->effective_end)->setTime(23, 59, 59);
+        return $date->between($start, $end);
     }
 
     // **********************************************************

@@ -70,25 +70,38 @@ class ServiceAuthUsageReport extends BaseReport
         return $this;
     }
 
+    /**
+     * Calculate and return usage stats for an auth during
+     * a specific period.
+     *
+     * @param ClientAuthorization $auth
+     * @param array $periods
+     * @return iterable
+     */
     protected function mapPeriodStats(ClientAuthorization $auth, array $periods) : iterable
     {
         return collect($periods)->map(function ($period) use ($auth) {
-            $calculator = new ServiceAuthCalculator($auth);
-
+            $calculator = $auth->getCalculator();
             $allowedHours = $auth->getUnits();
             $confirmed = $calculator->getConfirmedUsage($period);
             $unconfirmed = $calculator->getUnconfirmedUsage($period);
             $scheduled = $calculator->getScheduledUsage($period);
+            $remaining = subtract($auth->units, add(add($confirmed, $scheduled), $unconfirmed));
 
             return [
                 'period_display' => $period[0]->toDateString() . ' - ' . $period[1]->toDateString(),
                 'period' => [$period[0]->toDateString(), $period[1]->toDateString()],
                 'allowed_units' => $auth->units,
                 'allowed_hours' => $allowedHours,
-                'confirmed_shift_hours' => $confirmed,
-                'unconfirmed_shift_hours' => $unconfirmed,
-                'scheduled_hours' => $scheduled,
-                'remaining_hours' => subtract($allowedHours, add($confirmed, $scheduled)),
+                'confirmed_units' => $confirmed,
+                'confirmed_hours' => $auth->getHoursFromUnits($confirmed),
+                'unconfirmed_units' => $unconfirmed,
+                'unconfirmed_hours' => $auth->getHoursFromUnits($unconfirmed),
+                'scheduled_units' => $scheduled,
+                'scheduled_hours' => $auth->getHoursFromUnits($scheduled),
+                'remaining_units' => $remaining,
+                'remaining_hours' => $auth->getHoursFromUnits($remaining),
+                'is_exceeded' => ($remaining < 0.00),
             ];
         })->values();
     }
