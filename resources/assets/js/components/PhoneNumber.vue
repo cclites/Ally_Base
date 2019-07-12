@@ -38,8 +38,6 @@
                         <input-help :form="form" field="extension" text="Enter an extension (Optional)."></input-help>
                     </b-form-group>
                 </b-col>
-
-
                 <b-col lg="12">
                     <b-form-group label="Notes" label-for="notes">
                         <b-textarea
@@ -51,8 +49,6 @@
                         </b-textarea>
                     </b-form-group>
                 </b-col>
-
-
                 <b-col lg="3" sm="4" xs="12">
                     <b-form-group>
                         <b-button variant="success"
