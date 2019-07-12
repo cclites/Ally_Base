@@ -1,7 +1,7 @@
 <template>
     <b-row>
         <b-col>
-            <b-card header="Service Authorizations Usage Report"
+            <b-card header="Service Authorization Usage Report"
                 header-text-variant="white"
                 header-bg-variant="info"
             >
@@ -161,8 +161,7 @@
                     businesses: '',
                     start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                     end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
-                    client_id: '1',
-                    days: 30,
+                    client_id: '',
                     json: 1,
                 }),
                 busy: false,

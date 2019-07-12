@@ -295,6 +295,9 @@ Route::group([
     Route::get('reports/shifts/reload/{shift}', 'Business\Report\ShiftHistoryReportController@reloadShift')->name('reports.shifts.reload');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
+
+    Route::get('reports/third-party-payer', 'Business\Report\ThirdPartyPayerReportController@index')->name('reports.third-party');
+
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
     Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');
     Route::get('reports/reconciliation', 'Business\ReportsController@reconciliation')->name('reports.reconciliation');
@@ -358,8 +361,8 @@ Route::group([
     Route::get('reports/account-setup', 'Business\Report\BusinessAccountSetupReportController@index')->name('reports.account-setup');
     Route::get('reports/service-auth-ending', 'Business\Report\BusinessServiceAuthEndingReport@index')->name('reports.service-auth-ending');
     Route::get('reports/service-auth-ending/clients', 'Business\Report\BusinessServiceAuthEndingReport@clients')->name('reports.service-auth-ending.clients');
-    Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReport@index')->name('reports.service-auth-usage');
-    Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReport@clients')->name('reports.service-auth-usage.clients');
+    Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
+    Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReportController@clients')->name('reports.service-auth-usage.clients');
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
 

@@ -456,13 +456,23 @@
                         category: 2,
                         allowed: ['office_user'],
                     },
+                    /*
+                    Chad Note: Leaving this for now in case they want it back
                     {
                         name: 'Medicaid Billing',
                         url: 'reports/medicaid-billing',
                         description: 'Medicaid Billing Report',
                         category: 5,
                         allowed: ['office_user'],
+                    },*/
+                    {
+                        name: '3rd Party Payer',
+                        url: 'reports/third-party-payer',
+                        description: '3rd Party Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
                     },
+
                     {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
@@ -500,16 +510,16 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Service Authorizations Ending Report',
+                        name: 'Service Authorization Ending Report',
                         url: 'reports/service-auth-ending',
-                        description: 'Shows all clients service auths',
+                        description: 'Shows all clients service auths and the dates they are ending.',
                         category: 2,
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Service Authorizations Usage Report',
+                        name: 'Service Authorization Usage Report',
                         url: 'reports/service-auth-usage',
-                        description: 'Shows usage report for clients service auths',
+                        description: 'Shows a usage report for client\'s service authorizations.',
                         category: 2,
                         allowed: ['office_user'],
                     },
