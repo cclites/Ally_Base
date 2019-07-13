@@ -8,6 +8,7 @@ use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
 use App\Business;
 use App\Client;
+use App\Services\TellusApiException;
 use App\Services\TellusService;
 use App\Shift;
 use Carbon\Carbon;
@@ -102,11 +103,12 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-            $xml = $tellus->convertArrayToXML($this->getData($claim));
-            if ($tellus->sendXml($xml)) {
+            if ($tellus->submitClaim($this->getData($claim))) {
                 // Success
                 return true;
             }
+        } catch (TellusApiException $ex) {
+            throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');

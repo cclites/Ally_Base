@@ -4,6 +4,8 @@ namespace App\Services;
 use DOMDocument;
 use SimpleXMLElement;
 
+class TellusApiException extends \Exception {}
+
 /**
  * Tellus XML API v2.0 implementation.
  *
@@ -42,27 +44,56 @@ class TellusService
     }
 
     /**
+     * Submit an array of claim records through the
+     * Tellus API service using an XML file.
+     *
+     * @param array $records
+     * @return bool
+     * @throws TellusApiException
+     */
+    public function submitClaim(array $records) : bool
+    {
+        $xml = $this->convertArrayToXML($records);
+
+        list($httpCode, $response) = $this->sendXml($xml);
+
+        if ($httpCode === 401) {
+            throw new TellusApiException('Invalid credentials or otherwise not authorized.');
+        }
+
+        return true;
+    }
+
+    /**
      * Send XML to the Tellus Endpoint.
      *
      * @param string $xml
-     * @return string|bool
-     * @throws \Exception
+     * @return array
+     * @throws TellusApiException
      */
-    public function sendXml(string $xml)
+    protected function sendXml(string $xml) : array
     {
-        $process = curl_init($this->endpoint);
-        curl_setopt($process, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
-        curl_setopt($process, CURLOPT_HEADER, 1);
-        curl_setopt($process, CURLOPT_USERPWD, $this->username . ":" . $this->password);
-        curl_setopt($process, CURLOPT_TIMEOUT, 60);
-        curl_setopt($process, CURLOPT_POST, 1);
-        curl_setopt($process, CURLOPT_POSTFIELDS, $xml);
-        curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+        try {
+            $process = curl_init($this->endpoint);
+            curl_setopt($process, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
+            curl_setopt($process, CURLOPT_HEADER, 1);
+            curl_setopt($process, CURLOPT_USERPWD, $this->username . ":" . $this->password);
+            curl_setopt($process, CURLOPT_TIMEOUT, 60);
+            curl_setopt($process, CURLOPT_POST, 1);
+            curl_setopt($process, CURLOPT_POSTFIELDS, $xml);
+            curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
 
-        $result = curl_exec($process);
-        curl_close($process);
+            if (! ($result = curl_exec($process))) {
+                throw new TellusApiException('Invalid response from Tellus API.');
+            }
+            $responseCode = curl_getinfo($process, CURLINFO_HTTP_CODE);
+            curl_close($process);
 
-        return $result;
+            return [$responseCode, $result];
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            throw new TellusApiException('Error connecting to the Tellus API.');
+        }
     }
 
     /**
@@ -70,15 +101,20 @@ class TellusService
      *
      * @param array $records
      * @return string
-     * @throws \Exception
+     * @throws TellusApiException
      */
-    public function convertArrayToXML(array $records)
+    protected function convertArrayToXML(array $records)
     {
-        $dom = new DOMDocument("1.0", "UTF-8");
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($this->getSimpleXml($records)->asXML());
-        return $dom->saveXML();
+        try {
+            $dom = new DOMDocument("1.0", "UTF-8");
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            $dom->loadXML($this->getSimpleXml($records)->asXML());
+            return $dom->saveXML();
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            throw new TellusApiException('Error generating Tellus XML claim file..');
+        }
     }
 
     /**
