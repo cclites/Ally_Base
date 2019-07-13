@@ -302,7 +302,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param string|null $ssn
      * @return string
      */
-    private function cleanSsn(?string $ssn) : string
+    private function cleanSsn(?string $ssn) : ?string
     {
         if (empty($ssn)) {
             return null;
