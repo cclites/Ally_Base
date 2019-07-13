@@ -103,7 +103,7 @@ class TellusService
      * @return string
      * @throws TellusApiException
      */
-    protected function convertArrayToXML(array $records)
+    public function convertArrayToXML(array $records)
     {
         try {
             $dom = new DOMDocument("1.0", "UTF-8");
