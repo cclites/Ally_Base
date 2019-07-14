@@ -430,3 +430,14 @@ label.required::after, legend.required::after {
         max-width: 1140px;
     }
 }
+
+#impersonator-bar {
+  background: #333;
+  color: #fff;
+  top: 0;
+  left: 0;
+  width: 100%;
+  position: fixed;
+  z-index: 500;
+  opacity: 0.5;
+}
