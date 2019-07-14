@@ -297,6 +297,7 @@ Route::group([
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
 
     Route::get('reports/third-party-payer', 'Business\Report\ThirdPartyPayerReportController@index')->name('reports.third-party');
+    Route::get('reports/payroll-summary-report', 'Business\Report\PayrollSummaryReportController@index')->name('reports.payroll-summary');
 
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
     Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');

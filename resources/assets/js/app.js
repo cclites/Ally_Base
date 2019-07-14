@@ -162,6 +162,8 @@ Vue.component('business-notification-list', require('./components/BusinessNotifi
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 
 Vue.component('third-party-payer', require('./components/business/reports/ThirdPartyPayerReport.vue'));
+Vue.component('payroll-summary-report', require('./components/business/reports/PayrollSummaryReport.vue'));
+
 
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
