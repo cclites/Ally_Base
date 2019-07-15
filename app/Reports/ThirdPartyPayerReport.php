@@ -7,8 +7,11 @@ use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\View\InvoiceViewFactory;
+use App\Billing\View\InvoiceViewGenerator;
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 
 class ThirdPartyPayerReport extends BaseReport
@@ -168,8 +171,9 @@ class ThirdPartyPayerReport extends BaseReport
                 ->values()
                 ->filter();
         })
-        ->values()
-        ->flatten(1);
+        ->flatten(1)
+        ->sortBy('client_name')
+        ->values();
     }
 
     /**
@@ -196,9 +200,9 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shift->isVerified(),
             'service_id' => $shift->service->id,
             'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'date' => $shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
-            'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
-            'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
+            'date' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
+            'start' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
+            'end' => Carbon::parse($shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
             'billable' => multiply(floatval($shift->duration()), floatval($shift->getClientRate())),
         ];
@@ -228,9 +232,9 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shiftService->shift->isVerified(),
             'service_id' => $shiftService->service->id,
             'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'date' => $shiftService->shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
-            'start' => (new Carbon($shiftService->shift->checked_in_time))->toDateTimeString(),
-            'end' => (new Carbon($shiftService->shift->checked_out_time))->toDateTimeString(),
+            'date' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
+            'start' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
+            'end' => Carbon::parse($shiftService->shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
             'billable' => multiply(floatval($shiftService->duration), floatval($shiftService->getClientRate())),
         ];

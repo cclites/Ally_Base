@@ -149,7 +149,7 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 30,
+                perPage: 50,
                 currentPage: 1,
                 sortBy: 'client_name',
                 sortDesc: false,
@@ -164,15 +164,14 @@
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
                     { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x) },
-                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
-                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
+                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTime(x) },
+                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTime(x) },
                     { key: 'units', label: 'Units', sortable: true },
                     { key: 'hours', label: 'Hours', sortable: true },
                     { key: 'rate', label: 'Cost/Hour', sortable: true, formatter: x => this.moneyFormat(x) },
                     { key: 'evv', label: 'EVV', sortable: true },
                     { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
-
                 items: [],
                 item:'',
                 hasRun: false,
@@ -197,7 +196,7 @@
             },
 
             printTable() {
-                $(".report-table").print();
+                window.location = this.form.toQueryString(`/business/reports/third-party-payer?print=1`);
             },
         },
 
