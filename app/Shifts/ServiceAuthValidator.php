@@ -212,8 +212,6 @@ class ServiceAuthValidator
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
-        } else {
-            $query->where('fixed_rates', 0);
         }
 
         // Must match service
@@ -259,8 +257,6 @@ class ServiceAuthValidator
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
-        } else {
-            $query->where('fixed_rates', 0);
         }
 
         // Must match service
