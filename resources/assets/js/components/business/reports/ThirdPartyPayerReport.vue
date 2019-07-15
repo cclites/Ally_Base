@@ -159,7 +159,7 @@
                     { key: 'payer', label: 'Payer', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
-                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x) },
                     { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'units', label: 'Units', sortable: true },
