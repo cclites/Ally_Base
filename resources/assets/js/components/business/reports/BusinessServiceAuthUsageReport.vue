@@ -65,12 +65,6 @@
                                         </span>
                                     </strong>
                                 </div>
-<!--                                <b-table bordered striped hover show-empty-->
-<!--                                    :items="auth.periods"-->
-<!--                                    :fields="fields"-->
-<!--                                    sort-by="period"-->
-<!--                                >-->
-<!--                                </b-table>-->
                                 <table class="table-fit-more table b-table table-striped table-hover table-bordered">
                                     <thead>
                                         <tr>

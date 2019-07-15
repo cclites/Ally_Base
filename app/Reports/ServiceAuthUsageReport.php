@@ -82,16 +82,17 @@ class ServiceAuthUsageReport extends BaseReport
     {
         return collect($periods)->map(function ($period) use ($auth) {
             $calculator = $auth->getCalculator();
-            $allowedHours = $auth->getUnits();
+            $allowedUnits = $auth->getUnits($period[0]);
+            $allowedHours = $auth->getHours($period[0]);
             $confirmed = $calculator->getConfirmedUsage($period);
             $unconfirmed = $calculator->getUnconfirmedUsage($period);
             $scheduled = $calculator->getScheduledUsage($period);
-            $remaining = subtract($auth->units, add(add($confirmed, $scheduled), $unconfirmed));
+            $remaining = subtract($allowedUnits, add(add($confirmed, $scheduled), $unconfirmed));
 
             return [
                 'period_display' => $period[0]->toDateString() . ' - ' . $period[1]->toDateString(),
                 'period' => [$period[0]->toDateString(), $period[1]->toDateString()],
-                'allowed_units' => $auth->units,
+                'allowed_units' => $allowedUnits,
                 'allowed_hours' => $allowedHours,
                 'confirmed_units' => $confirmed,
                 'confirmed_hours' => $auth->getHoursFromUnits($confirmed),

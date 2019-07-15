@@ -83,7 +83,7 @@ class ServiceAuthCalculator
 
         if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
             // If fixed limit then just check the count of the fixed shifts
-            if ($query->count() > $this->auth->getUnits($day)) {
+            if ($query->count() > $this->auth->getHours($day)) {
                 return $this->auth;
             }
         } else {
@@ -95,7 +95,7 @@ class ServiceAuthCalculator
                 ->sum();
 
             // Check service auth units
-            if ($total > $this->auth->getUnits($day)) {
+            if ($total > $this->auth->getHours($day)) {
                 return $this->auth;
             }
         }
