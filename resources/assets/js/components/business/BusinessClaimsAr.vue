@@ -163,6 +163,35 @@
                 <span class="custom-control-description">Pay Full Balance</span>
             </label>
 
+            <label class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" v-model="form.markAsPaid"/>
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Mark as Paid</span>
+            </label>
+            <b-form-group label="Reason" v-if="form.markAsPaid">
+                <b-form-select
+                        id="reasonMarkedPaid"
+                        name="reasonMarkedPaid"
+                        v-model="form.reason_marked_paid"
+                        class="mt-1"
+                >
+                    <option value="partial_payment_applied">Partial Payment Applied</option>
+                    <option value="write_off">Write Off/Uncollectable</option>
+                    <option value="denial">Denial</option>
+                    <option value="supplier_contribution">Supplier Contribution</option>
+                    <option value="interest">Interest</option>
+                    <option value="discount">Discount</option>
+                </b-form-select>
+            </b-form-group>
+            <b-form-group label="Notes">
+                <b-form-textarea
+                        id="notes"
+                        name="notes"
+                        :rows="4"
+                        v-model="form.notes"
+                ></b-form-textarea>
+            </b-form-group>
+
             <div slot="modal-footer">
                 <b-btn variant="default" @click="cancelPayment()" :disabled="form.busy">Cancel</b-btn>
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
@@ -308,6 +337,9 @@
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
                     reference: '',
+                    markAsPaid: false,
+                    reason_marked_paid: 'payment_applied',
+                    note: '',
                 }),
                 selectedInvoice: {},
                 busy: false,
@@ -316,6 +348,7 @@
                 payFullBalance: false,
                 transmissionPrivate: false,
                 missingFieldsModal: false,
+
             }
         },
 
