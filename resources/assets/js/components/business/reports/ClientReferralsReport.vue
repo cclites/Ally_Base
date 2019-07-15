@@ -4,7 +4,7 @@
             <b-col>
                 <business-location-form-group
                         v-model="form.business"
-                        :allow-all="true"
+                        :allow-all="false"
                         class="mb-2 mr-2"
                         :label="null"
                 />

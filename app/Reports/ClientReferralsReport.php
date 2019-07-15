@@ -90,9 +90,6 @@ class ClientReferralsReport extends BaseReport
         }
 
         if(filled($county)){
-
-
-
             $this->query->whereHas('address', function($q) use($county){
                 $q->where('county', $county);
             });
