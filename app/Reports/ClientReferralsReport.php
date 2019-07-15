@@ -18,7 +18,10 @@ class ClientReferralsReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = Client::query()->whereNotNull('referral_source_id')->with(['user', 'address']);
+        $this->query = Client::query()
+                            ->whereNotNull('referral_source_id')
+                            ->with(['user', 'address'])
+                            ->orderByName();
     }
 
     /**
@@ -49,7 +52,7 @@ class ClientReferralsReport extends BaseReport
      *
      * @return this report
      */
-    public function applyFilters(string $start, string $end, int $business, ?int $client, ?string $county): self
+    public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county): self
     {
 
         $start = (new Carbon($start . ' 00:00:00', $this->timezone));
@@ -59,7 +62,16 @@ class ClientReferralsReport extends BaseReport
             $q->whereBetween('created_at', [$start, $end]);
         });
 
-        $this->query->forBusinesses([$business]);
+        if(filled($business)){
+            $this->query->forBusinesses([$business]);
+        }else{
+            //This is oddly inconsistent, and unused for now. Shows
+            //more results for a single business on a chain than it
+            //does for all businesses on a chain.
+            $ids = auth()->user()->role->businessChain->businesses->toArray();
+            $this->query->forBusinesses($ids);
+        }
+
 
         if(filled($client)){
             $this->query->where('id', $client);
