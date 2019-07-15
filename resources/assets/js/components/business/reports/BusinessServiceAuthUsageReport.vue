@@ -221,8 +221,16 @@
 
         async mounted() {
             this.loading = true;
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('client')) {
+                this.form.client_id = urlParams.get('client');
+            }
             await this.loadClients();
             this.loading = false;
+
+            if (this.form.client_id) {
+                this.fetch();
+            }
         },
 
         watch: {
