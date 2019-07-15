@@ -301,7 +301,6 @@ class ShiftFlagsTest extends TestCase
         ]);
 
         $shift->fresh()->flagManager()->generate();
-        $this->assertTrue($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
-
+        $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
 }
