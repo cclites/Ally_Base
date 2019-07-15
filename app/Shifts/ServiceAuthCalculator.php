@@ -5,6 +5,7 @@ use App\Schedule;
 use App\Shift;
 use App\Billing\ClientAuthorization;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class ServiceAuthCalculator
 {
@@ -20,6 +21,12 @@ class ServiceAuthCalculator
     public function __construct(ClientAuthorization $clientAuthorization)
     {
         $this->auth = $clientAuthorization;
+    }
+
+    public function getMatchingShifts(array $forPeriod) : Collection
+    {
+        return $this->getMatchingShiftsQuery($forPeriod)
+            ->get();
     }
 
     public function getConfirmedUsage(array $forPeriod) : float

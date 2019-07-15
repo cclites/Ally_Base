@@ -4,7 +4,6 @@ namespace App\Reports;
 
 use App\Billing\ClientAuthorization;
 use App\Client;
-use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 
 class ServiceAuthUsageReport extends BaseReport
