@@ -182,6 +182,8 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftRecord(ClientInvoice $invoice, Shift $shift) : array
     {
         return [
+            'invoice_id' => $invoice->id,
+            'invoice_name' => $invoice->name,
             'shift_id' => $shift->id,
             'client_name' => $invoice->client->nameLastFirst,
             'client_id' => $invoice->client_id,
@@ -212,6 +214,8 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftServiceRecord(ClientInvoice $invoice, ShiftService $shiftService) : array
     {
         return [
+            'invoice_id' => $invoice->id,
+            'invoice_name' => $invoice->name,
             'shift_id' => $shiftService->shift->id,
             'client_name' => $invoice->client->nameLastFirst,
             'client_id' => $invoice->client_id,

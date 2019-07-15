@@ -72,6 +72,9 @@
                                  :empty-text="emptyText"
                                  class="report-table"
                         >
+                            <template slot="invoice_name" scope="row">
+                                <a :href="`/business/client/invoices/${row.item.invoice_id}`">{{ row.item.invoice_name }}</a>
+                            </template>
                             <template slot="client_name" scope="row">
                                 <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
                             </template>
@@ -152,6 +155,7 @@
                 sortDesc: false,
                 fields: [
                     { key: 'client_name', label: 'Client', sortable: true, },
+                    { key: 'invoice_name', label: 'Invoice', sortable: true, },
                     { key: 'hic', label: 'HIC#', sortable: true, },
                     { key: 'dob', label: 'Client DOB', sortable: true, },
                     { key: 'code', label: 'Diagnosis Code', sortable: true, },
