@@ -18,7 +18,7 @@ class PayrollSummaryReport extends BaseReport
 
     public function __construct()
     {
-        //$this->query
+        $this->query = PayrollReport::query();
     }
 
 
@@ -46,9 +46,16 @@ class PayrollSummaryReport extends BaseReport
     }
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $caregiver): self
-    {}
+    {
+
+    }
 
     protected function results() : ?iterable
-    {}
+    {
+        $data = $report->forRequestedBusinesses()
+            ->forDates($request->start, $request->end)
+            ->forCaregiver($request->caregiver)
+            ->rows();
+    }
 
 }
