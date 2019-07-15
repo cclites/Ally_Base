@@ -44,7 +44,6 @@ class PayrollSummaryReportController extends BaseController
 
         $caregivers = new CaregiverDropdownResource(Caregiver::forRequestedBusinesses()->active()->get());
 
-        //TODO: add any parameters, change component name, change report name
         return view_component('payroll-summary-report', 'Payroll Summary Report', compact('caregivers'), [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
