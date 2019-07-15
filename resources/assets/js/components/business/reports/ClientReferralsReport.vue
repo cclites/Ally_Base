@@ -4,7 +4,7 @@
             <b-col>
                 <business-location-form-group
                         v-model="form.business"
-                        :allow-all="false"
+                        :allow-all="true"
                         class="mb-2 mr-2"
                         :label="null"
                 />
@@ -82,7 +82,7 @@
         components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         props: {
-            'clients' : null,
+
         },
 
         data() {
@@ -125,7 +125,9 @@
                         sortable: true,
                     },
                 ],
-                'items' : [],
+                items : [],
+                clients : [],
+
             };
         },
 
@@ -147,7 +149,34 @@
             print(){
                 $(".report-table").print();
             },
+
+            loadClients(){
+                this.loading = true;
+                axios.get('/business/reports/client-referrals/' + this.form.business)
+                    .then( ({ data }) => {
+                        this.clients = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.loading = false;
+                    })
+                this.loading = false;
+            },
         },
+
+        watch: {
+            async 'form.business'(newValue, oldValue) {
+                if (newValue != oldValue) {
+                    await this.loadClients();
+                }
+            }
+        },
+
+        mounted() {
+            this.$nextTick(function(){
+                this.loadClients();
+            })
+        }
     }
 </script>
 

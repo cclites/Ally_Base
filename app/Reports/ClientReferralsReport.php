@@ -13,6 +13,16 @@ class ClientReferralsReport extends BaseReport
      */
     public $timezone = 'America/New_York';
 
+    protected $start;
+
+    protected $end;
+
+    protected $business;
+
+    protected $client;
+
+    protected $county;
+
     /**
      * BusinessOfflineArAgingReport constructor.
      */
@@ -55,14 +65,15 @@ class ClientReferralsReport extends BaseReport
     public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county): self
     {
 
-        $start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
+        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
 
         $this->query->whereHas('user', function($q) use($start, $end){
             $q->whereBetween('created_at', [$start, $end]);
         });
 
         if(filled($business)){
+            $this->business = $business;
             $this->query->forBusinesses([$business]);
         }else{
             //This is oddly inconsistent, and unused for now. Shows
@@ -74,10 +85,14 @@ class ClientReferralsReport extends BaseReport
 
 
         if(filled($client)){
+            $this->client = $client;
             $this->query->where('id', $client);
         }
 
         if(filled($county)){
+
+
+
             $this->query->whereHas('address', function($q) use($county){
                 $q->where('county', $county);
             });

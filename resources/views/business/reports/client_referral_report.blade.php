@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <client-referrals-report :clients="{{ $clients }}"></client-referrals-report>
+            <client-referrals-report></client-referrals-report>
         </div>
     </div>
 @endsection

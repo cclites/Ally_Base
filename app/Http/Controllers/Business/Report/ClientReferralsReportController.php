@@ -8,6 +8,9 @@ use App\Http\Controllers\Business\BaseController;
 use App\Reports\ClientReferralsReport;
 use App\Http\Resources\ClientDropdownResource;
 use App\Client;
+use Session;
+
+use Log;
 
 /**
  *
@@ -15,6 +18,7 @@ use App\Client;
  */
 class ClientReferralsReportController extends BaseController
 {
+
     /**
      * @param Request
      * @param PayerInvoiceReport
@@ -35,11 +39,19 @@ class ClientReferralsReportController extends BaseController
             return $report->rows();
         }
 
-        $clients = new ClientDropdownResource(Client::forRequestedBusinesses()->whereNotNull('referral_source_id')->get());
-
-        return view_component('client-referrals-report', 'Client Referrals', compact('clients'), [
+        return view_component('client-referrals-report', 'Client Referrals', [], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
+    }
+
+    public function populateDropdown($business)
+    {
+        $clients = new ClientDropdownResource(Client::forBusinesses([$business])
+            ->whereNotNull('referral_source_id')
+            ->ordered()
+            ->get());
+
+        return response()->json($clients);
     }
 }
