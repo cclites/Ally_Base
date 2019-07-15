@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Business\Report;
 
-use App\Prospect;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Business\BaseController;
 use App\Reports\ClientReferralsReport;
 use App\Http\Resources\ClientDropdownResource;
 use App\Client;
-use Session;
+use App\Business;
+use App\User;
 
 use Log;
 
@@ -36,7 +36,7 @@ class ClientReferralsReportController extends BaseController
                     $request->county
                 );
 
-            return $report->rows();
+           return $report->rows();
         }
 
         return view_component('client-referrals-report', 'Client Referrals', [], [

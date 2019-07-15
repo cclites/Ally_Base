@@ -13,15 +13,16 @@ class ClientReferralsReport extends BaseReport
      */
     public $timezone = 'America/New_York';
 
+    /**
+     * @var string
+     */
     protected $start;
 
+    /**
+     * @var string
+     */
     protected $end;
 
-    protected $business;
-
-    protected $client;
-
-    protected $county;
 
     /**
      * BusinessOfflineArAgingReport constructor.
@@ -68,12 +69,11 @@ class ClientReferralsReport extends BaseReport
         $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
         $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
 
-        $this->query->whereHas('user', function($q) use($start, $end){
-            $q->whereBetween('created_at', [$start, $end]);
+        $this->query->whereHas('user', function($q){
+            $q->whereBetween('created_at', [$this->start, $this->end]);
         });
 
         if(filled($business)){
-            $this->business = $business;
             $this->query->forBusinesses([$business]);
         }else{
             //This is oddly inconsistent, and unused for now. Shows
@@ -85,8 +85,7 @@ class ClientReferralsReport extends BaseReport
 
 
         if(filled($client)){
-            $this->client = $client;
-            $this->query->where('id', $client);
+            $this->query->where('client.id', $client);
         }
 
         if(filled($county)){

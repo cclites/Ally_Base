@@ -29,7 +29,7 @@
                             v-model="form.client"
                     >
                         <option value="">All Clients</option>
-                        <option v-for="row in clients" :value="row.id" :key="row.id">{{ row.name }}</option>
+                        <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.name }}</option>
                     </b-form-select>
             </b-col>
             <b-col>
@@ -47,6 +47,18 @@
 
         <div v-show="!loading">
             <div class="table-responsive">
+                <!--div class="search-params">
+                    Start Date: {{ form.start }}  End Date: {{ form.end }}
+                    <span v-if="form.business">
+                        For Location: {{ this.location }}
+                    </span>
+                    <span v-if="form.county">
+                        County: {{ form.county }}
+                    </span>
+                    <span v-if="form.client">
+                        For Client: {{ this.clientName }}
+                    </span>
+                </div-->
                 <b-table bordered striped hover show-empty
                          :items="items"
                          :fields="fields"
@@ -126,7 +138,10 @@
                     },
                 ],
                 items : [],
+                //params: [],
                 clients : [],
+                clientName: '',
+                location: '',
 
             };
         },
@@ -137,7 +152,7 @@
                 this.loading = true;
                 this.form.get('/business/reports/client-referrals')
                     .then( ({ data }) => {
-                        this.items = data
+                        this.items = data;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
@@ -169,7 +184,7 @@
                 if (newValue != oldValue) {
                     await this.loadClients();
                 }
-            }
+            },
         },
 
         mounted() {
