@@ -115,7 +115,7 @@ class ServiceAuthValidator
 
                 if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
                     // If fixed limit then just check the count of the fixed shifts
-                    if ($query->count() > $auth->getUnits($day)) {
+                    if ($query->count() > $auth->getHours($day)) {
                         return $auth;
                     }
                 } else {
@@ -127,7 +127,7 @@ class ServiceAuthValidator
                         ->sum();
 
                     // Check service auth units
-                    if ($total > $auth->getUnits($day)) {
+                    if ($total > $auth->getHours($day)) {
                         return $auth;
                     }
                 }
@@ -154,7 +154,7 @@ class ServiceAuthValidator
                     $total = 1; // the current schedule
                     $total += $this->getMatchingShiftsQuery($auth, $day)->count();
                     $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)->count();
-                    if ($total > $auth->getUnits($day)) {
+                    if ($total > $auth->getHours($day)) {
                         return $auth;
                     }
                 } else {
@@ -179,7 +179,7 @@ class ServiceAuthValidator
                     $total += $schedule->getBillableHoursForDay($day, $auth->service_id);
 
                     // Check total against service auth units
-                    if ($total > $auth->getUnits($day)) {
+                    if ($total > $auth->getHours($day)) {
                         return $auth;
                     }
                 }

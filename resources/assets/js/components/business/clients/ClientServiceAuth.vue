@@ -237,6 +237,7 @@
                         sortable: true,
                         formatter: x => x ? x : '-',
                     },
+                    { key: 'service_auth_id', 'label': 'ID', sortable: true, },
                     {
                         key: 'effective_start_sortable',
                         label: 'Start',
