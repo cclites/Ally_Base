@@ -54,7 +54,8 @@
                 <b-row>
                     <b-col>
                         <loading-card v-if="busy" />
-                        <div v-else class="table-responsive">
+                        <div v-else class="table-responsive" id="report-table">
+                            <h2 v-if="items && items.length">{{ items[0].client_name }}</h2>
                             <div v-for="auth in items" :key="auth.id" class="mb-4">
                                 <div class="mb-2">
                                     <strong>
@@ -200,7 +201,7 @@
             },
 
             print() {
-                $("#auths-table").print();
+                $("#report-table").print();
             },
 
             async loadClients() {
