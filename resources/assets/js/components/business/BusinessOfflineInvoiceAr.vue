@@ -98,7 +98,8 @@
                 <date-picker v-model="form.payment_date" placeholder="Payment Date" :disabled="form.busy"></date-picker>
                 <input-help :form="form" field="payment_date" text="" />
             </b-form-group>
-            <b-form-group label="Payment Type">
+
+            <!--b-form-group label="Payment Type">
                 <b-form-input
                     name="type"
                     type="text"
@@ -107,7 +108,27 @@
                     :disabled="form.busy"
                 />
                 <input-help :form="form" field="type" text="" />
+            </b-form-group-->
+
+            <b-form-group label="Payment Type">
+                <b-form-select
+                        name="type"
+                        v-model="form.type"
+                        class="mt-1"
+                        :disabled="form.busy"
+                >
+                    <option value="payment_applied">Payment Applied</option>
+                    <option value="partial_payment_applied">Partial Payment Applied</option>
+                    <option value="overpayment">Overpayment/Surplus</option>
+                    <option value="write_off">Write Off/Uncollectable</option>
+                    <option value="denial">Denial</option>
+                    <option value="supplier_contribution">Supplier Contribution</option>
+                    <option value="interest">Interest</option>
+                    <option value="discount">Discount</option>
+                </b-form-select>
             </b-form-group>
+
+
             <b-form-group label="Reference #">
                 <b-form-input
                     name="reference"

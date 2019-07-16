@@ -36,6 +36,22 @@ class InvoiceViewGenerator
         $business = $client->business;
         $payments = $clientInvoice->payments;
 
+        $offlinePayments = $clientInvoice->OfflinePayments;
+
+        foreach($offlinePayments as $payment){
+            $payments->push((object)[
+                'created_at'=> $payment->payment_date,
+                'payment_type' => $payment->type,
+                'amount' => $payment->amount,
+                'pivot' => [
+                    'invoice_id' => $payment->invoice->id,
+                    'payment_id' => $payment->id,
+                    'amount_applied' => $payment->amount,
+                ],
+                'notes' => $payment->notes
+            ]);
+        }
+
         if ($clientPayer == null || $clientPayer->payer_id === Payer::PRIVATE_PAY_ID) {
             $recipient = $client;
             $subject = new NullContact();
