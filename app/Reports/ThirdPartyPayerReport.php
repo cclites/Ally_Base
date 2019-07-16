@@ -140,10 +140,18 @@ class ThirdPartyPayerReport extends BaseReport
                     return Carbon::parse($item->date)->between($this->start, $this->end);
                 })
                 ->map(function (ClientInvoiceItem $item) use ($invoice) {
-                    $data = ['billable' => $item->amount_due];
-
+                    $data = [];
                     if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
-                        $data += $this->mapShiftRecord($invoice, $item->shift);
+                        if (empty($item->shift->service) && filled($item->shift->services)) {
+                            // Shift has been modified after invoice to contain a service
+                            // breakout instead of a single service.
+                            foreach ($item->shift->services as $service) {
+                                $data += $this->mapShiftServiceRecord($invoice, $service);
+                            }
+                        } else {
+                            // Regular shift
+                            $data += $this->mapShiftRecord($invoice, $item->shift);
+                        }
                     } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
                         $data += $this->mapShiftServiceRecord($invoice, $item->shiftService);
                     } else {
@@ -186,10 +194,11 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shift->isVerified(),
             'service_id' => $shift->service->id,
             'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'date' => $shift->checked_in_time->toDateString(),
+            'date' => $shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
             'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
             'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
+            'billable' => multiply(floatval($shift->duration()), floatval($shift->getClientRate())),
         ];
     }
 
@@ -215,10 +224,11 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shiftService->shift->isVerified(),
             'service_id' => $shiftService->service->id,
             'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'date' => $shiftService->shift->checked_in_time->toDateString(),
+            'date' => $shiftService->shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
             'start' => (new Carbon($shiftService->shift->checked_in_time))->toDateTimeString(),
             'end' => (new Carbon($shiftService->shift->checked_out_time))->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
+            'billable' => multiply(floatval($shiftService->duration), floatval($shiftService->getClientRate())),
         ];
     }
 

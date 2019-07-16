@@ -1,12 +1,15 @@
 <?php
 namespace App\Reports;
 
+use App\Billing\View\InvoiceViewFactory;
+use App\Billing\View\InvoiceViewGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 
-class BulkInvoiceReport extends BaseReport
+class BatchInvoiceReport extends BaseReport
 {
     /**
      * @var \Eloquent
@@ -39,7 +42,7 @@ class BulkInvoiceReport extends BaseReport
      * Set the timezone of the report.
      *
      * @param string $timezone
-     * @return BulkInvoiceReport
+     * @return BatchInvoiceReport
      */
     public function setTimezone(string $timezone): self
     {
@@ -57,7 +60,7 @@ class BulkInvoiceReport extends BaseReport
      * @param int|null $client
      * @param string|null $type
      * @param int|null $active
-     * @return BulkInvoiceReport
+     * @return BatchInvoiceReport
      */
     public function applyFilters(string $start, string $end, int $business, ?int $client, ?string $type, ?int $active): self
     {
@@ -111,5 +114,48 @@ class BulkInvoiceReport extends BaseReport
                 return ($a["client"] < $b["client"]) ? -1 : 1;
             })
             ->values();
+    }
+
+    /**
+     * Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function print() : \Illuminate\Http\Response
+    {
+        $html = '';
+
+        $invoices = $this->query->with([
+            'payments',
+            'items',
+            'client',
+            'client.addresses',
+            'client.phoneNumbers',
+            'client.user',
+            'client.user.addresses',
+            'client.user.phoneNumbers',
+            'clientPayer',
+            'clientPayer.payer',
+            'client.business',
+        ])->get();
+
+        // TODO: convert this to a reduce() function
+        foreach ($invoices as $invoice) {
+            $strategy = InvoiceViewFactory::create($invoice, InvoiceViewFactory::HTML_VIEW, true);
+            $viewGenerator = new InvoiceViewGenerator($strategy);
+            $html .= $viewGenerator->generateClientInvoice($invoice)->getContent();
+        }
+
+        $html = response(view('invoices.batch_invoices', ['renderedInvoiceHtml' => $html]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="invoices.pdf"'
+            )
+        );
     }
 }

@@ -91,16 +91,24 @@ class DepositInvoiceAggregator
 
     private function caregiverInvoiceQuery(): CaregiverInvoiceQuery
     {
+        // Always sort by the amount so that negative balances can
+        // be applied first and we can calculate the proper balance
+        // to apply to the positive invoices.
         return $this->_caregiverInvoiceQuery
             ->notPaidInFull()
-            ->notOnHold();
+            ->notOnHold()
+            ->orderBy('amount');
     }
 
     private function businessInvoiceQuery(): BusinessInvoiceQuery
     {
+        // Always sort by the amount so that negative balances can
+        // be applied first and we can calculate the proper balance
+        // to apply to the positive invoices.
         return $this->_businessInvoiceQuery
             ->notPaidInFull()
-            ->notOnHold();
+            ->notOnHold()
+            ->orderBy('amount');
     }
 
     private function caregiverForChainQuery(BusinessChain $chain): CaregiverInvoiceQuery

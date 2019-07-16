@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\ClientAuthorization;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\ConfirmationResponse;
@@ -13,6 +14,7 @@ use App\Shift;
 use App\ShiftFlag;
 use App\ShiftIssue;
 use App\Shifts\RateFactory;
+use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
@@ -141,6 +143,24 @@ class ShiftController extends BaseController
             $shift->syncServices($request->getServices());
 
             event(new ShiftFlagsCouldChange($shift));
+
+            // Update flags for all shifts related to any of the service
+            // authorizations that are effected by this shift.
+            /** @var ClientAuthorization $auth */
+            foreach ($shift->getEffectedServiceAuthorizations() as $auth) {
+                $calculator = $auth->getCalculator();
+                $dates = $shift->getDateSpan();
+                $start = $dates[0];
+                $end = count($dates) > 1 ? $dates[2] : $dates[0];
+                $periods = $auth->getPeriodsForRange($start, $end);
+                foreach ($periods as $period) {
+                    $shifts = $calculator->getMatchingShifts($period);
+                    foreach ($shifts as $shift) {
+                        event(new ShiftFlagsCouldChange($shift));
+                    }
+                }
+            }
+
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');

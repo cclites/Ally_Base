@@ -5,6 +5,7 @@ use App\Schedule;
 use App\Shift;
 use App\Billing\ClientAuthorization;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class ServiceAuthCalculator
 {
@@ -20,6 +21,12 @@ class ServiceAuthCalculator
     public function __construct(ClientAuthorization $clientAuthorization)
     {
         $this->auth = $clientAuthorization;
+    }
+
+    public function getMatchingShifts(array $forPeriod) : Collection
+    {
+        return $this->getMatchingShiftsQuery($forPeriod)
+            ->get();
     }
 
     public function getConfirmedUsage(array $forPeriod) : float
@@ -70,92 +77,6 @@ class ServiceAuthCalculator
     }
 
     /**
-     * Check if the shift exceeds any client service authorizations that
-     * were active during the time of the shift and return the
-     * ClientAuthorization object that is exceeded.
-     *
-     * @param \App\Shift $shift
-     * @return ClientAuthorization|null
-     */
-    public function shiftExceedsServiceAuthorization(Shift $shift) : ?ClientAuthorization
-    {
-        $query = $this->getMatchingShiftsQuery($this->auth, $day);
-
-        if ($this->auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
-            // If fixed limit then just check the count of the fixed shifts
-            if ($query->count() > $this->auth->getUnits($day)) {
-                return $this->auth;
-            }
-        } else {
-            // Get total hours billed for each shift on this date only
-            $totalHours = $query->get()
-                ->map(function (Shift $item) use ($day) {
-                    return $item->getBillableHoursForDay($day, $this->auth->service_id);
-                })
-                ->sum();
-
-            // Check service auth units
-            if ($total > $this->auth->getUnits($day)) {
-                return $this->auth;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if the given schedule exceeds an existing service authorizations and
-     * return the ClientAuthorization object.
-     *
-     * @param Schedule $schedule
-     * @return ClientAuthorization|null
-     */
-    public function scheduleExceedsServiceAuthorization(Schedule $schedule) : ?ClientAuthorization
-    {
-        // Enumerate the shift dates and check service auths for all of them
-        foreach ($schedule->getDateSpan() as $day) {
-            foreach ($this->client->getActiveServiceAuths($day) as $auth) {
-                if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
-                    // If fixed limit then just check the count of the fixed shifts
-                    $total = 1; // the current schedule
-                    $total += $this->getMatchingShiftsQuery($auth, $day)->count();
-                    $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)->count();
-                    if ($total > $auth->getUnits($day)) {
-                        return $auth;
-                    }
-                } else {
-                    // Get total hours for each shift on this date only
-                    $total = $this->getMatchingShiftsQuery($auth, $day)
-                        ->get()
-                        ->map(function (Shift $item) use ($day, $auth) {
-                            return $item->getBillableHoursForDay($day, $auth->service_id);
-                        })
-                        ->sum();
-
-                    // Add total hours for all schedules during this period
-                    $total += $this->getMatchingSchedulesQuery($auth, $day, $schedule->id)
-                        ->get()
-                        ->map(function (Schedule $item) use ($day, $auth) {
-                            return $item->getBillableHoursForDay($day, $auth->service_id);
-                        })
-                        ->sum();
-
-                    // Add total of billable hours on the schedule being checked
-                    // since those changes may not be persisted yet.
-                    $total += $schedule->getBillableHoursForDay($day, $auth->service_id);
-
-                    // Check total against service auth units
-                    if ($total > $auth->getUnits($day)) {
-                        return $auth;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Build query to get the shifts that match the attributes of the
      * specified ClientAuthorization.
      *
@@ -176,8 +97,6 @@ class ServiceAuthCalculator
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
-        } else {
-            $query->where('fixed_rates', 0);
         }
 
         // Must match service
@@ -219,8 +138,6 @@ class ServiceAuthCalculator
             // Only query for fixed rates when client auth is set to fixed,
             // otherwise you want to include all shifts and count the hours
             $query->where('fixed_rates', 1);
-        } else {
-            $query->where('fixed_rates', 0);
         }
 
         // Must match service

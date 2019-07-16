@@ -39,6 +39,7 @@ class ScheduleEditor
             $startsAt = Carbon::parse($data['starts_at']);
             $data['added_to_past'] = $startsAt->isPast();
             $data['starts_at'] = $startsAt->toDateTimeString();
+            $data['weekday'] = $startsAt->dayOfWeek;
         }
 
         if ($schedule->update($data + ['group_id' => null])) {
