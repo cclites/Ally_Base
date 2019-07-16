@@ -102,13 +102,17 @@ class ThirdPartyPayerReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $payer): self
     {
-        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
+        $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
 
-        $this->query->whereHas('items', function ($q) {
-            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
-                ->whereBetween('date', [$this->start, $this->end]);
-        });
+        // Base the date range on the creation date of the invoice
+        // so we can properly get old imported timesheets from previous
+        // weeks in the current week.
+        $this->query->whereBetween('created_at', [$this->start, $this->end]);
+//        $this->query->whereHas('items', function ($q) {
+//            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
+//                ->whereBetween('date', [$this->start, $this->end]);
+//        });
 
         $this->query->forBusiness($business);
 
@@ -139,9 +143,9 @@ class ThirdPartyPayerReport extends BaseReport
         return $this->query->get()->map(function (ClientInvoice $invoice) {
             return $invoice->items
                 ->whereIn('invoiceable_type', ['shifts', 'shift_services'])
-                ->filter(function (ClientInvoiceItem $item) {
-                    return Carbon::parse($item->date)->between($this->start, $this->end);
-                })
+//                ->filter(function (ClientInvoiceItem $item) {
+//                    return Carbon::parse($item->date)->between($this->start, $this->end);
+//                })
                 ->map(function (ClientInvoiceItem $item) use ($invoice) {
                     $data = [];
                     if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
