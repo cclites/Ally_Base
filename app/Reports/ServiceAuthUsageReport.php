@@ -4,7 +4,6 @@ namespace App\Reports;
 
 use App\Billing\ClientAuthorization;
 use App\Client;
-use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 
 class ServiceAuthUsageReport extends BaseReport
@@ -71,6 +70,20 @@ class ServiceAuthUsageReport extends BaseReport
     }
 
     /**
+     * Convert period timezones to the report user timezone.
+     *
+     * @param array $period
+     * @return array
+     */
+    public function convertPeriodTimezone(array $period) : array
+    {
+        $period[0] = Carbon::parse($period[0]->toDateString(), $this->getTimezone())->setTime(0, 0, 0);
+        $period[1] = Carbon::parse($period[1]->toDateString(), $this->getTimezone())->setTime(23, 59, 59);
+
+        return $period;
+    }
+
+    /**
      * Calculate and return usage stats for an auth during
      * a specific period.
      *
@@ -82,16 +95,17 @@ class ServiceAuthUsageReport extends BaseReport
     {
         return collect($periods)->map(function ($period) use ($auth) {
             $calculator = $auth->getCalculator();
-            $allowedHours = $auth->getUnits();
+            $allowedUnits = $auth->getUnits($period[0]);
+            $allowedHours = $auth->getHours($period[0]);
             $confirmed = $calculator->getConfirmedUsage($period);
             $unconfirmed = $calculator->getUnconfirmedUsage($period);
-            $scheduled = $calculator->getScheduledUsage($period);
-            $remaining = subtract($auth->units, add(add($confirmed, $scheduled), $unconfirmed));
+            $scheduled = $calculator->getScheduledUsage($this->convertPeriodTimezone($period));
+            $remaining = subtract($allowedUnits, add(add($confirmed, $scheduled), $unconfirmed));
 
             return [
                 'period_display' => $period[0]->toDateString() . ' - ' . $period[1]->toDateString(),
                 'period' => [$period[0]->toDateString(), $period[1]->toDateString()],
-                'allowed_units' => $auth->units,
+                'allowed_units' => $allowedUnits,
                 'allowed_hours' => $allowedHours,
                 'confirmed_units' => $confirmed,
                 'confirmed_hours' => $auth->getHoursFromUnits($confirmed),

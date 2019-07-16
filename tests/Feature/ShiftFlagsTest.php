@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Caregiver;
 use App\Client;
 use App\Shift;
+use Tests\CreatesClientAuthorizations;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +21,7 @@ use App\Billing\Payer;
 class ShiftFlagsTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesClientAuthorizations;
 
     protected $caregiver;
     protected $client;
@@ -277,5 +279,28 @@ class ShiftFlagsTest extends TestCase
         $shift2 = Shift::create($data);
         $shift2->flagManager()->generate();
         $this->assertTrue($shift2->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+    }
+
+    /** @test */
+    function a_shift_that_is_no_longer_outside_auth_should_remove_its_flag()
+    {
+        $this->client->update(['max_weekly_hours' => 999]);
+
+        $auth = $this->createClientAuth([
+            'units' => 1,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+        ]);
+
+        $data = $this->makeShift(Carbon::now(), '12:00:00', '18:00:00');
+        $shift = Shift::create($data);
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::OUTSIDE_AUTH));
+
+        $auth->update([
+            'units' => 99,
+        ]);
+
+        $shift->fresh()->flagManager()->generate();
+        $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::OUTSIDE_AUTH));
     }
 }

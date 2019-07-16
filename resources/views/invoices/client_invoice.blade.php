@@ -52,4 +52,6 @@
             </table>
         </div>
     </div>
+    @include('invoices.partials.client_payments_table')
+
 @endsection

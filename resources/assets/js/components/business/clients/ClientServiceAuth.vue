@@ -1,10 +1,13 @@
 <template>
     <div>
-        <b-row class="mb-2">
-            <b-col lg="12">
+        <div class="mb-3 d-flex">
+            <div class="f-1">
                 <b-btn variant="info" @click="addAuth()">Add Authorization</b-btn>
-            </b-col>
-        </b-row>
+            </div>
+            <div class="ml-auto">
+                <a :href="`/business/reports/service-auth-usage?client=${clientId}`" target="_blank">View Service Auth Usage Report</a>
+            </div>
+        </div>
         <div>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -237,6 +240,7 @@
                         sortable: true,
                         formatter: x => x ? x : '-',
                     },
+                    { key: 'service_auth_id', 'label': 'ID', sortable: true, },
                     {
                         key: 'effective_start_sortable',
                         label: 'Start',

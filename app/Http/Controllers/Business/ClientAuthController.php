@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Business;
 
+use App\Events\ShiftFlagsCouldChange;
 use Auth;
 use App\Client;
 use App\Billing\ClientAuthorization;
@@ -79,12 +80,24 @@ class ClientAuthController extends BaseController
         $this->authorize('update', $auth->client);
 
         if ($auth->update($request->filtered())) {
+            // Recalculate shift flags for all shifts that match any periods
+            // the auth was effective in the past 14 days.
+            $calculator = $auth->getCalculator();
+            $periods = $auth->getPeriodsForRange(Carbon::now()->subDays(14), Carbon::now());
+            foreach ($periods as $period) {
+                $shifts = $calculator->getMatchingShifts($period);
+                foreach ($shifts as $shift) {
+                    event(new ShiftFlagsCouldChange($shift));
+                }
+            }
+
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
             $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
             $auth['effective_start_sortable'] = Carbon::parse($auth['effective_start'])->format('Ymd');
             $auth['effective_end_sortable'] = Carbon::parse($auth['effective_end'])->format('Ymd');
             $auth['service_code'] = optional($auth['service'])->code;
             $auth['service_type'] = optional($auth['service'])->name;
+
             return new SuccessResponse('Authorization has been updated.', $auth->load('service'));
         }
 
