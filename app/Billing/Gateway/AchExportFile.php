@@ -41,16 +41,19 @@ class AchExportFile
      * @param string $id
      * @param string $type
      * @param BankAccount $account
-     * @param string $amount
+     * @param float $amount
      * @throws PaymentAmountError
      */
-    public function addTransaction(string $id, string $type, BankAccount $account, string $amount)
+    public function addTransaction(string $id, string $type, BankAccount $account, float $amount)
     {
         if (!is_numeric($amount)) {
             throw new PaymentAmountError("The payment amount is not numeric");
         }
-        if ($amount <= 0) {
+        if ($type == 'credit' && $amount <= 0) {
             throw new PaymentAmountError("The payment amount must be greater than 0.");
+        }
+        if ($type == 'sale' && $amount >= 0) {
+            throw new PaymentAmountError("The payment amount must be less than 0.");
         }
 
         $this->transactions[] = [
