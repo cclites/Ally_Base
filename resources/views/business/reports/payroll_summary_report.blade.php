@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <payroll-summary-report :caregivers="{{ $caregivers }}"></payroll-summary-report>
+            <payroll-summary-report></payroll-summary-report>
         </div>
     </div>
 @endsection

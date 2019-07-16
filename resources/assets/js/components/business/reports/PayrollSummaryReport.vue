@@ -27,6 +27,11 @@
                 <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
             </b-select>
 
+            <b-select v-model="form.client_type" class="mb-2 mr-2">
+                <option value="">All Client Types</option>
+                <option v-for="type in clientTypes" :key="type.id" :value="type.id">{{ type.text }}</option>
+            </b-select>
+
             <b-button @click="fetch()" variant="info" :disabled="busy || form.output_format == ''" class="mr-2 mb-2">
                 <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                 Generate Report
@@ -49,10 +54,7 @@
         components: { BusinessLocationFormGroup, BusinessLocationSelect },
         mixins: [FormatsNumbers, FormatsDates, Constants],
         props: {
-            caregivers: {
-                type: [Array, Object],
-                default: () => { return []; },
-            },
+
         },
         data() {
             return {
@@ -71,7 +73,11 @@
                 perPage: 30,
                 currentPage: 1,
                 sortBy: 'caregivers',
-                sortDesc: false
+                sortDesc: false,
+                caregivers: {
+                    type: [Array, Object],
+                    default: () => { return []; },
+                },
             }
         },
         methods: {
@@ -80,6 +86,9 @@
                 this.busy = true;
                 this.form.get('/business/reports/payroll-summary-report')
                     .then( ({ data }) => {
+
+                        console.log(data);
+
                         this.items = data;
                         this.totalRows = this.items.length;
                     })
@@ -89,7 +98,26 @@
                         this.hasRun = true;
                     })
             },
-        }
+
+            fetchCaregivers(){
+
+                this.loading = true;
+                axios.get('/business/reports/payroll-summary-report/' + this.form.business)
+                    .then( ({ data }) => {
+                        this.caregivers = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.loading = false;
+                    })
+                this.loading = false;
+
+            }
+        },
+
+        mounted(){
+            this.fetchCaregivers();
+        },
     }
 </script>
 

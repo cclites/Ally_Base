@@ -4,6 +4,10 @@
 namespace App\Reports;
 
 
+use App\Billing\CaregiverInvoice;
+
+use Log;
+
 class PayrollSummaryReport extends BaseReport
 {
     /**
@@ -16,9 +20,13 @@ class PayrollSummaryReport extends BaseReport
      */
     protected $timezone;
 
-    public function __construct()
+    /**
+     * PayrollSummaryReport constructor.
+     * @param CaregiverInvoiceQuery $query
+     */
+    public function __construct(CaregiverInvoice $query)
     {
-        $this->query = PayrollReport::query();
+        $this->query = $query;
     }
 
 
@@ -29,7 +37,7 @@ class PayrollSummaryReport extends BaseReport
      */
     public function query(): self
     {
-        return $this->query;
+        return $this->query->with('items');
     }
 
     /**
@@ -47,15 +55,40 @@ class PayrollSummaryReport extends BaseReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $caregiver): self
     {
+        $this->query->whereBetween('created_at', [$start, $end]);
 
+        /*
+        $this->query->whereHas('caregiver.shifts', function($q) use($business){
+            $q->where('business_id', $business);
+        });
+
+        if(filled($client_type)){
+            $this->query->whereHas('client', function($q) use($client_type){
+                $q->where('client_type', $client_type);
+            });
+        }
+*/
+        if(filled($caregiver)){
+            $this->query->forCaregiver($caregiver);
+        }$this->query->get();
+
+
+        return $this;
     }
 
     protected function results() : ?iterable
     {
+
+        $results = $this->query->take(5)->get();
+
+        Log::info($results);
+
+        return $results;
+        /*
         $data = $report->forRequestedBusinesses()
             ->forDates($request->start, $request->end)
             ->forCaregiver($request->caregiver)
-            ->rows();
+            ->rows();*/
     }
 
 }

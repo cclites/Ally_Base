@@ -26,7 +26,7 @@ class PayrollSummaryReportController extends BaseController
     //TODO: Inject proper report template
     public function index(Request $request, PayrollSummaryReport $report ){
 
-        if ($request > filled('json')) {
+        if ($request->filled('json')) {
 
            $timezone = auth()->user()->role->getTimezone();
 
@@ -39,14 +39,18 @@ class PayrollSummaryReportController extends BaseController
                         $request->caregiver
                     );
 
-            return response($report->rows());
+            return $report->rows();
         }
 
-        $caregivers = new CaregiverDropdownResource(Caregiver::forRequestedBusinesses()->active()->get());
 
-        return view_component('payroll-summary-report', 'Payroll Summary Report', compact('caregivers'), [
+        return view_component('payroll-summary-report', 'Payroll Summary Report', [], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
+    }
+
+    public function caregivers($businessId){
+        $caregivers = new CaregiverDropdownResource(Caregiver::forBusinesses([$businessId])->active()->get());
+        return response()->json($caregivers);
     }
 }
