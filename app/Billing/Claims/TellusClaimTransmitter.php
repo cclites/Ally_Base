@@ -1,6 +1,7 @@
 <?php
 namespace App\Billing\Claims;
 
+use App\Address;
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
@@ -11,6 +12,7 @@ use App\Client;
 use App\Services\TellusApiException;
 use App\Services\TellusService;
 use App\Shift;
+use App\TellusTypecode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -110,6 +112,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         } catch (TellusApiException $ex) {
             throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
         } catch (\Exception $ex) {
+            \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
@@ -179,11 +182,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $clientInvoice = $claim->invoice;
 
         return [
-            'SourceSystem' => 'ALLY',
-            'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => $clientInvoice->getPayerCode(),
-            'Plan' => $clientInvoice->getPlanCode(),
-            'Program' => '', // N/A
+            'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
+            'Jurisdiction' => $this->tcLookup('Jurisdiction', $address->state ?? 'None'),
+            'Payer' => $this->tcLookup('Payer', $clientInvoice->getPayerCode()),
+            'Plan' => $this->tcLookup('Plan', $clientInvoice->getPlanCode()),
+            'Program' => $this->tcLookup('Program', 'None'), // N/A
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
             'ProviderMedicaidId' => $business->medicaid_id,
@@ -248,6 +251,27 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'PaidAmount' => '', // N/A
             'CareDirectionType' => '', // N/A
         ];
+    }
+
+    /**
+     * Lookup typecode data from the database.
+     *
+     * @param string $category
+     * @param string $textCode
+     * @return array|string
+     * @throws TellusApiException
+     */
+    public function tcLookup(string $category, string $textCode)
+    {
+        $typeCode = TellusTypecode::where('category', $category)
+            ->where('text_code', 'LIKE', $textCode)
+            ->first();
+
+        if (empty($typeCode)) {
+            throw new TellusApiException("Invalid text code value \"$textCode\" for $category.");
+        }
+
+        return [$typeCode->description, $typeCode->code];
     }
 
     /**

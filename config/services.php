@@ -65,7 +65,7 @@ return [
     ],
 
     'tellus' => [
-        'endpoint' => env('TELLUS_ENDPOINT', 'https://integration.pilot.4tellus.com/v2.0/ALLY'),
+        'endpoint' => env('TELLUS_ENDPOINT', 'https://edi.stg.4tellus.net/v2.0/ALLY01/SRVC'),
     ],
 
     'fullcalendar' => [

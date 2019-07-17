@@ -57,6 +57,14 @@ class TellusService
 
         list($httpCode, $response) = $this->sendXml($xml);
 
+        dd($response);
+
+        $xml = new SimpleXMLElement($response);
+        if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
+            \Log::error("Tellus API XML Error:\r\n$response");
+            throw new TellusApiException('Claim XML failed validation.');
+        }
+
         if ($httpCode === 401) {
             throw new TellusApiException('Invalid credentials or otherwise not authorized.');
         }
@@ -87,9 +95,12 @@ class TellusService
                 throw new TellusApiException('Invalid response from Tellus API.');
             }
             $responseCode = curl_getinfo($process, CURLINFO_HTTP_CODE);
+            $header_size = curl_getinfo($process, CURLINFO_HEADER_SIZE);
             curl_close($process);
 
-            return [$responseCode, $result];
+            $body = substr($result, $header_size);
+
+            return [$responseCode, $body];
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
             throw new TellusApiException('Error connecting to the Tellus API.');
@@ -151,7 +162,13 @@ class TellusService
         }
 
         foreach($record as $key => $value) {
-            $service->addChild($key, $value);
+            if (is_array($value) && count($value) >= 2) {
+                // Handle adding tc="" attribute
+                $child = $service->addChild($key, $value[0]);
+                $child->addAttribute('tc', $value[1]);
+            } else {
+                $service->addChild($key, $value);
+            }
         }
 
         return $service;

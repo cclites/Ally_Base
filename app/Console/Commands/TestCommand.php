@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Billing\Claim;
+use App\Billing\ClaimService;
+use App\Billing\ClaimStatus;
+use App\Billing\ClientInvoice;
 use Illuminate\Console\Command;
 
 class TestCommand extends Command
@@ -41,5 +45,20 @@ class TestCommand extends Command
             return;
         }
 
+        \DB::beginTransaction();
+        $invoice = ClientInvoice::find(30269);
+        $claim = Claim::getOrCreate($invoice);
+        $transmitter = Claim::getTransmitter(ClaimService::TELLUS());
+
+        if ($transmitter->isTestMode($claim)) {
+            $testFile = $transmitter->test($claim);
+        } else {
+            $transmitter->send($claim);
+            $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
+                'service' => $service,
+            ]);
+        }
+
+//        \DB::commit();
     }
 }
