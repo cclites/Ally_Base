@@ -5,6 +5,9 @@ namespace App\Reports;
 use App\Client;
 use App\Business\Payer;
 use Carbon\Carbon;
+use App\Billing\Payment;
+
+use Log;
 
 class ClientReferralsReport extends BaseReport
 {
@@ -31,7 +34,7 @@ class ClientReferralsReport extends BaseReport
     {
         $this->query = Client::query()
                             ->whereNotNull('referral_source_id')
-                            ->with(['user', 'address'])
+                            ->with(['user', 'address', 'invoice'])
                             ->orderByName();
     }
 
@@ -74,13 +77,13 @@ class ClientReferralsReport extends BaseReport
         });
 
         if(filled($business)){
-            $this->query->forBusinesses([$business]);
+            $this->query->forBusinesses([$business])->with('name');
         }else{
             //This is oddly inconsistent, and unused for now. Shows
             //more results for a single business on a chain than it
             //does for all businesses on a chain.
             $ids = auth()->user()->role->businessChain->businesses->toArray();
-            $this->query->forBusinesses($ids);
+            $this->query->forBusinesses($ids)->with('name');
         }
 
 
@@ -112,12 +115,15 @@ class ClientReferralsReport extends BaseReport
 
                 $client->payers->map(function($payer) use($client, $results){
 
+                    Log::info($payer);
+
                     $result =  [
                         'name' => $client->nameLastFirst,
                         'county' => $client->address["county"],
                         'payer' => $payer->payer_name,
                         'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
-                        'id' => $client->id
+                        'id' => $client->id,
+                        //'payments' => $client->
                     ];
 
                     $results->push($result);

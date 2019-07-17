@@ -117,8 +117,8 @@
                 sortDesc: '',
                 fields: [
                     {
-                        key: 'name',
-                        label: 'Client',
+                        key: 'location',
+                        label: 'Location',
                         sortable: true,
                     },
                     {
@@ -127,13 +127,23 @@
                         sortable: true,
                     },
                     {
+                        key: 'name',
+                        label: 'Client',
+                        sortable: true,
+                    },
+                    {
+                        key: 'date',
+                        label: 'Date Creater',
+                        sortable: true,
+                    },
+                    {
                         key: 'payer',
                         label: 'Payer',
                         sortable: true,
                     },
                     {
-                        key: 'date',
-                        label: 'Date',
+                        key: 'revenue',
+                        label: 'Revenue',
                         sortable: true,
                     },
                 ],
