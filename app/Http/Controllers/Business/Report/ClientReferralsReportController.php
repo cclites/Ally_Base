@@ -27,7 +27,7 @@ class ClientReferralsReportController extends BaseController
 
         if ($request->filled('json')) {
             $timezone = auth()->user()->role->getTimezone();
-            $report->setTimezone($timezone)
+            $result = $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
                     $request->end,
@@ -35,8 +35,7 @@ class ClientReferralsReportController extends BaseController
                     $request->client,
                     $request->county
                 );
-
-           return $report->rows();
+           return $result->rows();
         }
 
         return view_component('client-referrals-report', 'Client Referrals', [], [

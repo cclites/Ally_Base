@@ -47,18 +47,6 @@
 
         <div v-show="!loading">
             <div class="table-responsive">
-                <!--div class="search-params">
-                    Start Date: {{ form.start }}  End Date: {{ form.end }}
-                    <span v-if="form.business">
-                        For Location: {{ this.location }}
-                    </span>
-                    <span v-if="form.county">
-                        County: {{ form.county }}
-                    </span>
-                    <span v-if="form.client">
-                        For Client: {{ this.clientName }}
-                    </span>
-                </div-->
                 <b-table bordered striped hover show-empty
                          :items="items"
                          :fields="fields"
@@ -85,12 +73,13 @@
 
 <script>
     import FormatsDates from '../../../mixins/FormatsDates';
+    import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import BusinessLocationSelect from '../../../components/business/BusinessLocationSelect';
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
 
     export default {
         name: "ClientReferralsReport",
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
         components: { BusinessLocationFormGroup, BusinessLocationSelect },
 
         props: {
@@ -133,7 +122,7 @@
                     },
                     {
                         key: 'date',
-                        label: 'Date Creater',
+                        label: 'Date Created',
                         sortable: true,
                     },
                     {
@@ -144,6 +133,7 @@
                     {
                         key: 'revenue',
                         label: 'Revenue',
+                        formatter: val => this.moneyFormat(val),
                         sortable: true,
                     },
                 ],

@@ -6,9 +6,6 @@ use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Business\Payer;
 use Carbon\Carbon;
-use App\Billing\Payment;
-
-use Log;
 
 class ClientReferralsReport extends BaseReport
 {
@@ -27,21 +24,19 @@ class ClientReferralsReport extends BaseReport
      */
     protected $end;
 
-
     /**
-     * BusinessOfflineArAgingReport constructor.
+     * ClientReferralsReport constructor.
+     * @param Client $query
      */
-    public function __construct(ClientInvoiceQuery $query)
+    public function __construct(Client $query)
     {
         $this->query = $query->with([
-                            'client',
-                            'client.user',
-                            'clientPayer',
-                            'client.user.address'
-                        ]);
-                        //->whereNotNull('referral_source_id')
-                        //->orderByName();
+            'user',
+            'addresses'
+        ])->whereNotNull('referral_source_id');
+
     }
+
 
     /**
      * Return the instance of the query builder for additional manipulation
@@ -77,38 +72,31 @@ class ClientReferralsReport extends BaseReport
         $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
         $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
 
-        $this->query->whereHas('client', function($q){
-            $q->whereNotNull('referral_source_id');
-        });
-
         $this->query->whereHas('user', function($q){
             $q->whereBetween('created_at', [$this->start, $this->end]);
         });
 
         if(filled($business)){
-            $this->query->forBusinesses([$business])->with('name');
+            $this->query->forBusinesses([$business]);
         }else{
             //This is oddly inconsistent, and unused for now. Shows
             //more results for a single business on a chain than it
             //does for all businesses on a chain.
             $ids = auth()->user()->role->businessChain->businesses->toArray();
-            $this->query->forBusinesses($ids)->with('name');
+            $this->query->forBusinesses($business);
         }
-
 
         if(filled($client)){
-            $this->query->where('client.id', $client);
-
-            $this->query->whereHas('client', function($q) use($client){
-                $q->where('id', $client);
-            });
+            $this->query->where('id', $client);
         }
+
 
         if(filled($county)){
-            $this->query->whereHas('address', function($q) use($county){
-                $q->where('county', $county);
+            $this->query->whereHas('address', function ($q) use($county){
+                $q->where("county", $county);
             });
         }
+
 
         return $this;
     }
@@ -120,31 +108,35 @@ class ClientReferralsReport extends BaseReport
      */
     protected function results(): ?iterable
     {
-        $results = collect()->sortBy('payer');
-
-        $this->query
+        return $this->query
             ->get()
-            ->map(function($client) use($results){
+            ->unique()
+            ->map(function($client){
 
-                $client->payers->map(function($payer) use($client, $results){
+                $invoiced = (new ClientInvoiceQuery())->forClient($client->id)
+                            ->with('clientPayer')
+                            ->get()
+                            ->unique(['client_payer']);
 
-                    Log::info($payer);
+                $payer = '';
 
-                    $result =  [
-                        'name' => $client->nameLastFirst,
-                        'county' => $client->address["county"],
-                        'payer' => $payer->payer_name,
-                        'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
-                        'id' => $client->id,
-                        //'payments' => $client->
-                    ];
+                if(filled($invoiced)){
+                    $payer = $invoiced->first()->clientPayer->payer_name;
+                }
 
-                    $results->push($result);
-                });
+                return  [
+                    'location' =>$client->business->name,
+                    'county' => $client->addresses->first->county["county"] ? $client->addresses->first->county["county"] : "--",
+                    'payer' => $payer,
+                    'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
+                    'id' => $client->id,
+                    'name' => $client->nameLastFirst,
+                    'revenue' => $invoiced->sum('amount_paid')
+                ];
 
-            });
 
-        return $results;
+            })
+            ->values();
     }
 
 }
