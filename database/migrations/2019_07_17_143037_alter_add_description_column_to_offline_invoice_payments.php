@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use  App\Billing\Payments\PaymentDescriptionTypes;
 
 class AlterAddDescriptionColumnToOfflineInvoicePayments extends Migration
 {
@@ -14,7 +15,8 @@ class AlterAddDescriptionColumnToOfflineInvoicePayments extends Migration
     public function up()
     {
         Schema::table('offline_invoice_payments', function (Blueprint $table) {
-            $table->string('description')->after('type');
+            $table->dropColumn(['description']);
+            $table->enum('description', PaymentDescriptionTypes::PAYMENT_DESCRIPTIONS)->nullable()->after('type');
         });
     }
 

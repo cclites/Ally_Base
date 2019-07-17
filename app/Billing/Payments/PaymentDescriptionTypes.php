@@ -29,4 +29,14 @@ class PaymentDescriptionTypes extends enum
     private const INTEREST = 'interest';
     private const DISCOUNT = 'discount';
 
+    const PAYMENT_DESCRIPTIONS = [
+        self::PAYMENT_APPLIED,
+        self::PARTIAL_PAYMENT_APPLIED,
+        self::OVERPAYMENT,
+        self::DENIAL,
+        self::SUPPLIER_CONTRIBUTION,
+        self::INTEREST,
+        self::DISCOUNT,
+    ];
+
 }

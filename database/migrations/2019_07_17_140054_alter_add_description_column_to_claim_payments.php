@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use  App\Billing\Payments\PaymentDescriptionTypes;
 
 class AlterAddDescriptionColumnToClaimPayments extends Migration
 {
@@ -14,7 +15,8 @@ class AlterAddDescriptionColumnToClaimPayments extends Migration
     public function up()
     {
         Schema::table('claim_payments', function (Blueprint $table) {
-            $table->string('description')->after('type');
+            $table->dropColumn(['description']);
+            $table->enum('description', PaymentDescriptionTypes::PAYMENT_DESCRIPTIONS)->nullable()->after('type');
         });
     }
 
