@@ -2,6 +2,7 @@
 
 namespace App\Reports;
 
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Business\Payer;
 use Carbon\Carbon;
@@ -30,12 +31,16 @@ class ClientReferralsReport extends BaseReport
     /**
      * BusinessOfflineArAgingReport constructor.
      */
-    public function __construct()
+    public function __construct(ClientInvoiceQuery $query)
     {
-        $this->query = Client::query()
-                            ->whereNotNull('referral_source_id')
-                            ->with(['user', 'address', 'invoice'])
-                            ->orderByName();
+        $this->query = $query->with([
+                            'client',
+                            'client.user',
+                            'clientPayer',
+                            'client.user.address'
+                        ]);
+                        //->whereNotNull('referral_source_id')
+                        //->orderByName();
     }
 
     /**
@@ -72,6 +77,10 @@ class ClientReferralsReport extends BaseReport
         $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
         $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
 
+        $this->query->whereHas('client', function($q){
+            $q->whereNotNull('referral_source_id');
+        });
+
         $this->query->whereHas('user', function($q){
             $q->whereBetween('created_at', [$this->start, $this->end]);
         });
@@ -89,6 +98,10 @@ class ClientReferralsReport extends BaseReport
 
         if(filled($client)){
             $this->query->where('client.id', $client);
+
+            $this->query->whereHas('client', function($q) use($client){
+                $q->where('id', $client);
+            });
         }
 
         if(filled($county)){
