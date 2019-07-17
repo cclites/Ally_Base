@@ -15,7 +15,6 @@ class AlterAddDescriptionColumnToOfflineInvoicePayments extends Migration
     public function up()
     {
         Schema::table('offline_invoice_payments', function (Blueprint $table) {
-            $table->dropColumn(['description']);
             $table->enum('description', PaymentDescriptionTypes::PAYMENT_DESCRIPTIONS)->nullable()->after('type');
         });
     }
