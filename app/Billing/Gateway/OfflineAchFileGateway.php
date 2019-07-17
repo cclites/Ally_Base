@@ -136,6 +136,9 @@ class OfflineAchFileGateway implements ACHPaymentInterface
             $id = 'B-' . $account->business_id;
         }
 
+        // Always show a negative amount for charges.
+        $amount = multiply($amount, floatval(-1));
+
         $this->ACHFile->addTransaction($id, 'sale', $account, $amount);
         return $transaction;
     }
