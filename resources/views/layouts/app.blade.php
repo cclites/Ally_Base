@@ -38,7 +38,7 @@
 <!-- Main wrapper - style you can find in pages.scss -->
 <!-- ============================================================== -->
 @if(auth()->check() && auth()->user()->isImpersonating())
-    <div style="background: #333; color: #fff; top: 0; left: 0; width: 100%; position: absolute; z-index: 500;" id="impersonator-bar">
+    <div id="impersonator-bar">
         <div class="row">
             <div class="col-sm-8">
                 You are currently impersonating {{ auth()->user()->name() }}.

@@ -7,8 +7,11 @@ use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\View\InvoiceViewFactory;
+use App\Billing\View\InvoiceViewGenerator;
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 
 class ThirdPartyPayerReport extends BaseReport
@@ -99,13 +102,17 @@ class ThirdPartyPayerReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $payer): self
     {
-        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
+        $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
 
-        $this->query->whereHas('items', function ($q) {
-            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
-                ->whereBetween('date', [$this->start, $this->end]);
-        });
+        // Base the date range on the creation date of the invoice
+        // so we can properly get old imported timesheets from previous
+        // weeks in the current week.
+        $this->query->whereBetween('created_at', [$this->start, $this->end]);
+//        $this->query->whereHas('items', function ($q) {
+//            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
+//                ->whereBetween('date', [$this->start, $this->end]);
+//        });
 
         $this->query->forBusiness($business);
 
@@ -136,9 +143,9 @@ class ThirdPartyPayerReport extends BaseReport
         return $this->query->get()->map(function (ClientInvoice $invoice) {
             return $invoice->items
                 ->whereIn('invoiceable_type', ['shifts', 'shift_services'])
-                ->filter(function (ClientInvoiceItem $item) {
-                    return Carbon::parse($item->date)->between($this->start, $this->end);
-                })
+//                ->filter(function (ClientInvoiceItem $item) {
+//                    return Carbon::parse($item->date)->between($this->start, $this->end);
+//                })
                 ->map(function (ClientInvoiceItem $item) use ($invoice) {
                     $data = [];
                     if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
@@ -168,8 +175,9 @@ class ThirdPartyPayerReport extends BaseReport
                 ->values()
                 ->filter();
         })
-        ->values()
-        ->flatten(1);
+        ->flatten(1)
+        ->sortBy('client_name')
+        ->values();
     }
 
     /**
@@ -182,6 +190,8 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftRecord(ClientInvoice $invoice, Shift $shift) : array
     {
         return [
+            'invoice_id' => $invoice->id,
+            'invoice_name' => $invoice->name,
             'shift_id' => $shift->id,
             'client_name' => $invoice->client->nameLastFirst,
             'client_id' => $invoice->client_id,
@@ -194,9 +204,9 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shift->isVerified(),
             'service_id' => $shift->service->id,
             'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'date' => $shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
-            'start' => (new Carbon($shift->checked_in_time))->toDateTimeString(),
-            'end' => (new Carbon($shift->checked_out_time))->toDateTimeString(),
+            'date' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
+            'start' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
+            'end' => Carbon::parse($shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
             'billable' => multiply(floatval($shift->duration()), floatval($shift->getClientRate())),
         ];
@@ -212,6 +222,8 @@ class ThirdPartyPayerReport extends BaseReport
     protected function mapShiftServiceRecord(ClientInvoice $invoice, ShiftService $shiftService) : array
     {
         return [
+            'invoice_id' => $invoice->id,
+            'invoice_name' => $invoice->name,
             'shift_id' => $shiftService->shift->id,
             'client_name' => $invoice->client->nameLastFirst,
             'client_id' => $invoice->client_id,
@@ -224,9 +236,9 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shiftService->shift->isVerified(),
             'service_id' => $shiftService->service->id,
             'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'date' => $shiftService->shift->checked_in_time->setTimezone($this->timezone)->toDateString(),
-            'start' => (new Carbon($shiftService->shift->checked_in_time))->toDateTimeString(),
-            'end' => (new Carbon($shiftService->shift->checked_out_time))->toDateTimeString(),
+            'date' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
+            'start' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
+            'end' => Carbon::parse($shiftService->shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
             'billable' => multiply(floatval($shiftService->duration), floatval($shiftService->getClientRate())),
         ];
