@@ -42,6 +42,7 @@ class InvoiceViewGenerator
             $payments->push((object)[
                 'created_at'=> $payment->payment_date,
                 'payment_type' => $payment->type,
+                'description' => $payment->description,
                 'amount' => $payment->amount,
                 'pivot' => [
                     'invoice_id' => $payment->invoice->id,

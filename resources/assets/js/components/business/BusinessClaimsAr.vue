@@ -118,11 +118,20 @@
                 <date-picker v-model="form.payment_date" placeholder="Payment Date" :disabled="form.busy"></date-picker>
                 <input-help :form="form" field="payment_date" text="" />
             </b-form-group>
-
             <b-form-group label="Payment Type">
+                <b-form-input
+                        name="type"
+                        type="text"
+                        v-model="form.type"
+                        max="255"
+                        :disabled="form.busy"
+                />
+                <input-help :form="form" field="type" text="" />
+            </b-form-group>
+            <b-form-group label="Payment Description">
                 <b-form-select
                         name="type"
-                        v-model="form.type"
+                        v-model="form.description"
                         class="mt-1"
                         :disabled="form.busy"
                 >
@@ -325,6 +334,7 @@
                     amount: 0.00,
                     reference: '',
                     notes: '',
+                    description:'payment_applied',
                 }),
                 selectedInvoice: {},
                 busy: false,

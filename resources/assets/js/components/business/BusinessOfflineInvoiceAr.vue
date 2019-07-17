@@ -99,7 +99,7 @@
                 <input-help :form="form" field="payment_date" text="" />
             </b-form-group>
 
-            <!--b-form-group label="Payment Type">
+            <b-form-group label="Payment Type">
                 <b-form-input
                     name="type"
                     type="text"
@@ -108,12 +108,12 @@
                     :disabled="form.busy"
                 />
                 <input-help :form="form" field="type" text="" />
-            </b-form-group-->
+            </b-form-group>
 
-            <b-form-group label="Payment Type">
+            <b-form-group label="Payment Description">
                 <b-form-select
                         name="type"
-                        v-model="form.type"
+                        v-model="form.description"
                         class="mt-1"
                         :disabled="form.busy"
                 >
@@ -149,6 +149,14 @@
                     :disabled="form.busy || payFullBalance"
                 />
                 <input-help :form="form" field="amount" text="" />
+            </b-form-group>
+            <b-form-group label="Notes">
+                <b-form-textarea
+                        id="notes"
+                        name="notes"
+                        :rows="4"
+                        v-model="form.notes"
+                ></b-form-textarea>
             </b-form-group>
             <label class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input" v-model="payFullBalance" @change="updateFullBalance()" />
@@ -237,6 +245,8 @@
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
                     reference: '',
+                    description: 'payment_applied',
+                    notes: '',
                 }),
                 selectedInvoice: {},
                 busy: false,

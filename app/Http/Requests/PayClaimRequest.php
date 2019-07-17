@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Billing\ClaimPayment;
+use App\Rules\ValidEnum;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Billing\Payments\PaymentDescriptionTypes;
 
 class PayClaimRequest extends FormRequest
 {
@@ -29,6 +31,7 @@ class PayClaimRequest extends FormRequest
             'payment_date' => 'required|date',
             'amount' => 'required|numeric|between:0,9999999.99',
             'type' => 'nullable|string|max:255',
+            'description' => ['string', new ValidEnum(PaymentDescriptionTypes::class)],
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:4096',
         ];
