@@ -1,5 +1,7 @@
 <template>
-    <b-card>
+    <b-card
+      title="This report shows data that has been invoiced & billed. No data for the current service week will be included."
+    >
         <b-row>
             <b-col>
                 <business-location-form-group
@@ -45,8 +47,9 @@
 
         <loading-card v-show="loading"></loading-card>
 
+
         <div v-show="!loading">
-            <div class="table-responsive">
+            <div class="table-responsive" >
                 <b-table bordered striped hover show-empty
                          :items="items"
                          :fields="fields"
@@ -55,9 +58,43 @@
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
                          class="report-table"
+                         :footClone="footclone"
+                         :noFooterSorting="true"
                 >
+                    <template slot="FOOT_location" scope="item">
+                        <strong>For Location: </strong>{{ totals.location }}
+                    </template>
+
+                    <template slot="FOOT_county" scope="item">
+                        <strong>Start Date: </strong>{{ totals.start }}
+                    </template>
+
+                    <template slot="FOOT_client" scope="item">
+                        <strong>End Date: </strong>{{ totals.end }}
+                    </template>
+
+
+                    <template slot="FOOT_name" scope="item">
+                        <strong>For Client: </strong>{{ totals.client ? totals.client : 'All Clients' }}
+                    </template>
+
+                    <template slot="FOOT_date" scope="item">
+                        <strong>For County: </strong>{{ totals.county ? totals.county : 'All Counties' }}
+                    </template>
+
+                    <template slot="FOOT_payer" scope="item"></template>
+
+                    <template slot="FOOT_revenue" scope="item">
+                        <strong>Revenue: </strong>{{ totals.revenue }}
+                    </template>
+
+
                 </b-table>
+
             </div>
+
+
+
 
             <b-row>
                 <b-col lg="6" >
@@ -137,12 +174,13 @@
                         sortable: true,
                     },
                 ],
+                totals: '',
                 items : [],
                 //params: [],
                 clients : [],
                 clientName: '',
                 location: '',
-
+                footclone: false,
             };
         },
 
@@ -150,14 +188,17 @@
 
             fetch(){
                 this.loading = true;
+
                 this.form.get('/business/reports/client-referrals')
                     .then( ({ data }) => {
-                        this.items = data;
+                        this.items = data.data;
+                        this.totals = data.totals;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.loading = false;
+                        this.footclone = true;
                     })
             },
 
@@ -177,6 +218,10 @@
                     })
                 this.loading = false;
             },
+
+            computeCurrentServiceWeekStart(){
+                //set the max for the end date, and then set the start date based on that.
+            }
         },
 
         watch: {

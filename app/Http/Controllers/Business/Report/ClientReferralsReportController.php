@@ -35,7 +35,20 @@ class ClientReferralsReportController extends BaseController
                     $request->client,
                     $request->county
                 );
-           return $result->rows();
+
+            $data = $result->rows();
+
+            $totals = [
+                'totalClients' => $data->count(),
+                'totalRevenue' => $data->sum('revenue'),
+                'start' => $request->start,
+                'end' => $request->end,
+                'location' => Business::find($request->business)->name,
+                'client' => filled($request->client) ? Client::find($request->client)->nameLastFirst() : null,
+                'county' => filled($request->county) ? $request->county : null,
+            ];
+
+            return response()->json(['data'=>$data, 'totals'=>$totals]);
         }
 
         return view_component('client-referrals-report', 'Client Referrals', [], [
