@@ -6,14 +6,15 @@ namespace App\Http\Controllers\Business\Report;
 use App\Billing\Payer;
 use App\Client;
 use App\Http\Controllers\Business\BaseController;
-use App\Http\Resources\ClientDropdownResource;
-use App\Http\Resources\PayersDropdownResource;
 use Illuminate\Http\Request;
 use App\Reports\PaymentSummaryByPayerReport;
+
+use Log;
 
 class PaymentSummaryByPayerReportController extends BaseController
 {
     public function index(Request $request, PaymentSummaryByPayerReport $report){
+
 
         if ($request->filled('json')) {
 
@@ -25,7 +26,8 @@ class PaymentSummaryByPayerReportController extends BaseController
                     $request->end,
                     $request->business,
                     $request->client_type,
-                    $request->client
+                    $request->client,
+                    $request->payer
                 );
 
             $data = $report->rows();
@@ -44,28 +46,5 @@ class PaymentSummaryByPayerReportController extends BaseController
         );
     }
 
-    /**
-     * Get the clients for the Client Filter.
-     *
-     * @param Request $request
-     * @return ClientDropdownResource
-     */
-    public function clients(Request $request)
-    {
-        $clients = Client::forRequestedBusinesses()
-            ->active()
-            ->ordered()
-            ->get();
 
-        return new ClientDropdownResource($clients);
-    }
-
-    public function payers(Request $request)
-    {
-        $payers = Payer::forAuthorizedChain()
-            ->orderBy('name')
-            ->get();
-
-        return new PayersDropdownResource($payers);
-    }
 }

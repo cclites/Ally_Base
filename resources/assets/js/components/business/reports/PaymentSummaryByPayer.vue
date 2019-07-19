@@ -44,7 +44,49 @@
                                 <option v-for="p in payers" :key="p.id" :value="p.id">{{ p.name }}</option>
                             </b-form-select>
                         </b-form-group>
+
+                        <b-col md="2">
+                            <b-form-group label="&nbsp;">
+                                <b-button-group>
+                                    <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                                </b-button-group>
+                            </b-form-group>
+                        </b-col>
+
                     </b-row>
+
+                    <div class="d-flex justify-content-center" v-if="busy">
+                        <div class="my-5">
+                            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <b-row>
+                            <b-col>
+                                <b-table
+                                        class="payers-summary-table"
+                                        :items="items"
+                                        :fields="fields"
+                                        sort-by="payer"
+                                        empty-text="No Results"
+                                        :busy="busy"
+                                        :current-page="currentPage"
+                                        :per-page="perPage"
+                                />
+                            </b-col>
+                        </b-row>
+                    </div>
+
+                    <b-row v-if="this.items.length > 0">
+                        <b-col lg="6" >
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                        </b-col>
+                        <b-col lg="6" class="text-right">
+                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                        </b-col>
+                    </b-row>
+
 
                 </b-card>
             </b-col>
@@ -83,10 +125,10 @@
                 sortDesc: false,
                 fields: [
                     {key: 'client_name', label: 'Client', sortable: true,},
-                    {key: 'date', label: 'Date', sortable: true,},
+                    {key: 'date', label: 'Payment Date', sortable: true, formatter: x => { return this.formatDate(x) }},
                     {key: 'client_type', label: 'Client Type', sortable: true,},
                     {key: 'payer', label: 'Payer', sortable: true,},
-                    {key: 'amount', label: 'Amount', sortable: true,},
+                    {key: 'amount', label: 'Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
                 item: '',
@@ -97,16 +139,15 @@
         },
         methods: {
             fetch() {
-                this.busy = true;
+                this.loading = true;
                 this.form.get('/business/reports/payment-summary-by-payer')
                     .then( ({ data }) => {
-
-                        this.items = data.data;
+                        this.items = data;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
                     .finally(() => {
-                        this.busy = false;
+                        this.loading = false;
                     })
             },
 
