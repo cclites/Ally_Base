@@ -22,30 +22,6 @@ class PayrollSummaryReport extends BusinessResourceReport
      */
     protected $timezone;
 
-    /**
-     * @var string
-     */
-    protected $clientType;
-
-    /**
-     * @var string
-     */
-    protected $businessName;
-
-    /**
-     * @var string
-     */
-    protected  $caregiverName;
-
-    /**
-     * @var string
-     */
-    protected $startTime;
-
-    /**
-     * @var string
-     */
-    protected $endTime;
 
     /**
      * PayrollSummaryReport constructor.
