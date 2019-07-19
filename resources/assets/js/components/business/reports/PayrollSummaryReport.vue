@@ -28,17 +28,53 @@
             </b-select>
 
             <b-select v-model="form.client_type" class="mb-2 mr-2">
-                <option value="">All Client Types</option>
-                <option v-for="type in clientTypes" :key="type.id" :value="type.id">{{ type.text }}</option>
+                <option v-for="type in clientTypes" :key="type.value" :value="type.value">{{ type.text }}</option>
             </b-select>
 
-            <b-button @click="fetch()" variant="info" :disabled="busy || form.output_format == ''" class="mr-2 mb-2">
+            <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-2 mb-2">
                 <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                 Generate Report
             </b-button>
         </div>
+
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="items"
+                     :fields="fields"
+                     :current-page="currentPage"
+                     :per-page="perPage"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :footClone="footClone"
+            >
+                <template slot="FOOT_location" scope="item" class="primary">
+                    &nbsp;
+                </template>
+
+                <template slot="FOOT_date" scope="item">
+                    &nbsp;<strong>For Location:</strong> {{ totals.location }}
+                </template>
+
+                <template slot="FOOT_caregiver" scope="item" class="primary">
+                    &nbsp;<strong>For Client Types: </strong> {{totals.type}}
+                </template>
+
+                <template slot="FOOT_type" scope="item">
+                    &nbsp;
+                </template>
+
+                <template slot="FOOT_name" scope="item">
+                    &nbsp;
+                </template>
+
+                <template slot="FOOT_amount" scope="item" class="primary">
+                    &nbsp;<strong>Total:  </strong> {{ moneyFormat(totals.amount ) }}
+                </template>
+
+            </b-table>
+        </div>
     </b-card>
-    
+
 </template>
 
 <script>
@@ -78,6 +114,15 @@
                     type: [Array, Object],
                     default: () => { return []; },
                 },
+                fields: [
+                    //{ key: 'location', label: 'Location', sortable: true, },
+                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x)},
+                    { key: 'caregiver', label: 'Caregiver', sortable: true, },
+                    //{ key: 'type', label: 'Client Type', sortable: true },
+                    { key: 'amount', label: 'Amount', sortable: true, formatter: x => this.moneyFormat(x) },
+                ],
+                totals: [],
+                footClone: false
             }
         },
         methods: {
@@ -87,15 +132,15 @@
                 this.form.get('/business/reports/payroll-summary-report')
                     .then( ({ data }) => {
 
-                        console.log(data);
-
-                        this.items = data;
+                        this.items = data.data;
+                        this.totals = data.totals;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
                         this.hasRun = true;
+                        this.footClone = true;
                     })
             },
 
@@ -122,5 +167,4 @@
 </script>
 
 <style scoped>
-
 </style>

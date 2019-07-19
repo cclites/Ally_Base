@@ -4,11 +4,15 @@
 namespace App\Reports;
 
 
-use App\Billing\CaregiverInvoice;
+use App\Billing\Deposit;
+
+use App\Business;
+use Carbon\Carbon;
+use App\Client;
 
 use Log;
 
-class PayrollSummaryReport extends BaseReport
+class PayrollSummaryReport extends BusinessResourceReport
 {
     /**
      * @var \Eloquent
@@ -21,12 +25,41 @@ class PayrollSummaryReport extends BaseReport
     protected $timezone;
 
     /**
-     * PayrollSummaryReport constructor.
-     * @param CaregiverInvoiceQuery $query
+     * @var string
      */
-    public function __construct(CaregiverInvoice $query)
+    protected $clientType;
+
+    /**
+     * @var string
+     */
+    protected $businessName;
+
+    /**
+     * @var string
+     */
+    protected  $caregiverName;
+
+    /**
+     * @var string
+     */
+    protected $startTime;
+
+    /**
+     * @var string
+     */
+    protected $endTime;
+
+    /**
+     * PayrollSummaryReport constructor.
+     */
+    public function __construct()
     {
-        $this->query = $query;
+        $this->query = Deposit::query()
+                        ->where('deposit_type','caregiver')
+                        ->with([
+                                'shifts.client',
+                                'caregiver'
+                        ]);
     }
 
 
@@ -37,14 +70,14 @@ class PayrollSummaryReport extends BaseReport
      */
     public function query(): self
     {
-        return $this->query->with('items');
+        return $this->query;
     }
 
     /**
      * Set instance timezone
      *
      * @param string $timezone
-     * @return ThirdPartyPayerReport
+     * @return PayrollSummaryReport
      */
     public function setTimezone(string $timezone): self
     {
@@ -55,23 +88,25 @@ class PayrollSummaryReport extends BaseReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $caregiver): self
     {
-        $this->query->whereBetween('created_at', [$start, $end]);
 
-        /*
-        $this->query->whereHas('caregiver.shifts', function($q) use($business){
-            $q->where('business_id', $business);
-        });
+
+        $startDate = new Carbon($start . ' 00:00:00', $this->timezone);
+        $endDate = new Carbon($end . ' 23:59:59', $this->timezone);
+
+
+        $this->query->whereBetween('created_at', [$startDate, $endDate]);
+
+        $this->query->forBusinesses([$business]);
 
         if(filled($client_type)){
-            $this->query->whereHas('client', function($q) use($client_type){
+            $this->query->whereHas('shifts.client', function($q) use($client_type){
                 $q->where('client_type', $client_type);
             });
         }
-*/
-        if(filled($caregiver)){
-            $this->query->forCaregiver($caregiver);
-        }$this->query->get();
 
+        if(filled($caregiver)){
+            $this->query->whereCaregiverId($caregiver);
+        }
 
         return $this;
     }
@@ -79,16 +114,16 @@ class PayrollSummaryReport extends BaseReport
     protected function results() : ?iterable
     {
 
-        $results = $this->query->take(5)->get();
+        return $this->query->get()
+                ->map(function(Deposit $deposit){
+                    return [
+                            'amount'=>$deposit->amount,
+                            'caregiver'=>$deposit->caregiver->nameLastFirst(),
+                            'type'=>$this->clientType ? ucwords(str_replace("_", " ", $this->clientType)) : 'All Types',
+                            'date'=> (new Carbon($deposit->created_at))->format('m/d/Y')
+                        ];
 
-        Log::info($results);
+                })->values();
 
-        return $results;
-        /*
-        $data = $report->forRequestedBusinesses()
-            ->forDates($request->start, $request->end)
-            ->forCaregiver($request->caregiver)
-            ->rows();*/
     }
-
 }
