@@ -10,8 +10,6 @@ use App\Business;
 use Carbon\Carbon;
 use App\Client;
 
-use Log;
-
 class PayrollSummaryReport extends BusinessResourceReport
 {
     /**
