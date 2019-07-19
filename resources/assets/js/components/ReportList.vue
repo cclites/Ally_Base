@@ -509,6 +509,15 @@
                         category: 3,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Payment Summary By Payer',
+                        url: 'reports/payment-summary-by-payer',
+                        description: 'Payment Summary By Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
                     {
                         name: 'Service Authorization Ending Report',
                         url: 'reports/service-auth-ending',

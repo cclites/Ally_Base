@@ -9,6 +9,7 @@ use App\Http\Controllers\Business\BaseController;
 use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\PayersDropdownResource;
 use Illuminate\Http\Request;
+use App\Reports\PaymentSummaryByPayerReport;
 
 class PaymentSummaryByPayerReportController extends BaseController
 {
@@ -17,8 +18,6 @@ class PaymentSummaryByPayerReportController extends BaseController
         if ($request->filled('json')) {
 
             $timezone = auth()->user()->role->getTimezone();
-
-            $this->authorize('read', Business::find($request->business));
 
             $report->setTimezone($timezone)
                 ->applyFilters(

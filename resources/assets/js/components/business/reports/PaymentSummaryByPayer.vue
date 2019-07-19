@@ -9,29 +9,22 @@
                 >
                     <b-row>
                         <business-location-form-group
-                                v-model="form.business_id"
+                                v-model="form.business"
                                 label="Office Location"
-                                class="col-md-3"
                                 :allow-all="false"
+                                class="mr-2"
                         />
                         <b-form-group label="Start Date" class="mb-2 mr-2">
-                            <date-picker v-model="form.start_date" name="start_date"></date-picker>
+                            <date-picker v-model="form.start" name="start_date"></date-picker>
                         </b-form-group>
                         <b-form-group label="End Date" class="mb-2 mr-2">
-                            <date-picker v-model="form.end_date" name="end_date"></date-picker>
-                        </b-form-group>
-                        <b-form-group label="Payers" class="col-md-2" :payers="payers">
-                            <b-form-select v-model="form.payer_id" label="Payers" class="col-md-2" :payers="payers">
-                                <option :value="null" selected>All</option>
-                                <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                                </option>
-                            </b-form-select>
+                            <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
                         <b-form-group label="Client Type" class="mb-2 mr-2">
-                            <b-form-select v-model="form.client_type" name="client_type" :disabled="state === 'loading'">
-                                <option value="">All</option>
-                                <option v-for="item in clientTypes" :key="item.id" :value="item.id">
-                                    {{ item.name }}
+                            <b-form-select v-model="form.client_type" name="client_type">
+                                <option value="null">All</option>
+                                <option v-for="item in clientTypes" :key="item.value" :value="item.value">
+                                    {{ item.text }}
                                 </option>
                             </b-form-select>
                         </b-form-group>
@@ -65,11 +58,12 @@
     import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
 
     export default {
         name: "PaymentSummaryByPayer",
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, Constants],
         data() {
             return {
                 form: new Form({
@@ -96,8 +90,9 @@
                 ],
                 items: [],
                 item: '',
-                hasRun: false,
-                totals: []
+                totals: [],
+                payers: [],
+                clients: []
             }
         },
         methods: {
@@ -112,7 +107,6 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
-                        this.hasRun = true;
                     })
             },
 
@@ -120,9 +114,25 @@
                 $(".summary-table").print();
             },
 
-            getClients(){},
+            getClients(){
+                axios.get('/business/clientDropdownResource?business=' + this.form.business)
+                    .then( ({ data }) => {
+                        this.clients = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
+            },
 
-            getPayers(){},
+            getPayers(){
+                axios.get('/business/payerDropdownResource')
+                    .then( ({ data }) => {
+                        this.payers = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
+            },
         },
 
         mounted() {
