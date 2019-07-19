@@ -62,7 +62,7 @@ class PaymentSummaryByPayerReport extends BaseReport
         return $this;
     }
 
-    public function applyFilters(string $start, string $end, int $business, ?int $client, ?string $client_type,  ?int $payer): self
+    public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $client, ?int $payer): self
     {
         $startDate = new Carbon($start . ' 00:00:00', $this->timezone);
         $endDate = new Carbon($end . ' 23:59:59', $this->timezone);
@@ -73,13 +73,16 @@ class PaymentSummaryByPayerReport extends BaseReport
         $this->query->forBusinesses([$business]);
 
         if(filled($client_type)){
-            $this->query->whereHas('shifts.client', function($q) use($client_type){
+            $this->query->whereHas('client', function($q) use($client_type){
                 $q->where('client_type', $client_type);
             });
         }
 
         if(filled($client)){
-            $this->query->forClient($client);
+            //$this->query->forClient($client);
+            $this->query->whereHas('client', function($q) use($client){
+                $q->where('id', $client);
+            });
         }
 
         if(filled($payer)){

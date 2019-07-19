@@ -73,7 +73,29 @@
                                         :busy="busy"
                                         :current-page="currentPage"
                                         :per-page="perPage"
-                                />
+                                        :footClone="footClone"
+                                >
+                                    <template slot="FOOT_client_name" scope="item" class="primary">
+                                        <strong>For Client: </strong>{{totals.client_name}}
+                                    </template>
+
+                                    <template slot="FOOT_date" scope="item">
+                                        <strong>For Location: </strong> {{ totals.location }}
+                                    </template>
+
+                                    <template slot="FOOT_client_type" scope="item" class="primary">
+                                        <strong>For Client Types: </strong> {{totals.client_type}}
+                                    </template>
+
+                                    <template slot="FOOT_payer" scope="item">
+                                        <strong>For Payer: </strong> {{totals.payer}}
+                                    </template>
+
+
+                                    <template slot="FOOT_amount" scope="item" class="primary">
+                                        &nbsp;<strong>Total:  </strong> {{ moneyFormat(totals.total ) }}
+                                    </template>
+                                </b-table>
                             </b-col>
                         </b-row>
                     </div>
@@ -119,7 +141,7 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 50,
+                perPage: 25,
                 currentPage: 1,
                 sortBy: 'client_name',
                 sortDesc: false,
@@ -134,7 +156,8 @@
                 item: '',
                 totals: [],
                 payers: [],
-                clients: []
+                clients: [],
+                footClone: false
             }
         },
         methods: {
@@ -142,12 +165,14 @@
                 this.loading = true;
                 this.form.get('/business/reports/payment-summary-by-payer')
                     .then( ({ data }) => {
-                        this.items = data;
+                        this.items = data.data;
+                        this.totals = data.totals;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.loading = false;
+                        this.footClone = true;
                     })
             },
 
