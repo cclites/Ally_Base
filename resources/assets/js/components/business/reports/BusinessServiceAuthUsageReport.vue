@@ -54,7 +54,8 @@
                 <b-row>
                     <b-col>
                         <loading-card v-if="busy" />
-                        <div v-else class="table-responsive">
+                        <div v-else class="table-responsive" id="report-table">
+                            <h2 v-if="items && items.length">{{ items[0].client_name }}</h2>
                             <div v-for="auth in items" :key="auth.id" class="mb-4">
                                 <div class="mb-2">
                                     <strong>
@@ -64,12 +65,6 @@
                                         </span>
                                     </strong>
                                 </div>
-<!--                                <b-table bordered striped hover show-empty-->
-<!--                                    :items="auth.periods"-->
-<!--                                    :fields="fields"-->
-<!--                                    sort-by="period"-->
-<!--                                >-->
-<!--                                </b-table>-->
                                 <table class="table-fit-more table b-table table-striped table-hover table-bordered">
                                     <thead>
                                         <tr>
@@ -200,7 +195,7 @@
             },
 
             print() {
-                $("#auths-table").print();
+                $("#report-table").print();
             },
 
             async loadClients() {
@@ -226,8 +221,16 @@
 
         async mounted() {
             this.loading = true;
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('client')) {
+                this.form.client_id = urlParams.get('client');
+            }
             await this.loadClients();
             this.loading = false;
+
+            if (this.form.client_id) {
+                this.fetch();
+            }
         },
 
         watch: {

@@ -852,20 +852,31 @@ class Client extends AuditableModel implements
 
     /**
      * Get the client's service authorizations active on the
-     * specified date.  Defaults to today.
+     * specified date for a specific set of services.
+     * Defaults to today and any/all services.
      *
      * @param null|\Carbon\Carbon $date
+     * @param null|int|array
      * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
      */
-    public function getActiveServiceAuths(?Carbon $date = null) : Collection
+    public function getActiveServiceAuths(?Carbon $date = null, $serviceIds = null) : Collection
     {
         if (empty($date)) {
             $date = Carbon::now();
         }
 
-        return $this->serviceAuthorizations()
-            ->effectiveOn($date)
-            ->get();
+        $query = $this->serviceAuthorizations()
+            ->effectiveOn($date);
+
+        if (filled($serviceIds)) {
+            if (is_array($serviceIds)) {
+                $query->whereIn('service_id', $serviceIds);
+            } else {
+                $query->where('service_id', $serviceIds);
+            }
+        }
+
+        return $query->get();
     }
 
     /**

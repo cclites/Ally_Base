@@ -12,6 +12,7 @@ use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\PayersDropdownResource;
 use App\Reports\MedicaidBillingReport;
 use App\Reports\ThirdPartyPayerReport;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Request;
 
 class ThirdPartyPayerReportController extends Controller
@@ -42,7 +43,14 @@ class ThirdPartyPayerReportController extends Controller
                     $request->payer
                 );
 
-            return response($report->rows());
+            $data = $report->rows();
+
+            if (filled($request->print)) {
+                $pdf = PDF::loadView('business.reports.print.third_party_report', compact('data', 'timezone'));
+                return $pdf->download('third_party_report.pdf');
+            }
+
+            return response($data);
         }
 
         $clients = new ClientDropdownResource(Client::forRequestedBusinesses()->active()->get());
