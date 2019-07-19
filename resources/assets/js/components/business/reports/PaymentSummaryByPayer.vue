@@ -14,10 +14,10 @@
                                 class="col-md-3"
                                 :allow-all="false"
                         />
-                        <b-form-group label="Start Date" class="col-md-2">
+                        <b-form-group label="Start Date" class="mb-2 mr-2">
                             <date-picker v-model="form.start_date" name="start_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="End Date" class="col-md-2">
+                        <b-form-group label="End Date" class="mb-2 mr-2">
                             <date-picker v-model="form.end_date" name="end_date"></date-picker>
                         </b-form-group>
                         <b-form-group label="Payers" class="col-md-2" :payers="payers">
@@ -67,9 +67,68 @@
     import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
-        name: "PaymentSummaryByPayer"
+        name: "PaymentSummaryByPayer",
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsDates, FormatsNumbers],
+        data() {
+            return {
+                form: new Form({
+                    business: '',
+                    start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                    client_type: '',
+                    client: '',
+                    payer: '',
+                    json: 1
+                }),
+                busy: false,
+                totalRows: 0,
+                perPage: 50,
+                currentPage: 1,
+                sortBy: 'client_name',
+                sortDesc: false,
+                fields: [
+                    {key: 'client_name', label: 'Client', sortable: true,},
+                    {key: 'date', label: 'Date', sortable: true,},
+                    {key: 'client_type', label: 'Client Type', sortable: true,},
+                    {key: 'payer', label: 'Payer', sortable: true,},
+                    {key: 'amount', label: 'Amount', sortable: true,},
+                ],
+                items: [],
+                item: '',
+                hasRun: false,
+                totals: []
+            }
+        },
+        methods: {
+            fetch() {
+                this.busy = true;
+                this.form.get('/business/reports/payment-summary-by-payer')
+                    .then( ({ data }) => {
+
+                        this.items = data.data;
+                        this.totalRows = this.items.length;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.busy = false;
+                        this.hasRun = true;
+                    })
+            },
+
+            print(){
+                $(".summary-table").print();
+            },
+
+            getClients(){},
+
+            getPayers(){},
+        },
+
+        mounted() {
+            this.getClients();
+            this.getPayers();
+        },
     }
 </script>
 
