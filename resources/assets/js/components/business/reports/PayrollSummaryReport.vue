@@ -9,35 +9,40 @@
                     v-model="form.business"
                     :allow-all="true"
                     class="mb-2 mr-2"
-                    :label="null"
+                    :label="Location"
             />
-            <date-picker v-model="form.start"
-                         placeholder="Start Date"
-                         weekStart="1"
-                         class="mb-2 mr-2 col-md-2"
-            >
-            </date-picker>
-            &nbsp;to&nbsp;
-            <date-picker v-model="form.end"
-                         placeholder="End Date"
-                         class="mb-2 mr-2 col-md-2">
-            </date-picker>
-            <b-select v-model="form.caregiver" class="mb-2 mr-2">
-                <option value="">All Caregivers</option>
-                <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-            </b-select>
+            <b-form-group label="Start Date" class="mr-2">
+                <date-picker v-model="form.start" name="start_date"></date-picker>
+            </b-form-group>
+            <b-form-group label="End Date" class="mr-2">
+                <date-picker v-model="form.end" name="end_date"></date-picker>
+            </b-form-group>
 
-            <b-select v-model="form.client_type" class="mb-2 mr-2">
-                <option v-for="type in clientTypes" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </b-select>
+            <b-form-group label="Caregiver"  class="mr-2">
+                <b-select v-model="form.caregiver">
+                    <option value="">All Caregivers</option>
+                    <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                </b-select>
+            </b-form-group>
 
-            <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-2 mb-2">
-                <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
-                Generate Report
-            </b-button>
+
+            <b-form-group label="Client Type" class="mr-2">
+                <b-select v-model="form.client_type" >
+                    <option v-for="type in clientTypes" :key="type.value" :value="type.value">{{ type.text }}</option>
+                </b-select>
+            </b-form-group>
+
+            <b-col md="2">
+                <b-form-group label="&nbsp;">
+                    <b-button-group>
+                        <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                        <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                    </b-button-group>
+                </b-form-group>
+            </b-col>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive summary-table">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -143,10 +148,7 @@
                         this.footClone = true;
                     })
             },
-
             fetchCaregivers(){
-
-                this.loading = true;
                 axios.get('/business/reports/payroll-summary-report/' + this.form.business)
                     .then( ({ data }) => {
                         this.caregivers = data;
@@ -155,9 +157,11 @@
                     .finally(() => {
                         this.loading = false;
                     })
-                this.loading = false;
-
+            },
+            print(){
+                $(".summary-table").print();
             }
+
         },
 
         mounted(){
