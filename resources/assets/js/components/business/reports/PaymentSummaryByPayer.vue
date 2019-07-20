@@ -143,7 +143,7 @@
                 totalRows: 0,
                 perPage: 25,
                 currentPage: 1,
-                sortBy: 'client_name',
+                sortBy: 'payer',
                 sortDesc: false,
                 fields: [
                     {key: 'client_name', label: 'Client', sortable: true,},

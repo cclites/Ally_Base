@@ -10,8 +10,6 @@ use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Carbon\Carbon;
 
-use Log;
-
 class PaymentSummaryByPayerReport extends BaseReport
 {
 
@@ -40,7 +38,7 @@ class PaymentSummaryByPayerReport extends BaseReport
             'client',
             'client.user',
             'clientPayer',
-        ]);
+        ])->whereHas('payments');
     }
 
 
@@ -79,7 +77,6 @@ class PaymentSummaryByPayerReport extends BaseReport
         }
 
         if(filled($client)){
-            //$this->query->forClient($client);
             $this->query->whereHas('client', function($q) use($client){
                 $q->where('id', $client);
             });
@@ -102,16 +99,15 @@ class PaymentSummaryByPayerReport extends BaseReport
                 return $invoice->items
                 ->whereIn('invoiceable_type', ['shifts', 'shift_services'])
                     ->map(function (ClientInvoiceItem $item) use ($invoice) {
+
                         $data = [];
 
                         if ($item->invoiceable_type == 'shifts' && filled($item->shift)) {
                             if (empty($item->shift->service) && filled($item->shift->services)) {
-
                                 foreach ($item->shift->services as $service) {
                                     $data += $this->mapShiftServiceRecord($invoice, $service);
                                 }
                             } else {
-
                                 $data += $this->mapShiftRecord($invoice, $item->shift);
                             }
                         } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
@@ -119,7 +115,6 @@ class PaymentSummaryByPayerReport extends BaseReport
                         } else {
                             return null;
                         }
-
                         return $data;
                     })
                     ->values()
@@ -159,9 +154,11 @@ class PaymentSummaryByPayerReport extends BaseReport
         return [
             'payer'=>$invoice->clientPayer->payer->name,
             'client_name'=>$invoice->client->nameLastFirst,
-            'date'=>Carbon::parse($invoice->payments->last()->created_at, $this->timezone)->toDateString(),
+            'date'=>Carbon::parse($invoice->payments->first()->created_at, $this->timezone)->toDateString(),
             'client_type'=>ucwords(str_replace('_', ' ', $invoice->client->client_type)),
             'amount'=>$shiftService->getAmountCharged()
         ];
     }
+
+
 }

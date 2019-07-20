@@ -10,8 +10,6 @@ use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\PaymentSummaryByPayerReport;
 
-use Log;
-
 class PaymentSummaryByPayerReportController extends BaseController
 {
     public function index(Request $request, PaymentSummaryByPayerReport $report){
@@ -46,6 +44,8 @@ class PaymentSummaryByPayerReportController extends BaseController
                 'total'=>$data->sum('amount')
             ];
 
+            $data = $this->createSummary($data);
+
             return response()->json(['data'=>$data, 'totals'=>$totals]);
         }
 
@@ -58,6 +58,39 @@ class PaymentSummaryByPayerReportController extends BaseController
                 'Reports' => route('business.reports.index')
             ]
         );
+    }
+
+    /**
+     * Condense the results
+     *
+     * @param $data
+     * @return array
+     */
+    protected function createSummary($data): array
+    {
+
+        $set = [];
+
+        foreach($data as $item){
+
+            $key = $item['client_name'] . $item['payer'] . $item['date'] . $item['client_type'];
+
+            if(!isset($set[$key])){
+
+                $set[$key] = [
+                    'payer'=>$item['payer'],
+                    'client_name'=>$item['client_name'],
+                    'date'=>$item['date'],
+                    'client_type'=>$item['client_type'],
+                    'amount'=>$item['amount']
+                ];
+            }else{
+                $set[$key]['amount'] += $item['amount'];
+            }
+
+        }
+
+        return array_values($set);
     }
 
 
