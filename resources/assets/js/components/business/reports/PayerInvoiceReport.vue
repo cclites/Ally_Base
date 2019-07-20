@@ -51,12 +51,14 @@
                         </b-col>
                     </b-row>
 
+
+
                     <div class="d-flex justify-content-center" v-if="loading">
                         <div class="my-5">
                             <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                         </div>
                     </div>
-                    <div v-else>
+                    <div>
                         <b-row>
                             <b-col>
                                 <b-table
@@ -64,13 +66,19 @@
                                         :items="items"
                                         :fields="fields"
                                         sort-by="payer"
-                                        empty-text="No Results"
+                                        :empty-text="emptyText"
                                         :busy="loading"
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                 />
                             </b-col>
                         </b-row>
+                    </div>
+
+                    <div v-if="totalRows == 0" class="m-4">
+                        <div role="alert" aria-live="polite">
+                            <div class="text-center my-2">There are no records to show</div>
+                        </div>
                     </div>
 
                     <b-row v-if="this.items.length > 0">
@@ -174,6 +182,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
+                emptyText: "No Results",
 
             }
         },

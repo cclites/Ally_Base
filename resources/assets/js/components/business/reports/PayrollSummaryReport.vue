@@ -8,7 +8,7 @@
             <business-location-form-group
                     v-model="form.business"
                     :allow-all="true"
-                    class="mb-2 mr-2"
+                    class="mr-2"
                     :label="Location"
             />
             <b-form-group label="Start Date" class="mr-2">
@@ -32,7 +32,7 @@
                 </b-select>
             </b-form-group>
 
-            <b-col md="2">
+            <b-col>
                 <b-form-group label="&nbsp;">
                     <b-button-group>
                         <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
@@ -46,14 +46,16 @@
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
+                     :empty-text="emptyText"
                      :current-page="currentPage"
                      :per-page="perPage"
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
                      :footClone="footClone"
+                     class="mt-2"
             >
                 <template slot="FOOT_location" scope="item" class="primary">
-                    &nbsp;
+                    &nbsp;&nbsp;
                 </template>
 
                 <template slot="FOOT_date" scope="item">
@@ -65,11 +67,11 @@
                 </template>
 
                 <template slot="FOOT_type" scope="item">
-                    &nbsp;
+                    &nbsp;&nbsp;
                 </template>
 
                 <template slot="FOOT_name" scope="item">
-                    &nbsp;
+                    &nbsp;&nbsp;
                 </template>
 
                 <template slot="FOOT_amount" scope="item" class="primary">
@@ -127,7 +129,8 @@
                     { key: 'amount', label: 'Amount', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
                 totals: [],
-                footClone: false
+                footClone: false,
+                emptyText: "No Results"
             }
         },
         methods: {
@@ -144,7 +147,6 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
-                        this.hasRun = true;
                         this.footClone = true;
                     })
             },

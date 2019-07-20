@@ -22,6 +22,11 @@ class PayrollSummaryReport extends BusinessResourceReport
      */
     protected $timezone;
 
+    /**
+     * @var string
+     */
+    protected $clientType;
+
 
     /**
      * PayrollSummaryReport constructor.
@@ -73,6 +78,7 @@ class PayrollSummaryReport extends BusinessResourceReport
         $this->query->forBusinesses([$business]);
 
         if(filled($client_type)){
+            $this->clientType = $client_type;
             $this->query->whereHas('shifts.client', function($q) use($client_type){
                 $q->where('client_type', $client_type);
             });
