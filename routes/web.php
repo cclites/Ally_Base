@@ -443,6 +443,10 @@ Route::group([
     Route::resource('prospects', 'Business\ProspectController');
     Route::resource('contacts', 'Business\OtherContactController');
 
+    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
+    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
+    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
+
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
     Route::get('quickbooks/authorization', 'Business\QuickbooksSettingsController@authorization')->name('quickbooks.authorization');

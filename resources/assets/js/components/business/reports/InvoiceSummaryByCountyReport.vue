@@ -161,9 +161,11 @@
                     })
             },
 
-            mountet(){
-                this.getClients();
-            }
+
+        },
+        
+        mounted(){
+            this.getClients();
         }
     }
 </script>
