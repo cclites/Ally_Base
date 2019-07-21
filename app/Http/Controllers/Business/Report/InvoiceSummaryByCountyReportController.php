@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\Client;
 use App\Business;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
@@ -18,19 +19,31 @@ class InvoiceSummaryByCountyReportController extends BaseController
 
             $this->authorize('read', Business::find($request->business));
 
-            $data = $report->setTimezone($timezone)
+            if(filled($request->client)){
+                $this->authorize('read', Client::find($request->client));
+            }
+
+            $report->setTimezone($timezone)
                     ->applyFilters(
                         $request->start,
                         $request->end,
                         $request->business,
                         $request->client
-                    )->rows();
+                    );
+
+            $data = $report->rows();
 
             $totals = [
-                'totalRevenue' => $data->sum('amount'),
+                'amount' => $data->sum('amount'),
                 'location' => Business::find($request->business)->name,
                 'client' => filled($request->client) ? Client::find($request->client)->nameLastFirst() : null,
+                'start' => $request->start,
+                'end' => $request->end
             ];
+
+            $data = $this->createSummary($data);
+
+            return response()->json(['data'=>$data, 'totals'=>$totals]);
 
         }
 
@@ -43,7 +56,6 @@ class InvoiceSummaryByCountyReportController extends BaseController
                 'Reports' => route('business.reports.index')
             ]
         );
-
     }
 
     public function createSummary($data){
@@ -60,7 +72,7 @@ class InvoiceSummaryByCountyReportController extends BaseController
                   'amount'=>$item['amount']
                 ];
             }else{
-                $set[$key] += $item['amount'];
+                $set[$key]['amount'] += $item['amount'];
             }
         }
 

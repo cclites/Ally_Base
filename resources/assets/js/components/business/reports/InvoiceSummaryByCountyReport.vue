@@ -60,15 +60,15 @@
                                         :footClone="footClone"
                                 >
                                     <template slot="FOOT_county" scope="item" class="primary">
-                                        &nbsp;
+                                        <strong>For Location: </strong> {{ totals.location }}
                                     </template>
 
                                     <template slot="FOOT_amount" scope="item">
-                                        &nbsp;
+                                        &nbsp;<strong>For Dates: </strong>{{ totals.start }} to {{ totals.end }}
                                     </template>
 
                                     <template slot="FOOT_spacer" scope="item" class="primary">
-                                        <strong>Total Amount: </strong> {{totals.amount}}
+                                        <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
                                     </template>
 
                                 </b-table>

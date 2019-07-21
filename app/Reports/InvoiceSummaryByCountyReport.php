@@ -63,7 +63,7 @@ class InvoiceSummaryByCountyReport extends BaseReport
         $end = (new Carbon($end . ' 23:59:59', 'UTC'));
         $this->query->whereBetween('created_at', [$start, $end]);
 
-        $this->query->forBusiness($business);
+        $this->query->forBusinesses([$business]);
 
         if (filled($client)) {
             $this->query->where('client_id', $client);
@@ -71,8 +71,6 @@ class InvoiceSummaryByCountyReport extends BaseReport
 
         return $this;
     }
-
-
 
     /**
      * @return Collection
@@ -83,12 +81,11 @@ class InvoiceSummaryByCountyReport extends BaseReport
 
             return [
                 'client_name'=>$invoice->client->nameLastFirst,
-                'client_county'=>$invoice->client->addresses->first->county["county"] ? $invoice->client->addresses->first->county["county"] : "--",
+                'county'=>$invoice->client->addresses->first->county["county"] ? $invoice->client->addresses->first->county["county"] : "--",
                 'amount'=>$invoice->amount
-
             ];
 
-        })->values();
+        });
     }
 
 
