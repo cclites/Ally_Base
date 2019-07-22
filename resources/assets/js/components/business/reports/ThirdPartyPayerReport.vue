@@ -90,6 +90,11 @@
                                     <i class="fa fa-times-rectangle-o"></i>
                                 </span>
                             </template>
+                            <template slot="actions" scope="row">
+                                <a :href="`/business/claims-ar?start_date=${form.start}&end_date=${form.end}&filter=${row.item.invoice_name}`" target="_blank">
+                                    <b-btn variant="secondary">Goto Claims</b-btn>
+                                </a>
+                            </template>
                         </b-table>
                     </div>
                     <b-row>
@@ -103,7 +108,7 @@
                 </b-card>
             </b-col>
         </b-row>
-    </b-container>
+     </b-container>
 </template>
 
 <script>
@@ -171,6 +176,7 @@
                     { key: 'rate', label: 'Cost/Hour', sortable: true, formatter: x => this.moneyFormat(x) },
                     { key: 'evv', label: 'EVV', sortable: true },
                     { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
+                    { key: 'actions', label: '-', sortable: false },
                 ],
                 items: [],
                 item:'',
