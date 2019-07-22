@@ -364,6 +364,7 @@ Route::group([
     Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
     Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReportController@clients')->name('reports.service-auth-usage.clients');
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
+    Route::get('reports/invoice-summary-by-marketing', 'Business\Report\InvoiceSummaryByMarketingController@index')->name('reports.invoice-summary-by-marketing');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -483,6 +484,7 @@ Route::group([
     Route::get('clientDropdownResource', 'DropdownResourceController@clients');
     Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
     Route::get('payerDropdownResource', 'DropdownResourceController@payers');
+    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
 
 });
 
