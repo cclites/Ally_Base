@@ -348,9 +348,28 @@
             }
         },
 
-        mounted() {
-            this.loadClients();
-            this.fetchPayers();
+        async mounted() {
+            await this.loadClients();
+            await this.fetchPayers();
+
+            // load filters from query
+            let autoLoad = false;
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('start_date')) {
+                this.start_date = urlParams.get('start_date');
+                autoLoad = true;
+            }
+            if (urlParams.has('end_date')) {
+                this.end_date = urlParams.get('end_date');
+                autoLoad = true;
+            }
+            if (urlParams.has('filter')) {
+                this.filter = urlParams.get('filter');
+            }
+
+            if (autoLoad) {
+                this.loadItems();
+            }
         },
 
         computed: {
