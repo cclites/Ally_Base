@@ -479,6 +479,11 @@ Route::group([
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
+    /** Resources */
+    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
+    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
+    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
+
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
