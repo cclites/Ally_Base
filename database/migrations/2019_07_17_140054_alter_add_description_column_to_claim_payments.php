@@ -15,7 +15,7 @@ class AlterAddDescriptionColumnToClaimPayments extends Migration
     public function up()
     {
         Schema::table('claim_payments', function (Blueprint $table) {
-            $table->enum('description', PaymentDescriptionTypes::PAYMENT_DESCRIPTIONS)->nullable()->after('type');
+            $table->string('description', 30)->nullable()->after('type');
         });
     }
 

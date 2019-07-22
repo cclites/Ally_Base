@@ -29,7 +29,7 @@ class PayClaimRequest extends FormRequest
     {
         return [
             'payment_date' => 'required|date',
-            'amount' => 'required|numeric|between:0,9999999.99',
+            'amount' => 'required|numeric|between:-9999999,9999999.99',
             'type' => 'nullable|string|max:255',
             'description' => ['string', new ValidEnum(PaymentDescriptionTypes::class)],
             'reference' => 'nullable|string|max:255',
@@ -52,13 +52,7 @@ class PayClaimRequest extends FormRequest
 
     public function toClaimPayment(): ClaimPayment
     {
-        return new ClaimPayment([
-            'payment_date' => $this->filtered()['payment_date'],
-            'amount' => $this->filtered()['amount'],
-            'type' => $this->filtered()['type'] ?? null,
-            'reference' => $this->filtered()['reference'] ?? null,
-            'notes' => $this->filtered()['notes'] ?? null,
-        ]);
+        return new ClaimPayment($this->filtered());
     }
 
     public function getAmount(): float
