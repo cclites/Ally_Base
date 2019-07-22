@@ -147,7 +147,7 @@
                 sortDesc: false,
                 fields: [
                     {key: 'client_name', label: 'Client', sortable: true,},
-                    {key: 'date', label: 'Payment Date', sortable: true, formatter: x => { return this.formatDate(x) }},
+                    {key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
                     {key: 'client_type', label: 'Client Type', sortable: true,},
                     {key: 'payer', label: 'Payer', sortable: true,},
                     {key: 'amount', label: 'Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},

@@ -136,7 +136,7 @@ class PaymentSummaryByPayerReport extends BaseReport
         return [
             'payer'=>$invoice->clientPayer->payer->name,
             'client_name'=>$invoice->client->nameLastFirst,
-            'date'=>Carbon::parse($invoice->payments->last()->created_at, $this->timezone)->toDateString(),
+            'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
             'client_type'=>ucwords(str_replace('_', ' ', $invoice->client->client_type)),
             'amount'=>$shift->getAmountCharged()
         ];
@@ -154,7 +154,7 @@ class PaymentSummaryByPayerReport extends BaseReport
         return [
             'payer'=>$invoice->clientPayer->payer->name,
             'client_name'=>$invoice->client->nameLastFirst,
-            'date'=>Carbon::parse($invoice->payments->first()->created_at, $this->timezone)->toDateString(),
+            'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
             'client_type'=>ucwords(str_replace('_', ' ', $invoice->client->client_type)),
             'amount'=>$shiftService->getAmountCharged()
         ];

@@ -19,6 +19,10 @@ class PaymentSummaryByPayerReportController extends BaseController
 
             $timezone = auth()->user()->role->getTimezone();
 
+            $this->authorize('read', Business::find($request->business));
+            $this->authorize('read', Client::find($request->client));
+            $this->authorize('read', ClientPayer::find($request->payer));
+            
             $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
