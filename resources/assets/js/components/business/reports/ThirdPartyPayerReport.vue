@@ -56,9 +56,12 @@
             <b-col>
                 <b-card>
                     <div class="d-flex mb-2">
-                        <b-btn class="ml-auto" variant="success" @click="printTable()">
-                            <i class="fa fa-print"></i> Print
-                        </b-btn>
+                        <div class="ml-auto">
+                            <b-btn @click="download()" variant="success">Export to Excel</b-btn>
+                            <b-btn variant="primary" @click="printTable()">
+                                <i class="fa fa-print"></i> Print
+                            </b-btn>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
@@ -186,6 +189,10 @@
         },
 
         methods: {
+            download() {
+                window.location = this.form.toQueryString('/business/reports/third-party-payer?export=1')
+            },
+
             fetch() {
                 this.busy = true;
                 this.form.get('/business/reports/third-party-payer')

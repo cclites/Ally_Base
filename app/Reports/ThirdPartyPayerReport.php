@@ -284,4 +284,32 @@ class ThirdPartyPayerReport extends BaseReport
             ->where('effective_end', '>=', $date)
             ->first();
     }
+
+    public function download()
+    {
+        $this->rows = $this->results()->map(function ($row) {
+            return [
+                'client_name' => $row['client_name'],
+                'client_id' => $row['client_id'],
+                'invoice' => $row['invoice_name'],
+                'hic' => $row['hic'] ?: '-',
+                'client_dob' => $row['dob'] ?: '-',
+                'diagnosis_code' => $row['code'] ?: '-',
+                'caregiver' => $row['caregiver'] ?: '-',
+                'payer' => $row['payer'] ?: '-',
+                'service code & type' => $row['service'] ?: '-',
+                'Authorization Number' => $row['service_auth'] ?: '-',
+                'date' => $row['date'],
+                'start' => $row['start'],
+                'end' => $row['end'],
+                'units' => $row['units'],
+                'hours' => $row['hours'],
+                'Cost/Hour' => $row['rate'],
+                'EVV' => $row['evv'] ? 'Yes' : 'No',
+                'total_billable' => $row['billable'],
+            ];
+        });
+
+        parent::download();
+    }
 }
