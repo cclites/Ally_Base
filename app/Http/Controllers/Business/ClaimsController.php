@@ -33,6 +33,11 @@ class ClaimsController extends BaseController
         if ($request->expectsJson()) {
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
+                    case 'overpaid':
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount_paid', '>', 'amount');
+                        });
+                        break;
                     case 'paid':
                         $invoiceQuery->paidInFull();
                         break;
@@ -160,10 +165,6 @@ class ClaimsController extends BaseController
 
         if (empty($invoice->claim)) {
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
-        }
-
-        if ($request->getAmount() > $invoice->claim->getAmountDue()) {
-            return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
         }
 
         $invoice->claim->addPayment($request->toClaimPayment());

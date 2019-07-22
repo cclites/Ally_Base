@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Billing\ClaimPayment;
 use App\Billing\OfflineInvoicePayment;
 use App\Billing\Payments\OfflinePayment;
+use App\Billing\Payments\PaymentDescriptionTypes;
+use App\Rules\ValidEnum;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -29,8 +31,9 @@ class PayOfflineInvoiceRequest extends FormRequest
     {
         return [
             'payment_date' => 'required|date',
-            'amount' => 'required|numeric|between:0,9999999.99',
+            'amount' => 'required|numeric|between:-9999999,9999999.99',
             'type' => 'nullable|string|max:255',
+            'description' => ['required', new ValidEnum(PaymentDescriptionTypes::class)],
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:4096',
         ];
@@ -50,13 +53,7 @@ class PayOfflineInvoiceRequest extends FormRequest
 
     public function toOfflineInvoicePayment() : OfflineInvoicePayment
     {
-        return new OfflineInvoicePayment([
-            'payment_date' => $this->filtered()['payment_date'],
-            'amount' => $this->filtered()['amount'],
-            'type' => $this->filtered()['type'] ?? null,
-            'reference' => $this->filtered()['reference'] ?? null,
-            'notes' => $this->filtered()['notes'] ?? null,
-        ]);
+        return new OfflineInvoicePayment($this->filtered());
     }
 
     public function getAmount(): float

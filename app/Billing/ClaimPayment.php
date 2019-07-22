@@ -37,4 +37,29 @@ class ClaimPayment extends AuditableModel
     {
         return $this->belongsTo(Claim::class);
     }
+
+    /**
+     * Get the payment method description for the ClaimInvoice display.
+     *
+     * @return string
+     */
+    public function getPaymentMethod() : string
+    {
+        $str = '';
+        if ($this->description) {
+            $str = ucwords(str_replace('_', ' ', $this->description)) . ' ';
+        }
+
+        if ($this->type && $this->reference) {
+            $str .= "($this->type: {$this->reference})";
+        } else {
+            if ($this->type) {
+                $str .= "($this->type)";
+            } else if ($this->reference) {
+                $str .= "($this->reference)";
+            }
+        }
+
+        return $str;
+    }
 }
