@@ -80,8 +80,8 @@ class InvoiceSummaryByCountyReport extends BaseReport
         return $this->query->get()->map(function (ClientInvoice $invoice) {
 
             return [
-                'client_name'=>$invoice->client->nameLastFirst,
-                'county'=>$invoice->client->addresses->first->county["county"] ? $invoice->client->addresses->first->county["county"] : "--",
+                'client'=>$invoice->client->nameLastFirst,
+                'county'=>$invoice->client->addresses->first->county["county"] ? $invoice->client->addresses->first->county["county"] : "No county listed",
                 'amount'=>$invoice->amount
             ];
 

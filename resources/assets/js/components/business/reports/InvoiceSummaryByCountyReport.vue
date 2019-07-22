@@ -52,7 +52,7 @@
                                         class="payers-summary-table"
                                         :items="items"
                                         :fields="fields"
-                                        sort-by="payer"
+                                        :sort-by="sortBy"
                                         :empty-text="emptyText"
                                         :busy="busy"
                                         :current-page="currentPage"
@@ -118,9 +118,11 @@
                 sortBy: 'county',
                 sortDesc: false,
                 fields: [
+
                     {key: 'county', label: 'County', sortable: true,},
                     {key: 'amount', label: 'Total Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
-                    {key: 'spacer', label: '&nbsp', sortable: false,},
+
+                    //{key: 'client', label: 'Client', sortable: false,},
                 ],
                 items: [],
                 item: '',
@@ -163,7 +165,7 @@
 
 
         },
-        
+
         mounted(){
             this.getClients();
         }
