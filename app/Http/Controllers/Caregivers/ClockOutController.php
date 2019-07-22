@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\ClientType;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -108,14 +109,12 @@ class ClockOutController extends BaseController
         }
 
         // If not private pay, ADL and comments are required
-        if ($shift->client->client_type != 'private_pay') {
+        if ($shift->client->client_type != ClientType::PRIVATE_PAY) {
             $request->validate(
                 [
-                    'caregiver_comments' => 'required',
                     'activities' => 'min:1',
                 ],
                 [
-                    'caregiver_comments.required' => 'Care notes are required for this client.',
                     'activities.min' => 'A minimum of one activity is required for this client.',
                 ]
             );
