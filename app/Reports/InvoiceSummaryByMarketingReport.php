@@ -34,7 +34,7 @@ class InvoiceSummaryByMarketingReport extends BaseReport
             'client',
             'client.user',
             'clientPayer',
-            'client.sales_person_id'
+            'client.salesperson'
         ]);
 
     }
@@ -68,16 +68,20 @@ class InvoiceSummaryByMarketingReport extends BaseReport
         $this->query->forBusiness($business);
 
         if(filled($salesperson)){
-            $clientIds = $this->getClientIds($business, $salesperson);
-            $this->query->whereIn('client_id', $clientIds);
+            $this->query->whereHas('salesperson', function($q) use($salesperson){
+                $q->where('sales_person_id', $salesperson);
+            });
+        }elseif(filled($client)){
+            $this->query->where('client_id', $client);
         }else{
-            $clientIds = $this->getAllClientIds($business);
-            $this->query->whereIn('client_id', $clientIds);
+            $this->query->whereHas('client', function($q){
+                $q->whereNotNull('sales_person_id');
+            });
         }
 
-        if(filled($client)){
-            $this->query->where('client_id', $client);
-        }
+        $this->query->whereHas('client', function($q){
+            $q->whereNotNull('sales_person_id');
+        });
 
         return $this;
     }
@@ -87,80 +91,21 @@ class InvoiceSummaryByMarketingReport extends BaseReport
      */
     protected function results(): iterable
     {
-        $data = $this->query->get();
-
-        //foreach($invoices as $invoice){
-            //Log::info($)
-       // }
-        /*
         $data = $this->query
                     ->get()
                     ->map(function (ClientInvoice $invoice){
 
-
-                        Log::info(json_encode($invoice->client->salesperson));
-
                        return [
                            'client'=>$invoice->client->name,
                            'amount'=>$invoice->amount,
-                           'salesperson'=>$invoice->client->referral_source_id,
+                           'salesperson'=>$invoice->client->salesperson->fullName(),
                            'payer'=>$invoice->clientPayer->payer_name,
                         ];
 
                     })
                     ->sortBy('salesperson')
                     ->values();
-        */
-        Log::info(json_encode($data));
 
         return $data;
-
     }
-
-    public function getAllClientIds($businessId){
-
-        $clientIds = [];
-
-        SalesPerson::query()
-                ->where('business_id', $businessId)
-                ->get()
-                ->map(function(SalesPerson $salesperson) use(&$clientIds){
-
-                    $clientIdVals = $salesperson->clientIds();
-
-                    foreach ($clientIdVals as $clientId){
-                        $clientIds[] = $clientId;
-                    }
-
-                    return $salesperson;
-
-                });
-
-        return $clientIds;
-    }
-
-    public function getClientIds($businessId, $salespersonId){
-        $clientIds = [];
-
-        SalesPerson::query()
-            ->where('business_id', $businessId)
-            ->where('id', $salespersonId)
-            ->get()
-
-            ->map(function(SalesPerson $salesperson) use(&$clientIds){
-
-                $clientIdVals = $salesperson->clientIds();
-
-                foreach ($clientIdVals as $clientId){
-                    $clientIds[] = $clientId;
-                }
-
-                return $salesperson;
-
-            });
-
-        return $clientIds;
-    }
-
-
 }

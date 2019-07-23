@@ -56,10 +56,27 @@
                                         :fields="fields"
                                         :sort-by="sortBy"
                                         :empty-text="emptyText"
-                                        :busy="false"
+                                        :busy="busy"
                                         :current-page="currentPage"
                                         :per-page="perPage"
-                                />
+                                        :footClone="footClone"
+                                >
+                                    <template slot="FOOT_client" scope="item" class="primary">
+                                        <strong>For Salesperson: </strong> {{ totals.salesperson }}
+                                    </template>
+
+                                    <template slot="FOOT_salesperson" scope="item">
+                                        <strong>For Dates: </strong>{{ totals.start }} to {{ totals.end }}
+                                    </template>
+
+                                    <template slot="FOOT_payer" scope="item">
+                                        <strong>For Client: </strong>{{ totals.client }}
+                                    </template>
+
+                                    <template slot="FOOT_amount" scope="item" class="primary">
+                                        <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
+                                    </template>
+                                </b-table>
                             </b-col>
                         </b-row>
                     </div>
@@ -128,8 +145,8 @@
                 this.busy = true;
                 this.form.get('/business/reports/invoice-summary-by-marketing')
                     .then( ({ data }) => {
-                        this.items = data;
-                        //this.totals = data.totals;
+                        this.items = data.data;
+                        this.totals = data.totals;
                         this.totalRows = this.items.length;
                     })
                     .catch(e => {})
@@ -166,17 +183,17 @@
 
         watch: {
 
-            /*async 'form.business'(newValue, oldValue) {
+            async 'form.business'(newValue, oldValue) {
                 if (newValue != oldValue) {
-                    await this.loadClients();
+                    await this.loadMarketingClients();
                     this.loadSalespeople();
                 }
-            }*/
+            }
         },
 
         mounted() {
-            this.loadMarketingClients();
-            this.loadSalespeople();
+            //this.loadMarketingClients();
+            //this.loadSalespeople();
         },
 
     }

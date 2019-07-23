@@ -4,8 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-use Log;
-
 class ClientDropdownResource extends ResourceCollection
 {
     /**

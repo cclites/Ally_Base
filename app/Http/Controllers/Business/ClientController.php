@@ -463,4 +463,5 @@ class ClientController extends BaseController
         // Use the reload page redirect to update the timestamp
         return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
     }
+
 }
