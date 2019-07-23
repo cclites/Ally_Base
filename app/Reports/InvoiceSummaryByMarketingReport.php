@@ -79,9 +79,6 @@ class InvoiceSummaryByMarketingReport extends BaseReport
             });
         }
 
-        $this->query->whereHas('client', function($q){
-            $q->whereNotNull('sales_person_id');
-        });
 
         return $this;
     }
