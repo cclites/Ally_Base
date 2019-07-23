@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+use Log;
+
 class ClientDropdownResource extends ResourceCollection
 {
     /**
@@ -21,8 +23,8 @@ class ClientDropdownResource extends ResourceCollection
                 'nameLastFirst' => $row->nameLastFirst,
             ];
         })
-            ->sortBy('nameLastFirst')
-            ->values()
-            ->toArray();
+        ->sortBy('nameLastFirst')
+        ->values()
+        ->toArray();
     }
 }

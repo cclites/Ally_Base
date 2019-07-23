@@ -17,6 +17,8 @@ class InvoiceSummaryByMarketingReport extends BaseReport
 
     protected $timezone;
 
+    protected $query;
+
     public $start;
 
     public $end;
@@ -27,16 +29,12 @@ class InvoiceSummaryByMarketingReport extends BaseReport
      * InvoiceSummaryByMarketing constructor.
      */
     public function __construct(ClientInvoiceQuery $query)
-    //public function __construct()
     {
         $this->query = $query->with([
             'client',
             'client.user',
             'clientPayer',
-            'client.salesperson',
-
-            'business',
-            'business.salesPeople'
+            'client.sales_person_id'
         ]);
 
     }
@@ -69,19 +67,18 @@ class InvoiceSummaryByMarketingReport extends BaseReport
 
         $this->query->forBusiness($business);
 
-        /*
         if(filled($salesperson)){
-            $this->query->whereHas('salesperson', function($q) use($salesperson){
-                $q->where('id', $salesperson);
-            });
+            $clientIds = $this->getClientIds($business, $salesperson);
+            $this->query->whereIn('client_id', $clientIds);
+        }else{
+            $clientIds = $this->getAllClientIds($business);
+            $this->query->whereIn('client_id', $clientIds);
         }
 
         if(filled($client)){
             $this->query->where('client_id', $client);
         }
 
-
-       */
         return $this;
     }
 
@@ -92,7 +89,9 @@ class InvoiceSummaryByMarketingReport extends BaseReport
     {
         $data = $this->query->get();
 
-        Log::info($data);
+        //foreach($invoices as $invoice){
+            //Log::info($)
+       // }
         /*
         $data = $this->query
                     ->get()
@@ -111,11 +110,56 @@ class InvoiceSummaryByMarketingReport extends BaseReport
                     })
                     ->sortBy('salesperson')
                     ->values();
-
+        */
         Log::info(json_encode($data));
-*/
+
         return $data;
 
+    }
+
+    public function getAllClientIds($businessId){
+
+        $clientIds = [];
+
+        SalesPerson::query()
+                ->where('business_id', $businessId)
+                ->get()
+                ->map(function(SalesPerson $salesperson) use(&$clientIds){
+
+                    $clientIdVals = $salesperson->clientIds();
+
+                    foreach ($clientIdVals as $clientId){
+                        $clientIds[] = $clientId;
+                    }
+
+                    return $salesperson;
+
+                });
+
+        return $clientIds;
+    }
+
+    public function getClientIds($businessId, $salespersonId){
+        $clientIds = [];
+
+        SalesPerson::query()
+            ->where('business_id', $businessId)
+            ->where('id', $salespersonId)
+            ->get()
+
+            ->map(function(SalesPerson $salesperson) use(&$clientIds){
+
+                $clientIdVals = $salesperson->clientIds();
+
+                foreach ($clientIdVals as $clientId){
+                    $clientIds[] = $clientId;
+                }
+
+                return $salesperson;
+
+            });
+
+        return $clientIds;
     }
 
 

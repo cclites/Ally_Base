@@ -143,8 +143,8 @@
                 $(".summary-table").print();
             },
 
-            loadClients(){
-                axios.get('/business/clientDropdownResource?business=' + this.form.business)
+            loadMarketingClients(){
+                axios.get('/business/marketingClientsDropdownResource?business=' + this.form.business)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -165,16 +165,17 @@
         },
 
         watch: {
-            async 'form.business'(newValue, oldValue) {
+
+            /*async 'form.business'(newValue, oldValue) {
                 if (newValue != oldValue) {
                     await this.loadClients();
                     this.loadSalespeople();
                 }
-            }
+            }*/
         },
 
         mounted() {
-            this.loadClients();
+            this.loadMarketingClients();
             this.loadSalespeople();
         },
 

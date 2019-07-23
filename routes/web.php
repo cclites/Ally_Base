@@ -481,10 +481,11 @@ Route::group([
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
     /** Resources */
-    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
+    //Route::get('clientDropdownResource', 'DropdownResourceController@clients');
     Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
     Route::get('payerDropdownResource', 'DropdownResourceController@payers');
     Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
+    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
 
 });
 
