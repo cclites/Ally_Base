@@ -30,8 +30,8 @@ class InvoiceSummaryByMarketingController extends BaseController
                         $request->start,
                         $request->end,
                         $request->business,
-                        $request->client,
-                        $request->salesperson
+                        $request->salesperson,
+                        $request->client
                     )->rows();
 
             $totals = [

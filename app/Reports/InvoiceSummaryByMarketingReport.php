@@ -23,7 +23,6 @@ class InvoiceSummaryByMarketingReport extends BaseReport
 
     public $end;
 
-    public $clientIds;
 
     /**
      * InvoiceSummaryByMarketing constructor.
@@ -68,11 +67,17 @@ class InvoiceSummaryByMarketingReport extends BaseReport
         $this->query->forBusiness($business);
 
         if(filled($salesperson)){
-            $this->query->whereHas('salesperson', function($q) use($salesperson){
+            $this->query->whereHas('client', function($q) use($salesperson){
                 $q->where('sales_person_id', $salesperson);
             });
-        }elseif(filled($client)){
-            $this->query->where('client_id', $client);
+        }
+
+        if(filled($client)){
+
+            $this->query->whereHas('client', function($q) use($client){
+                $q->where('id', $client);
+            });
+
         }else{
             $this->query->whereHas('client', function($q){
                 $q->whereNotNull('sales_person_id');
