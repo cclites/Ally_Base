@@ -79,7 +79,7 @@ class TotalChargesReport extends BaseReport
                 'caregiver'=>$payment->caregiver_allotment,
                 'system'=>$payment->system_allotment,
                 'amount'=>$payment->amount,
-                'location'=>$payment->business->name
+                'location'=>filled($payment->business->name) ? $payment->business->name : "Adjustment"
             ];
         });
     }
