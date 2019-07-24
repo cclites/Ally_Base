@@ -133,6 +133,7 @@ Vue.component('business-contact-info-tab', require('./components/admin/BusinessC
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
+Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));
