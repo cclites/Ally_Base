@@ -9,12 +9,24 @@ use Carbon\Carbon;
 class TotalChargesReport extends BaseReport
 {
 
+    /**
+     * @var string
+     */
     protected $timezone;
 
+    /**
+     * @var string
+     */
     protected $start;
 
+    /**
+     * @var string
+     */
     protected $end;
 
+    /**
+     * @var PaymentQuery
+     */
     protected $query;
 
     /**
@@ -25,7 +37,8 @@ class TotalChargesReport extends BaseReport
         $this->query = $query->with('business');
     }
 
-    public function setTimezone($timezone){
+    public function setTimezone($timezone): self
+    {
 
         $this->timezone = $timezone;
 

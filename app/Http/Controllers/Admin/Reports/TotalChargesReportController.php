@@ -11,8 +11,6 @@ use App\Reports\TotalChargesReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use Log;
-
 class TotalChargesReportController extends Controller
 {
     public function index(Request $request, TotalChargesReport $report)
@@ -51,8 +49,6 @@ class TotalChargesReportController extends Controller
         $set = [];
 
         foreach($data as $item){
-
-            Log::info(json_encode($item));
 
             $key = $item["location"];
 
