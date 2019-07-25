@@ -113,9 +113,16 @@ class QuickbooksQueueController extends Controller
 
         foreach ($invoice->getItems() as $invoiceItem) {
             $lineItem = new QuickbooksInvoiceItem();
-            $lineItem->amount = $invoiceItem->total;
             $lineItem->quantity = $invoiceItem->units;
-            $lineItem->unitPrice = $invoiceItem->rate;
+
+            if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY) {
+                // use provider rates
+                $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate();
+                $lineItem->amount = multiply($lineItem->quantity, $lineItem->unitPrice);
+            } else {
+                $lineItem->unitPrice = $invoiceItem->rate;
+                $lineItem->amount = $invoiceItem->total;
+            }
 
             switch ($invoiceItem->invoiceable_type) {
                 case 'shifts':
