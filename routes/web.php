@@ -364,6 +364,8 @@ Route::group([
     Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
     Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReportController@clients')->name('reports.service-auth-usage.clients');
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
+    Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
+
 
     Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
 
@@ -442,6 +444,10 @@ Route::group([
     Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
     Route::resource('prospects', 'Business\ProspectController');
     Route::resource('contacts', 'Business\OtherContactController');
+
+    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
+    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
+    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');

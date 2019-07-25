@@ -503,6 +503,13 @@
                         allowed: ['office_user'],
                     },
                     {
+                        name: 'Invoice Summary By County',
+                        url: 'reports/invoice-summary-by-county',
+                        description: 'Invoice Summary Report By County',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
                         description: 'Shows a list of caregivers with incomplete account data.',

@@ -29,4 +29,6 @@ class DropDownResourceController extends BaseController
         $payers = new PayersDropdownResource(Payer::forAuthorizedChain()->get());
         return response()->json($payers);
     }
+
 }
+
