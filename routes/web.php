@@ -365,6 +365,8 @@ Route::group([
     Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReportController@clients')->name('reports.service-auth-usage.clients');
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
 
+    Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
+
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
     Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');
@@ -479,11 +481,18 @@ Route::group([
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
+<<<<<<< HEAD
     /** Resources */
+=======
+>>>>>>> ALLY-1354-payment-summary-by-payer-repor
     Route::get('clientDropdownResource', 'DropdownResourceController@clients');
     Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
     Route::get('payerDropdownResource', 'DropdownResourceController@payers');
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ALLY-1354-payment-summary-by-payer-repor
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

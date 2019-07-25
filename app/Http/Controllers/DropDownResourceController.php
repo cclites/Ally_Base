@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Billing\Payer;
 use App\Caregiver;
 use App\Client;
+
+use App\Http\Controllers\Business\BaseController;
 use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\CaregiverDropdownResource;
 use App\Http\Resources\PayersDropdownResource;
 use Illuminate\Http\Request;
 
-class DropDownResourceController
+class DropDownResourceController extends BaseController
+
 {
     public function clients(Request $request){
         $clients = new ClientDropdownResource(Client::forBusinesses([$request->business])->active()->get());
