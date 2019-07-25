@@ -100,7 +100,7 @@ class InvoiceSummaryByMarketingReport extends BaseReport
                        return [
                            'client'=>$invoice->client->name,
                            'amount'=>$invoice->amount,
-                           'salesperson'=>$invoice->client->salesperson->fullName(),
+                           'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->fullName() : 'None',
                            'payer'=>$invoice->clientPayer->payer_name,
                         ];
 

@@ -31,6 +31,7 @@ use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
+use App\SalesPerson;
 
 /**
  * App\Client
@@ -553,6 +554,10 @@ class Client extends AuditableModel implements
     public function quickbooksCustomer()
     {
         return $this->belongsTo(QuickbooksCustomer::class);
+    }
+
+    public function salesperson(){
+        return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
     }
 
     ///////////////////////////////////////////
