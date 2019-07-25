@@ -502,6 +502,15 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Invoice Summary By Marketing',
+                        url: 'reports/invoice-summary-by-marketing',
+                        description: 'Invoice Summary By Marketing Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
                     {
                         name: 'Invoice Summary By County',
                         url: 'reports/invoice-summary-by-county',
