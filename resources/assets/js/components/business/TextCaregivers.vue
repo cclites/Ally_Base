@@ -31,6 +31,14 @@
                                 </label>
                                 <input-help :form="form" field="accepted_terms" text=""></input-help>
                             </div>
+                            <div class="form-check" v-if="isAdmin">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="debug" v-model="form.debug" value="1">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Debug Mode</span>
+                                </label>
+                                <input-help :form="form" field="accepted_terms" text=""></input-help>
+                            </div>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -111,6 +119,7 @@ export default {
                 recipients: [],
                 business_id: "",
                 businesses: '',
+                debug: false,
             }),
             'numOfSets': 3,
             submitting: false,

@@ -106,6 +106,7 @@ class CommunicationController extends Controller
                 ->get();
         } else {
             $recipients = Caregiver::forRequestedBusinesses() // all allowed locations
+                ->active()
                 ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
@@ -137,6 +138,19 @@ class CommunicationController extends Controller
 
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);
+
+        if ($request->debug == 1) {
+            dd([
+                'thread_data' => $data,
+                'recipients' => $recipients->map(function ($item) {
+                    return [
+                        'user_id' => $item->id,
+                        'name' => $item->name,
+                        'number' => optional($item->smsNumber)->national_number,
+                    ];
+                })
+            ]);
+        }
 
         // send txt to caregivers default txt number
         foreach ($recipients as $recipient) {
