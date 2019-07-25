@@ -323,6 +323,10 @@ Vue.component('note-create', require('./components/notes/NoteCreate'));
 Vue.component('note-template-list', require('./components/notes/NoteTemplateList'));
 Vue.component('note-template-form', require('./components/notes/NoteTemplateForm'));
 
+Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
+Vue.component('payer-invoice-report', require("./components/business/reports/PayerInvoiceReport"));
+Vue.component('client-referrals-report', require("./components/business/reports/ClientReferralsReport"));
+
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
@@ -376,8 +380,7 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
-Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
-Vue.component('payer-invoice-report', require("./components/business/reports/PayerInvoiceReport"));
+
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
