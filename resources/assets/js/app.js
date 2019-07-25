@@ -235,15 +235,11 @@ Vue.component('business-account-setup-report', require('./components/business/re
 Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
-=======
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
->>>>>>> ALLY-1355-invoice-summary-by-client-coun
-=======
 Vue.component('invoice-summary-by-marketing-report', require('./components/business/reports/InvoiceSummaryByMarketingReport'));
->>>>>>> ALLY-1356-invoice-summary-by-marketing-s
+
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
