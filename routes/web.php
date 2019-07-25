@@ -364,14 +364,10 @@ Route::group([
     Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
     Route::get('reports/service-auth-usage/clients', 'Business\Report\BusinessServiceAuthUsageReportController@clients')->name('reports.service-auth-usage.clients');
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
-<<<<<<< HEAD
+
     Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
-
-
     Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
-=======
     Route::get('reports/invoice-summary-by-marketing', 'Business\Report\InvoiceSummaryByMarketingController@index')->name('reports.invoice-summary-by-marketing');
->>>>>>> ALLY-1356-invoice-summary-by-marketing-s
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
@@ -495,24 +491,12 @@ Route::group([
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
-<<<<<<< HEAD
-    /** Resources */
-<<<<<<< HEAD
-=======
->>>>>>> ALLY-1354-payment-summary-by-payer-repor
     Route::get('clientDropdownResource', 'DropdownResourceController@clients');
-=======
-    //Route::get('clientDropdownResource', 'DropdownResourceController@clients');
->>>>>>> ALLY-1356-invoice-summary-by-marketing-s
     Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
     Route::get('payerDropdownResource', 'DropdownResourceController@payers');
     Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
     Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
 
-<<<<<<< HEAD
-=======
-
->>>>>>> ALLY-1354-payment-summary-by-payer-repor
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
