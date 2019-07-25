@@ -160,6 +160,7 @@ Vue.component('business-deposit-history', require('./components/BusinessDepositH
 Vue.component('business-notification', require('./components/BusinessNotification.vue'));
 Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
+Vue.component('paid-billed-audit-report', require('./components/business/reports/PaidBilledAuditReport.vue'));
 
 Vue.component('third-party-payer', require('./components/business/reports/ThirdPartyPayerReport.vue'));
 
