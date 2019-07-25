@@ -43,7 +43,7 @@ class ClientInvoiceController extends Controller
                 $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items'])->get();
+            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items', 'claim'])->get();
 
             return ClientInvoiceResponse::collection($invoices);
         }

@@ -106,7 +106,9 @@
                         <span v-if="row.item.client_on_hold">- On Hold</span>
                     </template>
                     <template slot="actions" scope="row">
-                        <b-button @click="uninvoice(row.item.id)" variant="danger">Uninvoice</b-button>
+
+                        <b-button @click="uninvoice(row.item.id)" variant="danger" v-if="row.item.claims.length == 0">Uninvoice</b-button>
+
                         <b-button v-if="! row.item.client.user.payment_hold" @click="addHold(row.item)" variant="danger">Add Hold</b-button>
                         <b-button v-if="row.item.client.user.payment_hold" @click="removeHold(row.item)" variant="primary">Remove Hold</b-button>
                     </template>
