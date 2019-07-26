@@ -136,9 +136,6 @@ class CommunicationController extends Controller
             'sent_at' => Carbon::now(),
         ];
 
-        $this->authorize('create', [SmsThread::class, $data]);
-        $thread = SmsThread::create($data);
-
         if ($request->debug == 1) {
             dd([
                 'thread_data' => $data,
@@ -151,6 +148,9 @@ class CommunicationController extends Controller
                 })
             ]);
         }
+
+        $this->authorize('create', [SmsThread::class, $data]);
+        $thread = SmsThread::create($data);
 
         // send txt to caregivers default txt number
         foreach ($recipients as $recipient) {
