@@ -136,7 +136,7 @@ class ClockOutController extends BaseController
             $clockOut = new ClockOut($this->caregiver());
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
-            if (array_key_exists($data['caregiver_comments'])) $clockOut->setComments($data['caregiver_comments']);
+            if (array_key_exists('caregiver_comments', $data)) $clockOut->setComments($data['caregiver_comments']);
             $clockOut->setGoals($data['goals']);
             $clockOut->setQuestions($data['questions'], $allQuestions);
             $clockOut->setGeocode($data['latitude'] ?? null, $data['longitude'] ?? null);
