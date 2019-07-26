@@ -4,12 +4,14 @@
 namespace App\Reports;
 
 
+use App\Billing\ClientAuthorization;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class PaidBilledAuditReport extends BaseReport
 {
@@ -48,6 +50,7 @@ class PaidBilledAuditReport extends BaseReport
             'client.user',
             'client.serviceAuthorizations',
             'client.salesperson',
+            //'client.business',
 
             'payments'
         ]);
@@ -70,8 +73,8 @@ class PaidBilledAuditReport extends BaseReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $salesperson): self
     {
-        $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
-        $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
+        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
+        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
         $this->query->whereBetween('created_at', [$this->start, $this->end]);
 
         $this->query->forBusiness($business);
@@ -89,6 +92,16 @@ class PaidBilledAuditReport extends BaseReport
      */
     protected function results(): iterable
     {
+
+        //$data = $this->query
+            //->get()->values();
+
+        //\Log::info(json_encode($data));
+
+        //return $data;
+
+
+
         return $this->query
                 ->get()
                 ->map(function(ClientInvoice $invoice){
@@ -111,16 +124,19 @@ class PaidBilledAuditReport extends BaseReport
                                 return null;
                             }
 
+                            //return $data();
+
                             $serviceAuth = $this->findServiceAuth($data['date'], $data['service_id'], $invoice->client->serviceAuthorizations);
                             return array_merge($data, [
                                 'service_auth' => optional($serviceAuth)->service_auth_id,
                                 'unit_type' => optional($serviceAuth)->unit_type,
                                 'units' => $this->mapUnits(optional($serviceAuth)->unit_type, $data['hours'])
                             ]);
-                        })
-                        ->values()
-                        ->filter();
-                });
+                        });
+                })
+                ->flatten(1)
+                ->values();
+
     }
 
     /**
@@ -143,7 +159,10 @@ class PaidBilledAuditReport extends BaseReport
             'date' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
             'start' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'end' => Carbon::parse($shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
-            'billable' => multiply(floatval($shift->duration()), floatval($shift->getClientRate())),
+            'billable' => $invoice->amount,
+            'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->fullName() :  "No Salesperson",
+            'location'=> $invoice->client->business->name,
+            'amount'=>$this->calculateMargin($invoice,$invoice->payments)
         ];
     }
 
@@ -167,7 +186,10 @@ class PaidBilledAuditReport extends BaseReport
             'date' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
             'start' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
             'end' => Carbon::parse($shiftService->shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
-            'billable' => multiply(floatval($shiftService->duration), floatval($shiftService->getClientRate())),
+            'billable' => $invoice->amount,
+            'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->fullName() :  "No Salesperson",
+            'location'=> $invoice->client->business->name,
+            'amount'=>$this->calculateMargin($invoice, $invoice->payments)
         ];
     }
 
@@ -190,6 +212,50 @@ class PaidBilledAuditReport extends BaseReport
             default:
                 return '-';
         }
+    }
+
+    /**
+     * @param string $date
+     * @param int $serviceId
+     * @param Collection|null $serviceAuths
+     * @return ClientAuthorization|null
+     */
+    protected function findServiceAuth(string $date, int $serviceId, ?Collection $serviceAuths) : ?ClientAuthorization
+    {
+        if (empty($serviceAuths) || $serviceAuths->isEmpty()) {
+            return null;
+        }
+
+        return $serviceAuths->where('service_id', $serviceId)
+            ->where('effective_start', '<=', $date)
+            ->where('effective_end', '>=', $date)
+            ->first();
+    }
+
+    /**
+     * @param $payments
+     * @return float|int
+     */
+    protected function calculateMargin($invoice, $payments){
+
+        $total_amount = $invoice->amount;
+
+        //\Log::info($total_amount);
+
+        $caregiver_allotment = 0;
+
+        foreach($payments as $payment){
+
+            \Log::info($payment);
+
+            $caregiver_allotment += $payment->caregiver_allotment;
+        }
+
+        if($total_amount == 0){
+            return 0;
+        }
+
+        return ($total_amount-$caregiver_allotment)/$total_amount;
     }
 
 }

@@ -29,7 +29,7 @@
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
-                                    <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                                    <b-button @click="fetch()" variant="info" :disabled="busy" title="You must select a Registry to continue"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
                                     <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
@@ -104,13 +104,14 @@
         data() {
             return {
                 form: new Form({
-                    business: '',
+                    business:'',
                     salesperson: '',
                     start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     json: 1
                 }),
                 busy: false,
+                disabled: true,
                 totalRows: 0,
                 perPage: 25,
                 currentPage: 1,
@@ -121,8 +122,9 @@
                     {key: 'date', label: 'Service Date', sortable: true, formatter: x => { return this.formatDate(x) }},
                     {key: 'service', label: 'Service', sortable: true,},
                     {key: 'caregiver', label: 'Caregiver', sortable: true,},
+                    {key: 'salesperson', label: 'Salesperson', sortable: true},
                     {key: 'hours', label: 'Hours', sortable: true,},
-                    {key: 'total', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'billable', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     {key: 'margin', label: 'Margin', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
@@ -136,13 +138,16 @@
         methods: {
             fetch() {
                 this.busy = true;
-                this.form.get('/business/reports/paid-bill-audit-report')
+                this.disabled = true;
+                this.form.get('/admin/reports/paid-billed-audit-report')
                     .then( ({ data }) => {
                         this.items = data.data;
                         this.totals = data.totals;
                         this.totalRows = this.items.length;
+                        this.busy = false;
                     })
                     .catch(e => {})
+
                     .finally(() => {
                         this.busy = false;
                         this.footClone = true;
@@ -167,7 +172,9 @@
         watch: {
 
             async 'form.business'(newValue, oldValue) {
-                if (newValue != oldValue) {
+
+                if ( (!newValue || newValue != "") && newValue != oldValue) {
+                    this.disabled = false;
                     this.loadSalespeople();
                 }
             }

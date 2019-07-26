@@ -555,6 +555,10 @@ class Client extends AuditableModel implements
         return $this->belongsTo(QuickbooksCustomer::class);
     }
 
+    public function salesperson(){
+        return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

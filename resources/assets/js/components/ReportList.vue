@@ -200,7 +200,7 @@
                     },
                     {
                         name: 'Paid Billed Audit Report',
-                        url: 'reports/paid-billed-audit-report',
+                        url: '/admin/reports/paid-billed-audit-report',
                         description: '',
                         category: 5,
                         allowed: ['admin'],
