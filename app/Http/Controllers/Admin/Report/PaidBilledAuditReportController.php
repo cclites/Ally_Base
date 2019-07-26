@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Business\Report;
+namespace App\Http\Controllers\Admin\Report;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Reports\PaidBilledAuditReport;
+use App\SalesPerson;
+use App\Business;
 
 class PaidBilledAuditReportController extends Controller
 {

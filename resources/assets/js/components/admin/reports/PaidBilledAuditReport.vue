@@ -94,10 +94,13 @@
 
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import FormatsDates from '../../../mixins/FormatsDates';
+    import BusinessLocationSelect from "../../business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
 
     export default {
         name: "PaidBilledAuditReport",
         mixins: [FormatsNumbers, FormatsDates],
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
         data() {
             return {
                 form: new Form({

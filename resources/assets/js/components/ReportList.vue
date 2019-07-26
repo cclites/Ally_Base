@@ -199,6 +199,13 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Paid Billed Audit Report',
+                        url: 'reports/paid-billed-audit-report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Emails Report',
                         url: 'reports/emails',
                         description: '',
