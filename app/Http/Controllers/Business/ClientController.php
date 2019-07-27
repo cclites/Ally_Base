@@ -454,7 +454,7 @@ class ClientController extends BaseController
      * @param Client $client
      * @return \Illuminate\Http\Response
      */
-    public function trainingEmail(Client $client
+    public function trainingEmail(Client $client)
     {
         $client->update(['training_email_sent_at' => Carbon::now()]);
 
