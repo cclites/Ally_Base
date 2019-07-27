@@ -479,7 +479,13 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
-
+                    {
+                        name: 'Payroll Summary',
+                        url: 'reports/payroll-summary-report',
+                        description: 'Payroll Summary Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
                     {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
