@@ -212,6 +212,13 @@
                         category: 7,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Total Charges Report',
+                        url: 'reports/total_charges_report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 

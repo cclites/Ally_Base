@@ -572,6 +572,7 @@ Route::group([
     Route::get('reports/pending_transactions', 'Admin\ReportsController@pendingTransactions')->name('reports.pending_transactions');
     Route::get('reports/shared_shifts', 'Admin\ReportsController@sharedShifts')->name('reports.shared_shifts');
     Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
+    Route::get('reports/total_charges_report', 'Admin\Reports\TotalChargesReportController@index')->name('reports.total_charges_report');
 
     Route::get('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
