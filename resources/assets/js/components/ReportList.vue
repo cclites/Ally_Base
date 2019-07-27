@@ -502,6 +502,29 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Invoice Summary By Marketing',
+                        url: 'reports/invoice-summary-by-marketing',
+                        description: 'Invoice Summary By Marketing Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Invoice Summary By County',
+                        url: 'reports/invoice-summary-by-county',
+                        description: 'Invoice Summary Report By County',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Client Referrals',
+                        url: 'reports/client-referrals',
+                        description: 'Client Referrals Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
                     {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
@@ -509,6 +532,15 @@
                         category: 3,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Payment Summary By Payer',
+                        url: 'reports/payment-summary-by-payer',
+                        description: 'Payment Summary By Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
                     {
                         name: 'Service Authorization Ending Report',
                         url: 'reports/service-auth-ending',
