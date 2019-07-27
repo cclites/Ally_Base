@@ -20,7 +20,8 @@ class BusinessCaregiverExpirationsReportController extends BaseController
         if ($request->filled('json')) {
             $results = $report->forRequestedBusinesses()
                 ->setCaregiver($request->caregiver_id)
-                ->setActive($request->active == 1 ? true : false)
+                ->setActiveOnly($request->active === '1' ? true : false)
+                ->setInactiveOnly($request->active === '0' ? true : false)
                 ->setName($request->name)
                 ->setExpired($request->show_expired == 1 ? true : false)
                 ->setDays($request->days)

@@ -10,7 +10,8 @@ use Carbon\Carbon;
 class CertificationExpirationReport extends BaseReport implements BusinessReportInterface
 {
     protected $caregiverId;
-    protected $activeOnly;
+    protected $activeOnly = false;
+    protected $inactiveOnly = false;
     protected $name;
     protected $showExpired;
     protected $days;
@@ -21,9 +22,15 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
         return $this;
     }
 
-    public function setActive(?bool $activeOnly) : self
+    public function setActiveOnly(?bool $activeOnly) : self
     {
         $this->activeOnly = $activeOnly;
+        return $this;
+    }
+
+    public function setInactiveOnly(?bool $inactiveOnly) : self
+    {
+        $this->inactiveOnly = $inactiveOnly;
         return $this;
     }
 
@@ -71,10 +78,12 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     protected function results()
     {
         $query = $this->query()->whereHas('caregiver', function ($q) {
-                        if ($this->activeOnly) {
-                            $q->where('active', 1);
-                        }
-                    });
+            if ($this->activeOnly) {
+                $q->active();
+            } else if ($this->inactiveOnly) {
+                $q->inactive();
+            }
+        });
 
         if ($this->caregiverId) {
             $query->where('caregiver_id', $this->caregiverId);
