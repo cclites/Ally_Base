@@ -586,54 +586,64 @@ class ReportsController extends BaseController
      */
     public function clientReferralSources(Request $request)
     {
-        $reports = [];
-        $shiftstatuses = ShiftStatusManager::getPendingStatuses();
+        if ($request->expectsJson()) {
+            $results = [];
 
-        $referralsources = $this->businessChain()->referralSources()
-            ->forType('client')
-            ->withCount('clients', 'prospects')
-            ->with(['clients.shifts' => function ($query) use ($shiftstatuses) {
-                $query->whereNotIn('status', $shiftstatuses)->get();
-            }]);
-        
-        if($request->referral_source) {
-            $referralsources->where('id', $request->referral_source);
-        }
+            $query = $this->businessChain()->referralSources()
+                ->forType('client')
+                ->withCount('clients', 'prospects')
+                ->with([
+                    'clients',
+                    'clients.shifts.business',
+                    'clients.shifts.client',
+                    'clients.shifts.caregiver',
+                    'clients.shifts.shiftFlags',
+                    'clients.shifts.statusHistory',
+                    'clients.shifts.costHistory',
+                    'clients.shifts.service',
+                    'clients.shifts.services',
+                    'clients.shifts.services.service',
+                    'clients.shifts.client.primaryPayer',
+                    'clients.shifts.client.primaryPayer.payer',
+                    'clients.shifts.client.primaryPayer.client',
+                    'clients.shifts.client.primaryPayer.client.business',
+                    'clients.shifts.client.primaryPayer.paymentMethod',
+                ])
+                ->whereHas('clients.shifts', function ($q) {
+                    $q->whereNotIn('status', ShiftStatusManager::getPendingStatuses());
+                });
 
-        if($request->start_date && $request->end_date) {
-            $referralsources->where('created_at','>', (new Carbon($request->start_date)));
-            $referralsources->where('created_at','<', (new Carbon($request->end_date)));
-        }
+            if ($request->referral_source) {
+                $query->where('id', $request->referral_source);
+            }
 
-        $referralsources = $referralsources->get();
-        if ($referralsources) {
-            foreach($referralsources as $referralsource) {
-                $reports[] = [
-                    "id" => $referralsource->id,
-                    "business_id" => $referralsource->business_id,
-                    "organization" => $referralsource->organization,
-                    "contact_name" => $referralsource->contact_name,
-                    "phone" => $referralsource->phone,
-                    "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
-                    "clients_count" => $referralsource->clients_count,
-                    "prospects_count" => $referralsource->prospects_count,
-                    "shift_total" => ($referralsource->clients->map(function($item) {
+            if ($request->start_date && $request->end_date) {
+                $query->where('created_at','>', (new Carbon($request->start_date)));
+                $query->where('created_at','<', (new Carbon($request->end_date)));
+            }
+
+            foreach ($query->get() as $item) {
+                $results[] = [
+                    "id" => $item->id,
+                    "business_id" => $item->business_id,
+                    "organization" => $item->organization,
+                    "contact_name" => $item->contact_name,
+                    "phone" => $item->phone,
+                    "created_at" => Carbon::parse($item->created_at)->format('d/m/Y'),
+                    "clients_count" => $item->clients_count,
+                    "prospects_count" => $item->prospects_count,
+                    "shift_total" => ($item->clients->map(function($item) {
                            return $item->shifts->map(function($shift) {
                                return number_format($shift->costs()->getTotalCost(), 2);
                            })->sum();
                     }))->sum()
                 ];
             }
+
+            return response()->json(collect($results));
         }
 
-        $reports = collect($reports);
-        $type = 'client';
-
-        if($request->expectsJson()) {
-            return response()->json($reports);
-        }
-
-        return view('business.reports.referral_sources', compact('reports', 'type'));
+        return view('business.reports.referral_sources', ['type' => 'client']);
     }
 
     /**
@@ -644,53 +654,63 @@ class ReportsController extends BaseController
      */
     public function caregiverReferralSources(Request $request)
     {
-        $reports = [];
-        $shiftstatuses = ShiftStatusManager::getPendingStatuses();
+        if ($request->expectsJson()) {
+            $results = [];
 
-        $referralsources = $this->businessChain()->referralSources()
-            ->forType('caregiver')
-            ->withCount('caregivers')
-            ->with(['caregivers.shifts' => function ($query) use ($shiftstatuses) {
-                $query->whereNotIn('status', $shiftstatuses)->get();
-            }])->get();
-        
-        if($request->referral_source) {
-            $referralsources->where('id', $request->referral_source);
-        }
+            $query = $this->businessChain()->referralSources()
+                ->forType('caregiver')
+                ->withCount('caregivers')
+                ->with([
+                    'caregivers',
+                    'caregivers.shifts.business',
+                    'caregivers.shifts.client',
+                    'caregivers.shifts.caregiver',
+                    'caregivers.shifts.shiftFlags',
+                    'caregivers.shifts.statusHistory',
+                    'caregivers.shifts.costHistory',
+                    'caregivers.shifts.service',
+                    'caregivers.shifts.services',
+                    'caregivers.shifts.services.service',
+                    'caregivers.shifts.client.primaryPayer',
+                    'caregivers.shifts.client.primaryPayer.payer',
+                    'caregivers.shifts.client.primaryPayer.client',
+                    'caregivers.shifts.client.primaryPayer.client.business',
+                    'caregivers.shifts.client.primaryPayer.paymentMethod',
+                ])
+                ->whereHas('caregivers.shifts', function ($q) {
+                    $q->whereNotIn('status', ShiftStatusManager::getPendingStatuses());
+                });
 
-        if($request->start_date && $request->end_date) {
-            $referralsources->where('created_at','>', (new Carbon($request->start_date)));
-            $referralsources->where('created_at','<', (new Carbon($request->end_date)));
-        }
+            if($request->referral_source) {
+                $query->where('id', $request->referral_source);
+            }
 
-        $referralsources = $referralsources->get();
-        if ($referralsources) {
-            foreach($referralsources as $referralsource) {
-                $reports[] = [
-                    "id" => $referralsource->id,
-                    "business_id" => $referralsource->business_id,
-                    "organization" => $referralsource->organization,
-                    "contact_name" => $referralsource->contact_name,
-                    "phone" => $referralsource->phone,
-                    "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
-                    "caregivers_count" => $referralsource->caregivers_count,
-                    "shift_total" => ($referralsource->caregivers->map(function($item) {
+            if($request->start_date && $request->end_date) {
+                $query->where('created_at','>', (new Carbon($request->start_date)));
+                $query->where('created_at','<', (new Carbon($request->end_date)));
+            }
+
+            foreach($query->get() as $item) {
+                $results[] = [
+                    "id" => $item->id,
+                    "business_id" => $item->business_id,
+                    "organization" => $item->organization,
+                    "contact_name" => $item->contact_name,
+                    "phone" => $item->phone,
+                    "created_at" => Carbon::parse($item->created_at)->format('d/m/Y'),
+                    "caregivers_count" => $item->caregivers_count,
+                    "shift_total" => ($item->caregivers->map(function($item) {
                            return $item->shifts->map(function($shift) {
                                return number_format($shift->costs()->getTotalCost(), 2);
                            })->sum();
                     }))->sum()
                 ];
             }
+
+            return response()->json(collect($results));
         }
 
-        $reports = collect($reports);
-        $type = 'caregiver';
-
-        if($request->expectsJson()) {
-            return response()->json($reports);
-        }
-
-        return view('business.reports.referral_sources', compact('reports', 'type'));
+        return view('business.reports.referral_sources', ['type' => 'caregiver']);
     }
 
     public function caseManager()
