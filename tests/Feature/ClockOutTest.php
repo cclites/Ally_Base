@@ -35,13 +35,16 @@ class ClockOutTest extends TestCase
     public function test_active_shift_can_be_clocked_out()
     {
         $shift = $this->createShift();
+
+        $this->assertNull($shift->checked_out_time);
+
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->clockOut($shift);
-        $now = Carbon::now()->toDateTimeString();
 
         $this->assertTrue($result);
-        $this->assertFalse($shift->statusManager()->isClockedIn());
-        $this->assertEquals($now, $shift->checked_out_time->toDateTimeString(), 'The clocked out time does not match now.');
+        $this->assertFalse($shift->fresh()->statusManager()->isClockedIn());
+        $this->assertNotNull($shift->fresh()->checked_out_time);
+        $this->assertTrue($shift->fresh()->checked_out_time->isToday());
     }
 
     public function test_hours_are_set_once_clocked_out()
