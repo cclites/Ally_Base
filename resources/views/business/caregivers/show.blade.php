@@ -137,7 +137,12 @@
             <business-caregiver-office-locations-tab :caregiver="{{ $caregiver }}"></business-caregiver-office-locations-tab>
         </div>
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
-            <notes-tab :notes="{{ $caregiver->notes }}" :business="{{ $business }}" :caregiver="{{ $caregiver }}"></notes-tab>
+
+            <div class="alert alert-warning">
+                <h4>Notes are visible to Office Users only</h4>
+            </div>
+            <notes-tab :notes="{{ $caregiver->notes }}" :business="{{ $business }}" :caregiver="{{ $caregiver }}">
+            </notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
