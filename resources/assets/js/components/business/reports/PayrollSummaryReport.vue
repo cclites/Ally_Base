@@ -9,7 +9,7 @@
                     v-model="form.business"
                     :allow-all="true"
                     class="mr-2"
-                    :label="Location"
+                    label="Location"
             />
             <b-form-group label="Start Date" class="mr-2">
                 <date-picker v-model="form.start" name="start_date"></date-picker>
@@ -42,11 +42,12 @@
             </b-col>
         </div>
 
+        <loading-card v-show="busy"></loading-card>
+
         <div class="table-responsive summary-table">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
-                     :empty-text="emptyText"
                      :current-page="currentPage"
                      :per-page="perPage"
                      :sort-by.sync="sortBy"
@@ -54,9 +55,6 @@
                      :footClone="footClone"
                      class="mt-2"
             >
-                <template slot="FOOT_location" scope="item" class="primary">
-                    &nbsp;&nbsp;
-                </template>
 
                 <template slot="FOOT_date" scope="item">
                     &nbsp;<strong>For Location:</strong> {{ totals.location }}
@@ -64,14 +62,6 @@
 
                 <template slot="FOOT_caregiver" scope="item" class="primary">
                     &nbsp;<strong>For Client Types: </strong> {{totals.type}}
-                </template>
-
-                <template slot="FOOT_type" scope="item">
-                    &nbsp;&nbsp;
-                </template>
-
-                <template slot="FOOT_name" scope="item">
-                    &nbsp;&nbsp;
                 </template>
 
                 <template slot="FOOT_amount" scope="item" class="primary">
@@ -122,10 +112,8 @@
                     default: () => { return []; },
                 },
                 fields: [
-                    //{ key: 'location', label: 'Location', sortable: true, },
                     { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x)},
                     { key: 'caregiver', label: 'Caregiver', sortable: true, },
-                    //{ key: 'type', label: 'Client Type', sortable: true },
                     { key: 'amount', label: 'Amount', sortable: true, formatter: x => this.moneyFormat(x) },
                 ],
                 totals: [],

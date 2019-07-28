@@ -176,7 +176,6 @@
                 ],
                 totals: '',
                 items : [],
-                //params: [],
                 clients : [],
                 clientName: '',
                 location: '',

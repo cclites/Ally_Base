@@ -454,6 +454,9 @@ Route::group([
     Route::get('clientDropdownResource', 'DropdownResourceController@clients');
     Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
     Route::get('payerDropdownResource', 'DropdownResourceController@payers');
+    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
+    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
+
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
