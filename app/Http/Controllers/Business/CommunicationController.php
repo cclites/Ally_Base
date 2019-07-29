@@ -136,6 +136,26 @@ class CommunicationController extends Controller
             'sent_at' => Carbon::now(),
         ];
 
+        $this->authorize('create', [SmsThread::class, $data]);
+        $thread = SmsThread::create($data);
+
+        // send txt to caregivers default txt number
+        $txts = [];
+        foreach ($recipients as $recipient) {
+            if ($number = $recipient->smsNumber) {
+                if ($request->debug == 1) {
+                    $txts[] = [
+                        'to' => $number->number(false),
+                        'message' => $request->message,
+                        'from' => $business->outgoing_sms_number,
+                    ];
+                    continue;
+                }
+                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
+                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
+            }
+        }
+
         if ($request->debug == 1) {
             dd([
                 'thread_data' => $data,
@@ -145,19 +165,9 @@ class CommunicationController extends Controller
                         'name' => $item->name,
                         'number' => optional($item->smsNumber)->national_number,
                     ];
-                })
+                }),
+                'txts' => $txts,
             ]);
-        }
-
-        $this->authorize('create', [SmsThread::class, $data]);
-        $thread = SmsThread::create($data);
-
-        // send txt to caregivers default txt number
-        foreach ($recipients as $recipient) {
-            if ($number = $recipient->smsNumber) {
-                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
-                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
-            }
         }
 
         return new SuccessResponse('Text messages were successfully dispatched.');
