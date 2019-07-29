@@ -38,15 +38,15 @@ class CaregiverLicenseController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
-
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
             'expires_at' => 'required|date',
         ]);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data['expires_at'] = filter_date($data['expires_at']);
 
@@ -70,15 +70,15 @@ class CaregiverLicenseController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
-
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
             'expires_at' => 'required|date',
         ]);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data['expires_at'] = filter_date($data['expires_at']);
 

@@ -402,6 +402,17 @@ trait IsUserRole
     }
 
     /**
+     * Returns only inactive Clients.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInactive(Builder $builder)
+    {
+        return $builder->whereHas('user', function($q) { $q->where('active', 0); });
+    }
+
+    /**
      * Returns only users with real email addresses
      *
      * @param Builder $builder

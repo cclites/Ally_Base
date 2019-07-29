@@ -106,6 +106,7 @@ class CommunicationController extends Controller
                 ->get();
         } else {
             $recipients = Caregiver::forRequestedBusinesses() // all allowed locations
+                ->active()
                 ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
@@ -134,6 +135,19 @@ class CommunicationController extends Controller
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
         ];
+
+        if ($request->debug == 1) {
+            dd([
+                'thread_data' => $data,
+                'recipients' => $recipients->map(function ($item) {
+                    return [
+                        'user_id' => $item->id,
+                        'name' => $item->name,
+                        'number' => optional($item->smsNumber)->national_number,
+                    ];
+                })
+            ]);
+        }
 
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);

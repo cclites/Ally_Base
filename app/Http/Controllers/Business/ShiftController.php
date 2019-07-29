@@ -151,7 +151,7 @@ class ShiftController extends BaseController
                 $calculator = $auth->getCalculator();
                 $dates = $shift->getDateSpan();
                 $start = $dates[0];
-                $end = count($dates) > 1 ? $dates[2] : $dates[0];
+                $end = count($dates) > 1 ? $dates[1] : $dates[0];
                 $periods = $auth->getPeriodsForRange($start, $end);
                 foreach ($periods as $period) {
                     $shifts = $calculator->getMatchingShifts($period);
