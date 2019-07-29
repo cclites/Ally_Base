@@ -56,7 +56,7 @@
                         />
                         <input-help :form="form" field="notes" text="Enter a note explaining why this adjustment has occurred." />
                     </b-form-group>
-                    <b-btn @click.stop="showConfirmModal" :disabled="submitting">Submit</b-btn>
+                    <b-btn @click="showConfirmModal" :disabled="submitting">Submit</b-btn>
                     <span class="text-danger warning">DO NOT USE THIS FOR REFUNDS. USE THE CHARGES REPORT AND REFUND FROM THERE.</span>
                 </form>
             </b-col>
@@ -163,7 +163,6 @@
             },
 
             showConfirmModal(){
-                console.log("Submitting");
                 this.confirmModal = true;
             }
 
