@@ -56,20 +56,15 @@
 
                     </b-row>
 
-                    <div class="d-flex justify-content-center" v-if="busy">
-                        <div class="my-5">
-                            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                        </div>
-                    </div>
-                    <div v-else>
-                        <b-row>
-                            <b-col>
+                    <loading-card v-show="busy"></loading-card>
+
+                    <div v-show="!busy">
+                        <div class="table-responsive" >
                                 <b-table
                                         class="payers-summary-table"
                                         :items="items"
                                         :fields="fields"
-                                        sort-by="payer"
-                                        empty-text="No Results"
+                                        :sort-by="form.payer"
                                         :busy="busy"
                                         :current-page="currentPage"
                                         :per-page="perPage"
@@ -96,8 +91,7 @@
                                         &nbsp;<strong>Total:  </strong> {{ moneyFormat(totals.total ) }}
                                     </template>
                                 </b-table>
-                            </b-col>
-                        </b-row>
+                        </div>
                     </div>
 
                     <b-row v-if="this.items.length > 0">
