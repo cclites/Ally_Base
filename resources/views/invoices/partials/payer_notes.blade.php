@@ -1,9 +1,4 @@
-@if($invoice->clientPayer->payer->notes)
-    <p>{{ $invoice->clientPayer->payer->notes }}</p>
+@if($invoice->getClientPayer()->notes)
+    <div class="h3">Notes:</div>
+    <p>{{ $invoice->getClientPayer()->notes }}</p>
 @endif
-
- {{ $invoice->clientPayer->payer->notes }}
-
-<div class="h3">Notes:</div>
-
-<p>Notes Go Here!!</p>

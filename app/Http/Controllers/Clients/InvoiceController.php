@@ -29,8 +29,6 @@ class InvoiceController extends BaseController
     {
         $this->authorize('read', $invoice);
 
-        \Log::info(json_encode($invoice->clientPayer));
-
         $strategy = InvoiceViewFactory::create($invoice, $view);
         $viewGenerator = new InvoiceViewGenerator($strategy);
         return $viewGenerator->generateClientInvoice($invoice);
