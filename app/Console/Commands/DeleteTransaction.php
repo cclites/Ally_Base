@@ -30,6 +30,11 @@ class DeleteTransaction extends Command
     protected $description = 'Delete a transaction record and optionally un-invoice and un-authorize related shifts.';
 
     /**
+     * @var bool
+     */
+    protected $uninvoice = false;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -48,7 +53,6 @@ class DeleteTransaction extends Command
     public function handle()
     {
         $transactionId = $this->argument('transaction_id');
-
         if (strpos($transactionId, ',') > 0) {
             $transactionIds = explode(',', $transactionId);
         } else {
@@ -63,13 +67,13 @@ class DeleteTransaction extends Command
             $this->info("Found " . count($transactions) . ' transactions.');
         }
 
-        if (! $this->confirm("Do you want to delete these transaction and their related payment/deposit records from the database?  Changes will not be committed until you see the success message.")) {
+        if (! $this->confirm("Do you want to delete these transaction and their related payment/deposit records from the database?")) {
             return 0;
         }
 
-//        if (! $this->confirm("This will allow you to remove data related to the {$transaction->transaction_type} {$transaction->transaction_method} transaction #{$transactionId} and optionally un-invoice and un-authorize related shifts.  Continue?")) {
-//            return 0;
-//        }
+        if ($this->confirm("Do you want to also un-invoice any related invoices?")) {
+            $this->uninvoice = true;
+        }
 
         \DB::beginTransaction();;
         foreach ($transactions as $transaction) {
@@ -90,6 +94,14 @@ class DeleteTransaction extends Command
         $this->info("Operation successful!");
     }
 
+    /**
+     * Delete a deposit transaction.
+     *
+     * @param GatewayTransaction $transaction
+     * @param Deposit $deposit
+     * @return bool
+     * @throws \Exception
+     */
     public function deleteDepositTransaction(GatewayTransaction $transaction, Deposit $deposit) : bool
     {
         switch($deposit->deposit_type) {
@@ -105,13 +117,7 @@ class DeleteTransaction extends Command
                 $this->error("Unknown deposit type $deposit->deposit_type");
                 return false;
         }
-
         $invoiceIds = $invoices->pluck('id')->toArray();
-        $this->info("Transaction #{$transaction->id} is related to a deposit (#{$deposit->id}) with the following effected $type invoices: " . join(', ', $invoiceIds));
-
-//        if (! $this->confirm("Do you want to delete this transaction and deposit from the database?")) {
-//            return;
-//        }
 
         if ($transaction->failedTransaction) {
             $transaction->failedTransaction->delete();
@@ -127,30 +133,34 @@ class DeleteTransaction extends Command
         DepositLog::where('deposit_id', $deposit->id)->delete();
         $deposit->delete();
 
-        if (! $this->confirm("Transaction #{$transaction->id} and it's related deposit (#{$deposit->id}) have been removed.\r\nDo you also want to un-invoice the $type Invoices related to this transaction?  IDs: " . join(', ', $invoiceIds))) {
-            return true;
-        }
+        $this->info("Transaction #{$transaction->id} and it's related deposit #{$deposit->id} have been removed.");
 
-        foreach ($invoices as $invoice) {
-            if (! $invoice->delete()) {
-                $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
-                \DB::rollBack();
-                return false;
+        if ($this->uninvoice) {
+            foreach ($invoices as $invoice) {
+                if (! $invoice->delete()) {
+                    $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
+                    return false;
+                }
             }
+
+            $this->info("The following related $type Invoices have been un-invoiced: " . join(', ', $invoiceIds));
         }
 
         return true;
     }
 
+    /**
+     * Delete a Payment Transaction.
+     *
+     * @param GatewayTransaction $transaction
+     * @param Payment $payment
+     * @return bool
+     * @throws \Exception
+     */
     public function deletePaymentTransaction(GatewayTransaction $transaction, Payment $payment) : bool
     {
         $invoices = $payment->invoices;
         $invoiceIds = $invoices->pluck('id')->toArray();
-//        $this->info("Transaction #{$transaction->id} is related to a payment (#{$payment->id}) with the following effected invoices: " . join(', ', $invoiceIds));
-
-//        if (! $this->confirm("Do you want to delete this transaction and payment from the database?")) {
-//            return;
-//        }
 
         if ($transaction->failedTransaction) {
             $transaction->failedTransaction->delete();
@@ -161,7 +171,6 @@ class DeleteTransaction extends Command
         foreach($payment->invoices as $invoice) {
             /** @var \App\Billing\ClientInvoice $invoice */
             $invoice->removePayment($payment);
-
             $invoice->payments()->detach($payment->id);
         }
         $transaction->history()->delete();
@@ -184,27 +193,19 @@ class DeleteTransaction extends Command
         ->unique()
         ->toArray();
 
-        if (! $this->confirm("Transaction #{$transaction->id} and it's related payment (#{$payment->id}) have been removed.\r\nDo you also want to un-invoice the ClientInvoices related to this transaction?  IDs: " . join(', ', $invoiceIds))) {
-            return true;
-        }
+        $this->info("Transaction #{$transaction->id} and it's related payment #{$payment->id} have been removed.");
 
-        foreach ($invoices as $invoice) {
-            if (! $invoice->delete()) {
-                $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
-                \DB::rollBack();
-                return false;
+        if ($this->uninvoice) {
+            foreach ($invoices as $invoice) {
+                if (!$invoice->delete()) {
+                    $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
+                    return false;
+                }
             }
+            $this->info("The following related Client Invoices have been un-invoiced: " . join(', ', $invoiceIds));
         }
 
         $this->info("Found " . count($relatedShiftIds) . " related shifts with the following IDs: " . join(', ', $relatedShiftIds));
-
-//        if (! $this->confirm("Do you want to un-authorize the shifts related to this transaction?  Shift IDs: " . join(', ', $relatedShiftIds))) {
-//            return;
-//        }
-//
-//        foreach (Shift::whereIn('id', $relatedShiftIds)->get() as $shift) {
-//            $shift->statusManager()->unauthorize();
-//        }
 
         return true;
     }
