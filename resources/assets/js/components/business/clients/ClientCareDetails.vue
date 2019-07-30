@@ -1,6 +1,9 @@
 <template>
     <b-card class="client-care-needs">
-        <h2>General</h2>
+        <h2>
+            General
+            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+        </h2>
         <b-row>
             <b-col lg="6">
             <b-form-group label="Height">
@@ -214,7 +217,7 @@
         data() {
             return {
                 busy: false,
-                form: {},
+                form: new Form({}),
                 options: {
                     pets: {
                         cats: 'Cats',
@@ -385,6 +388,10 @@
 
             fillForm(data) {
                 this.form = new Form(data);
+            },
+
+            print(){
+                $('.client-care-needs').print();
             },
         },
 
