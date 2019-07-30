@@ -73,10 +73,17 @@ class ScheduleEvents implements Responsable
     public function toArray()
     {
         return $this->schedules->map(function(Schedule $schedule) {
+
             $additionalOptions = array_merge(
                 $this->additionalOptions['all'],
                 $this->additionalOptions[$schedule->id] ?? []
             );
+
+            $service_types = '';
+
+            foreach($schedule->services as $service){
+                $service_types .= substr($service->getName(), 0, 4) . ":" . $service->duration . ",";
+            }
 
             $title = $this->resolveEventTitle($schedule);
 
@@ -101,6 +108,7 @@ class ScheduleEvents implements Responsable
                 'shift_status' => $schedule->shift_status,
                 'has_overtime' => $schedule->hasOvertime(),
                 'added_to_past' => $schedule->added_to_past,
+                'service_types' => rtrim($service_types, ","),
             ], $additionalOptions);
         });
     }

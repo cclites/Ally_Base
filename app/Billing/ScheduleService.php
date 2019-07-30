@@ -57,4 +57,8 @@ class ScheduleService extends AuditableModel
         );
     }
 
+    public function getName(){
+        return Service::where('id', $this->service_id)->pluck('name')->first();
+    }
+
 }
