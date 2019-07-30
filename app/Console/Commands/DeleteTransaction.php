@@ -1,0 +1,211 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Billing\CaregiverInvoice;
+use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
+use App\Billing\Deposit;
+use App\Billing\DepositLog;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\PaymentLog;
+use App\Shift;
+use Illuminate\Console\Command;
+
+class DeleteTransaction extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'transaction:delete {transaction_id : The Ally transaction IDs separate by comma}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Delete a transaction record and optionally un-invoice and un-authorize related shifts.';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function handle()
+    {
+        $transactionId = $this->argument('transaction_id');
+
+        if (strpos($transactionId, ',') > 0) {
+            $transactionIds = explode(',', $transactionId);
+        } else {
+            $transactionIds = [$transactionId];
+        }
+
+        $transactions = GatewayTransaction::whereIn('id', $transactionIds)->get();
+        if ($transactions->isEmpty()) {
+            $this->error("No transactions found.  Be sure you are using the internal Ally Transaction IDs.");
+            return 1;
+        } else {
+            $this->info("Found " . count($transactions) . ' transactions.');
+        }
+
+        if (! $this->confirm("Do you want to delete these transaction and their related payment/deposit records from the database?  Changes will not be committed until you see the success message.")) {
+            return 0;
+        }
+
+//        if (! $this->confirm("This will allow you to remove data related to the {$transaction->transaction_type} {$transaction->transaction_method} transaction #{$transactionId} and optionally un-invoice and un-authorize related shifts.  Continue?")) {
+//            return 0;
+//        }
+
+        \DB::beginTransaction();;
+        foreach ($transactions as $transaction) {
+            if ($payment = $transaction->payment) {
+                if (! $this->deletePaymentTransaction($transaction, $payment)) {
+                    // error -> do not commit
+                    return 1;
+                }
+            } else if ($deposit = $transaction->deposit) {
+                if (! $this->deleteDepositTransaction($transaction, $deposit)) {
+                    // error -> do not commit
+                    return 1;
+                }
+            }
+        }
+        \DB::commit();
+
+        $this->info("Operation successful!");
+    }
+
+    public function deleteDepositTransaction(GatewayTransaction $transaction, Deposit $deposit) : bool
+    {
+        switch($deposit->deposit_type) {
+            case 'caregiver':
+                $invoices = $deposit->caregiverInvoices;
+                $type = 'Caregiver';
+                break;
+            case 'business':
+                $invoices = $deposit->businessInvoices;
+                $type = 'Business';
+                break;
+            default:
+                $this->error("Unknown deposit type $deposit->deposit_type");
+                return false;
+        }
+
+        $invoiceIds = $invoices->pluck('id')->toArray();
+        $this->info("Transaction #{$transaction->id} is related to a deposit (#{$deposit->id}) with the following effected $type invoices: " . join(', ', $invoiceIds));
+
+//        if (! $this->confirm("Do you want to delete this transaction and deposit from the database?")) {
+//            return;
+//        }
+
+        if ($transaction->failedTransaction) {
+            $transaction->failedTransaction->delete();
+        }
+
+        foreach($invoices as $invoice) {
+            /** @var \App\Billing\BusinessInvoice $invoice */
+            $invoice->removeDeposit($deposit);
+            $invoice->deposits()->detach($deposit->id);
+        }
+        $transaction->history()->delete();
+        $transaction->delete();
+        DepositLog::where('deposit_id', $deposit->id)->delete();
+        $deposit->delete();
+
+        if (! $this->confirm("Transaction #{$transaction->id} and it's related deposit (#{$deposit->id}) have been removed.\r\nDo you also want to un-invoice the $type Invoices related to this transaction?  IDs: " . join(', ', $invoiceIds))) {
+            return true;
+        }
+
+        foreach ($invoices as $invoice) {
+            if (! $invoice->delete()) {
+                $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
+                \DB::rollBack();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function deletePaymentTransaction(GatewayTransaction $transaction, Payment $payment) : bool
+    {
+        $invoices = $payment->invoices;
+        $invoiceIds = $invoices->pluck('id')->toArray();
+//        $this->info("Transaction #{$transaction->id} is related to a payment (#{$payment->id}) with the following effected invoices: " . join(', ', $invoiceIds));
+
+//        if (! $this->confirm("Do you want to delete this transaction and payment from the database?")) {
+//            return;
+//        }
+
+        if ($transaction->failedTransaction) {
+            $transaction->failedTransaction->delete();
+        }
+
+        // Un-apply all the the payment from all invoices and fix the balance.
+        // Source: UnapplyFailedPayments.php
+        foreach($payment->invoices as $invoice) {
+            /** @var \App\Billing\ClientInvoice $invoice */
+            $invoice->removePayment($payment);
+
+            $invoice->payments()->detach($payment->id);
+        }
+        $transaction->history()->delete();
+        $transaction->delete();
+        PaymentLog::where('payment_id', $payment->id)->delete();
+        $payment->delete();
+
+        $relatedShiftIds = $invoices->map(function ($invoice) {
+            /** @var ClientInvoice $invoice */
+            return $invoice->items->map(function ($item) {
+                /** @var ClientInvoiceItem $item */
+                if ($shift = $item->getInvoiceable()->getShift()) {
+                    return $shift->id;
+                }
+                return null;
+            })
+            ->filter();
+        })
+        ->flatten(1)
+        ->unique()
+        ->toArray();
+
+        if (! $this->confirm("Transaction #{$transaction->id} and it's related payment (#{$payment->id}) have been removed.\r\nDo you also want to un-invoice the ClientInvoices related to this transaction?  IDs: " . join(', ', $invoiceIds))) {
+            return true;
+        }
+
+        foreach ($invoices as $invoice) {
+            if (! $invoice->delete()) {
+                $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
+                \DB::rollBack();
+                return false;
+            }
+        }
+
+        $this->info("Found " . count($relatedShiftIds) . " related shifts with the following IDs: " . join(', ', $relatedShiftIds));
+
+//        if (! $this->confirm("Do you want to un-authorize the shifts related to this transaction?  Shift IDs: " . join(', ', $relatedShiftIds))) {
+//            return;
+//        }
+//
+//        foreach (Shift::whereIn('id', $relatedShiftIds)->get() as $shift) {
+//            $shift->statusManager()->unauthorize();
+//        }
+
+        return true;
+    }
+}
