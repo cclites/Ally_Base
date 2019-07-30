@@ -261,12 +261,16 @@ class CareDetails extends AuditableModel
     const VISION_GLASSES = 'glasses';
     const VISION_NORMAL = 'normal';
     const VISION_PERIPHERAL = 'peripheral';
+    const VISION_NO_PERIPHERAL = 'no_peripheral';
+    const VISION_BLIND = 'blind';
     const VISION = [
         self::VISION_RIGHT,
         self::VISION_LEFT,
         self::VISION_GLASSES,
         self::VISION_NORMAL,
         self::VISION_PERIPHERAL,
+        self::VISION_NO_PERIPHERAL,
+        self::VISION_BLIND,
     ];
 
     const HEARING_NORMAL = 'normal';
