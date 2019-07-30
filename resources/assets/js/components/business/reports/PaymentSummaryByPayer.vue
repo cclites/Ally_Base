@@ -69,6 +69,7 @@
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                         :footClone="footClone"
+                                        :show-empty="true"
                                 >
                                     <template slot="FOOT_client_name" scope="item" class="primary">
                                         <strong>For Client: </strong>{{totals.client_name}}
@@ -102,7 +103,6 @@
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
-
 
                 </b-card>
             </b-col>
