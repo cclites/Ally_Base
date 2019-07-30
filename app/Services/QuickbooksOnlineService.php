@@ -33,17 +33,12 @@ class QuickbooksOnlineService
     /**
      * @var \QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken
      */
-    protected $accessToken;
+    public $accessToken;
 
     /**
      * @var \QuickBooksOnline\API\DataService\DataService
      */
     protected $service;
-
-    /**
-     * @var bool
-     */
-    protected $accessTokenUpdated = false;
 
     /**
      * QuickbooksOnlineService Constructor.
@@ -109,16 +104,6 @@ class QuickbooksOnlineService
     }
 
     /**
-     * Check whether the service has updated the access token.
-     *
-     * @return bool
-     */
-    public function hasUpdatedAccessToken() : bool
-    {
-        return $this->accessTokenUpdated;
-    }
-
-    /**
      * Get a list of customer from the API.
      *
      * @return array|null
@@ -126,8 +111,7 @@ class QuickbooksOnlineService
      */
     public function getCustomers() : ?array
     {
-        return $this->autoRefreshToken()
-            ->queryAll('SELECT * FROM Customer ORDERBY GivenName');
+        return $this->queryAll('SELECT * FROM Customer ORDERBY GivenName');
     }
 
     /**
@@ -167,8 +151,7 @@ class QuickbooksOnlineService
      */
     public function getItems() : ?array
     {
-        return $this->autoRefreshToken()
-            ->queryAll('SELECT * FROM Item where Type = \'Service\'');
+        return $this->queryAll('SELECT * FROM Item where Type = \'Service\'');
     }
 
     /**
@@ -176,12 +159,10 @@ class QuickbooksOnlineService
      *
      * @return string
      * @throws \QuickBooksOnline\API\Exception\SdkException
-     * @throws \QuickBooksOnline\API\Exception\ServiceException
      */
     public function getCompanyName() : string
     {
-        $data = $this->autoRefreshToken()
-            ->service
+        $data = $this->service
             ->getCompanyInfo();
 
         return $data->CompanyName;
@@ -196,8 +177,6 @@ class QuickbooksOnlineService
      */
     public function createInvoice(array $data) : ?IPPIntuitEntity
     {
-        $this->autoRefreshToken();
-
         if ($result = $this->service->Add(Invoice::create($data))) {
             return $result;
         }
@@ -215,8 +194,6 @@ class QuickbooksOnlineService
      */
     public function createCustomer(Client $client) : array
     {
-        $this->autoRefreshToken();
-
         $address = $client->getBillingAddress();
 
         $data = [
@@ -250,11 +227,11 @@ class QuickbooksOnlineService
     /**
      * Automatically handle token refreshes.
      *
-     * @return QuickbooksOnlineService
+     * @return bool
      * @throws \QuickBooksOnline\API\Exception\SdkException
      * @throws \QuickBooksOnline\API\Exception\ServiceException
      */
-    protected function autoRefreshToken() : self
+    public function autoRefreshToken() : bool
     {
         $period = $this->accessToken->getAccessTokenValidationPeriodInSeconds();
         $now = strtotime(date('Y-m-d H:i:s'));
@@ -263,10 +240,10 @@ class QuickbooksOnlineService
         if ($period + $now > $expires) {
             $this->accessToken = $this->service->getOAuth2LoginHelper()->refreshToken();
             $this->service->updateOAuth2Token($this->accessToken);
-            $this->accessTokenUpdated = true;
+            return true;
         }
 
-        return $this;
+        return false;
     }
 
     /**

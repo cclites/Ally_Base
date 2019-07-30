@@ -6,13 +6,10 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
-use App\Billing\Payment;
 use App\Billing\PaymentLog;
-use App\Billing\Payments\BankAccountPayment;
-use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Billing\Payments\Methods\ProviderPayment;
+use App\Billing\Payments\Methods\Trust;
 use App\Billing\Payments\PaymentMethodFactory;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Business;
@@ -38,6 +35,11 @@ class ProcessChainPayments
      */
     protected $methodFactory;
 
+    /**
+     * @var array
+     */
+    protected $allowedPaymentMethodTypes = [Business::class, BankAccount::class, CreditCard::class, Trust::class];
+
     function __construct(PaymentMethodFactory $methodFactory = null, ProcessInvoicePayment $paymentProcessor = null,
         ApplyPayment $paymentApplicator = null, OnlineClientInvoiceQuery $invoiceQuery = null)
     {
@@ -51,10 +53,16 @@ class ProcessChainPayments
      * Process the payments for the chain, grouping by payment method
      *
      * @param \App\BusinessChain $chain
+     * @param array $forPaymentMethodTypes
      * @return Collection|\App\Billing\PaymentLog[]
+     * @throws \Exception
      */
-    function processPayments(BusinessChain $chain): Collection
+    function processPayments(BusinessChain $chain, array $forPaymentMethodTypes = []): Collection
     {
+        if (filled($forPaymentMethodTypes)) {
+            $this->allowedPaymentMethodTypes = $forPaymentMethodTypes;
+        }
+
         PaymentLog::acquireLock();
         $batchId = PaymentLog::getNextBatch($chain->id);
 
@@ -115,6 +123,13 @@ class ProcessChainPayments
         foreach($invoices as $invoice) {
             try {
                 $method = $this->getPaymentMethod($invoice);
+
+                // Only include payment methods that are allowed on this
+                // current processing call.
+                if (! $this->isPaymentMethodAllowed($method)) {
+                    continue;
+                }
+
                 $hash = $method->getHash();
             }
             catch (\Exception $e) {
@@ -141,5 +156,22 @@ class ProcessChainPayments
         }
 
         return $paymentMethod;
+    }
+
+    /**
+     * Check if the given payment method is allowed.
+     *
+     * @param ChargeableInterface $method
+     * @return bool
+     */
+    protected function isPaymentMethodAllowed(ChargeableInterface $method) : bool
+    {
+        foreach ($this->allowedPaymentMethodTypes as $class) {
+            if (is_a($method, $class, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

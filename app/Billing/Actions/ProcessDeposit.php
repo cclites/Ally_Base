@@ -11,9 +11,21 @@ use App\Caregiver;
 
 class ProcessDeposit
 {
-    public function deposit(DepositMethodStrategy $strategy, array $depositAttributes, float $amount, string $currency = 'USD'): Deposit
+    /**
+     * Process strategy deposit.
+     *
+     * @param DepositMethodStrategy $strategy
+     * @param array $depositAttributes
+     * @param float $amount
+     * @param string $currency
+     * @param bool $allowZero
+     * @return Deposit
+     * @throws PaymentAmountError
+     * @throws PaymentMethodError
+     */
+    public function deposit(DepositMethodStrategy $strategy, array $depositAttributes, float $amount, string $currency = 'USD', bool $allowZero = false): Deposit
     {
-        if ($amount <= 0)  {
+        if ($amount < 0)  {
             throw new PaymentAmountError("The payment amount cannot be less than $0");
         }
 
@@ -21,20 +33,44 @@ class ProcessDeposit
             throw new \InvalidArgumentException("A deposit_type attribute is required.");
         }
 
-        if (!$transaction = $strategy->deposit($amount, $currency)) {
-            throw new PaymentMethodError("Unable to get the transaction from the deposit method.");
+        if (floatval($amount) === floatval(0)) {
+            if (! $allowZero) {
+                throw new PaymentAmountError("The payment amount cannot be $0");
+            }
+            // If a zero amount was passed just fake the transaction.
+            $depositData = [
+                'amount' => $amount,
+                'success' => 1,
+            ];
         }
+        else {
+            if (!$transaction = $strategy->deposit($amount, $currency)) {
+                throw new PaymentMethodError("Unable to get the transaction from the deposit method.");
+            }
 
-        $depositData = [
-            'amount' => $amount,
-            'transaction_id' => $transaction->id,
-            'success' => $transaction->success,
-        ];
+            $depositData = [
+                'amount' => $amount,
+                'transaction_id' => $transaction->id,
+                'success' => $transaction->success,
+            ];
+        }
 
         return Deposit::create($depositData + $depositAttributes);
     }
 
-    public function depositToBusiness(Business $business, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD'): Deposit
+    /**
+     * Process business deposit.
+     *
+     * @param Business $business
+     * @param DepositMethodFactory $methodFactory
+     * @param float $amount
+     * @param string $currency
+     * @param bool $allowZero
+     * @return Deposit
+     * @throws PaymentAmountError
+     * @throws PaymentMethodError
+     */
+    public function depositToBusiness(Business $business, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD', bool $allowZero = false): Deposit
     {
         $account = $business->bankAccount;
         if (!$account) {
@@ -48,10 +84,22 @@ class ProcessDeposit
             'business_id'  => $business->id,
         ];
 
-        return $this->deposit($strategy, $attributes, $amount, $currency);
+        return $this->deposit($strategy, $attributes, $amount, $currency, $allowZero);
     }
 
-    public function depositToCaregiver(Caregiver $caregiver, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD'): Deposit
+    /**
+     * Process caregiver deposit.
+     *
+     * @param Caregiver $caregiver
+     * @param DepositMethodFactory $methodFactory
+     * @param float $amount
+     * @param string $currency
+     * @param bool $allowZero
+     * @return Deposit
+     * @throws PaymentAmountError
+     * @throws PaymentMethodError
+     */
+    public function depositToCaregiver(Caregiver $caregiver, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD', bool $allowZero = false): Deposit
     {
         $account = $caregiver->bankAccount;
         if (!$account) {
@@ -65,6 +113,6 @@ class ProcessDeposit
             'caregiver_id'  => $caregiver->id,
         ];
 
-        return $this->deposit($strategy, $attributes, $amount, $currency);
+        return $this->deposit($strategy, $attributes, $amount, $currency, $allowZero);
     }
 }

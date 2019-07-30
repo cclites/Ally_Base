@@ -212,6 +212,13 @@
                         category: 7,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Total Charges Report',
+                        url: 'reports/total_charges_report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 
@@ -290,7 +297,7 @@
                     },
                     {
                         name: 'Caregiver Expirations',
-                        url: 'reports/certification_expirations',
+                        url: 'reports/caregiver-expirations',
                         description: 'See a list of caregivers with an expiring certification or license',
                         category: 3,
                         allowed: ['office_user'],
@@ -438,7 +445,7 @@
                     {
                         name: 'Projected Billing',
                         url: 'reports/projected-billing',
-                        description: 'See forecasting billing amounts based on scheduled and completed visits',
+                        description: 'See forecasting billing amounts based on scheduled visits',
                         category: 5,
                         allowed: ['office_user'],
                     },
@@ -456,10 +463,26 @@
                         category: 2,
                         allowed: ['office_user'],
                     },
+                    /*
+                    Chad Note: Leaving this for now in case they want it back
                     {
                         name: 'Medicaid Billing',
                         url: 'reports/medicaid-billing',
                         description: 'Medicaid Billing Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },*/
+                    {
+                        name: '3rd Party Payer',
+                        url: 'reports/third-party-payer',
+                        description: '3rd Party Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Payroll Summary',
+                        url: 'reports/payroll-summary-report',
+                        description: 'Payroll Summary Report',
                         category: 5,
                         allowed: ['office_user'],
                     },
@@ -485,6 +508,73 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Payers Invoices',
+                        url: 'reports/payer-invoice-report',
+                        description: 'Payers Invoices Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Invoice Summary By Marketing',
+                        url: 'reports/invoice-summary-by-marketing',
+                        description: 'Invoice Summary By Marketing Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Invoice Summary By County',
+                        url: 'reports/invoice-summary-by-county',
+                        description: 'Invoice Summary Report By County',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Client Referrals',
+                        url: 'reports/client-referrals',
+                        description: 'Client Referrals Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Account Setup Status',
+                        url: 'reports/account-setup',
+                        description: 'Shows a list of caregivers with incomplete account data.',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Payment Summary By Payer',
+                        url: 'reports/payment-summary-by-payer',
+                        description: 'Payment Summary By Payer Report',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Service Authorization Ending Report',
+                        url: 'reports/service-auth-ending',
+                        description: 'Shows all clients service auths and the dates they are ending.',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Service Authorization Usage Report',
+                        url: 'reports/service-auth-usage',
+                        description: 'Shows a usage report for client\'s service authorizations.',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+                    // {
+                    //     name: 'Batch Invoice',
+                    //     url: 'reports/batch-invoice',
+                    //     description: 'Print Batch invoices to PDF',
+                    //     category: 2,
+                    //     allowed: ['office_user'],
+                    // },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },

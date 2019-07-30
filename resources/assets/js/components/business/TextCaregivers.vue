@@ -10,15 +10,16 @@
         >
             <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
                 <b-row>
-                    <b-col md="6">
+                    <b-col md="6" class="d-flex align-items-baseline">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
                                 <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Send to all active Caregivers</span>
+                                <span class="custom-control-description">Send to all active Caregivers for</span>
                             </label>
                             <input-help :form="form" field="accepted_terms" text=""></input-help>
                         </div>
+                        <business-location-select class=" f-1" v-model="form.businesses" :allow-all="true" name="businesses" :disabled="! form.all"/>
                     </b-col>
                     <b-col md="6" class="d-flex">
                         <b-form-group class="ml-auto">
@@ -27,6 +28,14 @@
                                     <input type="checkbox" class="custom-control-input" name="can_reply" v-model="form.can_reply" value="1">
                                     <span class="custom-control-indicator"></span>
                                     <span class="custom-control-description">Accept Replies</span>
+                                </label>
+                                <input-help :form="form" field="accepted_terms" text=""></input-help>
+                            </div>
+                            <div class="form-check" v-if="isAdmin">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="debug" v-model="form.debug" value="1">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Debug Mode</span>
                                 </label>
                                 <input-help :form="form" field="accepted_terms" text=""></input-help>
                             </div>
@@ -60,7 +69,7 @@
                     </div>
                     <input-help :form="form" field="recipients" text=""></input-help>
                 </b-form-group>
-                <business-location-form-group label="From Number"
+                <business-location-form-group label="From Number (This is the number Caregivers will receive the txt message from and reply to)"
                                               v-model="form.business_id"
                                               :form="form"
                                               field="business_id">
@@ -71,21 +80,25 @@
                 </b-form-group>
                 <b-form-group>
                     <b-button variant="info" type="submit" :disabled="submitting">
-                        <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send
+                        <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send Message
                     </b-button>
                 </b-form-group>
+                <b-alert variant="info" show>
+                    This will only send messages to Caregivers who have a phone number selected for text messages.
+                </b-alert>
             </form>
         </b-card>
     </div>
 </template>
 
 <script>
-import BusinessLocationFormGroup from "./BusinessLocationFormGroup";
+    import BusinessLocationFormGroup from "./BusinessLocationFormGroup";
+    import BusinessLocationSelect from "./BusinessLocationSelect";
 
 export default {
     name: "BusinessTextCaregivers",
 
-    components: {BusinessLocationFormGroup},
+    components: {BusinessLocationFormGroup, BusinessLocationSelect},
 
     props: {
         subject: false,
@@ -99,7 +112,15 @@ export default {
     data() {
         return {
             'selectedUsers': [],
-            'form': new Form({}),
+            'form': new Form({
+                can_reply: 1,
+                all: 0,
+                message: '',
+                recipients: [],
+                business_id: "",
+                businesses: '',
+                debug: false,
+            }),
             'numOfSets': 3,
             submitting: false,
         }
@@ -112,7 +133,6 @@ export default {
     },
 
     mounted() {
-        this.resetForm();
         if (this.fillMessage) {
             this.form.message = this.fillMessage;
         }
@@ -169,13 +189,10 @@ export default {
 
         resetForm()
         {
-            this.form = new Form({
-                can_reply: 1,
-                all: 0,
-                message: '',
-                recipients: [],
-                business_id: "",
-            });
+            this.form.can_reply = 1;
+            this.form.all = 0;
+            this.form.message = '';
+            this.form.recipients = [];
             this.selectedUsers = [];
         },
     }

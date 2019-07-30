@@ -7,10 +7,12 @@
                         <b-col xl="4" lg="6">
                             <b-form-group label="Date Range" class="form-inline">
                                 <date-picker ref="startDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.start_date"
                                              placeholder="Start Date">
                                 </date-picker> &nbsp;to&nbsp;
                                 <date-picker ref="endDate"
+                                             style="max-width: 8rem;"
                                              v-model="filters.end_date"
                                              placeholder="End Date">
                                 </date-picker>
@@ -65,11 +67,12 @@
                             <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <!-- ADMIN ONLY DROPDOWN -->
-                            <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
-                                <b-form-select v-model="filters.import_id">
-                                    <option value="">--Filter by Import--</option>
-                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                            <b-form-group label="Service" class="form-inline">
+                                <b-form-select v-model="filters.service_id">
+                                    <option value="">All Services</option>
+                                    <option v-for="item in services" :value="item.id" :key="item.id">
+                                        {{ item.name }} {{ item.code ? `(${item.code})` : '' }}
+                                    </option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -77,6 +80,16 @@
                             <b-form-group label="Client Type" class="form-inline">
                                 <b-form-select v-model="filters.client_type" ref="clientTypeFilter">
                                     <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="admin"> <!-- ADMIN ONLY DROPDOWN -->
+                        <b-col>
+                            <b-form-group label="Admin Imports" class="form-inline">
+                                <b-form-select v-model="filters.import_id">
+                                    <option value="">--Filter by Import--</option>
+                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -110,37 +123,34 @@
                     </b-row>
                 </b-container>
 
-                <!--<b-col lg="8">-->
-                    <!--<small v-show="loaded >= 3" v-html="filterDescription"></small>-->
-                <!--</b-col>-->
-
                 <b-col lg="12" class="text-right">
-                    <!--<b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>-->
                     <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
-                    <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="loaded >= 3">{{ summaryButtonText }}</b-button>
+                    <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="shiftsLoaded">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
 
-            <div class="text-center text-muted" v-show="loaded == -1">
+            <div class="text-center text-muted" v-show="! shiftsLoaded">
                 Update filters and press Generate Report
             </div>
 
-            <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
-
         </b-card>
 
-        <shift-history-summaries v-show="showSummary && loaded >= 3"
+        <loading-card v-show="showSummary && loadingSummaries"></loading-card>
+
+        <shift-history-summaries v-show="showSummary && ! loadingSummaries"
                                  :client-charges="items.clientCharges"
                                  :caregiver-payments="items.caregiverPayments"
                                  :admin="admin"
         />
+
+        <loading-card v-show="loadingShifts"></loading-card>
 
         <b-card
                 header="Shift List for Date Range &amp; Filters"
                 header-text-variant="white"
                 header-bg-variant="info"
                 title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
-                v-show="loaded >= 3"
+                v-show="shiftsLoaded && ! loadingShifts"
                 ref="SHRCard"
         >
             <b-row class="mb-2">
@@ -165,117 +175,10 @@
                                 <b-btn size="sm" @click.stop="confirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
                             </span>
                         <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
-
-                        <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
-                        <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="confirmShift(row.item)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
-                        <!--<b-dropdown-divider></b-dropdown-divider>-->
-                        <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
-                        <!--</b-dropdown>-->
                     </div>
                 </template>
             </shift-history-table>
         </b-card>
-
-        <b-modal size="lg" id="filtersModal" title="Select Date Range &amp; Filters">
-            <!-- This modal is temporarily hidden, add v-model="filtersModal" to re-enable -->
-            <!-- The filters are available inline instead -->
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="6">
-                        <b-form-group label="Date Range" class="form-inline">
-                            <date-picker ref="startDate"
-                                         v-model="filters.start_date"
-                                         placeholder="Start Date">
-                            </date-picker> &nbsp;to&nbsp;
-                            <date-picker ref="endDate"
-                                         v-model="filters.end_date"
-                                         placeholder="End Date">
-                            </date-picker>
-                        </b-form-group>
-                        <b-form-group label="Caregiver" class="form-inline">
-                            <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
-                                <option value="">All Caregivers</option>
-                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <b-form-group label="Client" class="form-inline">
-                            <b-form-select v-model="filters.client_id" ref="clientFilter">
-                                <option value="">All Clients</option>
-                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <!-- Business Location is not shown on single business registries -->
-                        <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
-                    </b-col>
-                    <b-col lg="6">
-                        <b-form-group label="Payment Method" class="form-inline">
-                            <b-form-select v-model="filters.payment_method" ref="paymentFilter">
-                                <option value="">All Payment Methods</option>
-                                <option value="credit_card">Credit Card</option>
-                                <option value="bank_account">Bank Account</option>
-                                <option value="business">Provider Payment</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <b-form-group label="Charge Status" class="form-inline">
-                            <b-form-select v-model="filters.charge_status" ref="chargeFilter">
-                                <option value="">All Statuses</option>
-                                <option value="charged">Charged</option>
-                                <option value="uncharged">Un-Charged</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <b-form-group label="Confirmed Status" class="form-inline">
-                            <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
-                                <option value="">All Statuses</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="unconfirmed">Unconfirmed</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <!-- ADMIN ONLY DROPDOWN -->
-                        <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
-                            <b-form-select v-model="filters.import_id">
-                                <option value="">--Filter by Import--</option>
-                                <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
-                            </b-form-select>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col lg="12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title">Filter by Flags</h6>
-                                <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
-                                    <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
-                                    <b-radio value="none">Has No Flags</b-radio><br />
-                                    <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
-                                </b-form-radio-group>
-                                <b-col lg="12">
-                                    <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
-                                    <b-form-checkbox v-for="(display, value) in flagTypes"
-                                                     v-model="filters.flags"
-                                                     :value="value"
-                                                     :key="value"
-                                                     class="flag-checkbox"
-                                                     :disabled="filters.flag_type !== 'selected'"
-                                                     @change="includeAllFlags = false"
-                                    >
-                                        {{ display }}
-                                    </b-form-checkbox>
-                                </b-col>
-                            </div>
-                        </div>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn variant="info" @click="reloadData()">
-                    Generate Report
-                </b-btn>
-                <b-btn variant="default" @click="filtersModal=false">Close</b-btn>
-            </div>
-        </b-modal>
 
         <!-- Filter columns modal -->
         <filter-columns-modal v-model="columnsModal"
@@ -295,8 +198,8 @@
             </template>
         </shift-details-modal>
 
-        <add-shift-modal 
-            v-model="addShiftModal" 
+        <add-shift-modal
+            v-model="addShiftModal"
             :caregiver="{id: filters.caregiver_id}"
             :client="{id: filters.client_id}"
             @shift-created="onShiftCreate"
@@ -371,15 +274,14 @@
                     flag_type: "any",
                     flags: [],
                     client_type: '',
+                    service_id: '',
                 },
                 includeAllFlags: false,
-                filterDescription: '',
                 clients: [],
                 caregivers: [],
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
-                filtersModal: !this.autoload,
                 addShiftModal: false,
                 editShiftModal: false,
                 detailsModal: false,
@@ -389,17 +291,21 @@
                 },
                 columnsModal: false,
                 filteredFields: [],
-                urlPrefix: '/business/reports/data/',
-                loaded: -1,
+                urlPrefix: '/business/reports/',
+                shiftsLoaded: false,
+                summaryLoaded: false,
+                loadingSummaries: false,
+                loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
+                services: [],
             }
         },
 
-        mounted() {
+        async mounted() {
             this.loadFiltersFromStorage();
             this.setInitialFields();
-            this.loadFiltersData();
+            await this.loadFiltersData();
             if (this.autoload) {
                 this.loadData();
             }
@@ -412,6 +318,7 @@
                     'Day',
                     'Time',
                     'Hours',
+                    'Services',
                     'Client',
                     'Caregiver',
                     'EVV',
@@ -481,10 +388,11 @@
                         'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
+                        'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
                         '_rowVariant': this.getRowVariant(item),
-                    }
+                    };
                 });
                 items.push({
                     '_rowVariant': 'info',
@@ -530,10 +438,10 @@
             },
             queryString() {
                 const filters = this.filters;
-                return '?start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
+                return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
-                        + '&client_type=' + filters.client_type
+                        + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             }
         },
@@ -545,7 +453,7 @@
                 }
                 return (item.confirmed) ? null : 'warning';
             },
-            
+
             fullscreenToggle() {
                 $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
                 $('.left-sidebar').toggle();
@@ -565,18 +473,16 @@
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
-                    let showSummary = this.getLocalStorage('showSummary');
-                    if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
             },
 
             reloadShift(id) {
                 console.log(`Reloading shift #${id}`);
-                axios.get(`${this.urlPrefix}shift/${id}`)
+                axios.get(this.urlPrefix + `shifts/reload/${id}`)
                     .then( ({ data }) => {
                         let index = this.items.shifts.findIndex(x => x.id === id);
                         if (index >= 0) {
-                            this.items.shifts.splice(index, 1, data)
+                            this.items.shifts.splice(index, 1, data.data);
                         } else {
                             console.log(`Could not reload shift #${id}`, data);
                         }
@@ -585,8 +491,9 @@
                     .catch(e => {})
             },
 
-            loadSummaries() {
-                axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
+            async loadSummaries() {
+                this.loadingSummaries = true;
+                await axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -594,9 +501,8 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
-                        this.loaded++;
                     });
-                axios.get(this.urlPrefix + 'client_charges' + this.queryString)
+                await axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -604,8 +510,8 @@
                         else {
                             this.items.clientCharges = [];
                         }
-                        this.loaded++;
                     });
+                this.loadingSummaries = false;
             },
 
             reloadData() {
@@ -616,10 +522,7 @@
             },
 
             loadData() {
-                this.filtersModal = false;
-                this.filterDescription = this.getFilterDescription();
-                this.loaded = 0;
-                this.loadSummaries();
+                this.loadingShifts = true;
 
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
@@ -629,61 +532,26 @@
                         else {
                             this.items.shifts = [];
                         }
-                        this.loaded++;
                     })
                     .catch(error => {
                         if (error.response.data && error.response.data.message) {
                             alerts.addMessage('error', error.response.data.message);
                         }
-                        this.loaded++;
-                        this.filtersModal = true;
+                    })
+                    .finally(() => {
+                        this.shiftsLoaded = true;
+                        this.loadingShifts = false;
                     });
-            },
 
-            getFilterDescription() {
-                return `<strong>Current Filters:</strong> `
-                    + `Dates: ${this.getTextFromRefInput('startDate')} - ${this.getTextFromRefInput('endDate')}; `
-                    + `Caregiver: ${this.getTextFromRefInput('caregiverFilter')}; `
-                    + `Client: ${this.getTextFromRefInput('clientFilter')}; `
-                    + `Payment Method: ${this.getTextFromRefInput('paymentFilter')}; `
-                    + `Charge Status: ${this.getTextFromRefInput('chargeFilter')}; `
-                    + `Confirmed Status: ${this.getTextFromRefInput('confirmedFilter')}; `
-                    + this.getFlagFilterDescription();
-            },
-
-            getFlagFilterDescription() {
-                if (this.filters.flag_type === 'none') return 'No Flags';
-                if (this.filters.flag_type === 'selected') return `Flags: ${this.filters.flags.length === this.shiftFlags.length ? 'ALL' : this.getTextFromSelector($('.flag-checkbox > input:checked').closest('label'))}`;
-                return '';
-            },
-
-            getTextFromSelector($selector) {
-                if ($selector.length > 1) {
-                    let texts = [];
-                    for(let i = 0; i < $selector.length; i++) {
-                        texts.push(this.getTextFromSelector($($selector[i])));
-                    }
-                    return texts.join(', ');
-                }
-                switch($selector.prop('tagName')) {
-                    case 'LABEL':
-                        return $selector.text();
-                    case 'INPUT':
-                        return $selector.val();
-                    case 'SELECT':
-                        return $selector.find('option:selected').text();
+                if (this.showSummary) {
+                    this.loadSummaries();
                 }
             },
 
-            getTextFromRefInput(refName)
-            {
-                const $selector = $(this.$refs[refName].$el);
-                return this.getTextFromSelector($selector);
-            },
-
-            loadFiltersData() {
-                axios.get('/business/clients').then(response => this.clients = response.data);
-                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+            async loadFiltersData() {
+                await axios.get('/business/clients').then(response => this.clients = response.data);
+                await axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+                await axios.get('/business/services?json=1').then(response => this.services = response.data);
             },
 
             details(item) {
@@ -798,8 +666,11 @@
                 this.filteredFields = this.availableFields.slice();
             },
 
-            showHideSummary() {
+            async showHideSummary() {
                 this.showSummary = !this.showSummary;
+                if (this.showSummary) {
+                    await this.loadSummaries();
+                }
             },
 
             onShiftUpdate(id) {
@@ -824,7 +695,9 @@
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
-                this.loadSummaries();
+                if (this.showSummary) {
+                    this.loadSummaries();
+                }
             },
 
             updateSavedFormFilters() {
@@ -851,9 +724,6 @@
             filteredFields(val) {
                 this.setLocalStorage('fields', val);
             },
-            showSummary(val) {
-                this.setLocalStorage('showSummary', val);
-            },
         }
     }
 </script>
@@ -879,9 +749,6 @@
     }
     .shift-table td > .fa {
         font-size: 16px;
-    }
-    #filtersModal .datepicker, #filtersContainer .datepicker {
-        max-width: 150px;
     }
     #filtersContainer .form-group {
         margin-bottom: 0.5rem;

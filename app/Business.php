@@ -16,6 +16,7 @@ use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
+use App\BusinessCommunications;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -847,7 +848,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getHhaPassword() : string
     {
-        return empty($this->attributes['hha_password']) ? null : Crypt::decrypt($this->attributes['hha_password']);
+        return empty($this->attributes['hha_password']) ? '' : Crypt::decrypt($this->attributes['hha_password']);
     }
 
     /**
@@ -867,7 +868,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getTellusPassword() : string
     {
-        return empty($this->attributes['tellus_password']) ? null : Crypt::decrypt($this->attributes['tellus_password']);
+        return empty($this->attributes['tellus_password']) ? '' : Crypt::decrypt($this->attributes['tellus_password']);
     }
 
     /**
@@ -895,6 +896,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return true;
     }
 
+    public function communicationSettings(){
+        return $this->hasOne(BusinessCommunications::class);
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -909,5 +914,15 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
         $builder->whereIn('id', $businessIds);
+    }
+
+    function getHic(): ?string
+    {
+        return null;
+    }
+
+    function getBirthdate(): ?string
+    {
+        return null;
     }
 }

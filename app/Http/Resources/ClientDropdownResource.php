@@ -21,8 +21,8 @@ class ClientDropdownResource extends ResourceCollection
                 'nameLastFirst' => $row->nameLastFirst,
             ];
         })
-            ->sortBy('nameLastFirst')
-            ->values()
-            ->toArray();
+        ->sortBy('nameLastFirst')
+        ->values()
+        ->toArray();
     }
 }

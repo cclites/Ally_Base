@@ -52,6 +52,7 @@ class UnverifiedShift extends BaseNotification
      */
     public function __construct($shift)
     {
+        parent::__construct();
         $this->shift = $shift;
         $this->mode = empty($this->shift->checked_out_time) ? 'in' : 'out';
         $this->url = route('business.shifts.show', ['shift' => $this->shift]);

@@ -27,40 +27,40 @@ class TelefonyManager
             return $cached;
         }
 
-        $client = Client::whereHas('phoneNumbers', function ($q) use ($national_number) {
-            $q->where('national_number', $national_number);
-        })->first();
+        $client = Client::active()
+            ->whereHas('phoneNumbers', function ($q) use ($national_number) {
+                $q->where('national_number', $national_number);
+            })
+            ->first();
 
         Cache::put('telefony_client_' . $national_number, $client, 2);
         return $client;
     }
 
     /**
-     * @param $digits
-     * @param int $iteration
+     * Lookup Caregiver record from a phone number.
+     *
+     * @param Client $client
+     * @param string $digits
      * @return Caregiver|null
      */
-    public function findCaregiverByLastDigits(Client $client, $digits, $iteration=0)
+    public function getCaregiverFromPhoneNumber(Client $client, string $digits) : ?Caregiver
     {
-        $phoneNumberSearch = function($q) use ($digits) {
-            $q->where('national_number', 'LIKE', '%' . $digits);
-        };
+        $caregiver = $client->caregivers()
+            ->whereHas('phoneNumbers', function ($q) use ($digits) {
+                $q->where('national_number', $digits);
+            })
+            ->first();
 
-        $caregivers = $client->caregivers()
-                             ->whereHas('phoneNumbers', $phoneNumberSearch)
-                             ->get();
-
-        $businessCaregivers = $client->business->caregivers()
-                                               ->whereHas('phoneNumbers', $phoneNumberSearch)
-                                               ->whereNotIn('caregiver_id', $caregivers->pluck('id'))
-                                               ->get();
-
-        $caregivers = $caregivers->merge($businessCaregivers)->values();
-
-        if (isset($caregivers[$iteration])) {
-            return $caregivers[$iteration];
+        if (empty($caregiver)) {
+            $caregiver = $client->business->caregivers()
+                ->whereHas('phoneNumbers', function ($q) use ($digits) {
+                    $q->where('national_number', $digits);
+                })
+                ->first();
         }
-        return null;
+
+        return $caregiver;
     }
 
     public function activeShiftForClient(Client $client)

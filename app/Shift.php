@@ -934,7 +934,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         if ($service = $this->service) {
             /** @var Service $service */
-            return $service->name;
+            return $service->name . ' ' . $service->code;
         }
 
         // Fallback
@@ -1131,6 +1131,29 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
         // TODO: this does not properly handle shifts that expand more than two days
         return [$start, $end];
+    }
+
+    /**
+     * Get service authorizations effected by this shift.
+     *
+     * @return iterable|null
+     */
+    public function getEffectedServiceAuthorizations() : ?iterable
+    {
+        $serviceIds = [$this->service_id];
+
+        if (filled($this->services)) {
+            $serviceIds = $this->services->pluck('id')->toArray();
+        } else if (empty($this->service_id)) {
+            return [];
+        }
+
+        $auths = collect([]);
+        foreach ($this->getDateSpan() as $date) {
+            $auths = $auths->merge($this->client->getActiveServiceAuths($date, $serviceIds));
+        }
+
+        return $auths->unique('id');
     }
 
     ///////////////////////////////////////////

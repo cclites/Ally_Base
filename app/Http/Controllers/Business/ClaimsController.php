@@ -8,8 +8,10 @@ use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\Client;
 use App\Http\Requests\PayClaimRequest;
 use App\Http\Requests\TransmitClaimRequest;
+use App\Http\Requests\UpdateMissingClaimsFieldsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
@@ -31,6 +33,11 @@ class ClaimsController extends BaseController
         if ($request->expectsJson()) {
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
+                    case 'overpaid':
+                        $invoiceQuery->whereHas('claim', function (Builder $q) {
+                            $q->whereColumn('amount_paid', '>', 'amount');
+                        });
+                        break;
                     case 'paid':
                         $invoiceQuery->paidInFull();
                         break;
@@ -113,21 +120,32 @@ class ClaimsController extends BaseController
             \DB::beginTransaction();
 
             $transmitter = Claim::getTransmitter($service);
-            $transmitter->validateInvoice($invoice);
+            if ($errors = $transmitter->validateInvoice($invoice)) {
+                return new ErrorResponse(412, 'Required data missing for transmitting claim.', $errors);
+            }
 
             $claim = Claim::getOrCreate($invoice);
 
-            $transmitter->send($claim);
-
-            $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
-                'service' => $service,
-            ]);
+            if ($transmitter->isTestMode($claim)) {
+                $testFile = $transmitter->test($claim);
+            } else {
+                $transmitter->send($claim);
+                $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
+                    'service' => $service,
+                ]);
+            }
 
             \DB::commit();
-            return new SuccessResponse('Claim was transmitted successfully.', new ClaimResource($invoice->fresh()));
+
+            $data = ['claim' => new ClaimResource($invoice->fresh())];
+            if (isset($testFile)) {
+                $data['test_result'] = $testFile;
+            }
+            return new SuccessResponse('Claim was transmitted successfully.', $data);
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {
+            \Log::error($ex);
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to transmit the claim.  Please try again.');
         }
@@ -149,12 +167,63 @@ class ClaimsController extends BaseController
             return new ErrorResponse(412, 'Cannot apply payment until the claim has been transmitted.');
         }
 
-        if ($request->getAmount() > $invoice->claim->getAmountDue()) {
-            return new ErrorResponse(412, 'This payment amount exceeds the claim balance.  Please modify the payment amount and try again.');
-        }
-
         $invoice->claim->addPayment($request->toClaimPayment());
 
         return new SuccessResponse('Payment was successfully applied.', new ClaimResource($invoice->fresh()));
+    }
+
+    /**
+     * Update missing fields that are required for transmitting the invoice.
+     *
+     * @param UpdateMissingClaimsFieldsRequest $request
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
+     */
+    public function updateMissingFields(UpdateMissingClaimsFieldsRequest $request, ClientInvoice $invoice)
+    {
+        $businessData = [];
+        $clientData = [];
+        $payerData = [];
+        foreach ($request->filtered() as $field => $value) {
+            if (starts_with($field, 'business_')) {
+                $businessData[substr($field, 9)] = $value;
+            }
+            if (starts_with($field, 'credentials_')) {
+                $businessData[substr($field, 12)] = $value;
+            }
+            if (starts_with($field, 'client_')) {
+                $clientData[substr($field, 7)] = $value;
+            }
+            if (starts_with($field, 'payer_')) {
+                $payerData[substr($field, 6)] = $value;
+            }
+        }
+
+        \DB::beginTransaction();
+
+        if (! empty($businessData)) {
+            $this->authorize('update', $invoice->client->business);
+            app('settings')->set($invoice->client->business, $businessData);
+        }
+
+        if (! empty($clientData)) {
+            $this->authorize('update', $invoice->client);
+            $invoice->client->update($clientData);
+        }
+
+        if (! empty($payerData)) {
+            if (empty($invoice->clientPayer)) {
+                return new ErrorResponse(500, 'Invoice has no payer.');
+            }
+
+            $this->authorize('update', $invoice->clientPayer->payer);
+            $invoice->clientPayer->payer->update($payerData);
+        }
+
+        \DB::commit();
+
+        return new SuccessResponse('Required fields have been saved.  You can now transmit the invoice.', $invoice);
     }
 }

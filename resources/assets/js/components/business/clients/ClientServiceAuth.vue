@@ -1,10 +1,13 @@
 <template>
     <div>
-        <b-row class="mb-2">
-            <b-col lg="12">
+        <div class="mb-3 d-flex">
+            <div class="f-1">
                 <b-btn variant="info" @click="addAuth()">Add Authorization</b-btn>
-            </b-col>
-        </b-row>
+            </div>
+            <div class="ml-auto">
+                <a :href="`/business/reports/service-auth-usage?client=${clientId}`" target="_blank">View Service Auth Usage Report</a>
+            </div>
+        </div>
         <div>
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -20,6 +23,12 @@
                     <template slot="units" scope="row">
                         <span v-if="row.item.period == 'specific_days'">N/A</span>
                         <span v-else>{{ row.item.units }}</span>
+                    </template>
+                    <template slot="effective_end_sortable" scope="row">
+                        {{ row.item.effective_end }}
+                    </template>
+                    <template slot="effective_start_sortable" scope="row">
+                        {{ row.item.effective_start }}
                     </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
@@ -215,8 +224,8 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'service_type',
-                sortDesc: false,
+                sortBy: 'effective_start_sortable',
+                sortDesc: true,
                 filter: null,
                 fields: [
                     {
@@ -231,13 +240,14 @@
                         sortable: true,
                         formatter: x => x ? x : '-',
                     },
+                    { key: 'service_auth_id', 'label': 'ID', sortable: true, },
                     {
-                        key: 'effective_start',
+                        key: 'effective_start_sortable',
                         label: 'Start',
                         sortable: true,
                     },
                     {
-                        key: 'effective_end',
+                        key: 'effective_end_sortable',
                         label: 'End',
                         sortable: true,
                     },
@@ -366,7 +376,7 @@
                     default:
                         return;
                 }
-                
+
                 this.form.effective_end = endDate.format('MM/DD/YYYY');
             },
 

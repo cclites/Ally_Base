@@ -6,6 +6,7 @@ use App\Billing\CaregiverInvoice;
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
+use App\Billing\OfflineInvoicePayment;
 use App\Billing\Payer;
 use App\Businesses\NullContact;
 use App\Contracts\ViewStrategy;
@@ -34,7 +35,26 @@ class InvoiceViewGenerator
         $client = $clientInvoice->client;
         $clientPayer = $clientInvoice->getClientPayer();
         $business = $client->business;
-        $payments = $clientInvoice->payments;
+
+        if ($clientInvoice->isOffline()) {
+            // TODO: refactor this into a Payment interface with methods to get these fields
+            $payments = $clientInvoice->OfflinePayments->map(function (OfflineInvoicePayment $payment) {
+                return (object)[
+                    'created_at'=> $payment->payment_date,
+                    'payment_type' => $payment->description.' ('.$payment->type.': '.$payment->reference.')',
+                    'description' => $payment->description,
+                    'amount' => $payment->amount,
+                    'pivot' => [
+                        'invoice_id' => $payment->invoice->id,
+                        'payment_id' => $payment->id,
+                        'amount_applied' => $payment->amount,
+                    ],
+                    'notes' => $payment->notes
+                ];
+            });
+        } else {
+            $payments = $clientInvoice->payments;
+        }
 
         if ($clientPayer == null || $clientPayer->payer_id === Payer::PRIVATE_PAY_ID) {
             $recipient = $client;

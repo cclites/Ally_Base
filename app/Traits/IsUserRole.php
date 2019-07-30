@@ -268,6 +268,23 @@ trait IsUserRole
         return $this->user ? $this->user->setup_status : null;
     }
 
+    function getHic(): ?string
+    {
+        if ($this->getRoleType() === 'client') {
+            return $this->hic;
+        }
+
+        return null;
+    }
+
+    function getBirthdate(): ?string
+    {
+        if ($this->getRoleType() === 'client') {
+            return $this->date_of_birth;
+        }
+
+        return null;
+    }
     ///////////////////////////////////////////
     /// Attribute Input Handling
     ///////////////////////////////////////////
@@ -382,6 +399,17 @@ trait IsUserRole
     public function scopeActive(Builder $builder)
     {
         return $builder->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
+    /**
+     * Returns only inactive Clients.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInactive(Builder $builder)
+    {
+        return $builder->whereHas('user', function($q) { $q->where('active', 0); });
     }
 
     /**

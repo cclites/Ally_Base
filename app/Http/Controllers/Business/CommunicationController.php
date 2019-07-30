@@ -93,27 +93,31 @@ class CommunicationController extends Controller
      *
      * @param \App\Http\Requests\SendTextRequest $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function sendText(SendTextRequest $request)
     {
         if ($request->input('all')) {
+            // Filter to the selected business for 'all' or default to all locations.
             $recipients = Caregiver::forRequestedBusinesses()
                 ->active()
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
         } else {
-            $recipients = Caregiver::forRequestedBusinesses()
+            $recipients = Caregiver::forRequestedBusinesses() // all allowed locations
+                ->active()
                 ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
-
-            if ($recipients->count() == 0) {
-                return new ErrorResponse(422, 'You must have at least 1 recipient.');
-            }
         }
 
+        if ($recipients->count() == 0) {
+            return new ErrorResponse(422, 'You must have at least 1 recipient.');
+        }
+
+        // Get the business selection for which outgoing number to use.
         $business = $request->getBusiness();
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
@@ -131,6 +135,19 @@ class CommunicationController extends Controller
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
         ];
+
+        if ($request->debug == 1) {
+            dd([
+                'thread_data' => $data,
+                'recipients' => $recipients->map(function ($item) {
+                    return [
+                        'user_id' => $item->id,
+                        'name' => $item->name,
+                        'number' => optional($item->smsNumber)->national_number,
+                    ];
+                })
+            ]);
+        }
 
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);
@@ -218,7 +235,7 @@ class CommunicationController extends Controller
     public function saveRecipients(Request $request)
     {
         $request->session()->flash('sms.load-recipients', $request->ids);
-
         return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
+
 }

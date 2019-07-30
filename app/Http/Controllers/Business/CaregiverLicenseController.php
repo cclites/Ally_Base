@@ -15,7 +15,9 @@ class CaregiverLicenseController extends BaseController
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param Caregiver $caregiver
+     * @return CaregiverLicense[]|\Illuminate\Database\Eloquent\Collection
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Caregiver $caregiver)
     {
@@ -27,22 +29,24 @@ class CaregiverLicenseController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
+     * @param Caregiver $caregiver
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(Request $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);
-
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
 
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
             'expires_at' => 'required|date',
         ]);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data['expires_at'] = filter_date($data['expires_at']);
 
@@ -56,23 +60,25 @@ class CaregiverLicenseController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\CaregiverLicense  $license
+     * @param \Illuminate\Http\Request $request
+     * @param Caregiver $caregiver
+     * @param \App\CaregiverLicense $license
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
         $this->authorize('update', $caregiver);
-
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
 
         $data = $request->validate([
             'name' => 'required|max:200',
             'description' => 'nullable',
             'expires_at' => 'required|date',
         ]);
+
+        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
+            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
+        }
 
         $data['expires_at'] = filter_date($data['expires_at']);
 
@@ -85,8 +91,11 @@ class CaregiverLicenseController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CaregiverLicense  $license
+     * @param Caregiver $caregiver
+     * @param \App\CaregiverLicense $license
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function destroy(Caregiver $caregiver, CaregiverLicense $license)
     {
@@ -98,10 +107,22 @@ class CaregiverLicenseController extends BaseController
         return new ErrorResponse(500, 'The license could not be deleted.');
     }
 
+    /**
+     * Send notification about expiring license to the Caregiver.
+     *
+     * @param CaregiverLicense $license
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function expirationReminder(CaregiverLicense $license)
     {
         $this->authorize('read', $license->caregiver);
 
-        $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
+        // TODO: figure out which business is asking
+        $business = $license->caregiver->businesses->first();
+
+        $license->caregiver->user->notify(new LicenseExpirationReminder($business, $license));
+
+        return new SuccessResponse('A reminder email has been sent.');
     }
 }

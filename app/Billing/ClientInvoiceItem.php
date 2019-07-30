@@ -5,7 +5,10 @@ use App\AuditableModel;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * \App\Billing\ClientInvoiceItem
@@ -90,5 +93,31 @@ class ClientInvoiceItem extends BaseInvoiceItem
         }
 
         return ShiftService::find($this->invoiceable_id);
+    }
+
+    /**
+     * Get the related Shift from the invoiceable item.
+     * WARNING: This does not check invoiceable_type and can provide
+     * unexpected results if you do not check invoiceable_type before
+     * using this relationship.
+     *
+     * @return HasOne
+     */
+    public function shift()
+    {
+        return $this->hasOne(Shift::class, 'id', 'invoiceable_id');
+    }
+
+    /**
+     * Get the related ShiftService from the invoiceable item.
+     * WARNING: This does not check invoiceable_type and can provide
+     * unexpected results if you do not check invoiceable_type before
+     * using this relationship.
+     *
+     * @return HasOne
+     */
+    public function shiftService()
+    {
+        return $this->hasOne(ShiftService::class, 'id', 'invoiceable_id');
     }
 }

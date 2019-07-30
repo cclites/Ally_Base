@@ -133,6 +133,7 @@ Vue.component('business-contact-info-tab', require('./components/admin/BusinessC
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
+Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));
@@ -151,7 +152,7 @@ Vue.component('business-client-skilled-nursing-poc', require('./components/busin
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-caregiver-clients-tab', require('./components/business/caregivers/CaregiverClientsTab'));
 Vue.component('business-caregiver-office-locations-tab', require('./components/business/caregivers/CaregiverOfficeLocationsTab'));
-Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
+Vue.component('business-caregiver-expirations-report', require('./components/BusinessCaregiverExpirationsReport.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));
@@ -161,6 +162,11 @@ Vue.component('business-deposit-history', require('./components/BusinessDepositH
 Vue.component('business-notification', require('./components/BusinessNotification.vue'));
 Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
+
+Vue.component('third-party-payer', require('./components/business/reports/ThirdPartyPayerReport.vue'));
+Vue.component('payroll-summary-report', require('./components/business/reports/PayrollSummaryReport.vue'));
+
+
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
@@ -224,10 +230,19 @@ Vue.component('business-payer-rates-table', require('./components/business/Payer
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
 Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
+Vue.component('business-communications-tab', require('./components/business/BusinessCommunicationsTab'));
 Vue.component('business-offline-invoice-ar', require('./components/business/BusinessOfflineInvoiceAr'));
 Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
 Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 Vue.component('sales-people-commission-report', require('./components/business/reports/SalespersonCommissionReport'));
+Vue.component('business-account-setup-report', require('./components/business/reports/BusinessAccountSetupReport'));
+Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
+Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
+Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
+
+Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
+Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
+Vue.component('invoice-summary-by-marketing-report', require('./components/business/reports/InvoiceSummaryByMarketingReport'));
 
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
@@ -251,21 +266,23 @@ Vue.component('clock-out', require('./components/ClockOut.vue'));
 Vue.component('clocked-in', require('./components/ClockedIn.vue'));
 Vue.component('adjoining-caregivers-card', require('./components/caregivers/AdjoiningCaregiversCard.vue'));
 
-Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
+
 Vue.component('caregiver-setup-wizard', require('./components/account-setup/CaregiverSetupWizard.vue'));
 
+Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
-Vue.component('client-list', require('./components/ClientList.vue'));
-Vue.component('client-profile', require('./components/ClientProfile.vue'));
-Vue.component('client-misc-tab', require('./components/business/clients/ClientMiscTab'));
-Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 Vue.component('client-insurance-service-auth', require('./components/business/clients/InsuranceServiceAuthTab'));
+Vue.component('client-list', require('./components/ClientList.vue'));
+Vue.component('client-misc-tab', require('./components/business/clients/ClientMiscTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
-Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 Vue.component('client-payers-tab', require('./components/business/clients/ClientPayersTab'));
 Vue.component('client-preferences-tab', require('./components/business/clients/ClientPreferencesTab'));
+Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
+Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
+Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
@@ -305,6 +322,10 @@ Vue.component('note-create', require('./components/notes/NoteCreate'));
 
 Vue.component('note-template-list', require('./components/notes/NoteTemplateList'));
 Vue.component('note-template-form', require('./components/notes/NoteTemplateForm'));
+
+Vue.component('default-expirations-manager', require("./components/business/chains/DefaultExpirationsManager"));
+Vue.component('payer-invoice-report', require("./components/business/reports/PayerInvoiceReport"));
+Vue.component('client-referrals-report', require("./components/business/reports/ClientReferralsReport"));
 
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
@@ -359,7 +380,7 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
-Vue.component('chain-expirations-autocomplete', require("./components/business/chains/ExpirationTypesAutocomplete"));
+
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

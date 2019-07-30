@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Business;
 
 use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\ClientInvoice;
+use App\Business;
 use App\Client;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
@@ -29,6 +32,7 @@ class ClientController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -208,7 +212,14 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        $invoices = $invoiceQuery->forClient($client->id, false)->get();
+
+        $invoiceQuery = new ClientInvoiceQuery();
+        $invoices = $invoiceQuery->forClient($client->id, false)
+            ->get()
+            ->map(function (ClientInvoice $item) {
+                $item->payer = optional($item->clientPayer)->name();
+                return $item;
+            });
 
         $salesPeople = SalesPerson::forRequestedBusinesses()
             ->whereActive()
@@ -243,6 +254,18 @@ class ClientController extends BaseController
         }
 
         \DB::beginTransaction();
+        if ($data['business_id'] != $client->business_id) {
+            // Handle changing of business location.
+            $business = Business::findOrFail($data['business_id']);
+
+            // All future schedules should be converted to the new location.
+            $client->schedules()->future($client->getTimezone())
+                ->update(['business_id' => $business->id]);
+
+            // All client notes should move with the client.
+            $client->notes()->update(['business_id' => $business->id]);
+        }
+
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
@@ -259,8 +282,9 @@ class ClientController extends BaseController
     /**
      * Remove the specified client from the business.
      *
-     * @param  \App\Client  $client
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy(Client $client)
     {
@@ -295,6 +319,7 @@ class ClientController extends BaseController
      *
      * @param \App\Client $client
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function reactivate(Client $client)
     {
@@ -359,6 +384,8 @@ class ClientController extends BaseController
             'ltci_fax',
             'medicaid_id',
             'medicaid_diagnosis_codes',
+            'medicaid_payer_id',
+            'medicaid_plan_id',
             'max_weekly_hours'
         ]);
 

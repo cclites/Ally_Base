@@ -219,21 +219,6 @@ class ReportsController extends Controller
         return response()->json(compact('stats'));
     }
 
-    public function shifts(Request $request)
-    {
-        $report = new ShiftsReport();
-        $report->forRequestedBusinesses()->orderBy('checked_in_time');
-
-        $this->addShiftReportFilters($report, $request);
-
-        if ($request->input('export')) {
-            return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
-                ->download();
-        }
-
-        return $report->rows();
-    }
-
     public function caregiverPayments(Request $request)
     {
         $report = new CaregiverPaymentsReport();

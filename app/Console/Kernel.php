@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AchOfflineChargeCommand;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
 use App\Console\Commands\ImportGenerationsCaregivers;
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         CronDailyNotifications::class,
         CronReminders::class,
         CronFlushTriggeredReminders::class,
+        AchOfflineChargeCommand::class,
     ];
 
     /**
@@ -53,8 +55,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('cron:daily_notifications')
             ->dailyAt('13:59'); // 8:59am EST / 9:59 EDT
 
-        $schedule->command('cron:visit_accuracy')
-            ->weeklyOn(1, '18:00'); // Mondays @ 1:00pm EST
+        // TEMPORARILY DISABLED
+//        $schedule->command('cron:visit_accuracy')
+//            ->weeklyOn(1, '18:00'); // Mondays @ 1:00pm EST
 
         $schedule->command('cron:reminders')
             ->everyMinute()

@@ -32,7 +32,7 @@
                 @foreach($payments as $payment)
                     <tr>
                         <td>{{ local_date($payment->created_at) }}</td>
-                        <td>{{ $payment->type }} ({{ $payment->reference }})</td>
+                        <td>{{ $payment->getPaymentMethod() }}</td>
                         <td>{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ number_format($payment->amount, 2) }}</td>
                     </tr>

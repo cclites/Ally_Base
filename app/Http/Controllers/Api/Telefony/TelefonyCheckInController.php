@@ -8,6 +8,8 @@ use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckInController extends BaseVoiceController
 {
+    const PromptForCaregiverPhone = 'Please enter your own ten digit phone number for identification';
+
     /**
      * Return check in response.
      */
@@ -55,11 +57,11 @@ class TelefonyCheckInController extends BaseVoiceController
     public function enterPhoneNumberDigits()
     {
         $gather = $this->telefony->gather([
-            'numDigits' => 4,
+            'numDigits' => 10,
             'action' => route('telefony.check-in.accept-digits')
         ]);
         $this->telefony->say(
-            'Please enter the last 4 digits of your phone number for identification',
+            self::PromptForCaregiverPhone,
             $gather
         );
         return $this->telefony->response();
@@ -70,17 +72,16 @@ class TelefonyCheckInController extends BaseVoiceController
      */
     public function acceptPhoneNumberDigits()
     {
-        $iteration = $this->request->input('iteration', 0);
         $digits = $this->request->input('Digits');
 
-        if (strlen($digits) !== 4) {
+        if (strlen($digits) !== 10) {
             if ($digits == 0) {
                 return $this->mainMenuResponse();
             }
             return $this->enterPhoneNumberDigits();
         }
 
-        if ($caregiver = $this->telefony->findCaregiverByLastDigits($this->client, $digits, $iteration)) {
+        if ($caregiver = $this->telefony->getCaregiverFromPhoneNumber($this->client, $digits)) {
             $gather = $this->telefony->gather([
                 'numDigits' => 1,
                 'action' => route('telefony.check-in', [$caregiver])

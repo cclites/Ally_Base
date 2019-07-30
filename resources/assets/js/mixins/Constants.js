@@ -20,6 +20,7 @@ export default {
                 { value: 'hawaiian', text: 'Native Hawaiian or Other Pacific Islander' },
                 { value: 'white', text: 'White or Caucasian' },
             ],
+            smsLength: 160,
             clientTypes: [
                 {value:'', text: "All Client Types"},
                 {value:'private_pay', text:'Private Pay'},
@@ -28,6 +29,8 @@ export default {
                 {value:'VA', text:'VA'},
                 {value:'lead_agency', text:'Lead Agency'},
             ],
+
+            EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',
         }
     },
 }

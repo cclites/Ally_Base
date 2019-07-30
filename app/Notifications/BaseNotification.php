@@ -59,6 +59,30 @@ abstract class BaseNotification extends Notification implements ShouldQueue
     protected $url;
 
     /**
+     * Unique event id attribute
+     *
+     * @var array
+     */
+    protected $appends = ['event_id'];
+
+    /**
+     * Unique event id
+     *
+     * @var string
+     */
+    protected $event_id = null;
+
+    /**
+     * Used to set a unique event id
+     *
+     * BaseNotification constructor.
+     */
+    public function __construct()
+    {
+        $this->setEventId();
+    }
+
+    /**
      * Get the notification's unique identifier.
      *
      * @return string
@@ -213,6 +237,17 @@ abstract class BaseNotification extends Notification implements ShouldQueue
             'message' => static::getMessage(),
             'action_url' => $this->url,
             'action' => $this->action,
+            'event_id' => $this->event_id,
         ], $data));
+    }
+
+    /**
+     * Generate a unique event ID.
+     *
+     * @return void
+     */
+    public function setEventId() : void
+    {
+        $this->event_id = SystemNotification::generateUniqueEventId();
     }
 }

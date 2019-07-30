@@ -1,31 +1,59 @@
 <?php
 
-
 namespace App\Billing\Gateway;
-
 
 use App\Billing\Exceptions\PaymentAmountError;
 use App\Billing\Payments\Methods\BankAccount;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
-class HeritageACHFile
+class AchExportFile
 {
-    private $transactions = [];
-    protected $storage_path;
+    /**
+     * @var array
+     */
+    protected $transactions = [];
 
-    public function __construct(string $storage_path = null)
+    /**
+     * @var string
+     */
+    protected $storage_path = '';
+
+    /**
+     * @var string
+     */
+    protected $bank = '';
+
+    /**
+     * AchExportFile constructor.
+     * @param string|null $storage_path
+     * @param string $bank
+     */
+    public function __construct(string $storage_path = null, string $bank = 'heritage')
     {
-        $this->storage_path = $storage_path ?? storage_path('heritage/exports');
+        $this->storage_path = $storage_path ?? storage_path('ach/exports');
+        $this->bank = $bank;
     }
 
-    public function addTransaction(string $id, string $type, BankAccount $account, string $amount)
+    /**
+     * Add transaction line to the file.
+     *
+     * @param string $id
+     * @param string $type
+     * @param BankAccount $account
+     * @param float $amount
+     * @throws PaymentAmountError
+     */
+    public function addTransaction(string $id, string $type, BankAccount $account, float $amount)
     {
         if (!is_numeric($amount)) {
             throw new PaymentAmountError("The payment amount is not numeric");
         }
-        if ($amount <= 0) {
+        if ($type == 'credit' && $amount <= 0) {
             throw new PaymentAmountError("The payment amount must be greater than 0.");
+        }
+        if ($type == 'sale' && $amount >= 0) {
+            throw new PaymentAmountError("The payment amount must be less than 0.");
         }
 
         $this->transactions[] = [
@@ -39,6 +67,12 @@ class HeritageACHFile
         ];
     }
 
+    /**
+     * Write file output.
+     *
+     * @return string
+     * @throws \Exception
+     */
     public function write(): string
     {
         if (!count($this->transactions)) {
@@ -51,7 +85,7 @@ class HeritageACHFile
             }
         }
 
-        $filename = "heritage_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
+        $filename = $this->getBankName() . "_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
         $format = 'xlsx';
         $filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.' . $format;
 
@@ -64,9 +98,19 @@ class HeritageACHFile
         })->store($format, $this->storage_path);
 
         if (!file_exists($filepath)) {
-            throw new \Exception("Unable to write Heritage ACH file to: " . $filepath);
+            throw new \Exception("Unable to write ACH Export file to: " . $filepath);
         }
 
         return $filepath;
+    }
+
+    /**
+     * Get the name of the bank used for the export.
+     *
+     * @return string
+     */
+    public function getBankName() : string
+    {
+        return $this->bank;
     }
 }

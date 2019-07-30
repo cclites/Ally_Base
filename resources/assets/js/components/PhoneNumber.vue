@@ -38,6 +38,17 @@
                         <input-help :form="form" field="extension" text="Enter an extension (Optional)."></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col lg="12">
+                    <b-form-group label="Notes" label-for="notes">
+                        <b-textarea
+                                id="notes"
+                                name="notes"
+                                :rows="3"
+                                v-model="form.notes"
+                        >
+                        </b-textarea>
+                    </b-form-group>
+                </b-col>
                 <b-col lg="3" sm="4" xs="12">
                     <b-form-group>
                         <b-button variant="success"
@@ -89,7 +100,8 @@
                     number: this.phone.number,
                     extension: this.phone.extension,
                     type: this.type,
-                    user_id: _.isEmpty(this.user) ? undefined : this.user.id
+                    user_id: _.isEmpty(this.user) ? undefined : this.user.id,
+                    notes: this.phone.notes
                 }),
                 deleteForm: new Form({
                     id: this.phone.id,
