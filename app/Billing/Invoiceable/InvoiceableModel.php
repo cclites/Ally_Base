@@ -103,6 +103,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         if ($this->getItemUnits() == 0) {
             return 0.0;
         }
+
         $allyFeeCharged = $this->getMetaValue("ally_fee_charged");
         if ($allyFeeCharged !== null) {
             return divide($allyFeeCharged, $this->getItemUnits(), 4);
@@ -117,7 +118,6 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     public function getProviderRate(): float
     {
         $allyRate = $this->getAllyRate();
-
         if ($allyRate === null && ($this->getClientRate() == 0 && $this->getCaregiverRate() == 0 || $this->getItemUnits() == 0)) {
             return 0.0;  // Fix for when the rates are set to 0 or the hours/units are set to 0 and therefore no payment is recorded/necessary.
         }
@@ -168,6 +168,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      * @param \App\Billing\Payment $payment
      * @param float $amount
      * @param float $allyFee The value of $amount that represents the Ally Fee
+     * @throws \Packages\MetaData\Exceptions\ModelNotSavedException
      */
     public function addAmountCharged(Payment $payment, float $amount, float $allyFee): void
     {
@@ -193,6 +194,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      *
      * @param \App\Billing\Deposit $deposit
      * @param float $amount
+     * @throws \Packages\MetaData\Exceptions\ModelNotSavedException
      */
     public function addAmountDeposited(Deposit $deposit, float $amount): void
     {
