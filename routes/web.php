@@ -623,6 +623,8 @@ Route::group([
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
 
     Route::resource('payment-holds', 'Admin\PaymentHoldController');
+
+    Route::get( '/control-file', 'Admin\ControlFileController@index' )->name( 'control-file' );
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
