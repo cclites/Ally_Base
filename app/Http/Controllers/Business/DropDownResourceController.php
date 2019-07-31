@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Business;
 
 use App\Billing\Payer;
@@ -11,10 +12,9 @@ use App\Http\Resources\SalespersonDropdownResource;
 use App\Responses\ErrorResponse;
 use App\SalesPerson;
 use Illuminate\Http\Request;
-use DB;
 use Illuminate\Support\Str;
 
-class DropDownResourceController extends BaseController
+class DropdownResourceController extends BaseController
 {
     /**
      * A list of the resource types that may be called through the route.
