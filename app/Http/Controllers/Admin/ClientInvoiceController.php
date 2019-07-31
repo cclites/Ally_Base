@@ -44,7 +44,7 @@ class ClientInvoiceController extends Controller
             }
 
             $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items', 'claim'])->get()->map(function($invoice){
-                $invoice['has_partial_payment'] = $invoice->getIsPartialPayment();
+                $invoice['has_partial_payment'] = $invoice->getHasPartialPayment();
                 return $invoice;
             });
 
