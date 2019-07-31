@@ -43,7 +43,10 @@ class ClientInvoiceController extends Controller
                 $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items', 'claim'])->get();
+            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items', 'claim'])->get()->map(function($invoice){
+                $invoice['has_partial_payment'] = $invoice->getIsPartialPayment();
+                return $invoice;
+            });
 
             return ClientInvoiceResponse::collection($invoices);
         }

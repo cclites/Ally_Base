@@ -268,6 +268,17 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return ! $this->items->where('was_split', 1)->isEmpty();
     }
 
+    public function getIsPartialPayment() : bool
+    {
+        foreach ($this->items as $item) {
+            if ($this->amount > $this->amount_paid && $this->amount_paid > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Get plan code for claim transmissions.
      *
