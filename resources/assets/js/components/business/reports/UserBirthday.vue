@@ -11,6 +11,9 @@
                 <template slot="name" scope="data">
                     <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.name }}</a>
                 </template>
+                <template slot="date_of_birth" scope="data">
+                    {{ data.item.formatted_date }}
+                </template>
             </ally-table>
         </div>
     </b-card>
@@ -50,7 +53,6 @@
                         label: 'Birthday',
                         sortable: true,
                         shouldShow: true,
-                        formatter: (v) => v ? moment(v).format('MM/DD/YYYY') : '-',
                     },
                 ],
             };
@@ -60,9 +62,16 @@
             items() {
                 let result = [ ...this.data];
 
+                //only show users that have a DOB
                 if(!this.showEmpty) {
                     result = result.filter(user => user.date_of_birth);
                 }
+
+                result = result.map(function(item){
+                    item.formatted_date = item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '';
+                    item.date_of_birth = moment(item.date_of_birth).format('MMDD');
+                    return item;
+                });
 
                 return result;
             }
