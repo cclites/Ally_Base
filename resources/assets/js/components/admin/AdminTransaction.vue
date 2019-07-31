@@ -47,90 +47,31 @@
                 </b-card>
             </b-col>
             <b-col lg="4">
-                <b-row>
-                    <b-col>
-                        <b-card
-                                header="Payer/Payee Details"
-                                header-text-variant="white"
-                                header-bg-variant="info"
-                        >
-                            <table>
-                                <tr>
-                                    <th>Type</th>
-                                    <td>{{ userType }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Name</th>
-                                    <td><a :href="userLink">{{ user.name }}</a></td>
-                                </tr>
-                                <tr v-if="transaction.payment">
-                                    <th>Payment Type &nbsp;</th>
-                                    <td>{{ transaction.payment.payment_type || 'N/A' }}</td>
-                                </tr>
-                                <tr v-if="transaction.payment">
-                                    <th>Registry</th>
-                                    <td v-if="transaction.payment.business">{{ transaction.payment.business.name }}</td>
-                                    <td v-else>N/A</td>
-                                </tr>
-                            </table>
-                        </b-card>
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col>
-                        <b-card
-                                header="Account Numbers"
-                                header-text-variant="white"
-                                header-bg-variant="info"
-                        >
-                            <!-- Payment -->
-                            <table v-if="transaction.payment">
-                                <!-- bank account -->
-                                <tr v-if="['ACH-P', 'ACH'].includes(transaction.payment.payment_type)">
-                                    <th>Routing Number</th>
-                                    <td>{{ deets.routing_number }}</td>
-                                </tr>
-                                <tr v-if="['ACH-P', 'ACH'].includes(transaction.payment.payment_type)">
-                                    <th>Account Number</th>
-                                    <td>{{ deets.account_number }}</td>
-                                </tr>
-                                <!-- credit card -->
-                                <tr v-if="['AMEX', 'CC'].includes(transaction.payment.payment_type)">
-                                    <th>Name on Card</th>
-                                    <td>{{ deets.name }}</td>
-                                </tr>
-                                <tr v-if="['AMEX', 'CC'].includes(transaction.payment.payment_type)">
-                                    <th>Type</th>
-                                    <td>{{ deets.type }}</td>
-                                </tr>
-                                <tr v-if="['AMEX', 'CC'].includes(transaction.payment.payment_type)">
-                                    <th>Card Number</th>
-                                    <td>{{ deets.number }}</td>
-                                </tr>
-                                <tr v-if="['AMEX', 'CC'].includes(transaction.payment.payment_type)">
-                                    <th>Expires</th>
-                                    <td>{{ deets.expiration_date }}</td>
-                                </tr>
-                            </table>
-                            <!-- Deposit -->
-                            <table v-else>
-                                <!-- bank account -->
-                                <tr>
-                                    <th>Account Type</th>
-                                    <td>{{ deets.account_type }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Routing Number</th>
-                                    <td>{{ deets.routing_number }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Account Number</th>
-                                    <td>{{ deets.account_number }}</td>
-                                </tr>
-                            </table>
-                        </b-card>
-                    </b-col>
-                </b-row>
+                <b-card
+                        header="Payer/Payee Details"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <table>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ userType }}</td>
+                        </tr>
+                        <tr>
+                            <th>Name</th>
+                            <td><a :href="userLink">{{ user.name }}</a></td>
+                        </tr>
+                        <tr v-if="transaction.payment">
+                            <th>Payment Type &nbsp;</th>
+                            <td>{{ transaction.payment.payment_type || 'N/A' }}</td>
+                        </tr>
+                        <tr v-if="transaction.payment">
+                            <th>Registry</th>
+                            <td v-if="transaction.payment.business">{{ transaction.payment.business.name }}</td>
+                            <td v-else>N/A</td>
+                        </tr>
+                    </table>
+                </b-card>
             </b-col>
         </b-row>
 
@@ -207,7 +148,6 @@
             'transaction': Object,
             'user': Object,
             'userType': String,
-            'deets': Object,
         },
 
         data() {

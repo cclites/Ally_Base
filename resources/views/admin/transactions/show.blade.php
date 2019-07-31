@@ -9,9 +9,5 @@
 @endsection
 
 @section('content')
-    <admin-transaction :transaction="{{ $transaction }}"
-                       :user="{{ $user or '{}' }}"
-                       user-type="{{ $userType }}"
-                       :deets="{{ $deets or '{}' }}"
-    />
+    <admin-transaction :transaction="{{ $transaction }}" :user="{{ $user or '{}' }}" user-type="{{ $userType }}"></admin-transaction>
 @endsection
