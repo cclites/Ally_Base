@@ -187,11 +187,12 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
 
     /**
      * @param \App\Billing\Contracts\InvoiceableInterface $invoiceable
-     * @param \App\Billing\ClientPayer $clientPayer
-     * @param float $allowance
+     * @param float $clientRate
+     * @param float $amountDue
+     * @param bool $wasSplit
      * @return array
      */
-    public function getItemData(InvoiceableInterface $invoiceable, float $clientRate, float $amountDue): array
+    public function getItemData(InvoiceableInterface $invoiceable, float $clientRate, float $amountDue, bool $wasSplit = false): array
     {
         return [
             'name' => $invoiceable->getItemName(ClientInvoice::class),
@@ -202,6 +203,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             'total' => round(bcmul($invoiceable->getItemUnits(), $clientRate, 4), 2),
             'amount_due' => $amountDue,
             'notes' => $invoiceable->getItemNotes(),
+            'was_split' => $wasSplit,
         ];
     }
 
@@ -258,8 +260,8 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             // Get invoiceable item data
             $allowance = $this->getPayerAllowance($clientPayer, $invoiceable->getItemDate());
             $clientRate = $this->getClientRate($clientPayer, $invoiceable);
-            [$amountDue, $allyFee] = $this->getAmountDueAndFee($clientPayer, $invoiceable, $allowance);
-            $data = $this->getItemData($invoiceable, $clientRate, $amountDue);
+            [$amountDue, $allyFee, $wasSplit] = $this->getAmountDueAndFee($clientPayer, $invoiceable, $allowance);
+            $data = $this->getItemData($invoiceable, $clientRate, $amountDue, $wasSplit);
             // Make item and associate invoiceable
             $item = new ClientInvoiceItem($data);
             $item->associateInvoiceable($invoiceable);
@@ -299,11 +301,17 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         return add($clientRate, $this->getAllyFee($clientRate, $invoiceable, $clientPayer, 4), 4);
     }
 
-    /** @return float[] */
+    /**
+     * @param ClientPayer $clientPayer
+     * @param InvoiceableInterface $invoiceable
+     * @param float $allowance
+     * @return float[]
+     */
     protected function getAmountDueAndFee(ClientPayer $clientPayer, InvoiceableInterface $invoiceable, $allowance = 999999.99): array
     {
         $amountDue = $invoiceable->getAmountDue();
         $split = $clientPayer->getSplitPercentage();
+        $wasSplit = false;
 
         if ($split < 1.0) {
             // Store amount owed by split payers (see allowance_payer_before_a_split_payer_does_not_skew_the_amounts)
@@ -312,6 +320,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             }
             $splitAmount = $this->splitPayerAmounts[$invoiceable->getItemHash()];
             $amountDue = multiply($splitAmount, $split);
+            $wasSplit = true;
         }
 
         $allyFee = $this->getAllyFee($amountDue, $invoiceable, $clientPayer, 2);
@@ -324,11 +333,13 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
                 )
             );
             $allyFee = subtract($allowance, $amountDue);
+            $wasSplit = true;
         }
 
         return [
             add($amountDue, $allyFee),
-            $allyFee
+            $allyFee,
+            $wasSplit
         ];
     }
 
