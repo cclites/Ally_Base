@@ -83,6 +83,7 @@
                                 <template slot="FOOT_period_75_plus" scope="row">
                                     <strong>Total:</strong>{{ moneyFormat(totals.period_75_plus) }}
                                 </template>
+
                             </b-table>
                         </div>
                         <b-row>
