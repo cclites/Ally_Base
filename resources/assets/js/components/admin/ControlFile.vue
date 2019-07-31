@@ -40,7 +40,7 @@
 
         <b-col cols="12">
 
-            <b-card class="mt-3" header="Form Data Result">
+            <b-card class="mt-3" header="Control File Result">
 
                 <input disabled type="text" class="form-control m-0 py-3" id="formattedInformation" :value=" formattedInformation " />
             </b-card>

@@ -10,6 +10,11 @@ class ControlFileController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * 
+     * resource controller ended up being a lot of guns for a little target.
+     * Very open minded to sticking this function in a non-dedicated controller - of course unless the functionality needs to expand one day
+     * 
+     * leaving the other functions here because why not - let me know if you'd prefer me to remove them
      *
      * @return \Illuminate\Http\Response
      */
