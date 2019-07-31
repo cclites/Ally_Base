@@ -676,8 +676,8 @@ class ServiceAuthValidatorTest extends TestCase
     /** @test */
     function it_should_check_service_auths_for_all_days_an_actual_hours_schedule_exists_on()
     {
-        $month1 = Carbon::parse('last month', $this->client->getTimezone())->startOfMonth();
-        $month2 = Carbon::parse('this month', $this->client->getTimezone())->startOfMonth();
+        $month1 = Carbon::parse('05/01/2019', $this->client->getTimezone())->startOfMonth();
+        $month2 = Carbon::parse('06/01/2019', $this->client->getTimezone())->startOfMonth();
 
         $this->createClientAuth([
             'units' => 9,
