@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 
 
 use App\Billing\GatewayTransaction;
+use App\Billing\Payments\PaymentMethodType;
+use App\Business;
 use App\Http\Controllers\Controller;
 use App\Payments\RefundProcessor;
 use App\Responses\CreatedResponse;
@@ -42,8 +44,36 @@ class TransactionsController extends Controller
 
         $user = null;
         $userType = null;
+        $paymentMethodType = PaymentMethodType::NONE();
+        $deets = [];
         if ($payment = $transaction->payment) {
-            $payment->load(['client', 'business']);
+            $payment->load(['client', 'business', 'paymentMethod']);
+            $paymentMethodType = $payment->payment_method->getPaymentType();
+            switch($paymentMethodType) {
+                case PaymentMethodType::AMEX():
+                case PaymentMethodType::CC():
+                    $deets = [
+                        'expiration_date' => $payment->payment_method->expiration_month.'/'.$payment->payment_method->expiration_year,
+                        'number' => $payment->payment_method->number,
+                        'name' => $payment->payment_method->name_on_card,
+                        'type' => $payment->payment_method->type,
+                    ];
+                    break;
+                case PaymentMethodType::ACH():
+                    $deets = [
+                        'account_type' => $payment->payment_method->account_type,
+                        'account_number' => $payment->payment_method->account_number,
+                        'routing_number' => $payment->payment_method->routing_number,
+                    ];
+                    break;
+                case PaymentMethodType::ACH_P():
+                    $deets = [
+                        'account_type' => $payment->payment_method->paymentAccount->account_type,
+                        'account_number' => $payment->payment_method->paymentAccount->account_number,
+                        'routing_number' => $payment->payment_method->paymentAccount->routing_number,
+                    ];
+                    break;
+            }
             if ($payment->client) {
                 $userType = 'client';
                 $user = $payment->client;
@@ -54,6 +84,17 @@ class TransactionsController extends Controller
             }
         }
         if ($deposit = $transaction->deposit) {
+            if ($transaction->deposit->deposit_type == 'business') {
+                $paymentMethod = $transaction->deposit->business->bankAccount;
+            } else if ($transaction->deposit->deposit_type == 'caregiver') {
+                $paymentMethod = $transaction->deposit->caregiver->bankAccount;
+            }
+            $deets = [
+                'account_type' => $paymentMethod->account_type,
+                'account_number' => $paymentMethod->account_number,
+                'routing_number' => $paymentMethod->routing_number,
+            ];
+
             if ($deposit->caregiver) {
                 $userType = 'caregiver';
                 $user = $deposit->caregiver;
@@ -64,7 +105,8 @@ class TransactionsController extends Controller
             }
         }
 
-        return view('admin.transactions.show', compact('transaction', 'user', 'userType'));
+        $deets = json_encode($deets);
+        return view('admin.transactions.show', compact('transaction', 'user', 'userType', 'deets'));
     }
 
     public function refund(GatewayTransaction $transaction, Request $request)
