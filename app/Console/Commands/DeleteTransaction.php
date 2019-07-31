@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Deposit;
@@ -10,7 +9,6 @@ use App\Billing\DepositLog;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\PaymentLog;
-use App\Shift;
 use Illuminate\Console\Command;
 
 class DeleteTransaction extends Command
@@ -67,7 +65,7 @@ class DeleteTransaction extends Command
             $this->info("Found " . count($transactions) . ' transactions.');
         }
 
-        if (! $this->confirm("Do you want to delete these transaction and their related payment/deposit records from the database?")) {
+        if (!$this->confirm("Do you want to delete these transaction and their related payment/deposit records from the database?")) {
             return 0;
         }
 
@@ -78,12 +76,12 @@ class DeleteTransaction extends Command
         \DB::beginTransaction();;
         foreach ($transactions as $transaction) {
             if ($payment = $transaction->payment) {
-                if (! $this->deletePaymentTransaction($transaction, $payment)) {
+                if (!$this->deletePaymentTransaction($transaction, $payment)) {
                     // error -> do not commit
                     return 1;
                 }
             } else if ($deposit = $transaction->deposit) {
-                if (! $this->deleteDepositTransaction($transaction, $deposit)) {
+                if (!$this->deleteDepositTransaction($transaction, $deposit)) {
                     // error -> do not commit
                     return 1;
                 }
@@ -102,9 +100,9 @@ class DeleteTransaction extends Command
      * @return bool
      * @throws \Exception
      */
-    public function deleteDepositTransaction(GatewayTransaction $transaction, Deposit $deposit) : bool
+    public function deleteDepositTransaction(GatewayTransaction $transaction, Deposit $deposit): bool
     {
-        switch($deposit->deposit_type) {
+        switch ($deposit->deposit_type) {
             case 'caregiver':
                 $invoices = $deposit->caregiverInvoices;
                 $type = 'Caregiver';
@@ -123,7 +121,7 @@ class DeleteTransaction extends Command
             $transaction->failedTransaction->delete();
         }
 
-        foreach($invoices as $invoice) {
+        foreach ($invoices as $invoice) {
             /** @var \App\Billing\BusinessInvoice $invoice */
             $invoice->removeDeposit($deposit);
             $invoice->deposits()->detach($deposit->id);
@@ -137,7 +135,7 @@ class DeleteTransaction extends Command
 
         if ($this->uninvoice) {
             foreach ($invoices as $invoice) {
-                if (! $invoice->delete()) {
+                if (!$invoice->delete()) {
                     $this->error("Error attempting uninvoice of #{$invoice->id}.  Escaping sequence (no data written)");
                     return false;
                 }
@@ -157,7 +155,7 @@ class DeleteTransaction extends Command
      * @return bool
      * @throws \Exception
      */
-    public function deletePaymentTransaction(GatewayTransaction $transaction, Payment $payment) : bool
+    public function deletePaymentTransaction(GatewayTransaction $transaction, Payment $payment): bool
     {
         $invoices = $payment->invoices;
         $invoiceIds = $invoices->pluck('id')->toArray();
@@ -168,7 +166,7 @@ class DeleteTransaction extends Command
 
         // Un-apply all the the payment from all invoices and fix the balance.
         // Source: UnapplyFailedPayments.php
-        foreach($payment->invoices as $invoice) {
+        foreach ($payment->invoices as $invoice) {
             /** @var \App\Billing\ClientInvoice $invoice */
             $invoice->removePayment($payment);
             $invoice->payments()->detach($payment->id);
@@ -187,11 +185,11 @@ class DeleteTransaction extends Command
                 }
                 return null;
             })
-            ->filter();
+                ->filter();
         })
-        ->flatten(1)
-        ->unique()
-        ->toArray();
+            ->flatten(1)
+            ->unique()
+            ->toArray();
 
         $this->info("Transaction #{$transaction->id} and it's related payment #{$payment->id} have been removed.");
 
