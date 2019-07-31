@@ -92,6 +92,10 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(500, 'An unexpected error occurred trying to connect to the Quickbooks API.  Please try again.');
         }
 
+        if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
+            return new ErrorResponse(500, 'Invoices must be charged and paid in full in order to transmit registry fees.');
+        }
+
         if (empty($client->quickbooksCustomer)) {
             // Create new customer relationship.
             [$customerId, $customerName] = $api->createCustomer($client);
