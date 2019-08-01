@@ -265,13 +265,7 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
      */
     public function getWasSplit() : bool
     {
-        foreach ($this->items as $item) {
-            if ($item->total <> $item->amount_due) {
-                return true;
-            }
-        }
-
-        return false;
+        return ! $this->items->where('was_split', 1)->isEmpty();
     }
 
     /**

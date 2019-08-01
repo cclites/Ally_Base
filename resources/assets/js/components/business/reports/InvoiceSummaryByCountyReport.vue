@@ -154,7 +154,7 @@
             },
 
             getClients(){
-                axios.get('/business/clientDropdownResource?business=' + this.form.business)
+                axios.get('/business/dropdown/clients?businesses=' + this.form.business)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -168,7 +168,13 @@
 
         mounted(){
             this.getClients();
-        }
+        },
+
+        watch: {
+            'form.business'(newValue, oldValue) {
+                this.getClients();
+            }
+        },
     }
 </script>
 

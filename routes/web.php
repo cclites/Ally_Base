@@ -450,13 +450,7 @@ Route::group([
     Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
     Route::resource('prospects', 'Business\ProspectController');
     Route::resource('contacts', 'Business\OtherContactController');
-
-    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
-    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
-    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
-    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
-    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
-
+    Route::get('dropdown/{resource}', 'Business\DropdownResourceController@index');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
@@ -495,13 +489,6 @@ Route::group([
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
-
-    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
-    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
-    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
-    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
-    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
-
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
