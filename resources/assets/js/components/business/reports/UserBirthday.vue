@@ -9,7 +9,7 @@
         <div v-show="! loading" class="table-responsive">
             <ally-table id="user-birthday" :columns="fields" :items="items" sort-by="nameLastFirst">
                 <template slot="name" scope="data">
-                    <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.name }}</a>
+                    <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.nameLastFirst }}</a>
                 </template>
                 <template slot="date_of_birth" scope="data">
                     {{ data.item.formatted_date }}
