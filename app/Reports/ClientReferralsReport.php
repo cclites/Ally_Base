@@ -32,11 +32,11 @@ class ClientReferralsReport extends BaseReport
     {
         $this->query = $query->with([
             'user',
-            'addresses'
+            'addresses',
+            'payers',
+            'salesperson',
         ])->whereNotNull('referral_source_id');
-
     }
-
 
     /**
      * Return the instance of the query builder for additional manipulation
@@ -90,13 +90,11 @@ class ClientReferralsReport extends BaseReport
             $this->query->where('id', $client);
         }
 
-
         if(filled($county)){
             $this->query->whereHas('address', function ($q) use($county){
                 $q->where("county", $county);
             });
         }
-
 
         return $this;
     }
@@ -118,6 +116,8 @@ class ClientReferralsReport extends BaseReport
                             ->get()
                             ->unique(['client_payer']);
 
+                \Log::info(json_encode($invoiced));
+
                 $payer = '';
 
                 if(filled($invoiced)){
@@ -131,9 +131,9 @@ class ClientReferralsReport extends BaseReport
                     'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
-                    'revenue' => $invoiced->sum('amount_paid')
+                    'revenue' => $invoiced->sum('amount_paid'),
+                    'salesperson' => $client->salesperson->fullName(),
                 ];
-
 
             })
             ->values();

@@ -57,13 +57,4 @@ class ClientReferralsReportController extends BaseController
         ]);
     }
 
-    public function populateDropdown($business)
-    {
-        $clients = new ClientDropdownResource(Client::forBusinesses([$business])
-            ->whereNotNull('referral_source_id')
-            ->ordered()
-            ->get());
-
-        return response()->json($clients);
-    }
 }

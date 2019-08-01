@@ -33,6 +33,7 @@ class DropdownResourceController extends BaseController
     public function index(Request $request, string $resource)
     {
         $method = Str::camel($resource);
+
         if (! in_array($resource, self::AVAILABLE_RESOURCES) || ! method_exists($this, $method)) {
             return new ErrorResponse(500, 'That resource does not exist.');
         }
