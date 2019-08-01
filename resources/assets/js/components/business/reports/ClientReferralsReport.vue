@@ -82,6 +82,7 @@
                         <strong>For County: </strong>{{ totals.county ? totals.county : 'All Counties' }}
                     </template>
 
+                    <template slot="FOOT_salesperson" scope="item"></template>
                     <template slot="FOOT_payer" scope="item"></template>
 
                     <template slot="FOOT_revenue" scope="item">
