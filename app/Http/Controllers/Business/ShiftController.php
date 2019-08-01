@@ -264,10 +264,9 @@ class ShiftController extends BaseController
 
     public function duplicate(Shift $shift)
     {
-
-        \Log::info($shift->activities);
-
         $this->authorize('read', $shift);
+
+        $shift->load('activities', 'services');
 
         // Duplicate an existing shift and advance one day
         /** @var Shift $shift */
