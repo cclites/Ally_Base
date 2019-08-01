@@ -60,20 +60,18 @@
 
         computed: {
             items() {
-                let result = [ ...this.data];
-
-                //only show users that have a DOB
-                if(!this.showEmpty) {
-                    result = result.filter(user => user.date_of_birth);
-                }
-
-                result = result.map(function(item){
-                    item.formatted_date = item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '';
-                    item.date_of_birth = moment(item.date_of_birth).format('MMDD');
-                    return item;
+                return this.data.filter(user => {
+                    if (this.showEmpty) {
+                        return true;
+                    }
+                    return !!user.date_of_birth;
+                }).map((item) => {
+                    return {
+                        ...item,
+                        formatted_date: item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '-',
+                        date_of_birth: moment(item.date_of_birth).format('MMDD'),
+                    };
                 });
-
-                return result;
             }
         },
 
