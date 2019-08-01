@@ -68,11 +68,13 @@
                     </template>
 
                     <template slot="FOOT_county" scope="item">
-                        <strong>Start Date: </strong>{{ totals.start }}
+                        <strong>Start: </strong>{{ totals.start }}
+                            &nbsp;&nbsp;
+                        <strong>End: </strong>{{ totals.end }}
                     </template>
 
                     <template slot="FOOT_client" scope="item">
-                        <strong>End Date: </strong>{{ totals.end }}
+
                     </template>
                     <template slot="FOOT_name" scope="item">
                         <strong>For Client: </strong>{{ totals.client ? totals.client : 'All Clients' }}
@@ -82,7 +84,9 @@
                         <strong>For County: </strong>{{ totals.county ? totals.county : 'All Counties' }}
                     </template>
 
-                    <template slot="FOOT_salesperson" scope="item"></template>
+                    <template slot="FOOT_salesperson" scope="item">
+                        <strong>For Salesperson: </strong>{{ totals.salesperson ? totals.salesperson : "All Salespeople" }}
+                    </template>
                     <template slot="FOOT_payer" scope="item"></template>
 
                     <template slot="FOOT_revenue" scope="item">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\SalesPerson;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Business\BaseController;
 use App\Reports\ClientReferralsReport;
@@ -33,7 +34,8 @@ class ClientReferralsReportController extends BaseController
                     $request->end,
                     $request->business,
                     $request->client,
-                    $request->county
+                    $request->county,
+                    $request->salesperson
                 );
 
             $data = $result->rows();
@@ -46,6 +48,7 @@ class ClientReferralsReportController extends BaseController
                 'location' => Business::find($request->business)->name,
                 'client' => filled($request->client) ? Client::find($request->client)->nameLastFirst() : null,
                 'county' => filled($request->county) ? $request->county : null,
+                'salesperson' => filled($request->salesperson) ? SalesPerson::find($request->salesperson)->fullName() : null,
             ];
 
             return response()->json(['data'=>$data, 'totals'=>$totals]);

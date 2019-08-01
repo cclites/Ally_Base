@@ -66,7 +66,7 @@ class ClientReferralsReport extends BaseReport
      *
      * @return this report
      */
-    public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county): self
+    public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county, ?int $salesperson): self
     {
 
         $start = (new Carbon($start . ' 00:00:00', $this->timezone));
@@ -84,6 +84,10 @@ class ClientReferralsReport extends BaseReport
             //does for all businesses on a chain.
             $ids = auth()->user()->role->businessChain->businesses->toArray();
             $this->query->forBusinesses($business);
+        }
+
+        if(filled($salesperson)){
+            $this->query->where('sales_person_id', $salesperson);
         }
 
         if(filled($client)){
@@ -130,7 +134,7 @@ class ClientReferralsReport extends BaseReport
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
                     'revenue' => $invoiced->sum('amount_paid'),
-                    'salesperson' => $client->salesperson->fullName(),
+                    'salesperson' => optional($client->salesperson->fullName()),
                 ];
 
             })
