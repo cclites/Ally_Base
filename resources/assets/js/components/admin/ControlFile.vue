@@ -259,10 +259,10 @@
 
                     var successful = document.execCommand( 'copy' );
                     var msg = successful ? 'successful' : 'unsuccessful';
-                    alert( 'Testing code was copied ' + msg );
+                    alerts.addMessage( 'success', 'Control File copied successfully' );
                 } catch ( err ) {
 
-                    alert( 'Oops, unable to copy' );
+                    alerts.addMessage( 'error', 'Something went wrong copying the Control File..' );
                 }
 
                 data.setAttribute( "disabled", "true" );
