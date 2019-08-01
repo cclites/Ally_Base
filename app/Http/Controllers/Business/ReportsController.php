@@ -757,7 +757,7 @@ class ReportsController extends BaseController
 
     public function userBirthdayData(Request $request)
     {
-        $type = $request->type == 'Clients' ? 'clients' : 'caregivers';
+        $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
 
         if($type == 'clients') {
             return Client::forRequestedBusinesses()->get();
