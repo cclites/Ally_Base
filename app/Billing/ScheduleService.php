@@ -4,6 +4,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Schedule;
+use \App\Billing\Service;
 use App\Data\ScheduledRates;
 
 /**
@@ -57,8 +58,8 @@ class ScheduleService extends AuditableModel
         );
     }
 
-    public function getName(){
-        return Service::where('id', $this->service_id)->pluck('name')->first();
+    public function service(){
+        return $this->hasOne(Service::class, 'id', 'service_id');
     }
 
 }

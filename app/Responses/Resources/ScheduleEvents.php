@@ -82,7 +82,7 @@ class ScheduleEvents implements Responsable
             $service_types = '';
 
             foreach($schedule->services as $service){
-                $service_types .= substr($service->getName(), 0, 4) . ":" . $service->duration . ",";
+                $service_types .= substr($service->service->name, 0, 4) . ":" . $service->duration . ",";
             }
 
             $title = $this->resolveEventTitle($schedule);
