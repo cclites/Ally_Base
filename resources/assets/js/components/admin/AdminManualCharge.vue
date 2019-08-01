@@ -70,7 +70,7 @@
             <p>Amount: {{ moneyFormat(form.amount)}}</p>
 
             <div slot="modal-footer">
-                <b-btn variant="info" @click="submit()">Yes</b-btn>
+                <b-btn variant="info" @click="submit()" :disabled="submitting">Yes, Create Adjustment</b-btn>
                 <b-btn variant="default" @click="confirmModal=false">No</b-btn>
             </div>
 
@@ -147,9 +147,10 @@
                 this.form.post('/admin/charges/manual')
                     .then(response => {
                         this.makeForm();
-                        this.submitting = false;
                     })
-                    .catch(error => {
+                    .catch(error => {})
+                    .finally(() => {
+                        this.confirmModal = false;
                         this.submitting = false;
                     });
             },
