@@ -28,6 +28,9 @@ class ClientReferralsReportController extends BaseController
 
         if ($request->filled('json')) {
             $timezone = auth()->user()->role->getTimezone();
+
+            $this->authorize('read', Business::find($request->business));
+
             $result = $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
