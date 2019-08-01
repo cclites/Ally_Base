@@ -69,11 +69,11 @@ class ClientReferralsReport extends BaseReport
     public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county): self
     {
 
-        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone));
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone));
 
-        $this->query->whereHas('user', function($q){
-            $q->whereBetween('created_at', [$this->start, $this->end]);
+        $this->query->whereHas('user', function($q) use($start, $end){
+            $q->whereBetween('created_at', [$start, $end]);
         });
 
         if(filled($business)){
@@ -115,8 +115,6 @@ class ClientReferralsReport extends BaseReport
                             ->with('clientPayer')
                             ->get()
                             ->unique(['client_payer']);
-
-                \Log::info(json_encode($invoiced));
 
                 $payer = '';
 

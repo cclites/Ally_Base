@@ -10,7 +10,6 @@
                         :label="null"
                 />
             </b-form-group>
-
             <b-form-group label="Start Date" class="mb-2 mr-2">
                 <date-picker v-model="form.start"
                              weekStart="1"
@@ -18,13 +17,11 @@
                 >
                 </date-picker>
             </b-form-group>
-
             <b-form-group label="End Date" class="mb-2 mr-2">
                 <date-picker v-model="form.end"
                              class="mb-2 mr-2"
                 ></date-picker>
             </b-form-group>
-
             <b-form-group label="Clients" class="mb-2 mr-2">
                     <b-form-select
                             name="client_id"
@@ -34,15 +31,12 @@
                         <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.name }}</option>
                     </b-form-select>
             </b-form-group>
-
             <b-form-group label="Salesperson" class="mb-2 mr-2" v-if="salespersons">
                 <b-form-select v-model="form.salesperson" class="mb-2 mr-2" name="salesperson">
                     <option value="">All Salespeople</option>
                     <option v-for="s in salespersons" :key="s.id" :value="s.id">{{ s.name }}</option>
                 </b-form-select>
             </b-form-group>
-
-
             <b-form-group label="County" class="mb-2 mr-2">
                 <b-form-input type="text" v-model="form.county" placeholder="County"/>
             </b-form-group>
@@ -55,7 +49,6 @@
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
-
 
         <div v-show="!loading">
             <div class="table-responsive" >
@@ -81,8 +74,6 @@
                     <template slot="FOOT_client" scope="item">
                         <strong>End Date: </strong>{{ totals.end }}
                     </template>
-
-
                     <template slot="FOOT_name" scope="item">
                         <strong>For Client: </strong>{{ totals.client ? totals.client : 'All Clients' }}
                     </template>
@@ -121,10 +112,6 @@
         name: "ClientReferralsReport",
         mixins: [FormatsDates, FormatsNumbers],
         components: { BusinessLocationFormGroup, BusinessLocationSelect },
-
-        props: {
-
-        },
 
         data() {
             return {
@@ -190,6 +177,7 @@
                 salespersons: '',
                 location: '',
                 footclone: false,
+                onFirstLoad: true,
             };
         },
 
@@ -210,12 +198,9 @@
                         this.footclone = true;
                     })
             },
-
             print(){
                 $(".report-table").print();
             },
-
-
             getClients(){
                 axios.get('/business/dropdown/clients?businesses=' + this.form.business)
                     .then( ({ data }) => {
@@ -225,7 +210,6 @@
                     .finally(() => {
                     })
             },
-
             getSalespeople(){
                 axios.get('/business/dropdown/sales-people')
                     .then( ({ data }) => {
@@ -235,17 +219,18 @@
                     .finally(() => {
                     })
             },
-
         },
-
         watch: {
             async 'form.business'(newValue, oldValue) {
-                if (newValue != oldValue) {
-                    await this.loadClients();
+                if(this.onFirstLoad){
+                    this.onFirstLoad = false;
+                }else if(newValue != oldValue){
+                    this.getClients();
+                    this.getSalespeople();
                 }
+
             },
         },
-
         mounted() {
             this.$nextTick(function(){
                 this.getClients();
