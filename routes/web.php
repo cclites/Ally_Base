@@ -317,9 +317,9 @@ Route::group([
     Route::get('reports/sales-people-commission/print', 'Business\Report\SalespersonCommissionReportController@print');
 
 
-    Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
-    Route::post('reports/claims-report', 'Business\ClaimController@data');
-    Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
+    Route::get('reports/claims-report', 'Business\ClaimsReportController@report')->name('reports.claims_report');
+    Route::post('reports/claims-report', 'Business\ClaimsReportController@data');
+    Route::get('reports/claims-report/print', 'Business\ClaimsReportController@print')->name('reports.claims_report.print');
     Route::get('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources')->name('reports.client_referral_sources');
     Route::post('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources');
     Route::get('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources')->name('reports.caregiver_referral_sources');
