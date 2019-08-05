@@ -268,10 +268,16 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return ! $this->items->where('was_split', 1)->isEmpty();
     }
 
+    /**
+     * Check if the invoice has items that are partially paid
+     * or might have rounding issues.
+     *
+     * @return bool
+     */
     public function getHasPartialPayment() : bool
     {
         foreach ($this->items as $item) {
-            if ($this->amount > $this->amount_paid && $this->amount_paid > 0) {
+            if ($item->total <> $item->amount_due) {
                 return true;
             }
         }
