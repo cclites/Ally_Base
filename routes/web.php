@@ -481,6 +481,9 @@ Route::group([
     Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
     Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
 
+    /* New Claims & AR */
+    Route::get('claims-queue', 'Business\ClaimsQueueController@index')->name('claims-queue');
+
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
     Route::post('expiration-types', 'Business\ExpirationTypesController@store');

@@ -54,6 +54,7 @@
         @if(activeBusiness()->use_rate_codes)
             <li><a href="{{ route('business.rate-codes.index') }}">Rate Codes</a></li>
         @endif
+        <li><a href="{{ route('business.claims-queue') }}">Claims Queue</a></li>
         <li><a href="{{ route('business.claims-ar') }}">Claims & AR</a></li>
         <li><a href="{{ route('business.offline-invoice-ar') }}">Offline Invoice AR</a></li>
         <li><a href="{{ route('business.quickbooks-queue') }}">Quickbooks Queue</a></li>

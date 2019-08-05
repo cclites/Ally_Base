@@ -239,6 +239,7 @@ Vue.component('business-account-setup-report', require('./components/business/re
 Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
+Vue.component('business-claims-queue', require('./components/business/claims/BusinessClaimsQueue'));
 
 Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
