@@ -178,7 +178,7 @@
                         fieldType   : 'text',
                         baseValue   : '',
                         placeholder : 'Enter Value',
-                        description : '',
+                        description : 'Implied decimal with two digits ( i.e xxxxxxxxx.xx )',
                         length      : 13,
                         decimal     : 2,
                         fillChar    : '0',
@@ -196,7 +196,7 @@
                         fieldType   : 'text',
                         baseValue   : '',
                         placeholder : 'Enter Value',
-                        description : '',
+                        description : 'Implied decimal with two digits ( i.e xxxxxxxxx.xx )',
                         length      : 13,
                         decimal     : 2,
                         fillChar    : '0',
@@ -312,7 +312,7 @@
                     }
                     finalResult = ( val.justify == 'left' ? formInput + fillers : fillers + formInput );
 
-                    if( val.decimal ) finalResult = finalResult.slice( 0, val.length - val.decimal ) + "." + finalResult.slice( val.length - val.decimal );
+                    // if( val.decimal ) finalResult = finalResult.slice( 0, val.length - val.decimal ) + "." + finalResult.slice( val.length - val.decimal );
 
                     string.push( finalResult );
                 });
