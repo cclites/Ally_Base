@@ -15,23 +15,26 @@ class TotalChargesReportController extends Controller
 {
     public function index(Request $request, TotalChargesReport $report)
     {
-        if ($request->filled('json')) {
+        if ( $request->filled( 'json' ) ) {
 
             $timezone = auth()->user()->role->getTimezone();
 
-            $report->setTimezone($timezone)
+            $report->setTimezone( $timezone )
                 ->applyFilters(
-                    $request->date
+
+                    $request->startdate,
+                    $request->enddate
                 );
 
             $data = $report->rows();
             $totals = [
-                'amount'=>$data->sum('amount')
+
+                'amount' => $data->sum( 'amount' )
             ];
 
-            $data = $this->createSummary($report->rows());
+            $data = $this->createSummary( $report->rows() );
 
-            return response()->json(['data'=>$data, 'totals'=>$totals]);
+            return response()->json([ 'data' => $data, 'totals' => $totals ]);
         }
 
         return view_component(

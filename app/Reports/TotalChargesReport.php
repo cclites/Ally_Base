@@ -57,12 +57,12 @@ class TotalChargesReport extends BaseReport
      * @param string $date
      * @return TotalChargesReport
      */
-    public function applyFilters(string $date): self
+    public function applyFilters( string $startdate, string $enddate ): self
     {
-        $this->start = (new Carbon($date . ' 00:00:00', 'UTC'));
-        $this->end = (new Carbon($date . ' 23:59:59', 'UTC'));
+        $this->start = ( new Carbon( $startdate . ' 00:00:00', 'UTC' ) );
+        $this->end   = ( new Carbon( $enddate . ' 23:59:59', 'UTC' ) );
 
-        $this->query->whereBetween('created_at', [$this->start, $this->end]);
+        $this->query->whereBetween( 'created_at', [ $this->start, $this->end ] );
 
         return $this;
 
