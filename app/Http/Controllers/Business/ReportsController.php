@@ -13,6 +13,7 @@ use App\Business;
 use App\Caregiver;
 use App\Prospect;
 use App\Client;
+use App\EmergencyContact;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
@@ -807,25 +808,7 @@ class ReportsController extends BaseController
         return view('business.reports.client_directory', compact('clients', 'fields'));
     }
 
-    /**
-     * Shows the page to generate the caregiver directory
-     *
-     * @return Response
-     */
-    public function caregiverDirectory()
-    {
-        $caregivers = Caregiver::forRequestedBusinesses()
-            ->with('address')
-            ->with('meta')
-            ->get();
 
-        $fields = CustomField::forAuthorizedChain()
-            ->where('user_type', 'caregiver')
-            ->with('options')
-            ->get();
-
-        return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
-    }
 
     /**
      * Handle the request to generate the prospect directory
@@ -857,41 +840,7 @@ class ReportsController extends BaseController
         return $report->rows();
     }
 
-    /**
-     * Handle the request to generate the caregiver directory
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
-     */
-    public function generateCaregiverDirectoryReport(Request $request)
-    {
-        $report = new CaregiverDirectoryReport();
-        $report->forRequestedBusinesses();
-        $report->query()->join('users','caregivers.id','=','users.id');
 
-        if($request->filter_start_date && $request->filter_end_date) {
-            $report->where('users.created_at', '>', (new Carbon($request->filter_start_date))->setTimezone('UTC')->setTime(0, 0, 0));
-            $report->where('users.created_at', '<', (new Carbon($request->filter_end_date))->setTimezone('UTC')->setTime(23, 59, 59));
-            $report->query()->with('meta');
-        }
-
-        if($request->has('filter_active')) {
-            $report->where('users.active', $request->filter_active);
-        }
-
-        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
-
-        if ($report->count() > 1000) {
-            // Limit to 1K caregivers for performance reasons
-            return new ErrorResponse(400, 'There are too many caregivers to report.  Please reduce your date range.');
-        }
-
-        if ($request->has('export') && $request->export == true) {
-            return $report->download();
-        }
-
-        return $report->rows();
-    }
 
     /**
      * Handle the request to generate the client directory
