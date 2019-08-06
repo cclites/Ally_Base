@@ -21,12 +21,15 @@ class AddressController
         $data = $request->validate([
             'address1' => 'required',
             'address2' => 'nullable',
-            'city' => 'required',
-            'state' => 'required',
-            'country' => 'required|size:2',
-            'county' => 'nullable',
-            'zip' => 'required|min:5'
+            'city'     => 'required',
+            'state'    => 'required',
+            'country'  => 'required|size:2',
+            'county'   => 'nullable',
+            'zip'      => 'required|min:5',
+            'notes'    => 'nullable|max:255'
         ]);
+
+        if( $data[ 'notes' ] ) $data[ 'notes' ] = filter_var( $data[ 'notes' ], FILTER_SANITIZE_STRING );
 
         \DB::beginTransaction();
         $address = $user->addresses->where('type', $type)->first();
