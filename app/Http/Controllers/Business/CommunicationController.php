@@ -18,6 +18,7 @@ use App\PhoneNumber;
 use App\SmsThreadReply;
 use Carbon\Carbon;
 use App\SmsThreadRecipient;
+use Illuminate\Support\Collection;
 use Twilio\Security\RequestValidator;
 
 class CommunicationController extends Controller
@@ -97,37 +98,21 @@ class CommunicationController extends Controller
      */
     public function sendText(SendTextRequest $request)
     {
-        if ($request->input('all')) {
-            // Filter to the selected business for 'all' or default to all locations.
-            $recipients = Caregiver::forRequestedBusinesses()
-                ->active()
-                ->has('phoneNumbers')
-                ->with('phoneNumbers')
-                ->get();
-        } else {
-            $recipients = Caregiver::forRequestedBusinesses() // all allowed locations
-                ->active()
-                ->whereIn('id', $request->recipients)
-                ->has('phoneNumbers')
-                ->with('phoneNumbers')
-                ->get();
-        }
+        $debugMode = $request->debug == 1;
 
+        // Scrub the recipients list
+        $recipients = $request->getEligibleCaregivers();
         if ($recipients->count() == 0) {
             return new ErrorResponse(422, 'You must have at least 1 recipient.');
         }
 
         // Get the business selection for which outgoing number to use.
         $business = $request->getBusiness();
-        $from = $business->outgoing_sms_number;
-        if (empty($from)) {
-            if ($request->input('can_reply')) {
-                return new ErrorResponse(422, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
-            }
-
-            $from = PhoneNumber::formatNational(config('services.twilio.default_number'));
+        if (! $from = $request->getOutgoingNumber()) {
+            return new ErrorResponse(418, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
         }
 
+        // Create the SmsThread
         $data = [
             'business_id' => $business->id,
             'from_number' => $from,
@@ -135,29 +120,42 @@ class CommunicationController extends Controller
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
         ];
+        $this->authorize('create', [SmsThread::class, $data]);
+        $thread = SmsThread::create($data);
 
-        if ($request->debug == 1) {
+        $failed = [];
+        /** @var \App\Caregiver $recipient */
+        foreach ($recipients as $recipient) {
+            if ($number = $recipient->smsNumber) {
+                try {
+                    dispatch(new SendTextMessage($number->number(false), $request->message, $from, $debugMode));
+                    $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
+
+                } catch (\Exception $ex) {
+                    app('sentry')->captureException($ex);
+                    \Log::error($ex->getMessage());
+                    $failed[] = "{$recipient->name} {$recipient->smsNumber->national_number}";
+                }
+            }
+        }
+
+        if (count($failed) > 0) {
+            return new ErrorResponse(500, "Message was sent but failed for the following users:\r\n" . join("\r\n", $failed));
+        }
+
+        if ($debugMode) {
             dd([
                 'thread_data' => $data,
                 'recipients' => $recipients->map(function ($item) {
                     return [
                         'user_id' => $item->id,
                         'name' => $item->name,
+                        'twilio_format' => $item->smsNumber->number(false),
                         'number' => optional($item->smsNumber)->national_number,
                     ];
-                })
+                }),
+                'failed' => $failed,
             ]);
-        }
-
-        $this->authorize('create', [SmsThread::class, $data]);
-        $thread = SmsThread::create($data);
-
-        // send txt to caregivers default txt number
-        foreach ($recipients as $recipient) {
-            if ($number = $recipient->smsNumber) {
-                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
-                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
-            }
         }
 
         return new SuccessResponse('Text messages were successfully dispatched.');

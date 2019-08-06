@@ -110,7 +110,8 @@ export default {
         },
 
         getDropdownLabel(options, key) {
-            return options.find(option => option.value == key).label;
+            let option = options.find(option => option.value == key);
+            return option ? option.label : '-';
         }
     }
 }
