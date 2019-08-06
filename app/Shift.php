@@ -578,18 +578,36 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Get the scheduled start time of the shift.
+     *
+     * @return Carbon|null
+     */
+    public function scheduledStartTime()
+    {
+        if (filled($this->schedule)) {
+            return $this->schedule->getStartDateTime();
+        }
+
+        return $this->checked_in_time;
+    }
+
+    /**
      * Get the scheduled end time of the shift
      *
      * @return Carbon
      */
     public function scheduledEndTime()
     {
-        if (!$this->schedule) {
-            // Return now if no schedule
-            return Carbon::now();
+        if (filled($this->schedule)) {
+            return $this->schedule->getEndDateTime();
         }
 
-        return $this->schedule->getEndDateTime();
+        if (filled($this->checked_out_time)) {
+            return $this->checked_out_time;
+        }
+
+        // Return now if no schedule and still clocked in.
+        return Carbon::now();
     }
 
     /**

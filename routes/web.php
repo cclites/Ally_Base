@@ -483,6 +483,7 @@ Route::group([
 
     /* New Claims & AR */
     Route::get('claims-queue', 'Business\ClaimsQueueController@index')->name('claims-queue');
+    Route::resource('claims', 'Business\ClaimController');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

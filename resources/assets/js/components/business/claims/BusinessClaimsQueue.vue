@@ -299,7 +299,18 @@
             },
 
             createClaim(invoice) {
+                this.creatingId = invoice.id;
+                let form = new Form({ client_invoice_id: invoice.id });
+                form.post(`/business/claims`)
+                    .then( ({ data }) => {
+                        let claim = data;
+                    })
+                    .catch(() => {
 
+                    })
+                    .finally(() => {
+                        this.creatingId = null;
+                    })
             },
 
             transmitClaim(invoice, skipAlert = false) {
