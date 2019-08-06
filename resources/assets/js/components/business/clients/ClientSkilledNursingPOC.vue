@@ -1,8 +1,9 @@
 <template>
-    <b-card>
+    <b-card class="nursing-poc">
         <h2>Skilled Nursing POC</h2>
 
         <b-btn variant="success" @click.prevent="save()" :disabled="busy">Save Changes</b-btn>
+        <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
     </b-card>
 </template>
 
@@ -50,6 +51,10 @@
 
             fillForm(data) {
                 this.form = new Form(data);
+            },
+
+            print(){
+                $('.nursing-poc').print();
             },
         },
 
