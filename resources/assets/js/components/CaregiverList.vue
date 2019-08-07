@@ -71,9 +71,10 @@
 <script>
     import BusinessLocationSelect from "./business/BusinessLocationSelect";
     import FormatsListData from "../mixins/FormatsListData";
+    import LocalStorage from "../mixins/LocalStorage";
 
     export default {
-        mixins: [FormatsListData],
+        mixins: [FormatsListData, LocalStorage],
         components: {BusinessLocationSelect},
 
         props: {},
@@ -138,6 +139,7 @@
                     status: '',
                     search: '',
                 }),
+                localStoragePrefix: 'caregiver_list_',
             }
         },
 
@@ -148,8 +150,11 @@
 
         computed: {
             listUrl() {
+
                 let active = '';
                 let aliasId = '';
+                this.loadFiltersFromStorage();
+
                 if (this.filters.status === '') {
                     active = '';
                 } else if (this.filters.status === 'active') {
@@ -171,11 +176,12 @@
 
         methods: {
             loadTable() {
-                this.$refs.table.refresh()
+                this.$refs.table.refresh();
             },
 
             itemProvider(ctx) {
                 this.loading = true;
+
                 let sort = ctx.sortBy == null ? '' : ctx.sortBy;
                 return axios.get(this.listUrl + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
@@ -186,6 +192,7 @@
                         return [];
                     })
                     .finally(() => {
+
                         this.loading = false;
                     });
             },
@@ -234,17 +241,38 @@
                     })
                     .catch(() => {})
             },
+            loadFiltersFromStorage() {
+                if (typeof(Storage) !== "undefined") {
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value) this.filters[filter] = value;
+                    }
+                    // Sorting/show UI
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) this.sortBy = sortBy;
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                }
+            },
+            updateSavedFormFilters() {
+                for (let filter of Object.keys(this.filters)) {
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+            },
         },
 
         watch: {
             'filters.status'(newVal, oldVal) {
                 if (newVal != oldVal) {
+                    this.updateSavedFormFilters();
                     this.$refs.table.refresh();
                 }
             },
 
             'filters.business'(newVal, oldVal) {
                 if (newVal != oldVal) {
+                    this.updateSavedFormFilters();
                     this.$refs.table.refresh();
                 }
             },
@@ -253,6 +281,7 @@
                 // debounce the reloading of the table to prevent
                 // unnecessary calls.
                 _.debounce(() => {
+                    this.updateSavedFormFilters();
                     this.$refs.table.refresh();
                 }, 350)();
             },
