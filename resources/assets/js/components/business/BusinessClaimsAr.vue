@@ -293,6 +293,12 @@
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
+                    {
+                        key: 'claim_balance',
+                        label: 'Claim Balance',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
                     // {
                     //     key: 'balance',
                     //     label: 'Invoice Balance',
@@ -308,12 +314,6 @@
                         key: 'claim_service',
                         label: 'Claim Service',
                         formatter: (x) => this.serviceLabel(x),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
