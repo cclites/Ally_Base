@@ -49,10 +49,6 @@
                             <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                             Generate Report
                         </b-button>
-                        <b-button @click="txtUsers()" variant="primary" :disabled="busy || totalRows == 0" class="mr-1 mt-1">
-
-                            Send Txt To These Users
-                        </b-button>
                     </div>
                     <div class="ml-auto">
 
@@ -182,23 +178,7 @@
             download() {
 
                 window.location = this.form.toQueryString( '/business/reports/client-account-setup?export=1' );
-            },
-
-            txtUsers() {
-
-                let ids = _.map( this.items, 'id' );
-
-                let form = new Form( {ids} );
-                form.put(`/business/communication/text-clients`) // CHECK
-                    .then( response => {
-
-                        console.log( 'response: ', response );
-                    })
-                    .catch( e => {
-
-                        console.log( 'error: ', e );
-                    });
-            },
+            }
         },
         async mounted() {
 
