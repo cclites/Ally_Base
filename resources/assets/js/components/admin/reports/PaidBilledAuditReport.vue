@@ -56,7 +56,23 @@
                                         :footClone="footClone"
                                 >
                                     <template slot="FOOT_client" scope="item" class="primary">
+                                        <strong>For Location: </strong> {{ totals.location }}
+                                    </template>
+
+                                    <template slot="FOOT_service_date" scope="item" class="primary">
                                         <strong>For Salesperson: </strong> {{ totals.salesperson }}
+                                    </template>
+
+                                    <template slot="FOOT_service" scope="item" class="primary">
+                                        <strong>For Salesperson: </strong> {{ totals.salesperson }}
+                                    </template>
+
+                                    <template slot="FOOT_date" scope="item" class="primary">
+                                        &nbsp;
+                                    </template>
+
+                                    <template slot="FOOT_caregiver" scope="item" class="primary">
+                                        &nbsp;
                                     </template>
 
                                     <template slot="FOOT_salesperson" scope="item">
@@ -67,8 +83,16 @@
                                         <strong>For Client: </strong>{{ totals.client }}
                                     </template>
 
+                                    <template slot="FOOT_hours" scope="item" class="primary">
+                                        &nbsp;
+                                    </template>
+
+                                    <template slot="FOOT_billable" scope="item" class="primary">
+                                        &nbsp;
+                                    </template>
+
                                     <template slot="FOOT_amount" scope="item" class="primary">
-                                        <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
+                                        <strong>Total Amount: </strong> {{ totals.amount }}
                                     </template>
                                 </b-table>
                             </b-col>
@@ -125,7 +149,7 @@
                     {key: 'salesperson', label: 'Salesperson', sortable: true},
                     {key: 'hours', label: 'Hours', sortable: true,},
                     {key: 'billable', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
-                    {key: 'margin', label: 'Margin', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'amount', label: 'Margin', sortable: true,},
                 ],
                 items: [],
                 item: '',

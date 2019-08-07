@@ -75,6 +75,7 @@ class PaidBilledAuditReport extends BaseReport
     {
         $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
         $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+
         $this->query->whereBetween('created_at', [$this->start, $this->end]);
 
         $this->query->forBusiness($business);
@@ -92,16 +93,6 @@ class PaidBilledAuditReport extends BaseReport
      */
     protected function results(): iterable
     {
-
-        //$data = $this->query
-            //->get()->values();
-
-        //\Log::info(json_encode($data));
-
-        //return $data;
-
-
-
         return $this->query
                 ->get()
                 ->map(function(ClientInvoice $invoice){
@@ -239,15 +230,9 @@ class PaidBilledAuditReport extends BaseReport
     protected function calculateMargin($invoice, $payments){
 
         $total_amount = $invoice->amount;
-
-        //\Log::info($total_amount);
-
         $caregiver_allotment = 0;
 
         foreach($payments as $payment){
-
-            \Log::info($payment);
-
             $caregiver_allotment += $payment->caregiver_allotment;
         }
 

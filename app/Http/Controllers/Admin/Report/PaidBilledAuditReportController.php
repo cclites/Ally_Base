@@ -21,8 +21,6 @@ class PaidBilledAuditReportController extends Controller
 
             $timezone = auth()->user()->role->getTimezone();
 
-            //$this->authorize('read', Business::find($request->business));
-
             $data = $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
@@ -30,9 +28,6 @@ class PaidBilledAuditReportController extends Controller
                     $request->business,
                     $request->salesperson
                 )->rows();
-
-            //\Log::info("Returned some data");
-           // \Log::info(json_encode($data->rows()));
 
             $totals = [
                 'amount'=>$data->sum('amount'),
@@ -63,9 +58,6 @@ class PaidBilledAuditReportController extends Controller
                 $item["salesperson"] = 'No Salesperson';
             }
 
-            //\Log::info(json_encode($item));
-
-
             $key = $item["location"] . $item["salesperson"] . $item["date"] . $item['service'] . $item['caregiver'];
 
             if(!isset($set[$key])){
@@ -78,6 +70,7 @@ class PaidBilledAuditReportController extends Controller
                     'billable' =>$item['billable'],
                     'amount' => $item['amount'],
                     'salesperson' => $item['salesperson'],
+                    'date' => $item['date'],
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];
@@ -92,17 +85,3 @@ class PaidBilledAuditReportController extends Controller
 
     }
 }
-
-/*
- * 'invoice_id' => $invoice->id,
-            'invoice_name' => $invoice->name,
-            'client_name' => $invoice->client->nameLastFirst,
-            'caregiver' => optional($shiftService->shift->caregiver)->nameLastFirst,
-            'hours' => $shiftService->duration,
-            'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'service_id' => $shiftService->service->id,
-            'date' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
-            'start' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
-            'end' => Carbon::parse($shiftService->shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
-            'billable' => m
- */
