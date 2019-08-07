@@ -23,7 +23,7 @@ class DepositInvoiceController extends Controller
 {
     public function index(Request $request, CaregiverInvoiceQuery $caregiverInvoiceQuery, BusinessInvoiceQuery $businessInvoiceQuery)
     {
-        if ($request->expectsJson()) {
+        if ($request->filled('json')) {
 
             if ($request->filled('paid')) {
                 if ($request->paid) {
@@ -35,17 +35,21 @@ class DepositInvoiceController extends Controller
                 }
             }
 
-            if ($chainId = $request->input('chain_id')) {
-                $chain = BusinessChain::findOrFail($chainId);
-                $caregiverInvoiceQuery->forBusinessChain($chain);
-                $businessInvoiceQuery->forBusinessChain($chain);
+            if ( $chainId = $request->input( 'chain_id' ) ) {
+
+                $chain = BusinessChain::findOrFail( $chainId );
+                $caregiverInvoiceQuery->forBusinessChain( $chain );
+                $businessInvoiceQuery->forBusinessChain( $chain );
             }
 
-            if ($request->has('start_date')) {
-                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
-                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
-                $caregiverInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
-                $businessInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            if ( $request->has( 'start_date' ) ) {
+
+                // dd( Carbon::parse( $request->start_date )->toDateString() . ' 00:00:00' );
+
+                $startDate = Carbon::parse( $request->start_date )->toDateTimeString();
+                $endDate   = Carbon::parse( $request->end_date )->toDateString() . ' 23:59:59';
+                $caregiverInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
+                $businessInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
             }
 
             $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains'])->get();
@@ -53,7 +57,10 @@ class DepositInvoiceController extends Controller
 
             $invoices = $caregiverInvoices->merge($businessInvoices);
 
-            return DepositInvoiceResponse::collection($invoices);
+            $stuff = DepositInvoiceResponse::collection($invoices);
+            // dd( $stuff );
+
+            return $stuff;
         }
 
         $chains = BusinessChain::ordered()->get();

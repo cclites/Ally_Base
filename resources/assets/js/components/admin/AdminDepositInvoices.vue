@@ -1,40 +1,62 @@
 <template>
     <b-card>
         <b-row>
+
             <b-col lg="12">
+
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
-                        <date-picker
-                                v-model="start_date"
-                                placeholder="Start Date"
-                        >
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                                v-model="end_date"
-                                placeholder="End Date"
-                        >
-                        </date-picker>
-                        <b-form-select
-                                id="paid"
-                                name="paid"
-                                v-model="paid"
-                        >
-                            <option value="">All Invoices</option>
-                            <option :value="0">Unpaid Invoices</option>
-                            <option :value="1">Paid Invoices</option>
-                        </b-form-select>
-                        <b-form-select
-                                id="chain_id"
-                                name="chain_id"
-                                v-model="chain_id"
-                        >
-                            <option value="">All Business Chains</option>
-                            <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
-                        </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+
+                    <b-form @submit.prevent=" loadItems() ">
+                        <b-row>
+
+                            <b-col sm="12" lg="6" class="my-1 d-flex align-items-center flex-row flex-wrap">
+
+                                <date-picker
+                                    v-model=" start_date "
+                                    placeholder="Start Date"
+                                >
+                                </date-picker>
+
+                                &nbsp;to&nbsp;
+
+                                <date-picker
+                                    v-model=" end_date "
+                                    placeholder="End Date"
+                                >
+                                </date-picker>
+                            </b-col>
+                            <b-col sm="6" lg="3" class="my-1">
+
+                                <b-form-select
+                                    id="paid"
+                                    name="paid"
+                                    v-model="paid"
+                                >
+                                    <option value="">All Invoices</option>
+                                    <option :value="0">Unpaid Invoices</option>
+                                    <option :value="1">Paid Invoices</option>
+                                </b-form-select>
+                            </b-col>
+                            <b-col sm="6" lg="3" class="my-1">
+
+                                <b-form-select
+                                    id="chain_id"
+                                    name="chain_id"
+                                    v-model="chain_id"
+                                >
+                                    <option value="">All Business Chains</option>
+                                    <option v-for=" ( chain, index ) in chains " :value=" chain.id " :key=" index ">{{ chain.name }}</option>
+                                </b-form-select>
+                            </b-col>
+                        </b-row>
+
+                        <b-row class="ml-1 mt-4">
+
+                            <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                        </b-row>
                     </b-form>
                 </b-card>
             </b-col>
@@ -54,11 +76,11 @@
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
             <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     :filter="filter"
+                :items="items"
+                :fields="fields"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :filter="filter"
             >
                 <template slot="name" scope="row">
                     <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
