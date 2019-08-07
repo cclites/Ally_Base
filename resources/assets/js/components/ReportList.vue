@@ -163,13 +163,13 @@
                         category: 5,
                         allowed: ['admin'],
                     },
-                    {
-                        name: 'Missing Deposit Accounts',
-                        url: 'reports/caregivers/deposits-missing-bank-account',
-                        description: '',
-                        category: 3,
-                        allowed: ['admin'],
-                    },
+                    // { Removed as per ALLY-1394
+                    //     name: 'Missing Deposit Accounts',
+                    //     url: 'reports/caregivers/deposits-missing-bank-account',
+                    //     description: '',
+                    //     category: 3,
+                    //     allowed: [],
+                    // },
                     {
                         name: 'Financial Summary',
                         url: 'reports/finances',
