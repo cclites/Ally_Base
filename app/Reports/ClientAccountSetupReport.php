@@ -68,17 +68,16 @@ class ClientAccountSetupReport extends BaseReport
 
             case 'active_no_payment':
 
-                // i'd like to get a little bit better clarification on what it means to 'not have payment'.. these are the candidate columns I could find.. are their related 'type' columns included? is 'client_payer' relationship included?
-                $this->query()->active()->where( 'default_payment_id', null )->where( 'medicaid_plan_id', null )->where( 'medicaid_payer_id', null );
+                $this->query()->active()->where( 'default_payment_id', null );
                 break;
             case 'inactive_no_payment':
 
-                $this->query()->inactive()->where( 'default_payment_id', null )->where( 'medicaid_plan_id', null )->where( 'medicaid_payer_id', null );
+                $this->query()->inactive()->where( 'default_payment_id', null );
                 break;
             case 'scheduled_no_payment':
 
                 // i see the word 'scheduled' and think it has to refer to 'future schedules'. There is also a relation to ask for any schedules including those in the past
-                $this->query()->active()->whereHas( 'futureSchedules' )->where( 'default_payment_id', null )->where( 'medicaid_plan_id', null )->where( 'medicaid_payer_id', null );
+                $this->query()->active()->whereHas( 'schedules' )->where( 'default_payment_id', null );
                 break;
             default:
 
