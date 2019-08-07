@@ -21,10 +21,9 @@
 
                         <b-select name="status" id="status" v-model="form.status" class="ml-2">
 
-                            <option value="not_setup">Active but Not Setup</option>
-                            <option value="active_no_bank">Active but No Bank Account</option>
-                            <option value="scheduled">Scheduled but Not Setup</option>
-                            <option value="no_bank">Scheduled but No Bank Account</option>
+                            <option value="active_no_payment">Active but No Payment</option>
+                            <option value="scheduled_no_payment">Scheduled but No Payment</option>
+                            <option value="inactive_no_payment">Inactive with No Payment</option>
                         </b-select>
                         <input-help :form="form" field="status" text=""></input-help>
                     </b-form-group>
@@ -139,7 +138,7 @@
                 form: new Form({
                     businesses: '',
                     role_type: 'client',
-                    status: 'scheduled',
+                    status: 'scheduled_no_payment',
                     phone: '',
                     json: 1,
                 }),
