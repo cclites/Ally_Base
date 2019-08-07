@@ -546,6 +546,14 @@
                         allowed: ['office_user'],
                     },
 
+                    { // added as per ALLY-1394
+                        name        : 'Client Account Setup Status',
+                        url         : 'reports/client-account-setup',
+                        description : 'Shows a list of clients with incomplete account data.',
+                        category    : 2,
+                        allowed     : [ 'office_user' ],
+                    },
+
                     {
                         name: 'Payment Summary By Payer',
                         url: 'reports/payment-summary-by-payer',
