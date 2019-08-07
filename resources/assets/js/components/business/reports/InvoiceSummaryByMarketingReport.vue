@@ -23,13 +23,13 @@
                         <b-form-group label="Salesperson" v-if="salespeople.length > 0" class="mr-2">
                             <b-form-select v-model="form.salesperson" :disabled="busy">
                                 <option value="">All</option>
-                                <option v-for="item in salespeople" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in salespeople" :value="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Client" class="mr-2">
                             <b-form-select v-model="form.client" :disabled="busy">
                                 <option value="">All</option>
-                                <option v-for="item in clients" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-col md="2">
@@ -60,6 +60,7 @@
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                         :footClone="footClone"
+                                        :show-empty="true"
                                 >
                                     <template slot="FOOT_client" scope="item" class="primary">
                                         <strong>For Salesperson: </strong> {{ totals.salesperson }}
@@ -161,7 +162,7 @@
             },
 
             loadMarketingClients(){
-                axios.get('/business/marketingClientsDropdownResource?business=' + this.form.business)
+                axios.get('/business/dropdown/marketing-clients?businesses=' + this.form.business)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -171,7 +172,7 @@
             },
 
             loadSalespeople(){
-                axios.get('/business/salespersonDropdownResource?business=' + this.form.business)
+                axios.get('/business/dropdown/sales-people?businesses=' + this.form.business)
                     .then( ({ data }) => {
                         this.salespeople = data;
                     })

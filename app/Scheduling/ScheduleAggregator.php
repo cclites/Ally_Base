@@ -172,7 +172,7 @@ class ScheduleAggregator
                 'caregiver_id'=> $schedule->caregiver_id,
                 'client_name' => optional($schedule->client)->name,
                 'caregiver_name' => $schedule->caregiver_id ? optional($schedule->caregiver)->name : 'No Caregiver Assigned',
-                'caregiver_phones' => optional($schedule->caregiver)->phoneNumbers
+                'caregiver_phones' => optional($schedule->caregiver)->phoneNumbers,
             ];
         });
     }

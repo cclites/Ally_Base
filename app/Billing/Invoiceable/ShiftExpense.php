@@ -186,7 +186,7 @@ class ShiftExpense extends InvoiceableModel
      */
     public function getProviderRate(): float
     {
-        return 0;
+        return floatval(0);
     }
 
     /**

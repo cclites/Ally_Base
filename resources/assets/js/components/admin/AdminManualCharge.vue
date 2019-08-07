@@ -56,17 +56,36 @@
                         />
                         <input-help :form="form" field="notes" text="Enter a note explaining why this adjustment has occurred." />
                     </b-form-group>
-                    <b-btn type="submit" :disabled="submitting">Submit</b-btn>
+                    <b-btn @click="showConfirmModal" :disabled="submitting">Submit</b-btn>
                     <span class="text-danger warning">DO NOT USE THIS FOR REFUNDS. USE THE CHARGES REPORT AND REFUND FROM THERE.</span>
                 </form>
             </b-col>
         </b-row>
+
+        <b-modal title="Confirm Manual Adjustment" v-model="confirmModal">
+            <p><strong>Are You sure?</strong></p>
+            <p>Business: {{ businessName }}</p>
+            <p>Client: {{ clientName }}</p>
+            <p>Type: {{ form.type }}</p>
+            <p>Amount: {{ moneyFormat(form.amount)}}</p>
+
+            <div slot="modal-footer">
+                <b-btn variant="info" @click="submit()" :disabled="submitting">Yes, Create Adjustment</b-btn>
+                <b-btn variant="default" @click="confirmModal=false">No</b-btn>
+            </div>
+
+        </b-modal>
+
     </b-card>
 </template>
 
 <script>
+
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
         props: {},
+        mixins: [FormatsNumbers],
 
         data() {
             return {
@@ -74,6 +93,7 @@
                 'clients': [],
                 'form': new Form(),
                 'submitting': false,
+                'confirmModal': false,
             }
         },
 
@@ -82,9 +102,23 @@
                 if (this.form.business_id) {
                     return this.clients.filter(obj => obj.business_id == this.form.business_id);
                 }
-
                 return this.clients;
             },
+            clientName(){
+                if (this.form.client_id) {
+                    let client = this.clients.find(obj => obj.id == this.form.client_id);
+                    return  client.lastname + ", " + client.firstname;
+                }
+                return '';
+            },
+            businessName(){
+                if (this.form.business_id) {
+                    let business = this.businesses.find(obj => obj.id == this.form.business_id);
+                    return business.name;
+                }
+                return '';
+
+            }
         },
 
         mounted() {
@@ -106,16 +140,17 @@
             },
 
             submit() {
-                // Prevent duplicate submissions
+
                 if (this.submitting) return;
                 this.submitting = true;
 
                 this.form.post('/admin/charges/manual')
                     .then(response => {
                         this.makeForm();
-                        this.submitting = false;
                     })
-                    .catch(error => {
+                    .catch(error => {})
+                    .finally(() => {
+                        this.confirmModal = false;
                         this.submitting = false;
                     });
             },
@@ -127,6 +162,11 @@
             loadClients() {
                 axios.get('/admin/clients?json=1').then(response => this.clients = response.data);
             },
+
+            showConfirmModal(){
+                this.confirmModal = true;
+            }
+
         },
 
         watch: {
@@ -137,6 +177,8 @@
                 this.form.client_id = '';
             },
         },
+
+
     }
 </script>
 

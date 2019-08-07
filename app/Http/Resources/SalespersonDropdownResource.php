@@ -18,9 +18,10 @@ class SalespersonDropdownResource extends ResourceCollection
             return [
                 'id' => $row->id,
                 'name' => $row->firstname . " " . $row->lastname,
+                'nameLastFirst' => $row->nameLastFirst,
             ];
         })
-            ->sortBy('name')
+            ->sortBy('nameLastFirst')
             ->values()
             ->toArray();
     }

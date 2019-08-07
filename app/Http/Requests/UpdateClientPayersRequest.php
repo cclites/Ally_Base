@@ -45,6 +45,7 @@ class UpdateClientPayersRequest extends FormRequest
             ],
             'payers.*.payment_allowance' => 'nullable|numeric|between:0,99999.99|required_if:payment_allocation,daily|required_if:payment_allocation,weekly|required_if:payment_allocation,monthly',
             'payers.*.split_percentage' => 'nullable|numeric|between:0,100|required_if:payment_allocation,split',
+            'payers.*.notes' => 'nullable|string'
         ];
     }
 

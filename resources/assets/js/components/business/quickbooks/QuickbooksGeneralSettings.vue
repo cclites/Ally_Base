@@ -19,6 +19,16 @@
                         <input-help :form="form" field="name_format" text="Select how we should format client names when we create customers."></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Fee Type" label-for="fee_type" label-class="required">
+                        <b-select name="fee_type" id="fee_type" v-model="form.fee_type" :disabled="busy">
+                            <option value="">-- Select Fee Type --</option>
+                            <option value="registry">Registry (Amount paid to registry)</option>
+                            <option value="client">Client (Amount paid by client)</option>
+                        </b-select>
+                        <input-help :form="form" field="fee_type" text="Select the fee type used to calculate invoice amounts."></input-help>
+                    </b-form-group>
+                </b-col>
             </b-row>
             <b-row class="mb-2" align-h="end">
                 <b-col lg="6">
@@ -110,6 +120,7 @@
             return {
                 form: new Form({
                     name_format: this.connection.name_format || '',
+                    fee_type: this.connection.fee_type || 'registry',
                     shift_service_id: this.connection.shift_service_id || '',
                     mileage_service_id: this.connection.mileage_service_id || '',
                     adjustment_service_id: this.connection.adjustment_service_id || '',
