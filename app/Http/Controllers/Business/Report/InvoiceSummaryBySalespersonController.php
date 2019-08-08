@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Business;
 use App\Client;
+use App\Reports\InvoiceSummaryBySalespersonReport;
 use App\SalesPerson;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
@@ -11,19 +12,15 @@ use App\Reports\InvoiceSummaryByMarketingReport;
 
 use Log;
 
-class InvoiceSummaryByMarketingController extends BaseController
+class InvoiceSummaryBySalespersonController extends BaseController
 {
-    public function index(Request $request, InvoiceSummaryByMarketingReport $report){
+    public function index(Request $request, InvoiceSummaryBySalespersonReport $report){
 
-        if ($request->filled('json')) {
+        if ($request->filled('json') || $request->filled('print')) {
 
             $timezone = auth()->user()->role->getTimezone();
 
             $this->authorize('read', Business::find($request->business));
-            /*
-            $this->authorize('read', Client::find($request->client));
-            $this->authorize('read', SalesPerson::find($request->salesperson));
-            */
 
             $data = $report->setTimezone($timezone)
                     ->applyFilters(
@@ -44,10 +41,15 @@ class InvoiceSummaryByMarketingController extends BaseController
             ];
 
             $data = $this->createSummary($data);
+
+            if ($request->filled('print')) {
+                return $data->print($data, $totals);
+            }
+
             return response()->json(['data'=>$data, 'totals'=>$totals]);
         }
 
-        return view_component('invoice-summary-by-marketing-report', 'Invoice Summary By Marketing Report', [], [
+        return view_component('invoice-summary-by-salesperson-report', 'Invoice Summary By Salesperson Report', [], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);

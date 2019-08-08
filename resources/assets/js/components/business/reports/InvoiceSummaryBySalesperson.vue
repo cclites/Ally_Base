@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Filters"
+                        header="This report shows total client charges for both active and inactive cleints grouped by salesperson"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -75,7 +75,7 @@
                                     </template>
 
                                     <template slot="FOOT_amount" scope="item" class="primary">
-                                        <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
+                                        <strong>Total Client Charges: </strong> {{ moneyFormat(totals.amount) }}
                                     </template>
                                 </b-table>
                             </b-col>
@@ -121,16 +121,15 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 25,
+                perPage: 100,
                 currentPage: 1,
-                sortBy: 'salesperson',
+                sortBy: '',
                 sortDesc: false,
                 fields: [
+                    {key: 'salesperson', label: 'Salesperson', sortable: true,},
                     {key: 'client', label: 'Client', sortable: true,},
-                    //{key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
-                    {key: 'salesperson', label: 'Sales Person', sortable: true,},
                     {key: 'payer', label: 'Payer', sortable: true,},
-                    {key: 'amount', label: 'Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'amount', label: 'Total Client Charges', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
                 item: '',
@@ -144,7 +143,7 @@
         methods: {
             fetch() {
                 this.busy = true;
-                this.form.get('/business/reports/invoice-summary-by-marketing')
+                this.form.get('/business/reports/invoice-summary-by-salesperson')
                     .then( ({ data }) => {
                         this.items = data.data;
                         this.totals = data.totals;
@@ -158,7 +157,16 @@
             },
 
             print(){
-                $(".summary-table").print();
+                //$(".summary-table").print();
+
+                this.form.get('/business/reports/invoice-summary-by-salesperson?print=true')
+                    .then( ({ data }) => {
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
+
+
             },
 
             loadMarketingClients(){
