@@ -19,32 +19,39 @@ class CaregiverDirectoryReportController extends BaseController
      *
      * @return Response
      */
-    public function index()
+    public function index( Request $request )
     {
-        $caregivers = Caregiver::forRequestedBusinesses()
-            ->with(['address', 'user', 'user.emergencyContacts', 'user.phoneNumbers'])
-            ->with('meta')
-            ->get()->map(function($caregiver){
+        if( $request->filled( 'json' ) ){
 
-                $caregiver->phone = $caregiver->user->notification_phone;
-                $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-                $caregiver->referral = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-                $caregiver->certification = $caregiver->certification ? $caregiver->certification : '-';
-                $caregiver->smoking_okay = $caregiver->smoking_okay ? "Yes" : "No";
-                $caregiver->ethnicity = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-                $caregiver->medicaid_id = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-                $caregiver->gender = $caregiver->user->gender ? $caregiver->user->gender : '-';
+            // dd( $request );
+            $caregivers = Caregiver::forRequestedBusinesses()
+                ->with([ 'address', 'user', 'user.emergencyContacts', 'user.phoneNumbers' ])
+                ->with( 'meta' )
+                ->get()->map( function( $caregiver ){
 
-                return $caregiver;
+                    $caregiver->phone = $caregiver->user->notification_phone;
+                    $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
+                    $caregiver->referral = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
+                    $caregiver->certification = $caregiver->certification ? $caregiver->certification : '-';
+                    $caregiver->smoking_okay = $caregiver->smoking_okay ? "Yes" : "No";
+                    $caregiver->ethnicity = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
+                    $caregiver->medicaid_id = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
+                    $caregiver->gender = $caregiver->user->gender ? $caregiver->user->gender : '-';
 
-            });
+                    return $caregiver;
+
+                });
+
+            // dd( response()->json( $caregivers ) );
+            return response()->json( $caregivers );
+        }
 
         $fields = CustomField::forAuthorizedChain()
-            ->where('user_type', 'caregiver')
-            ->with('options')
+            ->where( 'user_type', 'caregiver' )
+            ->with( 'options' )
             ->get();
 
-        return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
+        return view( 'business.reports.caregiver_directory', compact( 'fields' ) );
     }
 
     /**
