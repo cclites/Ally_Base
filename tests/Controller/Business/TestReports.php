@@ -34,14 +34,22 @@ class TestReports extends TestCase
      */
     public function caregiver_directory_report_works_properly()
     {
+        $this->withoutExceptionHandling();
 
         $data = factory( Caregiver::class, 15 )->create()->each( function( $caregiver ){
 
             $caregiver->businesses()->attach( $this->business );
         });
+        // dd( $data->toArray() );
 
-        $query_string = '?json=1&active=false&export=1';
-        $data = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string )
+        $start_date = '&start_date=08/02/2019';
+        $end_date   = '&end_date=08/10/2019';
+        $active     = '&active=true';
+
+        $query_string = '?json=1' . $active . $start_date . $end_date;
+        $results = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string )
             ->assertSuccessful();
+
+        dd( $results );
     }
 }

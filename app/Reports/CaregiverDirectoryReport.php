@@ -4,12 +4,15 @@ namespace App\Reports;
 use App\Caregiver;
 use App\Traits\IsDirectoryReport;
 use App\CustomField;
+use Carbon\Carbon;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
     use IsDirectoryReport;
 
-    private $activeFilter;
+    private $active_filter;
+    private $start_date;
+    private $end_date;
 
     /**
      * @var bool
@@ -31,7 +34,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers']);
+        $this->query = Caregiver::with([ 'user', 'address', 'user.emergencyContacts', 'user.phoneNumbers' ]);
     }
 
     /**
@@ -52,7 +55,21 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function setActiveFilter( $active ) : self
     {
-        $this->activeFilter = $active;
+        $this->active_filter = $active;
+
+        return $this;
+    }
+
+    /**
+     * Filter by active status.
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setDateFilter( $start_date = null, $end_date = null ) : self
+    {
+        if( $start_date ) $this->start_date = $start_date;
+        if( $end_date ) $this->end_date = $end_date;
 
         return $this;
     }
@@ -64,7 +81,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     protected function results(): ?iterable
     {
-        switch( $this->activeFilter ){
+        switch( $this->active_filter ){
 
             case 'true':
 
@@ -78,6 +95,9 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
                 break;
         }
+
+        if( $this->start_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '>=', ( new Carbon( $this->start_date . ' 00:00:00', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
+        if( $this->end_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '<=', ( new Carbon( $this->end_date . ' 23:59:59', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
 
         $caregivers = $this->query()->with( 'meta' )
             ->get()->map( function( $caregiver ){
@@ -95,6 +115,11 @@ class CaregiverDirectoryReport extends BusinessResourceReport
             });
 
         return $caregivers;
+
+
+
+
+
 
         // Erik 8/8/19 =>
         // this is the old function code that was here. Again, as far as I can tell this wasn't even in use. Leaving it here just in case it is needed.. mainly for archive purposes

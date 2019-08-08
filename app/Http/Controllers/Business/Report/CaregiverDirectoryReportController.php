@@ -26,8 +26,10 @@ class CaregiverDirectoryReportController extends BaseController
             $report = new CaregiverDirectoryReport();
             $report->query()->forRequestedBusinesses();
             $report->setActiveFilter( $request->active );
+            $report->setDateFilter( $request->start_date, $request->end_date );
 
             if ( $request->export == '1' ) {
+                // the request object attributes are coming through as strings
 
                 return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
                     ->download();
@@ -42,37 +44,5 @@ class CaregiverDirectoryReportController extends BaseController
             ->get();
 
         return view( 'business.reports.caregiver_directory', compact( 'fields' ) );
-    }
-
-    /**
-     * Handle the request to generate the caregiver directory
-     * 
-     * I feel safe manipulating this because i did a global check and didnt find anything using this or the route that accesses this
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
-     */
-    public function generateCaregiverDirectoryReport( Request $request )
-    {
-        $report = new CaregiverDirectoryReport();
-        $report->forRequestedBusinesses();
-
-        switch( $request->active ){
-
-            case 'true':
-
-                $query->active();
-                break;
-            case 'false':
-
-                $query->inactive();
-                break;
-            default:
-                break;
-        }
-
-        // $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
-
-        return $report->rows();
     }
 }

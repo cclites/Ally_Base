@@ -8,18 +8,54 @@
             <b-col lg="12">
 
                 <b-card
-                    header="Select Filters"
+                    header="Select Date Range &amp; Filters"
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
 
                     <b-row>
 
-                        <b-col lg="3">
+                        <!-- <b-col md="6" lg="3">
+
+                            <b-form-group label="Added From">
+
+                                <date-picker
+                                    name="start_date"
+                                    v-model=" form.start_date "
+                                    placeholder="Start Date"
+                                    :disabled=" busy "
+                                />
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="6" lg="3">
+
+                            <b-form-group label="Added To">
+
+                                <date-picker
+                                    name="end_date"
+                                    v-model=" form.end_date "
+                                    placeholder="End Date"
+                                    :disabled=" busy "
+                                />
+                            </b-form-group>
+                        </b-col> -->
+                        <b-col md="6" lg="3">
 
                             <b-form-group label="Caregiver status">
 
                                 <b-form-select v-model=" form.active ">
+
+                                    <option :value=" null ">All Caregivers</option>
+                                    <option :value=" true ">Active Caregivers</option>
+                                    <option :value=" false ">Inactive Caregivers</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="6" lg="3">
+
+                            <b-form-group label="Status Alias">
+
+                                <b-form-select>
 
                                     <option :value=" null ">All Caregivers</option>
                                     <option :value=" true ">Active Caregivers</option>
@@ -113,20 +149,14 @@
                 busy          : false,
                 form: new Form({
 
-                    active : null,
-                    json   : 1
+                    active     : null,
+                    start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
+                    end_date   : moment().format( 'MM/DD/YYYY' ),
+                    json       : 1
                 }),
                 customFieldKeys: [],
-                filters: {
-
-                    start_date: '',
-                    end_date: '',
-                    active: null,
-                    client_type: null,
-                },
-                directoryType : 'caregiver',
-                items         : [],
-                columns: {
+                items   : [],
+                columns : {
                     firstname: {
                         key: 'firstname',
                         label: 'First name',
@@ -233,10 +263,11 @@
 
             fields() {
 
-                let fields = Object.keys(this.columns).filter(key => this.columns[key].shouldShow);
-                fields = fields.map(col => ({
-                        sortable: true,
-                        ...this.columns[col],
+                let fields = Object.keys( this.columns ).filter( key => this.columns[ key ].shouldShow );
+                fields = fields.map( col => ({
+
+                    sortable : true,
+                    ...this.columns[ col ],
                 }));
 
                 return fields;
@@ -253,11 +284,11 @@
                         this.items     = data;
                         this.totalRows = this.items.length;
 
-                        console.log( this.items );
+                        console.log( this.items ); // get rid of this ERIK TODO
                     })
                     .catch( err => {
 
-                        console.error( err );
+                        console.error( err ); // maybe get rid of this ERIK TODO
                     })
                     .finally(() => {
 
@@ -269,7 +300,8 @@
                 window.location = this.form.toQueryString( '/business/reports/caregiver-directory?export=1' );
             },
             printTable() {
-                $('#table').print();
+
+                $( '#table' ).print(); // maybe get rid of this ERIK TODO
             },
 
             getFieldValue(meta, key) {
