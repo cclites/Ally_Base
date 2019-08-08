@@ -7,8 +7,7 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Client;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Http\Requests\PayClaimRequest;
 use App\Http\Requests\TransmitClaimRequest;
 use App\Http\Requests\UpdateMissingClaimsFieldsRequest;
@@ -25,10 +24,10 @@ class ClaimsController extends BaseController
      * Get claims listing.
      *
      * @param Request $request
-     * @param ClientInvoiceQuery $invoiceQuery
+     * @param OnlineClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
 
