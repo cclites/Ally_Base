@@ -67,7 +67,7 @@
             return {
                 sortBy: 'Day',
                 sortDesc: false,
-                confirmedByAdmin: '  Confirmed by Admin/System',
+                confirmedByAdmin: '  admin@allyms.com',
                 confirmedByClient: '  Confirmed by Client',
             }
         },
