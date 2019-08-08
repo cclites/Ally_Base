@@ -178,7 +178,13 @@ export default {
                 await this.form.post(`/business/communication/text-caregivers`);
                 this.resetForm();
             }
-            catch (e) {}
+            catch (e) {
+                if (e.response.status == 418) {
+                    // Message was sent but there were errors
+                    this.resetForm();
+                }
+
+            }
             this.submitting = false;
         },
 
