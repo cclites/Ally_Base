@@ -134,7 +134,7 @@ class ClientReferralsReport extends BaseReport
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
                     'revenue' => $invoiced->sum('amount_paid'),
-                    'salesperson' => optional($client->salesperson->fullName()),
+                    'salesperson' => optional($client->salesperson)->fullName(),
                 ];
 
             })
