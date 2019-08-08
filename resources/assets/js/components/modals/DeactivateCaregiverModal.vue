@@ -21,11 +21,13 @@
                     </b-form-group>
 
                     <b-form-group label="Reason for Deactivation">
-                        <b-form-select v-model="deactivation_reason_id">
+                        <b-form-select v-model="deactivation_reason_id" id="deactivation_reason_id">
                             <option v-for="reason in this.deactivationReasons.caregiver" :key="reason.id" :value="reason.id">
                                 {{ reason.name }}
                             </option>
                         </b-form-select>
+                        <input-help :form="form" field="deactivation_reason_id"
+                                text="Discharge Summary/Reason for deactivation will be added to the documents tab of caregiver profile"></input-help>
                     </b-form-group>
 
                     <b-form-group label="Notes">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\DeactivationReason;
+use App\Document;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -46,6 +47,9 @@ class DeactivationReasonController extends BaseController
         if ($reason = $this->businessChain()->deactivationReasons()->create($data)) {
             return new SuccessResponse(ucfirst($data['type']) . ' Deactivation reason created.', $reason);
         }
+
+        //want to create a new document entry here
+        $document = new Document();
 
         return new ErrorResponse(500, 'An unexpected error occurred.');
     }
