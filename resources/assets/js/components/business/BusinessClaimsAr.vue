@@ -279,6 +279,17 @@
                         sortable: true,
                     },
                     {
+                        key: 'invoice_total',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'balance',
+                        label: 'Invoice Balance',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
+                    {
                         key: 'client',
                         sortable: true,
                     },
@@ -293,12 +304,12 @@
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
-                    // {
-                    //     key: 'balance',
-                    //     label: 'Invoice Balance',
-                    //     formatter: (val) => this.moneyFormat(val),
-                    //     sortable: true,
-                    // },
+                    {
+                        key: 'claim_balance',
+                        label: 'Claim Balance',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
                     {
                         key: 'claim_status',
                         formatter: (x) => _.capitalize(_.startCase(x)),
@@ -308,12 +319,6 @@
                         key: 'claim_service',
                         label: 'Claim Service',
                         formatter: (x) => this.serviceLabel(x),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
