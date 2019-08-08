@@ -53,13 +53,14 @@ class ClientPayersTest extends TestCase
     public function the_claims_and_ar_report_works_soundly()
     {
 
+        // you have to add  || $request->filled( 'json' ) to the controller
         factory( ClientInvoice::class, 50 )->create();
 
         $query_string = '?json=1&businesses=3&start_date=07/09/2019&end_date=08/08/2019&invoiceType=&client_id=&payer_id=';
         $data = $this->get( route( 'business.claims-ar' ) . $query_string )
             ->assertSuccessful();
 
-        dd( $data );
+        // dd( $data );
     }
 
     /** @test */
