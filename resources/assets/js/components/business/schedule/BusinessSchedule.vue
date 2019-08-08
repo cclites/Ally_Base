@@ -896,7 +896,7 @@
             },
 
             renderTimelineDayEvent(content, event, note) {
-                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, `${event.service_types}`];
+                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -905,7 +905,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note) {
-                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, `${event.service_types}`];
+                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -914,7 +914,7 @@
             },
 
             renderAgendaWeekEvent(content, event, note) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, `${event.service_types}`];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -923,7 +923,7 @@
             },
 
             renderDefaultEvent(content, event, note) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, `${event.service_types}`];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),

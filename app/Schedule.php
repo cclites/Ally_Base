@@ -2,6 +2,7 @@
 namespace App;
 
 use App\Billing\ScheduleService;
+use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
@@ -195,6 +196,11 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     public function services()
     {
         return $this->hasMany(ScheduleService::class);
+    }
+
+    public function service()
+    {
+        return $this->hasOne(Service::class, 'id', 'service_id');
     }
 
     public function group()

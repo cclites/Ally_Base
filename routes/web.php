@@ -337,8 +337,8 @@ Route::group([
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
     Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
     Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
-    Route::get('reports/caregiver-directory', 'Business\ReportsController@caregiverDirectory')->name('reports.caregiver_directory');
-    Route::get('reports/caregiver-directory/download', 'Business\ReportsController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
+    Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
+    Route::get('reports/caregiver-directory/download', 'Business\Report\CaregiverDirectoryReportController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
@@ -361,6 +361,7 @@ Route::group([
     Route::get('reports/offline-ar-aging', 'Business\Report\BusinessOfflineArAgingReportController@index')->name('reports.offline-ar-aging');
     Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
     Route::get('reports/account-setup', 'Business\Report\BusinessAccountSetupReportController@index')->name('reports.account-setup');
+    Route::get('reports/client-account-setup', 'Business\Report\BusinessAccountSetupReportController@client')->name('reports.client-account-setup');
     Route::get('reports/service-auth-ending', 'Business\Report\BusinessServiceAuthEndingReport@index')->name('reports.service-auth-ending');
     Route::get('reports/service-auth-ending/clients', 'Business\Report\BusinessServiceAuthEndingReport@clients')->name('reports.service-auth-ending.clients');
     Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
