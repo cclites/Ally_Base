@@ -153,6 +153,7 @@
 
                 let active = '';
                 let aliasId = '';
+
                 this.loadFiltersFromStorage();
 
                 if (this.filters.status === '') {
@@ -260,6 +261,10 @@
                     this.setLocalStorage(filter, this.filters[filter]);
                 }
             },
+
+            updateSortOrder(){
+                this.setLocalStorage('sortBy', this.sortBy);
+            }
         },
 
         watch: {
@@ -285,6 +290,10 @@
                     this.$refs.table.refresh();
                 }, 350)();
             },
+
+            sortBy() {
+                this.updateSortOrder();
+            }
         },
     }
 </script>

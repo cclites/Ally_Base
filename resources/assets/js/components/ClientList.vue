@@ -89,16 +89,16 @@
         data() {
             return {
                 filters: {
-                    status: 'active',
+                    status: '',
                     client_type: '',
                     business_id: '',
                     search: null,
                     caseManager: '',
                 },
+                sortBy: 'lastname',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
                 modalDetails: { index:'', data:'' },
@@ -222,6 +222,10 @@
                 this.modalDetails.index = '';
             },
             onFiltered(filteredItems) {
+                //store sortBy
+                console.log("update sort order");
+                this.updateSortOrder();
+
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
@@ -261,13 +265,20 @@
                     this.setLocalStorage(filter, this.filters[filter]);
                 }
             },
+
+            updateSortOrder(){
+                this.setLocalStorage('sortBy', this.sortBy);
+            }
         },
 
         watch: {
             listUrl() {
-
                 this.loadClients();
             },
+
+            sortBy() {
+                this.updateSortOrder();
+            }
         }
     }
 </script>
