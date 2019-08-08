@@ -47,7 +47,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'services', 'carePlan'])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'carePlan', 'services.service'])
             ->ordered();
 
         // Filter by client or caregiver
@@ -652,8 +652,8 @@ class ScheduleController extends BaseController
                         'caregiver_id' => $request->caregiver_id,
                         'effective_start' => date('Y') . '-01-01',
                         'effective_end' => '9999-12-31',
-                        'caregiver_hourly_rate' => $service['caregiver_rate'],
-                        'client_hourly_rate' => $service['client_rate'],
+                        'caregiver_hourly_rate' => $service['caregiver_rate'] ?? 0,
+                        'client_hourly_rate' => $service['client_rate'] ?? 0,
                         'caregiver_fixed_rate' => 0,
                         'client_fixed_rate' => 0,
                         'service_id' => $service['service_id'],

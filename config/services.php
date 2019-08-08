@@ -50,6 +50,12 @@ return [
         'default_number' => env('TWILIO_DEFAULT_NUMBER'),
     ],
 
+    'twilio-sandbox' => [
+        'sid' => env('TWILIO_SANDBOX_SID'),
+        'token' => env('TWILIO_SANDBOX_APP_TOKEN'),
+        'default_number' => env('TWILIO_SANDBOX_DEFAULT_NUMBER'),
+    ],
+
     'slack' => [
         'endpoint' => env('SLACK_ENDPOINT'),
         'channel' => env('SLACK_CHANNEL')

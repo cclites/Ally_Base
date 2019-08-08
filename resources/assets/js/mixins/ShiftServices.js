@@ -116,7 +116,7 @@ export default {
                 service_id: service.service_id ? service.service_id : (this.defaultService ? this.defaultService.id : null),
                 payer_id: service.payer_id == 0 ? 0 : service.payer_id || null,
                 hours_type: service.hours_type || 'default',
-                duration: service.duration || 1,
+                duration: service.duration.toFixed(2) || 1,
                 caregiver_rate: service.caregiver_rate || null,
                 client_rate: service.client_rate || null,
                 provider_fee: null,

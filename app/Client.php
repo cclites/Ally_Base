@@ -31,6 +31,7 @@ use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
+use App\SalesPerson;
 
 /**
  * App\Client

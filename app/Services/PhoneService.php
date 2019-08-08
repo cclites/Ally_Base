@@ -18,14 +18,30 @@ class PhoneService
      */
     protected $from;
 
-    public function __construct(Client $client = null)
+    /**
+     * @var bool
+     */
+    protected $sandbox = false;
+
+    /**
+     * PhoneService constructor.
+     * @param Client|null $client
+     * @param bool $sandbox
+     * @throws \Twilio\Exceptions\ConfigurationException
+     */
+    public function __construct(?Client $client = null, bool $sandbox = false)
     {
-        if (config('sms.driver') == 'twilio') {
+        $this->from = config('services.twilio.default_number');
+
+        if ($sandbox || config('sms.driver') == 'sandbox') {
+            $this->sandbox = true;
+            $this->client = $client ?: new Client(config('services.twilio-sandbox.sid'), config('services.twilio-sandbox.token'));
+            $this->from = config('services.twilio-sandbox.default_number');
+        } elseif (config('sms.driver') == 'twilio') {
             $this->client = $client ?: new Client(config('services.twilio.sid'), config('services.twilio.token'));
         } else {
             // an empty client will use the 'log' driver
         }
-        $this->from = config('services.twilio.default_number');
     }
 
     /**
@@ -36,7 +52,11 @@ class PhoneService
      */
     public function setFromNumber($number)
     {
-        $this->from = $number;
+        if ($this->sandbox) {
+            $this->from = config('services.twilio-sandbox.default_number');
+        } else {
+            $this->from = $number;
+        }
     }
 
     /**
