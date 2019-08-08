@@ -490,11 +490,13 @@ Route::group([
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
+
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
+    Route::resource('note-templates', 'NoteTemplateController');
     Route::resource('note-templates', 'NoteTemplateController');
     Route::get('/business/office-users', 'Business\OfficeUserController@index');
 });
@@ -570,6 +572,8 @@ Route::group([
     Route::get('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
     Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
+
+    Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
 
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');

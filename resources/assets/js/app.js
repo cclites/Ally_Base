@@ -134,6 +134,8 @@ Vue.component('business-contact-info-tab', require('./components/admin/BusinessC
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
+
+Vue.component('paid-billed-audit-report', require('./components/admin/reports/PaidBilledAuditReport.vue'));
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 
 // Office User
@@ -267,7 +269,6 @@ Vue.component('clock-out', require('./components/ClockOut.vue'));
 Vue.component('clocked-in', require('./components/ClockedIn.vue'));
 Vue.component('adjoining-caregivers-card', require('./components/caregivers/AdjoiningCaregiversCard.vue'));
 
-
 Vue.component('caregiver-setup-wizard', require('./components/account-setup/CaregiverSetupWizard.vue'));
 
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
@@ -283,7 +284,6 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
 Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
-
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
