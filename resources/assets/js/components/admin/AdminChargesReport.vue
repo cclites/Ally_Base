@@ -213,7 +213,7 @@
         mounted() {
             this.refundInit(); // initialize
             this.loadBusinesses();
-            this.loadItems();
+            //this.loadItems();
         },
 
         methods: {
@@ -224,12 +224,14 @@
                 this.loading = true;
                 axios.get('/admin/charges?json=1&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
+
                         this.items = response.data.map(function(item) {
-                            item.name = (item.client) ? item.client.nameLastFirst : item.business.name;
+                            item.name = (item.client) ? item.client.nameLastFirst : '';
                             item.business_name = (item.business) ? item.business.name : '';
                             item.transaction_response = (item.transaction) ? item.transaction.response_text : '';
                             item.gateway_id = (item.transaction) ? item.transaction.transaction_id : '';
                             item.status = (item.transaction && item.transaction.last_history) ? item.transaction.last_history.status : '';
+
                             return item;
                         });
                         this.loading = false;
