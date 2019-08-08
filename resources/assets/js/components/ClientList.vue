@@ -222,10 +222,6 @@
                 this.modalDetails.index = '';
             },
             onFiltered(filteredItems) {
-                //store sortBy
-                console.log("update sort order");
-                this.updateSortOrder();
-
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
