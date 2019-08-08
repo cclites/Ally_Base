@@ -14,15 +14,15 @@ use App\Caregiver;
 use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
 
-class TestReports extends TestCase
+class ReportsTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
     /**
      * @test
-     * 
+     *
      * testing the results of the 'Total Charges Report'
-     * 
+     *
      * Criteria:
      *  - must accept a date range
      *  - must not paginate ( turns out there wasn't any backend code to implement this to begin with )
