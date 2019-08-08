@@ -482,7 +482,7 @@
                     {
                         name: 'Payroll Summary',
                         url: 'reports/payroll-summary-report',
-                        description: 'Payroll Summary Report',
+                        description: 'Total caregiver payments over a specified date range',
                         category: 5,
                         allowed: ['office_user'],
                     },
