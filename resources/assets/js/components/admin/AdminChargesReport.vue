@@ -213,7 +213,7 @@
         mounted() {
             this.refundInit(); // initialize
             this.loadBusinesses();
-            //this.loadItems();
+            this.loadItems();
         },
 
         methods: {
