@@ -43,9 +43,6 @@ class DepositInvoiceController extends Controller
             }
 
             if ( $request->has( 'start_date' ) ) {
-
-                // dd( Carbon::parse( $request->start_date )->toDateString() . ' 00:00:00' );
-
                 $startDate = Carbon::parse( $request->start_date )->toDateTimeString();
                 $endDate   = Carbon::parse( $request->end_date )->toDateString() . ' 23:59:59';
                 $caregiverInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
