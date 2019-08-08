@@ -102,8 +102,8 @@ class ThirdPartyPayerReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $payer): self
     {
-        $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
-        $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
+        $this->start = (new Carbon($start . ' 00:00:00',$this->timezone))->setTimezone('UTC');
+        $this->end = (new Carbon($end . ' 23:59:59',$this->timezone))->setTimezone('UTC');
 
         // Base the date range on the creation date of the invoice
         // so we can properly get old imported timesheets from previous
