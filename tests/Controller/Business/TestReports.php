@@ -35,12 +35,13 @@ class TestReports extends TestCase
     public function caregiver_directory_report_works_properly()
     {
 
-        $data = factory( Caregiver::class, 115 )->create()->each( function( $caregiver ){
+        $data = factory( Caregiver::class, 15 )->create()->each( function( $caregiver ){
 
             $caregiver->businesses()->attach( $this->business );
         });
-        // dd( $data->toArray() );
-        $query_string = '?json=1';
-        $data = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string );
+
+        $query_string = '?json=1&active=false&export=1';
+        $data = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string )
+            ->assertSuccessful();
     }
 }

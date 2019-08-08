@@ -338,7 +338,7 @@ Route::group([
     Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
     Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
     Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
-    Route::get('reports/caregiver-directory/download', 'Business\Report\CaregiverDirectoryReportController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
+    Route::get('reports/caregiver-directory/download', 'Business\Report\CaregiverDirectoryReportController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download'); // this isnt used anywhere, i can tell, based on a global search for the route, route name, controller and controller function
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 

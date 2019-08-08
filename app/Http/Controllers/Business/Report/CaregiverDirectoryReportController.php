@@ -23,27 +23,17 @@ class CaregiverDirectoryReportController extends BaseController
     {
         if( $request->filled( 'json' ) ){
 
-            // dd( $request );
-            $caregivers = Caregiver::forRequestedBusinesses()
-                ->with([ 'address', 'user', 'user.emergencyContacts', 'user.phoneNumbers' ])
-                ->with( 'meta' )
-                ->get()->map( function( $caregiver ){
+            $report = new CaregiverDirectoryReport();
+            $report->query()->forRequestedBusinesses();
+            $report->setActiveFilter( $request->active );
 
-                    $caregiver->phone = $caregiver->user->notification_phone;
-                    $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-                    $caregiver->referral = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-                    $caregiver->certification = $caregiver->certification ? $caregiver->certification : '-';
-                    $caregiver->smoking_okay = $caregiver->smoking_okay ? "Yes" : "No";
-                    $caregiver->ethnicity = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-                    $caregiver->medicaid_id = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-                    $caregiver->gender = $caregiver->user->gender ? $caregiver->user->gender : '-';
+            if ( $request->export == '1' ) {
 
-                    return $caregiver;
+                return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
+                    ->download();
+            }
 
-                });
-
-            // dd( response()->json( $caregivers ) );
-            return response()->json( $caregivers );
+            return response()->json( $report->rows() );
         }
 
         $fields = CustomField::forAuthorizedChain()
@@ -56,25 +46,32 @@ class CaregiverDirectoryReportController extends BaseController
 
     /**
      * Handle the request to generate the caregiver directory
+     * 
+     * I feel safe manipulating this because i did a global check and didnt find anything using this or the route that accesses this
      *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
-    public function generateCaregiverDirectoryReport(Request $request)
+    public function generateCaregiverDirectoryReport( Request $request )
     {
         $report = new CaregiverDirectoryReport();
         $report->forRequestedBusinesses();
-        $report->query()->join('users','caregivers.id','=','users.id');
 
-        if($request->has('filter_active')) {
-            $report->where('users.active', $request->filter_active);
+        switch( $request->active ){
+
+            case 'true':
+
+                $query->active();
+                break;
+            case 'false':
+
+                $query->inactive();
+                break;
+            default:
+                break;
         }
 
-        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
-
-        if ($request->has('export') && $request->export == true) {
-            return $report->download();
-        }
+        // $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
 
         return $report->rows();
     }

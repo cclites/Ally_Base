@@ -1,21 +1,29 @@
- <template>
+<template>
+
     <div>
+
         <!-- FILTERS CARD -->
         <b-row>
+
             <b-col lg="12">
+
                 <b-card
-                    header="Select Date Range &amp; Filters"
+                    header="Select Filters"
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
+
                     <b-row>
 
                         <b-col lg="3">
+
                             <b-form-group label="Caregiver status">
-                                <b-form-select v-model="filters.active">
-                                    <option :value="null">All Caregivers</option>
-                                    <option :value="true">Active Caregivers</option>
-                                    <option :value="false">Inactive Caregivers</option>
+
+                                <b-form-select v-model=" form.active ">
+
+                                    <option :value=" null ">All Caregivers</option>
+                                    <option :value=" true ">Active Caregivers</option>
+                                    <option :value=" false ">Inactive Caregivers</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -37,50 +45,67 @@
 
         <!-- TABLE CARD -->
         <b-row>
+
             <b-col lg="12">
+
                 <b-card>
+
                     <b-row class="mb-2">
-                        <b-col sm="6">
-                            <!-- MODAL TO SELECT COLUMNS -->
+
+                        <!-- <b-col sm="6">
+
                             <report-column-picker prefix="caregiver_directory_" v-bind:columns.sync="columns" />
-                        </b-col>
-                        <b-col sm="6" class="text-right">
-                            <b-btn :href="downloadableUrl" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                        </b-col> -->
+                        <b-col sm="12" class="text-right">
+
+                            <b-btn @click=" exportExcel() " variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
 
-                    <ally-table id="table" :columns="fields" :items="items">
+                    <ally-table id="table" :columns=" fields " :items=" items " :perPage=" 100 ">
+
                         <template slot="active" scope="row">
+
                             {{ row.item.active ? 'Active' : 'Inactive' }}
                         </template>
                         <template slot="address" scope="row">
-                            {{ addressFormat(row.item.address) }}
+
+                            {{ addressFormat( row.item.address ) }}
                         </template>
                         <template slot="created_at" scope="row">
-                            {{ formatDate(row.item.user.created_at) }}
+
+                            {{ formatDate( row.item.user.created_at ) }}
                         </template>
                         <template v-for="key in customFieldKeys" :slot="key" scope="row">
-                            {{ getFieldValue(row.item.meta, key) }}
+
+                            {{ getFieldValue( row.item.meta, key ) }}
                         </template>
                     </ally-table>
                 </b-card>
             </b-col>
         </b-row>
-    </div>    
- </template>
- 
+    </div>
+</template>
+
 <script>
 
     import moment from 'moment';
     import FormatsListData from '../../../mixins/FormatsListData';
-    import UserDirectory from '../../../mixins/UserDirectory';
+    // import UserDirectory from '../../../mixins/UserDirectory';
     import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
 
-        mixins: [ FormatsListData, FormatsDates, UserDirectory ],
+        mixins: [ FormatsListData, FormatsDates ],
+        props: {
 
+            customFields: {
+
+                type     : Array,
+                required : true,
+            },
+        },
         data() {
 
             return {
@@ -88,14 +113,19 @@
                 busy          : false,
                 form: new Form({
 
-                    // businesses : '',
-                    // role_type  : 'caregiver',
-                    // status     : 'scheduled',
-                    // phone      : '',
-                    json       : 1
+                    active : null,
+                    json   : 1
                 }),
+                customFieldKeys: [],
+                filters: {
+
+                    start_date: '',
+                    end_date: '',
+                    active: null,
+                    client_type: null,
+                },
                 directoryType : 'caregiver',
-                data          : null,
+                items         : [],
                 columns: {
                     firstname: {
                         key: 'firstname',
@@ -199,6 +229,19 @@
                 },
             };
         },
+        computed: {
+
+            fields() {
+
+                let fields = Object.keys(this.columns).filter(key => this.columns[key].shouldShow);
+                fields = fields.map(col => ({
+                        sortable: true,
+                        ...this.columns[col],
+                }));
+
+                return fields;
+            }
+        },
         methods: {
 
             fetch() {
@@ -207,8 +250,10 @@
                 this.form.get( '/business/reports/caregiver-directory' )
                     .then( ({ data }) => {
 
-                        this.data      = data;
+                        this.items     = data;
                         this.totalRows = this.items.length;
+
+                        console.log( this.items );
                     })
                     .catch( err => {
 
@@ -218,11 +263,57 @@
 
                         this.busy = false;
                     })
+            },
+            exportExcel(){
+
+                window.location = this.form.toQueryString( '/business/reports/caregiver-directory?export=1' );
+            },
+            printTable() {
+                $('#table').print();
+            },
+
+            getFieldValue(meta, key) {
+                const metaField = meta.find(fieldValue => fieldValue.key == key);
+                const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
+                const isDropdown = options.length > 0;
+
+                if(!metaField) {
+                    return fieldDefault;
+                }
+
+                return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
+            },
+
+            getDropdownLabel(options, key) {
+                let option = options.find(option => option.value == key);
+                return option ? option.label : '-';
             }
         },
         created(){
 
             this.fetch();
+
+            const obj = {};
+            const customKeys = [];
+            this.customFields.forEach(({ key, label }) => {
+
+                customKeys.push( key );
+                obj[ key ] = {
+
+                    sortable   : true,
+                    shouldShow : true,
+                    key,
+                    label,
+                };
+            });
+
+            this.customFieldKeys = customKeys;
+
+            this.columns = {
+
+                ...this.columns,
+                ...obj,
+            };
         }
     }
 </script>
