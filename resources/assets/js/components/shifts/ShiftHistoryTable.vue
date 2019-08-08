@@ -82,18 +82,10 @@
             },
 
             formatTooltip(item){
-
                 let dateTime = this.formatDateTimeFromUTC(item.confirmed_at);
                 let message = item.client_confirmed === 1 ? this.confirmedByClient : this.confirmedByAdmin;
-
                 this.confirmedByMessage = item.client_confirmed === 1 ? this.confirmedByClientMessage : this.confirmedByAdminMessage;
-
-                console.log(dateTime + " " + message);
-
                 return dateTime + " " + message;
-
-                //formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByClient
-                //formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByAdmin
             },
         },
     }
