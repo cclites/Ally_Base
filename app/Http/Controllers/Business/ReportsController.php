@@ -301,6 +301,10 @@ class ReportsController extends BaseController
      */
     public function caregiversMissingBankAccounts()
     {
+        // added a simple redirect as per ALLY-1394 which asked to remove this report. The front-end link is removed, so any sort of
+        // manual navigation to this route will also be rebuffed with the below line
+        return back();
+
         $caregivers = Caregiver::forRequestedBusinesses()
             ->with(['shifts' => function ($query) {
                 $query->where('status', 'WAITING_FOR_PAYOUT');
@@ -318,6 +322,10 @@ class ReportsController extends BaseController
      */
     public function clientsMissingPaymentMethods()
     {
+        // added a simple redirect as per ALLY-1394 which asked to remove this report. The front-end link is removed, so any sort of
+        // manual navigation to this route will also be rebuffed with the below line
+        return back();
+
         $clients = Client::forRequestedBusinesses()
             ->with(['shifts' => function ($query) {
                 $query->where('status', 'WAITING_FOR_CHARGE');
