@@ -57,10 +57,7 @@ class DepositInvoiceController extends Controller
 
             $invoices = $caregiverInvoices->merge($businessInvoices);
 
-            $stuff = DepositInvoiceResponse::collection($invoices);
-            // dd( $stuff );
-
-            return $stuff;
+            return DepositInvoiceResponse::collection($invoices);
         }
 
         $chains = BusinessChain::ordered()->get();
