@@ -30,7 +30,8 @@ class ClaimsController extends BaseController
      */
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->filled( 'json' )) {
+
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
                     case 'overpaid':

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Payer;
 use App\Billing\ClientPayer;
 use Illuminate\Support\Carbon;
+use App\Billing\ClientInvoice;
 
 class ClientPayersTest extends TestCase
 {
@@ -39,6 +40,26 @@ class ClientPayersTest extends TestCase
 
         $this->payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
         $this->actingAs($this->officeUser->user);
+    }
+
+    /**
+     * @test
+     * 
+     * testing the output of the Claims & AR report
+     * 
+     * not necessarily runnning many assertions on it, I just like having a CLI method of viewing the results.
+     * Plus setting up the factories helps me understand what data & relationships that the report works with
+     */
+    public function the_claims_and_ar_report_works_soundly()
+    {
+
+        factory( ClientInvoice::class, 50 )->create();
+
+        $query_string = '?json=1&businesses=3&start_date=07/09/2019&end_date=08/08/2019&invoiceType=&client_id=&payer_id=';
+        $data = $this->get( route( 'business.claims-ar' ) . $query_string )
+            ->assertSuccessful();
+
+        dd( $data );
     }
 
     /** @test */
