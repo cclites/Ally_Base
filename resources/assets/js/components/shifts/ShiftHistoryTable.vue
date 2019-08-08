@@ -30,9 +30,9 @@
             </template>
             <template slot="Confirmed" scope="row">
 
-                <span v-if="row.item.Confirmed && row.item.client_confirmed == 1" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByClient">Client</span>
-                <span v-else-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByAdmin">Yes</span>
-                <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
+                <span v-if="row.item.Confirmed && row.item.client_confirmed === 1" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByClient">Client</span>
+                <span v-else-if="row.item.Confirmed && row.item.client_confirmed === 0" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByAdmin">Yes</span>
+                <span v-else>No</span>
 
             </template>
             <template slot="Charged" scope="row">
@@ -68,7 +68,7 @@
                 sortBy: 'Day',
                 sortDesc: false,
                 confirmedByAdmin: '  admin@allyms.com',
-                confirmedByClient: '  Confirmed by Client',
+                confirmedByClient: '  Confirmed by a user of Ally, Username TBD',
             }
         },
 
