@@ -143,23 +143,4 @@ class InvoiceSummaryBySalespersonReport extends BaseReport
         return $collection;
     }
 
-    /**
-     * Get the PDF printed output of the report.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function print($data, $totals) : \Illuminate\Http\Response
-    {
-        $html = View::make('business.reports.print.invoice_summery_by_salesperson',['data'=>$data, 'totals'=>$totals])->render();
-
-        $snappy = \App::make('snappy.pdf');
-        return new Response(
-            $snappy->getOutputFromHtml($html),
-            200,
-            array(
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="invoices_summary_by_salesperson.pdf"'
-            )
-        );
-    }
 }

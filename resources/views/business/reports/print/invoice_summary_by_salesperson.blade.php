@@ -92,7 +92,7 @@
                             <td>{{ $item['salesperson'] }}</td>
                             <td>{{ $item['client'] }}</td>
                             <td>{{ $item['payer'] }}</td>
-                            <td>{{ money_format($item['amount']) }}</td>
+                            <td>{{ money_format('%i',$item['amount']) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -101,7 +101,7 @@
                         <td><strong>For Dates: </strong>{{ $totals['start'] }} to {{ $totals['end'] }}</td>
                         <td><strong>For Salesperson: </strong> {{ $totals['salesperson'] }}</td>
                         <td><strong>For Client: </strong>{{ $totals['client'] }}</td>
-                        <td><strong>Total Client Charges: </strong> ${{ money_format($totals['amount']) }}</td>
+                        <td><strong>Total Client Charges: </strong> ${{ money_format('%i', $totals['amount']) }}</td>
                     </tr>
                 </tfoot>
 

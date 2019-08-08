@@ -10,6 +10,7 @@ use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\InvoiceSummaryByMarketingReport;
 
+use Illuminate\Http\Response;
 use Log;
 
 class InvoiceSummaryBySalespersonController extends BaseController
@@ -43,7 +44,7 @@ class InvoiceSummaryBySalespersonController extends BaseController
             $data = $this->createSummary($data);
 
             if ($request->filled('print')) {
-                return $data->print($data, $totals);
+                return $this->printReport($data, $totals);
             }
 
             return response()->json(['data'=>$data, 'totals'=>$totals]);
@@ -75,5 +76,25 @@ class InvoiceSummaryBySalespersonController extends BaseController
         }
 
         return array_values($set);
+    }
+
+    /**
+     * Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function printReport($data, $totals) : \Illuminate\Http\Response
+    {
+        $html = \View::make('business.reports.print.invoice_summary_by_salesperson',['data'=>$data, 'totals'=>$totals])->render();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="invoices_summary_by_salesperson.pdf"'
+            )
+        );
     }
 }
