@@ -159,8 +159,7 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'active'      => $client->active ? 'Active' : 'Inactive',
                 'address'     => $client->address ? $client->address->full_address : '',
                 'client_type' => $client->client_type,
-                'date_added'  => $client->user->created_at->format( 'm-d-Y' ),
-                'created_at'  => $client->user->created_at->format( 'm-d-Y' ),
+                'date_added'  => $client->user->created_at->format( 'm-d-Y' )
             ];
 
             // Add the custom fields to the report row

@@ -145,23 +145,6 @@
                             <p style="height:25px; margin: auto 0;">{{ paginationStats }}</p>
                         </b-col>
                     </b-row>
-
-
-
-                    <!-- <ally-table id="table" :columns="fields" :items="items">
-                        <template slot="active" scope="row">
-                            {{ row.item.active ? 'Active' : 'Inactive' }}
-                        </template>
-                        <template slot="address" scope="row">
-                            {{ addressFormat(row.item.address) }}
-                        </template>
-                        <template slot="created_at" scope="row">
-                            {{ formatDate(row.item.user.created_at) }}
-                        </template>
-                        <template v-for="key in customFieldKeys" :slot="key" scope="row">
-                            {{ getFieldValue(row.item.meta, key) }}
-                        </template>
-                    </ally-table> -->
                 </b-card>
             </b-col>
         </b-row>
@@ -171,7 +154,7 @@
 <script>
 
     import FormatsListData from '../../../mixins/FormatsListData';
-    // import UserDirectory from '../../../mixins/UserDirectory';
+    // import UserDirectory from '../../../mixins/UserDirectory'; // this mixin supports client-side pagination, it is used in one other location and should be replaced with the one i replaced it with here.. TODO
     import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from '../../../mixins/Constants';
 
@@ -193,7 +176,7 @@
             return {
 
                 busy          : false,
-                directoryType : 'client', // is this used? ERIK TODO
+                directoryType : 'client',
                 items         : [],
                 columns: {
 

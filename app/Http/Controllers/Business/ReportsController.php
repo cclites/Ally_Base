@@ -828,13 +828,6 @@ class ReportsController extends BaseController
 
             return response()->json( [ 'rows' => $rows, 'total' => $total ] );
 
-
-            // I'm going to leave this here... why in gods name is this a thing?
-            // if ($report->count() > 1000) {
-            //     // Limit to 1K clients for performance reasons
-                    // ?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!??!
-            //     return new ErrorResponse(400, 'There are too many clients to report.  Please reduce your date range.');
-            // }
         }
 
         $fields = CustomField::forAuthorizedChain()
@@ -877,47 +870,6 @@ class ReportsController extends BaseController
         return $report->rows();
     }
 
-
-
-    /**
-     * Handle the request to generate the client directory
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
-     */
-    public function generateClientDirectoryReport(Request $request)
-    {
-        $report = new ClientDirectoryReport();
-        $report->forRequestedBusinesses();
-        $report->query()->join('users', 'clients.id', '=', 'users.id');
-
-        if ($request->filter_start_date && $request->filter_end_date) {
-            $report->where('users.created_at', '>', (new Carbon($request->filter_start_date))->setTimezone('UTC')->setTime(0, 0, 0));
-            $report->where('users.created_at', '<', (new Carbon($request->filter_end_date))->setTimezone('UTC')->setTime(23, 59, 59));
-            $report->query()->with('meta');
-        }
-
-        if ($request->filled('filter_active')) {
-            $report->where('users.active', $request->filter_active);
-        }
-
-        if($request->filled('filter_client_type')) {
-            $report->where('client_type', $request->filter_client_type);
-        }
-
-        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active','filter_client_type']));
-
-        if ($report->count() > 1000) {
-            // Limit to 1K clients for performance reasons
-            return new ErrorResponse(400, 'There are too many clients to report.  Please reduce your date range.');
-        }
-
-        if ($request->has('export') && $request->export == true) {
-            return $report->download();
-        }
-
-        return $report->rows();
-    }
 
     /**
      * See how many shifts have been worked by a caregiver
