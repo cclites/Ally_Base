@@ -50,7 +50,7 @@ class ShiftHistoryItemResource extends Resource
             'confirmed' => $shift->statusManager()->isConfirmed(),
             'confirmed_at' => $shift->confirmed_at,
             'client_confirmed' => $shift->client_confirmed,
-            'charged' => !($shift->statusManager()->isPending()),
+            'charged' => $shift->statusManager()->wasCharged(),
             'charged_at' => $shift->charged_at,
             'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
             // Send both verified and EVV for backwards compatibility
