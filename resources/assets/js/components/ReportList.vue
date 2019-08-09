@@ -511,9 +511,9 @@
                     },
 
                     {
-                        name: 'Payment Summary By Payer',
+                        name: 'Payment Summary By Private Pay Clients',
                         url: 'reports/payment-summary-by-payer',
-                        description: 'Payment Summary By Payer Report',
+                        description: 'See all payments made by private pay clients',
                         category: 5,
                         allowed: ['office_user'],
                     },
