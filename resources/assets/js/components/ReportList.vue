@@ -18,6 +18,10 @@
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
                         </template>
+                        <template slot="description" scope="row">
+                            {{ row.item.description }}
+                            <div v-if="row.item.hidden === true" class="text-danger">This is only shown for admins impersonating office users.</div>
+                        </template>
                     </b-table>
                 </div>
             </b-card>
@@ -569,6 +573,7 @@
                             description: 'Total caregiver payments over a specified date range',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Client Referrals',
@@ -576,6 +581,7 @@
                             description: 'Client Referrals Report',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Invoice Summary By Marketing',
@@ -583,6 +589,7 @@
                             description: 'Invoice Summary By Marketing Report',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Invoice Summary By County',
@@ -590,6 +597,7 @@
                             description: 'Invoice Summary Report By County',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Payment Summary By Payer',
@@ -597,6 +605,7 @@
                             description: 'Payment Summary By Payer Report',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                     )
                 }
