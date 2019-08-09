@@ -40,10 +40,22 @@ class ClaimsController extends BaseController
                         });
                         break;
                     case 'paid':
-                        $invoiceQuery->paidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '=', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '=', 'amount');
+                            });
+                        });
                         break;
                     case 'unpaid':
-                        $invoiceQuery->notPaidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '<', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '<', 'amount');
+                            });
+                        });
                         break;
                     case 'has_claim':
                         $invoiceQuery->whereHas('claim');
