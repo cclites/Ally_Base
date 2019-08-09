@@ -15,6 +15,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     private $current_page = 1; // simple default.. maybe it should start at zero?
     private $total_count;
 
+    private $alias_filter;
     private $active_filter;
 
     private $start_date;
@@ -67,6 +68,19 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
+     * Filter by status alias.
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setStatusAliasFilter( $alias_id ) : self
+    {
+        $this->alias_filter = $alias_id;
+
+        return $this;
+    }
+
+    /**
      * Set number of records to pagniate per page
      *
      * @param $status
@@ -80,7 +94,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Set number of records to pagniate per page
+     * Set current page
      *
      * @param $status
      * @return CaregiverAccountSetupReport
@@ -93,7 +107,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Filter by active status.
+     * Filter by date
      *
      * @param $status
      * @return CaregiverAccountSetupReport
@@ -141,6 +155,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
         // if( $this->start_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '>=', ( new Carbon( $this->start_date . ' 00:00:00', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
         // if( $this->end_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '<=', ( new Carbon( $this->end_date . ' 23:59:59', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
 
+        if( $this->alias_filter ) $this->query()->where( 'status_alias_id', $this->alias_filter );
 
         // perform count-query first
         $this->total_count = $this->query()->with( 'meta' )
@@ -157,12 +172,13 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
             $caregiver->phone             = $caregiver->user->notification_phone;
             $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-            $caregiver->referral          = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-            $caregiver->certification     = $caregiver->certification ? $caregiver->certification : '-';
-            $caregiver->smoking_okay      = $caregiver->smoking_okay ? "Yes" : "No";
-            $caregiver->ethnicity         = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-            $caregiver->medicaid_id       = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-            $caregiver->gender            = $caregiver->user->gender ? $caregiver->user->gender : '-';
+            $caregiver->referral          = $caregiver->referralSource  ? $caregiver->referralSource->name : '-';
+            $caregiver->certification     = $caregiver->certification   ? $caregiver->certification : '-';
+            $caregiver->smoking_okay      = $caregiver->smoking_okay    ? "Yes" : "No";
+            $caregiver->ethnicity         = $caregiver->ethnicity       ? $caregiver->ethnicity : '-';
+            $caregiver->medicaid_id       = $caregiver->medicaid_id     ? $caregiver->medicaid_id : '-';
+            $caregiver->status_alias_name = $caregiver->statusAlias     ? $caregiver->statusAlias->name : '-';
+            $caregiver->gender            = $caregiver->user->gender    ? $caregiver->user->gender : '-';
 
             return $caregiver;
         });
@@ -171,50 +187,5 @@ class CaregiverDirectoryReport extends BusinessResourceReport
         // dd( $caregivers->toArray() );
 
         return $caregivers;
-
-
-        // Erik 8/8/19 =>
-        // this is the old function code that was here. Again, as far as I can tell this wasn't even in use. Leaving it here just in case it is needed.. mainly for archive purposes
-
-        // $this->generated = true;
-        // $customFields =CustomField::forAuthorizedChain()->where('user_type', 'caregiver')->get();
-        // $rows = $caregivers->map(function(Caregiver $caregiver) use(&$customFields) {
-        //     $result = [
-        //         'id' => $caregiver->id,
-        //         'firstname' => $caregiver->user->firstname ? $caregiver->user->firstname : '-',
-        //         'lastname' => $caregiver->user->lastname ? $caregiver->user->lastname : '-',
-        //         'username' => $caregiver->username ? $caregiver->username : '-',
-        //         'title' => $caregiver->title,
-        //         'certification' => $caregiver->certification ? $caregiver->certification : '-',
-        //         'gender' => $caregiver->user->gender ? $caregiver->user->gender : '-',
-        //         'orientation_date' => $caregiver->orientation_date ? $caregiver->orientation_date->format('m-d-Y') : '-',
-        //         'smoking_okay' => $caregiver->smoking_okay ? "Yes" : "No",
-        //         'ethnicity' =>$caregiver->ethnicity ? $caregiver->ethnicity : '-',
-        //         'application_date' =>$caregiver->application_date ? $caregiver->application_date->format('m-d-Y') : '-',
-        //         'medicaid_id' => $caregiver->medicaid_id ? $caregiver->medicaid_id : '-',
-        //         'email' => $caregiver->user->email,
-        //         'phone' => $caregiver->user->notification_phone,
-        //         'active' => $caregiver->active ? 'Active' : 'Inactive',
-        //         'address' => $caregiver->address ? $caregiver->address->full_address : '',
-        //         'emergency_contact' => $caregiver->user->formatEmergencyContact(),
-        //         'date_added' => $caregiver->user->created_at->format('m-d-Y'),
-        //         'referral' => $caregiver->referralSource ? $caregiver->referralSource->name : ''
-        //     ];
-
-        //     // Add the custom fields to the report row
-        //     foreach($customFields as $field) {
-        //         if($meta = $caregiver->meta->where('key', $field->key)->first()) {
-        //             $result[$field->key] = $meta->display();
-        //             continue;
-        //         }
-
-        //         $result[$field->key] = $field->default;
-        //     }
-
-        //     return $result;
-        // });
-
-        // $rows = $this->filterColumns($rows);
-        // return $rows;
     }
 }

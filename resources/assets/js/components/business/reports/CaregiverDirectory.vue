@@ -39,7 +39,7 @@
                                 />
                             </b-form-group>
                         </b-col> -->
-                        <b-col sm="6">
+                        <b-col sm="4">
 
                             <b-form-group label="Caregiver status">
 
@@ -51,15 +51,14 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col sm="6">
+                        <b-col sm="4">
 
                             <b-form-group label="Status Alias">
 
-                                <b-form-select>
+                                <b-form-select name="status_alias_id" v-model=" form.status_alias_id ">
 
-                                    <option :value=" null ">All Caregivers</option>
-                                    <option :value=" true ">Active Caregivers</option>
-                                    <option :value=" false ">Inactive Caregivers</option>
+                                    <option value="">All Aliases</option>
+                                    <option v-for=" ( alias, i ) in statusAliases " :key=" i " :value=" alias.id ">{{ alias.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -189,13 +188,15 @@
 
                 form : new Form({
 
-                    active       : null,
+                    active          : null,
                     // start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
                     // end_date   : moment().format( 'MM/DD/YYYY' ),
-                    current_page : 1,
-                    json         : 1
+                    current_page    : 1,
+                    status_alias_id : '',
+                    json            : 1
                 }),
                 busy            : false,
+                statusAliases   : [],
                 totalRows       : 0,
                 perPage         : 100,
                 customFieldKeys : [],
@@ -252,6 +253,11 @@
                         label: 'Application Date',
                         shouldShow: true,
                         formatter: val => this.formatDate(val)
+                    },
+                    status_alias: {
+                        key: 'status_alias_name',
+                        label: 'Status Alias',
+                        shouldShow: true,
                     },
                     medicaid_id: {
                         key: 'medicaid_id',
@@ -334,6 +340,15 @@
         },
         methods: {
 
+            async fetchStatusAliases() {
+
+                let response = await axios.get( '/business/status-aliases' );
+                if ( response.data && response.data.caregiver ) {
+
+                    // console.log( response.data.caregiver );
+                    this.statusAliases = response.data.caregiver.map( alias => { return { 'name' : alias.name, 'id' : alias.id } } );
+                }
+            },
             fetch() {
 
                 this.busy = true;
@@ -412,6 +427,10 @@
                 ...this.columns,
                 ...obj,
             };
+        },
+        async mounted(){
+
+            await this.fetchStatusAliases();
         }
     }
 </script>

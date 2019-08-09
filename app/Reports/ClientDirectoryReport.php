@@ -170,7 +170,7 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'first_name'   => $client->user->firstname,
                 'last_name'    => $client->user->lastname,
                 'email'        => $client->user->email,
-                'active'       => $client->active ? 'Active' : 'Inactive',
+                'active'       => $client->active,
                 'address'      => $client->address ? $client->address->full_address : '',
                 'client_type'  => $client->client_type,
                 'status_alias' => $client->statusAlias ? $client->statusAlias->name : '',

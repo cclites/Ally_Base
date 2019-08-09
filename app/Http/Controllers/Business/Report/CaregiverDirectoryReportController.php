@@ -24,12 +24,13 @@ class CaregiverDirectoryReportController extends BaseController
         if( $request->filled( 'json' ) ){
 
             $report = new CaregiverDirectoryReport();
-            $report->query()->forRequestedBusinesses();
-            $report->setActiveFilter( $request->active );
-            // $report->setDateFilter( $request->start_date, $request->end_date );
-
-            $report->setCurrentPage( $request->current_page );
-            $report->setPageCount( 100 );
+            $report->query()->leftJoin( 'users', 'caregivers.id', '=', 'users.id' );
+            $report->forRequestedBusinesses()
+                ->setActiveFilter( $request->active )
+                ->setStatusAliasFilter( $request->status_alias_id )
+                ->setCurrentPage( $request->current_page )
+                ->setPageCount( 100 );
+                // ->setDateFilter( $request->start_date, $request->end_date );
 
             if ( $request->export == '1' ) {
                 // the request object attributes are coming through as strings

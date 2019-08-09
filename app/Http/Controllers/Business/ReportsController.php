@@ -806,14 +806,14 @@ class ReportsController extends BaseController
         if( $request->filled( 'json' ) ){
 
             $report = new ClientDirectoryReport();
-            $report->query()->forRequestedBusinesses();
             $report->query()->leftJoin( 'users', 'clients.id', '=', 'users.id' );
 
-            $report->setStatusAliasFilter( $request->status_alias_id );
-            $report->setClientTypeFilter( $request->client_type );
-            $report->setActiveFilter( $request->active );
-            $report->setCurrentPage( $request->current_page );
-            $report->setPageCount( 100 );
+            $report->forRequestedBusinesses()
+                ->setStatusAliasFilter( $request->status_alias_id )
+                ->setClientTypeFilter( $request->client_type )
+                ->setActiveFilter( $request->active )
+                ->setCurrentPage( $request->current_page )
+                ->setPageCount( 100 );
 
             // $report->applyColumnFilters( $request->except([ 'filter_start_date','filter_end_date','filter_active','filter_client_type' ]));
 
