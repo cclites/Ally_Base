@@ -425,6 +425,7 @@
 
 <script>
     import ClientForm from '../mixins/ClientForm';
+    import HasStatusAlias from '../mixins/HasStatusAlias';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from './business/BusinessLocationSelect';
@@ -447,7 +448,7 @@
             }
         },
 
-        mixins: [ClientForm, FormatsDates, AuthUser, Constants],
+        mixins: [ ClientForm, FormatsDates, AuthUser, Constants, HasStatusAlias ],
 
         components: {
             BusinessLocationFormGroup,
@@ -706,21 +707,6 @@
                     return 'The status was last updated ' + this.lastStatusUpdated;
                 }
                 return 'Select the Ally Agreement status of the client.';
-            },
-
-            statusAliasOptions() {
-                if (! this.statusAliases || !this.statusAliases.client) {
-                    return [];
-                }
-
-                return this.statusAliases.client.filter(item => {
-                    return item.active == this.active;
-                }).map(item => {
-                    return {
-                        value: item.id,
-                        text: item.name,
-                    };
-                });
             },
 
             showStatusHelp() {
