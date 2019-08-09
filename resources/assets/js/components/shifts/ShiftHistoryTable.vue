@@ -32,9 +32,12 @@
                 <span v-if="row.item.Confirmed" v-tooltip:left="formatTooltip(row.item)">{{ confirmedByMessage }}</span>
                 <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
             </template>
-            <template slot="Charged" scope="row">
-                <span v-if="row.item.Charged" v-tooltip:left="formatDateTimeFromUTC(row.item.charged_at)">Yes</span>
-                <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>
+<!--            <template slot="Charged" scope="row">-->
+<!--                <span v-if="row.item.Charged" v-tooltip:left="formatDateTimeFromUTC(row.item.charged_at)">Yes</span>-->
+<!--                <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>-->
+<!--            </template>-->
+            <template slot="Invoiced" scope="row">
+                {{ row.item.Invoiced ? 'Yes' : 'No' }}
             </template>
             <template slot="Services" scope="row">
                 <div v-for="service in row.item.Services" :key="service">
