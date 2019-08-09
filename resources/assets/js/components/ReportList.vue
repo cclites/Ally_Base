@@ -487,13 +487,6 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Payroll Summary',
-                        url: 'reports/payroll-summary-report',
-                        description: 'Total caregiver payments over a specified date range',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-                    {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
                         description: 'Claims AR Aging Report',
@@ -573,7 +566,7 @@
                         {
                             name: 'Payroll Summary',
                             url: 'reports/payroll-summary-report',
-                            description: 'Payroll Summary Report',
+                            description: 'Total caregiver payments over a specified date range',
                             category: 5,
                             allowed: ['office_user'],
                         },
