@@ -29,8 +29,6 @@ class AddressController
             'notes'    => 'nullable|max:255'
         ]);
 
-        if( $data[ 'notes' ] ) $data[ 'notes' ] = filter_var( $data[ 'notes' ], FILTER_SANITIZE_STRING );
-
         \DB::beginTransaction();
         $address = $user->addresses->where('type', $type)->first();
         if ($address) {
