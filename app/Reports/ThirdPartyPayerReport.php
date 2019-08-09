@@ -236,9 +236,9 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shiftService->shift->isVerified(),
             'service_id' => $shiftService->service->id,
             'service' => trim("{$shiftService->service->code} {$shiftService->service->name}"),
-            'date' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
-            'start' => Carbon::parse($shiftService->shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
-            'end' => Carbon::parse($shiftService->shift->checked_out_time->toDateTimeString(), $this->timezone)->toDateTimeString(),
+            'date' => $shiftService->shift->checked_in_time->toDateString(),
+            'start' => $shiftService->shift->checked_in_time->toDateTimeString(),
+            'end' => $shiftService->shift->checked_out_time->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
             'billable' => multiply(floatval($shiftService->duration), floatval($shiftService->getClientRate())),
         ];
