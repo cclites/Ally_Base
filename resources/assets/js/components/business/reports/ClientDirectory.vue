@@ -31,7 +31,7 @@
                             </b-form-group>
                         </b-col> -->
 
-                        <b-col sm="6">
+                        <b-col sm="4">
 
                             <b-form-group label="Client Status">
 
@@ -44,13 +44,24 @@
                             </b-form-group>
                         </b-col>
 
-                        <b-col sm="6">
+                        <b-col sm="4">
 
                             <b-form-group label="Client Type">
 
                                 <b-form-select v-model=" form.client_type " class="mb-2 mr-2" name="client_id">
 
                                     <option v-for=" item in clientTypes " :key=" item.value " :value=" item.value ">{{ item.text }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="4">
+
+                            <b-form-group label="Status Alias">
+
+                                <b-form-select name="status_alias_id" v-model=" form.status_alias_id ">
+
+                                    <option value="">All Aliases</option>
+                                    <option v-for=" ( alias, i ) in statusAliases " :key=" i " :value=" alias.id ">{{ alias.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -178,6 +189,7 @@
                 busy          : false,
                 directoryType : 'client',
                 items         : [],
+                statusAliases : [],
                 columns: {
 
                     firstname: {
@@ -201,6 +213,11 @@
                         label: 'Client Status',
                         shouldShow: true,
                     },
+                    status_alias: {
+                        key: 'status_alias',
+                        label: 'Status Alias',
+                        shouldShow: true,
+                    },
                     address: {
                         key: 'address',
                         label: 'Address',
@@ -213,7 +230,7 @@
                         formatter: val => this.uppercaseWords( val )
                     },
                     created_at: {
-                        key: 'created_at',
+                        key: 'date_added',
                         label: 'Date Added',
                         shouldShow: true,
                         formatter: val => this.formatDate( val )
@@ -221,10 +238,11 @@
                 },
                 form : new Form({
 
-                    active       : null,
-                    client_type  : '',
-                    current_page : 1,
-                    json         : 1
+                    active          : null,
+                    client_type     : '',
+                    status_alias_id : '',
+                    current_page    : 1,
+                    json            : 1
                 }),
                 totalRows       : 0,
                 perPage         : 100,
@@ -280,6 +298,15 @@
 
                         this.busy = false;
                     })
+            },
+            async fetchStatusAliases() {
+
+                let response = await axios.get( '/business/status-aliases' );
+                if ( response.data && response.data.client ) {
+
+                    // console.log( response.data.client );
+                    this.statusAliases = response.data.client.map( alias => { return { 'name' : alias.name, 'id' : alias.id } } );
+                }
             },
             renderCell( row, field ) {
 
@@ -340,6 +367,10 @@
                 ...this.columns,
                 ...obj,
             };
+        },
+        async mounted(){
+
+            await this.fetchStatusAliases();
         }
     }
 </script>

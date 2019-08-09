@@ -13,6 +13,7 @@ class ClientDirectoryReport extends BusinessResourceReport
     private $current_page = 1; // simple default.. maybe it should start at zero?
     private $total_count;
 
+    private $alias_filter;
     private $active_filter;
     private $client_type;
 
@@ -50,7 +51,7 @@ class ClientDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Filter by active status.
+     * Filter by client type.
      *
      * @param $status
      * @return CaregiverAccountSetupReport
@@ -58,6 +59,19 @@ class ClientDirectoryReport extends BusinessResourceReport
     public function setClientTypeFilter( $type ) : self
     {
         $this->client_type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Filter by status alias.
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setStatusAliasFilter( $alias_id ) : self
+    {
+        $this->alias_filter = $alias_id;
 
         return $this;
     }
@@ -133,14 +147,14 @@ class ClientDirectoryReport extends BusinessResourceReport
                 break;
         }
 
-        if( $this->client_type ) $this->query()->where( 'client_type', $this->client_type );
+        if( $this->client_type  ) $this->query()->where( 'client_type', $this->client_type );
+        if( $this->alias_filter ) $this->query()->where( 'status_alias_id', $this->alias_filter );
 
         $this->total_count = $this->query()->with( 'meta' )
             ->count();
 
 
         $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
-
 
         $clients = $this->query()->get();
 
@@ -152,14 +166,15 @@ class ClientDirectoryReport extends BusinessResourceReport
 
             $result = [
 
-                'id'          => $client->id,
-                'first_name'  => $client->user->firstname,
-                'last_name'   => $client->user->lastname,
-                'email'       => $client->user->email,
-                'active'      => $client->active ? 'Active' : 'Inactive',
-                'address'     => $client->address ? $client->address->full_address : '',
-                'client_type' => $client->client_type,
-                'date_added'  => $client->user->created_at->format( 'm-d-Y' )
+                'id'           => $client->id,
+                'first_name'   => $client->user->firstname,
+                'last_name'    => $client->user->lastname,
+                'email'        => $client->user->email,
+                'active'       => $client->active ? 'Active' : 'Inactive',
+                'address'      => $client->address ? $client->address->full_address : '',
+                'client_type'  => $client->client_type,
+                'status_alias' => $client->statusAlias ? $client->statusAlias->name : '',
+                'date_added'   => $client->user->created_at->format( 'm-d-Y' )
             ];
 
             // Add the custom fields to the report row

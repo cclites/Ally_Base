@@ -54,9 +54,7 @@
                         <input-help :form="form" field="certification" text="Select the caregiver's certification / license."></input-help>
                     </b-form-group>
                     <b-form-group label="Caregiver Status Alias">
-
                         <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
-
                             <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
                         </b-form-select>
                         <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>

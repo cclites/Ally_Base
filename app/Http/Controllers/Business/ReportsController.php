@@ -807,8 +807,9 @@ class ReportsController extends BaseController
 
             $report = new ClientDirectoryReport();
             $report->query()->forRequestedBusinesses();
-            $report->query()->join( 'users', 'clients.id', '=', 'users.id' );
+            $report->query()->leftJoin( 'users', 'clients.id', '=', 'users.id' );
 
+            $report->setStatusAliasFilter( $request->status_alias_id );
             $report->setClientTypeFilter( $request->client_type );
             $report->setActiveFilter( $request->active );
             $report->setCurrentPage( $request->current_page );
