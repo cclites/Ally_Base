@@ -29,7 +29,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Caregiver::with(['user', 'address']);
+        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers']);
     }
 
     /**
@@ -45,12 +45,24 @@ class CaregiverDirectoryReport extends BusinessResourceReport
         $rows = $caregivers->map(function(Caregiver $caregiver) use(&$customFields) {
             $result = [
                 'id' => $caregiver->id,
-                'firstname' => $caregiver->user->firstname,
-                'lastname' => $caregiver->user->lastname,
+                'firstname' => $caregiver->user->firstname ? $caregiver->user->firstname : '-',
+                'lastname' => $caregiver->user->lastname ? $caregiver->user->lastname : '-',
+                'username' => $caregiver->username ? $caregiver->username : '-',
+                'title' => $caregiver->title,
+                'certification' => $caregiver->certification ? $caregiver->certification : '-',
+                'gender' => $caregiver->user->gender ? $caregiver->user->gender : '-',
+                'orientation_date' => $caregiver->orientation_date ? $caregiver->orientation_date->format('m-d-Y') : '-',
+                'smoking_okay' => $caregiver->smoking_okay ? "Yes" : "No",
+                'ethnicity' =>$caregiver->ethnicity ? $caregiver->ethnicity : '-',
+                'application_date' =>$caregiver->application_date ? $caregiver->application_date->format('m-d-Y') : '-',
+                'medicaid_id' => $caregiver->medicaid_id ? $caregiver->medicaid_id : '-',
                 'email' => $caregiver->user->email,
+                'phone' => $caregiver->user->notification_phone,
                 'active' => $caregiver->active ? 'Active' : 'Inactive',
                 'address' => $caregiver->address ? $caregiver->address->full_address : '',
+                'emergency_contact' => $caregiver->user->formatEmergencyContact(),
                 'date_added' => $caregiver->user->created_at->format('m-d-Y'),
+                'referral' => $caregiver->referralSource ? $caregiver->referralSource->name : ''
             ];
 
             // Add the custom fields to the report row

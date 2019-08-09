@@ -438,6 +438,7 @@
             },
             queryString() {
                 const filters = this.filters;
+                this.items.shifts = [];
                 return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status

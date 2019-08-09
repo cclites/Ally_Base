@@ -18,7 +18,12 @@
                     <td>{{ local_date($payment->created_at) }}</td>
                     <td>{{ $payment->payment_type }}</td>
                     <td>{{ number_format($payment->amount, 2) }}</td>
-                    <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>
+
+                    @if(!is_array($payment->pivot))
+                        <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>
+                    @else
+                        <td>{{ number_format($payment->pivot['amount_applied'] ?? '-1', 2) }}</td>
+                    @endif
                 </tr>
                 @if($payment->notes)
                     <tr>

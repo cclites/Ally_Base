@@ -3,11 +3,7 @@
 namespace App;
 
 use App\Traits\BelongsToOneBusiness;
-use Illuminate\Database\Eloquent\Model;
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Client;
-
-use Log;
 
 class SalesPerson extends BaseModel implements BelongsToBusinessesInterface
 {
@@ -15,12 +11,20 @@ class SalesPerson extends BaseModel implements BelongsToBusinessesInterface
 
     protected $guarded = ['id'];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['nameLastFirst'];
+
     public function business()
     {
         return $this->belongsTo(Business::class);
     }
 
-    public function clients(){
+    public function clients()
+    {
         return $this->hasMany(Client::class);
     }
 
@@ -40,9 +44,13 @@ class SalesPerson extends BaseModel implements BelongsToBusinessesInterface
      *
      * @return string
      */
-    public function fullName(){
+    public function fullName()
+    {
         return $this->firstname . " " . $this->lastname;
     }
 
-
+    public function getNameLastFirstAttribute()
+    {
+        return $this->lastname . ', ' . $this->firstname;
+    }
 }

@@ -39,6 +39,9 @@ class OfflineInvoiceArController extends BaseController
                     case 'unpaid':
                         $invoiceQuery->notPaidInFull();
                         break;
+                    case 'overpaid':
+                        $invoiceQuery->overpaid();
+                        break;
                 }
             }
 
@@ -82,10 +85,6 @@ class OfflineInvoiceArController extends BaseController
 
         if (! $invoice->isOffline()) {
             return new ErrorResponse(400, 'Payments can only be applied to Offline Invoices.');
-        }
-
-        if ($request->getAmount() > $invoice->getAmountDue()) {
-            return new ErrorResponse(412, 'This payment amount exceeds the remaining invoice balance.  Please modify the payment amount and try again.');
         }
 
         $invoice->addOfflinePayment($request->toOfflineInvoicePayment());

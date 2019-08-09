@@ -29,8 +29,7 @@
                 </span>
             </template>
             <template slot="Confirmed" scope="row">
-                <span v-if="row.item.Confirmed && row.item.client_confirmed == 1" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Client</span>
-                <span v-else-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Yes</span>
+                <span v-if="row.item.Confirmed" v-tooltip:left="formatTooltip(row.item)">{{ confirmedByMessage }}</span>
                 <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
             </template>
             <template slot="Charged" scope="row">
@@ -65,6 +64,11 @@
             return {
                 sortBy: 'Day',
                 sortDesc: false,
+                confirmedByAdmin: '  admin@allyms.com',
+                confirmedByClient: '  Confirmed by a user of Ally, Username TBD',
+                confirmedByAdminMessage: 'Yes',
+                confirmedByClientMessage: 'Client',
+                confirmedByMessage: '',
             }
         },
 
@@ -75,6 +79,13 @@
         methods: {
             dayFormat(date) {
                 return moment.utc(date).local().format('ddd MMM D');
+            },
+
+            formatTooltip(item){
+                let dateTime = this.formatDateTimeFromUTC(item.confirmed_at);
+                let message = item.client_confirmed === 1 ? this.confirmedByClient : this.confirmedByAdmin;
+                this.confirmedByMessage = item.client_confirmed === 1 ? this.confirmedByClientMessage : this.confirmedByAdminMessage;
+                return dateTime + " " + message;
             },
         },
     }

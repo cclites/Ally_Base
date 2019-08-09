@@ -30,6 +30,10 @@
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                         Generate Report
                     </b-button>
+
+                    <b-button @click="download()" v-if="totalRows" variant="success" class="mr-1 mt-1">
+                        <i class="fa fa-file-excel-o"></i> Export to Excel
+                    </b-button>
                 </div>
 
                 <b-row>
@@ -46,6 +50,7 @@
                                 :sort-by.sync="sortBy"
                                 :sort-desc.sync="sortDesc"
                                 :empty-text="emptyText"
+                                :footClone="footClone"
                             >
                                 <template slot="name" scope="row">
                                     <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
@@ -53,6 +58,32 @@
                                 <template slot="client_name" scope="row">
                                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ row.item.client_name }}</a>
                                 </template>
+
+                                <template slot="FOOT_name" scope="row">
+                                    &nbsp;
+                                </template>
+                                <template slot="FOOT_client_name" scope="row">
+                                    &nbsp;
+                                </template>
+                                <template slot="FOOT_payer" scope="row">
+                                    &nbsp;
+                                </template>
+                                <template slot="FOOT_current" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(totals.current) }}
+                                </template>
+                                <template slot="FOOT_period_30_45" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(totals.period_30_45) }}
+                                </template>
+                                <template slot="FOOT_period_46_60" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(totals.period_46_60) }}
+                                </template>
+                                <template slot="FOOT_period_61_75" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(totals.period_61_75) }}
+                                </template>
+                                <template slot="FOOT_period_75_plus" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(totals.period_75_plus) }}
+                                </template>
+
                             </b-table>
                         </div>
                         <b-row>
@@ -85,7 +116,7 @@
                     return 'Press Generate Report';
                 }
                 return 'No matching records available.';
-            }
+            },
         },
 
         data() {
@@ -117,6 +148,9 @@
                 },
                 items: [],
                 hasRun: false,
+                footClone: true,
+                totals: {},
+
             }
         },
 
@@ -127,6 +161,7 @@
                     .then( ({ data }) => {
                         this.items = data;
                         this.totalRows = this.items.length;
+                        this.generateTotals();
                     })
                     .catch(e => {})
                     .finally(() => {
@@ -158,6 +193,18 @@
             invoiceUrl(invoice, view="") {
                 return `/business/client/invoices/${invoice.id}/${view}`;
             },
+
+            generateTotals(){
+                this.totals.current = this.items.reduce((total, item)=> total += item.current, 0);
+                this.totals.period_30_45 = this.items.reduce((total, item)=> total += item.period_30_45, 0);
+                this.totals.period_46_60 = this.items.reduce((total, item)=> total += item.period_46_60, 0);
+                this.totals.period_61_75 = this.items.reduce((total, item)=> total += item.period_61_75, 0);
+                this.totals.period_75_plus = this.items.reduce((total, item)=> total += item.period_75_plus, 0);
+            },
+
+            download() {
+                window.location = this.form.toQueryString('/business/reports/claims-ar-aging?export=1');
+            },
         },
 
         async mounted() {
@@ -168,3 +215,9 @@
         },
     }
 </script>
+
+<style scoped>
+    tfoot tr th strong {
+        margin-right: 12px;
+    }
+</style>

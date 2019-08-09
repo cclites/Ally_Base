@@ -9,19 +9,6 @@
                     header-bg-variant="info"
                 >
                     <b-row>
-                        <b-col lg="5">
-                            <b-form-group label="Caregivers added between" class="form-inline">
-                                <date-picker 
-                                    v-model="filters.start_date"
-                                    placeholder="Start Date"
-                                />
-                                &nbsp;and&nbsp;
-                                <date-picker 
-                                    v-model="filters.end_date"
-                                    placeholder="End Date"
-                                />
-                            </b-form-group>
-                        </b-col>
 
                         <b-col lg="3">
                             <b-form-group label="Caregiver status">
@@ -103,11 +90,63 @@
                     label: 'Last name',
                     shouldShow: true,
                 },
+                username: {
+                    key: 'username',
+                    label: 'User Name',
+                    shouldShow: true,
+                },
+                title: {
+                    key: 'title',
+                    label: 'Title',
+                    shouldShow: true,
+                },
+                certification: {
+                    key: 'certification',
+                    label: 'Certification',
+                    shouldShow: true,
+                },
+                gender: {
+                    key: 'gender',
+                    label: 'Gender',
+                    shouldShow: true,
+                },
+                orientation_date: {
+                    key: 'orientation_date',
+                    label: 'Orientation Date',
+                    shouldShow: true,
+                    formatter: val => this.formatDate(val)
+                },
+                smoking_okay: {
+                    key: 'smoking_okay',
+                    label: 'Smoking Okay',
+                    shouldShow: true,
+                },
+                ethnicity: {
+                    key: 'ethnicity',
+                    label: 'Ethnicity',
+                    shouldShow: true,
+                },
+                application_date: {
+                    key: 'application_date',
+                    label: 'Application Date',
+                    shouldShow: true,
+                    formatter: val => this.formatDate(val)
+                },
+                medicaid_id: {
+                    key: 'medicaid_id',
+                    label: 'Medicaid ID',
+                    shouldShow: true
+                },
                 email: {
                     key: 'email',
                     label: 'Email',
                     shouldShow: true,
                     formatter: this.formatEmail,
+                },
+                notification_phone: {
+                    key: 'phone',
+                    label: 'Phone',
+                    shouldShow: true,
                 },
                 active: {
                     key: 'active',
@@ -119,11 +158,26 @@
                     label: 'Address',
                     shouldShow: true,
                 },
+                phone: {
+                    key: 'phone',
+                    label: 'Phone',
+                    shouldShow: true,
+                },
+                emergency_contact: {
+                    key: 'emergency_contact',
+                    label: 'Emergency Contact',
+                    shouldShow: true,
+                },
                 created_at: {
                     key: 'created_at',
                     label: 'Date Added',
                     shouldShow: true,
                     formatter: val => this.formatDate(val)
+                },
+                referral: {
+                    key: 'referral',
+                    label: 'Referral',
+                    shouldShow: true,
                 },
             },
         };

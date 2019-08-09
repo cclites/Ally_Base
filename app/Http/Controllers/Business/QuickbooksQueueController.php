@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Payment;
 use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\ChargedRate;
+use App\QuickbooksClientInvoice;
 use App\QuickbooksConnection;
 use App\QuickbooksService;
 use App\Responses\ErrorResponse;
@@ -23,13 +27,14 @@ class QuickbooksQueueController extends Controller
      * Get claims listing.
      *
      * @param Request $request
-     * @param ClientInvoiceQuery $invoiceQuery
+     * @param OnlineClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
-            $invoiceQuery->forRequestedBusinesses();
+            $invoiceQuery->paidInFull()
+                ->forRequestedBusinesses();
 
             if ($request->has('start_date')) {
                 $startDate = Carbon::parse($request->start_date)->toDateTimeString();
@@ -87,6 +92,10 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(500, 'An unexpected error occurred trying to connect to the Quickbooks API.  Please try again.');
         }
 
+        if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
+            return new ErrorResponse(500, 'Invoices must be charged and paid in full in order to transmit registry fees.');
+        }
+
         if (empty($client->quickbooksCustomer)) {
             // Create new customer relationship.
             [$customerId, $customerName] = $api->createCustomer($client);
@@ -101,7 +110,6 @@ class QuickbooksQueueController extends Controller
 
         $qbInvoice = new QuickbooksInvoice();
         $qbInvoice->date = Carbon::parse($invoice->getDate());
-        $qbInvoice->amount = $invoice->getAmount();
         $qbInvoice->invoiceId = $invoice->getName();
 
         if ($customer = $client->quickbooksCustomer) {
@@ -111,11 +119,47 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(401, 'Could not find a Customer Client relationship.');
         }
 
+        /** @var ClientInvoiceItem $invoiceItem */
         foreach ($invoice->getItems() as $invoiceItem) {
             $lineItem = new QuickbooksInvoiceItem();
-            $lineItem->amount = $invoiceItem->total;
             $lineItem->quantity = $invoiceItem->units;
-            $lineItem->unitPrice = $invoiceItem->rate;
+
+            if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY) {
+                // Use the provider/registry rates
+
+                if ($invoiceItem->was_split) {
+                    // For split invoices, the first time an invoiceable appears
+                    // we send the full provider amount, and for subsequent occurrences
+                    // we just send zero values.  This allows for the total amount to
+                    // be accurate in Quickbooks without over-complicating things.
+                    $hasBeenSentAlready = QuickbooksClientInvoice::query()
+                        ->whereNotIn('client_invoice_id', [$invoice->id])
+                        ->whereHas('clientInvoice', function ($q) use ($invoiceItem) {
+                            $q->whereHas('items', function ($q) use ($invoiceItem) {
+                                $q->where('invoiceable_id', $invoiceItem->invoiceable_id)
+                                    ->where('invoiceable_type', $invoiceItem->invoiceable_type);
+                            });
+                        })
+                        ->exists();
+
+                    if ($hasBeenSentAlready) {
+                        $lineItem->unitPrice = floatval(0.00);
+                        $lineItem->amount = floatval(0.00);
+                    } else {
+                        $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate();
+                        $lineItem->amount = multiply($lineItem->quantity, $lineItem->unitPrice);
+                    }
+                } else {
+                    // For regular invoices, we just send the same provider fee
+                    // calculation used when generating the BusinessInvoices.
+                    $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate();
+                    $lineItem->amount = multiply($lineItem->quantity, $lineItem->unitPrice);
+                }
+            } else {
+                // Just use the client rate
+                $lineItem->unitPrice = $invoiceItem->rate ?? 0.00;
+                $lineItem->amount = $invoiceItem->total ?? 0.00;
+            }
 
             switch ($invoiceItem->invoiceable_type) {
                 case 'shifts':
@@ -145,6 +189,15 @@ class QuickbooksQueueController extends Controller
                     // Use the shift mapping for now.
                     [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection, $shiftService->quickbooks_service_id);
                     break;
+                case 'shift_expenses':
+                    $shift = $invoiceItem->invoiceable->getShift();
+                    $startTime = $shift->checked_in_time->timezone($timezone)->format('h:i A');
+                    $endTime = $shift->checked_out_time->timezone($timezone)->format('h:i A');
+                    $date = $shift->checked_in_time->timezone($timezone)->format('m/d/Y');
+                    $lineItem->serviceDate = $shift->checked_in_time->timezone($timezone)->format('Y-m-d');
+                    $lineItem->description = "$date - ({$shift->caregiver->lastname}, {$shift->caregiver->firstname}) $startTime to $endTime " . $invoiceItem->invoiceable->getItemName('');
+                    [$lineItem->itemId, $lineItem->itemName] = $this->mapInvoiceItemToService($invoiceItem, $connection);
+                    break;
                 default:
                     // Convert from raw line item data.
                     $lineItem->description = $invoiceItem->group;
@@ -153,6 +206,10 @@ class QuickbooksQueueController extends Controller
             }
             $qbInvoice->addItem($lineItem);
         }
+
+        $qbInvoice->amount = collect($qbInvoice->lineItems)->reduce(function (float $carry, $item) {
+           return add($carry, $item->amount);
+        }, floatval(0));
 
         $result = $api->createInvoice($qbInvoice->toArray());
         if (empty($result)) {

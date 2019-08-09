@@ -98,7 +98,8 @@
                          :sort-desc.sync="sortDesc">
                     <template slot="name" scope="row">
                         <a :href="invoiceUrl(row.item.id)" target="_blank">{{ row.value }}</a>
-                        <i v-if="row.item.was_split" class="fa fa-code-fork text-danger ml-2"></i>
+                        <i v-if="row.item.was_split" title="Invoice has items that were split between payers" class="fa fa-code-fork text-danger ml-2"></i>
+                        <i v-if="row.item.has_partial_payment" title="Invoice has partial payment or rounding issues" class="fa fa-money text-danger ml-2"></i>
                     </template>
                     <template slot="status" scope="row">
                         <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
@@ -106,7 +107,7 @@
                         <span v-if="row.item.client_on_hold">- On Hold</span>
                     </template>
                     <template slot="actions" scope="row">
-                        <b-button @click="uninvoice(row.item.id)" variant="danger">Uninvoice</b-button>
+                        <b-button @click="uninvoice(row.item.id)" variant="danger" v-if="!row.item.has_claim">Uninvoice</b-button>
                         <b-button v-if="! row.item.client.user.payment_hold" @click="addHold(row.item)" variant="danger">Add Hold</b-button>
                         <b-button v-if="row.item.client.user.payment_hold" @click="removeHold(row.item)" variant="primary">Remove Hold</b-button>
                     </template>

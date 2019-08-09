@@ -34,11 +34,11 @@
                             <b-form-group label="." label-class="hidden-label">
                                 <b-form-select v-model="filters.referral_source" class="mb-3">
                                     <option :value="null">-- All Referral Sources --</option>
-                                    <option 
-                                        v-for="report in reports" 
-                                        :value="report.id" 
-                                        :key="report.id"
-                                    >{{ report.organization }}</option>
+                                    <option
+                                        v-for="source in sources"
+                                        :value="source.id"
+                                        :key="source.id"
+                                    >{{ source.organization }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -57,7 +57,7 @@
                     <b-row>
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
-                                <b-button variant="info" @click="fetchData()">Generate</b-button>
+                                <b-button variant="info" @click="fetchData()" :disabled="busy">Generate</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -66,7 +66,9 @@
         </b-row>
         <b-row>
             <b-col lg="12">
+                <loading-card v-if="busy" text="Loading Report..."></loading-card>
                 <b-card
+                    v-else
                     header="Report"
                     header-text-variant="white"
                     header-bg-variant="info"
@@ -88,6 +90,7 @@
                         :items="items"
                         :fields="fields"
                         :filter="tableFilter"
+                        :show-empty="true"
                     >
                         <template slot="revenue"  scope="row">
                             {{ moneyFormat(row.item.revenue) }}
@@ -117,10 +120,6 @@
         },
 
         props: {
-            reports: {
-                type: Array,
-                required: true,
-            },
             sourceType: {
                 type: String,
                 required: true,
@@ -129,14 +128,16 @@
 
         data() {
             return {
+                busy: false,
                 showGraph: true,
                 checked: true,
                 selected: null,
-                data: null,
+                data: [],
+                sources: [],
                 filters: {
                     referral_source: null,
-                    start_date: '',
-                    end_date: '',
+                    start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
+                    end_date: moment().format('MM/DD/YYYY'),
                 },
                 donutOptions: {
                     tooltip: {
@@ -189,9 +190,19 @@
             if(this.$refs.revenueDonut) {
                 this.$refs.revenueDonut.resize();
             }
+
+            this.fetchReferralSources();
         },
 
         computed: {
+            fetchReferralSources() {
+                axios.get(`/business/referral-sources?type=${this.sourceType}`)
+                    .then( ({ data }) => {
+                        this.sources = data;
+                    })
+                    .catch(() => {});
+            },
+
             referralSourceData() {
                 return this.items.map(stats => ({
                     organization: stats.organization,
@@ -278,8 +289,7 @@
             },
 
             items() {
-                const source = this.data ? this.data : this.reports;
-                return source.map((report) => ({
+                return this.data.map((report) => ({
                     organization: report.organization,
                     name: report.contact_name,
                     phone: report.phone,
@@ -354,19 +364,23 @@
             },
 
             tableFilter() {
-                const report = this.reports.find(report => report.id == this.filters.referral_source);
+                const report = this.data.find(report => report.id == this.filters.referral_source);
                 return report ? report.organization : null;
             },
         },
 
         methods: {
             async fetchData() {
+                this.data = [];
+                this.busy = true;
                 try {
                     const form = new Form(this.filters);
                     const {data} = await form.post(`/business/reports/${this.sourceType}-referral-sources`);
                     this.data = data;
                 } catch(e) {
                     console.error(e);
+                } finally {
+                    this.busy = false;
                 }
             }
         }

@@ -22,6 +22,7 @@ use Carbon\Carbon;
  * @property string $effective_start
  * @property string $effective_end
  * @property string|null $payment_allocation
+ * @property string|null $notes
  * @property float|null $payment_allowance
  * @property float|null $split_percentage
  * @property int $priority

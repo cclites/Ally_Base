@@ -42,6 +42,9 @@
                 <template slot="effective_end" scope="row">
                     <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
+                <template slot="notes" scope="row">
+                    <b-form-input v-model="row.item.notes" type="text" class="date-input form-control-sm" />
+                </template>
                 <template slot="payment_allocation" scope="row">
                     <b-select v-model="row.item.payment_allocation" class="form-control-sm" >
                         <option value="balance">Balance</option>
@@ -134,6 +137,10 @@
                         label: 'Effective End',
                     },
                     {
+                        key: 'notes',
+                        label: 'Print on Client Invoice',
+                    },
+                    {
                         key: 'payment_allocation',
                         label: 'Payment Allocation',
                     },
@@ -174,7 +181,6 @@
                     return;
                 }
 
-                console.log('shift priority at index: ' + index);
                 this.items.splice(index-1, 0, this.items.splice(index, 1)[0]);
                 this.resetPriorities();
             },
@@ -191,6 +197,7 @@
                     payment_allowance: '0.00',
                     split_percentage: '0',
                     client_id: this.client.id,
+                    notes: '',
                     // payer: {},
                 });
                 this.resetPriorities();

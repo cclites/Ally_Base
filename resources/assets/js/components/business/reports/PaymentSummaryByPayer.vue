@@ -47,24 +47,20 @@
 
                     </b-row>
 
-                    <div class="d-flex justify-content-center" v-if="busy">
-                        <div class="my-5">
-                            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-                        </div>
-                    </div>
-                    <div v-else>
-                        <b-row>
-                            <b-col>
+                    <loading-card v-show="busy"></loading-card>
+
+                    <div v-show="!busy">
+                        <div class="table-responsive" >
                                 <b-table
                                         class="payers-summary-table"
                                         :items="items"
                                         :fields="fields"
-                                        sort-by="payer"
-                                        empty-text="No Results"
+                                        :sort-by="form.payer"
                                         :busy="busy"
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                         :footClone="footClone"
+                                        :show-empty="true"
                                 >
                                     <template slot="invoice" scope="row">
                                         <a :href="invoiceUrl(row.item.invoice)" target="_blank">{{ row.item.invoice }}</a>
@@ -86,8 +82,7 @@
                                         &nbsp;<strong>Total Invoiced Amount: </strong> {{ moneyFormat(totals.total ) }}
                                     </template>
                                 </b-table>
-                            </b-col>
-                        </b-row>
+                        </div>
                     </div>
 
                     <b-row v-if="this.items.length > 0">
@@ -98,7 +93,6 @@
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
-
 
                 </b-card>
             </b-col>
@@ -178,12 +172,8 @@
                     })
             },
 
-            print(){
-                $(".summary-table").print();
-            },
-
             getClients(){
-                axios.get('/business/clientDropdownResource?business=' + this.form.business)
+                axios.get('/business/dropdown/clients?businesses=' + this.form.business)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -194,7 +184,7 @@
 
             invoiceUrl(invoice, view="") {
                 return `/business/client/invoices/${invoice}/${view}`;
-            },
+            }
 
         },
 
@@ -214,6 +204,12 @@
 
         mounted() {
             this.getClients();
+        },
+
+        watch: {
+            'form.business'(newValue, oldValue) {
+                this.getClients();
+            }
         },
     }
 </script>

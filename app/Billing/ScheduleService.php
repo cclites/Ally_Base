@@ -27,15 +27,35 @@ use App\Data\ScheduledRates;
  */
 class ScheduleService extends AuditableModel
 {
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     protected $guarded = ['id'];
 
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
 
+    /**
+     * Get the Schedule relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function schedule()
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    /**
+     * Get the Service relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function service()
+    {
+        return $this->hasOne(Service::class, 'id', 'service_id');
     }
 
     ////////////////////////////////////
@@ -56,5 +76,4 @@ class ScheduleService extends AuditableModel
             $this->hours_type
         );
     }
-
 }
