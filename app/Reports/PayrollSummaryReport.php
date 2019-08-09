@@ -37,7 +37,8 @@ class PayrollSummaryReport extends BusinessResourceReport
                         ->where('deposit_type','caregiver')
                         ->with([
                                 'shifts.client',
-                                'caregiver'
+                                'caregiver',
+                                'caregiverInvoices',
                         ]);
     }
 
@@ -67,13 +68,12 @@ class PayrollSummaryReport extends BusinessResourceReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $caregiver): self
     {
+        $startDate = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
-
-        $startDate = new Carbon($start . ' 00:00:00', $this->timezone);
-        $endDate = new Carbon($end . ' 23:59:59', $this->timezone);
-
-
-        $this->query->whereBetween('created_at', [$startDate, $endDate]);
+        $this->query->whereHas('caregiverInvoices', function($q) use($startDate, $endDate){
+            $q->whereBetween('created_at', [$startDate, $endDate]);
+        });
 
         $this->query->forBusinesses([$business]);
 
@@ -100,9 +100,8 @@ class PayrollSummaryReport extends BusinessResourceReport
                             'amount'=>$deposit->amount,
                             'caregiver'=>$deposit->caregiver->nameLastFirst(),
                             'type'=>$this->clientType ? ucwords(str_replace("_", " ", $this->clientType)) : 'All Types',
-                            'date'=> (new Carbon($deposit->created_at))->format('m/d/Y')
+                            'date'=> (new Carbon($deposit->created_at))->format('m/d/Y'),
                         ];
-
                 })->values();
 
     }
