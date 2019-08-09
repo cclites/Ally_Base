@@ -64,8 +64,8 @@
             return {
                 sortBy: 'Day',
                 sortDesc: false,
-                confirmedByAdmin: '  admin@allyms.com',
-                confirmedByClient: '  Confirmed by a user of Ally, Username TBD',
+                confirmedByAdmin: '  Confirmed by a user of Ally, Username TBD',
+                confirmedByClient: '  Client confirmed themselves',
                 confirmedByAdminMessage: 'Yes',
                 confirmedByClientMessage: 'Client',
                 confirmedByMessage: '',
