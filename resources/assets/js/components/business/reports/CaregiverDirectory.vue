@@ -8,7 +8,7 @@
             <b-col lg="12">
 
                 <b-card
-                    header="Select Date Range &amp; Filters"
+                    header="Select Filters"
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
@@ -182,7 +182,8 @@
 
 <script>
 
-    // hiding this for now until better implemented server-side
+    // hiding this for now until implemented server-side
+    // right now the tabvle sorts the current page
     // :sort-by.sync=" sort "
     // @filtered=" onFiltered "
 
@@ -206,8 +207,7 @@
 
             return {
 
-                busy          : false,
-                form: new Form({
+                form : new Form({
 
                     active       : null,
                     // start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
@@ -215,6 +215,7 @@
                     current_page : 1,
                     json         : 1
                 }),
+                busy            : false,
                 totalRows       : 0,
                 perPage         : 100,
                 customFieldKeys : [],

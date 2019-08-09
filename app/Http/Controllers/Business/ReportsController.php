@@ -801,19 +801,48 @@ class ReportsController extends BaseController
      *
      * @return Response
      */
-    public function clientDirectory()
+    public function clientDirectory(Request $request )
     {
-        $clients = Client::forRequestedBusinesses()
-            ->with('address')
-            ->with('meta')
-            ->get();
+        if( $request->filled( 'json' ) ){
+
+            $report = new ClientDirectoryReport();
+            $report->query()->forRequestedBusinesses();
+            $report->query()->join( 'users', 'clients.id', '=', 'users.id' );
+
+            $report->setClientTypeFilter( $request->client_type );
+            $report->setActiveFilter( $request->active );
+            $report->setCurrentPage( $request->current_page );
+            $report->setPageCount( 100 );
+
+            // $report->applyColumnFilters( $request->except([ 'filter_start_date','filter_end_date','filter_active','filter_client_type' ]));
+
+            if ( $request->export == '1' ) {
+                // the request object attributes are coming through as strings
+
+                return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
+                    ->download();
+            }
+
+            $rows  = $report->rows();
+            $total = $report->getTotalCount();
+
+            return response()->json( [ 'rows' => $rows, 'total' => $total ] );
+
+
+            // I'm going to leave this here... why in gods name is this a thing?
+            // if ($report->count() > 1000) {
+            //     // Limit to 1K clients for performance reasons
+                    // ?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!??!
+            //     return new ErrorResponse(400, 'There are too many clients to report.  Please reduce your date range.');
+            // }
+        }
 
         $fields = CustomField::forAuthorizedChain()
-            ->where('user_type', 'client')
-            ->with('options')
+            ->where( 'user_type', 'client' )
+            ->with( 'options' )
             ->get();
 
-        return view('business.reports.client_directory', compact('clients', 'fields'));
+        return view( 'business.reports.client_directory', compact( 'fields' ) );
     }
 
 

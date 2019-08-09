@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Business;
 use App\OfficeUser;
 use App\Caregiver;
+use App\Client;
 
 class TestReports extends TestCase
 {
@@ -53,5 +54,33 @@ class TestReports extends TestCase
             ->assertSuccessful();
 
         // dd( $results );
+    }
+
+    /**
+     * @test
+     * 
+     * verifying the results of the Caregiver Directory Report
+     */
+    public function client_directory_report_works_properly()
+    {
+        $this->withoutExceptionHandling();
+
+        $data = factory( Client::class, 15 )->create([
+
+            'business_id' => $this->business->id
+        ]);
+        dd( $data->toArray() );
+
+        $query_string = '?json=1';
+        // $query_string .= '&start_date=08/02/2019';
+        // $query_string .= '&end_date=08/10/2019';
+        $query_string .= '&current_page=2';
+        $query_string .= '&per_page=5';
+        $query_string .= '&active=true';
+
+        $results = $this->get( route( 'business.reports.client_directory' ) . $query_string )
+            ->assertSuccessful();
+
+        dd( $results );
     }
 }
