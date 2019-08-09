@@ -67,16 +67,6 @@ class ShiftStatusManager
     /// Static Methods
     ///////////////////////////////////////////
 
-    public static function getChargedStatuses()
-    {
-        return [
-            Shift::WAITING_FOR_PAYOUT,
-            Shift::PAID_BUSINESS_ONLY,
-            Shift::PAID_CAREGIVER_ONLY,
-            Shift::PAID,
-        ];
-    }
-
     public static function getAllStatuses()
     {
         return self::$statuses;
@@ -169,19 +159,6 @@ class ShiftStatusManager
     ///////////////////////////////////////////
     /// Check Methods
     ///////////////////////////////////////////
-
-    /**
-     * Returns true if the shift has been charged.
-     *
-     * @return bool
-     */
-    public function wasCharged()
-    {
-        return in_array(
-            $this->status(),
-            self::getChargedStatuses()
-        );
-    }
 
     /**
      * Returns true if a shift should no longer be modified
