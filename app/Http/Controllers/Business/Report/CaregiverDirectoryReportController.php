@@ -26,7 +26,10 @@ class CaregiverDirectoryReportController extends BaseController
             $report = new CaregiverDirectoryReport();
             $report->query()->forRequestedBusinesses();
             $report->setActiveFilter( $request->active );
-            $report->setDateFilter( $request->start_date, $request->end_date );
+            // $report->setDateFilter( $request->start_date, $request->end_date );
+
+            $report->setCurrentPage( $request->current_page );
+            $report->setPageCount( 100 );
 
             if ( $request->export == '1' ) {
                 // the request object attributes are coming through as strings
@@ -35,7 +38,11 @@ class CaregiverDirectoryReportController extends BaseController
                     ->download();
             }
 
-            return response()->json( $report->rows() );
+            // rows() has to be called for the private variable total_count to be set within the report
+            $rows  = $report->rows();
+            $total = $report->getTotalCount();
+
+            return response()->json( [ 'rows' => $rows, 'total' => $total ] );
         }
 
         $fields = CustomField::forAuthorizedChain()

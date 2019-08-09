@@ -5,12 +5,18 @@ use App\Caregiver;
 use App\Traits\IsDirectoryReport;
 use App\CustomField;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
     use IsDirectoryReport;
 
+    private $per_page = 10; // simple default for 'limit'
+    private $current_page = 1; // simple default.. maybe it should start at zero?
+    private $total_count;
+
     private $active_filter;
+
     private $start_date;
     private $end_date;
 
@@ -61,6 +67,32 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
+     * Set number of records to pagniate per page
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setPageCount( $count ) : self
+    {
+        $this->per_page = $count;
+
+        return $this;
+    }
+
+    /**
+     * Set number of records to pagniate per page
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setCurrentPage( $page ) : self
+    {
+        $this->current_page = $page;
+
+        return $this;
+    }
+
+    /**
      * Filter by active status.
      *
      * @param $status
@@ -72,6 +104,15 @@ class CaregiverDirectoryReport extends BusinessResourceReport
         if( $end_date ) $this->end_date = $end_date;
 
         return $this;
+    }
+
+    /**
+     * 
+     * public accessor for the total count
+     */
+    public function getTotalCount()
+    {
+        return $this->total_count;
     }
 
     /**
@@ -96,29 +137,40 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                 break;
         }
 
-        if( $this->start_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '>=', ( new Carbon( $this->start_date . ' 00:00:00', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
-        if( $this->end_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '<=', ( new Carbon( $this->end_date . ' 23:59:59', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
+        // date filters are not desired at this moment, kept for reference
+        // if( $this->start_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '>=', ( new Carbon( $this->start_date . ' 00:00:00', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
+        // if( $this->end_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '<=', ( new Carbon( $this->end_date . ' 23:59:59', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
 
-        $caregivers = $this->query()->with( 'meta' )
-            ->get()->map( function( $caregiver ){
 
-                $caregiver->phone             = $caregiver->user->notification_phone;
-                $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-                $caregiver->referral          = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-                $caregiver->certification     = $caregiver->certification ? $caregiver->certification : '-';
-                $caregiver->smoking_okay      = $caregiver->smoking_okay ? "Yes" : "No";
-                $caregiver->ethnicity         = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-                $caregiver->medicaid_id       = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-                $caregiver->gender            = $caregiver->user->gender ? $caregiver->user->gender : '-';
+        // perform count-query first
+        $this->total_count = $this->query()->with( 'meta' )
+            ->count();
 
-                return $caregiver;
-            });
+
+        // implement pagination manually
+        $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+
+
+        $caregivers = $this->query()->get();
+
+        $caregivers->map( function( $caregiver ){
+
+            $caregiver->phone             = $caregiver->user->notification_phone;
+            $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
+            $caregiver->referral          = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
+            $caregiver->certification     = $caregiver->certification ? $caregiver->certification : '-';
+            $caregiver->smoking_okay      = $caregiver->smoking_okay ? "Yes" : "No";
+            $caregiver->ethnicity         = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
+            $caregiver->medicaid_id       = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
+            $caregiver->gender            = $caregiver->user->gender ? $caregiver->user->gender : '-';
+
+            return $caregiver;
+        });
+
+        // for quick verification, delete if not desired
+        // dd( $caregivers->toArray() );
 
         return $caregivers;
-
-
-
-
 
 
         // Erik 8/8/19 =>

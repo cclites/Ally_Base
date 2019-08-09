@@ -42,14 +42,16 @@ class TestReports extends TestCase
         });
         // dd( $data->toArray() );
 
-        $start_date = '&start_date=08/02/2019';
-        $end_date   = '&end_date=08/10/2019';
-        $active     = '&active=true';
+        $query_string = '?json=1';
+        // $query_string .= '&start_date=08/02/2019';
+        // $query_string .= '&end_date=08/10/2019';
+        $query_string .= '&current_page=2';
+        $query_string .= '&per_page=5';
+        $query_string .= '&active=true';
 
-        $query_string = '?json=1' . $active . $start_date . $end_date;
         $results = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string )
             ->assertSuccessful();
 
-        dd( $results );
+        // dd( $results );
     }
 }

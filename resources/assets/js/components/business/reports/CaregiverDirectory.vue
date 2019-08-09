@@ -39,7 +39,7 @@
                                 />
                             </b-form-group>
                         </b-col> -->
-                        <b-col md="6" lg="3">
+                        <b-col sm="6">
 
                             <b-form-group label="Caregiver status">
 
@@ -51,7 +51,7 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col md="6" lg="3">
+                        <b-col sm="6">
 
                             <b-form-group label="Status Alias">
 
@@ -99,7 +99,63 @@
                         </b-col>
                     </b-row>
 
-                    <ally-table id="table" :columns=" fields " :items=" items " :perPage=" 100 ">
+                    <b-row>
+
+                        <b-col lg="6">
+
+                            <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" form.current_page "/>
+                        </b-col>
+                        <b-col lg="6" class="d-flex justify-content-end align-content-center">
+
+                            <p style="height:25px; margin: auto 0;">{{ paginationStats }}</p>
+                        </b-col>
+                    </b-row>
+
+                    <div id="table" class="table-responsive">
+
+                        <b-table
+                            bordered striped hover show-empty
+                            :items=" items "
+                            :fields=" fields "
+                            :per-page=" 100 "
+                        >
+
+                            <template v-for=" field in fields " :slot=" field.key || field " scope="data" >
+
+                                <slot v-bind="data" :name="field.key || field"> {{ renderCell( data.item, field ) }}</slot>
+                            </template>
+                            <template slot="active" scope="row">
+
+                                {{ row.item.active ? 'Active' : 'Inactive' }}
+                            </template>
+                            <template slot="address" scope="row">
+
+                                {{ addressFormat( row.item.address ) }}
+                            </template>
+                            <template slot="created_at" scope="row">
+
+                                {{ formatDate( row.item.user.created_at ) }}
+                            </template>
+                            <template v-for="key in customFieldKeys" :slot="key" scope="row">
+
+                                {{ getFieldValue( row.item.meta, key ) }}
+                            </template>
+                        </b-table>
+                    </div>
+
+                    <b-row>
+
+                        <b-col lg="6">
+
+                            <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" form.current_page "/>
+                        </b-col>
+                        <b-col lg="6" class="text-right">
+
+                            <p style="height:25px; margin: auto 0;">{{ paginationStats }}</p>
+                        </b-col>
+                    </b-row>
+
+                    <!-- <ally-table id="table" :columns=" fields " :items=" items " :perPage=" 100 ">
 
                         <template slot="active" scope="row">
 
@@ -117,7 +173,7 @@
 
                             {{ getFieldValue( row.item.meta, key ) }}
                         </template>
-                    </ally-table>
+                    </ally-table> -->
                 </b-card>
             </b-col>
         </b-row>
@@ -125,6 +181,10 @@
 </template>
 
 <script>
+
+    // hiding this for now until better implemented server-side
+    // :sort-by.sync=" sort "
+    // @filtered=" onFiltered "
 
     import moment from 'moment';
     import FormatsListData from '../../../mixins/FormatsListData';
@@ -149,14 +209,17 @@
                 busy          : false,
                 form: new Form({
 
-                    active     : null,
-                    start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
-                    end_date   : moment().format( 'MM/DD/YYYY' ),
-                    json       : 1
+                    active       : null,
+                    // start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
+                    // end_date   : moment().format( 'MM/DD/YYYY' ),
+                    current_page : 1,
+                    json         : 1
                 }),
-                customFieldKeys: [],
-                items   : [],
-                columns : {
+                totalRows       : 0,
+                perPage         : 100,
+                customFieldKeys : [],
+                items           : [],
+                columns         : {
                     firstname: {
                         key: 'firstname',
                         label: 'First name',
@@ -271,6 +334,21 @@
                 }));
 
                 return fields;
+            },
+            paginationStats(){
+
+                if( this.busy ) return `Fetching page ${this.form.current_page}`;
+
+                const offset = this.perPage * ( this.form.current_page - 1 );
+                const current_last = offset + this.items.length;
+                return `Showing ${offset} - ${current_last} of ${this.totalRows} results`;
+            }
+        },
+        watch: {
+
+            'form.current_page' : function( val, oldVal ){
+
+                this.fetch();
             }
         },
         methods: {
@@ -281,19 +359,23 @@
                 this.form.get( '/business/reports/caregiver-directory' )
                     .then( ({ data }) => {
 
-                        this.items     = data;
-                        this.totalRows = this.items.length;
-
-                        console.log( this.items ); // get rid of this ERIK TODO
+                        console.log( 'data retreived: ', data );
+                        this.items     = data.rows;
+                        this.totalRows = data.total;
                     })
                     .catch( err => {
 
-                        console.error( err ); // maybe get rid of this ERIK TODO
+                        console.error( err );
                     })
                     .finally(() => {
 
                         this.busy = false;
                     })
+            },
+            renderCell( row, field ) {
+
+                const value = row[ field.key || field ];
+                return field.formatter ? field.formatter( value ) : value;
             },
             exportExcel(){
 
@@ -301,23 +383,26 @@
             },
             printTable() {
 
-                $( '#table' ).print(); // maybe get rid of this ERIK TODO
+                $( '#table' ).print();
             },
 
-            getFieldValue(meta, key) {
+            getFieldValue( meta, key ) {
+
                 const metaField = meta.find(fieldValue => fieldValue.key == key);
                 const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
                 const isDropdown = options.length > 0;
 
-                if(!metaField) {
+                if( !metaField ) {
+
                     return fieldDefault;
                 }
 
-                return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
+                return isDropdown ? this.getDropdownLabel( options, metaField.value ) : metaField.value;
             },
 
-            getDropdownLabel(options, key) {
-                let option = options.find(option => option.value == key);
+            getDropdownLabel( options, key ) {
+
+                let option = options.find( option => option.value == key );
                 return option ? option.label : '-';
             }
         },
