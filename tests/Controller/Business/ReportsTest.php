@@ -10,7 +10,7 @@ use App\OfficeUser;
 use App\Caregiver;
 use App\Client;
 
-class TestReports extends TestCase
+class ReportsTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
@@ -41,19 +41,17 @@ class TestReports extends TestCase
 
             $caregiver->businesses()->attach( $this->business );
         });
-        // dd( $data->toArray() );
 
         $query_string = '?json=1';
         // $query_string .= '&start_date=08/02/2019';
         // $query_string .= '&end_date=08/10/2019';
-        $query_string .= '&current_page=2';
-        $query_string .= '&per_page=5';
+        $query_string .= '&current_page=1';
+//        $query_string .= '&per_page=5';
         $query_string .= '&active=true';
 
         $results = $this->get( route( 'business.reports.caregiver_directory' ) . $query_string )
-            ->assertSuccessful();
-
-        // dd( $results );
+            ->assertSuccessful()
+            ->assertJsonCount(15, 'rows');
     }
 
     /**
@@ -69,18 +67,16 @@ class TestReports extends TestCase
 
             'business_id' => $this->business->id
         ]);
-        // dd( $data->toArray() );
 
         $query_string = '?json=1';
         // $query_string .= '&start_date=08/02/2019';
         // $query_string .= '&end_date=08/10/2019';
         $query_string .= '&current_page=1';
-        $query_string .= '&per_page=5';
+//        $query_string .= '&per_page=5';
         $query_string .= '&active=true';
 
         $results = $this->get( route( 'business.reports.client_directory' ) . $query_string )
-            ->assertSuccessful();
-
-        dd( $results );
+            ->assertSuccessful()
+            ->assertJsonCount(15, 'rows');
     }
 }
