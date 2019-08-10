@@ -526,13 +526,6 @@
                         category: 3,
                         allowed: ['office_user'],
                     },
-                    {
-                        name: 'Payment Summary By Private Pay Clients',
-                        url: 'reports/payment-summary-by-payer',
-                        description: 'See all payments made by private pay clients',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
 
                     { // added as per ALLY-1394
                         name        : 'Client Account Setup Status',
@@ -607,9 +600,9 @@
                             hidden: true,
                         },
                         {
-                            name: 'Payment Summary By Payer',
+                            name: 'Payment Summary By Private Pay Clients',
                             url: 'reports/payment-summary-by-payer',
-                            description: 'Payment Summary By Payer Report',
+                            description: 'See all payments made by private pay clients',
                             category: 5,
                             allowed: ['office_user'],
                             hidden: true,
