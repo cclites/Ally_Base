@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
+class CreateNewClientCareDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('client_care_details_temp', function (Blueprint $table) {
+        Schema::create('client_care_details', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('client_id')->unique();
 
@@ -22,7 +22,7 @@ class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
             $table->boolean('smoker')->default(0);
             $table->boolean('alcohol')->default(0);
             $table->boolean('incompetent')->default(0);
-            $table->string('competency_level')->nullable();
+            $table->string('competency_level', 100)->nullable();
             $table->boolean('can_provide_direction')->default(0);
             $table->boolean('assist_medications')->default(0);
             $table->text('medication_overseer')->nullable();
@@ -38,8 +38,8 @@ class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
             $table->string('bathing', 200)->nullable();
             $table->text('bathing_frequency')->nullable();
             $table->text('bathing_instructions')->nullable();
-            $table->string('vision')->nullable();
-            $table->string('hearing')->nullable();
+            $table->string('vision', 100)->nullable();
+            $table->string('hearing', 100)->nullable();
             $table->text('hearing_instructions')->nullable();
             $table->string('diet', 255)->nullable();
             $table->text('diet_likes')->nullable();
@@ -49,7 +49,7 @@ class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
             $table->string('hair', 100)->nullable();
             $table->text('hair_frequency')->nullable();
             $table->string('oral', 100)->nullable();
-            $table->string('shaving')->nullable();
+            $table->string('shaving', 100)->nullable();
             $table->text('shaving_instructions')->nullable();
             $table->string('nails', 100)->nullable();
             $table->string('dressing', 100)->nullable();
@@ -69,22 +69,13 @@ class MigrateClientCareDetailsToNewClientCareDetailsTable extends Migration
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
         });
 
-        /**** COPY TABLE ****/
-        $rows = DB::table('client_care_details')->get()->toArray();
-        $to_fill = [];
-        foreach($rows as $row) {
-            $to_fill[] = (array)$row;
-        }
+        $rows = DB::table('client_care_details_old')->get()
+            ->map(function ($item) {
+                return (array)$item;
+            })
+            ->toArray();
 
-        DB::table('client_care_details_temp')->insert($to_fill);
-
-
-        /**** DROP ORIGINAL TABLE ****/
-        Schema::drop('client_care_details');
-
-        /**** RENAME TABLE ****/
-        Schema::rename('client_care_details_temp', 'client_care_details');
-
+        DB::table('client_care_details')->insert($rows);
     }
 
     /**
