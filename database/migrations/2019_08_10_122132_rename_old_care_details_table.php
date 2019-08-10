@@ -14,6 +14,7 @@ class RenameOldCareDetailsTable extends Migration
     public function up()
     {
         Schema::table('client_care_details', function (Blueprint $table) {
+            $table->dropUnique(['client_id']);
             $table->dropForeign(['client_id']);
         });
         Schema::rename('client_care_details', 'client_care_details_old');
