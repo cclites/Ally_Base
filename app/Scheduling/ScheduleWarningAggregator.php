@@ -90,14 +90,14 @@ class ScheduleWarningAggregator
             $target_start = Carbon::parse( $schedule->starts_at );
             $target_end   = Carbon::parse( $schedule->starts_at )->addMinutes( $schedule->duration );
 
-            if( $target_start->gte( $start ) && $target_start->lte( $end ) ){
+            if( $target_start->gte( $start ) && $target_start->lt( $end ) ){
                 // if this shift starts during the one being created, grab it and break the loop
 
                 $target_schedule = $schedule;
                 break;
             }
 
-            if( $target_end->gte( $start ) && $target_end->lte( $end ) ){
+            if( $target_end->gt( $start ) && $target_end->lte( $end ) ){
                 // if this shift ends during the one being created, grab it and break the loop
 
                 $target_schedule = $schedule;
