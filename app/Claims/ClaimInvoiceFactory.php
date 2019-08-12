@@ -127,6 +127,12 @@ class ClaimInvoiceFactory
         return $claimItem;
     }
 
+    /**
+     * Create a ClaimInvoiceItem from a ShiftExpense.
+     *
+     * @param ClientInvoiceItem $item
+     * @return ClaimInvoiceItem
+     */
     protected function convertExpense(ClientInvoiceItem $item) : ClaimInvoiceItem
     {
         /** @var \App\ShiftExpense $shiftExpense */
@@ -152,7 +158,7 @@ class ClaimInvoiceFactory
     }
 
     /**
-     * Create a ClaimInvoiceItem from the given data.
+     * Create a ClaimInvoiceItem from the given service data.
      *
      * @param ClientInvoiceItem $item
      * @param Shift $shift
