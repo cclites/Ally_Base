@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Claims;
+namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ClaimInvoiceItem extends Model
+class ClaimableExpense extends Model
 {
     /**
      * The attributes that aren't mass assignable.
@@ -41,26 +41,6 @@ class ClaimInvoiceItem extends Model
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
-
-    /**
-     * Get the parent ClaimInvoice relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function claim()
-    {
-        return $this->belongsTo(ClaimInvoice::class, 'claim_invoice_id');
-    }
-
-    /**
-     * Get the claimable object.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-    */
-    public function claimable()
-    {
-        return $this->morphTo('claimable', 'claimable_type', 'claimable_id');
-    }
 
     // **********************************************************
     // MUTATORS

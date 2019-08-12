@@ -3,6 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Illuminate\Database\Eloquent\Builder;
@@ -119,5 +120,19 @@ class ClientInvoiceItem extends BaseInvoiceItem
     public function shiftService()
     {
         return $this->hasOne(ShiftService::class, 'id', 'invoiceable_id');
+    }
+
+
+    /**
+     * Get the related ShiftExpense from the invoiceable item.
+     * WARNING: This does not check invoiceable_type and can provide
+     * unexpected results if you do not check invoiceable_type before
+     * using this relationship.
+     *
+     * @return HasOne
+     */
+    public function shiftExpense()
+    {
+        return $this->hasOne(ShiftExpense::class, 'id', 'invoiceable_id');
     }
 }

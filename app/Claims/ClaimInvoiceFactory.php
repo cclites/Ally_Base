@@ -6,10 +6,13 @@ use App\Address;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\InvoiceableType;
 use App\Billing\Service;
 use App\Caregiver;
+use App\ClaimableExpense;
+use App\ClaimableService;
 use App\Shift;
 
 class ClaimInvoiceFactory
@@ -61,8 +64,10 @@ class ClaimInvoiceFactory
                     return $this->convertShift($item);
                 case InvoiceableType::SHIFT_SERVICE():
                     return $this->convertService($item);
-                case InvoiceableType::SHIFT_ADJUSTMENT():
                 case InvoiceableType::SHIFT_EXPENSE():
+                    return $this->convertExpense($item);
+                case InvoiceableType::SHIFT_ADJUSTMENT():
+                    // Adjustments are not copied to Claim Invoices.
                 default:
                     return null;
             }
@@ -92,7 +97,7 @@ class ClaimInvoiceFactory
             throw new \InvalidArgumentException('Shift has no related service.');
         }
 
-        return $this->createClaimInvoiceItem($item, $shift, $service, $caregiver, $evvAddress);
+        return $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
     }
 
     /**
@@ -112,7 +117,7 @@ class ClaimInvoiceFactory
         /** @var Service $service */
         $service = $item->shiftService->service;
 
-        $claimItem = $this->createClaimInvoiceItem($item, $shift, $service, $caregiver, $evvAddress);
+        $claimItem = $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
 
         // Update the visit start and end times with the pro-rated versions for service breakouts.
         list($start, $end) = $shiftService->getStartAndEndTime();
@@ -120,6 +125,30 @@ class ClaimInvoiceFactory
         $claimItem->visit_end_time = $end;
 
         return $claimItem;
+    }
+
+    protected function convertExpense(ClientInvoiceItem $item) : ClaimInvoiceItem
+    {
+        /** @var \App\ShiftExpense $shiftExpense */
+        $shiftExpense = $item->shiftExpense;
+
+        $claimableExpense = ClaimableExpense::create([
+            'shift_id' => $shiftExpense->shift_id,
+            'name' => $shiftExpense->name,
+            'date' => $item->date,
+            'notes' => $shiftExpense->notes,
+        ]);
+
+        return ClaimInvoiceItem::make([
+            'invoiceable_id' => $shiftExpense->id,
+            'invoiceable_type' => ShiftExpense::class,
+            'claimable_id' => $claimableExpense->id,
+            'claimable_type' => ClaimableExpense::class,
+            'rate' => $item->rate,
+            'units' => $item->units,
+            'amount' => $item->amount_due,
+            'amount_due' => $item->amount_due,
+        ]);
     }
 
     /**
@@ -132,16 +161,10 @@ class ClaimInvoiceFactory
      * @param Address|null $evvAddress
      * @return ClaimInvoiceItem
      */
-    protected function createClaimInvoiceItem(ClientInvoiceItem $item, Shift $shift, Service $service, Caregiver $caregiver, ?Address $evvAddress) : ClaimInvoiceItem
+    protected function createClaimableService(ClientInvoiceItem $item, Shift $shift, Service $service, Caregiver $caregiver, ?Address $evvAddress) : ClaimInvoiceItem
     {
-        return ClaimInvoiceItem::make([
+        $claimableService = ClaimableService::create([
             'shift_id' => $shift->id,
-            'claimable_id' => $shift->id,
-            'claimable_type' => Shift::class,
-            'amount' => $item->amount_due,
-            'amount_due' => $item->amount_due,
-            'rate' => $item->rate,
-            'duration' => $item->units,
             'caregiver_id' => $caregiver->id,
             'caregiver_first_name' => $caregiver->first_name,
             'caregiver_last_name' => $caregiver->last_name,
@@ -177,6 +200,17 @@ class ClaimInvoiceFactory
             'service_code' => $service->code,
             'activities' => $shift->activities->implode('code', ','),
             'caregiver_comments' => $shift->caregiver_comments,
+        ]);
+
+        return ClaimInvoiceItem::make([
+            'invoiceable_id' => $shift->id,
+            'invoiceable_type' => Shift::class,
+            'claimable_id' => $claimableService->id,
+            'claimable_type' => ClaimableService::class,
+            'rate' => $item->rate,
+            'units' => $item->units,
+            'amount' => $item->amount_due,
+            'amount_due' => $item->amount_due,
         ]);
     }
 
