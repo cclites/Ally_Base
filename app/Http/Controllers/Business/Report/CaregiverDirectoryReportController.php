@@ -19,56 +19,38 @@ class CaregiverDirectoryReportController extends BaseController
      *
      * @return Response
      */
-    public function index()
+    public function index( Request $request )
     {
-        $caregivers = Caregiver::forRequestedBusinesses()
-            ->with(['address', 'user', 'user.emergencyContacts', 'user.phoneNumbers'])
-            ->with('meta')
-            ->get()->map(function($caregiver){
+        if( $request->filled( 'json' ) ){
 
-                $caregiver->phone = $caregiver->user->notification_phone;
-                $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-                $caregiver->referral = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-                $caregiver->certification = $caregiver->certification ? $caregiver->certification : '-';
-                $caregiver->smoking_okay = $caregiver->smoking_okay ? "Yes" : "No";
-                $caregiver->ethnicity = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-                $caregiver->medicaid_id = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-                $caregiver->gender = $caregiver->user->gender ? $caregiver->user->gender : '-';
+            $report = new CaregiverDirectoryReport();
+            $report->query()->leftJoin( 'users', 'caregivers.id', '=', 'users.id' );
+            $report->forRequestedBusinesses()
+                ->setActiveFilter( $request->active )
+                ->setStatusAliasFilter( $request->status_alias_id )
+                ->setCurrentPage( $request->current_page )
+                ->setPageCount( 100 );
+                // ->setDateFilter( $request->start_date, $request->end_date );
 
-                return $caregiver;
+            if ( $request->export == '1' ) {
+                // the request object attributes are coming through as strings
 
-            });
+                return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
+                    ->download();
+            }
+
+            // rows() has to be called for the private variable total_count to be set within the report
+            $rows  = $report->rows();
+            $total = $report->getTotalCount();
+
+            return response()->json( [ 'rows' => $rows, 'total' => $total ] );
+        }
 
         $fields = CustomField::forAuthorizedChain()
-            ->where('user_type', 'caregiver')
-            ->with('options')
+            ->where( 'user_type', 'caregiver' )
+            ->with( 'options' )
             ->get();
 
-        return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
-    }
-
-    /**
-     * Handle the request to generate the caregiver directory
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
-     */
-    public function generateCaregiverDirectoryReport(Request $request)
-    {
-        $report = new CaregiverDirectoryReport();
-        $report->forRequestedBusinesses();
-        $report->query()->join('users','caregivers.id','=','users.id');
-
-        if($request->has('filter_active')) {
-            $report->where('users.active', $request->filter_active);
-        }
-
-        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
-
-        if ($request->has('export') && $request->export == true) {
-            return $report->download();
-        }
-
-        return $report->rows();
+        return view( 'business.reports.caregiver_directory', compact( 'fields' ) );
     }
 }

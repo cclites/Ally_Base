@@ -8,10 +8,13 @@
     <li class="breadcrumb-item active">Client Directory</li>
 @endsection
 
-@section('content')
+@section( 'content' )
+
     <div class="row">
+
         <div class="col-lg-12">
-            <client-directory :clients="{{ $clients }}" :custom-fields="{{ $fields }}"></client-directory>
+
+            <client-directory :custom-fields="{{ $fields }}"></client-directory>
         </div>
     </div>
 @endsection
