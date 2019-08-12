@@ -61,7 +61,7 @@ class CreateClaimInvoicesTable extends Migration
 
         Schema::create('claimable_expenses', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('shift_id');
+            $table->unsignedInteger('shift_id')->nullable();
             $table->string('name');
             $table->dateTime('date');
             $table->string('notes')->nullable();
@@ -73,7 +73,7 @@ class CreateClaimInvoicesTable extends Migration
 
         Schema::create('claimable_services', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('shift_id');
+            $table->unsignedInteger('shift_id')->nullable();
 
             $table->unsignedInteger('caregiver_id');
             $table->string('caregiver_first_name', 35);
