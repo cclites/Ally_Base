@@ -142,7 +142,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         // If amount is less than 1 cent, it has already been split
         // and fully invoiced but the calculation is off.  If we
         // return 0, it resolves an issue of a -0.01 balance after invoicing.
-        if ($amount <= floatval(0.01)) {
+        if ($amount > floatval(0.00) && $amount < floatval(0.01)) {
             return floatval(0.0);
         }
 
