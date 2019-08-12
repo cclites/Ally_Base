@@ -47,8 +47,6 @@ class InvoiceSummaryByCountyReportController extends BaseController
 
             return response()->json(['data'=>$data, 'totals'=>$locationsTotals]);
 
-            //return response()->json(['data'=>$data, 'totals'=>$locationsTotals, 'rowTotals'=>$rowTotals]);
-
         }
 
         return view_component(
@@ -68,18 +66,25 @@ class InvoiceSummaryByCountyReportController extends BaseController
 
         foreach($data as $item){
 
-            //$key = $item["county"] . $item['client'];
             $key = $item["county"];
 
             if(!isset($set[$key])){
                 $set[$key] = [
                   'county'=>$item['county'],
-                  'client' => $item['client'],
-                  'amount'=>$item['amount']
+                    'hours' => $item['hours'],
+                  'amount'=>$item['amount'],
+                    'clients'=> []
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];
+                $set[$key]['hours'] += $item['hours'];
             }
+        }
+
+        //add clients to each county
+        foreach($data as $item){
+            $key= $item['county'];
+            $set[$key]['clients'][] = ['client_name'=>$item['client_name'], 'client_id'=>$item['client_id']];
         }
 
         return array_values($set);

@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Filters"
+                        header="This report shows total client charges for both active and inactive clients"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -59,16 +59,24 @@
                                         :per-page="perPage"
                                         :footClone="footClone"
                                 >
+                                    <template slot="actions" scope="row" class="primary">
+                                        <b-btn :key="row.item.county" @click="showClientBreakdownModal(row.item.county)">View Client Breakdown</b-btn>
+                                    </template>
+
                                     <template slot="FOOT_county" scope="item" class="primary">
                                         <strong>For Location: </strong> {{ totals.location }}
                                     </template>
 
-                                    <template slot="FOOT_amount" scope="item">
+                                    <template slot="FOOT_hours" scope="item">
                                         &nbsp;<strong>For Dates: </strong>{{ totals.start }} to {{ totals.end }}
                                     </template>
 
-                                    <template slot="FOOT_spacer" scope="item" class="primary">
+                                    <template slot="FOOT_amount" scope="item" class="primary">
                                         <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
+                                    </template>
+
+                                    <template slot="FOOT_actions" scope="item" class="primary">
+                                        &nbsp;
                                     </template>
 
                                 </b-table>
@@ -84,6 +92,19 @@
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
+
+
+                    <template>
+                        <div class="modal" v-if="show" @click.self="close">
+                            <header>
+                                <h2>{{title}}</h2>
+                            </header>
+                            <section>
+                                <component :is="component" :data="data"></component>
+                            </section>
+                        </div>
+                    </template>
+
                 </b-card>
             </b-col>
         </b-row>
@@ -113,23 +134,24 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 25,
+                perPage: 100,
                 currentPage: 1,
                 sortBy: 'county',
                 sortDesc: false,
                 fields: [
-
                     {key: 'county', label: 'County', sortable: true,},
-                    {key: 'amount', label: 'Total Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
-
-                    //{key: 'client', label: 'Client', sortable: false,},
+                    {key: 'hours', label: 'Total Hours', sortable: true,},
+                    {key: 'amount', label: 'Total Client Charges', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'actions', label: 'Actions', sortable: true,}
                 ],
                 items: [],
                 item: '',
                 totals: [],
                 clients: [],
                 footClone: false,
-                emptyText: "No Results"
+                emptyText: "No Results",
+                //county: ''
+                clientsForModal: '',
             }
         },
 
@@ -163,6 +185,38 @@
                     })
             },
 
+
+            showClientBreakdownModal(county){
+
+                //this.county(this.items.filter(x => x.county == county));
+
+                this.clientsForModal = this.items.filter(function(item){
+
+                    if(item.county == county){
+                        console.log("We have a county");
+                        return item.clients;
+                    }
+
+                });
+
+                /*
+                let self = this;
+                for(var item of this.items){
+                    if(item.county == county){
+                        self.clientsForModal = item.clients;
+                    }
+                }*/
+            },
+        },
+
+        computed: {
+
+            county(event){
+
+                console.log(event);
+                console.log("County is triggered");
+                //return this.items.filter(x => x.county == county)
+            },
 
         },
 
