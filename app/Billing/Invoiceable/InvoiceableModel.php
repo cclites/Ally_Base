@@ -138,6 +138,14 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     {
         $amount = bcmul($this->getClientRate(), $this->getItemUnits(), 4);
         $amount = bcsub($amount, $this->getAmountInvoiced(), 4);
+
+        // If amount is less than 1 cent, it has already been split
+        // and fully invoiced but the calculation is off.  If we
+        // return 0, it resolves an issue of a -0.01 balance after invoicing.
+        if ($amount <= floatval(0.01)) {
+            return floatval(0.0);
+        }
+
         return round($amount, 2);
     }
 
