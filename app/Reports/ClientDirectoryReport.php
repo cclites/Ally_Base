@@ -182,11 +182,11 @@ class ClientDirectoryReport extends BusinessResourceReport
 
                 if( $meta = $client->meta->where( 'key', $field->key )->first() ) {
 
-                    $result[ $field->key ] = $meta->display();
+                    $result[ 'meta' ][ $field->key ] = $meta->display();
                     continue;
                 }
 
-                $result[ $field->key ] = $field->default;
+                $result[ 'meta' ][ $field->key ] = $field->default;
             }
 
             return $result;

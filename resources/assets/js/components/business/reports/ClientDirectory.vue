@@ -138,7 +138,7 @@
 
                                 {{ formatDate( row.item.user.created_at ) }}
                             </template> -->
-                            <template v-for="key in customFieldKeys" :slot="key" scope="row">
+                            <template v-for=" key in customFieldKeys " :slot=" key " scope="row">
 
                                 {{ getFieldValue( row.item.meta, key ) }}
                             </template>
@@ -286,7 +286,7 @@
                 this.form.get( '/business/reports/client-directory' )
                     .then( ({ data }) => {
 
-                        console.log( 'data retreived: ', data );
+                        // console.log( 'data retreived: ', data );
                         this.items     = data.rows;
                         this.totalRows = data.total;
                     })
@@ -324,16 +324,22 @@
 
             getFieldValue( meta, key ) {
 
-                const metaField = meta.find(fieldValue => fieldValue.key == key);
-                const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
-                const isDropdown = options.length > 0;
+                // console.log( 'meta: ', Object.entries( meta ) );
+                // console.log( 'key: ', key );
+                if( meta ){
 
-                if( !metaField ) {
+                    const metaField = Object.entries( meta ).find( fieldValue => fieldValue[ 0 ] == key );
+                    // console.log( 'found meta: ', metaField );
+                    const {options, default: fieldDefault} = this.customFields.find( definition => definition.key == key );
+                    const isDropdown = options.length > 0;
 
-                    return fieldDefault;
+                    if( !metaField ) {
+
+                        return fieldDefault;
+                    }
+
+                    return isDropdown ? this.getDropdownLabel( options, metaField[ 1 ] ) : metaField[ 1 ];
                 }
-
-                return isDropdown ? this.getDropdownLabel( options, metaField.value ) : metaField.value;
             },
 
             getDropdownLabel( options, key ) {
@@ -345,6 +351,7 @@
         created(){
 
             this.fetch();
+            // console.log( 'custom fields: ', this.customFields );
 
             const obj = {};
             const customKeys = [];
@@ -360,6 +367,7 @@
                 };
             });
 
+            // console.log( 'custom keys: ', customKeys );
             this.customFieldKeys = customKeys;
 
             this.columns = {
