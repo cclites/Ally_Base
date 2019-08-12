@@ -59,8 +59,8 @@
                                         :per-page="perPage"
                                         :footClone="footClone"
                                 >
-                                    <template slot="actions" scope="row" class="primary">
-                                        <b-btn :key="row.item.county" @click="showClientBreakdownModal(row.item.county)">View Client Breakdown</b-btn>
+                                    <template slot="actions" scope="item" class="primary">
+                                        <b-btn :key="item.county" @click="showClientBreakdownModal(item.county)">View Client Breakdown</b-btn>
                                     </template>
 
                                     <template slot="FOOT_county" scope="item" class="primary">
@@ -96,12 +96,7 @@
 
                     <template>
                         <div class="modal" v-if="show" @click.self="close">
-                            <header>
-                                <h2>{{title}}</h2>
-                            </header>
-                            <section>
-                                <component :is="component" :data="data"></component>
-                            </section>
+
                         </div>
                     </template>
 
@@ -150,8 +145,9 @@
                 clients: [],
                 footClone: false,
                 emptyText: "No Results",
-                //county: ''
-                clientsForModal: '',
+                county: '',
+                clientsForModal: [],
+                show: false
             }
         },
 
@@ -194,29 +190,18 @@
 
                     if(item.county == county){
                         console.log("We have a county");
+
+                        console.log(item.clients);
+
                         return item.clients;
                     }
 
                 });
 
-                /*
-                let self = this;
-                for(var item of this.items){
-                    if(item.county == county){
-                        self.clientsForModal = item.clients;
-                    }
-                }*/
             },
         },
 
         computed: {
-
-            county(event){
-
-                console.log(event);
-                console.log("County is triggered");
-                //return this.items.filter(x => x.county == county)
-            },
 
         },
 

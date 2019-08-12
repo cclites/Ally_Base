@@ -19,10 +19,6 @@ class InvoiceSummaryByCountyReportController extends BaseController
 
             $this->authorize('read', Business::find($request->business));
 
-            if(filled($request->client)){
-                $this->authorize('read', Client::find($request->client));
-            }
-
             $report->setTimezone($timezone)
                     ->applyFilters(
                         $request->start,
