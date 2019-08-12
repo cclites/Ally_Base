@@ -106,13 +106,11 @@ class ClientReferralsReport extends BaseReport
     {
         return $this->query
             ->get()
-            ->unique()
             ->map(function($client){
 
-                $invoiced = (new ClientInvoiceQuery())->forClient($client->id)
+                $invoiced = (new ClientInvoiceQuery())->forClient($client->id, false)
                             ->with('clientPayer')
-                            ->get()
-                            ->unique(['client_payer']);
+                            ->get();
 
                 $payer = '';
 
@@ -127,7 +125,7 @@ class ClientReferralsReport extends BaseReport
                     'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
-                    'revenue' => $invoiced->sum('amount_paid'),
+                    'revenue' => add($invoiced->sum('amount_paid'), $invoiced->sum('offline_amount_paid')),
                     'salesperson' => optional($client->salesperson)->fullName(),
                 ];
 
