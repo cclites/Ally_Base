@@ -230,6 +230,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     const PAID_NOT_CHARGED = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
     const PAID = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
+    const HOSPITAL_HOLD = 'HOSPITAL_HOLD'; // created for Ally-1335
+
     ////////////////////////////////////
     //// Shift Methods
     ////////////////////////////////////

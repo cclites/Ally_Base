@@ -28,6 +28,8 @@ class ShiftStatusManager
         Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
         Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
         Shift::PAID,
+
+        Shift::HOSPITAL_HOLD,
     ];
 
     public function __construct(Shift $shift)
