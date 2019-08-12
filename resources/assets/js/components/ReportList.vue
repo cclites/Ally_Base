@@ -584,9 +584,9 @@
                             hidden: true,
                         },
                         {
-                            name: 'Invoice Summary By Marketing',
-                            url: 'reports/invoice-summary-by-marketing',
-                            description: 'Invoice Summary By Marketing Report',
+                            name: 'Invoice Summary By Salesperson',
+                            url: 'reports/invoice-summary-by-salesperson',
+                            description: 'Total Client Charges By Salesperson',
                             category: 5,
                             allowed: ['office_user'],
                             hidden: true,

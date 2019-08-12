@@ -245,7 +245,7 @@ Vue.component('batch-invoice-report', require('./components/business/reports/Bat
 
 Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
-Vue.component('invoice-summary-by-marketing-report', require('./components/business/reports/InvoiceSummaryByMarketingReport'));
+Vue.component('invoice-summary-by-salesperson-report', require('./components/business/reports/InvoiceSummaryBySalesperson'));
 
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
