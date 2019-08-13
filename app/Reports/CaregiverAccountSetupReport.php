@@ -61,7 +61,7 @@ class CaregiverAccountSetupReport extends BaseReport
      */
     protected function results() : ?iterable
     {
-        switch ($this->statusFilter) {
+        switch ( $this->statusFilter ) {
 
             case 'active_no_bank':
 

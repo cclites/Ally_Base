@@ -336,9 +336,7 @@ Route::group([
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
     Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
-    Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
     Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
-    Route::get('reports/caregiver-directory/download', 'Business\Report\CaregiverDirectoryReportController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
@@ -370,7 +368,7 @@ Route::group([
 
     Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
     Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
-    Route::get('reports/invoice-summary-by-marketing', 'Business\Report\InvoiceSummaryByMarketingController@index')->name('reports.invoice-summary-by-marketing');
+    Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');

@@ -4,25 +4,29 @@
 namespace App\Reports;
 
 
+use App\Billing\View\InvoiceViewFactory;
+use App\Billing\View\InvoiceViewGenerator;
 use App\Client;
 use App\Billing\ClientInvoice;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\SalesPerson;
 use Carbon\Carbon;
 
+use Illuminate\Http\Response;
 use Log;
 
-class InvoiceSummaryByMarketingReport extends BaseReport
+class InvoiceSummaryBySalespersonReport extends BaseReport
 {
 
+    /**
+     * @var string
+     */
     protected $timezone;
 
+    /**
+     * @var ClientInvoiceQuery
+     */
     protected $query;
-
-    public $start;
-
-    public $end;
-
 
     /**
      * InvoiceSummaryByMarketing constructor.
@@ -57,11 +61,19 @@ class InvoiceSummaryByMarketingReport extends BaseReport
         return $this;
     }
 
+    /**
+     * @param string $start
+     * @param string $end
+     * @param int $business
+     * @param int|null $salesperson
+     * @param int|null $client
+     * @return InvoiceSummaryByMarketingReport
+     */
     public function applyFilters(string $start, string $end, int $business, ?int $salesperson, ?int $client): self
     {
-        $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
-        $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
-        $this->query->whereBetween('created_at', [$this->start, $this->end]);
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+        $this->query->whereBetween('created_at', [$start, $end]);
 
         $this->query->forBusiness($business);
 
@@ -97,16 +109,38 @@ class InvoiceSummaryByMarketingReport extends BaseReport
                     ->map(function (ClientInvoice $invoice){
 
                        return [
-                           'client'=>$invoice->client->name,
+                           'client'=>$invoice->client->nameLastFirst,
                            'amount'=>$invoice->amount,
-                           'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->fullName() : 'None',
-                           'payer'=>optional($invoice->clientPayer)->payer_name,
+                           'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->nameLastFirst : 'None',
+                           'payer'=>optional($invoice->clientPayer)->payer_name
                         ];
 
-                    })
-                    ->sortBy('salesperson')
-                    ->values();
+                    })->toArray();
 
-        return $data;
+        return $this->sort($data);
     }
+
+    protected function sort($data) : iterable
+    {
+        $salespersons = [];
+        $clients = [];
+
+        foreach ($data as $item){
+            $salespersons[] = $item['salesperson'];
+            $clients[] = $item['client'];
+        }
+
+        array_multisort($salespersons, SORT_ASC,
+                              $clients, SORT_ASC,
+                              $data
+            );
+
+        $collection = collect();
+        foreach($data as $item){
+            $collection->push($item);
+        }
+
+        return $collection;
+    }
+
 }
