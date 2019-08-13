@@ -1,10 +1,11 @@
 <template>
     <b-card
-      header="This report shows data that has been invoiced & billed. No data for the current service week will be included."
+      header="Client Referrals Report"
       header-text-variant="white"
       header-bg-variant="info"
     >
-        <b-row>
+        <b-alert show variant="info">This report shows data that has been invoiced & billed. No data for the current service week will be included.</b-alert>
+        <div class="form-inline">
             <b-form-group label="Location" class="mb-2 mr-2">
                 <business-location-form-group
                         v-model="form.business"
@@ -48,7 +49,7 @@
                     <b-btn @click="print()">Print</b-btn>
                 </b-button-group>
             </b-form-group>
-        </b-row>
+        </div>
 
         <loading-card v-show="loading"></loading-card>
 
@@ -61,7 +62,7 @@
                          :per-page="perPage"
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
-                         class="report-table"
+                         class="report-table mt-4"
                          :footClone="footclone"
                          :noFooterSorting="true"
                 >
@@ -247,9 +248,3 @@
         }
     }
 </script>
-
-<style>
-    table.b-table tfoot tr th{
-        padding-top: 40px;
-    }
-</style>
