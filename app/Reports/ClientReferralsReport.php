@@ -129,7 +129,8 @@ class ClientReferralsReport extends BaseReport
                     'salesperson' => optional($client->salesperson)->fullName(),
                 ];
 
-            })
+            })->sortBy('name')
+            ->sortBy('location')
             ->values();
     }
 
