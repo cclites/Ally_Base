@@ -55,6 +55,11 @@ class CronHhaCheckStatus extends Command
     {
         $pendingFiles = HhaFile::where('status', HhaFile::STATUS_PENDING)->get();
 
+        if ($pendingFiles->count() === 0) {
+            $this->log->push('There are no pending files.');
+            return;
+        }
+
         /** @var \App\HhaFile $hhaFile */
         foreach ($pendingFiles as $hhaFile) {
             /** @var \App\Business $business */
@@ -100,8 +105,6 @@ class CronHhaCheckStatus extends Command
                 \DB::rollBack();
             }
         }
-
-        dd($this->log);
     }
 
     /**

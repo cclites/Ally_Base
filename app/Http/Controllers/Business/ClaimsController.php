@@ -239,4 +239,21 @@ class ClaimsController extends BaseController
 
         return new SuccessResponse('Required fields have been saved.  You can now transmit the invoice.', $invoice);
     }
+
+    /**
+     * Get the response results from an HHA transmission.
+     *
+     * @param Claim $claim
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hhaResults(Claim $claim)
+    {
+        $hhaFile = $claim->hhaFiles()->with('results')->latest()->first();
+
+        if (empty($hhaFile)) {
+            return response()->json([]);
+        }
+
+        return response()->json($hhaFile->results);
+    }
 }
