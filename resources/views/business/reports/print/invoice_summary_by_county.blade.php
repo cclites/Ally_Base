@@ -64,6 +64,10 @@
         .logo img {
             max-height: 80px;
         }
+
+        table tfoot tr th{
+            padding-top: 40px;
+        }
     </style>
 @endpush
 
@@ -90,7 +94,7 @@
                     <tr>
                         <td>{{ $item['county'] }}</td>
                         <td>{{ $item['hours'] }}</td>
-                        <td>{{ money_format('%i',$item['amount']) }}</td>
+                        <td>${{ money_format('%i',$item['amount']) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
