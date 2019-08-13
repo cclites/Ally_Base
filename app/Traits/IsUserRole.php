@@ -263,6 +263,11 @@ trait IsUserRole
         return $this->user ? $this->user->status_alias_id : null;
     }
 
+    public function statusAlias()
+    {
+        return $this->hasOne( 'App\StatusAlias', 'id', 'status_alias_id' );
+    }
+
     public function getSetupStatusAttribute()
     {
         return $this->user ? $this->user->setup_status : null;
@@ -399,6 +404,17 @@ trait IsUserRole
     public function scopeActive(Builder $builder)
     {
         return $builder->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
+    /**
+     * Returns only inactive Clients.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInactive(Builder $builder)
+    {
+        return $builder->whereHas('user', function($q) { $q->where('active', 0); });
     }
 
     /**

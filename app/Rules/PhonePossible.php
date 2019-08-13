@@ -29,8 +29,12 @@ class PhonePossible implements Rule
      */
     public function passes($attribute, $value)
     {
-        $number = $this->phoneNumberUtil->parse($value, PhoneNumber::DEFAULT_REGION);
-        return $this->phoneNumberUtil->isPossibleNumber($number);
+        try {
+            $number = $this->phoneNumberUtil->parse($value, PhoneNumber::DEFAULT_REGION);
+            return $this->phoneNumberUtil->isPossibleNumber($number);
+        } catch (\Exception $ex) {
+            return false;
+        }
     }
 
     /**

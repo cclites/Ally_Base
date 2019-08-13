@@ -282,6 +282,8 @@
                         glasses: 'Wears glasses',
                         normal: 'Normal vision',
                         peripheral: 'Peripheral only',
+                        no_peripheral: 'No Peripheral Vision',
+                        blind: 'Blind'
                     },
                     hearing: {
                         normal: 'Normal hearing',

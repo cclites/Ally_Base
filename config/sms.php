@@ -10,7 +10,7 @@ return [
     | It will default to a simple log driver that will log SMS message details
     | to the laravel.log file.
     |
-    | Supported: "log", "twolio"
+    | Supported: "log", "twilio"
     |
     */
 

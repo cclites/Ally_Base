@@ -238,6 +238,7 @@ class ShiftAdjustment extends InvoiceableModel
     public function getProviderRate(): float
     {
         // TODO: Implement getProviderRate() method.
+        return floatval(0);
     }
 
     /**

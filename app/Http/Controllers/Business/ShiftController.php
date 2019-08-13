@@ -151,7 +151,7 @@ class ShiftController extends BaseController
                 $calculator = $auth->getCalculator();
                 $dates = $shift->getDateSpan();
                 $start = $dates[0];
-                $end = count($dates) > 1 ? $dates[2] : $dates[0];
+                $end = count($dates) > 1 ? $dates[1] : $dates[0];
                 $periods = $auth->getPeriodsForRange($start, $end);
                 foreach ($periods as $period) {
                     $shifts = $calculator->getMatchingShifts($period);
@@ -266,6 +266,8 @@ class ShiftController extends BaseController
     {
         $this->authorize('read', $shift);
 
+        $shift->load('activities', 'services');
+
         // Duplicate an existing shift and advance one day
         /** @var Shift $shift */
         $shift = $shift->replicate();
@@ -273,7 +275,6 @@ class ShiftController extends BaseController
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
         $shift->checked_in_distance = null;
         $shift->checked_out_distance = null;
-        
         $shift->status = null;
 
         $activities = $shift->business->allActivities();

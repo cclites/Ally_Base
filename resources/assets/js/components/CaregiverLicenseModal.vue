@@ -13,14 +13,15 @@
                             <option v-for="item in expirations" :value="item.type">{{ item.type }}</option>
                         </b-form-select>
                     </b-form-group>
-                    <b-form-group label="Name" label-for="selectedType">
+                    <b-form-group label="Name" label-for="name">
                         <b-form-input
-                                id="selectedType"
-                                name="selectedType"
+                                id="name"
+                                name="name"
                                 v-model="form.name"
                                 :disabled="expiration != ''"
                         >
                         </b-form-input>
+                        <input-help :form="form" field="name" text="Enter an optional description or notes"></input-help>
                     </b-form-group>
                     <b-form-group label="Description" label-for="description">
                         <b-textarea
@@ -115,6 +116,7 @@
                         }
                         this.$emit('update:items', newItems);
                         this.$parent.$forceUpdate();
+                        this.fetchChainExpirations();
 
                         this.form.reset();
                         this.expiration = '';

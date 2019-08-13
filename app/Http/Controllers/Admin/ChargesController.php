@@ -24,12 +24,9 @@ class ChargesController extends Controller
     public function index(Request $request)
     {
         if ($request->expectsJson() && $request->input('json')) {
-            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
-            // Make UTC to match DB
-            $startDate->setTimezone('UTC');
-            $endDate->setTimezone('UTC');
+            $startDate = (new Carbon($request->start_date . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+            $endDate = (new Carbon($request->end_date . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
 
             $query = Payment::with(['transaction', 'client', 'business', 'transaction.lastHistory'])
                             ->whereBetween('created_at', [$startDate, $endDate])

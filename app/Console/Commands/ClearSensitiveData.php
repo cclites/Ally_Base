@@ -10,6 +10,7 @@ use App\CaregiverApplication;
 use App\Client;
 use App\Billing\Payments\Methods\CreditCard;
 use App\ClientMedication;
+use App\CommunicationLog;
 use App\EmergencyContact;
 use App\Note;
 use App\PhoneNumber;
@@ -83,7 +84,9 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
-        // Fix encryption 
+        // Fix encryption
+        $this->clearAuditLog();
+        $this->clearCommunicationsLog();
         $this->cleanCaregivers();
         $this->cleanCaregiverApplications();
         $this->cleanClients();
@@ -93,7 +96,6 @@ class ClearSensitiveData extends Command
 
         if (! $this->option('fix-only')) {
             // Only execute these options if fix-only if OFF
-            $this->clearAuditLog();
             $this->cleanUserData();
             $this->cleanAddresses();
             $this->cleanPhoneNumbers();
@@ -169,6 +171,18 @@ class ClearSensitiveData extends Command
             });
             \DB::commit();
         });
+
+        $this->finish();
+    }
+
+    public function clearCommunicationsLog()
+    {
+        $this->startProgress(
+            'Clearing communications log...',
+            1
+        );
+
+        CommunicationLog::truncate();
 
         $this->finish();
     }

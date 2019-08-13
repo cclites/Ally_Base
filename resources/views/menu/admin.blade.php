@@ -63,5 +63,6 @@
         <li><a href="{{ route('admin.microbilt') }}">Microbilt</a></li>
         <li><a href="{{ route('admin.nacha_ach') }}">Nacha Ach</a></li>
         <li><a href="{{ route('admin.communication-log') }}">Communication Log</a></li>
+        <li><a href="{{ route('admin.control-file') }}">Control File</a></li>
     </ul>
 </li>

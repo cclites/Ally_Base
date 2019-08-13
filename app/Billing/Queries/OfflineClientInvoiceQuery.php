@@ -27,4 +27,10 @@ final class OfflineClientInvoiceQuery extends ClientInvoiceQuery
 
         return $this;
     }
+    public function overpaid(): self
+    {
+        $this->whereColumn('offline_amount_paid', '>', 'amount');
+
+        return $this;
+    }
 }

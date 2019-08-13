@@ -43,6 +43,10 @@ class ThirdPartyPayerReportController extends Controller
                     $request->payer
                 );
 
+            if (filled($request->export)) {
+                return $report->download();
+            }
+
             $data = $report->rows();
 
             if (filled($request->print)) {

@@ -16,3 +16,7 @@
 @section('payments')
     @include('invoices.partials.client_payments_table')
 @endsection
+
+@section('notes')
+    @include('invoices.partials.payer_notes')
+@endsection

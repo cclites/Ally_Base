@@ -1,12 +1,16 @@
 export default {
+
     props: {
+
         customFields: {
-            type: Array,
-            required: true,
+
+            type     : Array,
+            required : true,
         },
     },
 
     created() {
+
         const obj = {};
         const customKeys = [];
         this.customFields.forEach(({key, label}) => {
@@ -39,25 +43,30 @@ export default {
     },
 
     computed: {
+
         items() {
+
             const {start_date, end_date, active, client_type} = this.filters;
-            let items = this.data;
+            let items = this.data || [];
 
-            if(start_date && end_date) {
-                // Use first second and last second of the day to calculate between.
-                let startDateTime = moment(start_date).set({'hour': 0, 'minute': 0, 'seconds': 1});
-                let endDateTime = moment(end_date).set({'hour': 23, 'minute': 59, 'seconds': 59});
-                items = items.filter(({user}) => moment(user.created_at).isBetween(startDateTime, endDateTime));
+            if( items.length > 0 ){
+
+                if( start_date && end_date ) {
+
+                    // Use first second and last second of the day to calculate between.
+                    let startDateTime = moment(start_date).set({'hour': 0, 'minute': 0, 'seconds': 1});
+                    let endDateTime = moment(end_date).set({'hour': 23, 'minute': 59, 'seconds': 59});
+                    items = items.filter(({user}) => moment(user.created_at).isBetween(startDateTime, endDateTime));
+                }
+
+                if( typeof active == 'boolean' ) {
+                    items = items.filter(client => client.active == active);
+                }
+
+                if ( client_type ) {
+                    items = items.filter(client => client.client_type == client_type);
+                }
             }
-
-            if(typeof active == 'boolean') {
-                items = items.filter(client => client.active == active);
-            }
-
-            if (client_type) {
-                items = items.filter(client => client.client_type == client_type);
-            }
-
             return items;
         },
 
@@ -110,7 +119,8 @@ export default {
         },
 
         getDropdownLabel(options, key) {
-            return options.find(option => option.value == key).label;
+            let option = options.find(option => option.value == key);
+            return option ? option.label : '-';
         }
     }
 }

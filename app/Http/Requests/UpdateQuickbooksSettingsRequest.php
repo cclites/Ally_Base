@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\QuickbooksConnection;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateQuickbooksSettingsRequest extends FormRequest
@@ -25,6 +26,7 @@ class UpdateQuickbooksSettingsRequest extends FormRequest
     {
         return [
             'name_format' => 'required|in:first_last,last_first',
+            'fee_type' => 'required|in:' . join(',', [QuickbooksConnection::FEE_TYPE_REGISTRY, QuickbooksConnection::FEE_TYPE_CLIENT]),
             'mileage_service_id' => 'nullable|exists:quickbooks_services,id',
             'refund_service_id' => 'nullable|exists:quickbooks_services,id',
             'shift_service_id' => 'nullable|exists:quickbooks_services,id',

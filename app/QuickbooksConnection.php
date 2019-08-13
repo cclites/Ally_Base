@@ -29,6 +29,9 @@ class QuickbooksConnection extends BaseModel
      */
     protected $appends = [];
 
+    const FEE_TYPE_REGISTRY = 'registry';
+    const FEE_TYPE_CLIENT = 'client';
+
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************

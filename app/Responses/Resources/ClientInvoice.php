@@ -65,6 +65,7 @@ class ClientInvoice extends Resource
             'location' => $this->whenLoaded('client', function () {
                 return $this->resource->client->business->name;
             }),
+                'has_claim' => !empty($this->resource->claim)
         ];
     }
 }

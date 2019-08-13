@@ -47,6 +47,7 @@
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
+                            <option value="overpaid">Overpaid Invoices</option>
                             <option value="has_claim">Has Claim</option>
                             <option value="no_claim">Does Not Have Claim</option>
                             <option value="has_balance">Has Claim Balance</option>
@@ -120,14 +121,32 @@
             </b-form-group>
             <b-form-group label="Payment Type">
                 <b-form-input
-                    name="type"
-                    type="text"
-                    v-model="form.type"
-                    max="255"
-                    :disabled="form.busy"
+                        name="type"
+                        type="text"
+                        v-model="form.type"
+                        max="255"
+                        :disabled="form.busy"
                 />
                 <input-help :form="form" field="type" text="" />
             </b-form-group>
+            <b-form-group label="Payment Description">
+                <b-form-select
+                        name="type"
+                        v-model="form.description"
+                        class="mt-1"
+                        :disabled="form.busy"
+                >
+                    <option value="payment_applied">Payment Applied</option>
+                    <option value="partial_payment_applied">Partial Payment Applied</option>
+                    <option value="overpayment">Overpayment/Surplus</option>
+                    <option value="write_off">Write Off/Uncollectable</option>
+                    <option value="denial">Denial</option>
+                    <option value="supplier_contribution">Supplier Contribution</option>
+                    <option value="interest">Interest</option>
+                    <option value="discount">Discount</option>
+                </b-form-select>
+            </b-form-group>
+
             <b-form-group label="Reference #">
                 <b-form-input
                     name="reference"
@@ -157,12 +176,19 @@
                 />
                 <input-help :form="form" field="amount" text="" />
             </b-form-group>
+            <b-form-group label="Notes">
+                <b-form-textarea
+                        id="notes"
+                        name="notes"
+                        :rows="4"
+                        v-model="form.notes"
+                ></b-form-textarea>
+            </b-form-group>
             <label class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input" v-model="payFullBalance" @change="updateFullBalance()" />
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">Pay Full Balance</span>
             </label>
-
             <div slot="modal-footer">
                 <b-btn variant="default" @click="cancelPayment()" :disabled="form.busy">Cancel</b-btn>
                 <b-btn variant="info" @click="applyPayment()" :disabled="form.busy">Apply Payment</b-btn>
@@ -253,6 +279,17 @@
                         sortable: true,
                     },
                     {
+                        key: 'invoice_total',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
+                    {
+                        key: 'balance',
+                        label: 'Invoice Balance',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
+                    {
                         key: 'client',
                         sortable: true,
                     },
@@ -267,12 +304,12 @@
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
-                    // {
-                    //     key: 'balance',
-                    //     label: 'Invoice Balance',
-                    //     formatter: (val) => this.moneyFormat(val),
-                    //     sortable: true,
-                    // },
+                    {
+                        key: 'claim_balance',
+                        label: 'Claim Balance',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true,
+                    },
                     {
                         key: 'claim_status',
                         formatter: (x) => _.capitalize(_.startCase(x)),
@@ -282,12 +319,6 @@
                         key: 'claim_service',
                         label: 'Claim Service',
                         formatter: (x) => this.serviceLabel(x),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val),
                         sortable: true,
                     },
                     {
@@ -308,6 +339,8 @@
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
                     reference: '',
+                    notes: '',
+                    description:'payment_applied',
                 }),
                 selectedInvoice: {},
                 busy: false,
@@ -316,12 +349,32 @@
                 payFullBalance: false,
                 transmissionPrivate: false,
                 missingFieldsModal: false,
+
             }
         },
 
-        mounted() {
-            this.loadClients();
-            this.fetchPayers();
+        async mounted() {
+            await this.loadClients();
+            await this.fetchPayers();
+
+            // load filters from query
+            let autoLoad = false;
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('start_date')) {
+                this.start_date = urlParams.get('start_date');
+                autoLoad = true;
+            }
+            if (urlParams.has('end_date')) {
+                this.end_date = urlParams.get('end_date');
+                autoLoad = true;
+            }
+            if (urlParams.has('filter')) {
+                this.filter = urlParams.get('filter');
+            }
+
+            if (autoLoad) {
+                this.loadItems();
+            }
         },
 
         computed: {

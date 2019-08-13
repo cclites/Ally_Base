@@ -7,7 +7,7 @@
                 :fields="columns"
                 :current-page="currentPage"
                 :per-page="perPage"
-                :sort-by.sync="sortBy"
+                :sort-by.sync="sort"
                 @filtered="onFiltered"
             >
                 <template v-for="field in columns" :slot="field.key || field" scope="data">
@@ -46,12 +46,18 @@ export default {
             type: String,
             default: () => null,
         },
+        perPage: {
+            type: Number,
+            default: () => 15,
+        },
     },
 
     data() {
+
         return {
+
+            sort: '',
             totalRows: 0,
-            perPage: 15,
             currentPage: 1,
         };
     },
@@ -67,6 +73,10 @@ export default {
             const value = row[field.key || field];
             return field.formatter ? field.formatter(value) : value;
         },
+    },
+
+    mounted() {
+        this.sort = this.sortBy;
     },
 }
 </script>

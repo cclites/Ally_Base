@@ -16,6 +16,7 @@ trait PaymentMethodRequest
         else if ($request->has('account_number')) {
             return $this->validateBankAccount($request, $existing);
         }
-    }
 
+        return null;
+    }
 }

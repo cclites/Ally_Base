@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class ClientDropdownResource extends ResourceCollection
+class SalespersonDropdownResource extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
@@ -17,12 +17,12 @@ class ClientDropdownResource extends ResourceCollection
         return $this->collection->map(function ($row) {
             return [
                 'id' => $row->id,
-                'name' => $row->name,
+                'name' => $row->firstname . " " . $row->lastname,
                 'nameLastFirst' => $row->nameLastFirst,
             ];
         })
-        ->sortBy('nameLastFirst')
-        ->values()
-        ->toArray();
+            ->sortBy('nameLastFirst')
+            ->values()
+            ->toArray();
     }
 }
