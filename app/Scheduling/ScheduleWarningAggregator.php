@@ -5,6 +5,7 @@ namespace App\Scheduling;
 use App\Schedule;
 use App\Shifts\ServiceAuthValidator;
 use Carbon\Carbon;
+use App\Client;
 
 /**
  * Class ScheduleWarningAggregator
@@ -41,6 +42,7 @@ class ScheduleWarningAggregator
     public function getAll() : array
     {
         if (! empty($this->schedule->caregiver)) {
+            $this->checkCaregiverScheduleConflicts();
             $this->checkPreferenceMismatches();
             $this->checkCaregiverRestrictions();
             $this->checkCaregiverDaysOff();
@@ -50,6 +52,81 @@ class ScheduleWarningAggregator
         $this->checkClientServiceAuths();
 
         return $this->warnings->toArray();
+    }
+
+    /**
+     * 
+     * the algorithm is as follows:
+     * - grab all scheduled shifts for that cargiver on the specified day, I figure that parsing the times in PHP would be more efficient than creating a list of where clauses for multiple whole-table-searches
+     * - check the array of discovered shifts for the following 3 conditions:
+     *      - any shift that starts during the one being setup
+     *      - any shift that ends during the one being setup
+     *      - any shift that starts before this one, and ends after ( therefore this shift is a sub-set of the other one )
+     * - if an offending shift is found, the date/time/client information will be returned as per the task spec
+     * 
+     * 
+     * I cannot think of any scenarios to search for, if I missed something please let me know
+     * 
+     */
+    public function checkCaregiverScheduleConflicts()
+    {
+        $conflicts = collect([]);
+
+        /** @var \App\Caregiver $caregiver */
+        $caregiver = $this->schedule->caregiver;
+
+        // take the input date for when the scheduled shift is trying to be made at and find all scheduled shifts for that entire day
+        $other_schedules = $caregiver->schedules()->whereBetween( 'starts_at', [ Carbon::parse( $this->schedule->starts_at )->startOfDay(), Carbon::parse( $this->schedule->starts_at )->endOfDay() ] )->get();
+
+        if( count( $other_schedules ) < 1 ) return; // if nothing else is scheduled that day, return early
+
+        $start = Carbon::parse( $this->schedule->starts_at );
+        $end   = Carbon::parse( $this->schedule->starts_at )->addMinutes( $this->schedule->duration );
+
+        $target_schedule = null;
+
+        foreach( $other_schedules as $schedule ){
+
+            $target_start = Carbon::parse( $schedule->starts_at );
+            $target_end   = Carbon::parse( $schedule->starts_at )->addMinutes( $schedule->duration );
+
+            if( $target_start->gte( $start ) && $target_start->lt( $end ) ){
+                // if this shift starts during the one being created, grab it and break the loop
+
+                $target_schedule = $schedule;
+                break;
+            }
+
+            if( $target_end->gt( $start ) && $target_end->lte( $end ) ){
+                // if this shift ends during the one being created, grab it and break the loop
+
+                $target_schedule = $schedule;
+                break;
+            }
+
+            if( $target_start->lt( $start ) && $target_end->gt( $end ) ){
+                // if the shift being created is entirely within another shift, grab it and break the loop
+
+                $target_schedule = $schedule;
+                break;
+            }
+        }
+
+        if( $target_schedule ){
+            // if we found a conflicting schedule, grab it's relevant meta data
+            // date/time/client information
+
+            $target_start = Carbon::parse( $target_schedule->starts_at )->format( 'm/d/Y h:i:s A' );
+            $target_end   = Carbon::parse( $target_schedule->starts_at )->addMinutes( $target_schedule->duration )->format( 'm/d/Y h:i:s A' );
+            $client       = Client::find( $target_schedule->client_id );
+
+            $conflicts->push( $caregiver->name . ' is currently scheduled at ' . $target_start . ' to ' . $target_end . ' with client ' . $client->name );
+        }
+
+        if ( $conflicts->count() ) {
+
+            $this->pushWarnings( $conflicts, 'Caregiver Schedule Conflict' );
+        }
     }
 
     public function checkPreferenceMismatches()
