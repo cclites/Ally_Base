@@ -33,7 +33,7 @@
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
                                     <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                                    <b-button @click="printReport()"><i class="fa fa-print mr-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
@@ -59,8 +59,8 @@
                                         :per-page="perPage"
                                         :footClone="footClone"
                                 >
-                                    <template slot="actions" scope="item" class="primary">
-                                        <b-btn :key="item.county" @click="showClientBreakdownModal(item.county)">View Client Breakdown</b-btn>
+                                    <template slot="actions" scope="row" class="primary">
+                                        <b-btn @click="addClientsToModal(row.item.clients)">View Client Breakdown</b-btn>
                                     </template>
 
                                     <template slot="FOOT_county" scope="item" class="primary">
@@ -93,12 +93,13 @@
                         </b-col>
                     </b-row>
 
+                    <b-modal ref="clientModal">
+                        <p v-for="cl in clientsForModal" orderBy="cl.client_name" >
+                        <a :href="'/business/clients/' + cl.client_id">{{ cl.client_name }}</a>
+                        </p>
 
-                    <template>
-                        <div class="modal" v-if="show" @click.self="close">
+                    </b-modal>
 
-                        </div>
-                    </template>
 
                 </b-card>
             </b-col>
@@ -145,7 +146,6 @@
                 clients: [],
                 footClone: false,
                 emptyText: "No Results",
-                county: '',
                 clientsForModal: [],
                 show: false
             }
@@ -167,8 +167,13 @@
                     })
             },
 
-            print(){
-                $(".summary-table").print();
+            printReport(){
+                this.form.get('/business/reports/invoice-summary-by-county&print=true')
+                    .then( ({ data }) => {
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
             },
 
             getClients(){
@@ -182,23 +187,18 @@
             },
 
 
-            showClientBreakdownModal(county){
-
-                //this.county(this.items.filter(x => x.county == county));
-
-                this.clientsForModal = this.items.filter(function(item){
-
-                    if(item.county == county){
-                        console.log("We have a county");
-
-                        console.log(item.clients);
-
-                        return item.clients;
-                    }
-
-                });
-
+            addClientsToModal(clients){
+                this.clientsForModal = clients.sort( (a, b) => a.client_name > b.client_name ? 1 : -1);
+                this.showModal();
             },
+
+            showModal(){
+                this.$refs.clientModal.show()
+            },
+
+            hideModal(){
+                this.$refs.clientModal.hide()
+            }
         },
 
         computed: {
@@ -211,6 +211,8 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    table.b-table tfoot tr th{
+        padding-top: 40px;
+    }
 </style>

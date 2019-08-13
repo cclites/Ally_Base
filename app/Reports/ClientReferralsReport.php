@@ -111,9 +111,7 @@ class ClientReferralsReport extends BaseReport
 
                 $invoiced = (new ClientInvoiceQuery())->forClient($client->id)
                             ->with('clientPayer')
-                            ->get()
-                            ->unique(['client_payer']);
-
+                            ->get();
                 $payer = '';
 
                 if(filled($invoiced)){

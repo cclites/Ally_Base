@@ -505,7 +505,7 @@
                     {
                         name: 'Invoice Summary By County',
                         url: 'reports/invoice-summary-by-county',
-                        description: 'Invoice Summary Report By County',
+                        description: 'Client Charges By County',
                         category: 5,
                         allowed: ['office_user'],
                     },
