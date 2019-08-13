@@ -135,9 +135,9 @@
                 ),
                 loading: false,
                 totalRows: 0,
-                perPage: 30,
+                perPage: 100,
                 currentPage: 1,
-                sortBy: '',
+                sortBy: 'salesperson',
                 sortDesc: '',
                 fields: [
                     {
@@ -248,6 +248,8 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    table.b-table tfoot tr th{
+        padding-top: 40px;
+    }
 </style>
