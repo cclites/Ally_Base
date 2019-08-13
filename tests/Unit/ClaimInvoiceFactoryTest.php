@@ -74,7 +74,6 @@ class ClaimInvoiceFactoryTest extends TestCase
 
         $this->assertInstanceOf(ClaimInvoice::class, $claim);
 
-        // Only shift_service and shift should be attached
-        $this->assertCount(2, $claim->items);
+        $this->assertCount(3, $claim->items);
     }
 }

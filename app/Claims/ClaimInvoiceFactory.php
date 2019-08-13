@@ -121,8 +121,10 @@ class ClaimInvoiceFactory
 
         // Update the visit start and end times with the pro-rated versions for service breakouts.
         list($start, $end) = $shiftService->getStartAndEndTime();
-        $claimItem->visit_start_time = $start;
-        $claimItem->visit_end_time = $end;
+        $claimItem->claimable->update([
+            'visit_start_time' => $start,
+            'visit_end_time' => $end,
+        ]);
 
         return $claimItem;
     }
