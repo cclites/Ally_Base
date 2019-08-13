@@ -29,7 +29,7 @@ class InvoiceSummaryByCountyReportController extends BaseController
                         $request->client
                     );
 
-            $data = $report->rows();
+            $data = $report->rows()->sortBy('county');
 
             $totals = [
                 'amount' => $data->sum('amount'),
@@ -124,7 +124,7 @@ class InvoiceSummaryByCountyReportController extends BaseController
      */
     public function printReport($data, $totals) : \Illuminate\Http\Response
     {
-        $html = \View::make('business.reports.print.invoice_summary_by_county', ['data' => $data, 'totals' => $totals])->render();
+        $html = response(view('business.reports.print.invoice_summary_by_county',['data'=>$data, 'totals'=>$totals]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(

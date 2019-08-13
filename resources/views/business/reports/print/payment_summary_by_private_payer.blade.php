@@ -92,16 +92,16 @@
                         <td>{{ $item['client_name'] }}</td>
                         <td>{{ $item['date'] }}</td>
                         <td>{{ $item['invoice'] }}</td>
-                        <td>{{ money_format($item['amount']) }}</td>
+                        <td>${{ money_format('%i',$item['amount']) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td><strong>For Client: </strong>{{ $totals['client'] }}</td>
+                    <td><strong>For Client: </strong>{{ $totals['client_name'] }}</td>
                     <td><strong>For Locations: </strong>{{ $totals['location'] }}</td>
                     <td>&nbsp;</td>
-                    <td><strong>Total Invoiced Amount: </strong> ${{ money_format($totals['amount']) }}</td>
+                    <td><strong>Total Invoiced Amount: </strong> ${{ money_format('%i',$totals['total']) }}</td>
                 </tr>
                 </tfoot>
 

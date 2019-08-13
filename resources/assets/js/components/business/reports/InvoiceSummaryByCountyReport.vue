@@ -168,12 +168,7 @@
             },
 
             printReport(){
-                this.form.get('/business/reports/invoice-summary-by-county&print=true')
-                    .then( ({ data }) => {
-                    })
-                    .catch(e => {})
-                    .finally(() => {
-                    })
+                window.location = this.form.toQueryString(`/business/reports/invoice-summary-by-county?print=true`);
             },
 
             getClients(){
