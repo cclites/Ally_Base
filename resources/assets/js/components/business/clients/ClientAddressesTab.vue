@@ -49,3 +49,10 @@
         }
     }
 </script>
+
+<style>
+    .d-block {
+        position: relative;
+        bottom: 17px;
+    }
+</style>
