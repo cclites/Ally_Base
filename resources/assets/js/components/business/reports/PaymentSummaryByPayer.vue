@@ -20,15 +20,6 @@
                         <b-form-group label="End Date" class="mb-2 mr-2 col-md-2">
                             <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="Client Type" class="mb-2 mr-2">
-                            <b-form-select v-model="form.client_type" name="client_type">
-                                <option value="null">All</option>
-                                <option v-for="item in clientTypes" :key="item.value" :value="item.value">
-                                    {{ item.text }}
-                                </option>
-                            </b-form-select>
-                        </b-form-group>
-
                         <b-form-group label="Clients" class="mb-2 mr-2">
                             <b-select v-model="form.client" class="mb-2 mr-2">
                                 <option value="">All Clients</option>
@@ -163,13 +154,7 @@
             },
 
             printReport(){
-                this.loading = true;
-                this.form.get('/business/reports/payment-summary-by-payer?print=true')
-                    .then( ({ data }) => {
-                    })
-                    .catch(e => {})
-                    .finally(() => {
-                    })
+                window.location = this.form.toQueryString(`/business/reports/payment-summary-by-payer?print=true`);
             },
 
             getClients(){
