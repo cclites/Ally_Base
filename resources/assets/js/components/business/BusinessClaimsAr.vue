@@ -95,6 +95,13 @@
                 <template slot="client" scope="row">
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
+                <template slot="claim_status" scope="row">
+                    {{ formatStatus(row.item.claim_status) }}
+                    <span v-if="row.item.claim_service == 'HHA' && row.item.claim_status == 'REJECTED'">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item.claim)"></i>
+<!--                        <b-btn size="xl" @click="hhaResultsModal = true">More</b-btn>-->
+                    </span>
+                </template>
                 <template slot="actions" scope="row">
                     <b-btn v-if="!row.item.claim || row.item.claim.status == 'CREATED'" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
@@ -110,6 +117,22 @@
                 </template>
             </b-table>
         </div>
+
+        <b-modal id="hhaResultsModal"
+             size="lg"
+             :title="`HHA Results for Claim #${selectedClaim.id}`"
+             v-model="hhaResultsModal"
+        >
+            <b-row>
+                <b-table bordered striped hover show-empty
+                         :items="hhaResults"
+                         :fields="hhaFields"
+                         sort-by="service_date"
+                >
+                </b-table>
+            </b-row>
+        </b-modal>
+
         <b-modal id="applyPaymentModal"
                  :title="`Apply Payment to Claim #${selectedInvoice.name}`"
                  v-model="paymentModal"
@@ -312,7 +335,6 @@
                     },
                     {
                         key: 'claim_status',
-                        formatter: (x) => _.capitalize(_.startCase(x)),
                         sortable: true,
                     },
                     {
@@ -349,7 +371,16 @@
                 payFullBalance: false,
                 transmissionPrivate: false,
                 missingFieldsModal: false,
-
+                selectedClaim: {},
+                hhaResultsModal: false,
+                hhaResults: [],
+                hhaFields: {
+                    service_date: { sortable: true, label: 'Date', formatter: x => this.formatDateTime(x) },
+                    // reference_id: { sortable: true, label: 'Shift ID' },
+                    service_code: { sortable: true, label: 'Service Code' },
+                    status_code: { sortable: true, label: 'Status Code' },
+                    import_status: { sortable: true, label: 'Import Status' },
+                }
             }
         },
 
@@ -386,6 +417,24 @@
         },
 
         methods: {
+            showHhaResults(claim) {
+                this.selectedClaim = claim;
+
+                axios.get(`/business/claims-ar/hha-results/${claim.id}`)
+                    .then( ({ data }) => {
+                        this.hhaResults = data;
+                    })
+                    .catch(() => {
+
+                    });
+                // claims-ar/hha-results
+                this.hhaResultsModal = true;
+            },
+
+            formatStatus(status) {
+                return _.capitalize(_.startCase(status));
+            },
+
             showMissingFieldsModal(errors, invoice) {
                 this.selectedInvoice = invoice;
                 this.$refs.missingFieldsForm.createForm(errors);

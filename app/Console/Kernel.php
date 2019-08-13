@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
+use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
 use App\Console\Commands\ImportGenerationsCaregivers;
@@ -33,6 +34,7 @@ class Kernel extends ConsoleKernel
         CronReminders::class,
         CronFlushTriggeredReminders::class,
         AchOfflineChargeCommand::class,
+        CronHhaCheckStatus::class,
     ];
 
     /**
@@ -65,6 +67,10 @@ class Kernel extends ConsoleKernel
             
         $schedule->command('cron:flush_reminders')
             ->twiceDaily(8, 20)
+            ->withoutOverlapping();
+
+        $schedule->command(CronHhaCheckStatus::class)
+            ->everyThirtyMinutes()
             ->withoutOverlapping();
     }
 
