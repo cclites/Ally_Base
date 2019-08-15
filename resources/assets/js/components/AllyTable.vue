@@ -46,13 +46,18 @@ export default {
             type: String,
             default: () => null,
         },
+        perPage: {
+            type: Number,
+            default: () => 15,
+        },
     },
 
     data() {
+
         return {
+
             sort: '',
             totalRows: 0,
-            perPage: 15,
             currentPage: 1,
         };
     },

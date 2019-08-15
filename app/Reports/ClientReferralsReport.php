@@ -69,8 +69,8 @@ class ClientReferralsReport extends BaseReport
     public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county, ?int $salesperson): self
     {
 
-        $start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
         $this->query->whereHas('user', function($q) use($start, $end){
             $q->whereBetween('created_at', [$start, $end]);
@@ -78,12 +78,6 @@ class ClientReferralsReport extends BaseReport
 
         if(filled($business)){
             $this->query->forBusinesses([$business]);
-        }else{
-            //This is oddly inconsistent, and unused for now. Shows
-            //more results for a single business on a chain than it
-            //does for all businesses on a chain.
-            $ids = auth()->user()->role->businessChain->businesses->toArray();
-            $this->query->forBusinesses($business);
         }
 
         if(filled($salesperson)){
@@ -112,13 +106,11 @@ class ClientReferralsReport extends BaseReport
     {
         return $this->query
             ->get()
-            ->unique()
             ->map(function($client){
 
-                $invoiced = (new ClientInvoiceQuery())->forClient($client->id)
+                $invoiced = (new ClientInvoiceQuery())->forClient($client->id, false)
                             ->with('clientPayer')
-                            ->get()
-                            ->unique(['client_payer']);
+                            ->get();
 
                 $payer = '';
 
@@ -133,11 +125,12 @@ class ClientReferralsReport extends BaseReport
                     'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
-                    'revenue' => $invoiced->sum('amount_paid'),
-                    'salesperson' => optional($client->salesperson->fullName()),
+                    'revenue' => add($invoiced->sum('amount_paid'), $invoiced->sum('offline_amount_paid')),
+                    'salesperson' => optional($client->salesperson)->fullName(),
                 ];
 
-            })
+            })->sortBy('name')
+            ->sortBy('location')
             ->values();
     }
 

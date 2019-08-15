@@ -141,11 +141,12 @@
                                         <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                             <td>
                                                 <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                                    <option v-for="service in services" :value="service.id">{{ service.name }} {{ service.code }}</option>
+
+                                                    <option v-for=" ( service, i ) in services" :value=" service.id " :key=" i ">{{ service.name }} {{ service.code }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td>
-                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
+                                                <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" @change="(x) => onChangeHoursType( x, this.form.hours_type )">
                                                     <option value="default">REG</option>
                                                     <option value="holiday">HOL</option>
                                                     <option value="overtime">OT</option>
@@ -155,7 +156,7 @@
                                                 {{ billingType === 'hourly' ? scheduledHours : 'Fixed' }}
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
-                                                {{ numberFormat(form.default_rates.caregiver_rate) }}
+                                                {{ form.default_rates ? numberFormat( form.default_rates.caregiver_rate ) : '-' }}
                                             </td>
                                             <td v-else>
                                                 <b-form-input
@@ -170,7 +171,7 @@
                                                 />
                                             </td>
                                             <td class="text-only"  v-if="defaultRates">
-                                                {{ numberFormat(form.default_rates.provider_fee) }}
+                                                {{ form.default_rates ? numberFormat( form.default_rates.provider_fee ) : '-' }}
                                             </td>
                                             <td v-else>
                                                 <b-form-input
@@ -185,11 +186,11 @@
                                                 />
                                             </td>
                                             <td class="text-only">
-                                                <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
-                                                <span v-else>{{ numberFormat(form.ally_fee) }}</span>
+                                                <span v-if=" defaultRates ">{{ form.default_rates ? numberFormat( form.default_rates.ally_fee ) : '-' }}</span>
+                                                <span v-else>{{ form ? numberFormat( form.ally_fee ) : '-' }}</span>
                                             </td>
                                             <td class="text-only" v-if="defaultRates">
-                                                {{ numberFormat(form.default_rates.client_rate) }}
+                                                {{ form.default_rates ? numberFormat( form.default_rates.client_rate ) : '-' }}
                                             </td>
                                             <td v-else>
                                                 <b-form-input
@@ -206,7 +207,7 @@
                                             <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                                 <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
-                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                    <option v-for=" ( payer, i ) in clientPayers " :value=" payer.id " :key=" i ">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td colspan="2" v-if="allowQuickbooksMapping">
@@ -218,10 +219,10 @@
                                         </tr>
 
                                         <!-- Service Breakout -->
-                                        <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
+                                        <tr v-if=" billingType === 'services' " v-for=" ( service, index ) in form.services " :key=" index ">
                                             <td>
                                                 <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                                    <option v-for="s in services" :value="s.id">{{ s.name }} {{ s.code }}</option>
+                                                    <option v-for=" ( s, i ) in services" :value=" s.id " :key=" i ">{{ s.name }} {{ s.code }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td>
@@ -293,7 +294,7 @@
                                             <td>
                                                 <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
                                                     <option :value="null">(Auto)</option>
-                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                    <option v-for=" ( payer, i ) in clientPayers" :value=" payer.id " :key=" i ">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td v-if="allowQuickbooksMapping">

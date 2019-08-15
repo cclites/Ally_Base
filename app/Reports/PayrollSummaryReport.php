@@ -4,8 +4,10 @@
 namespace App\Reports;
 
 
+use App\Billing\CaregiverInvoice;
 use App\Billing\Deposit;
 
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use App\Business;
 use Carbon\Carbon;
 use App\Client;
@@ -31,14 +33,21 @@ class PayrollSummaryReport extends BusinessResourceReport
     /**
      * PayrollSummaryReport constructor.
      */
-    public function __construct()
+    public function __construct(CaregiverInvoiceQuery $query)
     {
+        $this->query = $query
+                        ->with([
+                            'caregiver',
+                            'caregiver.clients'
+                        ]);
+        /*
         $this->query = Deposit::query()
                         ->where('deposit_type','caregiver')
                         ->with([
                                 'shifts.client',
-                                'caregiver'
-                        ]);
+                                'caregiver',
+                                'caregiverInvoices',
+                        ]);*/
     }
 
 
@@ -67,19 +76,19 @@ class PayrollSummaryReport extends BusinessResourceReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $caregiver): self
     {
-
-
-        $startDate = new Carbon($start . ' 00:00:00', $this->timezone);
-        $endDate = new Carbon($end . ' 23:59:59', $this->timezone);
-
-
+        $startDate = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
         $this->query->whereBetween('created_at', [$startDate, $endDate]);
 
-        $this->query->forBusinesses([$business]);
+        //$this->query->forBusinesses([$business]);
+
+        $this->query->whereHas('caregiver', function($q) use($business){
+            $q->forBusinesses([$business]);
+        });
 
         if(filled($client_type)){
             $this->clientType = $client_type;
-            $this->query->whereHas('shifts.client', function($q) use($client_type){
+            $this->query->whereHas('caregiver.clients', function($q) use($client_type){
                 $q->where('client_type', $client_type);
             });
         }
@@ -94,15 +103,13 @@ class PayrollSummaryReport extends BusinessResourceReport
     protected function results() : ?iterable
     {
 
-        return $this->query->get()
-                ->map(function(Deposit $deposit){
+          return $this->query->get()->map(function(CaregiverInvoice $invoice){
                     return [
-                            'amount'=>$deposit->amount,
-                            'caregiver'=>$deposit->caregiver->nameLastFirst(),
+                            'amount'=>$invoice->amount,
+                            'caregiver'=>$invoice->caregiver->nameLastFirst(),
                             'type'=>$this->clientType ? ucwords(str_replace("_", " ", $this->clientType)) : 'All Types',
-                            'date'=> (new Carbon($deposit->created_at))->format('m/d/Y')
+                            'date'=> (new Carbon($invoice->created_at))->format('m/d/Y'),
                         ];
-
                 })->values();
 
     }

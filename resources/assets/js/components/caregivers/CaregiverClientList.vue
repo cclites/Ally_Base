@@ -13,7 +13,7 @@
             </b-table>
         </div>
 
-        <b-modal v-model="viewClientModal" :title="selectedClient.name">
+        <b-modal v-model="viewClientModal" :title="selectedClient.name" size="lg">
             <b-container fluid v-if="selectedClient">
                 <caregiver-client-details :client="selectedClient"
                                           :address="selectedClient.evv_address || {}"

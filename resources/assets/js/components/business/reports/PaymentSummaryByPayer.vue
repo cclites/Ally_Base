@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Filters"
+                        header="This report shows all payments made by private pay clients"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -14,21 +14,12 @@
                                 :allow-all="false"
                                 class="mr-2"
                         />
-                        <b-form-group label="Start Date" class="mb-2 mr-2">
+                        <b-form-group label="Start Date" class="mb-2 mr-2 col-md-2">
                             <date-picker v-model="form.start" name="start_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="End Date" class="mb-2 mr-2">
+                        <b-form-group label="End Date" class="mb-2 mr-2 col-md-2">
                             <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="Client Type" class="mb-2 mr-2">
-                            <b-form-select v-model="form.client_type" name="client_type">
-                                <option value="null">All</option>
-                                <option v-for="item in clientTypes" :key="item.value" :value="item.value">
-                                    {{ item.text }}
-                                </option>
-                            </b-form-select>
-                        </b-form-group>
-
                         <b-form-group label="Clients" class="mb-2 mr-2">
                             <b-select v-model="form.client" class="mb-2 mr-2">
                                 <option value="">All Clients</option>
@@ -36,20 +27,11 @@
                             </b-select>
                         </b-form-group>
 
-                        <b-form-group label="Payers" class="mb-2 mr-2">
-                            <b-form-select v-model="form.payer" class="mb-2 mr-2" name="payer">
-                                <option value="">All Payers</option>
-                                <option :value="PRIVATE_PAY_ID">PRIVATE PAY</option>
-                                <option :value="OFFLINE_PAY_ID">OFFLINE</option>
-                                <option v-for="p in payers" :key="p.id" :value="p.id">{{ p.name }}</option>
-                            </b-form-select>
-                        </b-form-group>
-
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
                                     <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                                    <b-button @click="printReport()"><i class="fa fa-print mr-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
@@ -71,6 +53,10 @@
                                         :footClone="footClone"
                                         :show-empty="true"
                                 >
+                                    <template slot="invoice" scope="row">
+                                        <a :href="invoiceUrl(row.item.invoice)" target="_blank">{{ row.item.invoice }}</a>
+                                    </template>
+
                                     <template slot="FOOT_client_name" scope="item" class="primary">
                                         <strong>For Client: </strong>{{totals.client_name}}
                                     </template>
@@ -79,17 +65,12 @@
                                         <strong>For Location: </strong> {{ totals.location }}
                                     </template>
 
-                                    <template slot="FOOT_client_type" scope="item" class="primary">
-                                        <strong>For Client Types: </strong> {{totals.client_type}}
+                                    <template slot="FOOT_invoice" scope="item" class="primary">
+                                        &nbsp;
                                     </template>
-
-                                    <template slot="FOOT_payer" scope="item">
-                                        <strong>For Payer: </strong> {{totals.payer}}
-                                    </template>
-
 
                                     <template slot="FOOT_amount" scope="item" class="primary">
-                                        &nbsp;<strong>Total:  </strong> {{ moneyFormat(totals.total ) }}
+                                        &nbsp;<strong>Total Invoiced Amount: </strong> {{ moneyFormat(totals.total ) }}
                                     </template>
                                 </b-table>
                         </div>
@@ -135,23 +116,25 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 25,
+                perPage: 100,
                 currentPage: 1,
-                sortBy: 'payer',
+                sortBy: 'client_name',
                 sortDesc: false,
                 fields: [
                     {key: 'client_name', label: 'Client', sortable: true,},
                     {key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
-                    {key: 'client_type', label: 'Client Type', sortable: true,},
-                    {key: 'payer', label: 'Payer', sortable: true,},
-                    {key: 'amount', label: 'Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'invoice', label: 'Invoice', sortable: true,},
+                    //{key: 'client_type', label: 'Client Type', sortable: true,},
+                    {key: 'amount', label: 'Total Invoiced Amount', sortable: true, formatter: x => { return this.moneyFormat(x)}},
+                    //{key: 'registry_amount', label: 'Total Registry Amount', sortable: true,},
                 ],
                 items: [],
                 item: '',
                 totals: [],
                 payers: [],
                 clients: [],
-                footClone: false
+                footClone: false,
+                firstRun: true
             }
         },
         methods: {
@@ -170,8 +153,8 @@
                     })
             },
 
-            print(){
-                $(".summary-table").print();
+            printReport(){
+                window.location = this.form.toQueryString(`/business/reports/payment-summary-by-payer?print=true`);
             },
 
             getClients(){
@@ -184,20 +167,28 @@
                     })
             },
 
-            getPayers(){
-                axios.get('/business/dropdown/payers')
-                    .then( ({ data }) => {
-                        this.payers = data;
-                    })
-                    .catch(e => {})
-                    .finally(() => {
-                    })
-            },
+            invoiceUrl(invoice, view="") {
+                return `/business/client/invoices/${invoice}/${view}`;
+            }
+
+        },
+
+        watch: {
+            'form.business'(newVal, oldVal){
+
+                if(this.firstRun){
+                    this.firstRun = false;
+                    return;
+                }
+
+                if(newVal !== oldVal){
+                    this.getClients();
+                }
+            }
         },
 
         mounted() {
             this.getClients();
-            this.getPayers();
         },
 
         watch: {
@@ -208,6 +199,9 @@
     }
 </script>
 
-<style scoped>
+<style>
 
+     .payers-summary-table tfoot th{
+         padding-top: 40px !important;
+     }
 </style>

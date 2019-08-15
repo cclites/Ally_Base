@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Filters"
+                        header="This report shows total client charges for both active and inactive clients"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -33,7 +33,7 @@
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
                                     <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                                    <b-button @click="printReport()"><i class="fa fa-print mr-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
@@ -59,16 +59,24 @@
                                         :per-page="perPage"
                                         :footClone="footClone"
                                 >
+                                    <template slot="actions" scope="row" class="primary">
+                                        <b-btn @click="addClientsToModal(row.item.clients)">View Client Breakdown</b-btn>
+                                    </template>
+
                                     <template slot="FOOT_county" scope="item" class="primary">
                                         <strong>For Location: </strong> {{ totals.location }}
                                     </template>
 
-                                    <template slot="FOOT_amount" scope="item">
+                                    <template slot="FOOT_hours" scope="item">
                                         &nbsp;<strong>For Dates: </strong>{{ totals.start }} to {{ totals.end }}
                                     </template>
 
-                                    <template slot="FOOT_spacer" scope="item" class="primary">
+                                    <template slot="FOOT_amount" scope="item" class="primary">
                                         <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
+                                    </template>
+
+                                    <template slot="FOOT_actions" scope="item" class="primary">
+                                        &nbsp;
                                     </template>
 
                                 </b-table>
@@ -84,6 +92,15 @@
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
+
+                    <b-modal ref="clientModal">
+                        <p v-for="cl in clientsForModal" orderBy="cl.client_name" >
+                        <a :href="'/business/clients/' + cl.client_id">{{ cl.client_name }}</a>
+                        </p>
+
+                    </b-modal>
+
+
                 </b-card>
             </b-col>
         </b-row>
@@ -113,23 +130,24 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 25,
+                perPage: 100,
                 currentPage: 1,
                 sortBy: 'county',
                 sortDesc: false,
                 fields: [
-
                     {key: 'county', label: 'County', sortable: true,},
-                    {key: 'amount', label: 'Total Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
-
-                    //{key: 'client', label: 'Client', sortable: false,},
+                    {key: 'hours', label: 'Total Hours', sortable: true,},
+                    {key: 'amount', label: 'Total Client Charges', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'actions', label: 'Actions', sortable: true,}
                 ],
                 items: [],
                 item: '',
                 totals: [],
                 clients: [],
                 footClone: false,
-                emptyText: "No Results"
+                emptyText: "No Results",
+                clientsForModal: [],
+                show: false
             }
         },
 
@@ -149,8 +167,8 @@
                     })
             },
 
-            print(){
-                $(".summary-table").print();
+            printReport(){
+                window.location = this.form.toQueryString(`/business/reports/invoice-summary-by-county?print=true`);
             },
 
             getClients(){
@@ -163,6 +181,22 @@
                     })
             },
 
+
+            addClientsToModal(clients){
+                this.clientsForModal = clients.sort( (a, b) => a.client_name > b.client_name ? 1 : -1);
+                this.showModal();
+            },
+
+            showModal(){
+                this.$refs.clientModal.show()
+            },
+
+            hideModal(){
+                this.$refs.clientModal.hide()
+            }
+        },
+
+        computed: {
 
         },
 
@@ -178,6 +212,8 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    table.b-table tfoot tr th{
+        padding-top: 40px;
+    }
 </style>

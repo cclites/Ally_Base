@@ -149,13 +149,13 @@ class ShiftHistoryReport extends BusinessResourceReport
             $this->query->where('import_id', $importId);
         }
 
-        if (filled($status)) {
-            if ($status === 'charged') {
-                $this->query->whereReadOnly();
-            } elseif ($status === 'uncharged') {
-                $this->query->wherePending();
-            }
-        }
+//        if (filled($status)) {
+//            if ($status === 'charged') {
+//                $this->query->whereReadOnly();
+//            } elseif ($status === 'uncharged') {
+//                $this->query->wherePending();
+//            }
+//        }
 
         if (filled($confirmed)) {
             if ($confirmed === 'unconfirmed') {

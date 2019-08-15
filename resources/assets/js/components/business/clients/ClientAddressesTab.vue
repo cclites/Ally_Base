@@ -6,11 +6,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6 col-sm-12">
-                <user-address title="Service Address <small class='pull-right'>* EVV GPS Verification checks against this address.</small>" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
+            <div class="col-lg-6 col-sm-12">
+                <user-address :hasNotes="true" title="Service Address <small class='d-block text-right'>* EVV GPS Verification checks against this address.</small>" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
             </div>
-            <div class="col-md-6 col-sm-12">
-                <user-address title="Billing Address" type="billing" :action="'/business/clients/'+clientId+'/address/billing'" :address="billingAddress"></user-address>
+            <div class="col-lg-6 col-sm-12">
+                <user-address title="Billing Address <small class='d-block mb-3'></small>" type="billing" :action="'/business/clients/'+clientId+'/address/billing'" :address="billingAddress"></user-address>
             </div>
         </div>
     </div>
@@ -49,3 +49,10 @@
         }
     }
 </script>
+
+<style>
+    .d-block {
+        position: relative;
+        bottom: 17px;
+    }
+</style>

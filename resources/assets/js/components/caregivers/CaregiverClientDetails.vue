@@ -9,6 +9,12 @@
                     {{ address.address1 }}<br />
                     <span v-if="address.address2">{{ address.address2 }}<br /></span>
                     {{ address.city }}, {{ address.state }} {{ address.zip }}
+
+                    <span class="d-block mt-2">
+
+                        Notes:<br/>
+                        {{ address.notes }}
+                    </span>
                 </p>
                 <p v-if="phone">
                     {{ phone }}
@@ -35,8 +41,8 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="client.medications">
-            <client-medication :client="client" :medications="client.medications" />
+        <b-row v-if="client.medications" class="mt-5">
+            <client-medication :client="client" :medications="client.medications" class="w-100" />
         </b-row>
     </div>
 

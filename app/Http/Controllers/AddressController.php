@@ -21,11 +21,12 @@ class AddressController
         $data = $request->validate([
             'address1' => 'required',
             'address2' => 'nullable',
-            'city' => 'required',
-            'state' => 'required',
-            'country' => 'required|size:2',
-            'county' => 'nullable',
-            'zip' => 'required|min:5'
+            'city'     => 'required',
+            'state'    => 'required',
+            'country'  => 'required|size:2',
+            'county'   => 'nullable',
+            'zip'      => 'required|min:5',
+            'notes'    => 'nullable|max:255'
         ]);
 
         \DB::beginTransaction();

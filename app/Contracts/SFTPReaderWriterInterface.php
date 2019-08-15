@@ -2,7 +2,7 @@
 
 namespace App\Contracts;
 
-interface SFTPWriterInterface
+interface SFTPReaderWriterInterface
 {
     function login($username);
 
@@ -13,6 +13,13 @@ interface SFTPWriterInterface
         $start = -1,
         $local_start = -1,
         $progressCallback = null
+    );
+
+    function get(
+        $remote_file,
+        $local_file = false,
+        $offset = 0,
+        $length = -1
     );
 
     function _close_handle($handle);
