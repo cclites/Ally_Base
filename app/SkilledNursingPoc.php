@@ -18,12 +18,13 @@ class SkilledNursingPoc extends AuditableModel
      */
     protected $guarded = ['id'];
 
+    /*
     const PETS = [
         self::PET_CATS,
         self::PET_DOGS,
         self::PET_BIRDS,
         self::PET_OTHER,
-    ];
+    ];*/
 
     // **********************************************************
     // RELATIONSHIPS
