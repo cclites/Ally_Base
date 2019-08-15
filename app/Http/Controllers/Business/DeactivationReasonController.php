@@ -48,9 +48,6 @@ class DeactivationReasonController extends BaseController
             return new SuccessResponse(ucfirst($data['type']) . ' Deactivation reason created.', $reason);
         }
 
-        //want to create a new document entry here
-        $document = new Document();
-
         return new ErrorResponse(500, 'An unexpected error occurred.');
     }
 
