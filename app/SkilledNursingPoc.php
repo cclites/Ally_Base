@@ -46,7 +46,7 @@ class SkilledNursingPoc extends AuditableModel
 
     public function getPetsAttribute()
     {
-        return self::stringToArray($this->attributes['pets']);
+        //return self::stringToArray($this->attributes['pets']);
     }
 
     // **********************************************************
@@ -66,7 +66,7 @@ class SkilledNursingPoc extends AuditableModel
      * @var array
      */
     protected static $arrayKeys = [
-        'pets',
+        //'pets',
     ];
 
     /**
