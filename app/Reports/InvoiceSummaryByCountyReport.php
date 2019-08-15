@@ -26,7 +26,16 @@ class InvoiceSummaryByCountyReport extends BaseReport
      */
     public function __construct(ClientInvoiceQuery $query)
     {
-        $this->query = $query->with(['client']);
+        $this->query = $query->with([
+            'client',
+
+            'items.shift',
+            'items.shift.service',
+            'items.shift.services',
+
+            'items.shiftService',
+            'items.shiftService.service',
+        ]);
     }
 
     /**
@@ -59,8 +68,8 @@ class InvoiceSummaryByCountyReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, int $business, ?int $client): self
     {
-        $start = (new Carbon($start . ' 00:00:00', 'UTC'));
-        $end = (new Carbon($end . ' 23:59:59', 'UTC'));
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
         $this->query->whereBetween('created_at', [$start, $end]);
 
         $this->query->forBusinesses([$business]);
@@ -79,10 +88,29 @@ class InvoiceSummaryByCountyReport extends BaseReport
     {
         return $this->query->get()->map(function (ClientInvoice $invoice) {
 
+            $hours = 0;
+
+            foreach($invoice->items as $item){
+
+                if ($item->invoiceable_type == 'shifts' && filled($item->shift)){
+                    if (empty($item->shift->service) && filled($item->shift->services)) {
+                        foreach ($item->shift->services as $service) {
+                            //$hours += $service->duration();
+                        }
+                    } else {
+                        $hours += $item->shift->duration();
+                    }
+                } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
+                    //$hours += $item->shiftService->duration();
+                }
+            }
+
             return [
-                'client'=>$invoice->client->nameLastFirst,
+                'client_name'=>$invoice->client->nameLastFirst,
+                'client_id' => $invoice->client->id,
                 'county'=>$invoice->client->addresses->first->county["county"] ? $invoice->client->addresses->first->county["county"] : "No county listed",
-                'amount'=>$invoice->amount
+                'amount'=>$invoice->amount,
+                'hours' => $hours,
             ];
 
         });

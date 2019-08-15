@@ -165,6 +165,10 @@ class ReportsController extends Controller
 
     public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
     {
+        // removed as per ALLY-1394, did not delete this, rather removed the front end link that will lead here,
+        // and then added this 'return back()' to rebuff manual attempts to access this report
+        return back();
+
         if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
             $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
             $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {

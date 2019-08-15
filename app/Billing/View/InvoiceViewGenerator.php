@@ -49,7 +49,6 @@ class InvoiceViewGenerator
                         'payment_id' => $payment->id,
                         'amount_applied' => $payment->amount,
                     ],
-                    'notes' => $payment->notes
                 ];
             });
         } else {

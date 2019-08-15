@@ -20,6 +20,7 @@
         @include('invoices.partials.header')
         @yield('items')
         @yield('payments')
+        @yield('notes')
         @include('invoices.partials.footer')
     </div>
 @endsection

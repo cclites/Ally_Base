@@ -18,7 +18,6 @@ class SettingsRepository
         if (!$user || !$officeUser = $user->officeUser) {
             return new OfficeUserSettings();
         }
-
         $chain = $officeUser->businessChain;
         $defaultBusiness = $officeUser->getDefaultBusiness();
 

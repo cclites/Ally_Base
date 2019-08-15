@@ -9,8 +9,11 @@
                 >
                     <b-row>
 
-                        <b-form-group label="Date" class="mr-2">
-                            <date-picker v-model="form.date" name="date"></date-picker>
+                        <b-form-group label="Start" class="mr-2">
+                            <date-picker v-model="form.start" name="date"></date-picker>
+                        </b-form-group>
+                        <b-form-group label="End" class="mr-2">
+                            <date-picker v-model="form.end" name="date"></date-picker>
                         </b-form-group>
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
@@ -91,7 +94,8 @@
         data() {
             return {
                 form: new Form({
-                    date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                    start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     json: 1
                 }),
                 busy: false,

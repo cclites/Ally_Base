@@ -29,15 +29,15 @@
                 </span>
             </template>
             <template slot="Confirmed" scope="row">
-
-                <span v-if="row.item.Confirmed && row.item.client_confirmed == 1" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByClient">Client</span>
-                <span v-else-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at) + confirmedByAdmin">Yes</span>
+                <span v-if="row.item.Confirmed" v-tooltip:left="formatTooltip(row.item)">{{ formatConfirmedMessage(row.item) }}</span>
                 <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
-
             </template>
-            <template slot="Charged" scope="row">
-                <span v-if="row.item.Charged" v-tooltip:left="formatDateTimeFromUTC(row.item.charged_at)">Yes</span>
-                <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>
+<!--            <template slot="Charged" scope="row">-->
+<!--                <span v-if="row.item.Charged" v-tooltip:left="formatDateTimeFromUTC(row.item.charged_at)">Yes</span>-->
+<!--                <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>-->
+<!--            </template>-->
+            <template slot="Invoiced" scope="row">
+                {{ row.item.Invoiced ? 'Yes' : 'No' }}
             </template>
             <template slot="Services" scope="row">
                 <div v-for="service in row.item.Services" :key="service">
@@ -67,9 +67,14 @@
             return {
                 sortBy: 'Day',
                 sortDesc: false,
-                confirmedByAdmin: '  Confirmed by Admin/System',
-                confirmedByClient: '  Confirmed by Client',
+                confirmedByAdmin: '  Confirmed by a user of Ally, Username TBD',
+                confirmedByClient: '  Client confirmed themselves',
+                confirmedByAdminMessage: 'Yes',
+                confirmedByClientMessage: 'Client',
             }
+        },
+
+        computed: {
         },
 
         mounted() {
@@ -77,6 +82,17 @@
         },
 
         methods: {
+            formatTooltip(item)
+            {
+                let dateTime = this.formatDateTimeFromUTC(item.confirmed_at);
+                let message = item.client_confirmed == 1 ? this.confirmedByClient : this.confirmedByAdmin;
+                return dateTime + " " + message;
+            },
+            formatConfirmedMessage(item)
+            {
+                return item.client_confirmed == 1 ? this.confirmedByClientMessage : this.confirmedByAdminMessage;
+            },
+
             dayFormat(date) {
                 return moment.utc(date).local().format('ddd MMM D');
             },

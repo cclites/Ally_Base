@@ -32,11 +32,11 @@ class ClientReferralsReport extends BaseReport
     {
         $this->query = $query->with([
             'user',
-            'addresses'
+            'addresses',
+            'payers',
+            'salesperson',
         ])->whereNotNull('referral_source_id');
-
     }
-
 
     /**
      * Return the instance of the query builder for additional manipulation
@@ -66,37 +66,33 @@ class ClientReferralsReport extends BaseReport
      *
      * @return this report
      */
-    public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county): self
+    public function applyFilters(string $start, string $end, ?int $business, ?int $client, ?string $county, ?int $salesperson): self
     {
 
-        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone));
-        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone));
+        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
-        $this->query->whereHas('user', function($q){
-            $q->whereBetween('created_at', [$this->start, $this->end]);
+        $this->query->whereHas('user', function($q) use($start, $end){
+            $q->whereBetween('created_at', [$start, $end]);
         });
 
         if(filled($business)){
             $this->query->forBusinesses([$business]);
-        }else{
-            //This is oddly inconsistent, and unused for now. Shows
-            //more results for a single business on a chain than it
-            //does for all businesses on a chain.
-            $ids = auth()->user()->role->businessChain->businesses->toArray();
-            $this->query->forBusinesses($business);
+        }
+
+        if(filled($salesperson)){
+            $this->query->where('sales_person_id', $salesperson);
         }
 
         if(filled($client)){
             $this->query->where('id', $client);
         }
 
-
         if(filled($county)){
             $this->query->whereHas('address', function ($q) use($county){
                 $q->where("county", $county);
             });
         }
-
 
         return $this;
     }
@@ -110,13 +106,11 @@ class ClientReferralsReport extends BaseReport
     {
         return $this->query
             ->get()
-            ->unique()
             ->map(function($client){
 
-                $invoiced = (new ClientInvoiceQuery())->forClient($client->id)
+                $invoiced = (new ClientInvoiceQuery())->forClient($client->id, false)
                             ->with('clientPayer')
-                            ->get()
-                            ->unique(['client_payer']);
+                            ->get();
 
                 $payer = '';
 
@@ -131,11 +125,12 @@ class ClientReferralsReport extends BaseReport
                     'date' => ( new Carbon($client->created_at))->format('m/d/Y'),
                     'id' => $client->id,
                     'name' => $client->nameLastFirst,
-                    'revenue' => $invoiced->sum('amount_paid')
+                    'revenue' => add($invoiced->sum('amount_paid'), $invoiced->sum('offline_amount_paid')),
+                    'salesperson' => optional($client->salesperson)->fullName(),
                 ];
 
-
-            })
+            })->sortBy('name')
+            ->sortBy('location')
             ->values();
     }
 

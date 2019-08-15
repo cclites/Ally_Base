@@ -31,6 +31,7 @@ class ClaimsController extends BaseController
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
+
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
                     case 'overpaid':
@@ -39,10 +40,22 @@ class ClaimsController extends BaseController
                         });
                         break;
                     case 'paid':
-                        $invoiceQuery->paidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '=', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '=', 'amount');
+                            });
+                        });
                         break;
                     case 'unpaid':
-                        $invoiceQuery->notPaidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '<', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '<', 'amount');
+                            });
+                        });
                         break;
                     case 'has_claim':
                         $invoiceQuery->whereHas('claim');
@@ -225,5 +238,22 @@ class ClaimsController extends BaseController
         \DB::commit();
 
         return new SuccessResponse('Required fields have been saved.  You can now transmit the invoice.', $invoice);
+    }
+
+    /**
+     * Get the response results from an HHA transmission.
+     *
+     * @param Claim $claim
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hhaResults(Claim $claim)
+    {
+        $hhaFile = $claim->hhaFiles()->with('results')->latest()->first();
+
+        if (empty($hhaFile)) {
+            return response()->json([]);
+        }
+
+        return response()->json($hhaFile->results);
     }
 }

@@ -6,6 +6,7 @@ use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 
 class ScheduleEvents implements Responsable
 {
@@ -73,6 +74,7 @@ class ScheduleEvents implements Responsable
     public function toArray()
     {
         return $this->schedules->map(function(Schedule $schedule) {
+
             $additionalOptions = array_merge(
                 $this->additionalOptions['all'],
                 $this->additionalOptions[$schedule->id] ?? []
@@ -101,8 +103,23 @@ class ScheduleEvents implements Responsable
                 'shift_status' => $schedule->shift_status,
                 'has_overtime' => $schedule->hasOvertime(),
                 'added_to_past' => $schedule->added_to_past,
+                'service_types' => $this->getServiceTypes($schedule),
             ], $additionalOptions);
         });
+    }
+
+    public function getServiceTypes(Schedule $schedule) : Collection
+    {
+        if (count($schedule->services) > 0) {
+            return $schedule->services->map(function ($item) {
+                    return substr($item->service->name, 0, 3) . ':' . $item->duration;
+                })->chunk(3)->map(function ($item) {
+                    return $item->values();
+                });
+        } else {
+            $duration = divide(floatval($schedule->duration), 60, 2);
+            return collect([substr($schedule->service->name, 0, 3) . ':' . number_format($duration, 2)]);
+        }
     }
 
     public function __toString()

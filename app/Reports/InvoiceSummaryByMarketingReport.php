@@ -59,7 +59,6 @@ class InvoiceSummaryByMarketingReport extends BaseReport
 
     public function applyFilters(string $start, string $end, int $business, ?int $salesperson, ?int $client): self
     {
-
         $this->start = (new Carbon($start . ' 00:00:00', 'UTC'));
         $this->end = (new Carbon($end . ' 23:59:59', 'UTC'));
         $this->query->whereBetween('created_at', [$this->start, $this->end]);
@@ -101,7 +100,7 @@ class InvoiceSummaryByMarketingReport extends BaseReport
                            'client'=>$invoice->client->name,
                            'amount'=>$invoice->amount,
                            'salesperson'=>$invoice->client->salesperson ? $invoice->client->salesperson->fullName() : 'None',
-                           'payer'=>$invoice->clientPayer->payer_name,
+                           'payer'=>optional($invoice->clientPayer)->payer_name,
                         ];
 
                     })

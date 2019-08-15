@@ -336,9 +336,7 @@ Route::group([
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
     Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
-    Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
-    Route::get('reports/caregiver-directory', 'Business\ReportsController@caregiverDirectory')->name('reports.caregiver_directory');
-    Route::get('reports/caregiver-directory/download', 'Business\ReportsController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
+    Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
@@ -361,6 +359,7 @@ Route::group([
     Route::get('reports/offline-ar-aging', 'Business\Report\BusinessOfflineArAgingReportController@index')->name('reports.offline-ar-aging');
     Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
     Route::get('reports/account-setup', 'Business\Report\BusinessAccountSetupReportController@index')->name('reports.account-setup');
+    Route::get('reports/client-account-setup', 'Business\Report\BusinessAccountSetupReportController@client')->name('reports.client-account-setup');
     Route::get('reports/service-auth-ending', 'Business\Report\BusinessServiceAuthEndingReport@index')->name('reports.service-auth-ending');
     Route::get('reports/service-auth-ending/clients', 'Business\Report\BusinessServiceAuthEndingReport@clients')->name('reports.service-auth-ending.clients');
     Route::get('reports/service-auth-usage', 'Business\Report\BusinessServiceAuthUsageReportController@index')->name('reports.service-auth-usage');
@@ -369,7 +368,7 @@ Route::group([
 
     Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
     Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
-    Route::get('reports/invoice-summary-by-marketing', 'Business\Report\InvoiceSummaryByMarketingController@index')->name('reports.invoice-summary-by-marketing');
+    Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
@@ -450,13 +449,7 @@ Route::group([
     Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
     Route::resource('prospects', 'Business\ProspectController');
     Route::resource('contacts', 'Business\OtherContactController');
-
-    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
-    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
-    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
-    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
-    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
-
+    Route::get('dropdown/{resource}', 'Business\DropdownResourceController@index');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');
@@ -486,6 +479,7 @@ Route::group([
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
     Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
     Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
+    Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
@@ -496,17 +490,12 @@ Route::group([
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
-    Route::get('clientDropdownResource', 'DropdownResourceController@clients');
-    Route::get('caregiverDropdownResource', 'DropdownResourceController@caregivers');
-    Route::get('payerDropdownResource', 'DropdownResourceController@payers');
-    Route::get('salespersonDropdownResource', 'DropdownResourceController@salespeople');
-    Route::get('marketingClientsDropdownResource', 'DropdownResourceController@marketingClients');
-
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
+    Route::resource('note-templates', 'NoteTemplateController');
     Route::resource('note-templates', 'NoteTemplateController');
     Route::get('/business/office-users', 'Business\OfficeUserController@index');
 });
@@ -583,6 +572,8 @@ Route::group([
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
     Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
 
+    Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
+
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
@@ -636,6 +627,8 @@ Route::group([
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');
 
     Route::resource('payment-holds', 'Admin\PaymentHoldController');
+
+    Route::get( '/control-file', 'Admin\ControlFileController@index' )->name( 'control-file' );
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
