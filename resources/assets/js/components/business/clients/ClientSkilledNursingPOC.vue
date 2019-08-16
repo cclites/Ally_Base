@@ -20,13 +20,6 @@
             return {
                 busy: false,
                 form: {},
-                options: {
-                    pets: {
-                        cats: 'Cats',
-                        dogs: 'Dogs',
-                        birds: 'Birds'
-                    },
-                }
             }
         },
 
@@ -60,57 +53,42 @@
 
         mounted() {
             if (this.client.skilled_nursing_poc) {
-                this.fillForm(JSON.parse(JSON.stringify(this.client.skilled_nursing_poc)));
-                return;
+                //this.fillForm(JSON.parse(JSON.stringify(this.client.skilled_nursing_poc)));
+                //return;
             }
 
             this.fillForm({
-                height: '',
-                weight: '',
-                lives_alone: '',
-                pets: [],
-                smoker: '',
-                alcohol: '',
-                incompetent: '',
-                competency_level: '',
-                can_provide_direction: '',
-                assist_medications: '',
-                medication_overseer: '',
+                claim_number: '',
+                start_of_care: '',
+                certification_start: '',
+                certification_end: '',
+                medical_record_number: '',
+                provider_number: '',
+                client: '',
+                registry: '',
+                dob: '',
+                sex: '',
+                medications: '',
+                principal_diagnosis_icd_cm: '',
+                principal_diagnosis: '',
+                principal_diagnosis_date: '',
+                surgical_icd_cm: '',
+                surgical: '',
+                surgical_date: '',
+                other_diagnosis_icd_cm: '',
+                other_diagnosis: '',
+                other_diagnosis_date: '',
+                dme_and_supplies: '',
+                safety_measures: '',
+                nutritional_req: '',
                 allergies: '',
-                pharmacy_name: '',
-                pharmacy_number: '',
-                safety_measures: [],
-                safety_instructions: '',
-                mobility: [],
-                mobility_instructions: '',
-                toileting: [],
-                toileting_instructions: '',
-                bathing: [],
-                bathing_frequency: '',
-                bathing_instructions: '',
-                vision: '',
-                hearing: '',
-                hearing_instructions: '',
-                diet: [],
-                diet_likes: '',
-                feeding_instructions: '',
-                skin: [],
-                skin_conditions: '',
-                hair: '',
-                hair_frequency: '',
-                oral: [],
-                shaving: '',
-                shaving_instructions: '',
-                nails: [],
-                dressing: [],
-                dressing_instructions: '',
-                housekeeping: [],
-                housekeeping_instructions: '',
-                errands: [],
-                supplies: [],
-                supplies_instructions: '',
-                comments: '',
-                instructions: '',
+                functional_limitations: '',
+                activities_permitted: '',
+                mental_status: '',
+                prognosis: '',
+                orders: '',
+                goals: '',
+
             });
         },
     }
