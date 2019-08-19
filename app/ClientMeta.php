@@ -51,6 +51,9 @@ class ClientMeta extends BaseModel
             ->first();
 
         if( $field->type == 'dropdown' ) {
+            // this is the old search.. I was unable to reproduce the server error, however the error suggested grbbign a propery of a non-object so I guarded against that.
+            // return $field->options->where( 'value', $this->value )->first()->label;
+            // https://sentry.io/organizations/jtr-solutions/issues/1123330667/?project=1391475&query=is%3Aunresolved
 
             $options = $field->options->where( 'value', $this->value )->first();
             if( is_object( $options ) ) return $options->label;
