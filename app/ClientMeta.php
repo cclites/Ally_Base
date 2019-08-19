@@ -50,10 +50,13 @@ class ClientMeta extends BaseModel
             ->with('options')
             ->first();
 
-        if($field->type == 'dropdown') {
-            return $field->options->where('value', $this->value)->first()->label;
+        if( $field->type == 'dropdown' ) {
+
+            $options = $field->options->where( 'value', $this->value )->first();
+            if( is_object( $options ) ) return $options->label;
+            return '';
         }
-        
+
         return $this->value;
     }
 }
