@@ -181,19 +181,18 @@ abstract class BaseReport implements Report
      */
     public function download()
     {
-        return Excel::create($this->getDownloadName(), function($excel) {
+        return Excel::create($this->getDownloadName(), function( $excel ) {
 
-            $excel->sheet('Sheet1', function($sheet) {
+            $excel->sheet('Sheet1', function( $sheet ) {
 
                 $data = $this->setHeadersFormat()
                              ->setNumericToFloatFormat()
                              ->setScalarFilter()
                              ->toArray();
-                $sheet->fromArray($data, null, 'A1', true);
-
+                $sheet->fromArray( $data, null, 'A1', true );
             });
 
-        })->export('xls');
+        })->export( 'xls' );
     }
 
     /**
@@ -221,9 +220,11 @@ abstract class BaseReport implements Report
      */
     public function setHeadersFormat()
     {
-        $this->formatters['headers'] = function($row) {
+        $this->formatters['headers'] = function( $row ) {
+
             $formatted = [];
-            foreach($row as $key => $value) {
+            foreach( $row as $key => $value ) {
+
                 if ($key === 'id') $key = 'ID';
                 $key = ucwords(str_replace('_', ' ', $key));
                 $formatted[$key] = $value;

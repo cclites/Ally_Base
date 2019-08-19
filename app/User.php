@@ -371,6 +371,18 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return null;
     }
 
+    public function getInactiveAtAttribute( $value )
+    {
+        if ( !$value ) return '';
+        return $value;
+    }
+
+    public function getGenderAttribute( $value )
+    {
+        if ( !$value ) return '';
+        return $value;
+    }
+
     /**
      * Return the fully-qualified name of the role class
      *

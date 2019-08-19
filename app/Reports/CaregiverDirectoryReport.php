@@ -168,17 +168,29 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
         $caregivers = $this->query()->get();
 
-        $caregivers->map( function( $caregiver ){
+        $caregivers->each( function( $caregiver ){
 
-            $caregiver->phone             = $caregiver->user->notification_phone;
-            $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-            $caregiver->referral          = $caregiver->referralSource  ? $caregiver->referralSource->name : '-';
-            $caregiver->certification     = $caregiver->certification   ? $caregiver->certification : '-';
-            $caregiver->smoking_okay      = $caregiver->smoking_okay    ? "Yes" : "No";
-            $caregiver->ethnicity         = $caregiver->ethnicity       ? $caregiver->ethnicity : '-';
-            $caregiver->medicaid_id       = $caregiver->medicaid_id     ? $caregiver->medicaid_id : '-';
-            $caregiver->status_alias_name = $caregiver->statusAlias     ? $caregiver->statusAlias->name : '-';
-            $caregiver->gender            = $caregiver->user->gender    ? $caregiver->user->gender : '-';
+            // dd( $caregiver );
+            $caregiver->title                    = $caregiver->title ?? '-';
+
+            $caregiver->inactive_at              = $caregiver->inactive_at ?? '-';
+            $caregiver->welcome_email_sent_at    = $caregiver->welcome_email_sent_at ?? '-';
+            $caregiver->training_email_sent_at   = $caregiver->training_email_sent_at ?? '-';
+            $caregiver->setup_status             = $caregiver->setup_status ?? '-';
+
+
+            $caregiver->onboarded         = $caregiver->onboarded                ? $caregiver->onboarded : '';
+            $caregiver->bank_account_id   = $caregiver->bank_account_id          ?? '-';
+            $caregiver->phone             = $caregiver->user->notification_phone ?? '';
+            $caregiver->emergency_contact = $caregiver->user->emergency_contact  ? $caregiver->user->formatEmergencyContact() : '-';
+            $caregiver->referral          = $caregiver->referralSource           ? $caregiver->referralSource->name : '-';
+            $caregiver->certification     = $caregiver->certification            ? $caregiver->certification : '-';
+            $caregiver->smoking_okay      = $caregiver->smoking_okay             ? "Yes" : "No";
+            $caregiver->ethnicity         = $caregiver->ethnicity                ? $caregiver->ethnicity : '-';
+            $caregiver->medicaid_id       = $caregiver->medicaid_id              ? $caregiver->medicaid_id : '-';
+            $caregiver->status_alias_id   = $caregiver->statusAlias              ? $caregiver->statusAlias->id : '-';
+            $caregiver->status_alias_name = $caregiver->statusAlias              ? $caregiver->statusAlias->name : '-';
+            $caregiver->gender            = $caregiver->user                     ? $caregiver->user->gender : '';
 
             return $caregiver;
         });
