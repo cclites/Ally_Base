@@ -168,9 +168,8 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
         $caregivers = $this->query()->get();
 
-        $caregivers->each( function( $caregiver ){
+        $caregivers->map( function( $caregiver ){
 
-            // dd( $caregiver );
             $caregiver->title                    = $caregiver->title ?? '-';
 
             $caregiver->inactive_at              = $caregiver->inactive_at ?? '-';
@@ -188,15 +187,11 @@ class CaregiverDirectoryReport extends BusinessResourceReport
             $caregiver->smoking_okay      = $caregiver->smoking_okay             ? "Yes" : "No";
             $caregiver->ethnicity         = $caregiver->ethnicity                ? $caregiver->ethnicity : '-';
             $caregiver->medicaid_id       = $caregiver->medicaid_id              ? $caregiver->medicaid_id : '-';
-            $caregiver->status_alias_id   = $caregiver->statusAlias              ? $caregiver->statusAlias->id : '-';
             $caregiver->status_alias_name = $caregiver->statusAlias              ? $caregiver->statusAlias->name : '-';
             $caregiver->gender            = $caregiver->user                     ? $caregiver->user->gender : '';
 
             return $caregiver;
         });
-
-        // for quick verification, delete if not desired
-        // dd( $caregivers->toArray() );
 
         return $caregivers;
     }

@@ -202,7 +202,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         'pets_birds_okay',
         'ethnicity',
     ];
-    protected $appends = ['masked_ssn'];
+    protected $appends = [ 'masked_ssn' ];
+    protected $attributes = [];
 
     public $dates = ['hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
@@ -391,7 +392,6 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 
     public function getStatusAliasIdAttribute( $value )
     {
-        if( !$value ) return '';
         return $value;
     }
 
