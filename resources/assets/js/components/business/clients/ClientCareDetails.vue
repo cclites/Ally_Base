@@ -1,9 +1,51 @@
 <template>
     <b-card class="client-care-needs">
+
+        <b-form-group class="pb-2">
+            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+        </b-form-group>
+
+        <b-form-group>
+            <span class="d-block p-2 bg-secondary text-white rounded">The following sections are required for the Skilled Nursing Plan of Care</span>
+        </b-form-group>
+
+        <b-form-group label="Functional Limitations" class="mb-2 mr-2" label-class="required">
+            <b-form-checkbox-group v-model="form.functional" required>
+                <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
+            </b-form-checkbox-group>
+            <b-form-input
+                    id="functional_other"
+                    name="functional_other"
+                    type="text"
+                    v-model="form.functional_other"
+                    placeholder="Other functional limitations"
+            >
+            </b-form-input>
+        </b-form-group>
+
+        <b-form-group label="Client Mobility" label-class="required">
+            <checkbox-group v-model="form.mobility" :items="options.mobility"/>
+        </b-form-group>
+
+        <b-form-group label="Mental Status" label-class="required">
+            <b-form-checkbox-group v-model="form.mental_status">
+                <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
+            </b-form-checkbox-group>
+        </b-form-group>
+
+        <b-form-group label="Prognosis" class="mb-2 mr-2" label-class="required">
+            <b-form-radio-group v-model="form.prognosis" required>
+                <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
+            </b-form-radio-group>
+        </b-form-group>
+
+
+        <hr>
+
         <h2>
             General
-            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
         </h2>
+
         <b-row>
             <b-col lg="6">
             <b-form-group label="Height">
@@ -16,6 +58,13 @@
             </b-form-group>
             </b-col>
         </b-row>
+
+        <b-form-group label="Level of competency">
+            <b-form-radio-group v-model="form.competency_level">
+                <b-form-radio v-for="(label, key) in options.competency_level" :key="key" :value="key">{{ label }}</b-form-radio>
+            </b-form-radio-group>
+        </b-form-group>
+
         <b-form-group label="Living Arrangements">
             <b-form-radio-group id="lives_alone" v-model="form.lives_alone">
                 <b-form-radio value="1">Lives alone</b-form-radio>
@@ -46,11 +95,7 @@
             </b-form-radio-group>
         </b-form-group>
 
-        <b-form-group label="Level of competency">
-            <b-form-radio-group id="competency_level" v-model="form.competency_level">
-                <b-form-radio v-for="(label, key) in options.competency_level" :key="key" :value="key">{{ label }}</b-form-radio>
-            </b-form-radio-group>
-        </b-form-group>
+
 
         <hr />
 
@@ -95,7 +140,7 @@
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
         </b-form-group>
 
-        <checkbox-group label="Client Mobility" v-model="form.mobility" :items="options.mobility" />
+
 
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
@@ -193,6 +238,8 @@
             <b-form-textarea id="supplies_instructions" v-model="form.supplies_instructions" :rows="3" />
         </b-form-group>
 
+
+
         <b-form-group label="Comments">
             <b-form-textarea id="comments" v-model="form.comments" :rows="3" />
         </b-form-group>
@@ -240,6 +287,7 @@
                     },
                     mobility: {
                         bedrest: 'Complete bedrest',
+                        bedrest_bdr: 'Bedrest BDR',
                         hoyer_lift: 'Hoyer lift',
                         independent: 'Independent at home',
                         wheelchair: 'Wheelchair',
@@ -252,6 +300,8 @@
                         partial_weight: 'Partial weight bearing',
                         walker: 'Walker',
                         hospital_bed: 'Hospital bed',
+                        crutches: 'Crutches',
+                        exercises_prescribed: 'Exercises Prescribed'
                     },
                     toileting: {
                         continent: 'Continent',
@@ -365,6 +415,33 @@
                         caregiver: 'Caregiver must bring own',
                         other: 'Other',
                     },
+                    functional: {
+                        amputation: 'Amputation',
+                        contracture: "Contracture",
+                        paralysis: "Paralysis",
+                        endurance: "Endurance",
+                        ambulation: "Ambulation",
+                        speech: "Speech",
+                        dyspnea: 'Dyspnea with Minimal Exertion',
+                        other: 'Other'
+                    },
+                    prognosis: {
+                        poor: 'Poor',
+                        guarded: 'Guarded',
+                        fair: 'Fair',
+                        good: 'Good',
+                        excellent: 'Excellent',
+                    },
+
+                    mental_status: {
+                        oriented: "Oriented",
+                        comatose: "Comatose",
+                        forgetful: "Forgetful",
+                        depressed: "Depressed",
+                        lethargic: "Lethargic",
+                        agitated: "Agitated",
+                        other: "Other",
+                    }
                 }
             }
         },
@@ -389,6 +466,7 @@
             },
 
             fillForm(data) {
+                console.log(data);
                 this.form = new Form(data);
             },
 
@@ -448,12 +526,18 @@
                 errands: [],
                 supplies: [],
                 supplies_instructions: '',
+                functional: [],
+                functional_other: '',
+                prognosis: '',
                 comments: '',
                 instructions: '',
+                mental_status: [],
             });
         },
     }
 </script>
+
+/*******************************************************************************************************/
 
 <style lang="scss">
     .client-care-needs {

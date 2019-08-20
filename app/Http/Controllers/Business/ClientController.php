@@ -176,6 +176,7 @@ class ClientController extends BaseController
             'carePlans',
             'caseManager',
             'deactivationReason',
+            'skilledNursingPoc',
             'payers',
             'rates',
             'notes' => function ($query) {

@@ -9,7 +9,7 @@ class SkilledNursingPoc extends AuditableModel
      *
      * @var string
      */
-    protected $table = 'client_care_details';
+    protected $table = 'skilled_nursing_pocs';
 
     /**
      * The attributes that aren't mass assignable.
@@ -18,13 +18,6 @@ class SkilledNursingPoc extends AuditableModel
      */
     protected $guarded = ['id'];
 
-    /*
-    const PETS = [
-        self::PET_CATS,
-        self::PET_DOGS,
-        self::PET_BIRDS,
-        self::PET_OTHER,
-    ];*/
 
     // **********************************************************
     // RELATIONSHIPS
@@ -44,10 +37,21 @@ class SkilledNursingPoc extends AuditableModel
     // MUTATORS
     // **********************************************************
 
-    public function getPetsAttribute()
+    public function getMobilityAttribute()
     {
-        //return self::stringToArray($this->attributes['pets']);
+        return self::stringToArray($this->attributes['mobility']);
     }
+
+    public function getFunctionalAttribute()
+    {
+        return self::stringToArray($this->attributes['functional']);
+    }
+
+    public function getMentalStatusAttribute()
+    {
+        return self::stringToArray($this->attributes['mental_status']);
+    }
+
 
     // **********************************************************
     // OTHER FUNCTIONS
@@ -58,7 +62,7 @@ class SkilledNursingPoc extends AuditableModel
      *
      * @var array
      */
-    protected static $boolKeys = ['lives_alone'];
+    protected static $boolKeys = [];
 
     /**
      * Attributes that are imploded arrays.
@@ -66,7 +70,17 @@ class SkilledNursingPoc extends AuditableModel
      * @var array
      */
     protected static $arrayKeys = [
-        //'pets',
+        'safety_measures',
+        'mobility',
+        'diet',
+        'skin',
+        'oral',
+        'nails',
+        'dressing',
+        'housekeeping',
+        'errands',
+        'supplies',
+        'mental_status'
     ];
 
     /**

@@ -13,10 +13,12 @@ class RenameOldCareDetailsTable extends Migration
      */
     public function up()
     {
+        /*
         Schema::table('client_care_details', function (Blueprint $table) {
-            $table->dropUnique(['client_id']);
-            $table->dropForeign(['client_id']);
-        });
+
+            $table->dropUnique(['client_care_details_client_id_unique']);
+            $table->dropForeign(['client_care_details_client_id_foreign']);
+        });*/
         Schema::rename('client_care_details', 'client_care_details_old');
     }
 
@@ -28,8 +30,9 @@ class RenameOldCareDetailsTable extends Migration
     public function down()
     {
         Schema::rename('client_care_details_old', 'client_care_details');
+        /*
         Schema::table('client_care_details', function (Blueprint $table) {
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
-        });
+        });*/
     }
 }
