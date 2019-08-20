@@ -186,6 +186,10 @@ class ScheduleEvents implements Responsable
             return '#ad92b0';
         }
 
+        if ($shift === Schedule::HOSPITAL_HOLD) {
+            return '#9881e9';
+        }
+
         if (!$schedule->caregiver_id) {
             // Open shift
             return '#d9c01c';

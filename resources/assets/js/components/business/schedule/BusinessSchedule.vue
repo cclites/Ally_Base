@@ -44,7 +44,7 @@
                             <input type="checkbox" v-model="statusFilters" value="ADDED_TO_PAST"> <span class="badge badge-primary added_to_past" v-b-popover.hover="`Visit was added after the start date. This visit will not be copied into the Shift History and is not included in billing. ${statusHelp}`">Added to Past</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="HOSPITAL_HOLD"> <span class="badge badge-primary hospital_hold" v-b-popover.hover="`I'm not sure what the exact specs for this filter are, at this moment. ${statusHelp}`">Hospital Hold</span>
+                            <input type="checkbox" v-model="statusFilters" value="HOSPITAL_HOLD"> <span class="badge badge-primary hospital_hold" v-b-popover.hover="`Will not be copied over to the Shift History. ${statusHelp}`">Hospital Hold</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -227,6 +227,7 @@
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                     <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
                     <option value="OPEN_SHIFT">Open Shift</option>
+                    <option value="HOSPITAL_HOLD">Hospital Hold</option>
                 </b-form-select>
             </div>
         </div>
@@ -434,7 +435,7 @@
             getFilteredEvents() {
                 let events = this.events;
 
-                console.log( events );
+                // console.log( events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {

@@ -147,6 +147,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const CLOCKED_IN = 'CLOCKED_IN';
     const CONFIRMED = 'CONFIRMED';
     const UNCONFIRMED = 'UNCONFIRMED';
+    const HOSPITAL_HOLD = 'HOSPITAL_HOLD'; // created for Ally-1335
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -325,6 +326,8 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         }
         // Suppress missed clock in status for now
 //        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        if( $this->status == self::HOSPITAL_HOLD ) return self::HOSPITAL_HOLD;
+
         return self::SCHEDULED;
     }
 
