@@ -8,12 +8,13 @@ use App\Http\Requests\UpdateSkilledNursingPocRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Client;
+use App\SkilledNursingPoc;
 use http\Env\Request;
 
 class SkilledNursingPocController extends BaseController
 {
 
-    public function index(Request $request)
+    public function index(Request $request){}
 
 
     /**
@@ -29,19 +30,17 @@ class SkilledNursingPocController extends BaseController
 
         $this->authorize('update', $client);
 
-        return new SuccessResponse('POC information received.');
+        if (empty($client->skilledNursingPoc)) {
+            $client->skilledNursingPoc()->create([]);
+        }
 
-        /*
-        if (empty($client->ski)) {
-            $client->careDetails()->create([]);
-        }*/
+        $data = SkilledNursingPoc::convertFormData($request->validated());
 
-        $data = CareDetails::convertFormData($request->validated());
-        if ($client->careDetails()->update($data)) {
-            return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->careDetails);
+        if ($client->skilledNursingPoc()->update($data)) {
+            return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->skilledNursingPoc);
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
-        */
+
     }
 }

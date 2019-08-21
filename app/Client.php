@@ -926,4 +926,6 @@ class Client extends AuditableModel implements
 
         return $this->addresses->first();
     }
+
+
 }

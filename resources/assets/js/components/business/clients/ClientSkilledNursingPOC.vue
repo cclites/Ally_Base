@@ -61,18 +61,7 @@
             </b-col>
         </b-row>
 
-        <b-row>
-            <div class="h5 pl-3 pt-2">Medications</div>
-        </b-row>
-
-        <b-row>
-            <b-col>
-                <b-form-group label="Medications: Dose/Frequency/Route (N)ew (C)hanged" class="mb-2 mr-2">
-                    <b-form-textarea v-model="form.medications" rows="4">
-                    </b-form-textarea>
-                </b-form-group>
-            </b-col>
-        </b-row>
+        <hr>
 
         <b-row>
             <div class="h5 pl-3 pt-2">Principal Diagnosis</div>
@@ -182,6 +171,23 @@
             </b-col>
         </b-row>
 
+        <hr>
+
+        <b-row>
+            <div class="h5 pl-3 pt-2">Medications</div>
+        </b-row>
+
+        <b-row>
+            <b-col>
+                <b-form-group label="Medications: Dose/Frequency/Route (N)ew (C)hanged" class="mb-2 mr-2">
+                    <p v-for="m in client.medications">
+                        {{ m.type }}/{{ m.dose }}/{{ m.frequency }}/{{ m.route }}/{{m.new_changed}}
+                    </p>
+                </b-form-group>
+            </b-col>
+        </b-row>
+
+
         <b-row>
             <div class="h5 pl-3 pt-2">Additional</div>
         </b-row>
@@ -193,7 +199,8 @@
                             id="dme_and_supplies"
                             name="dme_and_supplies"
                             type="text"
-                            v-model="form.dme_and_supplies"
+                            :value="supplies"
+                            disabled
                     >
                     </b-form-input>
                 </b-form-group>
@@ -204,7 +211,8 @@
                             id="safety_measures"
                             name="safety_measures"
                             type="text"
-                            v-model="form.safety_measures"
+                            :value="safety_measures"
+                            disabled
                     >
                     </b-form-input>
                 </b-form-group>
@@ -218,7 +226,8 @@
                             id="nutritional_req"
                             name="nutritional_req"
                             type="text"
-                            v-model="form.nutritional_req"
+                            :value="nutritional"
+                            disabled
                     >
                     </b-form-input>
                 </b-form-group>
@@ -229,7 +238,8 @@
                             id="allergies"
                             name="allergies"
                             type="text"
-                            v-model="form.allergies"
+                            v-model="client.care_details.allergies"
+                            disabled
                     >
                     </b-form-input>
                 </b-form-group>
@@ -239,17 +249,9 @@
         <b-row>
             <b-col>
                 <b-form-group label="Functional Limitations" class="mb-2 mr-2">
-
-                    <b-form-checkbox-group id="functional" v-model="form.functional">
+                    <b-form-checkbox-group id="functional" v-model="client.care_details.functional" disabled>
                         <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
                     </b-form-checkbox-group>
-
-                    <b-form-input
-                            type="text"
-                            v-model="form.functional_other"
-                            placeholder="Other functional limitations"
-                    >
-                    </b-form-input>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -257,14 +259,9 @@
         <b-row>
             <b-col>
                 <b-form-group label="Activities Permitted" class="mb-2 mr-2">
-                    <b-form-checkbox-group  v-model="form.mobility">
+                    <b-form-checkbox-group  v-model="client.care_details.mobility" disabled>
                         <b-form-checkbox v-for="(label, key) in options.mobility" :key="key" :value="key">{{ label }}</b-form-checkbox>
                     </b-form-checkbox-group>
-                    <b-form-input
-                            type="text"
-                            v-model="form.mobility_instructions"
-                    >
-                    </b-form-input>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -272,7 +269,7 @@
         <b-row>
             <b-col>
                 <b-form-group label="Mental Status" class="mb-2 mr-2">
-                    <b-form-checkbox-group v-model="form.mental_status">
+                    <b-form-checkbox-group v-model="client.care_details.mental_status" disabled>
                         <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
                     </b-form-checkbox-group>
                 </b-form-group>
@@ -283,7 +280,7 @@
         <b-row>
             <b-col>
                 <b-form-group label="Prognosis" class="mb-2 mr-2">
-                    <b-form-radio-group v-model="form.prognosis">
+                    <b-form-radio-group v-model="client.care_details.prognosis" disabled>
                         <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
                     </b-form-radio-group>
                 </b-form-group>
@@ -302,8 +299,9 @@
         <b-row>
             <b-col>
                 <b-form-group label="Goals/Rehabilitation Potential/Discharge Plans" class="mb-2 mr-2">
-                    <b-form-textarea v-model="form.goals" rows="4">
-                    </b-form-textarea>
+                    <p v-for="g in client.care_details.goals">
+                        {{ g.question }}
+                    </p>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -356,10 +354,10 @@
 
     import States from "../../../classes/States";
     import FormatsListData from "../../../mixins/FormatsListData";
-
+    import FormatsStrings from "../../../mixins/FormatsStrings";
     export default {
 
-        mixins: [FormatsListData],
+        mixins: [FormatsListData, FormatsStrings],
 
         props: {
             client: {
@@ -376,31 +374,19 @@
                     certification_end: '',
                     medical_record_number: '',
                     provider_number: '',
-                    medications: '',
-                    principal_diagnosis_icd_cd: '',
+                    principal_diagnosis_icd_cm: '',
                     principal_diagnosis: '',
                     principal_diagnosis_date: '',
-                    surgical_procedure_icd_cd: '',
+                    surgical_procedure_icd_cm: '',
                     surgical_procedure: '',
                     surgical_procedure_date: '',
-                    other_diagnosis_icd_cd: '',
+                    other_diagnosis_icd_cm: '',
                     other_diagnosis: '',
                     other_diagnosis_date: '',
-                    dme_and_supplies: '',
-                    safety_measures: '',
-                    nutritional_req: '',
-                    allergies: '',
-                    functional: [],
-                    functional_other: '',
-                    mobility: [],
-                    competency_level: [],
-                    prognosis: '',
                     orders: '',
-                    goals: '',
                     physician_name: '',
                     physician_address: '',
                     physician_phone: '',
-                    mental_status: [],
                 }),
                 options: {
                     functional: {
@@ -425,7 +411,6 @@
                         wheelchair: "Wheelchair",
                         walker: "Walker",
                     },
-
                     prognosis: {
                         poor: "Poor",
                         guarded: "Guarded",
@@ -452,6 +437,18 @@
             url() {
                 return `/business/clients/${this.client.id}/skilled-nursing-poc`;
             },
+
+           safety_measures() {
+                return this.convertSnakeCaseArrayToString(this.client.care_details.safety_measures);
+           },
+
+           supplies() {
+               return this.convertSnakeCaseArrayToString(this.client.care_details.supplies);
+           },
+           nutritional() {
+               return this.convertSnakeCaseArrayToString(this.client.care_details.diet);
+           },
+
         },
 
         methods: {
@@ -475,13 +472,53 @@
                 $('.nursing-poc').print();
             },
 
+            convertSnakeCaseArrayToString(itemsArray){
+                let str = '';
+
+                for(var item in itemsArray){
+                    let descr = this.fromSnakeCase(itemsArray[item]);
+                    str +=  descr.charAt(0).toUpperCase() + descr.slice(1) + ", " ;
+                }
+
+                return str.replace(/,\s*$/, "");
+            }
         },
 
         mounted() {
             if (this.client.skilled_nursing_poc) {
-                this.fillForm(JSON.parse(JSON.stringify(this.client.skilled_nursing_poc)));
+                //this.fillForm(JSON.parse(JSON.stringify(this.client.skilled_nursing_poc)));
+                //return;
+                let details = JSON.parse(JSON.stringify(this.client.skilled_nursing_poc));
+
+                this.form.certification_start = details.certification_start;
+                this.form.certification_end = details.certification_end;
+                this.form.medical_record_number = details.medical_record_number;
+
+                this.form.provider_number = details.provider_number;
+
+                this.form.principal_diagnosis_icd_cm = details.principal_diagnosis_icd_cm;
+                this.form.principal_diagnosis = details.principal_diagnosis;
+                this.form.principal_diagnosis_date = details.principal_diagnosis_date;
+                this.form.surgical_procedure_icd_cm = details.surgical_procedure_icd_cm;
+                this.form.surgical_procedure = details.surgical_procedure;
+                this.form.surgical_procedure_date = details.surgical_procedure_date;
+                this.form.other_diagnosis_icd_cm = details.other_diagnosis_icd_cm;
+                this.form.other_diagnosis = details.other_diagnosis;
+                this.form.other_diagnosis_date = details.other_diagnosis_date;
+
+                this.form.orders = details.order;
+                this.form.physician_name = details.physician_name;
+                this.form.physician_address = details.physician_address;
+                this.form.physician_phone = details.physician_phone;
+
                 return;
             }
+
+
+            //this.fillForm({
+
+            //);
+
 
         },
     }

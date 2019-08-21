@@ -117,6 +117,10 @@ class ClientContact extends Model
         return null;
     }
 
+
+
+
+
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
@@ -202,4 +206,6 @@ class ClientContact extends Model
                 $index = $index + 1;
             });
     }
+
+
 }

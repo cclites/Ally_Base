@@ -51,6 +51,23 @@
                         />
                         <input-help :form="form" field="description" text="Enter the description of this medicine." />
                     </b-form-group>
+
+                    <b-form-group label="Route" label-for="route">
+                        <b-form-input
+                                id="route"
+                                name="route"
+                                v-model="form.route"
+                        />
+                        <input-help :form="form" field="route" text="Enter information about how this medicine will be administered." />
+                    </b-form-group>
+
+                    <b-form-group label="New/Changed" label-for="new_changed">
+                        <b-form-radio-group v-model="form.new_changed">
+                            <b-form-radio value="(N)">(N)ew</b-form-radio>
+                            <b-form-radio value="(C)">(C)hanged</b-form-radio>
+                        </b-form-radio-group>
+                    </b-form-group>
+
                     <b-form-group label="Side effects" label-for="side_effects">
                         <b-form-textarea
                             name="side_effects"
@@ -59,6 +76,7 @@
                         />
                         <input-help :form="form" field="side_effects" text="Enter information about the side effects of this medicine." />
                     </b-form-group>
+
                     <b-form-group label="Notes">
                         <b-form-textarea
                             name="notes"
@@ -148,12 +166,28 @@
                         shouldShow: true,
                     },
                     {
+                        key: 'route',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
+                        label: 'New/Changed',
+                        key: 'new_changed',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
                         key: 'tracking',
                         sortable: true,
                         shouldShow: true,
                     },
                     {
                         key: 'side_effects',
+                        sortable: false,
+                        shouldShow: true,
+                    },
+                    {
+                        key: 'notes',
                         sortable: false,
                         shouldShow: true,
                     },
@@ -173,6 +207,8 @@
                     frequency: '',
                     notes: '',
                     tracking: '',
+                    new_changed: '',
+                    route: '',
                 }),
             }
         },
@@ -194,6 +230,8 @@
                     frequency: '',
                     notes: '',
                     tracking: '',
+                    new_changed: '',
+                    route: '',
                 });
             },
 
@@ -211,6 +249,8 @@
                         'frequency',
                         'notes',
                         'tracking',
+                        'route',
+                        'new_changed',
                     ].forEach(field => this.form[field] = medication[field]);
                 } else {
                     this.selected = {};

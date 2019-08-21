@@ -69,19 +69,7 @@ class SkilledNursingPoc extends AuditableModel
      *
      * @var array
      */
-    protected static $arrayKeys = [
-        'safety_measures',
-        'mobility',
-        'diet',
-        'skin',
-        'oral',
-        'nails',
-        'dressing',
-        'housekeeping',
-        'errands',
-        'supplies',
-        'mental_status'
-    ];
+    protected static $arrayKeys = [];
 
     /**
      * Converts form data array into mass assignable array.
