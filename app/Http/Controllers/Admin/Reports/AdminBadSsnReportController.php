@@ -64,7 +64,7 @@ class AdminBadSsnReportController extends Controller
 
     public function validSSN($ssn){
 
-        if(!filled($ssn)){
+        if(!isset($ssn)){
             return true;
         }
 
