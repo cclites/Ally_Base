@@ -161,6 +161,20 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Bad Ssn Report (Clients)',
+                        url: 'reports/bad-ssn-report?type=client',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Bad Ssn Report (Caregivers)',
+                        url: 'reports/bad-ssn-report?type=caregivers',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Unpaid Shifts',
                         url: 'reports/unpaid_shifts',
                         description: '',
