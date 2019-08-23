@@ -46,7 +46,7 @@
             'name': {
                 type: String,
                 default: ''
-            }
+            },
         },
 
         data() {

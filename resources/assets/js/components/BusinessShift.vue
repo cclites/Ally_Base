@@ -75,10 +75,10 @@
                                 <tbody>
                                 <tr>
                                     <td>
-                                        <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
+                                        <date-picker v-model="startDate" @input="changedStartDate(startDate)"/>
                                     </td>
                                     <td>
-                                        <date-picker v-model="endDate" @input="changedEndDate(endDate)"  />
+                                        <date-picker v-model="endDate" @input="changedEndDate(endDate)"/>
                                     </td>
                                     <td>
                                         <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
@@ -518,8 +518,8 @@
                     </b-col>
                     <b-col lg="8" class="text-right" v-else>
                         <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                        <b-dropdown variant="light">
-                            <template slot="button-content">
+                        <b-dropdown variant="light" :disabled="saveDisabled">
+                            <template slot="button-content" >
                                 <i class='fa fa-list'></i> Actions
                             </template>
                             <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
@@ -603,6 +603,7 @@
                 confirmModal: false,
                 loading: false,
                 loadingQuickbooksConfig: false,
+                saveDisabled: false,
             }
         },
         mounted() {
@@ -690,6 +691,7 @@
             disableQuickbooksMapping() {
                 return !this.business || this.loadingQuickbooksConfig;
             },
+
         },
         methods: {
             changedShift(shift) {
@@ -722,7 +724,7 @@
                 this.fetchAllRates();
             },
 
-            changedEndDate(startDate) {
+            changedEndDate(endDate) {
                 this.validateTimeDifference('checked_out_time');
             },
 
@@ -806,7 +808,6 @@
             },
 
             initForm(shift = {}) {
-                console.log('initForm', this.form);
                 return {
                     client_id: shift.id ? shift.client_id : this.client.id || null,
                     caregiver_id: shift.id ? shift.caregiver_id : this.caregiver.id || null,
@@ -859,6 +860,11 @@
             getClockedOutMoment() {
                 return moment(this.endDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
             },
+            getMaxDateTime(){
+                return moment().format('MM/DD/YYYY HH:mm')
+            },
+
+
             getHalfOfActivities(leftHalf = true)
             {
                 let half_length = Math.ceil(this.activities.length / 2);
@@ -963,13 +969,22 @@
                 this.$nextTick(function() {
                     let clockin = this.getClockedInMoment();
                     let clockout = this.getClockedOutMoment();
+                    let maxDateTime = this.getMaxDateTime();
                     if (clockin.isValid() && clockout.isValid()) {
                         let newVal = field === 'checked_in_time' ?  clockin : clockout;
                         let diffFromShift = newVal.diff(moment.utc(this.shift[field]), 'minutes');
                         // debugger;
                         let diffInMinutes = clockout.diff(clockin, 'minutes');
+                        let maxMinutes = clockout.diff(maxDateTime, 'minutes');
 
                         this.form.clearError(field);
+
+                        if(maxMinutes > 10080){
+                            this.form.addError(field, 'The end time is too far in the future to save.  Please check that dates and times are correct.');
+                            this.saveDisabled = true;
+                        }else{
+                            this.saveDisabled = false;
+                        }
 
                         if (diffFromShift === 0) {
                             return;
@@ -1078,6 +1093,7 @@
             onChangeHoursType(newVal, oldVal) {
                 this.handleChangedHoursType(this.form, newVal, oldVal);
             },
+
         },
         watch: {
             'form.hours_type': function(newVal, oldVal) {
