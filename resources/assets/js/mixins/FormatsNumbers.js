@@ -6,8 +6,10 @@ export default {
         percentageFormat(number) {
             return numeral(number).format('0.00%');
         },
-        moneyFormat(number, sign='$') {
-            return sign + this.numberFormat(number);
+        moneyFormat( number, sign = '$', dash = false ) {
+
+            if( dash && [ null, 'null', 0, 0.00, '0', '0.00' ].includes( number ) ) return '-';
+            return sign + this.numberFormat( number );
         }
     }
 }

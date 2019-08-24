@@ -20,13 +20,19 @@ $factory->define(Shift::class, function(Faker $faker) {
 
     // Attach a random caregiver to a client if client does not have caregivers already
     $client = Client::inRandomOrder()->first();
-    if ($client && !$client->caregivers->count()) {
+    if ( $client && !$client->caregivers->count() ) {
+
         $caregiver = $client->business->caregivers()->inRandomOrder()->first() ?? null;
-        if ($caregiver) {
-            $client->caregivers()->attach($caregiver, [
+
+        if ( $caregiver ) {
+
+            $client->caregivers()->attach( $caregiver, [
+
                 'caregiver_hourly_rate' => $faker->randomFloat(2, 10, 25),
                 'provider_hourly_fee' => $faker->randomFloat(2, 5, 10),
             ]);
+            $client->save();
+            $client->refresh();
         }
     }
 

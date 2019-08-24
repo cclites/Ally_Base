@@ -4,7 +4,10 @@ export default {
             return moment(date, fromFormat).format(format);
         },
 
-        formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null) {
+        formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null, dash = false ) {
+
+            if( dash && [ null, 'null' ].includes( date ) ) return '-';
+
             return moment.utc(date, fromFormat).local().format(format);
         },
 
@@ -12,8 +15,9 @@ export default {
             return this.formatDate(dateTime, format, fromFormat);
         },
 
-        formatTimeFromUTC(dateTime, format='h:mm a', fromFormat = null) {
-            return this.formatDateFromUTC(dateTime, format, fromFormat);
+        formatTimeFromUTC( dateTime, format = 'h:mm a', fromFormat = null ) {
+
+            return this.formatDateFromUTC( dateTime, format, fromFormat );
         },
 
         formatDateTime(dateTime, format='MM/DD/YYYY h:mm a', fromFormat=null) {

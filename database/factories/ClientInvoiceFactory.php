@@ -12,6 +12,10 @@ $factory->define(\App\Billing\ClientInvoice::class, function (Faker $faker) {
             $payer = \App\Billing\ClientPayer::inRandomOrder()->first() ?? factory(\App\Billing\ClientPayer::class)->create();
             return $payer->id;
         },
-        'name' => mt_rand(),
+        'name'                => mt_rand(),
+        'amount'              => $faker->numerify( '###' ),
+        'amount_paid'         => 0,
+        'offline'             => 0,
+        'offline_amount_paid' => 0
     ];
 });

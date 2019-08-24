@@ -14,6 +14,7 @@ use App\Caregiver;
 use App\ClaimableExpense;
 use App\ClaimableService;
 use App\Shift;
+use Illuminate\Support\Facades\DB;
 
 class ClaimInvoiceFactory
 {
@@ -24,59 +25,94 @@ class ClaimInvoiceFactory
      * @return ClaimInvoice
      * @throws \Exception
      */
-    public function createFromClientInvoice(ClientInvoice $invoice) : ClaimInvoice
+    public function createFromClientInvoice( ClientInvoice $invoice ) : ClaimInvoice
     {
-        $invoice->load('items', 'items.shift', 'items.shiftService', 'items.shiftService.shift');
-        $client = $invoice->client;
+        $invoice->load( 'items', 'items.shift', 'items.shiftService', 'items.shiftService.shift' );
+        $client   = $invoice->client;
         $business = $invoice->client->business;
-        $payer = $invoice->clientPayer->payer;
+        $payer    = $invoice->clientPayer->payer;
 
         \DB::beginTransaction();
         /** @var ClaimInvoice $claim */
         $claim = ClaimInvoice::create([
-            'business_id' => $business->id,
+
+            'business_id'       => $business->id,
             'client_invoice_id' => $invoice->id,
-            'name' => $this->getInvoiceName($business->id),
+            'name'              => $this->getInvoiceName($business->id),
 
             // TODO: calculate from items
-            'amount' => $invoice->amount,
+            'amount'     => $invoice->amount,
             'amount_due' => $invoice->amount,
 
-            'status' => ClaimStatus::CREATED(),
+            'status'              => ClaimStatus::CREATED(),
             'transmission_method' => $payer->getTransmissionMethod(),
 
-            'client_id' => $client->id,
-            'client_first_name' => $client->first_name,
-            'client_last_name' => $client->last_name,
-            'client_dob' => $client->date_of_birth,
-            'client_medicaid_id' => $client->medicaid_id,
+            'client_id'                       => $client->id,
+            'client_first_name'               => $client->first_name,
+            'client_last_name'                => $client->last_name,
+            'client_dob'                      => $client->date_of_birth,
+            'client_medicaid_id'              => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
 
-            'payer_id' => $payer->id,
+            'payer_id'   => $payer->id,
             'payer_name' => $payer->name,
             'payer_code' => $invoice->getPayerCode(),
-            'plan_code' => $invoice->getPlanCode(),
+            'plan_code'  => $invoice->getPlanCode(),
         ]);
 
-        $items = $invoice->items->map(function (ClientInvoiceItem $item) {
-            switch ($item->invoiceable_type) {
+        $items = $invoice->items->map( function ( ClientInvoiceItem $item ) {
+
+            switch ( $item->invoiceable_type ) {
+
                 case InvoiceableType::SHIFT():
-                    return $this->convertShift($item);
+
+                    return $this->convertShift( $item );
+
                 case InvoiceableType::SHIFT_SERVICE():
-                    return $this->convertService($item);
+
+                    return $this->convertService( $item );
+
                 case InvoiceableType::SHIFT_EXPENSE():
-                    return $this->convertExpense($item);
+
+                    return $this->convertExpense( $item) ;
+
                 case InvoiceableType::SHIFT_ADJUSTMENT():
                     // Adjustments are not copied to Claim Invoices.
+
                 default:
+
                     return null;
             }
         })->filter();
 
-        $claim->items()->saveMany($items);
+        $claim->items()->saveMany( $items );
         \DB::commit();
 
         return $claim;
+    }
+
+    /**
+     * Delete a claim invocie permanently, along with all of it's associated data
+     * 
+     * @param ClaimInvoice $claim
+     */
+    public function hardDeleteClaimInvoice( ClaimInvoice $claim )
+    {
+
+        \DB::beginTransaction();
+
+            // delete each item and it's reference
+            foreach( $claim->items as $item ){
+
+                $item->claimable_type::where( 'id', $item->claimable_id )->delete();
+                ClaimInvoiceItem::where( 'id', $item->id )->delete();
+            }
+            // delete the claim itself
+            $claim->delete();
+
+        \DB::commit();
+
+        // not sure what to return here
     }
 
     /**
@@ -87,17 +123,18 @@ class ClaimInvoiceFactory
      */
     protected function convertShift(ClientInvoiceItem $item) : ClaimInvoiceItem
     {
-        $shift = $item->getShift();
-        $caregiver = $shift->caregiver;
+
+        $shift      = $item->getShift();
+        $caregiver  = $shift->caregiver;
         $evvAddress = $shift->address;
         /** @var Service $service */
         $service = $shift->service;
+        if ( empty( $service ) ) {
 
-        if (empty($service)) {
-            throw new \InvalidArgumentException('Shift has no related service.');
+            throw new \InvalidArgumentException( 'Shift has no related service.' );
         }
 
-        return $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
+        return $this->createClaimableService( $item, $shift, $service, $caregiver, $evvAddress );
     }
 
     /**
@@ -116,7 +153,6 @@ class ClaimInvoiceFactory
         $shiftService = $item->shiftService;
         /** @var Service $service */
         $service = $item->shiftService->service;
-
         $claimItem = $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
 
         // Update the visit start and end times with the pro-rated versions for service breakouts.

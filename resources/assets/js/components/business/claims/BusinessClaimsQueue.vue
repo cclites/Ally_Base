@@ -1,12 +1,18 @@
 <template>
+
     <b-card>
+
         <b-row>
+
             <b-col lg="12">
-                <b-card header="Select Date Range"
+
+                <b-card header="Filter Claims"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
+
+                    <b-form inline @submit.prevent=" loadItems() ">
+
                         <business-location-form-group
                             v-model="businesses"
                             :label="null"
@@ -26,12 +32,14 @@
                         >
                         </date-picker>
                         <b-form-select v-model="clientFilter" class="mr-1 mt-1">
+
                             <option v-if="loadingClients" selected>Loading...</option>
                             <option v-else value="">-- Select a Client --</option>
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
                         <b-form-select v-model="payerFilter" class="mr-1 mt-1">
+
                             <option v-if="loadingPayers" selected>Loading...</option>
                             <option v-else value="">-- Select a Payer --</option>
                             <option value="0">(Client)</option>
@@ -58,59 +66,101 @@
                 </b-card>
             </b-col>
         </b-row>
+
         <b-row>
+
             <b-col>
+
                 <b-alert show variant="info">
+
                     Once claims are submitted, you will need to follow up with the Payer or your Claims Portal for updates.
                 </b-alert>
             </b-col>
         </b-row>
+
         <b-row class="mb-2">
+
             <b-col lg="6">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
+
+                <b-form-input v-model=" filter " placeholder="Type to Search" />
             </b-col>
             <b-col lg="6" class="text-right">
+
                 <a href="/business/reports/claims-ar-aging" target="_blank">View Aging Report</a>
             </b-col>
         </b-row>
+
         <loading-card v-if="loaded == 0"></loading-card>
-        <b-row v-if="loaded < 0">
+
+        <b-row v-if=" loaded < 0 ">
+
             <b-col lg="12">
+
                 <b-card class="text-center text-muted">
+
                     Select filters and press Generate Report
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive" v-if="loaded > 0">
+        <div class="table-responsive" v-if=" loaded > 0 ">
+
             <b-table bordered striped hover show-empty
-                     :items="filteredItems"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     :filter="filter"
+                :items="filteredItems"
+                :fields="fields"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :filter="filter"
             >
+
                 <template slot="name" scope="row">
-                    <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
+
+                    <a :href=" invoiceUrl( row.item ) " target="_blank">{{ row.value }}</a>
                 </template>
                 <template slot="client" scope="row">
+
                     <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
                 </template>
+                <template slot="claim_status" scope="row">
+
+                    <!-- ERIK TODO: make this reference the actual claim invoice -->
+                    {{ row.item.claim ? row.item.claim_status : '-' }}
+                </template>
+                <template slot="claim" scope="row">
+
+                    <!-- ERIK TODO: make this reference the actual claim invoice -->
+                    <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.claim ? row.item.claim.name : '-' }}</a>
+                </template>
+
                 <template slot="actions" scope="row">
-                    <b-btn v-if="!row.item.claim" variant="success" class="mr-2" @click="createClaim(row.item)" :disabled="busy">
+
+                    <b-btn v-if=" !row.item.claim " variant="success" class="flex-1 my-1" @click=" createClaim( row.item ) " :disabled=" busy ">
+
                         <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner"></i>
                         <span>Create Claim</span>
                     </b-btn>
-                    <b-btn v-else-if="row.item.claim.status == 'CREATED'" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
+
+                    <b-btn v-if=" row.item.claim " variant="warning" class="flex-1 my-1" @click=" deleteClaim( row.item ) " :disabled=" busy ">
+
+                        <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
+                        <span>Delete Claim</span>
+                    </b-btn>
+                    <!--
+                    <b-btn v-else-if=" row.item.claim.status == 'CREATED' " variant="primary" class="flex-1 my-1" @click=" transmitClaim( row.item ) " :disabled="busy">
+
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
                         <span>Transmit Claim</span>
                     </b-btn>
-                    <b-btn v-else-if="(row.item.claim && row.item.claim.status != 'CREATED') && isAdmin" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
+
+                    <b-btn v-else-if="( row.item.claim && row.item.claim.status != 'CREATED' ) && isAdmin " variant="primary" class="flex-1 my-1" @click=" transmitClaim( row.item ) " :disabled="busy">
+
                         <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
                         <span>Re-Transmit Claim</span>
                     </b-btn>
-                    <b-btn v-if="row.item.claim && row.item.claim.status != 'CREATED'" variant="success" class="mr-2" @click="showPaymentModal(row.item)">Apply Payment</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="mr-2" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
+
+                    <b-btn v-if="row.item.claim && row.item.claim.status != 'CREATED'" variant="success" class="flex-1 my-1" @click=" showPaymentModal( row.item )">Apply Payment</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="flex-1 my-1" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
+                    <b-btn v-if="row.item.claim" variant="secondary" class="flex-1 my-1" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
+                    -->
                 </template>
             </b-table>
         </div>
@@ -153,17 +203,21 @@
 </template>
 
 <script>
+
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import Constants from '../../../mixins/Constants';
 
     export default {
-        components: { BusinessLocationFormGroup },
-        mixins: [FormatsDates, FormatsNumbers, Constants],
+
+        components : { BusinessLocationFormGroup },
+        mixins     : [ FormatsDates, FormatsNumbers, Constants ],
 
         data() {
+
             return {
+
                 sortBy: 'shift_time',
                 sortDesc: false,
                 filter: null,
@@ -173,58 +227,71 @@
                 invoiceType: "",
                 items: [],
                 fields: [
+
                     {
-                        key: 'created_at',
-                        label: 'Date',
-                        formatter: (val) => this.formatDateFromUTC(val),
-                        sortable: true,
+                        key       : 'created_at',
+                        label     : 'Inv Date',
+                        formatter : ( val ) => this.formatDateFromUTC( val ),
+                        sortable  : true,
                     },
                     {
-                        key: 'name',
-                        label: 'Invoice #',
-                        sortable: true,
+                        key      : 'name',
+                        label    : 'Invoice #',
+                        sortable : true,
                     },
                     {
-                        key: 'client',
-                        sortable: true,
+                        key      : 'client',
+                        sortable : true,
                     },
                     {
-                        key: 'payer',
-                        formatter: (val) => val ? val.name : 'None',
-                        sortable: true,
+                        key       : 'payer',
+                        formatter : ( val ) => val ? val.name : 'None',
+                        sortable  : true,
                     },
                     {
-                        key: 'amount',
-                        label: 'Claim Total',
-                        formatter: (val) => this.moneyFormat(val),
-                        sortable: true,
-                    },
-                    // {
-                    //     key: 'balance',
-                    //     label: 'Invoice Balance',
-                    //     formatter: (val) => this.moneyFormat(val),
-                    //     sortable: true,
-                    // },
-                    {
-                        key: 'claim_status',
-                        formatter: (x) => _.capitalize(_.startCase(x)),
-                        sortable: true,
+                        key       : 'amount',
+                        label     : 'Invoiced Amt',
+                        formatter : ( val ) => this.moneyFormat( val, '$', true ),
+                        sortable  : true,
                     },
                     {
-                        key: 'claim_service',
-                        label: 'Claim Service',
-                        formatter: (x) => this.serviceLabel(x),
-                        sortable: true,
+                        key       : 'claim',
+                        label     : 'Claim',
+                        sortable  : false
                     },
                     {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val),
-                        sortable: true,
+                        key       : 'claim_date',
+                        formatter : ( val ) => this.formatDateFromUTC( val, 'MM/DD/YYYY h:mm a', null, true ),
+                        label     : 'Claim Date',
+                        sortable  : true
                     },
                     {
-                        key: 'actions',
-                        sortable: false,
+                        key       : 'claim_total',
+                        label     : 'Claim Amt',
+                        formatter : ( val ) => this.moneyFormat( val, '$', true ),
+                        sortable  : true
+                    },
+                    {
+                        key       : 'claim_paid',
+                        label     : 'Amt Paid',
+                        formatter : ( val ) => this.moneyFormat( val, '$', true ),
+                        sortable  : true
+                    },
+                    {
+                        key       : 'claim_balance',
+                        label     : 'Claim Balance',
+                        formatter : ( val ) => this.moneyFormat( val, '$', true ),
+                        sortable  : true,
+                    },
+                    {
+                        key       : 'claim_status',
+                        formatter : ( x ) => _.capitalize( _.startCase( x ) ),
+                        sortable  : true,
+                    },
+                    {
+                        key      : 'actions',
+                        tdClass  : 'actions-column',
+                        sortable : false,
                     },
                 ],
                 loadingClients: false,
@@ -236,58 +303,42 @@
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
-                    type: '',
-                    payment_date: moment().format('MM/DD/YYYY'),
-                    amount: 0.00,
-                    reference: '',
-                    notes: '',
-                    description:'payment_applied',
+
+                    type         : '',
+                    payment_date : moment().format( 'MM/DD/YYYY' ),
+                    amount       : 0.00,
+                    reference    : '',
+                    notes        : '',
+                    description  : 'payment_applied',
                 }),
                 selectedInvoice: {},
                 busy: false,
                 transmittingId: null,
                 creatingId: null,
+                deletingId: null,
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
             }
         },
 
-        async mounted() {
-            await this.loadClients();
-            await this.fetchPayers();
-
-            // load filters from query
-            let autoLoad = false;
-            var urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('start_date')) {
-                this.start_date = urlParams.get('start_date');
-                autoLoad = true;
-            }
-            if (urlParams.has('end_date')) {
-                this.end_date = urlParams.get('end_date');
-                autoLoad = true;
-            }
-            if (urlParams.has('filter')) {
-                this.filter = urlParams.get('filter');
-            }
-
-            if (autoLoad) {
-                this.loadItems();
-            }
-        },
-
         computed: {
+
             filteredItems() {
-                return this.items.map(item => {
+
+                return this.items.map( item => {
+
                     return item;
                 });
             },
         },
 
         methods: {
-            serviceLabel(serviceValue) {
-                switch (serviceValue) {
+
+            serviceLabel( serviceValue ) {
+
+                switch ( serviceValue ) {
+
                     case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
                     case this.CLAIM_SERVICE.TELLUS: return 'Tellus';
                     case this.CLAIM_SERVICE.CLEARINGHOUSE: return 'CareExchange LTC Clearinghouse';
@@ -298,65 +349,190 @@
                 }
             },
 
-            createClaim(invoice) {
+            createClaim( invoice ) {
+
                 this.creatingId = invoice.id;
-                let form = new Form({ client_invoice_id: invoice.id });
-                form.post(`/business/claims`)
+                let form        = new Form({ client_invoice_id: invoice.id });
+                form.post( `/business/claims` )
                     .then( ({ data }) => {
-                        let claim = data;
+
+                        let claim = data.data.claim;
+                        // console.log( 'created claim: ', claim );
+
+                        let item           = this.items.find( item => item.id == claim.client_invoice_id );
+                        // manually set the attributes that the claim-resource does..
+                        item.claim_total   = this.moneyFormat( claim.amount, '$', true );
+                        item.claim_paid    = this.moneyFormat( claim.amount - claim.balance, '$', true );
+                        item.claim_balance = this.moneyFormat( claim.balance, '$', true );
+                        item.claim_status  = claim.status;
+                        item.claim_date    = this.formatDateFromUTC( claim.created_at, 'MM/DD/YYYY h:mm a', null, true );
+                        item.claim         = claim;
                     })
                     .catch(() => {
 
                     })
                     .finally(() => {
+
                         this.creatingId = null;
                     })
             },
 
-            transmitClaim(invoice, skipAlert = false) {
+            deleteClaim( invoice ){
+
+                // add client-side check for transmitted status here
+
+                this.deletingId = invoice.id;
+                let form        = new Form();
+                form.submit( 'delete', `/business/claims/${invoice.claim.id}` )
+                    .then( ({ data }) => {
+
+                        let claim = data;
+                        // console.log( 'delete response: ', data );
+
+                        let item           = this.items.find( item => item.id == invoice.id );
+                        item.claim_total   = null;
+                        item.claim_paid    = null;
+                        item.claim_balance = null;
+                        item.claim_status  = null;
+                        item.claim_date    = null;
+                        // item.claim_date    = this.formatDateFromUTC( null, 'MM/DD/YYYY', null, true );
+                        item.claim         = null;
+                    })
+                    .catch(() => {
+
+                    })
+                    .finally(() => {
+
+                        this.deletingId = null;
+                    })
+            },
+
+            transmitClaim( invoice, skipAlert = false ) {
+
+                if( true ) return;
+
+                if ( !skipAlert ) {
+
+                    if ( invoice.payer && [ this.PRIVATE_PAY_ID, this.OFFLINE_PAY_ID ].includes( invoice.payer.id ) ) {
+                        // offline and private pay Payer objects have no transmission method set
+                        // so we allow the user to select which method they would like to use
+
+                        this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = true;
+
+                        this.$refs.confirmTransmissionMethod.confirm(() => {
+
+                            this.transmitClaim( invoice, true );
+                        });
+                        return;
+                    }
+
+                    if ( invoice.payer && ! invoice.payer.transmission_method ) {
+                        // if no transmission method set up for the payer, allow them to choose
+
+                        this.selectedTransmissionMethod = '';
+                        this.transmissionPrivate = false;
+                        this.$refs.confirmTransmissionMethod.confirm( () => {
+
+                            this.transmitClaim( invoice, true );
+                        });
+                        return;
+                    }
+
+                    if ( invoice.payer && [ this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX ].includes( invoice.payer.transmission_method ) ) {
+
+                        this.$refs.confirmManualTransmission.confirm( () => {
+
+                            this.transmitClaim( invoice, true );
+                        });
+                        return;
+                    }
+                }
+
+                this.busy = true;
+                this.transmittingId = invoice.id;
+                let form = new Form({
+
+                    method: this.selectedTransmissionMethod,
+                });
+
+                form.post(`/business/claims-ar/${invoice.id}/transmit`)
+                    .then( ({ data }) => {
+                        // success
+                        if (data.data.test_result) {
+                            // test mode
+                            this.$refs.open_test_link.href = data.data.test_result;
+                            this.$refs.open_test_link.click();
+                        }
+                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data.claim);
+                        }
+                    })
+                    .catch(e => {
+                        if (e.response.status == 412) {
+                            // Required fields are missing.
+                            this.showMissingFieldsModal(e.response.data.data, invoice);
+                        }
+                    })
+                    .finally(() => {
+                        this.busy = false;
+                        this.transmittingId = null;
+                    });
             },
 
             async loadItems() {
+
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
-                axios.get(url)
+                let url     = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                axios.get( url )
                     .then( ({ data }) => {
+
                         this.items = data.data;
                     })
-                    .catch(e => {
+                    .catch( e => {
+
                         this.items = [];
                     })
-                    .finally(() => {
+                    .finally( () => {
+
                         this.loaded = 1;
                     });
             },
 
             async fetchPayers() {
-                this.payers = [];
+
+                this.payers        = [];
                 this.loadingPayers = true;
-                let response = await axios.get('/business/payers?json=1');
-                if (Array.isArray(response.data)) {
+                let response       = await axios.get( '/business/payers?json=1' );
+                if ( Array.isArray( response.data ) ) {
+
                     this.payers = response.data;
                 } else {
+
                     this.payers = [];
                 }
                 this.loadingPayers = false;
             },
 
             async loadClients() {
-                this.clients = [];
+
+                this.clients        = [];
                 this.loadingClients = true;
-                const response = await axios.get('/business/clients?json=1');
-                this.clients = response.data;
+                const response      = await axios.get( '/business/clients?json=1' );
+                this.clients        = response.data;
                 this.loadingClients = false;
             },
 
-            invoiceUrl(invoice, view="") {
+            invoiceUrl( invoice, view = "" ) {
+
                 return `/business/client/invoices/${invoice.id}/${view}`;
             },
 
-            claimInvoiceUrl(invoice, view="") {
-                if (! invoice.claim) {
+            claimInvoiceUrl( invoice, view = "" ) {
+
+                if ( !invoice.claim ) {
+
                     return;
                 }
 
@@ -365,14 +541,67 @@
 
             updateFullBalance() {
             },
+        },
+
+        async mounted() {
+
+            await this.loadClients();
+            await this.fetchPayers();
+
+            // load filters from query
+            let autoLoad  = false;
+            var urlParams = new URLSearchParams( window.location.search );
+
+            if ( urlParams.has( 'start_date' ) ) {
+                // ERIK TODO => check if this search filter is even valid..
+
+                this.start_date = urlParams.get( 'start_date' );
+                autoLoad = true;
+            }
+
+            if ( urlParams.has( 'end_date' ) ) {
+                // ERIK TODO => check if this search filter is even valid..
+
+                this.end_date = urlParams.get( 'end_date' );
+                autoLoad = true;
+            }
+
+            if ( urlParams.has( 'filter' ) ) {
+                // ERIK TODO => check if this search filter is even valid..
+
+                this.filter = urlParams.get( 'filter' );
+            }
+
+            // ERIK TODO => check if more search filters are to be added
+
+            if ( autoLoad ) {
+
+                this.loadItems();
+            }
         }
     }
 </script>
 
 <style>
+
+    td.actions-column {
+
+        display: flex;
+        flex-direction: column;
+    }
+
     table:not(.form-check) {
+
         font-size: 14px;
     }
-    .fa-check-square-o { color: green; }
-    .fa-times-rectangle-o { color: darkred; }
+
+    .fa-check-square-o {
+        
+        color: green;
+    }
+
+    .fa-times-rectangle-o {
+        
+        color: darkred;
+    }
 </style>

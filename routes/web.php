@@ -621,7 +621,7 @@ Route::group([
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
     Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
-    Route::get('invoices/claims/{claim}', 'Admin\ClainInvoiceController@show');
+    // Route::get('invoices/claims/{claim}', 'Admin\ClaimInvoiceController@show');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');

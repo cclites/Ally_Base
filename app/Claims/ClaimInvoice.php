@@ -53,6 +53,25 @@ class ClaimInvoice extends Model
     }
 
     // **********************************************************
+    // ACCESSORS
+    // **********************************************************
+
+    function getAmount(): float
+    {
+        return ( float ) $this->amount;
+    }
+
+    function getAmountDue(): float
+    {
+        return ( float ) $this->amount_due;
+    }
+
+    function getAmountPaid(): float
+    {
+        return ( float ) $this->getAmount() - $this->getAmountDue();
+    }
+
+    // **********************************************************
     // MUTATORS
     // **********************************************************
 
