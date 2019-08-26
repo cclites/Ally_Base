@@ -69,7 +69,7 @@ class PaymentSummaryByPayerReportController extends BaseController
      * @param $data
      * @return array
      */
-    protected function createSummary($data): array
+    protected function createSummary(): array
     {
         $set = [];
 
