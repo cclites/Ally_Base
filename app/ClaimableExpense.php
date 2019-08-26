@@ -42,6 +42,11 @@ class ClaimableExpense extends Model
     // RELATIONSHIPS
     // **********************************************************
 
+    public function shift()
+    {
+        return $this->belongsTo( Shift::class );
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************

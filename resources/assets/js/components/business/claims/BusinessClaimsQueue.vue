@@ -138,11 +138,19 @@
                         <span>Create Claim</span>
                     </b-btn>
 
-                    <b-btn v-if=" row.item.claim " variant="warning" class="flex-1 my-1" @click=" deleteClaim( row.item ) " :disabled=" busy ">
+                    <div v-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
 
-                        <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
-                        <span>Delete Claim</span>
-                    </b-btn>
+                        <b-btn variant="warning" style="flex:1" class="m-1 w-25" @click=" deleteClaim( row.item ) " :disabled=" busy ">
+
+                            <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
+                            <i class="fa fa-trash"></i>
+                        </b-btn>
+
+                        <b-btn variant="info" style="flex:2" class="m-1 w-75" @click=" editClaim( row.item ) " :disabled=" busy ">
+
+                            <span>Edit</span>
+                        </b-btn>
+                    </div>
                     <!--
                     <b-btn v-else-if=" row.item.claim.status == 'CREATED' " variant="primary" class="flex-1 my-1" @click=" transmitClaim( row.item ) " :disabled="busy">
 

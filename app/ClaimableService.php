@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\Service;
 use Illuminate\Database\Eloquent\Model;
 
 class ClaimableService extends Model
@@ -41,6 +42,21 @@ class ClaimableService extends Model
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
+
+    public function shift()
+    {
+        return $this->belongsTo( Shift::class );
+    }
+
+    public function caregiver()
+    {
+        return $this->belongsTo( Caregiver::class );
+    }
+
+    public function service()
+    {
+        return $this->belongsTo( Service::class );
+    }
 
     // **********************************************************
     // MUTATORS

@@ -3,6 +3,9 @@
 namespace App\Claims;
 
 use App\Billing\BaseInvoiceItem;
+use App\ClaimableExpense;
+use App\ClaimableService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ClaimInvoiceItem extends BaseInvoiceItem
@@ -19,7 +22,7 @@ class ClaimInvoiceItem extends BaseInvoiceItem
      *
      * @var array
      */
-    public $with = [];
+    public $with = [ 'claimable' ];
 
     /**
      * The accessors to append to the model's array form.
@@ -75,4 +78,34 @@ class ClaimInvoiceItem extends BaseInvoiceItem
     // OTHER FUNCTIONS
     // **********************************************************
 
+    public function getShift()
+    {
+        return $this->claimable->shift;
+    }
+
+    public function getShiftName()
+    {
+        if( $this->claimable instanceof ClaimableExpense ) return $this->claimable->name;
+
+        return $this->getService()->name;
+    }
+
+    public function getShiftTitle()
+    {
+        $shift = $this->getShift();
+
+        return Carbon::parse( $shift->checked_in_time )->format( 'M d' ) . ' ' . Carbon::parse( $shift->checked_in_time )->format( 'h:iA' ) . ' - ' . Carbon::parse( $shift->checked_out_time )->format( 'h:iA' ) . ': ' . $shift->caregiver->name;
+    }
+
+    public function getCaregiver()
+    {
+        if( $this->claimable instanceof ClaimableService ) return $this->claimable->caregiver;
+        return null;
+    }
+
+    public function getService()
+    {
+        if( $this->claimable instanceof ClaimableService ) return $this->claimable->service;
+        return null;
+    }
 }

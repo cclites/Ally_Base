@@ -1,6 +1,9 @@
 export default {
     methods: {
-        formatDate(date, format='MM/DD/YYYY', fromFormat = null) {
+        formatDate( date, format='MM/DD/YYYY', fromFormat = null, dash = false ) {
+
+            if( dash && [ null, 'null' ].includes( date ) ) return '-';
+
             return moment(date, fromFormat).format(format);
         },
 
@@ -8,7 +11,7 @@ export default {
 
             if( dash && [ null, 'null' ].includes( date ) ) return '-';
 
-            return moment.utc(date, fromFormat).local().format(format);
+            return moment.utc( date, fromFormat ).local().format( format );
         },
 
         formatTime(dateTime, format='h:mm a', fromFormat = null) {

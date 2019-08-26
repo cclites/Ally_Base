@@ -118,11 +118,27 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface
         return $this->items;
     }
 
+    /**
+     * 
+     * because there is no 'group' column, and this information is more-or-less computed by the editable claim data,
+     * I am going to do some manual joining and formatting for the invoice here
+     * 
+     * basically, group by 'shift'..
+     *  - the shift row title will be the computed 'group' name..
+     *  - each item within it will either be the service rendered or the expense listed
+     */
     function getItemGroups(): Collection
     {
-        // ERIK TODO => figure out how this specifically applies to this model..
-        return $this->getItems()->sortBy( 'created_at' )->groupBy( 'claimable_type' );
-        // return $this->getItems()->sortBy( 'date' )->groupBy( 'group' ); <= the original
+        $items = $this->getItems()->sortBy( 'created_at' );
+
+        $shifts = [];
+
+        foreach( $items as $item ){
+
+            $shifts[ $item->getShiftTitle() ][] = $item;
+        }
+
+        return collect( $shifts );
     }
 
     // **********************************************************
