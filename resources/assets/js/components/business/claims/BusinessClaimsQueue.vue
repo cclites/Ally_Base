@@ -122,13 +122,12 @@
                 </template>
                 <template slot="claim_status" scope="row">
 
-                    <!-- ERIK TODO: make this reference the actual claim invoice -->
                     {{ row.item.claim ? row.item.claim_status : '-' }}
                 </template>
                 <template slot="claim" scope="row">
 
-                    <!-- ERIK TODO: make this reference the actual claim invoice -->
-                    <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.claim ? row.item.claim.name : '-' }}</a>
+                    <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`">{{ row.item.claim.name }}</a>
+                    <span v-else> - </span>
                 </template>
 
                 <template slot="actions" scope="row">

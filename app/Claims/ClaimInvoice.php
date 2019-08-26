@@ -2,9 +2,15 @@
 
 namespace App\Claims;
 
+use App\AuditableModel;
+use App\Billing\ClaimPayment;
+use App\Billing\ClientPayer;
+use App\Billing\Contracts\InvoiceInterface;
+use App\Client;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
-class ClaimInvoice extends Model
+class ClaimInvoice extends AuditableModel implements InvoiceInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -52,9 +58,32 @@ class ClaimInvoice extends Model
         return $this->hasMany(ClaimInvoiceItem::class, 'claim_invoice_id', 'id');
     }
 
+    function client()
+    {
+        return $this->belongsTo( Client::class );
+    }
+
+    function clientPayer()
+    {
+        return $this->belongsTo( ClientPayer::class );
+    }
+
+    /**
+     * ERIK TODO => figure out if this is real and/or necessary, consult docs for next ticket about payment system
+    */
+    public function payments()
+    {
+        return $this->hasMany( ClaimPayment::class );
+    }
+
     // **********************************************************
     // ACCESSORS
     // **********************************************************
+
+    function getClientPayer(): ?ClientPayer
+    {
+        return $this->clientPayer;
+    }
 
     function getAmount(): float
     {
@@ -69,6 +98,31 @@ class ClaimInvoice extends Model
     function getAmountPaid(): float
     {
         return ( float ) $this->getAmount() - $this->getAmountDue();
+    }
+
+    function getName(): string
+    {
+        return $this->name;
+    }
+
+    function getDate(): string
+    {
+        return $this->created_at->format( 'm/d/Y' );
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|\App\Billing\ClaimInvoiceItem[]
+     */
+    function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    function getItemGroups(): Collection
+    {
+        // ERIK TODO => figure out how this specifically applies to this model..
+        return $this->getItems()->sortBy( 'created_at' )->groupBy( 'claimable_type' );
+        // return $this->getItems()->sortBy( 'date' )->groupBy( 'group' ); <= the original
     }
 
     // **********************************************************

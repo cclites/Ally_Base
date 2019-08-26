@@ -2,9 +2,10 @@
 
 namespace App\Claims;
 
+use App\Billing\BaseInvoiceItem;
 use Illuminate\Database\Eloquent\Model;
 
-class ClaimInvoiceItem extends Model
+class ClaimInvoiceItem extends BaseInvoiceItem
 {
     /**
      * The attributes that aren't mass assignable.

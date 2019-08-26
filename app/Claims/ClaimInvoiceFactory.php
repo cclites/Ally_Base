@@ -86,6 +86,7 @@ class ClaimInvoiceFactory
         })->filter();
 
         $claim->items()->saveMany( $items );
+
         \DB::commit();
 
         return $claim;
