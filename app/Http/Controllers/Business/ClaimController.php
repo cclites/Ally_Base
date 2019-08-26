@@ -10,6 +10,7 @@ use App\Claims\ClaimInvoiceFactory;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Responses\ErrorResponse;
 
 class ClaimController extends Controller
 {
@@ -39,11 +40,25 @@ class ClaimController extends Controller
      */
     public function show( ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW )
     {
+        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
+
         $strategy = InvoiceViewFactory::create( $claim, $view );
 
         $viewGenerator = new InvoiceViewGenerator( $strategy );
 
         return $viewGenerator->generateNewClaimInvoice( $claim );
+    }
+
+    /**
+     * grab the data for a specific claim_invoice to populate the edit-modal
+     */
+    public function edit( ClaimInvoice $claim )
+    {
+        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
+
+        $claim->load([ 'items', 'client' ]);
+
+        return response()->json( $claim );
     }
 
     /**
@@ -57,6 +72,7 @@ class ClaimController extends Controller
     public function destroy( Request $request, ClaimInvoiceFactory $factory )
     {
         $claim = ClaimInvoice::findOrFail( $request->claim );
+        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
 
         $factory->hardDeleteClaimInvoice( $claim );
 

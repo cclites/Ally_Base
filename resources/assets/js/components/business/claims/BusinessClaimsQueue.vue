@@ -138,15 +138,15 @@
                         <span>Create Claim</span>
                     </b-btn>
 
-                    <div v-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
+                    <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
 
-                        <b-btn variant="warning" style="flex:1" class="m-1 w-25" @click=" deleteClaim( row.item ) " :disabled=" busy ">
+                        <b-btn variant="warning" style="flex:1" class="m-1 w-25" @click=" deleteClaimModal( row.item ) " :disabled=" busy ">
 
                             <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
-                            <i class="fa fa-trash"></i>
+                            <i v-else class="fa fa-trash"></i>
                         </b-btn>
 
-                        <b-btn variant="info" style="flex:2" class="m-1 w-75" @click=" editClaim( row.item ) " :disabled=" busy ">
+                        <b-btn variant="info" style="flex:2" class="m-1 w-75" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy ">
 
                             <span>Edit</span>
                         </b-btn>
@@ -205,6 +205,15 @@
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
 
+
+        <!-- Details modal -->
+        <edit-claim-modal v-model=" editClaimModalOpen " :claim=" editingClaim "></edit-claim-modal>
+
+        <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete">
+
+            <p>Are you sure you want to delete this claim?</p>
+        </confirm-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -215,10 +224,11 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import Constants from '../../../mixins/Constants';
+    import EditClaimModal from "../modals/EditClaimModal";
 
     export default {
 
-        components : { BusinessLocationFormGroup },
+        components : { BusinessLocationFormGroup, EditClaimModal },
         mixins     : [ FormatsDates, FormatsNumbers, Constants ],
 
         data() {
@@ -326,6 +336,9 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
+
+                editClaimModalOpen : false,
+                editingClaim : {},
             }
         },
 
@@ -384,34 +397,61 @@
                     })
             },
 
+            deleteClaimModal( invoice ){
+
+                this.$refs.confirmDeleteClaim.confirm( () => {
+
+                    this.deleteClaim( invoice );
+                });
+            },
+
             deleteClaim( invoice ){
 
-                // add client-side check for transmitted status here
+                if( invoice.claim && invoice.claim.status == 'CREATED' ){
 
-                this.deletingId = invoice.id;
-                let form        = new Form();
-                form.submit( 'delete', `/business/claims/${invoice.claim.id}` )
-                    .then( ({ data }) => {
+                    this.deletingId = invoice.id;
+                    let form        = new Form();
+                    form.submit( 'delete', `/business/claims/${invoice.claim.id}` )
+                        .then( ({ data }) => {
 
-                        let claim = data;
-                        // console.log( 'delete response: ', data );
+                            let claim = data;
+                            // console.log( 'delete response: ', data );
 
-                        let item           = this.items.find( item => item.id == invoice.id );
-                        item.claim_total   = null;
-                        item.claim_paid    = null;
-                        item.claim_balance = null;
-                        item.claim_status  = null;
-                        item.claim_date    = null;
-                        // item.claim_date    = this.formatDateFromUTC( null, 'MM/DD/YYYY', null, true );
-                        item.claim         = null;
+                            let item           = this.items.find( item => item.id == invoice.id );
+                            item.claim_total   = null;
+                            item.claim_paid    = null;
+                            item.claim_balance = null;
+                            item.claim_status  = null;
+                            item.claim_date    = null;
+                            item.claim         = null;
+                        })
+                        .catch(() => {
+
+                        })
+                        .finally(() => {
+
+                            this.deletingId = null;
+                        })
+                }
+            },
+
+            editClaimModal( claim ){
+
+                axios.get( '/business/claims/' + claim.id + '/edit' )
+                    .then( res => {
+
+                        console.log( res );
+
+                        let claim = res.data;
+
+                        this.editingClaim = claim;
+                        this.editClaimModalOpen = true;
                     })
-                    .catch(() => {
+                    .catch( err => {
 
-                    })
-                    .finally(() => {
-
-                        this.deletingId = null;
-                    })
+                        console.err( err );
+                        alert( 'Problem loading claim details..' );
+                    });
             },
 
             transmitClaim( invoice, skipAlert = false ) {
