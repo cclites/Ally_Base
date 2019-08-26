@@ -54,7 +54,8 @@ class TotalChargesReport extends BaseReport
     }
 
     /**
-     * @param string $date
+     * @param string $startdate
+     * @param string $enddate
      * @return TotalChargesReport
      */
     public function applyFilters( string $startdate, string $enddate ): self
@@ -65,7 +66,6 @@ class TotalChargesReport extends BaseReport
         $this->query->whereBetween( 'created_at', [ $this->start, $this->end ] );
 
         return $this;
-
     }
 
     /**
@@ -79,7 +79,7 @@ class TotalChargesReport extends BaseReport
                 'caregiver'=>$payment->caregiver_allotment,
                 'system'=>$payment->system_allotment,
                 'amount'=>$payment->amount,
-                'location'=>filled($payment->business->name) ? $payment->business->name : "Adjustment"
+                'location'=>filled($payment->business) ? $payment->business->name : "Adjustment"
             ];
         });
     }

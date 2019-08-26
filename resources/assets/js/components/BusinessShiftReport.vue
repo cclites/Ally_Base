@@ -45,13 +45,13 @@
                             </b-form-group>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Charge Status" class="form-inline">
-                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">
-                                    <option value="">All Statuses</option>
-                                    <option value="charged">Charged</option>
-                                    <option value="uncharged">Un-Charged</option>
-                                </b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Charge Status" class="form-inline">-->
+<!--                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">-->
+<!--                                    <option value="">All Statuses</option>-->
+<!--                                    <option value="charged">Charged</option>-->
+<!--                                    <option value="uncharged">Un-Charged</option>-->
+<!--                                </b-form-select>-->
+<!--                            </b-form-group>-->
                         </b-col>
                         <b-col xl="4" lg="6">
                             <b-form-group label="Confirmed Status" class="form-inline">
@@ -335,7 +335,8 @@
                     'Shift Total',
                     'Type',
                     'Confirmed',
-                    'Charged',
+                    // 'Charged',
+                    'Invoiced',
                 ];
 
                 return fields;
@@ -386,8 +387,9 @@
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
                         'client_confirmed': item.client_confirmed,
-                        'Charged': item.charged,
-                        'charged_at': item.charged_at,
+                        'Invoiced': item.invoiced,
+                        // 'Charged': item.charged,
+                        // 'charged_at': item.charged_at,
                         'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
@@ -438,6 +440,7 @@
             },
             queryString() {
                 const filters = this.filters;
+                this.items.shifts = [];
                 return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status

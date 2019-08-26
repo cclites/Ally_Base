@@ -9,6 +9,7 @@ use App\Billing\Claims\TellusClaimTransmitter;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\HhaFile;
 use Illuminate\Support\Collection;
 
 /**
@@ -84,6 +85,16 @@ class Claim extends AuditableModel implements InvoiceInterface
     public function payments()
     {
         return $this->hasMany(ClaimPayment::class);
+    }
+
+    /**
+     * Get the HhaFiles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function hhaFiles()
+    {
+        return $this->hasMany(HhaFile::class);
     }
 
     // **********************************************************

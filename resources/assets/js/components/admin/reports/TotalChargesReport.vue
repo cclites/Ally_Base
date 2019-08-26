@@ -8,7 +8,6 @@
                         header-bg-variant="info"
                 >
                     <b-row>
-
                         <b-col sm="12" md="4">
 
                             <b-form-group label="Date" class="mr-2">
@@ -105,7 +104,6 @@
             return {
 
                 form: new Form({
-
                     startdate: moment().startOf( 'isoweek' ).subtract( 1, 'days' ).format( 'MM/DD/YYYY' ),
                     enddate  : moment().endOf( 'isoday' ).format( 'MM/DD/YYYY' ),
                     json: 1

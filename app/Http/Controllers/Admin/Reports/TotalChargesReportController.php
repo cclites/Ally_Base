@@ -21,10 +21,8 @@ class TotalChargesReportController extends Controller
 
             $report->setTimezone( $timezone )
                 ->applyFilters(
-
                     $request->startdate,
-                    $request->enddate
-                );
+                    $request->enddate);
 
             $data = $report->rows();
             $totals = [

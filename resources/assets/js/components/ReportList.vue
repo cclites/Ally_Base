@@ -18,6 +18,10 @@
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
                         </template>
+                        <template slot="description" scope="row">
+                            {{ row.item.description }}
+                            <div v-if="row.item.hidden === true" class="text-danger">This is only shown for admins impersonating office users.</div>
+                        </template>
                     </b-table>
                 </div>
             </b-card>
@@ -194,6 +198,13 @@
                     {
                         name: 'Bank Report',
                         url: 'reports/bucket',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Paid Billed Audit Report',
+                        url: '/admin/reports/paid-billed-audit-report',
                         description: '',
                         category: 5,
                         allowed: ['admin'],
@@ -480,13 +491,6 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Payroll Summary',
-                        url: 'reports/payroll-summary-report',
-                        description: 'Payroll Summary Report',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-                    {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
                         description: 'Claims AR Aging Report',
@@ -517,28 +521,6 @@
                     },
 
                     {
-                        name: 'Invoice Summary By Marketing',
-                        url: 'reports/invoice-summary-by-marketing',
-                        description: 'Invoice Summary By Marketing Report',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-
-                    {
-                        name: 'Invoice Summary By County',
-                        url: 'reports/invoice-summary-by-county',
-                        description: 'Invoice Summary Report By County',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-                    {
-                        name: 'Client Referrals',
-                        url: 'reports/client-referrals',
-                        description: 'Client Referrals Report',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-                    {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
                         description: 'Shows a list of caregivers with incomplete account data.',
@@ -553,15 +535,6 @@
                         category    : 2,
                         allowed     : [ 'office_user' ],
                     },
-
-                    {
-                        name: 'Payment Summary By Payer',
-                        url: 'reports/payment-summary-by-payer',
-                        description: 'Payment Summary By Payer Report',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
-
                     {
                         name: 'Service Authorization Ending Report',
                         url: 'reports/service-auth-ending',
@@ -591,6 +564,61 @@
                     // { name: 'Client Online Setup', url: 'reports/clients-onboarded', description: '' },
                     // { name: 'Caregiver Online Setup', url: 'reports/caregivers-onboarded', description: '' },
                 ];
+
+                // Add temporary hidden reports for Admins when impersonating
+                if (this.isAdmin) {
+                    reports.push(
+                        {
+                            name: 'Payroll Summary',
+                            url: 'reports/payroll-summary-report',
+                            description: 'Total caregiver payments over a specified date range',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Client Referrals',
+                            url: 'reports/client-referrals',
+                            description: 'Client Referrals Report',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By Salesperson',
+                            url: 'reports/invoice-summary-by-salesperson',
+                            description: 'Total Client Charges By Salesperson',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Invoice Summary Report By County',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Payment Summary By Private Pay Clients',
+                            url: 'reports/payment-summary-by-payer',
+                            description: 'See all payments made by private pay clients',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Client Charges By County',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                    )
+                }
+
                 const {role_type} = this.role;
                 const filteredByRole = reports.filter(({allowed}) => allowed.find(role => role == role_type));
 

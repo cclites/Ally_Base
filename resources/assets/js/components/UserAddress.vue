@@ -8,6 +8,10 @@
 
                 <b-col lg="12">
 
+                    <div class="maps-link">
+
+                        <a :href=" mapsAddress " target="_blank">See on Google Maps</a>
+                    </div>
                     <b-form-group label="Address Line 1" label-for="address1" label-class="required">
 
                         <b-form-input v-model="form.address1" type="text" required  />
@@ -128,6 +132,25 @@
                     notes    : this.address.notes || ''
                 });
             }
+        },
+        computed: {
+
+            mapsAddress(){
+
+                return `https://maps.google.com/?q=${ this.form.address1 }, ${ this.form.state }, ${ this.form.city }, ${ this.form.zip }`;
+
+
+                // https://maps.google.com/?q=1200 Pennsylvania Ave SE, Washington, District of Columbia, 20003
+            }
         }
     }
 </script>
+
+<style scoped>
+
+    .maps-link {
+
+        position: absolute;
+        right: 15px;
+    }
+</style>
