@@ -154,6 +154,10 @@ class ScheduleEvents implements Responsable
             return '#C30000';
         }
 
+        if ($status === Schedule::HOSPITAL_HOLD) {
+            return '#9881e9';
+        }
+
         if ($status === Schedule::CAREGIVER_CANCELED) {
             return '#ff8c00';
         }
@@ -184,10 +188,6 @@ class ScheduleEvents implements Responsable
 
         if ($shift === Schedule::UNCONFIRMED) {
             return '#ad92b0';
-        }
-
-        if ($shift === Schedule::HOSPITAL_HOLD) {
-            return '#9881e9';
         }
 
         if (!$schedule->caregiver_id) {
