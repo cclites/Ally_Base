@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="This report shows all payments made by private pay clients"
+                        header="Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -11,69 +11,75 @@
                         <business-location-form-group
                                 v-model="form.business"
                                 label="Office Location"
-                                :allow-all="false"
                                 class="mr-2"
+                                :allow-all="false"
                         />
-                        <b-form-group label="Start Date" class="mb-2 mr-2 col-md-2">
+                        <b-form-group label="Start Date" class="mr-2">
                             <date-picker v-model="form.start" name="start_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="End Date" class="mb-2 mr-2 col-md-2">
+                        <b-form-group label="End Date"class="mr-2">
                             <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="Clients" class="mb-2 mr-2">
-                            <b-select v-model="form.client" class="mb-2 mr-2">
-                                <option value="">All Clients</option>
-                                <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
-                            </b-select>
+                        <b-form-group label="Salesperson" v-if="salespeople.length > 0" class="mr-2">
+                            <b-form-select v-model="form.salesperson" :disabled="busy">
+                                <option value="">All</option>
+                                <option v-for="item in salespeople" :value="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
                         </b-form-group>
-
+                        <b-form-group label="Client" class="mr-2">
+                            <b-form-select v-model="form.client" :disabled="busy">
+                                <option value="">All</option>
+                                <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                        </b-form-group>
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
                                     <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                                    <b-button @click="printReport()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
-
                     </b-row>
 
-                    <loading-card v-show="busy"></loading-card>
-
-                    <div v-show="!busy">
-                        <div class="table-responsive" >
+                    <div class="d-flex justify-content-center" v-if="busy">
+                        <div class="my-5">
+                            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <b-row>
+                            <b-col>
                                 <b-table
-                                        class="payers-summary-table"
+                                        class="summary-table"
                                         :items="items"
                                         :fields="fields"
-                                        :sort-by="form.payer"
+                                        :sort-by="sortBy"
+                                        :empty-text="emptyText"
                                         :busy="busy"
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                         :footClone="footClone"
                                         :show-empty="true"
                                 >
-                                    <template slot="invoice" scope="row">
-                                        <a :href="invoiceUrl(row.item.invoice)" target="_blank">{{ row.item.invoice }}</a>
+                                    <template slot="FOOT_client" scope="item" class="primary">
+                                        <strong>For Salesperson: </strong> {{ totals.salesperson }}
                                     </template>
 
-                                    <template slot="FOOT_client_name" scope="item" class="primary">
-                                        <strong>For Client: </strong>{{totals.client_name}}
+                                    <template slot="FOOT_salesperson" scope="item">
+                                        <strong>For Dates: </strong>{{ totals.start }} to {{ totals.end }}
                                     </template>
 
-                                    <template slot="FOOT_date" scope="item">
-                                        <strong>For Location: </strong> {{ totals.location }}
-                                    </template>
-
-                                    <template slot="FOOT_invoice" scope="item" class="primary">
-                                        &nbsp;
+                                    <template slot="FOOT_payer" scope="item">
+                                        <strong>For Client: </strong>{{ totals.client }}
                                     </template>
 
                                     <template slot="FOOT_amount" scope="item" class="primary">
-                                        &nbsp;<strong>Total Invoiced Amount: </strong> {{ moneyFormat(totals.total ) }}
+                                        <strong>Total Amount: </strong> {{ moneyFormat(totals.amount) }}
                                     </template>
                                 </b-table>
-                        </div>
+                            </b-col>
+                        </b-row>
                     </div>
 
                     <b-row v-if="this.items.length > 0">
@@ -92,55 +98,53 @@
 </template>
 
 <script>
-
+    import FormatsNumbers from '../../../mixins/FormatsNumbers';
+    import FormatsDates from '../../../mixins/FormatsDates';
     import BusinessLocationSelect from "../../business/BusinessLocationSelect";
     import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
-    import FormatsNumbers from "../../../mixins/FormatsNumbers";
-    import FormatsDates from "../../../mixins/FormatsDates";
-    import Constants from "../../../mixins/Constants";
 
     export default {
-        name: "PaymentSummaryByPayer",
+        name: "invoice-summary-by-marketing-report",
+
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsDates, FormatsNumbers, Constants],
+        mixins: [FormatsNumbers, FormatsDates],
+
         data() {
             return {
                 form: new Form({
                     business: '',
+                    salesperson: '',
                     start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
-                    client_type: '',
                     client: '',
-                    payer: '',
                     json: 1
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 100,
+                perPage: 25,
                 currentPage: 1,
-                sortBy: 'client_name',
+                sortBy: 'salesperson',
                 sortDesc: false,
                 fields: [
-                    {key: 'client_name', label: 'Client', sortable: true,},
-                    {key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
-                    {key: 'invoice', label: 'Invoice', sortable: true,},
-                    //{key: 'client_type', label: 'Client Type', sortable: true,},
-                    {key: 'amount', label: 'Total Invoiced Amount', sortable: true, formatter: x => { return this.moneyFormat(x)}},
-                    //{key: 'registry_amount', label: 'Total Registry Amount', sortable: true,},
+                    {key: 'client', label: 'Client', sortable: true,},
+                    //{key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
+                    {key: 'salesperson', label: 'Sales Person', sortable: true,},
+                    {key: 'payer', label: 'Payer', sortable: true,},
+                    {key: 'amount', label: 'Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
                 item: '',
                 totals: [],
-                payers: [],
                 clients: [],
+                salespeople: [],
                 footClone: false,
-                firstRun: true
+                emptyText: "No Results",
             }
         },
         methods: {
             fetch() {
-                this.loading = true;
-                this.form.get('/business/reports/payment-summary-by-payer')
+                this.busy = true;
+                this.form.get('/business/reports/invoice-summary-by-marketing')
                     .then( ({ data }) => {
                         this.items = data.data;
                         this.totals = data.totals;
@@ -148,17 +152,17 @@
                     })
                     .catch(e => {})
                     .finally(() => {
-                        this.loading = false;
+                        this.busy = false;
                         this.footClone = true;
                     })
             },
 
-            printReport(){
-                window.location = this.form.toQueryString(`/business/reports/payment-summary-by-payer?print=true`);
+            print(){
+                $(".summary-table").print();
             },
 
-            getClients(){
-                axios.get('/business/dropdown/clients?businesses=' + this.form.business)
+            loadMarketingClients(){
+                axios.get('/business/dropdown/marketing-clients?businesses=' + this.form.business)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -167,41 +171,35 @@
                     })
             },
 
-            invoiceUrl(invoice, view="") {
-                return `/business/client/invoices/${invoice}/${view}`;
-            }
-
+            loadSalespeople(){
+                axios.get('/business/dropdown/sales-people?businesses=' + this.form.business)
+                    .then( ({ data }) => {
+                        this.salespeople = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
+            },
         },
 
         watch: {
-            'form.business'(newVal, oldVal){
 
-                if(this.firstRun){
-                    this.firstRun = false;
-                    return;
-                }
-
-                if(newVal !== oldVal){
-                    this.getClients();
+            async 'form.business'(newValue, oldValue) {
+                if (newValue != oldValue) {
+                    await this.loadMarketingClients();
+                    this.loadSalespeople();
                 }
             }
         },
 
         mounted() {
-            this.getClients();
+            //this.loadMarketingClients();
+            //this.loadSalespeople();
         },
 
-        watch: {
-            'form.business'(newValue, oldValue) {
-                this.getClients();
-            }
-        },
     }
 </script>
 
-<style>
+<style scoped>
 
-     .payers-summary-table tfoot th{
-         padding-top: 40px !important;
-     }
 </style>

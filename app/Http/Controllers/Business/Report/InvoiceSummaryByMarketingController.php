@@ -4,25 +4,26 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Business;
 use App\Client;
-use App\Reports\InvoiceSummaryBySalespersonReport;
 use App\SalesPerson;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\InvoiceSummaryByMarketingReport;
 
-use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Log;
 
-use Illuminate\Http\Response;
-
-class InvoiceSummaryBySalespersonController extends BaseController
+class InvoiceSummaryByMarketingController extends BaseController
 {
-    public function index(Request $request, InvoiceSummaryBySalespersonReport $report){
+    public function index(Request $request, InvoiceSummaryByMarketingReport $report){
 
-        if ($request->filled('json') || $request->filled('print')) {
+        if ($request->filled('json')) {
 
             $timezone = auth()->user()->role->getTimezone();
 
             $this->authorize('read', Business::find($request->business));
+            /*
+            $this->authorize('read', Client::find($request->client));
+            $this->authorize('read', SalesPerson::find($request->salesperson));
+            */
 
             $data = $report->setTimezone($timezone)
                     ->applyFilters(
@@ -43,15 +44,10 @@ class InvoiceSummaryBySalespersonController extends BaseController
             ];
 
             $data = $this->createSummary($data);
-
-            if ($request->filled('print')) {
-                return $this->printReport($data, $totals);
-            }
-
             return response()->json(['data'=>$data, 'totals'=>$totals]);
         }
 
-        return view_component('invoice-summary-by-salesperson-report', 'Invoice Summary By Salesperson Report', [], [
+        return view_component('invoice-summary-by-marketing-report', 'Invoice Summary By Marketing Report', [], [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
@@ -77,28 +73,5 @@ class InvoiceSummaryBySalespersonController extends BaseController
         }
 
         return array_values($set);
-    }
-
-    /**
-     * Get the PDF printed output of the report.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function printReport($data, $totals) : \Illuminate\Http\Response
-    {
-
-        $html = response(view('business.reports.print.invoice_summary_by_salesperson',['data'=>$data, 'totals'=>$totals]))->getContent();
-
-        $snappy = \App::make('snappy.pdf');
-
-        return new Response(
-            $snappy->getOutputFromHtml($html),
-            200,
-            array(
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="invoices.pdf"'
-            )
-        );
-
     }
 }
