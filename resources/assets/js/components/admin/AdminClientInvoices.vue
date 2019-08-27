@@ -2,39 +2,60 @@
     <b-card>
         <b-row>
             <b-col lg="12">
-                <b-card header="Select Date Range"
+                <b-card header="Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
                     <b-form inline @submit.prevent="loadItems()">
-                        <date-picker
-                                v-model="start_date"
-                                placeholder="Start Date"
-                        >
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                                v-model="end_date"
-                                placeholder="End Date"
-                        >
-                        </date-picker>
-                        <b-form-select
-                                id="paid"
-                                name="paid"
-                                v-model="paid"
-                        >
-                            <option value="">All Invoices</option>
-                            <option :value="0">Unpaid Invoices</option>
-                            <option :value="1">Paid Invoices</option>
-                        </b-form-select>
-                        <b-form-select
-                                id="chain_id"
-                                name="chain_id"
-                                v-model="chain_id"
-                        >
-                            <option value="">All Business Chains</option>
-                            <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
-                        </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+
+                        <b-form-group label="Business Chains" class="mb-2 mr-2">
+                            <b-form-select
+                                    id="chain_id"
+                                    name="chain_id"
+                                    v-model="chain_id"
+                            >
+                                <option value="">All Business Chains</option>
+                                <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
+                            </b-form-select>
+                        </b-form-group>
+
+                        <b-form-group label="Start Date" class="mb-2 mr-2">
+                            <date-picker
+                                    v-model="start_date"
+                            >
+                            </date-picker>
+                        </b-form-group>
+
+                        <b-form-group label="End Date" class="mb-2 mr-2">
+                            <date-picker
+                                    v-model="end_date"
+                            >
+                            </date-picker>
+                        </b-form-group>
+
+                        <b-form-group label="Status" class="mb-2 mr-2">
+                            <b-form-select
+                                    id="paid"
+                                    name="paid"
+                                    v-model="paid"
+                            >
+                                <option value="">All Invoices</option>
+                                <option :value="0">Unpaid Invoices</option>
+                                <option :value="1">Paid Invoices</option>
+                            </b-form-select>
+                        </b-form-group>
+
+                        <b-form-group label="Clients" class="mb-2 mr-2" v-if="chain_id">
+                            <b-form-select
+                                    name="client_id"
+                                    v-model="client_id"
+                            >
+                                <option value="">All Clients</option>
+                                <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.nameLastFirst }}</option>
+                            </b-form-select>
+                        </b-form-group>
+
+                        <b-button type="submit" variant="info" :disabled="loaded === 0" class="mt-3 mr-2">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -94,6 +115,8 @@
                 loaded: -1,
                 start_date: '01/01/2018',
                 end_date: moment().format('MM/DD/YYYY'),
+                clients: '',
+                client_id: '',
                 chain_id: "",
                 paid: 0,
                 items: [],
@@ -156,7 +179,7 @@
             async loadItems() {
                 this.loaded = 0;
                 let url = '/admin/invoices/clients?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&chain_id=' + this.chain_id + '&paid=' + this.paid;
+                    '&chain_id=' + this.chain_id + '&paid=' + this.paid + '&client_id=' + this.client_id;
                 const response = await axios.get(url);
                 this.items = response.data.data.map(item => {
                     item.chain_name = (item.client && item.client.business && item.client.business.chain) ? item.client.business.chain.name : "";
@@ -171,10 +194,30 @@
                 this.loaded = 1;
             },
 
+            getClients(){
+                axios.get('/business/dropdown/clients-for-chain?chain=' + this.chain_id)
+                    .then( ({ data }) => {
+                        this.clients = data;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                    })
+            },
+
             invoiceUrl(invoice, view="") {
                 return `/admin/invoices/clients/${invoice.id}/${view}`;
             },
-        }
+        },
+
+        watch: {
+            async 'chain_id'(newValue, oldValue) {
+                this.clients = [];
+                this.client = '';
+                if (newValue !== ''){
+                    this.getClients();
+                }
+            },
+        },
     }
 </script>
 

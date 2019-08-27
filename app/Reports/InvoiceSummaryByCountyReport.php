@@ -95,13 +95,22 @@ class InvoiceSummaryByCountyReport extends BaseReport
                 if ($item->invoiceable_type == 'shifts' && filled($item->shift)){
                     if (empty($item->shift->service) && filled($item->shift->services)) {
                         foreach ($item->shift->services as $service) {
-                            //$hours += $service->duration();
+                            try{
+                                $hours += $service->duration();
+                            }catch (\Exception $e){
+                                //swallow
+                            }
                         }
                     } else {
                         $hours += $item->shift->duration();
                     }
                 } else if ($item->invoiceable_type == 'shift_services' && filled($item->shiftService)) {
-                    //$hours += $item->shiftService->duration();
+
+                    try{
+                        $hours += $item->shiftService->duration();
+                    }catch (\Exception $e){
+                        //swallow
+                    }
                 }
             }
 
