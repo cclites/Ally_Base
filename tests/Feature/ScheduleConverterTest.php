@@ -144,4 +144,21 @@ class ScheduleConverterTest extends TestCase
         $convertedShifts = $this->scheduleConverter->convertAllThisWeek();
         $this->assertEquals(1, count($convertedShifts));
     }
+
+    /** @test */
+    public function a_schedule_entry_with_status_hospital_hold_should_not_convert()
+    {
+        Carbon::setTestNow(Carbon::parse('2019-02-21 12:00:00'));
+
+        $schedule = factory(Schedule::class)->create([
+            'starts_at' => '2019-02-20 12:00:00',
+            'business_id' => $this->business->id,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'status' => Schedule::HOSPITAL_HOLD,
+        ]);
+
+        $convertedShifts = $this->scheduleConverter->convertAllThisWeek();
+        $this->assertCount(0, $convertedShifts);
+    }
 }

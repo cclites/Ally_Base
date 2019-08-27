@@ -154,6 +154,10 @@ class ScheduleEvents implements Responsable
             return '#C30000';
         }
 
+        if ($status === Schedule::HOSPITAL_HOLD) {
+            return '#9881e9';
+        }
+
         if ($status === Schedule::CAREGIVER_CANCELED) {
             return '#ff8c00';
         }
