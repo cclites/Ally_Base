@@ -10,8 +10,9 @@ use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\InvoiceSummaryByMarketingReport;
 
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+
 use Illuminate\Http\Response;
-use Log;
 
 class InvoiceSummaryBySalespersonController extends BaseController
 {
@@ -85,16 +86,19 @@ class InvoiceSummaryBySalespersonController extends BaseController
      */
     public function printReport($data, $totals) : \Illuminate\Http\Response
     {
-        $html = \View::make('business.reports.print.invoice_summary_by_salesperson',['data'=>$data, 'totals'=>$totals])->render();
+
+        $html = response(view('business.reports.print.invoice_summary_by_salesperson',['data'=>$data, 'totals'=>$totals]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
+
         return new Response(
             $snappy->getOutputFromHtml($html),
             200,
             array(
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="invoices_summary_by_salesperson.pdf"'
+                'Content-Disposition' => 'attachment; filename="invoices.pdf"'
             )
         );
+
     }
 }

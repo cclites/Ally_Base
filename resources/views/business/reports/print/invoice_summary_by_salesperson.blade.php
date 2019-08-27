@@ -64,6 +64,11 @@
         .logo img {
             max-height: 80px;
         }
+
+        table.b-table tfoot tr th{
+            padding-top: 40px;
+        }
+
     </style>
 @endpush
 
