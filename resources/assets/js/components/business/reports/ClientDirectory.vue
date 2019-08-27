@@ -344,7 +344,10 @@
 
             getDropdownLabel( options, key ) {
 
-                let option = options.find( option => option.value == key );
+                // console.log( 'find label: ', options );
+                // console.log( 'find label key: ', key );
+                let option = options.find( option => option.label == key );
+                // console.log( 'found option: ', option );
                 return option ? option.label : '-';
             }
         },
