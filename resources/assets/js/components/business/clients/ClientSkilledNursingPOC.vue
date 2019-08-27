@@ -16,7 +16,7 @@
             </b-col-->
             <b-col>
                 <b-form-group class="float-lg-right action-buttons">
-                    <b-btn @click="print()" variant="primary" class="text-right"><i class="fa fa-print"></i> Print</b-btn>
+                    <b-btn @click="generatePdf()" variant="primary" class="text-right"><i class="fa fa-print"></i> Print</b-btn>
                     <b-btn variant="success" @click.prevent="save()" :disabled="busy" class="text-right mr-2">Save Changes</b-btn>
                 </b-form-group>
             </b-col>
@@ -468,8 +468,8 @@
                 this.form = new Form(data);
             },
 
-            print(){
-                $('.nursing-poc').print();
+            generatePdf(){
+                window.location = this.url + '/print';
             },
 
             convertSnakeCaseArrayToString(itemsArray){
@@ -486,16 +486,13 @@
 
         mounted() {
             if (this.client.skilled_nursing_poc) {
-                //this.fillForm(JSON.parse(JSON.stringify(this.client.skilled_nursing_poc)));
-                //return;
+
                 let details = JSON.parse(JSON.stringify(this.client.skilled_nursing_poc));
 
                 this.form.certification_start = details.certification_start;
                 this.form.certification_end = details.certification_end;
                 this.form.medical_record_number = details.medical_record_number;
-
                 this.form.provider_number = details.provider_number;
-
                 this.form.principal_diagnosis_icd_cm = details.principal_diagnosis_icd_cm;
                 this.form.principal_diagnosis = details.principal_diagnosis;
                 this.form.principal_diagnosis_date = details.principal_diagnosis_date;
@@ -505,7 +502,6 @@
                 this.form.other_diagnosis_icd_cm = details.other_diagnosis_icd_cm;
                 this.form.other_diagnosis = details.other_diagnosis;
                 this.form.other_diagnosis_date = details.other_diagnosis_date;
-
                 this.form.orders = details.order;
                 this.form.physician_name = details.physician_name;
                 this.form.physician_address = details.physician_address;
@@ -513,12 +509,6 @@
 
                 return;
             }
-
-
-            //this.fillForm({
-
-            //);
-
 
         },
     }
