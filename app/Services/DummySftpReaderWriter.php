@@ -2,7 +2,7 @@
 namespace App\Services;
 
 use phpseclib\Net\SFTP;
-use App\Contracts\SFTPWriterInterface;
+use App\Contracts\SFTPReaderWriterInterface;
 
 /**
  * Class DummySFTPWriter
@@ -11,7 +11,7 @@ use App\Contracts\SFTPWriterInterface;
  *
  * @package App\Services
  */
-class DummySFTPWriter extends SFTP implements SFTPWriterInterface
+class DummySFTPReaderWriter extends SFTP implements SFTPReaderWriterInterface
 {
     function __construct(string $host, int $port = 22, int $timeout = 10)
     {}
@@ -36,6 +36,27 @@ class DummySFTPWriter extends SFTP implements SFTPWriterInterface
                 return \File::copy($data, $path);
             default:
                 return \File::put($path, $data);
+        }
+    }
+
+    function get(
+        $remote_file,
+        $local_file = false,
+        $offset = 0,
+        $length = -1
+    ) {
+        $path = storage_path('sftp' . DIRECTORY_SEPARATOR . $remote_file);
+
+        if (! file_exists($path)) {
+            return null;
+        }
+
+        $data = file_get_contents($path);
+
+        if (! $local_file) {
+            return $data;
+        } else {
+            return \File::put($local_file, $data);
         }
     }
 

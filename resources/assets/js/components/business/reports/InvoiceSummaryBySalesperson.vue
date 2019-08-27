@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="This report shows total client charges for both active and inactive cleints grouped by salesperson"
+                        header="This report shows total client charges for both active and inactive clients grouped by salesperson"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -157,16 +157,7 @@
             },
 
             print(){
-                //$(".summary-table").print();
-
-                this.form.get('/business/reports/invoice-summary-by-salesperson?print=true')
-                    .then( ({ data }) => {
-                    })
-                    .catch(e => {})
-                    .finally(() => {
-                    })
-
-
+                window.location = this.form.toQueryString(`/business/reports/invoice-summary-by-salesperson?print=true`);
             },
 
             loadMarketingClients(){
@@ -201,13 +192,13 @@
         },
 
         mounted() {
-            //this.loadMarketingClients();
-            //this.loadSalespeople();
         },
 
     }
 </script>
 
-<style scoped>
-
+<style>
+  table.b-table tfoot tr th{
+      padding-top: 40px;
+  }
 </style>

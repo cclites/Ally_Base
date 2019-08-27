@@ -99,7 +99,7 @@ class PaymentSummaryByPayerReportController extends BaseController
      */
     public function printReport($data, $totals) : \Illuminate\Http\Response
     {
-        $html = \View::make('business.reports.print.payment_summary_by_private_payer',['data'=>$data, 'totals'=>$totals])->render();
+        $html = response(view('business.reports.print.payment_summary_by_private_payer',['data'=>$data, 'totals'=>$totals]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(

@@ -7,6 +7,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
+use App\HhaFile;
 use App\Services\HhaExchangeService;
 use App\Shift;
 use Illuminate\Support\Collection;
@@ -72,9 +73,17 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             throw new ClaimTransmissionException('Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
         }
 
+        $filename = $hha->getFilename();
         $hha->addItems($this->getData($claim));
-        if ($hha->uploadCsv()) {
+        if ($hha->uploadCsv($filename)) {
             // Success
+
+            // create new HhaFile for the Claim
+            $claim->hhaFiles()->create([
+                'filename' => substr($filename, 0,  strlen($filename) - 4),
+                'status' => HhaFile::STATUS_PENDING,
+            ]);
+
             return true;
         }
 
