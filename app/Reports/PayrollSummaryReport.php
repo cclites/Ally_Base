@@ -5,12 +5,14 @@ namespace App\Reports;
 
 
 use App\Billing\CaregiverInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Deposit;
 
 use App\Billing\Queries\CaregiverInvoiceQuery;
 use App\Business;
 use Carbon\Carbon;
 use App\Client;
+
 
 class PayrollSummaryReport extends BusinessResourceReport
 {
@@ -38,16 +40,10 @@ class PayrollSummaryReport extends BusinessResourceReport
         $this->query = $query
                         ->with([
                             'caregiver',
-                            'caregiver.clients'
+                            'caregiver.clients',
+                            'items',
+                            'deposits'
                         ]);
-        /*
-        $this->query = Deposit::query()
-                        ->where('deposit_type','caregiver')
-                        ->with([
-                                'shifts.client',
-                                'caregiver',
-                                'caregiverInvoices',
-                        ]);*/
     }
 
 
@@ -80,8 +76,6 @@ class PayrollSummaryReport extends BusinessResourceReport
         $endDate = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
         $this->query->whereBetween('created_at', [$startDate, $endDate]);
 
-        //$this->query->forBusinesses([$business]);
-
         $this->query->whereHas('caregiver', function($q) use($business){
             $q->forBusinesses([$business]);
         });
@@ -102,15 +96,16 @@ class PayrollSummaryReport extends BusinessResourceReport
 
     protected function results() : ?iterable
     {
-
           return $this->query->get()->map(function(CaregiverInvoice $invoice){
-                    return [
-                            'amount'=>$invoice->amount,
-                            'caregiver'=>$invoice->caregiver->nameLastFirst(),
-                            'type'=>$this->clientType ? ucwords(str_replace("_", " ", $this->clientType)) : 'All Types',
-                            'date'=> (new Carbon($invoice->created_at))->format('m/d/Y'),
-                        ];
-                })->values();
+                return [
+                        'amount'=>$invoice->amount,
+                        'caregiver'=>$invoice->caregiver->nameLastFirst(),
+                        'type'=>$this->clientType ? ucwords(str_replace("_", " ", $this->clientType)) : 'All Types',
+                        'date'=> (new Carbon($invoice->created_at))->format('m/d/Y'),
+                        'invoice_items' => $invoice->items,
+                        'deposits' => $invoice->deposits->first(),
+                    ];
+          });
 
     }
 }
