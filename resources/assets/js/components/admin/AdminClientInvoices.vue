@@ -51,7 +51,7 @@
                                     v-model="client_id"
                             >
                                 <option value="">All Clients</option>
-                                <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.name }}</option>
+                                <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
 
@@ -211,14 +211,11 @@
 
         watch: {
             async 'chain_id'(newValue, oldValue) {
-
-                if(newValue !== ''){
+                this.clients = [];
+                this.client = '';
+                if (newValue !== ''){
                     this.getClients();
-                }else{
-                    this.clients = [];
-                    this.client = '';
                 }
-
             },
         },
     }
