@@ -120,7 +120,8 @@
                     },
                     {
                         key: 'actions',
-                        class: 'hidden-print'
+                        class: 'hidden-print',
+                        sortable: false,
                     }
                 ],
             }

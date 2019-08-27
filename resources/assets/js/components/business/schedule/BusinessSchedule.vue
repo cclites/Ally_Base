@@ -43,6 +43,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="ADDED_TO_PAST"> <span class="badge badge-primary added_to_past" v-b-popover.hover="`Visit was added after the start date. This visit will not be copied into the Shift History and is not included in billing. ${statusHelp}`">Added to Past</span>
                         </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="HOSPITAL_HOLD"> <span class="badge badge-primary hospital_hold" v-b-popover.hover="`Will not be copied over to the Shift History. ${statusHelp}`">Hospital Hold</span>
+                        </label>
                     </b-col>
                 </b-row>
             </b-col>
@@ -227,6 +230,7 @@
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                     <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
                     <option value="OPEN_SHIFT">Open Shift</option>
+                    <option value="HOSPITAL_HOLD">Hospital Hold</option>
                 </b-form-select>
             </div>
         </div>
@@ -433,6 +437,8 @@
         methods: {
             getFilteredEvents() {
                 let events = this.events;
+
+                // console.log( events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
@@ -1120,6 +1126,7 @@
     .badge.no_show { background-color: #63cbc7; }
     .badge.overtime { background-color: #fc4b6c; }
     .badge.added_to_past { background-color: #124aa5; }
+    .badge.hospital_hold { background-color: #9881e9; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */
