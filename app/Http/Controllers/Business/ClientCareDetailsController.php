@@ -27,7 +27,6 @@ class ClientCareDetailsController extends BaseController
         }
 
         $data = CareDetails::convertFormData($request->validated());
-
         if ($client->careDetails()->update($data)) {
             return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->careDetails);
         }

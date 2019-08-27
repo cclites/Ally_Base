@@ -206,6 +206,4 @@ class ClientContact extends Model
                 $index = $index + 1;
             });
     }
-
-
 }

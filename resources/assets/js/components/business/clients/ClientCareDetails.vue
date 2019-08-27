@@ -1,5 +1,9 @@
 <template>
-    <b-card class="client-care-needs">
+    <b-card class="client-care-needs"
+            header="Detailed Client Care Needs"
+            header-text-variant="white"
+            header-bg-variant="info"
+    >
 
         <b-form-group class="pb-2">
             <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
@@ -95,8 +99,6 @@
             </b-form-radio-group>
         </b-form-group>
 
-
-
         <hr />
 
         <h2>Medication: </h2>
@@ -139,8 +141,6 @@
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
         </b-form-group>
-
-
 
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
@@ -237,8 +237,6 @@
         <b-form-group label="Special Instructions:" class="ml-4">
             <b-form-textarea id="supplies_instructions" v-model="form.supplies_instructions" :rows="3" />
         </b-form-group>
-
-
 
         <b-form-group label="Comments">
             <b-form-textarea id="comments" v-model="form.comments" :rows="3" />

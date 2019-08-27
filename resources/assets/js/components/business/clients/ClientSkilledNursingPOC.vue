@@ -474,12 +474,10 @@
 
             convertSnakeCaseArrayToString(itemsArray){
                 let str = '';
-
                 for(var item in itemsArray){
                     let descr = this.fromSnakeCase(itemsArray[item]);
                     str +=  descr.charAt(0).toUpperCase() + descr.slice(1) + ", " ;
                 }
-
                 return str.replace(/,\s*$/, "");
             }
         },
