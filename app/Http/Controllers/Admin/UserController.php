@@ -42,7 +42,7 @@ class UserController extends Controller
 
             $total = $query->count();
 
-            if ($sortBy == 'lastname') {
+            if ($sortBy == 'lastname' || $sortBy == 'null') {
                 $query->orderByRaw("users.lastname $sortOrder, users.firstname $sortOrder");
             } else {
                 $query->orderBy($sortBy, $sortOrder);
