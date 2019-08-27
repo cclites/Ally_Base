@@ -372,10 +372,10 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate),
-                        'Reg Rate': this.hourlyFormat(item, item.provider_fee),
-                        'Ally Fee': this.hourlyFormat(item, item.ally_fee),
-                        'Total Hourly': this.hourlyFormat(item, item.hourly_total),
+                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate, 'caregiver'),
+                        'Reg Rate': this.hourlyFormat(item, item.provider_fee, null),
+                        'Ally Fee': this.hourlyFormat(item, item.ally_fee, null),
+                        'Total Hourly': this.hourlyFormat(item, item.hourly_total, null),
                         'Mileage': item.mileage,
                         'CG Total': this.moneyFormat(item.caregiver_total),
                         'Reg Total': this.moneyFormat(item.provider_total),
@@ -689,7 +689,12 @@
                 this.reloadData();
             },
 
-            hourlyFormat(item, amount) {
+            hourlyFormat(item, amount, type) {
+
+                if(item.services.length > 1 && type == 'caregiver'){
+                    return 'M';
+                }
+
                 return (item.fixed_rates) ? '---' : this.moneyFormat(amount);
             },
 
