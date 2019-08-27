@@ -2,7 +2,7 @@
 
     <b-modal id="editClaimModal" title="Edit Claim" v-model=" showModal " size="lg">
 
-        <!-- <shift-details v-if="shift.id" :shift="shift"></shift-details> -->
+        <claim-details v-if=" claim.id " :claim=" claim "></claim-details>
 
         <div slot="modal-footer">
 
