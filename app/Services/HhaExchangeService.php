@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Contracts\SFTPWriterInterface;
+use App\Contracts\SFTPReaderWriterInterface;
 use Carbon\Carbon;
 
 class HhaExchangeService
@@ -50,7 +50,7 @@ class HhaExchangeService
             return;
         }
 
-        $this->sftp = app(SFTPWriterInterface::class, ['host' => config('services.hha-exchange.sftp_host'), 'port' => config('services.hha-exchange.sftp_port')]);
+        $this->sftp = app(SFTPReaderWriterInterface::class, ['host' => config('services.hha-exchange.sftp_host'), 'port' => config('services.hha-exchange.sftp_port')]);
         if (! $this->login()) {
             throw new \Exception('Your HHA username and password was not accepted.  Please contact HHA and let them know you are unable to login to their SFTP server.');
         }
@@ -95,13 +95,28 @@ class HhaExchangeService
     /**
      * Send the CSV file to the remote SFTP server.
      *
+     * @param string $filename
      * @return bool
      */
-    public function uploadCsv() : bool
+    public function uploadCsv(string $filename) : bool
     {
         return $this->sftp->put(
-            config('services.hha-exchange.sftp_directory') . "//Inbox//" . $this->getFilename(),
+            config('services.hha-exchange.sftp_directory') . "//Inbox//" . $filename,
             $this->getCsv()
+        );
+    }
+
+    /**
+     * Get the string results from a response CSV file.
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    public function downloadResponse(string $filename)
+    {
+        return $this->sftp->get(
+            config('services.hha-exchange.sftp_directory') . "//Outbox//Responsefiles//$filename",
+            false
         );
     }
 
@@ -110,7 +125,7 @@ class HhaExchangeService
      *
      * @return string
      */
-    protected function getFilename() : string
+    public function getFilename() : string
     {
         // EDI_AgencyTaxID_YYYYMMDDHHMMSS.CSV
         $date = Carbon::now()->setTimezone('America/New_York')->format('YmdHis');

@@ -648,6 +648,20 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Determine if the Shift was ever Invoiced.
+     *
+     * @return bool
+     */
+    public function wasInvoiced() : bool
+    {
+        if ($status = $this->statusHistory->where('new_status', Shift::WAITING_FOR_CHARGE)->first()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Look for an EXACT duplicate.  This is different than the 'duplicate' flag which looks for potential duplicates.
      *
      * @return bool

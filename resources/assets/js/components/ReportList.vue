@@ -519,6 +519,7 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
                     {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
@@ -603,6 +604,14 @@
                             name: 'Payment Summary By Private Pay Clients',
                             url: 'reports/payment-summary-by-payer',
                             description: 'See all payments made by private pay clients',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Client Charges By County',
                             category: 5,
                             allowed: ['office_user'],
                             hidden: true,

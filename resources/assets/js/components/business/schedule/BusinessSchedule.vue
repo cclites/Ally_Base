@@ -208,8 +208,11 @@
                 <span><strong>Dates:</strong> {{ formatDate(hoverShift.start_date) }} {{ formatTime(hoverShift.start_date) }} - {{ formatDate(hoverShift.end_date) }} {{ formatTime(hoverShift.end_date) }}</span>
             </div>
             <div>
+
                 <span><strong>Services:</strong></span>
-                <div v-for="service in hoverShift.service_summary">
+
+                <div v-for=" ( service, index ) in hoverShift.service_summary" :key=" index ">
+
                     {{ service.duration }} - {{ service.name }}
                 </div>
             </div>

@@ -1,6 +1,6 @@
 @extends('layouts.print')
 
-@section('title', "Payment Summary By Private Payer")
+@section('title', "Invoice Summary By County")
 
 @push('head')
     <style>
@@ -64,6 +64,10 @@
         .logo img {
             max-height: 80px;
         }
+
+        table tfoot tr th{
+            padding-top: 40px;
+        }
     </style>
 @endpush
 
@@ -73,35 +77,32 @@
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
-                <div class="h4">Payment Summary By Private Payer</div>
+                <div class="h4">Invoice Summary By Salesperson</div>
             </div>
         </div>
         <div>
             <table>
                 <thead>
                 <tr>
-                    <th>Client</th>
-                    <th>Invoice Date</th>
-                    <th>Invoice</th>
-                    <th>Total Invoiced Amount</th>
+                    <th>County</th>
+                    <th>Total Hours</th>
+                    <th>Total Client Charges</th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($data as $item)
                     <tr>
-                        <td>{{ $item['client_name'] }}</td>
-                        <td>{{ $item['date'] }}</td>
-                        <td>{{ $item['invoice'] }}</td>
+                        <td>{{ $item['county'] }}</td>
+                        <td>{{ $item['hours'] }}</td>
                         <td>${{ money_format('%i',$item['amount']) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td><strong>For Client: </strong>{{ $totals['client_name'] }}</td>
-                    <td><strong>For Locations: </strong>{{ $totals['location'] }}</td>
-                    <td>&nbsp;</td>
-                    <td><strong>Total Invoiced Amount: </strong> ${{ money_format('%i',$totals['total']) }}</td>
+                    <td><strong>For Dates: </strong>{{ $totals['start'] }} to {{ $totals['end'] }}</td>
+                    <td><strong>For Location: </strong> {{ $totals['location'] }}</td>
+                    <td><strong>Total Client Charges: </strong> ${{ money_format('%i', $totals['amount']) }}</td>
                 </tr>
                 </tfoot>
 
