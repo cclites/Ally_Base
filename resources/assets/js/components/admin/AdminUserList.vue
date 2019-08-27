@@ -149,12 +149,6 @@
             },
 
             itemProvider(ctx) {
-
-                //This will be triggered if the Actions header is clicked.
-                if( ctx.sortBy === null && typeof ctx.sortBy === "object"){
-                    return 0;
-                }
-
                 this.loading = true;
                 return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.search}`)
                     .then( ({ data }) => {
