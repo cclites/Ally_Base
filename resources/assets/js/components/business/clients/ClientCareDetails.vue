@@ -29,6 +29,14 @@
 
         <b-form-group label="Client Mobility" label-class="required">
             <checkbox-group v-model="form.mobility" :items="options.mobility"/>
+            <b-form-input
+                    id="mobility_other"
+                    name="mobility_other"
+                    type="text"
+                    v-model="form.mobility_other"
+                    placeholder="Other Activities Permitted"
+            >
+            </b-form-input>
         </b-form-group>
 
         <b-form-group label="Mental Status" label-class="required">
@@ -299,7 +307,8 @@
                         walker: 'Walker',
                         hospital_bed: 'Hospital bed',
                         crutches: 'Crutches',
-                        exercises_prescribed: 'Exercises Prescribed'
+                        exercises_prescribed: 'Exercises Prescribed',
+                        other: 'Other'
                     },
                     toileting: {
                         continent: 'Continent',
@@ -457,6 +466,7 @@
                     .then( ({ data }) => {
                         this.fillForm(data.data);
                         this.busy = false;
+                        location = location;
                     })
                     .catch(e => {
                         this.busy = false;
@@ -497,6 +507,7 @@
                 safety_instructions: '',
                 mobility: [],
                 mobility_instructions: '',
+                mobility_other: '',
                 toileting: [],
                 toileting_instructions: '',
                 bathing: [],

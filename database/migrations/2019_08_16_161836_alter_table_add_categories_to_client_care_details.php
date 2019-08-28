@@ -20,6 +20,7 @@ class AlterTableAddCategoriesToClientCareDetails extends Migration
             $table->string('functional_limitations_other', 255)->nullable();
             $table->text('activities_permitted')->nullable();
             $table->string('activities_permitted_other', 255)->nullable();
+            $table->string('mobility_other', 255)->nullable();
         });
     }
 
@@ -36,7 +37,8 @@ class AlterTableAddCategoriesToClientCareDetails extends Migration
                                 'functional_limitations',
                                 'functional_limitations_other',
                                 'activities_permitted',
-                                'activities_permitted_other'
+                                'activities_permitted_other',
+                                'mobility_other',
                 ]);
         });
     }

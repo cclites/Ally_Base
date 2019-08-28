@@ -73,6 +73,7 @@ class UpdateClientCareDetailsRequest extends FormRequest
             'prognosis' => ['required', Rule::in(CareDetails::PROGNOSIS)],
             'functional' => ['required', 'array', Rule::in(CareDetails::FUNCTIONAL)],
             'functional_other' => 'nullable|string',
+            'mobility_other' => 'nullable|string',
             'comments' => 'nullable|string',
             'instructions' => 'nullable|string',
             'mental_status' => ['present', 'array', Rule::in(CareDetails::MENTAL_STATUS)],

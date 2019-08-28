@@ -251,6 +251,7 @@
                 <b-form-group label="Functional Limitations" class="mb-2 mr-2">
                     <b-form-checkbox-group id="functional" v-model="client.care_details.functional" disabled>
                         <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
+                        <b-form-input v-model="client.care_details.functional_other" disabled></b-form-input>
                     </b-form-checkbox-group>
                 </b-form-group>
             </b-col>
@@ -262,6 +263,7 @@
                     <b-form-checkbox-group  v-model="client.care_details.mobility" disabled>
                         <b-form-checkbox v-for="(label, key) in options.mobility" :key="key" :value="key">{{ label }}</b-form-checkbox>
                     </b-form-checkbox-group>
+                    <b-form-input v-model="client.care_details.mobility_other" disabled></b-form-input>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -296,7 +298,7 @@
             </b-col>
         </b-row>
 
-        <b-row>
+        <!--b-row>
             <b-col>
                 <b-form-group label="Goals/Rehabilitation Potential/Discharge Plans" class="mb-2 mr-2">
                     <p v-for="g in client.care_details.goals">
@@ -304,7 +306,7 @@
                     </p>
                 </b-form-group>
             </b-col>
-        </b-row>
+        </b-row-->
 
         <b-row>
             <div class="h5 pl-3 pt-2">Physician's Information</div>
@@ -396,7 +398,8 @@
                         endurance: "Endurance",
                         ambulation: "Ambulation",
                         speech: "Speech",
-                        dyspnea: 'Dyspnea with Minimal Exertion'
+                        dyspnea: 'Dyspnea with Minimal Exertion',
+                        other: 'Other'
                     },
                     mobility: {
                         complete_bedrest: "Complete Bedrest",
@@ -410,6 +413,7 @@
                         cane: "Cane",
                         wheelchair: "Wheelchair",
                         walker: "Walker",
+                        other: "Other",
                     },
                     prognosis: {
                         poor: "Poor",

@@ -106,7 +106,7 @@
             <div style="position:absolute;left:296.44px;top:128.86px" class="cls_004"><span class="cls_004">10. Medications:</span></div>
             <div style="position:absolute;left:359.14px;top:128.86px;width:50%;" class="cls_004"><span class="cls_004">Dose/Frequency/Route (N)ew (C)hanged</span>
                 @foreach($client->medications as $medication)
-                    <span class="cls_005 gender-label">
+                    <span class="cls_005"  style="width:100%;">
                         {{ $medication->dose }} - {{ $medication->frequency }} - {{ $medication->route }} - {{ $medication->new_changed }}
                     </span>
                 @endforeach
@@ -114,7 +114,7 @@
 
             <div style="position:absolute;left:11.50px;top:140.92px" class="cls_004">
                 <span class="cls_004">11. ICD-9-CM</span>
-                <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis_number'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis_icd_cm'] }}</span>
             </div>
             <div style="position:absolute;left:68.56px;top:140.92px" class="cls_004">
                 <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis'] }}</span>
@@ -127,7 +127,7 @@
 
             <div style="position:absolute;left:11.50px;top:164.86px" class="cls_004">
                 <span class="cls_004">12. ICD-9-CM</span>
-                <span class="cls_004">{{ $client->skilledNursingPoc['surgical_procedure_number'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['surgical_procedure_icd_cm'] }}</span>
             </div>
             <div style="position:absolute;left:68.56px;top:164.86px" class="cls_004">
                 <span class="cls_004">Surgical Procedure</span>
@@ -140,7 +140,7 @@
 
             <div style="position:absolute;left:11.50px;top:189.34px" class="cls_004">
                 <span class="cls_004">13. ICD-9-CM</span>
-                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_number'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_icd_cm'] }}</span>
             </div>
             <div style="position:absolute;left:68.56px;top:189.34px" class="cls_004">
                 <span class="cls_004">Other Pertinent Diagnoses</span>
@@ -153,21 +153,19 @@
 
             <div style="position:absolute;left:11.50px;top:249.82px" class="cls_004">
                 <span class="cls_004">14. DME and Supplies</span>
-                <span class="cls_004">{{ $client->careDetails->supplies_as_string }}</span>
+                <span class="cls_004"  style="width:100%;">{{ $client->careDetails->supplies_as_string }}</span>
             </div>
 
             <div style="position:absolute;left:299.50px;top:249.82px" class="cls_004">
                 <span class="cls_004">15. Safety Measures:</span>
-                <span class="cls_004">{{ $client->careDetails->safety_measures_as_string }}</span>
+                <span class="cls_004" style="width:300px;position:absolute;left:0px;">{{ $client->careDetails->safety_measures_as_string }}</span>
             </div>
 
             <div style="position:absolute;left:11.50px;top:272.32px" class="cls_004">
-                <span class="cls_004">16. Nutritional Req.</span>
-                <span class="cls_004">{{ $client->careDetails->diet_as_string }}</span>
+                <span class="cls_004" style="width:300px;">16. Nutritional Req {{ $client->careDetails->diet_as_string }}.</span>
             </div>
             <div style="position:absolute;left:298.96px;top:272.86px" class="cls_004">
-                <span class="cls_004">17. Allergies:</span>
-                <span class="cls_004">{{ $client->careDetails->allergies }}</span>
+                <span class="cls_004" style="width:300px;">17. Allergies:{{ $client->careDetails->allergies }}</span>
             </div>
 
             <div style="position:absolute;left:11.50px;top:285.82px;width:45%;" class="cls_004"><span class="cls_004">18.A. Functional Limitations</span></div>
@@ -325,7 +323,11 @@
 
             <div style="position:absolute;left:20.32px;top:320.92px" class="cls_004"><span class="cls_004">3</span></div>
             <div style="position:absolute;left:135.70px;top:320.38px" class="cls_004"><span class="cls_004">7</span></div>
-            <div style="position:absolute;left:207.34px;top:321.10px" class="cls_004"><span class="cls_004">B</span></div>
+
+            <div style="position:absolute;left:207.34px;top:321.10px" class="cls_004">
+                <span class="cls_004">B</span>
+                <span class="cls_004 functional_other">{{ $client->careDetails['functional_other'] }}</span>
+            </div>
             <div style="position:absolute;left:301.48px;top:320.92px" class="cls_004"><span class="cls_004">3</span></div>
             <div style="position:absolute;left:401.74px;top:320.38px" class="cls_004"><span class="cls_004">8</span></div>
             <div style="position:absolute;left:502.18px;top:320.38px" class="cls_004"><span class="cls_004">C</span></div>
@@ -369,7 +371,12 @@
             <div style="position:absolute;left:135.70px;top:333.34px" class="cls_004"><span class="cls_004">8</span></div>
             <div style="position:absolute;left:301.48px;top:332.98px" class="cls_004"><span class="cls_004">4</span></div>
             <div style="position:absolute;left:401.74px;top:332.44px" class="cls_004"><span class="cls_004">9</span></div>
-            <div style="position:absolute;left:502.18px;top:332.62px" class="cls_004"><span class="cls_004">D</span></div>
+
+            <div style="position:absolute;left:502.18px;top:332.62px" class="cls_004">
+                <span class="cls_004">D</span>
+                <span class="cls_004 mobility_other">{{ $client->careDetails['mobility_other'] }}</span>
+            </div>
+
             <div style="position:absolute;left:301.48px;top:344.86px" class="cls_004"><span class="cls_004">5</span></div>
 
             <div style="position:absolute;left:327.03px;top:345.24px" class="cls_005">
@@ -504,8 +511,15 @@
                 </span>
             </div>
 
-            <div style="position:absolute;left:11.50px;top:392.20px;width:100%;" class="cls_004"><span class="cls_004">21. Orders for Discipline and Treatments (Specify Amount/Frequency/Duration)</span></div>
-            <div style="position:absolute;left:11.50px;top:579.58px;width:100%" class="cls_004"><span class="cls_004">22. Goals/Rehabilitation Potential/Discharge Plans</span></div>
+            <div style="position:absolute;left:11.50px;top:392.20px;width:100%;" class="cls_004">
+                <span class="cls_004">21. Orders for Discipline and Treatments (Specify Amount/Frequency/Duration)</span>
+                {{ $client->skilledNursingPoc['orders'] }}
+            </div>
+
+            <div style="position:absolute;left:11.50px;top:579.58px;width:100%" class="cls_004">
+                <span class="cls_004">22. Goals/Rehabilitation Potential/Discharge Plans</span>
+                {{ $client->goals_as_string }}
+            </div>
             <div style="position:absolute;left:11.50px;top:638.62px" class="cls_004"><span class="cls_004">23.</span></div>
             <div style="position:absolute;left:27.07px;top:638.62px;width:50%;" class="cls_004"><span class="cls_004">Nurse's Signature and Date of Verbal SOC Where Applicable:</span></div>
             <div style="position:absolute;left:410.74px;top:638.62px" class="cls_004"><span class="cls_004">25.</span></div>

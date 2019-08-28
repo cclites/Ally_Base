@@ -66,6 +66,7 @@ class SkilledNursingPocController extends BaseController
         $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->supplies);
         $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->safety_measures);
         $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->diet);
+        $client->goals_as_string = $client->goals->implode('question', '<br/>');
 
         $image = asset('/images/background1.jpg');
 

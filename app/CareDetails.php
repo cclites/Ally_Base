@@ -203,6 +203,7 @@ class CareDetails extends AuditableModel
     const MOBILITY_HOSPITAL_BED = 'hospital_bed';
     const MOBILITY_CRUTCHES = 'crutches';
     const MOBILITY_EXERCISES_PRESCRIBED = 'exercises_prescribed';
+    const MOBILITY_OTHER = 'other';
     const MOBILITY = [
         self::MOBILITY_BEDREST,
         self::MOBILITY_BEDREST_BDR,
@@ -220,6 +221,7 @@ class CareDetails extends AuditableModel
         self::MOBILITY_HOSPITAL_BED,
         self::MOBILITY_CRUTCHES,
         self::MOBILITY_EXERCISES_PRESCRIBED,
+        self::MOBILITY_OTHER,
     ];
 
     const TOILETING_CONTINENT = 'continent';
