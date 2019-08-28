@@ -496,7 +496,7 @@ class CaregiverController extends BaseController
     public function generateDeactivationPdf(Caregiver $caregiver){
 
         $caregiver->load('deactivationReason');
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['caregiver' => $caregiver]);
+        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['caregiver' => $caregiver, 'deactivatedBy'=> \Auth::user()->nameLastFirst()]);
 
         $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {

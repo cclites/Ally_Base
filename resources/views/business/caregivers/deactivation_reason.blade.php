@@ -64,7 +64,7 @@
                 <br>
             <strong>Date: </strong> {{ $caregiver->getInActiveAtAttribute()->format('m-d-Y') }}
                 <br>
-            <strong>By:</strong>  {{ Auth::user()->nameLastFirst() }}
+            <strong>By:</strong>  {{ $deactivatedBy }}
                 <br>
         </div>
 
