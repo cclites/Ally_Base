@@ -112,9 +112,10 @@
             <div style="position:absolute;left:296.44px;top:128.86px" class="cls_004"><span class="cls_004">10. Medications:</span></div>
             <div style="position:absolute;left:359.14px;top:128.86px;width:50%;" class="cls_004"><span class="cls_004">Dose/Frequency/Route (N)ew (C)hanged</span>
                 @foreach($client->medications as $medication)
-                    <span class="cls_005"  style="width:350px;position:absolute;left:-50px;">
+                    <span class="cls_005"  style="width:350px;position:relative;left:-48px;">
                         {{ $medication->dose }} - {{ $medication->frequency }} - {{ $medication->route }} - {{ $medication->new_changed }}
                     </span>
+                    <br>
                 @endforeach
             </div>
 
@@ -530,7 +531,9 @@
 
             <div style="position:absolute;left:11.50px;top:579.58px;width:100%" class="cls_004">
                 <span class="cls_004">22. Goals/Rehabilitation Potential/Discharge Plans</span>
-                {{ $client->goals_as_string }}
+                @foreach($client->goals as $goal)
+                    {{$goal["question"]}}<br>
+                @endforeach
             </div>
             <div style="position:absolute;left:11.50px;top:638.62px" class="cls_004"><span class="cls_004">23.</span></div>
             <div style="position:absolute;left:27.07px;top:638.62px;width:50%;" class="cls_004"><span class="cls_004">Nurse's Signature and Date of Verbal SOC Where Applicable:</span></div>

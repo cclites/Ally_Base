@@ -183,8 +183,9 @@
 
                 this.form.submit(method, url)
                     .then( ({ data }) => {
-                        this.updateGoals(data.data);
-                        this.clientGoalModal = false;
+                        window.location.reload();
+                        //this.updateGoals(data.data);
+                        //this.clientGoalModal = false;
                     });
             },
 

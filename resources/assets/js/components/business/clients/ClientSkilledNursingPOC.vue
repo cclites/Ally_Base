@@ -25,19 +25,19 @@
         <b-row>
 
             <b-col lg="2">
-                <b-form-group label="Certification Start Date">
-                    <date-picker v-model="form.certification_start" name="certification_start" class=""></date-picker>
+                <b-form-group label="Certification Start Date" label-class="required">
+                    <date-picker v-model="form.certification_start" name="certification_start"></date-picker>
                 </b-form-group>
             </b-col>
 
             <b-col lg="2">
-                <b-form-group label="Certification End Date" class="mb-2 mr-2">
-                    <date-picker v-model="form.certification_end" name="certification_end" class=""></date-picker>
+                <b-form-group label="Certification End Date" class="mb-2 mr-2" label-class="required">
+                    <date-picker v-model="form.certification_end" name="certification_end"></date-picker>
                 </b-form-group>
             </b-col>
 
             <b-col lg="2">
-                <b-form-group label="Medical Record No."class="mb-2 mr-2">
+                <b-form-group label="Medical Record No."class="mb-2 mr-2" label-class="required">
                     <b-form-input
                             id="medical_record_number"
                             name="medical_record_number"
@@ -379,30 +379,32 @@
 
         <b-row>
             <b-col lg="3">
-                <b-form-group label="Physician's Name" class="mb-2 mr-2">
+                <b-form-group label="Physician's Name" class="mb-2 mr-2" label-class="required">
                     <b-form-input
                             id="physician_name"
                             name="physician_name"
                             type="text"
                             v-model="form.physician_name"
+                            class="required"
                     >
                     </b-form-input>
                 </b-form-group>
             </b-col>
             <b-col lg="6">
-                <b-form-group label="Physician's Address" class="mb-2 mr-2">
+                <b-form-group label="Physician's Address" class="mb-2 mr-2" label-class="required">
                     <b-form-input
                             id="physician_address"
                             name="physician_address"
                             type="text"
                             v-model="form.physician_address"
+                            class="required"
                     >
                     </b-form-input>
                 </b-form-group>
             </b-col>
 
             <b-col lg="2">
-                <b-form-group label="Physician's Phone" class="mb-2 mr-2">
+                <b-form-group label="Physician's Phone" class="mb-2 mr-2" label-class="required">
                     <b-form-input
                             id="physician_phone"
                             name="physician_phone"
@@ -574,7 +576,7 @@
                 this.form.other_diagnosis_icd_cm = details.other_diagnosis_icd_cm;
                 this.form.other_diagnosis = details.other_diagnosis;
                 this.form.other_diagnosis_date = details.other_diagnosis_date;
-                this.form.orders = details.order;
+                this.form.orders = details.orders;
                 this.form.physician_name = details.physician_name;
                 this.form.physician_address = details.physician_address;
                 this.form.physician_phone = details.physician_phone;
