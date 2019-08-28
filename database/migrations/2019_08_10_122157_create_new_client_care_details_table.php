@@ -13,7 +13,7 @@ class CreateNewClientCareDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('client_care_details_old', function (Blueprint $table) {
+        Schema::create('client_care_details', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('client_id')->unique();
 
@@ -69,17 +69,13 @@ class CreateNewClientCareDetailsTable extends Migration
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
         });
 
-        $rows = DB::table('client_care_details')->get()
+        $rows = DB::table('client_care_details_old')->get()
             ->map(function ($item) {
                 return (array)$item;
             })
             ->toArray();
 
-        DB::table('client_care_details_old')->insert($rows);
-
-        Schema::rename('client_care_details', 'client_care_details_temp');
-        Schema::rename('client_care_details_old', 'client_care_details');
-        Schema::drop('client_care_details_temp');
+        DB::table('client_care_details')->insert($rows);
     }
 
     /**
