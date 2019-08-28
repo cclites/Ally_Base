@@ -193,6 +193,7 @@ class ClientDirectoryReport extends BusinessResourceReport
         });
 
         $rows = $this->filterColumns( $rows );
+
         return $rows;
     }
 }

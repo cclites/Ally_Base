@@ -161,14 +161,14 @@
                         allowed: ['admin'],
                     },
                     {
-                        name: 'Bad Ssn Report (Clients)',
-                        url: 'reports/bad-ssn-report?type=client',
+                        name: 'Bad SSN Report (Clients)',
+                        url: 'reports/bad-ssn-report?type=clients',
                         description: '',
                         category: 7,
                         allowed: ['admin'],
                     },
                     {
-                        name: 'Bad Ssn Report (Caregivers)',
+                        name: 'Bad SSN Report (Caregivers)',
                         url: 'reports/bad-ssn-report?type=caregivers',
                         description: '',
                         category: 7,

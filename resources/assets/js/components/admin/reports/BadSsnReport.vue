@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <b-card>
         <b-row>
             <b-col lg="12">
 
@@ -13,6 +13,9 @@
                             :per-page="perPage"
                             :show-empty="true"
                     >
+                        <template slot="name" scope="row">
+                            <a :href="`/business/${row.item.type}s/${row.item.id}`" target="_blank">{{ row.item.name }}</a>
+                        </template>
                     </b-table>
                 </div>
 
@@ -27,7 +30,7 @@
 
             </b-col>
         </b-row>
-    </div>
+    </b-card>
 </template>
 
 <script>
@@ -56,13 +59,13 @@
                     },
                     {
                         key: 'business',
-                        label: 'Business Location',
+                        label: 'Office Location',
                         sortable: true
                     },
-                    {
-                        key: 'type',
-                        label: 'Type',
-                    },
+                    // {
+                    //     key: 'type',
+                    //     label: 'Type',
+                    // },
                 ],
             };
         },
