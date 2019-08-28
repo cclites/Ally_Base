@@ -18,7 +18,6 @@ class SkilledNursingPocController extends BaseController
 
     public function index(Request $request){}
 
-
     /**
      * Update the client care details.
      *
@@ -45,13 +44,14 @@ class SkilledNursingPocController extends BaseController
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
     }
 
-    public function generatePdf(Client $client){
+    public function generatePdf($client){
 
-        $client = Client::where('id', 157)->with([
+        $client = Client::where('id', $client)->with([
             'user',
             'medications',
             'careDetails',
             'carePlans',
+            'business',
             'business',
             'skilledNursingPoc',
             'addresses',
@@ -62,6 +62,7 @@ class SkilledNursingPocController extends BaseController
             },
             'contacts',
         ])->first();
+
 
         $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->supplies);
         $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->safety_measures);

@@ -242,4 +242,25 @@ class BusinessChain extends AuditableModel
             ->get()
             ->pluck('user');
     }
+
+    /**
+     * @return string|null
+     */
+    public function getStreetAddressAttribute()
+    {
+        $fullAddress = $this->address1;
+
+        if (!empty($this->address2)) {
+            $fullAddress .= ' ' . $this->address2;
+        }
+
+        return $fullAddress;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCityStateZipAttribute(){
+        return $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+    }
 }

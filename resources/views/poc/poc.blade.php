@@ -32,8 +32,8 @@
             <div style="position:absolute;left:146.14px;top:30.51px" class="cls_003"><span class="cls_003">HOME HEALTH CERTIFICATION AND PLAN OF CARE</span></div>
 
             <div style="position:absolute;left:11.50px;top:43.90px" class="cls_004">
-                <span class="cls_004">1. Patient HI Claim No.{{ $client->hic }}</span>
-                <span class="cls_004">{{ $client->hic }}</span>
+                <span class="cls_004">1. Patient HI Claim No.</span>
+                <span class="cls_004" style="width:200px;">{{ $client->hic }}</span>
             </div>
 
             <div style="position:absolute;left:139.47px;top:43.90px" class="cls_004">
@@ -66,17 +66,23 @@
             <div style="position:absolute;left:11.50px;top:68.92px;width:50%;" class="cls_004">
                 <span class="cls_004">6. Patient's Name and Address</span>
                 {{ $client->nameLastFirst() }}<br>
-                {{ $client->addresses->first()->address1 }}<br>
-                {{ $client->addresses->first()->address2 }}<br>
-                {{ $client->addresses->first()->city }}, {{ $client->addresses->first()->state }}, {{ $client->addresses->first()->zip }}
+                @if($client->getBillingAddress())
+                {{ $client->getBillingAddress()->getStreetAddressAttribute() }}<br>
+                {{ $client->getBillingAddress()->getCityStateZipAttribute() }}
+                @endif
             </div>
 
             <div style="position:absolute;left:295.52px;top:68.92px;width:50%;" class="cls_004">
                 <span class="cls_004">7. Provider's Name, Address and Telephone Number</span>
-                {{ $client->business->name }}<br>
-                {{ $client->business->address1 }}<br>
-                {{ $client->business->address2 }}<br>
-                {{ $client->business->city }}, {{ $client->business->state }}, {{ $client->business->zip }}
+                    {{ $client->business->getBillingName() }}<br>
+                @if($client->business->getStreetAddressAttribute())
+                    {{ $client->business->getStreetAddressAttribute() }}<br>
+                    {{ $client->business->getCityStateZipAttribute() }}
+                @elseif($client->business->businessChain->getStreetAddressAttribute())
+                    {{ $client->business->businessChain->getStreetAddressAttribute() }}<br>
+                    {{ $client->business->businessChain->getCityStateZipAttribute() }}
+                @endif
+
             </div>
 
             <div style="position:absolute;left:13.79px;top:129.76px" class="cls_004">
@@ -106,7 +112,7 @@
             <div style="position:absolute;left:296.44px;top:128.86px" class="cls_004"><span class="cls_004">10. Medications:</span></div>
             <div style="position:absolute;left:359.14px;top:128.86px;width:50%;" class="cls_004"><span class="cls_004">Dose/Frequency/Route (N)ew (C)hanged</span>
                 @foreach($client->medications as $medication)
-                    <span class="cls_005"  style="width:100%;">
+                    <span class="cls_005"  style="width:350px;position:absolute;left:-50px;">
                         {{ $medication->dose }} - {{ $medication->frequency }} - {{ $medication->route }} - {{ $medication->new_changed }}
                     </span>
                 @endforeach
@@ -117,8 +123,8 @@
                 <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis_icd_cm'] }}</span>
             </div>
             <div style="position:absolute;left:68.56px;top:140.92px" class="cls_004">
-                <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis'] }}</span>
                 <span class="cls_004">Principal Diagnosis</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['principal_diagnosis'] }}</span>
             </div>
             <div style="position:absolute;left:237.04px;top:140.92px" class="cls_004">
                 <span class="cls_004">Date</span>
