@@ -1170,6 +1170,21 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $auths->unique('id');
     }
 
+    /**
+     * Add an activity to the Shift, preventing duplicates.
+     *
+     * @param Activity $activity
+     */
+    public function addActivity(Activity $activity) : void
+    {
+        if ($this->activities()->where('activity_id', $activity->id)->exists()) {
+            // already exists -> skip.
+            return;
+        }
+
+        $this->activities()->attach($activity->id);
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////
