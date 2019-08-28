@@ -288,7 +288,7 @@ class CaregiverController extends BaseController
 
         if ($caregiver->update($data)) {
             $caregiver->unassignFromFutureSchedules();
-            $this->generateDeactivationPdf($caregiver, $data['deactivation_note']);
+            $this->generateDeactivationPdf($caregiver);
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
         return new ErrorResponse(500, 'Error archiving this caregiver.');
@@ -493,16 +493,17 @@ class CaregiverController extends BaseController
         return new SuccessResponse('A training email was dispatched to the Caregiver.', null, '.');
     }
 
-    public function generateDeactivationPdf(Caregiver $caregiver, $reason){
+    public function generateDeactivationPdf(Caregiver $caregiver){
 
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['reason' => $reason]);
+        $caregiver->load('deactivationReason');
+        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['caregiver' => $caregiver]);
 
         $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
 
-        $filename = str_slug($caregiver->id . ' ' . $caregiver->nameLastFirst() .' Deactivation').'.pdf';
+        $filename = str_slug($caregiver->id . '-' . $caregiver->nameLastFirst() . '-' . $caregiver->getInActiveAtAttribute()->format('m-d-Y') . '-deactivation').'.pdf';
         $filePath = $dir . '/' . $filename;
 
         if (config('app.env') == 'local') {
@@ -523,7 +524,6 @@ class CaregiverController extends BaseController
                     'user_id' => $caregiver->id
                 ]);
             });
-
         }
     }
 }

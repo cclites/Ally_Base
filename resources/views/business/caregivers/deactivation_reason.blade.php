@@ -58,9 +58,11 @@
         </div>
 
         <div class="row">
-            <strong>Deactivation Reason:</strong> {{ $reason }}
+            <strong>Deactivation Reason:</strong> {{ $caregiver->deactivationReason["name"] }}
                 <br>
-            <strong>Date: </strong> {{ \Carbon\Carbon::today() }}
+            <strong>Deactivation Note:</strong> {{ $caregiver->deactivation_note }}
+                <br>
+            <strong>Date: </strong> {{ $caregiver->getInActiveAtAttribute()->format('m-d-Y') }}
                 <br>
             <strong>By:</strong>  {{ Auth::user()->nameLastFirst() }}
                 <br>
