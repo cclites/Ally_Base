@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Billing\Payer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
@@ -25,6 +26,12 @@ class UpdateClientRatesRequest extends FormRequest
      */
     public function rules()
     {
+        $payersForChain = Payer::where('chain_id', $this->route('client')->business->chain_id)
+            ->pluck('id')
+            ->values()
+            ->push(Payer::PRIVATE_PAY_ID)
+            ->implode(',');
+
         return [
             'rates' => 'nullable|array',
             'rates.*.service_id' => [
@@ -34,13 +41,7 @@ class UpdateClientRatesRequest extends FormRequest
                     $query->where('chain_id', $this->route('client')->business->chain_id);
                 })
             ],
-            'rates.*.payer_id' => [
-                'nullable',
-                'numeric',
-                Rule::exists('payers', 'id')->where(function ($query) {
-                    $query->where('chain_id', $this->route('client')->business->chain_id);
-                })
-            ],
+            'rates.*.payer_id' => "nullable|numeric|in:$payersForChain",
             'rates.*.caregiver_id' => [
                 'nullable',
                 'numeric',
