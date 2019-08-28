@@ -444,7 +444,7 @@ class CareDetails extends AuditableModel
     const FUNCTIONAL_AMBULATION = 'ambulation';
     const FUNCTIONAL_SPEECH = 'speech';
     const FUNCTIONAL_HEARING = 'hearing';
-    const FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION = 'dyspnea_with_minimal_exertion';
+    const FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION = 'dyspnea';
     const FUNCTIONAL_OTHER = 'other';
     const FUNCTIONAL = [
         self::FUNCTIONAL_AMPUTATION,
@@ -484,6 +484,7 @@ class CareDetails extends AuditableModel
     const MENTAL_STATUS_POOR = 'poor';
     const MENTAL_STATUS_GOOD = 'good';
     const MENTAL_STATUS_FAIR = 'fair';
+    const MENTAL_STATUS_FORGETFUL = 'forgetful';
     const MENTAL_STATUS_EXCELLENT = 'excellent';
     const MENTAL_STATUS_OTHER = 'other';
     const MENTAL_STATUS = [
@@ -497,6 +498,8 @@ class CareDetails extends AuditableModel
         self::MENTAL_STATUS_GOOD,
         self::MENTAL_STATUS_EXCELLENT,
         self::MENTAL_STATUS_FAIR,
+        self::MENTAL_STATUS_FORGETFUL,
+        self::MENTAL_STATUS_OTHER,
     ];
 
 

@@ -173,7 +173,7 @@
 
         <hr>
 
-        <b-row>
+        <!--b-row>
             <div class="h5 pl-3 pt-2">Medications</div>
         </b-row>
 
@@ -185,10 +185,11 @@
                     </p>
                 </b-form-group>
             </b-col>
-        </b-row>
+        </b-row-->
 
+        <hr>
 
-        <b-row>
+        <!--b-row>
             <div class="h5 pl-3 pt-2">Additional</div>
         </b-row>
 
@@ -287,7 +288,7 @@
                     </b-form-radio-group>
                 </b-form-group>
             </b-col>
-        </b-row>
+        </b-row-->
 
         <b-row>
             <b-col>
@@ -339,7 +340,6 @@
             <b-col lg="2">
                 <b-form-group label="Physician's Phone" class="mb-2 mr-2">
                     <b-form-input
-                            class="mt-1"
                             id="physician_phone"
                             name="physician_phone"
                             type="text"

@@ -464,9 +464,7 @@
                 this.busy = true;
                 this.form.post(this.url)
                     .then( ({ data }) => {
-                        this.fillForm(data.data);
-                        this.busy = false;
-                        location = location;
+                        window.location.reload();
                     })
                     .catch(e => {
                         this.busy = false;
