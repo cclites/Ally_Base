@@ -30,6 +30,16 @@ class ShiftActivity extends AuditableModel
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
