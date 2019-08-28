@@ -107,10 +107,10 @@
             <b-col lg="4">
                 <b-form-group label="Surgical Procedure ICD-CM" class="mb-2 mr-2">
                     <b-form-input
-                            id="surgical_diagnosis_icd_cm"
-                            name="surgical_diagnosis_icd_cm"
+                            id="surgical_procedure_icd_cm"
+                            name="surgical_procedure_icd_cm"
                             type="text"
-                            v-model="form.surgical_diagnosis_icd_cm"
+                            v-model="form.surgical_procedure_icd_cm"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -119,10 +119,10 @@
             <b-col lg="4">
                 <b-form-group label="Surgical Procedure" class="mb-2 mr-2">
                     <b-form-input
-                            id="surgical_diagnosis"
-                            name="surgical_diagnosis"
+                            id="surgical_procedure"
+                            name="surgical_procedure"
                             type="text"
-                            v-model="form.surgical_diagnosis"
+                            v-model="form.surgical_procedure"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -130,7 +130,7 @@
 
             <b-col lg="4">
                 <b-form-group label="Date of Surgical Procedure" class="mb-2 mr-2">
-                    <date-picker v-model="form.surgical_diagnosis_date" name="surgical_diagnosis_date"></date-picker>
+                    <date-picker v-model="form.surgical_procedure_date" name="surgical_procedure_date"></date-picker>
                 </b-form-group>
             </b-col>
         </b-row>
