@@ -43,11 +43,11 @@ class ClaimsARTest extends TestCase
     /**
      * @test
      * 
-     * overall CR-D test for claim_invoices
+     * overall CR-D test for claim_invoices form client_invoices
      * 
      * - Reading the table, helps make correct adjustments to the return value structure and ensure certain elements exist
      * - Creating a claim from a client_invoice
-     * - Deleting the claim
+     * - Deleting the entire claim
      * 
      * this test is not testing updating the claim_invoice at this moment
      * 
@@ -126,7 +126,7 @@ class ClaimsARTest extends TestCase
             'payer_id'    => null,
         ]))->assertJsonFragment( $claim->toArray() );
 
-        // Step 4: Delete the cliam_invoice
+        // Step 4: Delete the entire claim_invoice
         // we can also delete the claim invoice using our route function..
         $data = $this->delete( route( 'business.claims.destroy', [ 'claim' => $claim->id ] ) );
 
@@ -135,5 +135,65 @@ class ClaimsARTest extends TestCase
         $this->assertCount( 0, ClaimInvoiceItem::get() );
         $this->assertCount( 0, ClaimableService::get() );
         $this->assertCount( 0, ClaimableExpense::get() );
+    }
+
+    /**
+     * @test
+     * 
+     * This test takes a claim and asserts that CRUD operations can be done on that independent of the original invoice
+     */
+    public function office_user_can_manage_claim_specific_data()
+    {
+        $this->withoutExceptionHandling();
+
+        // Step 1: World building, create our client_invoice
+        // given that we have a client invoice..
+        $client_invoice = factory( ClientInvoice::class )->create();
+        $this->assertDatabaseHas( 'client_invoices', $client_invoice->toArray() );
+
+        // ..give our invoice an associated shift/service
+        $shift = factory( Shift::class )->create();
+        $service = factory( Service::class )->create();
+        $shift->service()->associate( $service );
+        $shift->save();
+
+        // save these items..
+        $client_invoice->items()->saveMany( factory( ClientInvoiceItem::class, 3 )->make([
+
+            'invoice_id'       => $client_invoice->id,
+            'invoiceable_type' => 'shifts',
+            'invoiceable_id'   => $shift->id
+        ]));
+        $this->assertEquals( 3, $client_invoice->items->count() );
+
+        $item = ClientInvoiceItem::first();
+        $this->assertEquals( 3, $item->count() );
+
+        // ..and an expense
+        $expense = factory( ShiftExpense::class )->create([ 'shift_id' => $shift->id ]);
+        $client_invoice->items()->saveMany( factory( ClientInvoiceItem::class, 3 )->make([
+
+            'invoice_id'       => $client_invoice->id,
+            'invoiceable_type' => 'shift_expenses',
+            'invoiceable_id'   => $expense->id
+        ]));
+
+        $this->assertEquals( 6, $client_invoice->refresh()->items->count() );
+
+        // Step 2: Create the claim invoice
+        // we can create a claim-invoice based off of it using our route..
+        $this->post( route( 'business.claims.store' ), [ 'client_invoice_id' => $client_invoice->id ] );
+
+        // and prove it exists
+        $claim = ClaimInvoice::where( 'client_invoice_id', $client_invoice->id )->first();
+        $this->assertEquals( 1, $claim->count() );
+
+        // grab a random item to try deleting
+        $item = ClaimInvoiceItem::inRandomOrder()->with( 'claimable' )->first();
+
+        $this->delete( route( 'business.claims.item.delete', [ 'item' => $item->id ] ) );
+
+        $this->assertEquals( 5, ClaimInvoiceItem::count() );
+        $this->assertNotEquals( $claim->amount, $claim->refresh()->amount ); // after deleting, the amount should be adjusted
     }
 }

@@ -60,6 +60,8 @@ class ClaimInvoiceFactory
             'plan_code'  => $invoice->getPlanCode(),
         ]);
 
+        $claim->client_name = ucwords( implode( ' ', [ $client->client_first_name, $client->client_last_name ] ) );
+
         $items = $invoice->items->map( function ( ClientInvoiceItem $item ) {
 
             switch ( $item->invoiceable_type ) {
@@ -112,8 +114,6 @@ class ClaimInvoiceFactory
             $claim->delete();
 
         \DB::commit();
-
-        // not sure what to return here
     }
 
     /**

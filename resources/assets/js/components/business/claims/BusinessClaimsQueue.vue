@@ -61,7 +61,11 @@
                             <option value="has_balance">Has Claim Balance</option>
                             <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
-                        &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
+
+                        <div class="w-100 d-flex align-itmes:center justify-content-end">
+
+                            <b-button type="submit" variant="outline-info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
+                        </div>
                     </b-form>
                 </b-card>
             </b-col>
@@ -118,7 +122,7 @@
                 </template>
                 <template slot="client" scope="row">
 
-                    <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
+                    <a :href="`/business/clients/${row.item.client.id}`">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
                 <template slot="claim_status" scope="row">
 
@@ -128,6 +132,10 @@
 
                     <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`">{{ row.item.claim.name }}</a>
                     <span v-else> - </span>
+                </template>
+                <template slot="payer" scope="row">
+
+                    {{ ( row.item.claim ? row.item.claim.payer_name : row.item.payer.name ) }}
                 </template>
 
                 <template slot="actions" scope="row">
@@ -207,7 +215,7 @@
 
 
         <!-- Details modal -->
-        <edit-claim-modal v-model=" editClaimModalOpen " :claim=" editingClaim "></edit-claim-modal>
+        <edit-claim-modal v-model=" editClaimModalOpen " :claim=" editingClaim " :transmitUpdate=" updateClaim " :transmitDelete=" deleteClaimItem " :transmitEditItem=" editClaimItem "></edit-claim-modal>
 
         <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete">
 
@@ -262,7 +270,6 @@
                     },
                     {
                         key       : 'payer',
-                        formatter : ( val ) => val ? val.name : 'None',
                         sortable  : true,
                     },
                     {
@@ -377,16 +384,18 @@
                     .then( ({ data }) => {
 
                         let claim = data.data.claim;
-                        // console.log( 'created claim: ', claim );
+                        console.log( 'created claim: ', claim );
 
                         let item           = this.items.find( item => item.id == claim.client_invoice_id );
                         // manually set the attributes that the claim-resource does..
                         item.claim_total   = this.moneyFormat( claim.amount, '$', true );
-                        item.claim_paid    = this.moneyFormat( claim.amount - claim.balance, '$', true );
-                        item.claim_balance = this.moneyFormat( claim.balance, '$', true );
+                        item.claim_paid    = this.moneyFormat( claim.amount - claim.amount_due, '$', true );
+                        item.claim_balance = this.moneyFormat( claim.amount_due, '$', true );
+                        item.claim_status  = claim.status;
                         item.claim_status  = claim.status;
                         item.claim_date    = this.formatDateFromUTC( claim.created_at, 'MM/DD/YYYY h:mm a', null, true );
                         item.claim         = claim;
+                        item.client_name   = _.upperFirst( claim.client_first_name ) + ' ' + _.upperFirst( claim.client_last_name );
                     })
                     .catch(() => {
 
@@ -422,11 +431,14 @@
                             item.claim_paid    = null;
                             item.claim_balance = null;
                             item.claim_status  = null;
+                            item.client_name   = null;
                             item.claim_date    = null;
                             item.claim         = null;
                         })
-                        .catch(() => {
+                        .catch( err => {
 
+                            alert( 'error deleting claim' );
+                            console.err( err );
                         })
                         .finally(() => {
 
@@ -444,6 +456,11 @@
 
                         let claim = res.data;
 
+                        claim.items.forEach( item => {
+
+                            item.removing = false;
+                            item.editing  = false;
+                        });
                         this.editingClaim = claim;
                         this.editClaimModalOpen = true;
                     })
@@ -452,6 +469,60 @@
                         console.err( err );
                         alert( 'Problem loading claim details..' );
                     });
+            },
+
+            updateClaim( newData ){
+                // for when claim-info is edited
+
+                let invoice = this.items.find( invoice => {
+
+                    return invoice.claim && invoice.claim.id == newData.id;
+                });
+
+                invoice.claim = {
+
+                    ...invoice.claim,
+                    ...newData
+                };
+
+                invoice.client_name = _.upperFirst( newData.client_first_name ) + ' ' + _.upperFirst( newData.client_last_name );
+            },
+
+            editClaimItem( item ){
+                // for when a claim item is deleted from a claim
+
+                console.log( 'transmitted edit item..', item );
+                // let invoice = this.items.find( client_invoice => client_invoice.claim && client_invoice.claim.id == item.claim_invoice_id );
+
+                // // the value in the claim is always an int, not formatted
+                // let current_claim_total   = invoice.claim.amount;
+                // let current_claim_balance = invoice.claim.amount_due;
+
+                // current_claim_total    -= parseFloat( item.amount );
+                // current_claim_balance  -= parseFloat( item.amount_due );
+                // let current_claim_paid = current_claim_total - current_claim_balance;
+
+                // invoice.claim_balance = this.moneyFormat( current_claim_balance, '$', true );
+                // invoice.claim_total   = this.moneyFormat( current_claim_total, '$', true );
+                // invoice.claim_paid    = this.moneyFormat( current_claim_paid, '$', true );
+            },
+
+            deleteClaimItem( item ){
+                // for when a claim item is deleted from a claim
+
+                let invoice = this.items.find( client_invoice => client_invoice.claim && client_invoice.claim.id == item.claim_invoice_id );
+
+                // the value in the claim is always an int, not formatted
+                let current_claim_total   = invoice.claim.amount;
+                let current_claim_balance = invoice.claim.amount_due;
+
+                current_claim_total    -= parseFloat( item.amount );
+                current_claim_balance  -= parseFloat( item.amount_due );
+                let current_claim_paid = current_claim_total - current_claim_balance;
+
+                invoice.claim_balance = this.moneyFormat( current_claim_balance, '$', true );
+                invoice.claim_total   = this.moneyFormat( current_claim_total, '$', true );
+                invoice.claim_paid    = this.moneyFormat( current_claim_paid, '$', true );
             },
 
             transmitClaim( invoice, skipAlert = false ) {
@@ -588,6 +659,27 @@
 
             updateFullBalance() {
             },
+        },
+
+        watch : {
+
+            // editClaimModalOpen: function( newVal, oldVal ){
+            //     // when the modal closes make sure the editing cliam is up-to-date
+
+            //     if( newVal === false ){
+
+            //         let claim = this.items.find( claim => claim.id == this.editingClaim.id );
+            //         claim = {
+
+            //             ...claim,
+            //             ...this.editingClaim,
+            //             client_name : _.upperFirst( this.editingClaim.client_first_name ) + ' ' + _.upperFirst( this.editingClaim.client_last_name )
+            //         };
+
+            //         console.log( 'editing: ', this.editingClaim );
+            //         console.log( 'claim: ', claim );
+            //     }
+            // }
         },
 
         async mounted() {

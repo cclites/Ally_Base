@@ -2,7 +2,7 @@
 
     <b-modal id="editClaimModal" title="Edit Claim" v-model=" showModal " size="lg">
 
-        <claim-details v-if=" claim.id " :claim=" claim "></claim-details>
+        <claim-details v-if=" claim.id " :claim=" claim " :transmitUpdate=" transmitUpdate " :transmitDelete=" transmitDelete " :transmitEditItem=" transmitEditItem "></claim-details>
 
         <div slot="modal-footer">
 
@@ -26,6 +26,9 @@
                 type    : Object,
                 default : () => {},
             },
+            transmitUpdate   : Function,
+            transmitDelete   : Function,
+            transmitEditItem : Function
         },
 
         computed: {

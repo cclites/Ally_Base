@@ -488,6 +488,7 @@ Route::group([
         'except' => [ 'show' ]
     ]);
     Route::get( 'claims/{claim}/{view?}', 'Business\ClaimController@show' );
+    Route::delete( 'claims/item/{item}', 'Business\ClaimController@deleteClaimItem' )->name( 'claims.item.delete' );
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

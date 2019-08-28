@@ -25,6 +25,9 @@ class ClaimResource extends ClientInvoice
             'payer'         => optional( $this->resource->clientPayer )->payer,
             'payments'      => $this->resource->payments,
 
+            // these are necessary for the new claims-queue because when the registry updates the client name on the claim it only updates that claim record not the actual client
+            'client_name'   => empty( $claim ) ? $this->resource->client->name : ucwords( implode( ' ', [ $claim->client_first_name, $claim->client_last_name ] ) ),
+
             'balance'       => $this->resource->amount - $this->resource->getAmountPaid(),
 
             // claim-related data

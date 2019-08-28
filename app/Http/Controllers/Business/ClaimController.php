@@ -7,10 +7,12 @@ use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceFactory;
+use App\Claims\ClaimInvoiceItem;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\ErrorResponse;
+use Exception;
 
 class ClaimController extends Controller
 {
@@ -59,6 +61,55 @@ class ClaimController extends Controller
         $claim->load([ 'items', 'client' ]);
 
         return response()->json( $claim );
+    }
+
+    public function update( ClaimInvoice $claim, Request $request )
+    {
+
+        // validate data
+        $validated = $request->validate([
+
+            'client_first_name'               => 'sometimes|required',
+            'client_last_name'                => 'sometimes|required',
+            'client_medicaid_diagnosis_codes' => 'nullable',
+            'client_medicaid_id'              => 'nullable',
+            'payer_code'                      => 'nullable',
+            'payer_name'                      => 'sometimes|required',
+            'plan_code'                       => 'nullable',
+            'transmission_method'             => 'nullable'
+        ]);
+
+        // make the update
+        $claim->update( $validated );
+
+        // return
+        return response()->json( $claim->refresh() );
+    }
+
+    public function deleteClaimItem( ClaimInvoiceItem $item )
+    {
+        if ( !in_array( $item->claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
+
+        try {
+
+            \DB::beginTransaction();
+
+                $claim = $item->claim;
+
+                $claim->amount -= $item->amount;
+                $claim->amount_due -= $item->amount_due;
+
+                $claim->update();
+
+                $item->claimable->delete();
+                $item->delete();
+            \DB::commit();
+        } catch ( Exception $e ) {
+
+            return $e->getMessage();
+        }
+
+        return new SuccessResponse( 'Claim Item has been deleted.' );
     }
 
     /**
