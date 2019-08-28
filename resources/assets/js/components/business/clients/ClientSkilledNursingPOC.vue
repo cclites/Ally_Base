@@ -171,6 +171,70 @@
             </b-col>
         </b-row>
 
+        <b-row>
+            <b-col lg="4">
+                <b-form-group label="Other Pertinent Diagnoses ICD-CM" class="mb-2 mr-2">
+                    <b-form-input
+                            id="other_diagnosis_icd_cm1"
+                            name="other_diagnosis_icd_cm1"
+                            type="text"
+                            v-model="form.other_diagnosis_icd_cm1"
+                    >
+                    </b-form-input>
+                </b-form-group>
+            </b-col>
+
+            <b-col lg="4">
+                <b-form-group label="Other Pertinent Diagnoses" class="mb-2 mr-2">
+                    <b-form-input
+                            id="other_diagnosis1"
+                            name="other_diagnosis1"
+                            type="text"
+                            v-model="form.other_diagnosis1"
+                    >
+                    </b-form-input>
+                </b-form-group>
+            </b-col>
+
+            <b-col lg="4">
+                <b-form-group label="Date of Other Pertinent Diagnoses" class="mb-2 mr-2">
+                    <date-picker v-model="form.other_diagnosis_date1" name="other_diagnosis_date1"></date-picker>
+                </b-form-group>
+            </b-col>
+        </b-row>
+
+        <b-row>
+            <b-col lg="4">
+                <b-form-group label="Other Pertinent Diagnoses ICD-CM" class="mb-2 mr-2">
+                    <b-form-input
+                            id="other_diagnosis_icd_cm2"
+                            name="other_diagnosis_icd_cm2"
+                            type="text"
+                            v-model="form.other_diagnosis_icd_cm2"
+                    >
+                    </b-form-input>
+                </b-form-group>
+            </b-col>
+
+            <b-col lg="4">
+                <b-form-group label="Other Pertinent Diagnoses" class="mb-2 mr-2">
+                    <b-form-input
+                            id="other_diagnosis2"
+                            name="other_diagnosis2"
+                            type="text"
+                            v-model="form.other_diagnosis2"
+                    >
+                    </b-form-input>
+                </b-form-group>
+            </b-col>
+
+            <b-col lg="4">
+                <b-form-group label="Date of Other Pertinent Diagnoses" class="mb-2 mr-2">
+                    <date-picker v-model="form.other_diagnosis_date2" name="other_diagnosis_date2"></date-picker>
+                </b-form-group>
+            </b-col>
+        </b-row>
+
         <hr>
 
         <!--b-row>
@@ -385,6 +449,12 @@
                     other_diagnosis_icd_cm: '',
                     other_diagnosis: '',
                     other_diagnosis_date: '',
+                    other_diagnosis_icd_cm1: '',
+                    other_diagnosis1: '',
+                    other_diagnosis_date1: '',
+                    other_diagnosis_icd_cm2: '',
+                    other_diagnosis2: '',
+                    other_diagnosis_date2: '',
                     orders: '',
                     physician_name: '',
                     physician_address: '',

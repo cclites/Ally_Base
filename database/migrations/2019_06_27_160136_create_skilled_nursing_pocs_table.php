@@ -27,11 +27,22 @@ class CreateSkilledNursingPocsTable extends Migration
             $table->string('surgical_procedure_icd_cm')->nullable();
             $table->text('surgical_procedure')->nullable();
             $table->text('surgical_procedure_date')->nullable();
+
             $table->string('other_diagnosis_icd_cm')->nullable();
             $table->text('other_diagnosis')->nullable();
             $table->text('other_diagnosis_date')->nullable();
+
+            $table->string('other_diagnosis_icd_cm1')->nullable();
+            $table->text('other_diagnosis1')->nullable();
+            $table->text('other_diagnosis_date1')->nullable();
+
+            $table->string('other_diagnosis_icd_cm2')->nullable();
+            $table->text('other_diagnosis2')->nullable();
+            $table->text('other_diagnosis_date2')->nullable();
+
             $table->string('physician_name')->nullable();
             $table->string('physician_address')->nullable();
+
             $table->string('physician_phone')->nullable();
             $table->text('orders')->nullable();
         });

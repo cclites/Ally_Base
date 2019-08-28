@@ -147,14 +147,20 @@
             <div style="position:absolute;left:11.50px;top:189.34px" class="cls_004">
                 <span class="cls_004">13. ICD-9-CM</span>
                 <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_icd_cm'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_icd_cm1'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_icd_cm2'] }}</span>
             </div>
             <div style="position:absolute;left:68.56px;top:189.34px" class="cls_004">
                 <span class="cls_004">Other Pertinent Diagnoses</span>
                 <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis1'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis2'] }}</span>
             </div>
             <div style="position:absolute;left:237.04px;top:189.34px" class="cls_004">
                 <span class="cls_004">Date</span>
                 <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_date'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_date1'] }}</span>
+                <span class="cls_004">{{ $client->skilledNursingPoc['other_diagnosis_date2'] }}</span>
             </div>
 
             <div style="position:absolute;left:11.50px;top:249.82px" class="cls_004">
