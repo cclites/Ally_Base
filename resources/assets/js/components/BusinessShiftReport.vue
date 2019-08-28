@@ -124,7 +124,7 @@
                 </b-container>
 
                 <b-col lg="12" class="text-right">
-                    <b-btn variant="info" @click="reloadData()" :disabled="disabled">Generate Report</b-btn>
+                    <b-btn variant="info" @click="reloadData()" :disabled="generateReportDisabled">Generate Report</b-btn>
                     <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="shiftsLoaded">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
@@ -447,16 +447,10 @@
                         + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             },
-            disabled(){
-
-                let format = 'YYYYMMDD';
-                let comparable_start = this.formatDate(this.filters.start_date, format, null);
-                let comparable_end = this.formatDate(this.filters.end_date, format, null);
-
-                if(comparable_end > comparable_start){
+            generateReportDisabled(){
+                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))){
                     return false;
                 }
-
                 return true;
             },
         },
