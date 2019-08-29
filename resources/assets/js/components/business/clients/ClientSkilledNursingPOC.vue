@@ -49,7 +49,7 @@
             </b-col>
 
             <b-col lg="2">
-                <b-form-group label="Provider No." class="mb-2 mr-2">
+                <b-form-group label="Provider No." class="mb-2 mr-2" label-class="required">
                     <b-form-input
                             id="provider_number"
                             name="provider_number"
