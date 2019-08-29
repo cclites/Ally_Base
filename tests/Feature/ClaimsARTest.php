@@ -188,12 +188,28 @@ class ClaimsARTest extends TestCase
         $claim = ClaimInvoice::where( 'client_invoice_id', $client_invoice->id )->first();
         $this->assertEquals( 1, $claim->count() );
 
-        // grab a random item to try deleting
+        // Step 3: Grab a random item to try deleting
         $item = ClaimInvoiceItem::inRandomOrder()->with( 'claimable' )->first();
 
         $this->delete( route( 'business.claims.item.delete', [ 'item' => $item->id ] ) );
 
         $this->assertEquals( 5, ClaimInvoiceItem::count() );
-        $this->assertNotEquals( $claim->amount, $claim->refresh()->amount ); // after deleting, the amount should be adjusted
+        $this->assertNotEquals( floatval( $claim->amount ), floatval( $claim->refresh()->amount ) ); // after deleting, the amount should be adjusted
+
+        // Step 4: Grab a random item and try editing it
+        $items = ClaimInvoiceItem::with( 'claimable' )->where( 'claimable_type', 'App\ClaimableService' )->get();
+
+        $editing_item          = $items->first();
+        $stolen_data_model     = $items->last();
+        $stolen_data_model->id = $editing_item->id;
+
+        $this->patch( route( 'business.claims.item.update', [ 'item' => $editing_item->id ] ), $stolen_data_model->toArray() );
+
+        // test a few specific items to make sure that they are equal
+        $this->assertEquals( $editing_item->refresh()->rate, $stolen_data_model->rate );
+        $this->assertEquals( $editing_item->refresh()->units, $stolen_data_model->units );
+        $this->assertEquals( $editing_item->refresh()->claimable->caregiver_first_name, $stolen_data_model->claimable->caregiver_first_name );
+        $this->assertEquals( $editing_item->refresh()->claimable->caregiver_last_name, $stolen_data_model->claimable->caregiver_last_name );
+        $this->assertEquals( $editing_item->refresh()->claimable->service_name, $stolen_data_model->claimable->service_name );
     }
 }

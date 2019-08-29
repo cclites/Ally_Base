@@ -207,7 +207,6 @@
                                         <td>{{ service.claimable.service_name }}</td>
                                         <td>{{ service.claimable.service_code }}</td>
                                         <td>{{ service.amount }}</td>
-                                        <td>{{ service.balance }}</td>
                                         <td>{{ service.units }}</td>
                                         <td>{{ service.rate }}</td>
                                         <td>{{ service.claimable.address1 }}</td>
@@ -289,8 +288,8 @@
 
                             <div>
 
-                                <b-button variant="outline-success" @click=" editItem( false, null ) " class="mr-2">Cancel</b-button>
-                                <b-button variant="info" @click=" saveEditing() ">Save</b-button>
+                                <b-button variant="outline-success" @click=" editing_claim_item = false " class="mr-2">Cancel</b-button>
+                                <b-button variant="info" @click=" saveEditingItem() " :disabled=" process_loading ">Save</b-button>
                             </div>
                         </div>
                     </b-col>
@@ -308,8 +307,8 @@
 
                 <div class="d-flex align-items-center justify-content-end mt-2">
 
-                    <b-button variant="outline-success" @click=" editItem( false, null ) " class="mr-2">Cancel</b-button>
-                    <b-button variant="info" @click=" saveEditing() ">Save</b-button>
+                    <b-button variant="outline-success" @click=" editing_claim_item = false " class="mr-2">Cancel</b-button>
+                    <b-button variant="info" @click=" saveEditingItem() " :disabled=" process_loading ">Save</b-button>
                 </div>
             </div>
         </transition>
@@ -342,7 +341,7 @@
         data: () => ({
 
             editing_claim      : false,
-            editing_item       : {},
+            editing_item       : null,
             editing_claim_item : false,
             process_loading    : false,
             claim_details      : {},
@@ -351,7 +350,7 @@
 
                 {
                     name      : 'caregiver_first_name',
-                    label     : 'Last Name',
+                    label     : 'First Name',
                     claimable : true
                 },
                 {
@@ -397,22 +396,22 @@
                 {
                     name      : 'amount',
                     label     : 'Amount',
-                    claimable : true
+                    claimable : false
                 },
                 {
-                    name      : 'balance',
+                    name      : 'amount_due',
                     label     : 'Balance',
-                    claimable : true
+                    claimable : false
                 },
                 {
                     name      : 'units',
                     label     : 'Units',
-                    claimable : true
+                    claimable : false
                 },
                 {
                     name      : 'rate',
                     label     : 'Rate',
-                    claimable : true
+                    claimable : false
                 },
                 {
                     name      : 'address1',
@@ -580,11 +579,48 @@
                         item.processing = false;
                     });
             },
-            saveChanges( item ){
+            saveEditingItem(){
 
-                console.log( 'saving..' );
+                this.process_loading = true;
 
-                this.transmitEditItem( item );
+                const previous_amount = parseFloat( this.editing_item.amount );
+
+                this.editable_rows.forEach( row => {
+                    // update the value of the row in the modal component
+                    // having this deep copy in the first place prevents the need to do this after a cancel
+
+                    if( row.claimable ) this.editing_item.claimable[ row.name ] = row.value;
+                    else this.editing_item[ row.name ] = row.value;
+                });
+
+                // calculate the new amount based on rate and units because amount is not editable
+                const new_amount = parseFloat( this.editing_item.rate ) * parseFloat( this.editing_item.units );
+                this.editing_item.amount = new_amount;
+
+                const form = new Form( this.editing_item );
+                form.patch( '/business/claims/item/' + this.editing_item.id )
+                    .then( res => {
+
+                        console.log( 'response: ', res );
+
+                        // send the change in amount to the table-parent-component for update there, since the table doesnt contain the item data
+                        const changed_amount = previous_amount - new_amount;
+                        const data = {
+
+                            changed_amount,
+                            claim_invoice_id : this.editing_item.claim_invoice_id
+                        };
+                        this.transmitEditItem( data );
+                        this.editing_claim_item = false;
+                    })
+                    .catch( err => {
+
+                        console.error( err );
+                    })
+                    .finally( () => {
+
+                        this.process_loading = false;
+                    });
             },
             editItem( state, item ){
 
@@ -596,7 +632,7 @@
 
                     if( row.claimable ) row.value = this.editing_item.claimable[ row.name ];
                     else row.value = this.editing_item[ row.name ];
-                })
+                });
             }
         },
 
