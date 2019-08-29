@@ -211,6 +211,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         });
     }
 
+    const MAX_FUTURE_END_DATE = 168; // hours
+
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////

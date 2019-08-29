@@ -518,7 +518,7 @@
                     </b-col>
                     <b-col lg="8" class="text-right" v-else>
                         <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                        <b-dropdown variant="light" :disabled="saveDisabled">
+                        <b-dropdown variant="light">
                             <template slot="button-content" >
                                 <i class='fa fa-list'></i> Actions
                             </template>
@@ -555,10 +555,11 @@
     import ShiftServices from "../mixins/ShiftServices";
     import AuthUser from '../mixins/AuthUser';
     import { mapGetters } from 'vuex';
+    import Constants from '../mixins/Constants';
 
     export default {
         components: {ConfirmationModal},
-        mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices],
+        mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices, Constants],
 
         props: {
             'shift': {
@@ -603,7 +604,6 @@
                 confirmModal: false,
                 loading: false,
                 loadingQuickbooksConfig: false,
-                saveDisabled: false,
             }
         },
         mounted() {
@@ -860,11 +860,6 @@
             getClockedOutMoment() {
                 return moment(this.endDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
             },
-            getMaxDateTime(){
-                return moment().format('MM/DD/YYYY HH:mm')
-            },
-
-
             getHalfOfActivities(leftHalf = true)
             {
                 let half_length = Math.ceil(this.activities.length / 2);
@@ -969,23 +964,17 @@
                 this.$nextTick(function() {
                     let clockin = this.getClockedInMoment();
                     let clockout = this.getClockedOutMoment();
-                    let maxDateTime = this.getMaxDateTime();
                     if (clockin.isValid() && clockout.isValid()) {
                         let newVal = field === 'checked_in_time' ?  clockin : clockout;
                         let diffFromShift = newVal.diff(moment.utc(this.shift[field]), 'minutes');
                         // debugger;
                         let diffInMinutes = clockout.diff(clockin, 'minutes');
-                        let maxMinutes = clockout.diff(maxDateTime, 'minutes');
 
                         this.form.clearError(field);
 
-                        if(maxMinutes > 10080){
-                            this.form.addError(field, 'The end time is too far in the future to save.  Please check that dates and times are correct.');
-                            this.saveDisabled = true;
-                        }else{
-                            this.saveDisabled = false;
+                        if (clockout.diff(moment(), 'hours') > this.SHIFT_MAX_FUTURE_END_DATE) {
+                            this.form.addError(field, 'The clock out time cannot be more than '+this.SHIFT_MAX_FUTURE_END_DATE+' hours from now.');
                         }
-
                         if (diffFromShift === 0) {
                             return;
                         }
