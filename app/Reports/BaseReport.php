@@ -189,6 +189,7 @@ abstract class BaseReport implements Report
                              ->setNumericToFloatFormat()
                              ->setScalarFilter()
                              ->toArray();
+
                 $sheet->fromArray( $data, null, 'A1', true );
             });
 

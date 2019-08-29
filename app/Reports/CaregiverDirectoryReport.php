@@ -168,31 +168,43 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
         $caregivers = $this->query()->get();
 
-        $caregivers->map( function( $caregiver ){
+        $data = $caregivers->map( function( $caregiver ){
 
-            $caregiver->title                    = $caregiver->title ?? '-';
+            return [
 
-            $caregiver->inactive_at              = $caregiver->inactive_at ?? '-';
-            $caregiver->welcome_email_sent_at    = $caregiver->welcome_email_sent_at ?? '-';
-            $caregiver->training_email_sent_at   = $caregiver->training_email_sent_at ?? '-';
-            $caregiver->setup_status             = $caregiver->setup_status ?? '-';
-
-
-            $caregiver->onboarded         = $caregiver->onboarded                ? $caregiver->onboarded : '';
-            $caregiver->bank_account_id   = $caregiver->bank_account_id          ?? '-';
-            $caregiver->phone             = $caregiver->user->notification_phone ?? '';
-            $caregiver->emergency_contact = $caregiver->user->emergency_contact  ? $caregiver->user->formatEmergencyContact() : '-';
-            $caregiver->referral          = $caregiver->referralSource           ? $caregiver->referralSource->name : '-';
-            $caregiver->certification     = $caregiver->certification            ? $caregiver->certification : '-';
-            $caregiver->smoking_okay      = $caregiver->smoking_okay             ? "Yes" : "No";
-            $caregiver->ethnicity         = $caregiver->ethnicity                ? $caregiver->ethnicity : '-';
-            $caregiver->medicaid_id       = $caregiver->medicaid_id              ? $caregiver->medicaid_id : '-';
-            $caregiver->status_alias_name = $caregiver->statusAlias              ? $caregiver->statusAlias->name : '-';
-            $caregiver->gender            = $caregiver->user                     ? $caregiver->user->gender : '';
-
-            return $caregiver;
+                'NameLastFirst'              => $caregiver->nameLastFirst                                              ?? '',
+                'Certification'              => $caregiver->certification                                              ?? '',
+                'Phone Number'               => $caregiver->notification_phone                                         ?? '',
+                'Username'                   => $caregiver->username                                                   ?? '',
+                'Email'                      => $caregiver->email                                                      ?? '',
+                'Notification Email'         => $caregiver->notification_email                                         ?? '',
+                'Date Of Birth'              => Carbon::parse( $caregiver->date_of_birth )->format( 'm/d/Y' )          ?? '',
+                'Role Type'                  => $caregiver->role_type                                                  ?? '',
+                'Onboarded'                  => Carbon::parse( $caregiver->onboarded )->format( 'm/d/Y' )              ?? '',
+                'W9 Name'                    => $caregiver->w9_name                                                    ?? '',
+                'Medicaid Id'                => $caregiver->medicaid_id                                                ?? '',
+                'Gender'                     => $caregiver->gender                                                     ? $caregiver->formatted_gender : '',
+                'Deactivation Note'          => $caregiver->deactivation_note                                          ?? '',
+                'Smoking Okay'               => $caregiver->smoking_okay                                               ? 'Yes' : 'No',
+                'Pets Dogs Okay'             => $caregiver->pets_dogs_okay                                             ? 'Yes' : 'No',
+                'Pets Cats Okay'             => $caregiver->pets_cats_okay                                             ? 'Yes' : 'No',
+                'Pets Birds Okay'            => $caregiver->pets_birds_okay                                            ? 'Yes' : 'No',
+                'Ethnicity'                  => $caregiver->ethnicity                                                  ?? '',
+                'Active'                     => $caregiver->active                                                     ? 'Active' : 'Inactive',
+                'Inactive At'                => Carbon::parse( $caregiver->inactive_at )->format( 'm/d/Y' )            ?? '',
+                'Welcome Email Sent'         => Carbon::parse( $caregiver->welcome_email_sent_at )->format( 'm/d/Y' )  ?? '',
+                'Training Email Sent'        => Carbon::parse( $caregiver->training_email_sent_at )->format( 'm/d/Y' ) ?? '',
+                'Setup Status'               => $caregiver->setup_status                                               ? title_case( str_replace( '_', ' ', $caregiver->setup_status ) ) : '',
+                'Allow Sms Notifications'    => $caregiver->allow_sms_notifications                                    ? 'Yes' : 'No',
+                'Allow Email Notifications'  => $caregiver->allow_email_notifications                                  ? 'Yes' : 'No',
+                'Allow System Notifications' => $caregiver->allow_system_notifications                                 ? 'Yes' : 'No',
+                'Emergency Contact'          => $caregiver->user->formatEmergencyContact()                             ?? '',
+                'Referral'                   => $caregiver->referralSource                                             ? $caregiver->referralSource->organization : '',
+                'Status Alias Name'          => $caregiver->statusAliasName                                            ?? '',
+                'Masked Ssn'                 => $caregiver->masked_ssn                                                 ?? '',
+            ];
         });
 
-        return $caregivers;
+        return $data;
     }
 }

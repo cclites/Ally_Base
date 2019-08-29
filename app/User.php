@@ -371,16 +371,22 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return null;
     }
 
-    public function getInactiveAtAttribute( $value )
+    public function getFormattedGenderAttribute()
     {
-        if ( !$value ) return '';
-        return $value;
-    }
+        switch( strtolower( $this->gender ) ){
 
-    public function getGenderAttribute( $value )
-    {
-        if ( !$value ) return '';
-        return $value;
+            case 'm':
+
+                return 'Male';
+                break;
+            case 'f':
+
+                return 'Female';
+                break;
+            default:
+
+                return null;
+        }
     }
 
     /**

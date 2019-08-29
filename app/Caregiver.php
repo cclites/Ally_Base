@@ -205,7 +205,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     protected $appends = [ 'masked_ssn' ];
     protected $attributes = [];
 
-    public $dates = ['hire_date', 'deleted_at', 'application_date', 'orientation_date'];
+    public $dates = [ 'onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date' ];
 
     /**
      * The notification classes related to this user role.
@@ -378,41 +378,11 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
     }
 
-    /////////////////////////////////////////////////////////////?//////////////////?//////////////////?
 
-    /// EXCEL plugin has trouble setting these columns if they have null values, so reports were all messed up
-    // added these accessors as a temporary solution until more definiton-based excel report header capabilities are defined for the end user
-
-    /////////////////////////////////////////////////////////////?//////////////////?//////////////////?
-    public function getSetupStatusAttribute( $value )
+    public function getStatusAliasNameAttribute()
     {
-        if( !$value ) return '';
-        return $value;
+        return $this->statusAlias ? $this->statusAlias->name : null;
     }
-
-    public function getStatusAliasIdAttribute( $value )
-    {
-        return $value;
-    }
-
-    public function getW9NameAttribute( $value )
-    {
-        if( !$value ) return '';
-        return $value;
-    }
-
-    public function getDeactivationNoteAttribute( $value )
-    {
-        if( !$value ) return '';
-        return $value;
-    }
-
-    public function getOnboardedAttribute( $value )
-    {
-        if( !$value ) return '';
-        return ( new Carbon( $value ) )->format( 'm/d/Y h:i:s A' );
-    }
-    //////////////////?//////////////////?//////////////////?//////////////////?//////////////////?//////////////////?//////////////////?//////////////////?
 
     ///////////////////////////////////////////
     /// Instance Methods
