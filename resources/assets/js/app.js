@@ -137,6 +137,7 @@ Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSe
 
 Vue.component('paid-billed-audit-report', require('./components/admin/reports/PaidBilledAuditReport.vue'));
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
+Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));
