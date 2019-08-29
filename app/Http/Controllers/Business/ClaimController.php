@@ -12,6 +12,7 @@ use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\ErrorResponse;
+use Carbon\Carbon;
 use Exception;
 
 class ClaimController extends Controller
@@ -59,6 +60,8 @@ class ClaimController extends Controller
         if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
 
         $claim->load([ 'items', 'client' ]);
+
+        // dd( $claim );
 
         return response()->json( $claim );
     }
@@ -163,6 +166,14 @@ class ClaimController extends Controller
                         'claimable.activities'            => 'nullable',
                         'claimable.caregiver_comments'    => 'nullable',
                     ]);
+
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'caregiver_dob'        ] ) ) $claimableValidation[ 'claimable' ][ 'caregiver_dob' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'caregiver_dob' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'scheduled_start_time' ] ) ) $claimableValidation[ 'claimable' ][ 'scheduled_start_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'scheduled_start_time' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'scheduled_end_time'   ] ) ) $claimableValidation[ 'claimable' ][ 'scheduled_end_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'scheduled_end_time' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'visit_start_time'     ] ) ) $claimableValidation[ 'claimable' ][ 'visit_start_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'visit_start_time' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'visit_end_time'       ] ) ) $claimableValidation[ 'claimable' ][ 'visit_end_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'visit_end_time' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'evv_start_time'       ] ) ) $claimableValidation[ 'claimable' ][ 'evv_start_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'evv_start_time' ] );
+                    if( !empty( $claimableValidation[ 'claimable' ][ 'evv_end_time'         ] ) ) $claimableValidation[ 'claimable' ][ 'evv_end_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'evv_end_time' ] );
 
                 } else if( $item->claimable_type == 'App\ClaimableExpense' ){
 

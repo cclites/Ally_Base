@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Billing\Service;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ClaimableService extends Model
@@ -56,6 +57,15 @@ class ClaimableService extends Model
     public function service()
     {
         return $this->belongsTo( Service::class );
+    }
+
+    // **********************************************************
+    // ACCESSORS
+    // **********************************************************
+
+    public function getCaregiverDobAttribute( $value )
+    {
+        return Carbon::parse( $value )->format( 'm/d/Y' );
     }
 
     // **********************************************************

@@ -211,5 +211,7 @@ class ClaimsARTest extends TestCase
         $this->assertEquals( $editing_item->refresh()->claimable->caregiver_first_name, $stolen_data_model->claimable->caregiver_first_name );
         $this->assertEquals( $editing_item->refresh()->claimable->caregiver_last_name, $stolen_data_model->claimable->caregiver_last_name );
         $this->assertEquals( $editing_item->refresh()->claimable->service_name, $stolen_data_model->claimable->service_name );
+
+        $this->get( '/business/claims/' . $claim->id . '/edit' );
     }
 }

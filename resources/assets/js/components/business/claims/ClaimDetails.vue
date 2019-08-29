@@ -316,14 +316,39 @@
                         </div>
                     </b-col>
 
-                    <b-col class="my-1" sm="6" v-for=" ( row, j ) in ( editing_item.claimable_type == 'App\\ClaimableService' ? editable_service_rows: editable_expense_rows ) " :key=" j ">
+                    <b-col class="my-2" :sm=" row.col_sm " :md=" row.col_md " v-for=" ( row, j ) in ( editing_item.claimable_type == 'App\\ClaimableService' ? editable_service_rows: editable_expense_rows ) " :key=" j ">
 
-                        <label :for=" row.name ">{{ row.label }}:</label>
+                        <label v-if=" row.name != 'amount' " :for=" row.name ">{{ row.label }}:</label>
+
+                        <div v-if=" row.name == 'amount' ">
+
+                            <h3 class="text-muted">Calculated Cost</h3>
+                            {{ calculatedTotal }}
+                        </div>
+
+                        <date-picker
+                            v-else-if=" row.type == 'date' "
+                            v-model=" row.value "
+                            :placeholder=" row.placeholder "
+                        />
+
+                        <b-form-textarea
+                            v-else-if=" row.type == 'textarea' "
+                            v-model=" row.value "
+                            :placeholder=" row.placeholder "
+                            rows="3"
+                            max-rows="6"
+                        ></b-form-textarea>
+
                         <b-form-input
+                            v-else
+                            :type=" row.type || 'text' "
+                            :step=" row.step "
                             :id=" row.name "
                             v-model=" row.value "
                             trim
                         ></b-form-input>
+
                     </b-col>
                 </b-row>
 
@@ -342,10 +367,11 @@
     // import authUser from '../../mixins/AuthUser';
     // import ShiftServices from "../../mixins/ShiftServices";
     // import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
 
-        // mixins: [ authUser, ShiftServices, FormatsNumbers ],
+        mixins: [ FormatsDates ],
 
         props: {
 
@@ -387,169 +413,401 @@
             editable_service_rows : [
 
                 {
-                    name      : 'caregiver_first_name',
-                    label     : 'First Name',
-                    claimable : true
+                    name        : 'caregiver_first_name',
+                    label       : 'First Name',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : 'required',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'caregiver_last_name',
-                    label     : 'Last Name',
-                    claimable : true
+                    name        : 'caregiver_last_name',
+                    label       : 'Last Name',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : 'required',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'gender',
-                    label     : 'Gender',
-                    claimable : true
+                    name        : 'gender',
+                    label       : 'Gender',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'dropdown',
+                    placeholder : '',
+                    description : '',
+                    options     : {
+
+                        'm' : 'male',
+                        'f' : 'female'
+                    },
+                    format      : '',
                 },
                 {
-                    name      : 'caregiver_dob',
-                    label     : 'Date of Birth',
-                    claimable : true
+                    name        : 'caregiver_dob',
+                    label       : 'Date of Birth',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'date',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'caregiver_ssn',
-                    label     : 'Caregiver Ssn',
-                    claimable : true
+                    name        : 'caregiver_ssn',
+                    label       : 'Caregiver Ssn',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'caregiver_medicaid_id',
-                    label     : 'Caregiver Medicaid ID',
-                    claimable : true
+                    name        : 'caregiver_medicaid_id',
+                    label       : 'Caregiver Medicaid ID',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'caregiver_comments',
-                    label     : 'Caregiver Comments',
-                    claimable : true
+                    name        : 'caregiver_comments',
+                    label       : 'Caregiver Comments',
+                    claimable   : true,
+                    col_sm      : 8,
+                    col_md      : 8,
+                    type        : 'textarea',
+                    placeholder : 'enter any relevant comments that the caregiver had for this service',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'service_name',
-                    label     : 'Service Name',
-                    claimable : true
+                    name        : 'service_name',
+                    label       : 'Service Name',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'service_code',
-                    label     : 'Service Code',
-                    claimable : true
+                    name        : 'service_code',
+                    label       : 'Service Code',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'amount',
-                    label     : 'Amount',
-                    claimable : false
+                    name        : 'units',
+                    label       : 'Units',
+                    claimable   : false,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'number',
+                    step        : '.25',
+                    placeholder : '',
+                    description : 'either the time or another value for this charge',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'amount_due',
-                    label     : 'Balance',
-                    claimable : false
+                    name        : 'rate',
+                    label       : 'Rate',
+                    claimable   : false,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'number',
+                    step        : '.5',
+                    placeholder : '',
+                    description : 'the amount to be charged per unit',
+                    options     : [],
+                    format      : '',
+                },
+                // {
+                //     name        : 'amount',
+                //     label       : 'Total Cost',
+                //     claimable   : false,
+                //     col_sm      : 4,
+                //     col_md      : 4,
+                //     type        : 'text',
+                //     placeholder : '',
+                //     description : '',
+                //     options     : [],
+                //     format      : '',
+                // },
+                {
+                    name        : 'address1',
+                    label       : 'Address 1',
+                    claimable   : true,
+                    col_sm      : 8,
+                    col_md      : 8,
+                    type        : 'text',
+                    placeholder : 'Main Address',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'units',
-                    label     : 'Units',
-                    claimable : false
+                    name        : 'address2',
+                    label       : 'Address 2',
+                    claimable   : true,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : 'Address details',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'rate',
-                    label     : 'Rate',
-                    claimable : false
+                    name        : 'city',
+                    label       : 'City',
+                    claimable   : true,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'address1',
-                    label     : 'Address 1',
-                    claimable : true
+                    name        : 'state',
+                    label       : 'State',
+                    claimable   : true,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'dropdown',
+                    placeholder : '',
+                    description : '',
+                    options     : {
+
+                        'FL' : 'Florida'
+                    },
+                    format      : '',
                 },
                 {
-                    name      : 'address2',
-                    label     : 'Address 2',
-                    claimable : true
+                    name        : 'zip',
+                    label       : 'Zip',
+                    claimable   : true,
+                    col_sm      : 4,
+                    col_md      : 4,
+                    type        : 'number',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'city',
-                    label     : 'City',
-                    claimable : true
+                    name        : 'checked_in_number',
+                    label       : 'Checked-in Number',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'state',
-                    label     : 'State',
-                    claimable : true
+                    name        : 'checked_out_number',
+                    label       : 'Checked-out Number',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'zip',
-                    label     : 'Zip',
-                    claimable : true
+                    name        : 'checked_in_latitude',
+                    label       : 'Checked-in Latitude',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'latitude',
-                    label     : 'Latitude',
-                    claimable : true
+                    name        : 'checked_out_longitude',
+                    label       : 'Checked-out Longitude',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'longitude',
-                    label     : 'Longitude',
-                    claimable : true
+                    name        : 'scheduled_start_time',
+                    label       : 'Scheduled Start Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'checked_in_number',
-                    label     : 'Checked-in Number',
-                    claimable : true
+                    name        : 'scheduled_end_time',
+                    label       : 'Scheduled End Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'checked_out_number',
-                    label     : 'Checked-out Number',
-                    claimable : true
+                    name        : 'visit_start_time',
+                    label       : 'Visit Start Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'checked_in_latitude',
-                    label     : 'Checked-in Latitude',
-                    claimable : true
+                    name        : 'visit_end_time',
+                    label       : 'Visit End Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'checked_out_longitude',
-                    label     : 'Checked-out Longitude',
-                    claimable : true
+                    name        : 'evv_start_time',
+                    label       : 'Evv Start Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'scheduled_start_time',
-                    label     : 'Scheduled Start Time',
-                    claimable : true
+                    name        : 'evv_end_time',
+                    label       : 'Evv End Time',
+                    claimable   : true,
+                    col_sm      : 3,
+                    col_md      : 4,
+                    type        : 'datetime',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'scheduled_end_time',
-                    label     : 'Scheduled End Time',
-                    claimable : true
+                    name        : 'latitude',
+                    label       : 'Evv Latitude',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 6,
+                    type        : 'text',
+                    placeholder : '',
+                    description : 'for the clients EVV address',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'visit_start_time',
-                    label     : 'Visit Start Time',
-                    claimable : true
+                    name        : 'longitude',
+                    label       : 'Evv Longitude',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 6,
+                    type        : 'text',
+                    placeholder : '',
+                    description : 'for the clients EVV address',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'visit_end_time',
-                    label     : 'Visit End Time',
-                    claimable : true
+                    name        : 'activities',
+                    label       : 'Activities',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'dropdown',
+                    placeholder : '',
+                    description : '',
+                    options     : {
+
+                        'first'  : 'hello',
+                        'second' : 'options'
+                    },
+                    format      : '',
                 },
                 {
-                    name      : 'activities',
-                    label     : 'Activities',
-                    claimable : true
+                    name        : 'evv_method_in',
+                    label       : 'Evv Method In',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
                 {
-                    name      : 'evv_start_time',
-                    label     : 'Evv Start Time',
-                    claimable : true
-                },
-                {
-                    name      : 'evv_end_time',
-                    label     : 'Evv End Time',
-                    claimable : true
-                },
-                {
-                    name      : 'evv_method_in',
-                    label     : 'Evv Method In',
-                    claimable : true
-                },
-                {
-                    name      : 'evv_method_out',
-                    label     : 'Evv Method Out',
-                    claimable : true
+                    name        : 'evv_method_out',
+                    label       : 'Evv Method Out',
+                    claimable   : true,
+                    col_sm      : 6,
+                    col_md      : 4,
+                    type        : 'text',
+                    placeholder : '',
+                    description : '',
+                    options     : [],
+                    format      : '',
                 },
             ]
         }),
@@ -567,6 +825,12 @@
                 if( !this.claim.id ) return [];
 
                 return this.claim.items.filter( item => item.claimable_type == 'App\\ClaimableExpense' );
+            },
+            calculatedTotal( rate = null, units = null ){
+
+                if( !this.editing_claim_item ) return null;
+
+                // let rate = this.
             }
         },
 

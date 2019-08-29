@@ -449,6 +449,7 @@
 
             editClaimModal( claim ){
 
+                this.busy = true;
                 axios.get( '/business/claims/' + claim.id + '/edit' )
                     .then( res => {
 
@@ -468,7 +469,7 @@
 
                         console.err( err );
                         alert( 'Problem loading claim details..' );
-                    });
+                    }).finally( () => this.busy = false );
             },
 
             updateClaim( newData ){
