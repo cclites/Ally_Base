@@ -790,5 +790,4 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     {
         $builder->whereNull('onboarded')->doesntHave('shifts');
     }
-
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Business;
 
 use App\DeactivationReason;
-use App\Document;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Auth\Access\AuthorizationException;
