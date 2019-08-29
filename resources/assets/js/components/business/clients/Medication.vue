@@ -276,6 +276,7 @@
                         }
                         this.selected = {};
                         this.confirmDeleteModal = false;
+                        window.location.reload();
                     });
             },
 
@@ -287,6 +288,7 @@
                         : await this.form.post(url);
                     this.editModal = false;
                     this.updateMedication(data);
+                    window.location.reload();
                 }catch(e) {
                     console.error(e);
                 }
