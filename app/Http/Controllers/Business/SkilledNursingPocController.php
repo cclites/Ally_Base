@@ -41,7 +41,7 @@ class SkilledNursingPocController extends BaseController
             return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc);
         }
 
-        return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to save the Skilled Nursing Plan of Care.  Please try again.');
     }
 
     public function generatePdf($client){
