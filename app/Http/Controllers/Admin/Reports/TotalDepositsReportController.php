@@ -54,6 +54,7 @@ class TotalDepositsReportController
                 $set[$key] = [
                     'name'=>$item['name'],
                     'amount' => $item['amount'],
+                    'type' => $item['type'],
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];

@@ -60,6 +60,9 @@
                                     <template slot="FOOT_name" scope="item">
                                         &nbsp;
                                     </template>
+                                    <template slot="FOOT_type" scope="item">
+                                        &nbsp;
+                                    </template>
 
                                     <template slot="FOOT_amount" scope="item">
                                         <strong>Total: </strong> {{ moneyFormat(totals.amount) }}
@@ -103,6 +106,7 @@
                 sortDesc: false,
                 fields: [
                     {key: 'name', label: 'Name', sortable: true,},
+                    {key: 'type', label: 'Type', sortable: true,},
                     {key: 'amount', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],

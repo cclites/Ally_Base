@@ -9,7 +9,6 @@ use Carbon\Carbon;
 
 class TotalDepositsReport extends BaseReport
 {
-
     /**
      * @var string
      */
@@ -41,6 +40,10 @@ class TotalDepositsReport extends BaseReport
         ]);
     }
 
+    /**
+     * @param $timezone
+     * @return TotalDepositsReport
+     */
     public function setTimezone($timezone): self
     {
         $this->timezone = $timezone;
@@ -68,7 +71,7 @@ class TotalDepositsReport extends BaseReport
     /**
      * @return Collection
      */
-    protected function results()
+    protected function results(): iterable
     {
         return $this->query->get()->map(function(Deposit $deposit){
 
@@ -80,6 +83,7 @@ class TotalDepositsReport extends BaseReport
 
             return [
                 'name'=> $name,
+                'type' => ucfirst($deposit->deposit_type),
                 'amount'=>$deposit->amount
             ];
 
