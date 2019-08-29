@@ -29,7 +29,8 @@ class CaregiverDirectoryReportController extends BaseController
                 ->setActiveFilter( $request->active )
                 ->setStatusAliasFilter( $request->status_alias_id )
                 ->setCurrentPage( $request->current_page )
-                ->setPageCount( 100 );
+                ->setPageCount( 100 )
+                ->setForExport( $request->export == '1' );
                 // ->setDateFilter( $request->start_date, $request->end_date );
 
             if ( $request->export == '1' ) {

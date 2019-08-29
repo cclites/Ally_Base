@@ -17,6 +17,8 @@ class ClientDirectoryReport extends BusinessResourceReport
     private $active_filter;
     private $client_type;
 
+    private $for_export;
+
     /**
      * @var bool
      */
@@ -54,7 +56,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      * Filter by client type.
      *
      * @param $status
-     * @return CaregiverAccountSetupReport
+     * @return ClientAccountSetupReport
      */
     public function setClientTypeFilter( $type ) : self
     {
@@ -64,10 +66,23 @@ class ClientDirectoryReport extends BusinessResourceReport
     }
 
     /**
+     * Filter by client type.
+     *
+     * @param $status
+     * @return ClientAccountSetupReport
+     */
+    public function setForExport( $flag ) : self
+    {
+        $this->for_export = $flag;
+
+        return $this;
+    }
+
+    /**
      * Filter by status alias.
      *
      * @param $status
-     * @return CaregiverAccountSetupReport
+     * @return ClientAccountSetupReport
      */
     public function setStatusAliasFilter( $alias_id ) : self
     {
@@ -80,7 +95,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      * Filter by active status.
      *
      * @param $status
-     * @return CaregiverAccountSetupReport
+     * @return ClientAccountSetupReport
      */
     public function setActiveFilter( $active ) : self
     {
@@ -93,7 +108,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      * Set number of records to pagniate per page
      *
      * @param $status
-     * @return CaregiverAccountSetupReport
+     * @return ClientAccountSetupReport
      */
     public function setPageCount( $count ) : self
     {
@@ -106,7 +121,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      * Set number of records to pagniate per page
      *
      * @param $status
-     * @return CaregiverAccountSetupReport
+     * @return ClientAccountSetupReport
      */
     public function setCurrentPage( $page ) : self
     {
@@ -154,7 +169,11 @@ class ClientDirectoryReport extends BusinessResourceReport
             ->count();
 
 
-        $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+        // implement pagination manually
+        if( !$this->for_export ){
+
+            $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+        }
 
         $clients = $this->query()->get();
 
