@@ -166,7 +166,7 @@
 
             <div style="position:absolute;left:11.50px;top:249.82px" class="cls_004">
                 <span class="cls_004">14. DME and Supplies</span>
-                <span class="cls_004"  style="width:100%;">{{ $client->careDetails->supplies_as_string }}</span>
+                <span class="cls_004"  style="width:300px;">{{ $client->careDetails->supplies_as_string }}</span>
             </div>
 
             <div style="position:absolute;left:299.50px;top:249.82px" class="cls_004">
