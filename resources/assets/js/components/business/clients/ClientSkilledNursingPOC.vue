@@ -580,6 +580,12 @@
                 this.form.other_diagnosis_icd_cm = details.other_diagnosis_icd_cm;
                 this.form.other_diagnosis = details.other_diagnosis;
                 this.form.other_diagnosis_date = details.other_diagnosis_date;
+                this.form.other_diagnosis_icd_cm1 = details.other_diagnosis_icd_cm1;
+                this.form.other_diagnosis1 = details.other_diagnosis1;
+                this.form.other_diagnosis_date1 = details.other_diagnosis_date1;
+                this.form.other_diagnosis_icd_cm2 = details.other_diagnosis_icd_cm2;
+                this.form.other_diagnosis2 = details.other_diagnosis2;
+                this.form.other_diagnosis_date2 = details.other_diagnosis_date2;
                 this.form.orders = details.orders;
                 this.form.physician_name = details.physician_name;
                 this.form.physician_address = details.physician_address;
