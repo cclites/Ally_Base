@@ -26,7 +26,7 @@ class AlterTableAddVehicleToClientMedications extends Migration
      */
     public function down()
     {
-        Schema::table('client_care_details', function (Blueprint $table) {
+        Schema::table('client_medications', function (Blueprint $table) {
             $table->dropColumn(['route',
                 'new_changed',
             ]);

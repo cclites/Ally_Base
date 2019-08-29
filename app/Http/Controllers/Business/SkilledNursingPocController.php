@@ -38,7 +38,7 @@ class SkilledNursingPocController extends BaseController
         $data = SkilledNursingPoc::convertFormData($request->validated());
 
         if ($client->skilledNursingPoc()->update($data)) {
-            return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->skilledNursingPoc);
+            return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc);
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
