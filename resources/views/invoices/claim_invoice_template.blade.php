@@ -67,7 +67,7 @@
                             </td>
                             <td class="text-nowrap">{{ $item->units }}</td>
                             <td class="text-nowrap">{{ rate_format($item->rate) }}</td>
-                            <td class="text-nowrap">{{ number_format($item->total, 2) }}</td>
+                            <td class="text-nowrap">{{ number_format($item->amount, 2) }}</td>
                             <td class="text-nowrap">{{ number_format($item->amount_due, 2) }}</td>
                         </tr>
                     @endforeach
@@ -78,8 +78,8 @@
                     <tr>
 
                         <th colspan="4">Total</th>
-                        <th class="text-nowrap">{{ number_format($invoice->getItems()->sum('total'), 2) }}</th>
-                        <th class="text-nowrap">{{ number_format($invoice->amount, 2) }}</th>
+                        <th class="text-nowrap">{{ number_format( $invoice->getItems()->sum( 'amount' ), 2 ) }}</th>
+                        <th class="text-nowrap">{{ number_format( $invoice->amount, 2 ) }}</th>
                     </tr>
                 </tfoot>
             </table>

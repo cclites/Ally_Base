@@ -180,12 +180,12 @@
 
                                             <transition name="slide-fade" mode="out-in">
 
-                                                <div v-if=" !service.removing && !editing_claim_item " class="d-flex flex-column">
+                                                <div v-if=" !service.removing " class="d-flex flex-column">
 
                                                     <b-button variant="outline-info" size="sm" class="mb-1" @click=" editItem( true, service ) ">Edit</b-button>
                                                     <b-button variant="outline-danger" size="sm" @click=" service.removing = true ">Remove</b-button>
                                                 </div>
-                                                <div v-if=" service.removing && !editing_claim_item " class="d-flex flex-column">
+                                                <div v-if=" service.removing " class="d-flex flex-column">
 
                                                     <b-button variant="outline-success" size="sm" class="mb-1" @click=" service.removing = false ">Cancel</b-button>
                                                     <b-button variant="danger" size="sm" @click=" deleteItem( service ) ">Delete</b-button>
@@ -249,6 +249,7 @@
                                 <thead>
 
                                     <tr>
+                                        <th>Actions</th>
                                         <th>Expense Name</th>
                                         <th>Expense Charge</th>
                                         <th>Expense Balance</th>
@@ -262,6 +263,27 @@
 
                                     <tr v-for=" ( expense, j ) in claimableExpenses " :key=" j ">
 
+                                        <td>
+
+                                            <transition name="slide-fade" mode="out-in">
+
+                                                <div v-if=" !expense.removing " class="d-flex flex-column">
+
+                                                    <b-button variant="outline-info" size="sm" class="mb-1" @click=" editItem( true, expense ) ">Edit</b-button>
+                                                    <b-button variant="outline-danger" size="sm" @click=" expense.removing = true ">Remove</b-button>
+                                                </div>
+                                                <div v-if=" expense.removing " class="d-flex flex-column">
+
+                                                    <b-button variant="outline-success" size="sm" class="mb-1" @click=" expense.removing = false ">Cancel</b-button>
+                                                    <b-button variant="danger" size="sm" @click=" deleteItem( expense ) ">Delete</b-button>
+                                                </div>
+                                                <!-- <div v-if=" !service.removing && service.editing " class="d-flex flex-column">
+
+                                                    <b-button variant="outline-default" size="sm" class="mb-1" @click=" service.editing = false ">Cancel</b-button>
+                                                    <b-button variant="info" size="sm" @click=" saveChanges( service ) ">Save</b-button>
+                                                </div> -->
+                                            </transition>
+                                        </td>
                                         <td>{{ expense.claimable.name }}</td>
                                         <td>{{ expense.amount }}</td>
                                         <td>{{ expense.balance }}</td>
@@ -294,7 +316,7 @@
                         </div>
                     </b-col>
 
-                    <b-col class="my-1" sm="6" v-for=" ( row, j ) in editable_rows " :key=" j ">
+                    <b-col class="my-1" sm="6" v-for=" ( row, j ) in ( editing_item.claimable_type == 'App\\ClaimableService' ? editable_service_rows: editable_expense_rows ) " :key=" j ">
 
                         <label :for=" row.name ">{{ row.label }}:</label>
                         <b-form-input
@@ -346,7 +368,23 @@
             process_loading    : false,
             claim_details      : {},
 
-            editable_rows : [
+            editable_expense_rows : [
+
+                {
+                    name  : 'name',
+                    label : 'Expense Name',
+                },
+                {
+                    name  : 'date',
+                    label : 'Expense Date',
+                },
+                {
+                    name  : 'notes',
+                    label : 'Caregiver Notes',
+                }
+            ],
+
+            editable_service_rows : [
 
                 {
                     name      : 'caregiver_first_name',
@@ -581,11 +619,11 @@
             },
             saveEditingItem(){
 
-                this.process_loading = true;
+                this.process_loading   = true;
+                const preserved_values = _.cloneDeep( this.editing_item );
+                const previous_amount  = parseFloat( this.editing_item.amount );
 
-                const previous_amount = parseFloat( this.editing_item.amount );
-
-                this.editable_rows.forEach( row => {
+                this.editable_service_rows.forEach( row => {
                     // update the value of the row in the modal component
                     // having this deep copy in the first place prevents the need to do this after a cancel
 
@@ -615,6 +653,7 @@
                     })
                     .catch( err => {
 
+                        this.editing_item = preserved_values;
                         console.error( err );
                     })
                     .finally( () => {
@@ -627,12 +666,22 @@
                 this.editing_claim_item = state;
                 this.editing_item = item;
 
-                this.editable_rows.forEach( row => {
-                    // set the value for the editing object
+                if( this.editing_item.claimable_type == 'App\\ClaimableService' ){
 
-                    if( row.claimable ) row.value = this.editing_item.claimable[ row.name ];
-                    else row.value = this.editing_item[ row.name ];
-                });
+                    this.editable_service_rows.forEach( row => {
+                        // set the value for the editing object
+
+                        if( row.claimable ) row.value = this.editing_item.claimable[ row.name ];
+                        else row.value = this.editing_item[ row.name ];
+                    });
+                } else {
+
+                    this.editable_expense_rows.forEach( row => {
+                        // set the value for the editing object
+
+                        row.value = this.editing_item.claimable[ row.name ];
+                    });
+                }
             }
         },
 

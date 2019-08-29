@@ -518,6 +518,9 @@
                 current_claim_balance  -= parseFloat( item.amount_due );
                 let current_claim_paid = current_claim_total - current_claim_balance;
 
+                invoice.claim.amount     = current_claim_total;
+                invoice.claim.amount_due = current_claim_balance;
+
                 invoice.claim_balance = this.moneyFormat( current_claim_balance, '$', true );
                 invoice.claim_total   = this.moneyFormat( current_claim_total, '$', true );
                 invoice.claim_paid    = this.moneyFormat( current_claim_paid, '$', true );

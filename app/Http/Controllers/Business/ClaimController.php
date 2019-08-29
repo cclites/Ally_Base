@@ -108,6 +108,7 @@ class ClaimController extends Controller
                 // now that I think about it.. edited items ae pre-transmission.. so the balance would always = the amount and paid would always = 0.. right?
                 $new_balance_due = floatval( $item->amount_due ) - $amount_change;
 
+                // update the claim_invoice_item
                 $item->update([
 
                     'rate'       => $new_rate,
@@ -116,6 +117,13 @@ class ClaimController extends Controller
                     'amount_due' => $new_balance_due,
                 ]);
 
+                // update the claim_invoice
+                $claim_invoice = $item->claim;
+                $claim_invoice->amount     = floatval( $claim_invoice->amount ) - $amount_change;
+                $claim_invoice->amount_due = floatval( $claim_invoice->amount_due ) - $amount_change;
+                $claim_invoice->update();
+
+                // update the claimable reference
                 $claimable = $item->claimable;
 
                 if( $item->claimable_type == 'App\ClaimableService' ){
