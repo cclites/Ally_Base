@@ -62,7 +62,7 @@
                 <br>
             <strong>Deactivation Note:</strong> {{ $caregiver->deactivation_note }}
                 <br>
-            <strong>Date: </strong> {{ $caregiver->getInActiveAtAttribute()->format('m-d-Y') }}
+            <strong>Date: </strong> {{ $caregiver->in_active_at->format('m-d-Y') }}
                 <br>
             <strong>By:</strong>  {{ $deactivatedBy }}
                 <br>
