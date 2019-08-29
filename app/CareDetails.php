@@ -188,7 +188,7 @@ class CareDetails extends AuditableModel
     ];
 
     const MOBILITY_BEDREST = 'bedrest';
-    const MOBILITY_BEDREST_BDR = 'bedrest_bdr';
+    const MOBILITY_BEDREST_BRP = 'bedrest_brp';
     const MOBILITY_HOYER_LIFT = 'hoyer_lift';
     const MOBILITY_INDEPENDENT = 'independent';
     const MOBILITY_WHEELCHAIR = 'wheelchair';
@@ -206,7 +206,7 @@ class CareDetails extends AuditableModel
     const MOBILITY_OTHER = 'other';
     const MOBILITY = [
         self::MOBILITY_BEDREST,
-        self::MOBILITY_BEDREST_BDR,
+        self::MOBILITY_BEDREST_BRP,
         self::MOBILITY_HOYER_LIFT,
         self::MOBILITY_INDEPENDENT,
         self::MOBILITY_WHEELCHAIR,
@@ -438,12 +438,14 @@ class CareDetails extends AuditableModel
      * For Nursing Plan of Care ALLY-1312
      */
     const FUNCTIONAL_AMPUTATION = 'amputation';
+    const FUNCTIONAL_INCONTINENCE = 'incontinence';
     const FUNCTIONAL_CONTRACTURE = 'contracture';
+    const FUNCTIONAL_HEARING = 'hearing';
     const FUNCTIONAL_PARALYSIS = 'paralysis';
     const FUNCTIONAL_ENDURANCE = 'endurance';
     const FUNCTIONAL_AMBULATION = 'ambulation';
     const FUNCTIONAL_SPEECH = 'speech';
-    const FUNCTIONAL_HEARING = 'hearing';
+    const FUNCTIONAL_BLIND = 'blind';
     const FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION = 'dyspnea';
     const FUNCTIONAL_OTHER = 'other';
     const FUNCTIONAL = [
@@ -456,6 +458,8 @@ class CareDetails extends AuditableModel
         self::FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION,
         self::FUNCTIONAL_OTHER,
         self::FUNCTIONAL_HEARING,
+        self::FUNCTIONAL_BLIND,
+        self::FUNCTIONAL_INCONTINENCE,
     ];
 
 

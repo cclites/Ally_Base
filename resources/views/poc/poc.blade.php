@@ -210,14 +210,14 @@
             </div>
 
             <div style="position:absolute;left:327.56px;top:296.82px" class="cls_005">
-                @if( in_array('bedrest', $client->careDetails['functional'])  )
+                @if( in_array('bedrest', $client->careDetails['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Complete Bedrest</span>
             </div>
 
             <div style="position:absolute;left:427.66px;top:296.82px" class="cls_005">
-                @if( in_array('partial_weight_bearing', $client->careDetails['mobility'])  )
+                @if( in_array('partial_weight', $client->careDetails['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Partial Weight Bearing</span>
@@ -252,7 +252,7 @@
             </div>
 
             <div style="position:absolute;left:427.64px;top:308.88px" class="cls_005">
-                @if( in_array('independent_at_home', $client->careDetails['mobility'])  )
+                @if( in_array('independent', $client->careDetails['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Independent At Home</span>
@@ -328,7 +328,7 @@
             </div>
 
             <div style="position:absolute;left:527.76px;top:320.76px" class="cls_005">
-                @if( in_array('none', $client->careDetails['mobility'])  )
+                @if( in_array('no_restrictions', $client->careDetails['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">No Restrictions</span>

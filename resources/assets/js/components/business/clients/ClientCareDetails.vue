@@ -293,7 +293,7 @@
                     },
                     mobility: {
                         bedrest: 'Complete bedrest',
-                        bedrest_bdr: 'Bedrest BDR',
+                        bedrest_brp: 'Bedrest BRP',
                         hoyer_lift: 'Hoyer lift',
                         independent: 'Independent at home',
                         wheelchair: 'Wheelchair',
@@ -424,11 +424,14 @@
                     },
                     functional: {
                         amputation: 'Amputation',
+                        incontinence: 'Bowel/Bladder (Incontinence)',
                         contracture: "Contracture",
+                        hearing: 'Hearing',
                         paralysis: "Paralysis",
                         endurance: "Endurance",
                         ambulation: "Ambulation",
                         speech: "Speech",
+                        blind: 'Legally Blind',
                         dyspnea: 'Dyspnea with Minimal Exertion',
                         other: 'Other'
                     },
@@ -445,6 +448,7 @@
                         comatose: "Comatose",
                         forgetful: "Forgetful",
                         depressed: "Depressed",
+                        disoriented: "Disoriented",
                         lethargic: "Lethargic",
                         agitated: "Agitated",
                         other: "Other",

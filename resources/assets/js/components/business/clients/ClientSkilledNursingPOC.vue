@@ -309,9 +309,9 @@
                     </b-form-input>
                 </b-form-group>
             </b-col>
-        </b-row>
+        </b-row-->
 
-        <b-row>
+        <!--b-row>
             <b-col>
                 <b-form-group label="Functional Limitations" class="mb-2 mr-2">
                     <b-form-checkbox-group id="functional" v-model="client.care_details.functional" disabled>
@@ -354,14 +354,14 @@
             </b-col>
         </b-row-->
 
-        <b-row>
+        <!--b-row>
             <b-col>
                 <b-form-group label="Orders for Discipline and Treatments (Specify Amount/Frequency/Duration)" class="mb-2 mr-2">
                     <b-form-textarea v-model="form.orders" rows="10">
                     </b-form-textarea>
                 </b-form-group>
             </b-col>
-        </b-row>
+        </b-row-->
 
         <!--b-row>
             <b-col>
@@ -465,22 +465,25 @@
                 options: {
                     functional: {
                         amputation: 'Amputation',
+                        incontinence: 'Bowel/Bladder (Incontinence)',
                         contracture: "Contracture",
+                        hearing: 'Hearing',
                         paralysis: "Paralysis",
                         endurance: "Endurance",
                         ambulation: "Ambulation",
                         speech: "Speech",
+                        blind: 'Legally Blind',
                         dyspnea: 'Dyspnea with Minimal Exertion',
                         other: 'Other'
                     },
                     mobility: {
-                        complete_bedrest: "Complete Bedrest",
+                        bedrest: "Complete Bedrest",
                         bedrest_brp: "Bedrest BRP",
                         up_as_tolerated: "Up As Tolerated",
                         assist_transfers: "Transfer Bed/Chair",
                         exercises_prescribed: "Exercises Prescribed",
-                        partial_weight_bearing: "Partial Weight Bearing",
-                        independent_at_home: "Independent At Home",
+                        partial_weight: "Partial Weight Bearing",
+                        independent: "Independent At Home",
                         crutches: "Crutches",
                         cane: "Cane",
                         wheelchair: "Wheelchair",
@@ -499,6 +502,7 @@
                         comatose: "Comatose",
                         forgetful: "Forgetful",
                         depressed: "Depressed",
+                        disoriented: "Disoriented",
                         lethargic: "Lethargic",
                         agitated: "Agitated",
                         other: "Other",
