@@ -125,9 +125,10 @@
 
                     <b-col sm="12">
 
-                        <div class="my-4">
+                        <div class="d-flex align-items-center justify-content-between my-4">
 
                             <strong>Claim Services:</strong>
+                            <b-button variant="outline-success" size="sm" @click=" initAddNew() ">Add New</b-button>
                         </div>
 
                         <div class="table-responsive">
@@ -237,9 +238,10 @@
 
                     <b-col sm="12">
 
-                        <div class="my-4">
+                        <div class="d-flex align-items-center justify-content-between my-4">
 
                             <strong>Claim Expenses:</strong>
+                            <b-button variant="outline-success" size="sm" @click=" initAddNew() ">Add New</b-button>
                         </div>
 
                         <div class="table-responsive">
@@ -946,6 +948,10 @@
                         row.value = this.editing_item.claimable[ row.name ];
                     });
                 }
+            },
+            initAddNew(){
+
+                console.log( 'getting here' );
             }
         },
 
