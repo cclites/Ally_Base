@@ -114,7 +114,7 @@
                                 <b-button variant="primary" @click.prevent=" updateClaim() " :disabled=" process_loading ">Save</b-button>
                             </div>
 
-                            <b-button variant="primary" @click=" editing_claim = !editing_claim " v-else>Edit Claim</b-button>
+                            <b-button variant="primary" @click=" editing_claim = !editing_claim " v-else>Edit Claim Information</b-button>
                         </transition>
                     </b-col>
                 </b-row>
@@ -127,7 +127,7 @@
 
                         <div class="d-flex align-items-center justify-content-between my-4">
 
-                            <strong>Claim Services:</strong>
+                            <strong>Shift Details</strong>
                             <b-button variant="outline-success" size="sm" @click=" initAddNew() ">Add New</b-button>
                         </div>
 
@@ -183,13 +183,13 @@
 
                                                 <div v-if=" !service.removing " class="d-flex flex-column">
 
-                                                    <b-button variant="outline-info" size="sm" class="mb-1" @click=" editItem( true, service ) ">Edit</b-button>
-                                                    <b-button variant="outline-danger" size="sm" @click=" service.removing = true ">Remove</b-button>
+                                                    <b-button variant="info" size="sm" class="mb-1" @click=" editItem( true, service ) "><i class="fa fa-edit"></i></b-button>
+                                                    <b-button variant="danger" size="sm" @click=" service.removing = true "><i class="fa fa-times"></i></b-button>
                                                 </div>
                                                 <div v-if=" service.removing " class="d-flex flex-column">
 
-                                                    <b-button variant="outline-success" size="sm" class="mb-1" @click=" service.removing = false ">Cancel</b-button>
-                                                    <b-button variant="danger" size="sm" @click=" deleteItem( service ) ">Delete</b-button>
+                                                    <b-button variant="outline-default" size="sm" class="mb-1" @click=" service.removing = false ">Cancel</b-button>
+                                                    <b-button variant="danger" size="sm" @click=" deleteItem( service ) ">Confirm</b-button>
                                                 </div>
                                                 <!-- <div v-if=" !service.removing && service.editing " class="d-flex flex-column">
 
@@ -271,13 +271,13 @@
 
                                                 <div v-if=" !expense.removing " class="d-flex flex-column">
 
-                                                    <b-button variant="outline-info" size="sm" class="mb-1" @click=" editItem( true, expense ) ">Edit</b-button>
-                                                    <b-button variant="outline-danger" size="sm" @click=" expense.removing = true ">Remove</b-button>
+                                                    <b-button variant="info" size="sm" class="mb-1" @click=" editItem( true, expense ) "><i class="fa fa-edit"></i></b-button>
+                                                    <b-button variant="danger" size="sm" @click=" expense.removing = true "><i class="fa fa-times"></i></b-button>
                                                 </div>
                                                 <div v-if=" expense.removing " class="d-flex flex-column">
 
-                                                    <b-button variant="outline-success" size="sm" class="mb-1" @click=" expense.removing = false ">Cancel</b-button>
-                                                    <b-button variant="danger" size="sm" @click=" deleteItem( expense ) ">Delete</b-button>
+                                                    <b-button variant="outline-default" size="sm" class="mb-1" @click=" expense.removing = false ">Cancel</b-button>
+                                                    <b-button variant="danger" size="sm" @click=" deleteItem( expense ) ">Confirm</b-button>
                                                 </div>
                                                 <!-- <div v-if=" !service.removing && service.editing " class="d-flex flex-column">
 

@@ -64,7 +64,7 @@
 
                         <div class="w-100 d-flex align-itmes:center justify-content-end">
 
-                            <b-button type="submit" variant="outline-info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
+                            <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                         </div>
                     </b-form>
                 </b-card>
@@ -148,15 +148,14 @@
 
                     <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
 
-                        <b-btn variant="warning" style="flex:1" class="m-1 w-25" @click=" deleteClaimModal( row.item ) " :disabled=" busy ">
+                        <b-btn variant="info" style="flex:1" class="m-1" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy ">
+
+                            <i class="fa fa-edit"></i>
+                        </b-btn>
+                        <b-btn variant="danger" style="flex:1" class="m-1" @click=" deleteClaimModal( row.item ) " :disabled=" busy ">
 
                             <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
-                            <i v-else class="fa fa-trash"></i>
-                        </b-btn>
-
-                        <b-btn variant="info" style="flex:2" class="m-1 w-75" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy ">
-
-                            <span>Edit</span>
+                            <i v-else class="fa fa-times"></i>
                         </b-btn>
                     </div>
                     <!--
