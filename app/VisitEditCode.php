@@ -49,7 +49,7 @@ class VisitEditCode extends Model
             '900' => 'Attendant failed to call in',
             '910' => 'Attendant failed to call in and out',
             '915' => 'Wrong Phone Number - Verified Services Were Delivered',
-            '999' => 'Other ( Warning: May result in audit'
+            '999' => 'Other ( Warning: May result in audit )'
         ]
     ];
 }

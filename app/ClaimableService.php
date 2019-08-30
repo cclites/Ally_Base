@@ -5,9 +5,13 @@ namespace App;
 use App\Billing\Service;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasSSNAttribute;
+
 
 class ClaimableService extends Model
 {
+    use HasSSNAttribute;
+
     /**
      * The attributes that aren't mass assignable.
      *
@@ -27,7 +31,7 @@ class ClaimableService extends Model
      *
      * @var array
      */
-    protected $appends = [];
+    protected $appends = [ 'masked_ssn', 'name_last_first' ];
 
     /**
      * The "booting" method of the model.
@@ -66,6 +70,16 @@ class ClaimableService extends Model
     public function getCaregiverDobAttribute( $value )
     {
         return Carbon::parse( $value )->format( 'm/d/Y' );
+    }
+
+    public function getNameLastFirstAttribute()
+    {
+        return $this->caregiver->nameLastFirst();
+    }
+
+    public function getSsnAttribute()
+    {
+        return $this->caregiver_ssn;
     }
 
     // **********************************************************

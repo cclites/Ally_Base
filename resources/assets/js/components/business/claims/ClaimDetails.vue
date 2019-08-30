@@ -128,7 +128,7 @@
                         <div class="d-flex align-items-center justify-content-between my-4">
 
                             <strong>Shift Details</strong>
-                            <b-button variant="outline-success" size="sm" @click=" initAddNew() ">Add New</b-button>
+                            <b-button variant="info" size="sm" @click=" initAddNew() ">Add New</b-button>
                         </div>
 
                         <div class="table-responsive">
@@ -139,13 +139,9 @@
 
                                     <tr>
                                         <th>Actions</th>
-                                        <th>Caregiver First Name</th>
-                                        <th>Caregiver Last Name</th>
-                                        <th>Caregiver Gender</th>
-                                        <th>Caregiver D.O.B</th>
-                                        <th>Caregiver SSN</th>
-                                        <th>Caregiver Medicaid ID</th>
-                                        <th>Caregiver Comments</th>
+                                        <th>Caregiver</th>
+                                        <th>Service Date</th>
+                                        <th>Service Hours</th>
                                         <th>Service Name</th>
                                         <th>Service Code</th>
                                         <th>Service Charge</th>
@@ -171,6 +167,7 @@
                                         <th>EVV End</th>
                                         <th>EVV Method In</th>
                                         <th>EVV Method Out</th>
+                                        <th>Caregiver Medicaid ID</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -183,8 +180,12 @@
 
                                                 <div v-if=" !service.removing " class="d-flex flex-column">
 
-                                                    <b-button variant="info" size="sm" class="mb-1" @click=" editItem( true, service ) "><i class="fa fa-edit"></i></b-button>
-                                                    <b-button variant="danger" size="sm" @click=" service.removing = true "><i class="fa fa-times"></i></b-button>
+                                                    <b-button style="width:30px" size="sm" class="mb-1" @click=" viewItem( true, service ) "><i class="fa fa-eye"></i></b-button>
+                                                    <!-- <div class="d-flex flex-column mx-1"> -->
+
+                                                        <b-button style="width:30px" variant="info" size="sm" class="mb-1" @click=" editItem( true, service ) "><i class="fa fa-edit"></i></b-button>
+                                                        <b-button style="width:30px" variant="danger" size="sm" @click=" service.removing = true "><i class="fa fa-times"></i></b-button>
+                                                    <!-- </div> -->
                                                 </div>
                                                 <div v-if=" service.removing " class="d-flex flex-column">
 
@@ -198,13 +199,9 @@
                                                 </div> -->
                                             </transition>
                                         </td>
-                                        <td>{{ service.claimable.caregiver_first_name }}</td>
-                                        <td>{{ service.claimable.caregiver_last_name }}</td>
-                                        <td>{{ service.claimable.gender }}</td>
-                                        <td>{{ service.claimable.caregiver_dob }}</td>
-                                        <td>{{ service.claimable.caregiver_ssn }}</td>
-                                        <td>{{ service.claimable.caregiver_medicaid_id }}</td>
-                                        <td>{{ service.claimable.caregiver_comments }}</td>
+                                        <td>{{ service.claimable.name_last_first }}</td>
+                                        <td>{{ serviceDate( service ) }}</td>
+                                        <td>{{ serviceHours( service ) }}</td>
                                         <td>{{ service.claimable.service_name }}</td>
                                         <td>{{ service.claimable.service_code }}</td>
                                         <td>{{ service.amount }}</td>
@@ -230,6 +227,7 @@
                                         <td>{{ service.claimable.evv_end_time }}</td>
                                         <td>{{ service.claimable.evv_method_in }}</td>
                                         <td>{{ service.claimable.evv_method_out }}</td>
+                                        <td>{{ service.claimable.caregiver_medicaid_id }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -240,8 +238,8 @@
 
                         <div class="d-flex align-items-center justify-content-between my-4">
 
-                            <strong>Claim Expenses:</strong>
-                            <b-button variant="outline-success" size="sm" @click=" initAddNew() ">Add New</b-button>
+                            <strong>Shift Expenses</strong>
+                            <b-button variant="info" size="sm" @click=" initAddNew() ">Add New</b-button>
                         </div>
 
                         <div class="table-responsive">
@@ -952,6 +950,15 @@
             initAddNew(){
 
                 console.log( 'getting here' );
+            },
+
+            serviceDate( service ){
+
+                return moment.utc( service.claimable.scheduled_start_time ).local().format( 'MM/DD/YYYY' )
+            },
+            serviceHours( service ){
+
+                return moment.utc( service.claimable.scheduled_start_time ).local().format( 'h:mm' ) + ' - ' + moment.utc( service.claimable.scheduled_end_time ).local().format( 'h:mm a' );
             }
         },
 

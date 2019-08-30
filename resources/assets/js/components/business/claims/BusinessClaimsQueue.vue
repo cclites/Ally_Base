@@ -140,7 +140,7 @@
 
                 <template slot="actions" scope="row">
 
-                    <b-btn v-if=" !row.item.claim " variant="success" class="flex-1 my-1" @click=" createClaim( row.item ) " :disabled=" busy ">
+                    <b-btn v-if=" !row.item.claim " variant="success" class="flex-1 my-1" @click=" createClaim( row.item ) " :disabled=" busy " size="sm">
 
                         <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner"></i>
                         <span>Create Claim</span>
@@ -148,11 +148,11 @@
 
                     <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
 
-                        <b-btn variant="info" style="flex:1" class="m-1" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy ">
+                        <b-btn variant="info" style="flex:1" class="m-1" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy " size="sm">
 
                             <i class="fa fa-edit"></i>
                         </b-btn>
-                        <b-btn variant="danger" style="flex:1" class="m-1" @click=" deleteClaimModal( row.item ) " :disabled=" busy ">
+                        <b-btn variant="danger" style="flex:1" class="m-1" @click=" deleteClaimModal( row.item ) " :disabled=" busy " size="sm">
 
                             <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
                             <i v-else class="fa fa-times"></i>
