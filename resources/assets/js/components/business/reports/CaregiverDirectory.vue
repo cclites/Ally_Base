@@ -127,10 +127,26 @@
                     firstname: { label: 'First name', sortable: true, },
                     lastname: { label: 'Last name', sortable: true, },
                     username: { label: 'User Name', sortable: true, },
+                    email: { sortable: true, },
                     title: { sortable: true, },
                     date_of_birth: { sortable: true, formatter: x => x ? this.formatDate(x) : '-' },
                     certification: { sortable: true, },
                     gender: { sortable: true, },
+                    active: { label: 'Caregiver Status', sortable: true, },
+                    status_alias: { sortable: false, },
+                    office_location: { label: 'Office Locations', sortable: false },
+                    created_at: {
+                        label: 'Date Added',
+                        sortable: true,
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
+                    },
+                    address: { sortable: false, },
+                    phone: { sortable: false, },
+                    notification_phone: { sortable: true },
+                    application_date: {
+                        sortable: true,
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
+                    },
                     orientation_date: {
                         sortable: true,
                         formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
@@ -140,22 +156,8 @@
                     pets_cats_okay: { sortable: true, },
                     pets_birds_okay: { sortable: true, },
                     ethnicity: { sortable: true, },
-                    application_date: {
-                        sortable: true,
-                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
-                    },
-                    status_alias: { sortable: false, },
                     medicaid_id: { label: 'Medicaid ID', sortable: true },
-                    email: { sortable: true, },
-                    active: { label: 'Caregiver Status', sortable: true, },
-                    address: { sortable: false, },
-                    phone: { sortable: false, },
                     emergency_contact: { label: 'Emergency Contact', sortable: false, },
-                    created_at: {
-                        label: 'Date Added',
-                        sortable: true,
-                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
-                    },
                     referral: { sortable: false, },
                 },
             };

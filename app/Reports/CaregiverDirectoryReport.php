@@ -1,6 +1,7 @@
 <?php
 namespace App\Reports;
 
+use App\Business;
 use App\Caregiver;
 use App\CustomField;
 use App\Traits\IsDirectoryReport;
@@ -184,7 +185,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
         if ($this->sortBy == 'lastname' || !$this->sortBy) {
             $this->query()->orderByRaw("users.lastname {$this->sortOrder}, users.firstname {$this->sortOrder}");
         } else if (in_array($this->sortBy, [
-            'firstname', 'id', 'username', 'email', 'date_of_birth', 'gender', 'active', 'created_at',
+            'firstname', 'id', 'username', 'email', 'date_of_birth', 'gender', 'active', 'created_at', 'notification_phone',
         ])) {
             $this->query()->orderBy('users.'.$this->sortBy, $this->sortOrder);
         } else {
@@ -206,26 +207,29 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                 'firstname' => $caregiver->firstname,
                 'lastname' => $caregiver->lastname,
                 'username' => starts_with($caregiver->username, 'no_login_') ? null : $caregiver->username,
+                'email' => str_contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
                 'title' => $caregiver->title,
                 'date_of_birth' => $caregiver->date_of_birth,
                 'certification' => $caregiver->certification,
                 'gender' => $caregiver->gender,
+                'active' => $caregiver->active,
+                'status_alias' => optional($caregiver->statusAlias)->name,
+                'office_location' => $caregiver->businesses->map(function (Business $item) {
+                    return $item->name;
+                })->implode(', '),
+                'created_at' => $caregiver->created_at->toDateTimeString(),
+                'address' => optional($caregiver->getAddress())->full_address,
+                'phone' => optional($caregiver->getPhoneNumber())->number(),
+                'notification_phone' => optional($caregiver->user)->notification_phone,
+                'application_date' => optional($caregiver->application_date)->toDateTimeString(),
                 'orientation_date' => optional($caregiver->orientation_date)->toDateTimeString(),
                 'smoking_okay' => $caregiver->smoking_okay ? 'Yes' : 'No',
                 'pets_dogs_okay' => $caregiver->pets_dogs_okay ? 'Yes' : 'No',
                 'pets_cats_okay' => $caregiver->pets_cats_okay ? 'Yes' : 'No',
                 'pets_birds_okay' => $caregiver->pets_birds_okay ? 'Yes' : 'No',
                 'ethnicity' => ucfirst($caregiver->ethnicity),
-                'application_date' => optional($caregiver->application_date)->toDateTimeString(),
-                'status_alias' => optional($caregiver->statusAlias)->name,
                 'medicaid_id' => $caregiver->medicaid_id,
-                'email' => str_contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
-                'notification_phone' => optional($caregiver->user)->notification_phone,
-                'active' => $caregiver->active,
-                'address' => optional($caregiver->getAddress())->full_address,
-                'phone' => optional($caregiver->getPhoneNumber())->number(),
                 'emergency_contact' => optional($caregiver->user)->formatEmergencyContact(),
-                'created_at' => $caregiver->created_at->toDateTimeString(),
                 'referral' => optional($caregiver->referralSource)->organization,
             ];
 
