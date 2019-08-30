@@ -215,7 +215,8 @@
             },
 
             exportExcel() {
-                window.location = this.filters.toQueryString('/business/reports/caregiver-directory?export=1');
+                let sort = this.sortBy == null ? 'lastname' : this.sortBy;
+                window.location = this.filters.toQueryString(`/business/reports/caregiver-directory?export=1&sort=${sort}&desc=${this.sortDesc}`);
             },
 
             printTable() {
