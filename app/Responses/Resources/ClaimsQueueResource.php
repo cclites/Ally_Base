@@ -1,6 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\Resource;
 
 class ClaimsQueueResource extends Resource

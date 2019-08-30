@@ -12,13 +12,11 @@ use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceItem;
 use App\Shift;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ClaimsARTest extends TestCase
 {
     use RefreshDatabase;
-
 
     protected function setUp()
     {

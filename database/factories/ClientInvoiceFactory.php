@@ -13,7 +13,7 @@ $factory->define(\App\Billing\ClientInvoice::class, function (Faker $faker) {
             return $payer->id;
         },
         'name'                => mt_rand(),
-        'amount'              => $faker->numerify( '###' ),
+        'amount'              => 0.00,
         'amount_paid'         => 0,
         'offline'             => 0,
         'offline_amount_paid' => 0
