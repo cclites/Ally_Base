@@ -26,7 +26,7 @@ class ClientMetaController extends BaseController
 
         $rules = [];
         foreach ($customFields as $field) {
-            $rules[$field->key] = ($field->required ? 'required' : 'nullable') . '|string';
+            $rules[$field->key] = ($field->required ? 'required' : 'nullable');
         }
 
         \DB::beginTransaction();
