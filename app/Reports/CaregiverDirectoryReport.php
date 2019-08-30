@@ -11,9 +11,12 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     use IsDirectoryReport;
 
     // Pagination
-    private $per_page = 100;
+    private $per_page = 50;
     private $current_page = 1;
     private $total_count;
+    private $sortBy;
+    private $sortOrder;
+
     // Filters / Other
     private $alias_filter;
     private $active_filter;
@@ -40,7 +43,8 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers']);
+        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers', 'businesses'])
+            ->leftJoin('users', 'caregivers.id', '=', 'users.id');
     }
 
     /**
@@ -132,6 +136,21 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
+     * Set sorting field and direction.
+     *
+     * @param string $sortBy
+     * @param string $sortOrder
+     * @return CaregiverDirectoryReport
+     */
+    public function setSort(string $sortBy, string $sortOrder) : self
+    {
+        $this->sortBy = $sortBy;
+        $this->sortOrder = $sortOrder;
+
+        return $this;
+    }
+
+    /**
      *
      * public accessor for the total count
      */
@@ -162,6 +181,16 @@ class CaregiverDirectoryReport extends BusinessResourceReport
             $this->query()->where('status_alias_id', $this->alias_filter);
         }
 
+        if ($this->sortBy == 'lastname' || !$this->sortBy) {
+            $this->query()->orderByRaw("users.lastname {$this->sortOrder}, users.firstname {$this->sortOrder}");
+        } else if (in_array($this->sortBy, [
+            'firstname', 'id', 'username', 'email', 'date_of_birth', 'gender', 'active', 'created_at',
+        ])) {
+            $this->query()->orderBy('users.'.$this->sortBy, $this->sortOrder);
+        } else {
+            $this->query()->orderBy('caregivers.'.$this->sortBy, $this->sortOrder);
+        }
+
         // perform count-query first
         $this->total_count = $this->query()->with('meta')
             ->count();
@@ -171,9 +200,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
             $this->query()->limit($this->per_page)->offset($this->per_page * ($this->current_page - 1));
         }
 
-        $caregivers = $this->query()->get();
-
-        return $caregivers->map(function (\App\Caregiver $caregiver) {
+        return $this->query()->get()->map(function (\App\Caregiver $caregiver) {
             $data = [
                 'id' => $caregiver->id,
                 'firstname' => $caregiver->firstname,

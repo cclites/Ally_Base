@@ -22,14 +22,18 @@ class CaregiverDirectoryReportController extends BaseController
             ->get();
 
         if ($request->filled('json')) {
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sort', 'lastname');
+            $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
+
             $report = new CaregiverDirectoryReport();
-            $report->query()->leftJoin('users', 'caregivers.id', '=', 'users.id');
             $report->forRequestedBusinesses()
                 ->setCustomFields($fields)
                 ->setActiveFilter($request->active)
                 ->setStatusAliasFilter($request->status_alias_id)
-                ->setCurrentPage($request->current_page)
-                ->setPageCount(100)
+                ->setPageCount(50)
+                ->setCurrentPage($page)
+                ->setSort($sortBy, $sortOrder)
                 ->setForExport($request->export == '1');
 
             if ($request->export == '1') {
