@@ -68,9 +68,6 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo( ClientPayer::class );
     }
 
-    /**
-     * ERIK TODO => figure out if this is real and/or necessary, consult docs for next ticket about payment system
-    */
     public function payments()
     {
         return $this->hasMany( ClaimPayment::class );

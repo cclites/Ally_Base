@@ -491,7 +491,7 @@
             editClaimItem( data ){
                 // for when a claim item is edited, contains the changed amount of the item
 
-                console.log( 'transmitted edit item..', data ); // Erik TODO => clear console.logs during PR. Keep for debug
+                console.log( 'transmitted edit item..', data );
                 let invoice = this.items.find( client_invoice => client_invoice.claim && client_invoice.claim.id == data.claim_invoice_id );
 
                 // // the value in the claim is always an int, not formatted
@@ -693,26 +693,18 @@
             var urlParams = new URLSearchParams( window.location.search );
 
             if ( urlParams.has( 'start_date' ) ) {
-                // ERIK TODO => check if this search filter is even valid..
-
                 this.start_date = urlParams.get( 'start_date' );
                 autoLoad = true;
             }
 
             if ( urlParams.has( 'end_date' ) ) {
-                // ERIK TODO => check if this search filter is even valid..
-
                 this.end_date = urlParams.get( 'end_date' );
                 autoLoad = true;
             }
 
             if ( urlParams.has( 'filter' ) ) {
-                // ERIK TODO => check if this search filter is even valid..
-
                 this.filter = urlParams.get( 'filter' );
             }
-
-            // ERIK TODO => check if more search filters are to be added
 
             if ( autoLoad ) {
 
