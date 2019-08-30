@@ -371,6 +371,24 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return null;
     }
 
+    public function getFormattedGenderAttribute()
+    {
+        switch( strtolower( $this->gender ) ){
+
+            case 'm':
+
+                return 'Male';
+                break;
+            case 'f':
+
+                return 'Female';
+                break;
+            default:
+
+                return null;
+        }
+    }
+
     /**
      * Return the fully-qualified name of the role class
      *

@@ -1,75 +1,33 @@
 <template>
-
     <div>
-
         <!-- FILTERS CARD -->
         <b-row>
-
             <b-col lg="12">
-
                 <b-card
                     header="Select Filters"
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
-
                     <b-row>
-
-                        <!-- <b-col md="6" lg="3">
-
-                            <b-form-group label="Added From">
-
-                                <date-picker
-                                    name="start_date"
-                                    v-model=" form.start_date "
-                                    placeholder="Start Date"
-                                    :disabled=" busy "
-                                />
-                            </b-form-group>
+                        <b-col sm="3">
+                            <business-location-select v-model="filters.businesses" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
                         </b-col>
-                        <b-col md="6" lg="3">
-
-                            <b-form-group label="Added To">
-
-                                <date-picker
-                                    name="end_date"
-                                    v-model=" form.end_date "
-                                    placeholder="End Date"
-                                    :disabled=" busy "
-                                />
-                            </b-form-group>
-                        </b-col> -->
-                        <b-col sm="4">
-
-                            <b-form-group label="Caregiver status">
-
-                                <b-form-select v-model=" form.active ">
-
-                                    <option :value=" null ">All Caregivers</option>
-                                    <option :value=" true ">Active Caregivers</option>
-                                    <option :value=" false ">Inactive Caregivers</option>
-                                </b-form-select>
-                            </b-form-group>
+                        <b-col sm="3">
+                            <b-form-select v-model=" filters.active ">
+                                <option :value="null">All Caregivers</option>
+                                <option :value="true">Active Caregivers</option>
+                                <option :value="false">Inactive Caregivers</option>
+                            </b-form-select>
                         </b-col>
-                        <b-col sm="4">
-
-                            <b-form-group label="Status Alias">
-
-                                <b-form-select name="status_alias_id" v-model=" form.status_alias_id ">
-
-                                    <option value="">All Aliases</option>
-                                    <option v-for=" ( alias, i ) in statusAliases " :key=" i " :value=" alias.id ">{{ alias.name }}</option>
-                                </b-form-select>
-                            </b-form-group>
+                        <b-col sm="3">
+                            <b-form-select name="status_alias_id" v-model=" filters.status_alias_id ">
+                                <option value="">All Aliases</option>
+                                <option v-for=" ( alias, i ) in statusAliases " :key=" i " :value=" alias.id ">{{ alias.name }}</option>
+                            </b-form-select>
                         </b-col>
-                    </b-row>
-                    <b-row>
-
                         <b-col md="3">
-
-                            <b-button @click=" fetch() " variant="info" :disabled=" busy " class="mr-1 mt-1">
-
-                                <i class="fa fa-circle-o-notch fa-spin mr-1" v-if=" busy "></i>
+                            <b-button @click="loadTable()" variant="info" :disabled="busy">
+                                <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                                 Generate Report
                             </b-button>
                         </b-col>
@@ -80,77 +38,51 @@
 
         <!-- TABLE CARD -->
         <b-row>
-
             <b-col lg="12">
-
                 <b-card>
-
                     <b-row class="mb-2">
-
-                        <!-- <b-col sm="6">
-
-                            <report-column-picker prefix="caregiver_directory_" v-bind:columns.sync="columns" />
-                        </b-col> -->
                         <b-col sm="12" class="text-right">
-
                             <b-btn @click=" exportExcel() " variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
 
                     <b-row>
-
                         <b-col lg="6">
-
-                            <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" form.current_page "/>
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
                         </b-col>
-                        <b-col lg="6" class="d-flex justify-content-end align-content-center">
-
-                            <p style="height:25px; margin: auto 0;">{{ paginationStats }}</p>
+                        <b-col lg="6" class="text-right">
+                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
 
                     <div id="table" class="table-responsive">
-
                         <b-table
                             bordered striped hover show-empty
-                            :items=" items "
-                            :fields=" fields "
-                            :per-page=" 100 "
+                            :items="itemProvider"
+                            :fields="fields"
+                            :current-page.sync="currentPage"
+                            :per-page="perPage"
+                            :sort-by.sync="sortBy"
+                            :sort-desc.sync="sortDesc"
+                            :busy="loading"
+                            ref="table"
                         >
-
-                            <template v-for=" field in fields " :slot=" field.key || field " scope="data" >
-
-                                <slot v-bind="data" :name="field.key || field"> {{ renderCell( data.item, field ) }}</slot>
+                            <template slot="id" scope="row">
+                                <a :href="`/business/caregivers/${row.item.id}`" target="_blank">{{ row.item.id }}</a>
                             </template>
                             <template slot="active" scope="row">
-
                                 {{ row.item.active ? 'Active' : 'Inactive' }}
-                            </template>
-                            <template slot="address" scope="row">
-
-                                {{ addressFormat( row.item.address ) }}
-                            </template>
-                            <template slot="created_at" scope="row">
-
-                                {{ formatDate( row.item.user.created_at ) }}
-                            </template>
-                            <template v-for="key in customFieldKeys" :slot="key" scope="row">
-
-                                {{ getFieldValue( row.item.meta, key ) }}
                             </template>
                         </b-table>
                     </div>
 
                     <b-row>
-
                         <b-col lg="6">
-
-                            <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" form.current_page "/>
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
                         </b-col>
                         <b-col lg="6" class="text-right">
-
-                            <p style="height:25px; margin: auto 0;">{{ paginationStats }}</p>
+                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                         </b-col>
                     </b-row>
                 </b-card>
@@ -160,278 +92,136 @@
 </template>
 
 <script>
-
-    // hiding this for now until implemented server-side
-    // right now the tabvle sorts the current page
-    // :sort-by.sync=" sort "
-    // @filtered=" onFiltered "
-
-    import moment from 'moment';
+    import BusinessLocationSelect from "./../../business/BusinessLocationSelect";
     import FormatsListData from '../../../mixins/FormatsListData';
-    // import UserDirectory from '../../../mixins/UserDirectory';
     import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
-
-        mixins: [ FormatsListData, FormatsDates ],
+        mixins: [FormatsListData, FormatsDates],
+        components: {BusinessLocationSelect},
         props: {
-
             customFields: {
-
-                type     : Array,
-                required : true,
+                type: Array,
+                required: true,
             },
         },
+
         data() {
-
             return {
-
-                form : new Form({
-
-                    active          : null,
-                    // start_date : moment().subtract( 6, 'days' ).format( 'MM/DD/YYYY' ),
-                    // end_date   : moment().format( 'MM/DD/YYYY' ),
-                    current_page    : 1,
-                    status_alias_id : '',
-                    json            : 1
+                filters: new Form({
+                    businesses: '',
+                    active: null,
+                    status_alias_id: '',
+                    json: 1
                 }),
-                busy            : false,
-                statusAliases   : [],
-                totalRows       : 0,
-                perPage         : 100,
-                customFieldKeys : [],
-                items           : [],
-                columns         : {
-                    firstname: {
-                        key: 'firstname',
-                        label: 'First name',
-                        shouldShow: true,
+                loading: false,
+                busy: false,
+                statusAliases: [],
+                totalRows: 0,
+                perPage: 50,
+                currentPage: 1,
+                sortBy: 'lastname',
+                sortDesc: false,
+                columns: {
+                    id: { label: 'ID', sortable: true, },
+                    firstname: { label: 'First name', sortable: true, },
+                    lastname: { label: 'Last name', sortable: true, },
+                    username: { label: 'User Name', sortable: true, },
+                    email: { sortable: true, },
+                    title: { sortable: true, },
+                    date_of_birth: { sortable: true, formatter: x => x ? this.formatDate(x) : '-' },
+                    certification: { sortable: true, },
+                    gender: { sortable: true, },
+                    active: { label: 'Caregiver Status', sortable: true, },
+                    status_alias: { sortable: false, },
+                    office_location: { label: 'Office Locations', sortable: false },
+                    created_at: {
+                        label: 'Date Added',
+                        sortable: true,
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
                     },
-                    lastname: {
-                        key: 'lastname',
-                        label: 'Last name',
-                        shouldShow: true,
-                    },
-                    username: {
-                        key: 'username',
-                        label: 'User Name',
-                        shouldShow: true,
-                    },
-                    title: {
-                        key: 'title',
-                        label: 'Title',
-                        shouldShow: true,
-                    },
-                    certification: {
-                        key: 'certification',
-                        label: 'Certification',
-                        shouldShow: true,
-                    },
-                    gender: {
-                        key: 'gender',
-                        label: 'Gender',
-                        shouldShow: true,
+                    address: { sortable: false, },
+                    phone: { sortable: false, },
+                    notification_phone: { sortable: true },
+                    application_date: {
+                        sortable: true,
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
                     },
                     orientation_date: {
-                        key: 'orientation_date',
-                        label: 'Orientation Date',
-                        shouldShow: true,
-                        formatter: val => this.formatDate(val)
+                        sortable: true,
+                        formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'
                     },
-                    smoking_okay: {
-                        key: 'smoking_okay',
-                        label: 'Smoking Okay',
-                        shouldShow: true,
-                    },
-                    ethnicity: {
-                        key: 'ethnicity',
-                        label: 'Ethnicity',
-                        shouldShow: true,
-                    },
-                    application_date: {
-                        key: 'application_date',
-                        label: 'Application Date',
-                        shouldShow: true,
-                        formatter: val => this.formatDate(val)
-                    },
-                    status_alias: {
-                        key: 'status_alias_name',
-                        label: 'Status Alias',
-                        shouldShow: true,
-                    },
-                    medicaid_id: {
-                        key: 'medicaid_id',
-                        label: 'Medicaid ID',
-                        shouldShow: true
-                    },
-                    email: {
-                        key: 'email',
-                        label: 'Email',
-                        shouldShow: true,
-                        formatter: this.formatEmail,
-                    },
-                    notification_phone: {
-                        key: 'phone',
-                        label: 'Phone',
-                        shouldShow: true,
-                    },
-                    active: {
-                        key: 'active',
-                        label: 'Caregiver Status',
-                        shouldShow: true,
-                    },
-                    address: {
-                        key: 'address',
-                        label: 'Address',
-                        shouldShow: true,
-                    },
-                    phone: {
-                        key: 'phone',
-                        label: 'Phone',
-                        shouldShow: true,
-                    },
-                    emergency_contact: {
-                        key: 'emergency_contact',
-                        label: 'Emergency Contact',
-                        shouldShow: true,
-                    },
-                    created_at: {
-                        key: 'created_at',
-                        label: 'Date Added',
-                        shouldShow: true,
-                        formatter: val => this.formatDate(val)
-                    },
-                    referral: {
-                        key: 'referral',
-                        label: 'Referral',
-                        shouldShow: true,
-                    },
+                    smoking_okay: { sortable: true, },
+                    pets_dogs_okay: { sortable: true, },
+                    pets_cats_okay: { sortable: true, },
+                    pets_birds_okay: { sortable: true, },
+                    ethnicity: { sortable: true, },
+                    medicaid_id: { label: 'Medicaid ID', sortable: true },
+                    emergency_contact: { label: 'Emergency Contact', sortable: false, },
+                    referral: { sortable: false, },
                 },
             };
         },
+
         computed: {
-
             fields() {
-
-                let fields = Object.keys( this.columns ).filter( key => this.columns[ key ].shouldShow );
-                fields = fields.map( col => ({
-
-                    sortable : true,
-                    ...this.columns[ col ],
-                }));
-
-                return fields;
+                let cols = this.columns;
+                this.customFields.forEach(x => {
+                    cols[x.key] = {
+                        key: x.key,
+                        sortable: false,
+                    }
+                });
+                return cols;
             },
-            paginationStats(){
-
-                if( this.busy ) return `Fetching page ${this.form.current_page}`;
-
-                const offset = this.perPage * ( this.form.current_page - 1 );
-                const current_last = offset + this.items.length;
-                return `Showing ${offset} - ${current_last} of ${this.totalRows} results`;
-            }
         },
-        watch: {
 
-            'form.current_page' : function( val, oldVal ){
-
-                this.fetch();
-            }
-        },
         methods: {
-
-            async fetchStatusAliases() {
-
-                let response = await axios.get( '/business/status-aliases' );
-                if ( response.data && response.data.caregiver ) {
-
-                    // console.log( response.data.caregiver );
-                    this.statusAliases = response.data.caregiver.map( alias => { return { 'name' : alias.name, 'id' : alias.id } } );
-                }
+            loadTable() {
+                this.$refs.table.refresh();
             },
-            fetch() {
 
-                this.busy = true;
-                this.form.get( '/business/reports/caregiver-directory' )
+            itemProvider(ctx) {
+                this.loading = true;
+                let sort = ctx.sortBy == null ? 'lastname' : ctx.sortBy;
+                return this.filters.get(`/business/reports/caregiver-directory?&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
-
-                        console.log( 'data retreived: ', data );
-                        this.items     = data.rows;
                         this.totalRows = data.total;
+                        return data.rows || [];
                     })
-                    .catch( err => {
-
-                        console.error( err );
+                    .catch(() => {
+                        return [];
                     })
                     .finally(() => {
+                        this.loading = false;
+                    });
+            },
 
-                        this.busy = false;
+            async fetchStatusAliases() {
+                axios.get(`/business/status-aliases`)
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data.caregiver;
+                        } else {
+                            this.statusAliases = [];
+                        }
                     })
+                    .catch(() => {});
             },
-            renderCell( row, field ) {
 
-                const value = row[ field.key || field ];
-                return field.formatter ? field.formatter( value ) : value;
+            exportExcel() {
+                let sort = this.sortBy == null ? 'lastname' : this.sortBy;
+                window.location = this.filters.toQueryString(`/business/reports/caregiver-directory?export=1&sort=${sort}&desc=${this.sortDesc}`);
             },
-            exportExcel(){
 
-                window.location = this.form.toQueryString( '/business/reports/caregiver-directory?export=1' );
-            },
             printTable() {
-
-                $( '#table' ).print();
+                $('#table').print();
             },
-
-            getFieldValue( meta, key ) {
-
-                const metaField = meta.find(fieldValue => fieldValue.key == key);
-                const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
-                const isDropdown = options.length > 0;
-
-                if( !metaField ) {
-
-                    return fieldDefault;
-                }
-
-                return isDropdown ? this.getDropdownLabel( options, metaField.value ) : metaField.value;
-            },
-
-            getDropdownLabel( options, key ) {
-
-                let option = options.find( option => option.value == key );
-                return option ? option.label : '-';
-            }
         },
-        created(){
 
-            this.fetch();
-
-            const obj = {};
-            const customKeys = [];
-            this.customFields.forEach(({ key, label }) => {
-
-                customKeys.push( key );
-                obj[ key ] = {
-
-                    sortable   : true,
-                    shouldShow : true,
-                    key,
-                    label,
-                };
-            });
-
-            this.customFieldKeys = customKeys;
-
-            this.columns = {
-
-                ...this.columns,
-                ...obj,
-            };
-        },
-        async mounted(){
-
+        async mounted() {
             await this.fetchStatusAliases();
-        }
+        },
     }
 </script>
  
