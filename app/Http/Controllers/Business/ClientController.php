@@ -90,8 +90,8 @@ class ClientController extends BaseController
 
             $data = [
 
-                $total,
-                $clients
+                'total'   => $total,
+                'clients' => $clients
             ];
 
             return $data;

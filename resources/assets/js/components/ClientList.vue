@@ -48,7 +48,6 @@
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
                     :filter="filters.search"
-                    @filtered="onFiltered"
                 >
                     <template slot="payment_type" scope="row">
                         {{ paymentTypes.find(type => type.value == row.item.payment_type).text }}
@@ -154,7 +153,7 @@
             }
         },
 
-        async created() {
+        async mounted() {
 
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
@@ -226,23 +225,33 @@
 
                 console.log( 'BEING CALLED WITH URL: ', this.listUrl );
                 this.loading = true;
+                this.clients = [];
 
-                const res = await axios.get( this.listUrl );
+                axios.get( this.listUrl )
+                    .then( res => {
 
-                console.log( 'response: ', res );
-                this.totalRows = res.data[ 0 ];
+                        console.log( 'response: ', res );
+                        this.totalRows = res.data[ 'total' ];
 
-                console.log( 'total rows: ', this.totalRows );
+                        console.log( 'total rows: ', this.totalRows );
 
-                this.clients = res.data[ 1 ].map( client => {
+                        this.clients = res.data[ 'clients' ].map( client => {
 
-                    client.county = client.address ? client.address.county : '';
-                    client.case_manager_name = client.case_manager ? client.case_manager.name : null;
-                    return client;
-                });
+                            client.county = client.address ? client.address.county : '';
+                            client.case_manager_name = client.case_manager ? client.case_manager.name : null;
+                            return client;
+                        });
 
-                this.updateSavedFormFilters();
-                this.loading = false;
+                        this.updateSavedFormFilters();
+                    })
+                    .catch( err => {
+
+                        console.error( err );
+                    })
+                    .finally( () => {
+
+                        this.loading = false;
+                    });
             },
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
@@ -258,11 +267,6 @@
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
-            },
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
             },
             async fetchStatusAliases() {
                 this.loading = true;
