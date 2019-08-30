@@ -2,26 +2,23 @@
 namespace App\Reports;
 
 use App\Caregiver;
-use App\Traits\IsDirectoryReport;
 use App\CustomField;
-use Carbon\Carbon;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Traits\IsDirectoryReport;
+use Illuminate\Support\Collection;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
     use IsDirectoryReport;
 
-    private $per_page = 10; // simple default for 'limit'
-    private $current_page = 1; // simple default.. maybe it should start at zero?
+    // Pagination
+    private $per_page = 100;
+    private $current_page = 1;
     private $total_count;
-
+    // Filters / Other
     private $alias_filter;
     private $active_filter;
-
-    private $start_date;
-    private $end_date;
-
     private $for_export;
+    private $customFields = [];
 
     /**
      * @var bool
@@ -43,7 +40,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Caregiver::with([ 'user', 'address', 'user.emergencyContacts', 'user.phoneNumbers' ]);
+        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers']);
     }
 
     /**
@@ -59,10 +56,10 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     /**
      * Filter by active status.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param bool|string|int $active
+     * @return CaregiverDirectoryReport
      */
-    public function setActiveFilter( $active ) : self
+    public function setActiveFilter($active): self
     {
         $this->active_filter = $active;
 
@@ -72,10 +69,10 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     /**
      * set for export flag
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param bool $flag
+     * @return CaregiverDirectoryReport
      */
-    public function setForExport( $flag ) : self
+    public function setForExport(bool $flag): self
     {
         $this->for_export = $flag;
 
@@ -85,10 +82,10 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     /**
      * Filter by status alias.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param int|string $alias_id
+     * @return CaregiverDirectoryReport
      */
-    public function setStatusAliasFilter( $alias_id ) : self
+    public function setStatusAliasFilter($alias_id): self
     {
         $this->alias_filter = $alias_id;
 
@@ -96,12 +93,25 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Set number of records to pagniate per page
+     * Set the custom fields that should be returned.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param iterable $customFields
+     * @return CaregiverDirectoryReport
      */
-    public function setPageCount( $count ) : self
+    public function setCustomFields(iterable $customFields): self
+    {
+        $this->customFields = $customFields;
+
+        return $this;
+    }
+
+    /**
+     * Set number of records to paginate per page
+     *
+     * @param int|string $count
+     * @return CaregiverDirectoryReport
+     */
+    public function setPageCount($count): self
     {
         $this->per_page = $count;
 
@@ -111,10 +121,10 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     /**
      * Set current page
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param int|string $page
+     * @return CaregiverDirectoryReport
      */
-    public function setCurrentPage( $page ) : self
+    public function setCurrentPage($page): self
     {
         $this->current_page = $page;
 
@@ -122,21 +132,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Filter by date
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
-     */
-    public function setDateFilter( $start_date = null, $end_date = null ) : self
-    {
-        if( $start_date ) $this->start_date = $start_date;
-        if( $end_date ) $this->end_date = $end_date;
-
-        return $this;
-    }
-
-    /**
-     * 
      * public accessor for the total count
      */
     public function getTotalCount()
@@ -151,78 +147,97 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     protected function results(): ?iterable
     {
-        switch( $this->active_filter ){
-
+        switch ($this->active_filter) {
             case 'true':
-
                 $this->query()->active();
                 break;
             case 'false':
-
                 $this->query()->inactive();
                 break;
             default:
-
                 break;
         }
 
-        // date filters are not desired at this moment, kept for reference
-        // if( $this->start_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '>=', ( new Carbon( $this->start_date . ' 00:00:00', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
-        // if( $this->end_date ) $this->query()->whereHas( 'user', function( $query ){ $query->where( 'users.created_at', '<=', ( new Carbon( $this->end_date . ' 23:59:59', 'America/New_York' ) )->setTimezone( 'UTC' ) ); } );
-
-        if( $this->alias_filter ) $this->query()->where( 'status_alias_id', $this->alias_filter );
-
-        // perform count-query first
-        $this->total_count = $this->query()->with( 'meta' )
-            ->count();
-
-
-        // implement pagination manually
-        if( !$this->for_export ){
-
-            $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+        if ($this->alias_filter) {
+            $this->query()->where('status_alias_id', $this->alias_filter);
         }
 
+        // perform count-query first
+        $this->total_count = $this->query()->with('meta')
+            ->count();
+
+        // implement pagination only when not exporting
+        if (! $this->for_export) {
+            $this->query()->limit($this->per_page)->offset($this->per_page * ($this->current_page - 1));
+        }
 
         $caregivers = $this->query()->get();
 
-        $data = $caregivers->map( function( $caregiver ){
-
-            return [
-
-                'NameLastFirst'              => $caregiver->nameLastFirst                                              ?? '',
-                'Certification'              => $caregiver->certification                                              ?? '',
-                'Phone Number'               => $caregiver->notification_phone                                         ?? '',
-                'Username'                   => $caregiver->username                                                   ?? '',
-                'Email'                      => $caregiver->email                                                      ?? '',
-                'Notification Email'         => $caregiver->notification_email                                         ?? '',
-                'Date Of Birth'              => Carbon::parse( $caregiver->date_of_birth )->format( 'm/d/Y' )          ?? '',
-                'Role Type'                  => $caregiver->role_type                                                  ?? '',
-                'Onboarded'                  => Carbon::parse( $caregiver->onboarded )->format( 'm/d/Y' )              ?? '',
-                'W9 Name'                    => $caregiver->w9_name                                                    ?? '',
-                'Medicaid Id'                => $caregiver->medicaid_id                                                ?? '',
-                'Gender'                     => $caregiver->gender                                                     ? $caregiver->formatted_gender : '',
-                'Deactivation Note'          => $caregiver->deactivation_note                                          ?? '',
-                'Smoking Okay'               => $caregiver->smoking_okay                                               ? 'Yes' : 'No',
-                'Pets Dogs Okay'             => $caregiver->pets_dogs_okay                                             ? 'Yes' : 'No',
-                'Pets Cats Okay'             => $caregiver->pets_cats_okay                                             ? 'Yes' : 'No',
-                'Pets Birds Okay'            => $caregiver->pets_birds_okay                                            ? 'Yes' : 'No',
-                'Ethnicity'                  => $caregiver->ethnicity                                                  ?? '',
-                'Active'                     => $caregiver->active                                                     ? 'Active' : 'Inactive',
-                'Inactive At'                => Carbon::parse( $caregiver->inactive_at )->format( 'm/d/Y' )            ?? '',
-                'Welcome Email Sent'         => Carbon::parse( $caregiver->welcome_email_sent_at )->format( 'm/d/Y' )  ?? '',
-                'Training Email Sent'        => Carbon::parse( $caregiver->training_email_sent_at )->format( 'm/d/Y' ) ?? '',
-                'Setup Status'               => $caregiver->setup_status                                               ? title_case( str_replace( '_', ' ', $caregiver->setup_status ) ) : '',
-                'Allow Sms Notifications'    => $caregiver->allow_sms_notifications                                    ? 'Yes' : 'No',
-                'Allow Email Notifications'  => $caregiver->allow_email_notifications                                  ? 'Yes' : 'No',
-                'Allow System Notifications' => $caregiver->allow_system_notifications                                 ? 'Yes' : 'No',
-                'Emergency Contact'          => $caregiver->user->formatEmergencyContact()                             ?? '',
-                'Referral'                   => $caregiver->referralSource                                             ? $caregiver->referralSource->organization : '',
-                'Status Alias Name'          => $caregiver->statusAliasName                                            ?? '',
-                'Masked Ssn'                 => $caregiver->masked_ssn                                                 ?? '',
+        return $caregivers->map(function (\App\Caregiver $caregiver) {
+            $data = [
+                'id' => $caregiver->id,
+                'firstname' => $caregiver->firstname,
+                'lastname' => $caregiver->lastname,
+                'username' => starts_with($caregiver->username, 'no_login_') ? null : $caregiver->username,
+                'title' => $caregiver->title,
+                'date_of_birth' => $caregiver->date_of_birth,
+                'certification' => $caregiver->certification,
+                'gender' => $caregiver->gender,
+                'orientation_date' => optional($caregiver->orientation_date)->toDateTimeString(),
+                'smoking_okay' => $caregiver->smoking_okay ? 'Yes' : 'No',
+                'pets_dogs_okay' => $caregiver->pets_dogs_okay ? 'Yes' : 'No',
+                'pets_cats_okay' => $caregiver->pets_cats_okay ? 'Yes' : 'No',
+                'pets_birds_okay' => $caregiver->pets_birds_okay ? 'Yes' : 'No',
+                'ethnicity' => ucfirst($caregiver->ethnicity),
+                'application_date' => optional($caregiver->application_date)->toDateTimeString(),
+            'status_alias' => optional($caregiver->statusAlias)->name,
+                'medicaid_id' => $caregiver->medicaid_id,
+                'email' => str_contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
+            'notification_phone' => optional($caregiver->user)->notification_phone,
+                'active' => $caregiver->active,
+            'address' => optional($caregiver->getAddress())->full_address,
+            'phone' => optional($caregiver->getPhoneNumber())->number(),
+            'emergency_contact' => optional($caregiver->user)->formatEmergencyContact(),
+                'created_at' => $caregiver->created_at->toDateTimeString(),
+            'referral' => optional($caregiver->referralSource)->organization,
             ];
-        });
 
-        return $data;
+            $meta = [];
+            foreach ($this->customFields as $field) {
+                $meta[$field->key] = $this->mapMetaField($field, $caregiver->meta);
+            }
+            $data = array_merge($data, $meta);
+
+            return $data;
+        });
+    }
+
+    /**
+     * Get Caregiver's meta value for custom field.
+     *
+     * @param CustomField $field
+     * @param Collection|null $caregiverMeta
+     * @return string|null
+     */
+    private function mapMetaField(CustomField $field, ?Collection $caregiverMeta)
+    {
+        if (empty($caregiverMeta)) {
+            return null;
+        }
+
+        if ($meta = $caregiverMeta->where('key', $field->key)->first()) {
+            $value = $meta->display();
+
+            // trim longer values for the table
+            if (! $this->for_export) {
+                if (strlen($value) > 25 && in_array($field->type, ['input', 'textarea'])) {
+                    return substr($value, 0, 25) . '...';
+                }
+            }
+
+            return $value;
+        }
+
+        return null;
     }
 }

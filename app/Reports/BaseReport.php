@@ -6,6 +6,7 @@ use App\Shift;
 use Carbon\Carbon;
 use File;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Collections\SheetCollection;
 use Maatwebsite\Excel\Facades\Excel;
 use PHPExcel_IOFactory;
 
@@ -187,6 +188,7 @@ abstract class BaseReport implements Report
 
                 $data = $this->setHeadersFormat()
                              ->setNumericToFloatFormat()
+                             ->setNullsToStrings()
                              ->setScalarFilter()
                              ->toArray();
 
@@ -279,6 +281,21 @@ abstract class BaseReport implements Report
     }
 
     /**
+     * Fix all null values to return empty strings.
+     *
+     * @return $this
+     */
+    public function setNullsToStrings()
+    {
+        $this->formatters['fix_null'] = function($row) {
+            return array_map(function($value) {
+                return $value === null ? '': $value;
+            }, $row);
+        };
+        return $this;
+    }
+
+    /**
      * Format all date time values to a specified format and timezone
      *
      * @param $format
@@ -319,5 +336,4 @@ abstract class BaseReport implements Report
 
         return $this;
     }
-
 }
