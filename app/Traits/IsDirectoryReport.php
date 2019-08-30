@@ -1,6 +1,9 @@
 <?php
 namespace App\Traits;
 
+use App\CustomField;
+use Illuminate\Support\Collection;
+
 trait IsDirectoryReport {
     
     /**
@@ -63,5 +66,34 @@ trait IsDirectoryReport {
 
             return $entry;
         });
+    }
+
+    /**
+     * Get User's meta value for custom field.
+     *
+     * @param CustomField $field
+     * @param Collection|null $userMeta
+     * @return string|null
+     */
+    protected function mapMetaField(CustomField $field, ?Collection $userMeta)
+    {
+        if (empty($userMeta)) {
+            return null;
+        }
+
+        if ($meta = $userMeta->where('key', $field->key)->first()) {
+            $value = $meta->display();
+
+            // trim longer values for the table
+            if (! $this->for_export) {
+                if (strlen($value) > 25 && in_array($field->type, ['input', 'textarea'])) {
+                    return substr($value, 0, 25) . '...';
+                }
+            }
+
+            return $value;
+        }
+
+        return null;
     }
 }

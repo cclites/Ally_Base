@@ -10,7 +10,7 @@
                 >
                     <b-row>
                         <b-col sm="3">
-                            <business-location-select v-model="filters.business" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
+                            <business-location-select v-model="filters.businesses" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
                         </b-col>
                         <b-col sm="3">
                             <b-form-select v-model=" filters.active ">
@@ -41,9 +41,6 @@
             <b-col lg="12">
                 <b-card>
                     <b-row class="mb-2">
-                        <!-- <b-col sm="6">
-                            <report-column-picker prefix="caregiver_directory_" v-bind:columns.sync="columns" />
-                        </b-col> -->
                         <b-col sm="12" class="text-right">
                             <b-btn @click=" exportExcel() " variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
@@ -112,7 +109,7 @@
         data() {
             return {
                 filters: new Form({
-                    business: '',
+                    businesses: '',
                     active: null,
                     status_alias_id: '',
                     json: 1
@@ -210,10 +207,6 @@
                     .catch(() => {});
             },
 
-            updateSortOrder(){
-                this.setLocalStorage('sortBy', this.sortBy);
-            },
-
             exportExcel() {
                 let sort = this.sortBy == null ? 'lastname' : this.sortBy;
                 window.location = this.filters.toQueryString(`/business/reports/caregiver-directory?export=1&sort=${sort}&desc=${this.sortDesc}`);
@@ -226,12 +219,6 @@
 
         async mounted() {
             await this.fetchStatusAliases();
-        },
-
-        watch: {
-            sortBy() {
-                this.updateSortOrder();
-            }
         },
     }
 </script>

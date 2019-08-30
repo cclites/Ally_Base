@@ -217,16 +217,16 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                 'pets_birds_okay' => $caregiver->pets_birds_okay ? 'Yes' : 'No',
                 'ethnicity' => ucfirst($caregiver->ethnicity),
                 'application_date' => optional($caregiver->application_date)->toDateTimeString(),
-            'status_alias' => optional($caregiver->statusAlias)->name,
+                'status_alias' => optional($caregiver->statusAlias)->name,
                 'medicaid_id' => $caregiver->medicaid_id,
                 'email' => str_contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
-            'notification_phone' => optional($caregiver->user)->notification_phone,
+                'notification_phone' => optional($caregiver->user)->notification_phone,
                 'active' => $caregiver->active,
-            'address' => optional($caregiver->getAddress())->full_address,
-            'phone' => optional($caregiver->getPhoneNumber())->number(),
-            'emergency_contact' => optional($caregiver->user)->formatEmergencyContact(),
+                'address' => optional($caregiver->getAddress())->full_address,
+                'phone' => optional($caregiver->getPhoneNumber())->number(),
+                'emergency_contact' => optional($caregiver->user)->formatEmergencyContact(),
                 'created_at' => $caregiver->created_at->toDateTimeString(),
-            'referral' => optional($caregiver->referralSource)->organization,
+                'referral' => optional($caregiver->referralSource)->organization,
             ];
 
             $meta = [];
@@ -237,34 +237,5 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
             return $data;
         });
-    }
-
-    /**
-     * Get Caregiver's meta value for custom field.
-     *
-     * @param CustomField $field
-     * @param Collection|null $caregiverMeta
-     * @return string|null
-     */
-    private function mapMetaField(CustomField $field, ?Collection $caregiverMeta)
-    {
-        if (empty($caregiverMeta)) {
-            return null;
-        }
-
-        if ($meta = $caregiverMeta->where('key', $field->key)->first()) {
-            $value = $meta->display();
-
-            // trim longer values for the table
-            if (! $this->for_export) {
-                if (strlen($value) > 25 && in_array($field->type, ['input', 'textarea'])) {
-                    return substr($value, 0, 25) . '...';
-                }
-            }
-
-            return $value;
-        }
-
-        return null;
     }
 }
