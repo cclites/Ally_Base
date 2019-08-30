@@ -10,7 +10,6 @@ use App\ClaimableExpense;
 use App\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceItem;
-use App\Responses\Resources\ClaimResource;
 use App\Shift;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;

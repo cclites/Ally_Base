@@ -7,7 +7,7 @@ use App\Http\Requests\TransmitClaimRequest;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use App\Responses\Resources\ClaimResource;
+use App\Responses\Resources\ClaimsQueueResource;
 
 class ClaimsQueueController extends BaseController
 {
@@ -86,7 +86,7 @@ class ClaimsQueueController extends BaseController
             }
 
             $invoices = $invoiceQuery->with([ 'client', 'clientPayer.payer', 'payments', 'claimInvoice' ])->get();
-            $coll = ClaimResource::collection( $invoices );
+            $coll = ClaimsQueueResource::collection( $invoices );
 
             // dd( $coll );
 
