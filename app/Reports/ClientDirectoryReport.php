@@ -44,7 +44,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Client::with(['user', 'address', 'user.phoneNumbers', 'business'])
+        $this->query = Client::with(['user', 'addresses', 'creator', 'updator', 'statusAlias', 'evvPhone', 'salesperson', 'caseManager', 'referralSource', 'evvAddress', 'business'])
             ->leftJoin('users', 'clients.id', '=', 'users.id');
     }
 

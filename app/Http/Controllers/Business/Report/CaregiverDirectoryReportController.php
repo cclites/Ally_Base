@@ -26,6 +26,8 @@ class CaregiverDirectoryReportController extends BaseController
             $sortBy = $request->input('sort', 'lastname');
             $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
 
+            \DB::enableQueryLog();
+
             $report = new CaregiverDirectoryReport();
             $report->forRequestedBusinesses()
                 ->setCustomFields($fields)
@@ -44,6 +46,8 @@ class CaregiverDirectoryReportController extends BaseController
             // rows() has to be called for the private variable total_count to be set within the report
             $rows = $report->rows();
             $total = $report->getTotalCount();
+
+            \Log::info(\DB::getQueryLog());
 
             return response()->json(['rows' => $rows, 'total' => $total]);
         }

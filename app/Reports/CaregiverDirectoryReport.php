@@ -3,9 +3,7 @@ namespace App\Reports;
 
 use App\Business;
 use App\Caregiver;
-use App\CustomField;
 use App\Traits\IsDirectoryReport;
-use Illuminate\Support\Collection;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
@@ -44,7 +42,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Caregiver::with(['user', 'address', 'user.emergencyContacts', 'user.phoneNumbers', 'businesses'])
+        $this->query = Caregiver::with(['user', 'statusAlias', 'address', 'phoneNumber', 'user.emergencyContacts', 'user.phoneNumbers', 'businesses', 'referralSource'])
             ->leftJoin('users', 'caregivers.id', '=', 'users.id');
     }
 
