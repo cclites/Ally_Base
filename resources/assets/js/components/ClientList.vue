@@ -64,7 +64,7 @@
 
             <b-row>
                 <b-col lg="6" >
-                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                    <b-pagination :total-rows=" totalRows " :per-page="perPage" v-model="currentPage" />
                 </b-col>
                 <b-col lg="6" class="text-right">
                     Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
@@ -154,50 +154,88 @@
             }
         },
 
-        async mounted() {
+        async created() {
+
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
-            this.loadClients();
             this.loadOfficeUsers();
+            await this.loadClients();
         },
 
         computed: {
-            listUrl() {
-                const {client_type, business_id, status, caseManager} = this.filters;
-                let active = '';
-                let aliasId = '';
-                if (status === '') {
-                    active = '';
-                } else if (status === 'active') {
-                    active = 1;
-                } else if (status === 'inactive') {
-                    active = 0;
-                } else {
-                    aliasId = status;
-                    let alias = this.statuses.client.find(x => x.id == this.filters.status);
-                    if (alias) {
-                        aliasId = alias.id;
-                        active = alias.active;
-                    }
-                }
-
-                return `/business/clients?json=1&address=1&case_managers=1&businesses[]=${business_id}&active=${active}&status=${aliasId}&client_type=${client_type}&case_manager_id=${caseManager}`;
-            },
 
             filteredCaseManagers() {
                 return (!this.filters.business_id)
                     ? this.caseManagers
                     : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
-            }
+            },
 
+            listUrl() {
+
+                // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
+
+                let query = '/business/clients?json=1';
+                query += '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
+
+                // pagination controls
+                query += '&page=' + this.currentPage;
+                query += '&perPage=' + this.perPage;
+                query += '&sortBy=' + this.sortBy;
+                query += '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
+
+                let active = this.filters.status;
+                let aliasId = '';
+                switch( active ){
+
+                    case '':
+
+                        active = '';
+                        break;
+                    case 'active':
+
+                        break;
+                    case 'inactive':
+
+                        break;
+                    default:
+
+                        aliasId = this.filters.status;
+                        let alias = this.statuses.client.find( x => x.id == this.filters.status );
+                        if ( alias ) {
+
+                            aliasId = alias.id;
+                            active  = alias.active;
+                        }
+                        break;
+                }
+
+                query += '&active=' + active;
+                query += '&status=' + aliasId;
+
+                query += '&client_type=' + this.filters.client_type;
+                query += '&case_manager_id=' + this.filters.caseManager;
+                query += '&businesses[]=' + this.filters.business_id;
+
+                return query;
+            },
         },
 
         methods: {
-            async loadClients() {
-                this.loading = true;
-                const response = await axios.get(this.listUrl);
 
-                this.clients = response.data.map(client => {
+            async loadClients() {
+
+                console.log( 'BEING CALLED WITH URL: ', this.listUrl );
+                this.loading = true;
+
+                const res = await axios.get( this.listUrl );
+
+                console.log( 'response: ', res );
+                this.totalRows = res.data[ 0 ];
+
+                console.log( 'total rows: ', this.totalRows );
+
+                this.clients = res.data[ 1 ].map( client => {
+
                     client.county = client.address ? client.address.county : '';
                     client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
@@ -268,7 +306,10 @@
         },
 
         watch: {
+
             listUrl() {
+
+                console.log( 'asdasdasdasd' );
                 this.loadClients();
             },
 

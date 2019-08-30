@@ -38,8 +38,14 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        if ($request->expectsJson()) {
-            $query = Client::forRequestedBusinesses()->ordered();
+        if ( $request->filled( 'json' ) || $request->expectsJson() ) {
+
+            $query = Client::forRequestedBusinesses();
+
+            // sorting controls using the BaseModel class
+            $this->orderedColumn = $request->input( 'sortBy', 'users.lastname' ); // Erik TODO => this may need adjustments
+            $order = $request->input( 'sortDirection', 'asc' );
+            $query->ordered( $order );
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -70,8 +76,25 @@ class ClientController extends BaseController
                 $query->with('caseManager');
             }
 
+            // grab total before pagination
+            $total = $query->count();
+
+            // pagination controls
+            $per_page     = $request->input( 'perPage', 50 );
+            $current_page = $request->input( 'page', 1 );
+            $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
+
             $clients = $query->get();
-            return $clients;
+
+            // dd( $clients->first()->id );
+
+            $data = [
+
+                $total,
+                $clients
+            ];
+
+            return $data;
         }
 
         return view('business.clients.index');
