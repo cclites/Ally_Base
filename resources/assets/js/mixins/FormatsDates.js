@@ -1,15 +1,18 @@
 export default {
     methods: {
-        formatDate( date, format='MM/DD/YYYY', fromFormat = null, dash = false ) {
+        formatDate( date, format='MM/DD/YYYY', fromFormat = null, dash = true ) {
 
-            if( dash && [ null, 'null' ].includes( date ) ) return '-';
-
+            if( dash && [ null, 'null' ].includes( date ) ) {
+                return '-';
+            }
+            
             return moment(date, fromFormat).format(format);
         },
 
-        formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null, dash = false ) {
-
-            if( dash && [ null, 'null' ].includes( date ) ) return '-';
+        formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null, dash = true ) {
+            if( dash && [ null, 'null' ].includes( date ) ) {
+                return '-';
+            }
 
             return moment.utc( date, fromFormat ).local().format( format );
         },

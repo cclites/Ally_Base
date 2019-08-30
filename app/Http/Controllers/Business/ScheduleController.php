@@ -47,7 +47,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'services', 'carePlan'])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service'])
             ->ordered();
 
         // Filter by client or caregiver
@@ -552,7 +552,7 @@ class ScheduleController extends BaseController
     public function preview(Schedule $schedule)
     {
         $this->authorize('read', $schedule);
-        $data = $schedule->load(['caregiver', 'client'])->toArray();
+        $data = $schedule->load(['caregiver', 'client', 'service', 'services'])->toArray();
 
         if ($schedule->caregiver) {
             $phone = $schedule->caregiver->phoneNumbers()->where('type', 'primary')->first();
@@ -573,6 +573,19 @@ class ScheduleController extends BaseController
         $data['client_address'] = $schedule->client->evvAddress->fullAddress ?? null;
         $data['client_phone'] = $schedule->client->evvPhone->number ?? null;
 
+        if (count($schedule->services)) {
+            $data['service_summary'] = $schedule->services->map(function ($item) {
+                return ['name' => $item->service->name, 'duration' => $item->duration];
+            })->values();
+        } else {
+            $duration = divide(floatval($schedule->duration), 60, 2);
+            $data['service_summary'] = [
+                [
+                    'name' => $schedule->service->name,
+                    'duration' => number_format($duration, 2),
+                ]
+            ];
+        }
         return response()->json($data);
     }
 

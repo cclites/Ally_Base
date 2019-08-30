@@ -1,6 +1,8 @@
 <template>
     <b-card
-      title="This report shows data that has been invoiced & billed. No data for the current service week will be included."
+      header="This report shows data that has been invoiced & billed. No data for the current service week will be included."
+      header-text-variant="white"
+      header-bg-variant="info"
     >
         <b-row>
             <b-form-group label="Location" class="mb-2 mr-2">
@@ -90,7 +92,7 @@
                     <template slot="FOOT_payer" scope="item"></template>
 
                     <template slot="FOOT_revenue" scope="item">
-                        <strong>Revenue: </strong>{{ totals.revenue }}
+                        <strong>Revenue: </strong>{{ moneyFormat(totals.totalRevenue) }}
                     </template>
                 </b-table>
             </div>
@@ -133,9 +135,9 @@
                 ),
                 loading: false,
                 totalRows: 0,
-                perPage: 30,
+                perPage: 100,
                 currentPage: 1,
-                sortBy: '',
+                sortBy: 'salesperson',
                 sortDesc: '',
                 fields: [
                     {
@@ -149,6 +151,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'salesperson',
+                        label: 'Salesperson',
+                        sortable: true,
+                    },
+                    {
                         key: 'name',
                         label: 'Client',
                         sortable: true,
@@ -158,11 +165,7 @@
                         label: 'Date Created',
                         sortable: true,
                     },
-                    {
-                        key: 'salesperson',
-                        label: 'Salesperson',
-                        sortable: true,
-                    },
+
                     {
                         key: 'payer',
                         label: 'Payer',
@@ -170,7 +173,7 @@
                     },
                     {
                         key: 'revenue',
-                        label: 'Revenue',
+                        label: 'Total Client Charges',
                         formatter: val => this.moneyFormat(val),
                         sortable: true,
                     },
@@ -245,6 +248,8 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    table.b-table tfoot tr th{
+        padding-top: 40px;
+    }
 </style>

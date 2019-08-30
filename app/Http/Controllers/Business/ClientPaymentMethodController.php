@@ -36,9 +36,11 @@ class ClientPaymentMethodController extends BaseController
         }
 
 
-        $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
-        if ($client->setPaymentMethod($method, $backup)) {
-            return $this->paymentMethodResponse($client, 'The payment method has been updated.');
+        if ($method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup)))
+        {
+            if ($client->setPaymentMethod($method, $backup)) {
+                return $this->paymentMethodResponse($client, 'The payment method has been updated.');
+            }
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }

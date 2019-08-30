@@ -17,9 +17,9 @@ use App\Services\Slack;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use App\Services\SFTPWriter;
-use App\Services\DummySFTPWriter;
-use App\Contracts\SFTPWriterInterface;
+use App\Services\SFTPReaderReaderWriter;
+use App\Services\DummySFTPReaderWriter;
+use App\Contracts\SFTPReaderWriterInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,9 +43,9 @@ class AppServiceProvider extends ServiceProvider
 
         // SFTP
         if (config('services.sftp.driver') == 'sftp') {
-            $this->app->bind(SFTPWriterInterface::class, SFTPWriter::class);
+            $this->app->bind(SFTPReaderWriterInterface::class, SFTPReaderReaderWriter::class);
         } else {
-            $this->app->bind(SFTPWriterInterface::class, DummySFTPWriter::class);
+            $this->app->bind(SFTPReaderWriterInterface::class, DummySFTPReaderWriter::class);
         }
 
         $this->app->singleton(QuickbooksOnlineService::class, function() {

@@ -266,6 +266,8 @@ class ShiftController extends BaseController
     {
         $this->authorize('read', $shift);
 
+        $shift->load('activities', 'services');
+
         // Duplicate an existing shift and advance one day
         /** @var Shift $shift */
         $shift = $shift->replicate();
@@ -273,7 +275,6 @@ class ShiftController extends BaseController
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
         $shift->checked_in_distance = null;
         $shift->checked_out_distance = null;
-        
         $shift->status = null;
 
         $activities = $shift->business->allActivities();

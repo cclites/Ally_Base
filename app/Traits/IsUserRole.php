@@ -263,6 +263,11 @@ trait IsUserRole
         return $this->user ? $this->user->status_alias_id : null;
     }
 
+    public function statusAlias()
+    {
+        return $this->hasOne( 'App\StatusAlias', 'id', 'status_alias_id' );
+    }
+
     public function getSetupStatusAttribute()
     {
         return $this->user ? $this->user->setup_status : null;

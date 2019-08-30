@@ -80,24 +80,25 @@
     import business from "../store/modules/business";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import Constants from '../mixins/Constants';
+    import LocalStorage from "../mixins/LocalStorage";
 
     export default {
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsListData, Constants],
+        mixins: [FormatsListData, Constants, LocalStorage],
 
         data() {
             return {
                 filters: {
-                    status: 'active',
+                    status: '',
                     client_type: '',
                     business_id: '',
                     search: null,
                     caseManager: '',
                 },
+                sortBy: 'lastname',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
                 modalDetails: { index:'', data:'' },
@@ -149,10 +150,12 @@
                 ],
                 loading: false,
                 statuses: {caregiver: [], client: []},
+                localStoragePrefix: 'client_list_',
             }
         },
 
         async mounted() {
+            this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
             this.loadClients();
             this.loadOfficeUsers();
@@ -161,7 +164,6 @@
         computed: {
             listUrl() {
                 const {client_type, business_id, status, caseManager} = this.filters;
-
                 let active = '';
                 let aliasId = '';
                 if (status === '') {
@@ -194,11 +196,14 @@
             async loadClients() {
                 this.loading = true;
                 const response = await axios.get(this.listUrl);
+
                 this.clients = response.data.map(client => {
                     client.county = client.address ? client.address.county : '';
                     client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
+
+                this.updateSavedFormFilters();
                 this.loading = false;
             },
             async loadOfficeUsers() {
@@ -237,12 +242,39 @@
                         this.loading = false;
                     })
             },
+            loadFiltersFromStorage() {
+                if (typeof(Storage) !== "undefined") {
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value) this.filters[filter] = value;
+                    }
+                    // Sorting/show UI
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) this.sortBy = sortBy;
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                }
+            },
+            updateSavedFormFilters() {
+                for (let filter of Object.keys(this.filters)) {
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+            },
+
+            updateSortOrder(){
+                this.setLocalStorage('sortBy', this.sortBy);
+            }
         },
 
         watch: {
             listUrl() {
                 this.loadClients();
             },
+
+            sortBy() {
+                this.updateSortOrder();
+            }
         }
     }
 </script>

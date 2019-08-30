@@ -50,7 +50,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="activity in shift.activities" :key="activity.id">
+                    <tr v-for="(activity, index) in shift.activities" :key="index">
                         <td>{{ activity.code }}</td>
                         <td>{{ activity.name }}</td>
                     </tr>

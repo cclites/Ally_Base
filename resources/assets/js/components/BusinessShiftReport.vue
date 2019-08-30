@@ -45,13 +45,13 @@
                             </b-form-group>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Charge Status" class="form-inline">
-                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">
-                                    <option value="">All Statuses</option>
-                                    <option value="charged">Charged</option>
-                                    <option value="uncharged">Un-Charged</option>
-                                </b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Charge Status" class="form-inline">-->
+<!--                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">-->
+<!--                                    <option value="">All Statuses</option>-->
+<!--                                    <option value="charged">Charged</option>-->
+<!--                                    <option value="uncharged">Un-Charged</option>-->
+<!--                                </b-form-select>-->
+<!--                            </b-form-group>-->
                         </b-col>
                         <b-col xl="4" lg="6">
                             <b-form-group label="Confirmed Status" class="form-inline">
@@ -124,7 +124,7 @@
                 </b-container>
 
                 <b-col lg="12" class="text-right">
-                    <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
+                    <b-btn variant="info" @click="reloadData()" :disabled="generateReportDisabled">Generate Report</b-btn>
                     <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="shiftsLoaded">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
@@ -335,7 +335,8 @@
                     'Shift Total',
                     'Type',
                     'Confirmed',
-                    'Charged',
+                    // 'Charged',
+                    'Invoiced',
                 ];
 
                 return fields;
@@ -371,10 +372,10 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate),
-                        'Reg Rate': this.hourlyFormat(item, item.provider_fee),
-                        'Ally Fee': this.hourlyFormat(item, item.ally_fee),
-                        'Total Hourly': this.hourlyFormat(item, item.hourly_total),
+                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate, 'caregiver'),
+                        'Reg Rate': this.hourlyFormat(item, item.provider_fee, null),
+                        'Ally Fee': this.hourlyFormat(item, item.ally_fee, null),
+                        'Total Hourly': this.hourlyFormat(item, item.hourly_total, null),
                         'Mileage': item.mileage,
                         'CG Total': this.moneyFormat(item.caregiver_total),
                         'Reg Total': this.moneyFormat(item.provider_total),
@@ -386,8 +387,9 @@
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
                         'client_confirmed': item.client_confirmed,
-                        'Charged': item.charged,
-                        'charged_at': item.charged_at,
+                        'Invoiced': item.invoiced,
+                        // 'Charged': item.charged,
+                        // 'charged_at': item.charged_at,
                         'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
@@ -443,7 +445,13 @@
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
                         + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
-            }
+            },
+            generateReportDisabled(){
+                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))){
+                    return false;
+                }
+                return true;
+            },
         },
 
         methods: {
@@ -686,7 +694,12 @@
                 this.reloadData();
             },
 
-            hourlyFormat(item, amount) {
+            hourlyFormat(item, amount, type) {
+
+                if(item.services.length > 1 && type == 'caregiver'){
+                    return 'M';
+                }
+
                 return (item.fixed_rates) ? '---' : this.moneyFormat(amount);
             },
 

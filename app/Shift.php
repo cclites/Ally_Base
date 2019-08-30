@@ -211,6 +211,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         });
     }
 
+    const MAX_FUTURE_END_DATE = 168; // hours
+
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////
@@ -661,6 +663,20 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function isReadOnly()
     {
         return $this->statusManager()->isReadOnly();
+    }
+
+    /**
+     * Determine if the Shift was ever Invoiced.
+     *
+     * @return bool
+     */
+    public function wasInvoiced() : bool
+    {
+        if ($status = $this->statusHistory->where('new_status', Shift::WAITING_FOR_CHARGE)->first()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1172,6 +1188,21 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
 
         return $auths->unique('id');
+    }
+
+    /**
+     * Add an activity to the Shift, preventing duplicates.
+     *
+     * @param Activity $activity
+     */
+    public function addActivity(Activity $activity) : void
+    {
+        if ($this->activities()->where('activity_id', $activity->id)->exists()) {
+            // already exists -> skip.
+            return;
+        }
+
+        $this->activities()->attach($activity->id);
     }
 
     ///////////////////////////////////////////

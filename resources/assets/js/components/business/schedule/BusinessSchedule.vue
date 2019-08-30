@@ -43,6 +43,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="ADDED_TO_PAST"> <span class="badge badge-primary added_to_past" v-b-popover.hover="`Visit was added after the start date. This visit will not be copied into the Shift History and is not included in billing. ${statusHelp}`">Added to Past</span>
                         </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="HOSPITAL_HOLD"> <span class="badge badge-primary hospital_hold" v-b-popover.hover="`Will not be copied over to the Shift History. ${statusHelp}`">Hospital Hold</span>
+                        </label>
                     </b-col>
                 </b-row>
             </b-col>
@@ -205,6 +208,15 @@
                 <span><strong>Dates:</strong> {{ formatDate(hoverShift.start_date) }} {{ formatTime(hoverShift.start_date) }} - {{ formatDate(hoverShift.end_date) }} {{ formatTime(hoverShift.end_date) }}</span>
             </div>
             <div>
+
+                <span><strong>Services:</strong></span>
+
+                <div v-for=" ( service, index ) in hoverShift.service_summary" :key=" index ">
+
+                    {{ service.duration }} - {{ service.name }}
+                </div>
+            </div>
+            <div>
                 <label for="hover_status"><strong>Status:</strong></label>
                 <b-form-select
                     id="hover_status"
@@ -218,6 +230,7 @@
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                     <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
                     <option value="OPEN_SHIFT">Open Shift</option>
+                    <option value="HOSPITAL_HOLD">Hospital Hold</option>
                 </b-form-select>
             </div>
         </div>
@@ -293,7 +306,9 @@
                 hoverTarget: '',
                 location: 'all',
 
-                statusHelp: "\nClick to activate or deactivate this filter."
+                statusHelp: "\nClick to activate or deactivate this filter.",
+
+                service_types: ''
             }
         },
 
@@ -422,6 +437,8 @@
         methods: {
             getFilteredEvents() {
                 let events = this.events;
+
+                // console.log( events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
@@ -894,7 +911,7 @@
             },
 
             renderTimelineDayEvent(content, event, note) {
-                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`];
+                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -903,7 +920,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note) {
-                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`];
+                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -912,7 +929,7 @@
             },
 
             renderAgendaWeekEvent(content, event, note) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -921,7 +938,7 @@
             },
 
             renderDefaultEvent(content, event, note) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1109,6 +1126,7 @@
     .badge.no_show { background-color: #63cbc7; }
     .badge.overtime { background-color: #fc4b6c; }
     .badge.added_to_past { background-color: #124aa5; }
+    .badge.hospital_hold { background-color: #9881e9; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */
