@@ -16,6 +16,7 @@ class ClientCareDetailsController extends BaseController
      * @param UpdateClientCareDetailsRequest $request
      * @param Client $client
      * @return SuccessResponse|ErrorResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(UpdateClientCareDetailsRequest $request, Client $client)
     {

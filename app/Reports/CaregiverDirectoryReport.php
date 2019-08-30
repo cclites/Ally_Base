@@ -21,6 +21,8 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     private $start_date;
     private $end_date;
 
+    private $for_export;
+
     /**
      * @var bool
      */
@@ -63,6 +65,19 @@ class CaregiverDirectoryReport extends BusinessResourceReport
     public function setActiveFilter( $active ) : self
     {
         $this->active_filter = $active;
+
+        return $this;
+    }
+
+    /**
+     * set for export flag
+     *
+     * @param $status
+     * @return CaregiverAccountSetupReport
+     */
+    public function setForExport( $flag ) : self
+    {
+        $this->for_export = $flag;
 
         return $this;
     }
@@ -163,7 +178,10 @@ class CaregiverDirectoryReport extends BusinessResourceReport
 
 
         // implement pagination manually
-        $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+        if( !$this->for_export ){
+
+            $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
+        }
 
 
         $caregivers = $this->query()->get();

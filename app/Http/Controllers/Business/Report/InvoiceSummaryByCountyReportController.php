@@ -15,7 +15,7 @@ class InvoiceSummaryByCountyReportController extends BaseController
 {
     public function index(Request $request, InvoiceSummaryByCountyReport $report){
 
-        if ($request->filled('json') || $request->filled('json')) {
+        if ($request->filled('json') || $request->filled('print')) {
 
             $timezone = auth()->user()->role->getTimezone();
 

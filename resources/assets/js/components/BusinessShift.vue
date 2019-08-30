@@ -75,10 +75,10 @@
                                 <tbody>
                                 <tr>
                                     <td>
-                                        <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
+                                        <date-picker v-model="startDate" @input="changedStartDate(startDate)"/>
                                     </td>
                                     <td>
-                                        <date-picker v-model="endDate" @input="changedEndDate(endDate)"  />
+                                        <date-picker v-model="endDate" @input="changedEndDate(endDate)"/>
                                     </td>
                                     <td>
                                         <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
@@ -519,7 +519,7 @@
                     <b-col lg="8" class="text-right" v-else>
                         <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
                         <b-dropdown variant="light">
-                            <template slot="button-content">
+                            <template slot="button-content" >
                                 <i class='fa fa-list'></i> Actions
                             </template>
                             <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
@@ -555,10 +555,11 @@
     import ShiftServices from "../mixins/ShiftServices";
     import AuthUser from '../mixins/AuthUser';
     import { mapGetters } from 'vuex';
+    import Constants from '../mixins/Constants';
 
     export default {
         components: {ConfirmationModal},
-        mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices],
+        mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices, Constants],
 
         props: {
             'shift': {
@@ -690,6 +691,7 @@
             disableQuickbooksMapping() {
                 return !this.business || this.loadingQuickbooksConfig;
             },
+
         },
         methods: {
             changedShift(shift) {
@@ -722,7 +724,7 @@
                 this.fetchAllRates();
             },
 
-            changedEndDate(startDate) {
+            changedEndDate(endDate) {
                 this.validateTimeDifference('checked_out_time');
             },
 
@@ -806,7 +808,6 @@
             },
 
             initForm(shift = {}) {
-                console.log('initForm', this.form);
                 return {
                     client_id: shift.id ? shift.client_id : this.client.id || null,
                     caregiver_id: shift.id ? shift.caregiver_id : this.caregiver.id || null,
@@ -971,6 +972,9 @@
 
                         this.form.clearError(field);
 
+                        if (clockout.diff(moment(), 'hours') > this.SHIFT_MAX_FUTURE_END_DATE) {
+                            this.form.addError(field, 'The clock out time cannot be more than '+this.SHIFT_MAX_FUTURE_END_DATE+' hours from now.');
+                        }
                         if (diffFromShift === 0) {
                             return;
                         }
@@ -1078,6 +1082,7 @@
             onChangeHoursType(newVal, oldVal) {
                 this.handleChangedHoursType(this.form, newVal, oldVal);
             },
+
         },
         watch: {
             'form.hours_type': function(newVal, oldVal) {

@@ -124,7 +124,7 @@
                 </b-container>
 
                 <b-col lg="12" class="text-right">
-                    <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
+                    <b-btn variant="info" @click="reloadData()" :disabled="generateReportDisabled">Generate Report</b-btn>
                     <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="shiftsLoaded">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
@@ -372,10 +372,10 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate),
-                        'Reg Rate': this.hourlyFormat(item, item.provider_fee),
-                        'Ally Fee': this.hourlyFormat(item, item.ally_fee),
-                        'Total Hourly': this.hourlyFormat(item, item.hourly_total),
+                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate, 'caregiver'),
+                        'Reg Rate': this.hourlyFormat(item, item.provider_fee, null),
+                        'Ally Fee': this.hourlyFormat(item, item.ally_fee, null),
+                        'Total Hourly': this.hourlyFormat(item, item.hourly_total, null),
                         'Mileage': item.mileage,
                         'CG Total': this.moneyFormat(item.caregiver_total),
                         'Reg Total': this.moneyFormat(item.provider_total),
@@ -440,13 +440,18 @@
             },
             queryString() {
                 const filters = this.filters;
-                this.items.shifts = [];
                 return '?json=1&start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
                         + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
-            }
+            },
+            generateReportDisabled(){
+                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))){
+                    return false;
+                }
+                return true;
+            },
         },
 
         methods: {
@@ -689,7 +694,12 @@
                 this.reloadData();
             },
 
-            hourlyFormat(item, amount) {
+            hourlyFormat(item, amount, type) {
+
+                if(item.services.length > 1 && type == 'caregiver'){
+                    return 'M';
+                }
+
                 return (item.fixed_rates) ? '---' : this.moneyFormat(amount);
             },
 

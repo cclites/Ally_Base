@@ -813,7 +813,8 @@ class ReportsController extends BaseController
                 ->setClientTypeFilter( $request->client_type )
                 ->setActiveFilter( $request->active )
                 ->setCurrentPage( $request->current_page )
-                ->setPageCount( 100 );
+                ->setPageCount( 100 )
+                ->setForExport( $request->export == '1' );
 
             // $report->applyColumnFilters( $request->except([ 'filter_start_date','filter_end_date','filter_active','filter_client_type' ]));
 
