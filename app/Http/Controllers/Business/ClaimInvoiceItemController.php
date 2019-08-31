@@ -2,101 +2,28 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Billing\ClientInvoice;
-use App\Billing\View\InvoiceViewFactory;
-use App\Billing\View\InvoiceViewGenerator;
-use App\Claims\ClaimInvoice;
-use App\Claims\ClaimInvoiceFactory;
 use App\Claims\ClaimInvoiceItem;
-use App\Responses\SuccessResponse;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
-use Exception;
+use Illuminate\Http\Request;
 
-class ClaimController extends Controller
+class ClaimInvoiceItemController extends BaseController
 {
     /**
-     * Create a ClaimInvoice.
+     * Update a ClaimInvoiceItem.
      *
+     * @param ClaimInvoiceItem $item
      * @param Request $request
-     * @param ClaimInvoiceFactory $factory
-     * @return SuccessResponse
-     * @throws \Exception
+     * @return SuccessResponse|string
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store( Request $request, ClaimInvoiceFactory $factory )
+    public function update(ClaimInvoiceItem $item, Request $request)
     {
-        $clientInvoice = ClientInvoice::findOrFail( $request->client_invoice_id );
-
-        $claim = $factory->createFromClientInvoice( $clientInvoice );
-
-        return new SuccessResponse( 'Claim has been created.', compact( 'claim' ) );
-    }
-
-    /**
-     * 
-     * Show a claim_invoice
-     * 
-     * @param ClaimInvoice $claim
-     * @param string $view
-     */
-    public function show( ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW )
-    {
-        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
-
-        $strategy = InvoiceViewFactory::create( $claim, $view );
-
-        $viewGenerator = new InvoiceViewGenerator( $strategy );
-
-        return $viewGenerator->generateNewClaimInvoice( $claim );
-    }
-
-    /**
-     * grab the data for a specific claim_invoice to populate the edit-modal
-     */
-    public function edit( ClaimInvoice $claim )
-    {
-        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
-
-        $claim->load([ 'items', 'client' ]);
-
-        // dd( $claim );
-
-        return response()->json( $claim );
-    }
-
-    public function update( ClaimInvoice $claim, Request $request )
-    {
-
-        // validate data
-        $validated = $request->validate([
-
-            'client_first_name'               => 'sometimes|required',
-            'client_last_name'                => 'sometimes|required',
-            'client_medicaid_diagnosis_codes' => 'nullable',
-            'client_medicaid_id'              => 'nullable',
-            'payer_code'                      => 'nullable',
-            'payer_name'                      => 'sometimes|required',
-            'plan_code'                       => 'nullable',
-            'transmission_method'             => 'nullable'
-        ]);
-
-        // make the update
-        $claim->update( $validated );
-
-        // return
-        return response()->json( $claim->refresh() );
-    }
-
-    public function updateClaimItem( ClaimInvoiceItem $item, Request $request )
-    {
-        if ( !in_array( $item->claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
+        $this->authorize('update', $item->claim);
 
         try {
-
             \DB::beginTransaction();
-
                 // to update the claim invoice item:
                 // calculate the new amount and amount_due
                 // create the array with those, rate and units
@@ -130,10 +57,8 @@ class ClaimController extends Controller
                 $claimable = $item->claimable;
 
                 if( $item->claimable_type == 'App\ClaimableService' ){
-
                     $claimableValidation = $request->validate([
                         // white list the attributes to update for the claimable relationship
-
                         'claimable.caregiver_first_name'  => 'required',
                         'claimable.caregiver_last_name'   => 'required',
                         'claimable.caregiver_gender'      => 'nullable',
@@ -176,7 +101,6 @@ class ClaimController extends Controller
                     if( !empty( $claimableValidation[ 'claimable' ][ 'evv_end_time'         ] ) ) $claimableValidation[ 'claimable' ][ 'evv_end_time' ] = Carbon::parse( $claimableValidation[ 'claimable' ][ 'evv_end_time' ] );
 
                 } else if( $item->claimable_type == 'App\ClaimableExpense' ){
-
                     $claimableValidation = $request->validate([
                         // white list the attributes to update for the claimable relationship
 
@@ -189,55 +113,40 @@ class ClaimController extends Controller
                 $claimable->update( $claimableValidation[ 'claimable' ] );
 
             \DB::commit();
-        } catch ( Exception $e ) {
-
-            return $e->getMessage();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return new ErrorResponse(500, "Error updating this item: " . $e->getMessage());
         }
 
-        return new SuccessResponse( 'Claim Item has been updated.' );
+        return new SuccessResponse( 'Claim Item has been updated.');
     }
 
-    public function deleteClaimItem( ClaimInvoiceItem $item )
+    /**
+     * Remove a ClaimInvoiceItem.
+     *
+     * @param ClaimInvoiceItem $item
+     * @return SuccessResponse|string
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function destroy(ClaimInvoiceItem $item)
     {
-        if ( !in_array( $item->claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
+        $this->authorize('update', $item->claim);
 
         try {
-
             \DB::beginTransaction();
-
                 $claim = $item->claim;
-
                 $claim->amount -= $item->amount;
                 $claim->amount_due -= $item->amount_due;
-
                 $claim->update();
 
                 $item->claimable->delete();
                 $item->delete();
             \DB::commit();
-        } catch ( Exception $e ) {
-
-            return $e->getMessage();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return new ErrorResponse(500, "Error deleting this item: " . $e->getMessage());
         }
 
-        return new SuccessResponse( 'Claim Item has been deleted.' );
-    }
-
-    /**
-     * Create a ClaimInvoice.
-     *
-     * @param Request $request
-     * @param ClaimInvoiceFactory $factory
-     * @return SuccessResponse
-     * @throws \Exception
-     */
-    public function destroy( Request $request, ClaimInvoiceFactory $factory )
-    {
-        $claim = ClaimInvoice::findOrFail( $request->claim );
-        if ( !in_array( $claim->business_id, auth()->user()->getBusinessIds() ) ) abort( 403 );
-
-        $factory->hardDeleteClaimInvoice( $claim );
-
-        return new SuccessResponse( 'Claim has been deleted.' );
+        return new SuccessResponse('Claim Item has been deleted.');
     }
 }

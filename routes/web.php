@@ -485,13 +485,9 @@ Route::group([
 
     /* New Claims & AR */
     Route::get('claims-queue', 'Business\ClaimsQueueController@index')->name('claims-queue');
-    Route::resource( 'claims', 'Business\ClaimController', [
-
-        'except' => [ 'show' ]
-    ]);
-    Route::get( 'claims/{claim}/{view?}', 'Business\ClaimController@show' );
-    Route::delete( 'claims/item/{item}', 'Business\ClaimController@deleteClaimItem' )->name( 'claims.item.delete' );
-    Route::patch( 'claims/item/{item}', 'Business\ClaimController@updateClaimItem' )->name( 'claims.item.update' );
+    Route::resource( 'claims', 'Business\ClaimInvoiceController');
+    Route::resource( 'claims-item/{item}', 'Business\ClaimInvoiceController');
+    Route::get('claims/{claim}/{view?}', 'Business\ClaimInvoiceController@print');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

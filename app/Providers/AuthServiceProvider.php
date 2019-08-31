@@ -10,6 +10,7 @@ use App\Business;
 use App\BusinessChain;
 use App\Caregiver;
 use App\CaregiverApplication;
+use App\Claims\ClaimInvoice;
 use App\Client;
 use App\Billing\Deposit;
 use App\EmergencyContact;
@@ -22,6 +23,7 @@ use App\Policies\BusinessChainPolicy;
 use App\Policies\BusinessPolicy;
 use App\Policies\CaregiverApplicationPolicy;
 use App\Policies\CaregiverPolicy;
+use App\Policies\ClaimInvoicePolicy;
 use App\Policies\ClientInvoicePolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
@@ -106,6 +108,7 @@ class AuthServiceProvider extends ServiceProvider
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
         ExpirationType::class => ExpirationTypePolicy::class,
+        ClaimInvoice::class => ClaimInvoicePolicy::class,
     ];
 
     /**

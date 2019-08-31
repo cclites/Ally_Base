@@ -1,13 +1,14 @@
 <template>
-
-    <b-modal id="editClaimModal" title="Edit Claim" v-model=" showModal " size="lg">
-
-        <claim-details v-if=" claim.id " :claim=" claim " :transmitUpdate=" transmitUpdate " :transmitDelete=" transmitDelete " :transmitEditItem=" transmitEditItem "></claim-details>
+    <b-modal id="editClaimModal" title="Edit Claim" v-model=" showModal " size="lg" class="modal-fit-more">
+        <claim-details v-if=" claim.id "
+                       :claim=" claim "
+                       :transmitUpdate=" transmitUpdate "
+                       :transmitDelete=" transmitDelete "
+                       :transmitEditItem=" transmitEditItem "
+        />
 
         <div slot="modal-footer">
-
             <slot name="buttons">
-
                 <b-btn variant="default" @click=" showModal = false ">Close</b-btn>
             </slot>
         </div>
@@ -15,14 +16,10 @@
 </template>
 
 <script>
-
     export default {
-
         props: {
-
             value: false,
             claim: {
-
                 type    : Object,
                 default : () => {},
             },
@@ -32,11 +29,8 @@
         },
 
         computed: {
-
             showModal: {
-
                 get() {
-
                     return this.value;
                 },
                 set( value ) {

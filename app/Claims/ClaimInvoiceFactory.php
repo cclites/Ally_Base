@@ -14,7 +14,6 @@ use App\Caregiver;
 use App\ClaimableExpense;
 use App\ClaimableService;
 use App\Shift;
-use Illuminate\Support\Facades\DB;
 
 class ClaimInvoiceFactory
 {

@@ -4,14 +4,20 @@ namespace App\Claims;
 
 use App\AuditableModel;
 use App\Billing\ClaimPayment;
+use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
 use App\Billing\Contracts\InvoiceInterface;
+use App\Billing\Payer;
+use App\Business;
 use App\Client;
-use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 use Illuminate\Support\Collection;
 
-class ClaimInvoice extends AuditableModel implements InvoiceInterface
+class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
+
     /**
      * The attributes that aren't mass assignable.
      *
@@ -49,6 +55,26 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface
     // **********************************************************
 
     /**
+     * Get the Business relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the ClientInvoice relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function clientInvoice()
+    {
+        return $this->belongsTo(ClientInvoice::class);
+    }
+
+    /**
      * Get the ClaimInvoiceItems relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -63,9 +89,14 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo( Client::class );
     }
 
-    function clientPayer()
+    /**
+     * Get the Payer relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function payer()
     {
-        return $this->belongsTo( ClientPayer::class );
+        return $this->belongsTo( Payer::class );
     }
 
     public function payments()

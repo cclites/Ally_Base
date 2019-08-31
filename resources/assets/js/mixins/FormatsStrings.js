@@ -27,6 +27,9 @@ export default {
         },
         fromSnakeCase(str){
            return str.replace(/_/g, ' ');
-        }
+        },
+        snakeToTitleCase(status) {
+            return this.uppercaseWords(status.replace('_', ' '));
+        },
     }
 }
