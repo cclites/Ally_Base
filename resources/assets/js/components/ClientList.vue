@@ -42,6 +42,7 @@
                 <b-table 
                     bordered striped hover show-empty
                     :items="clients"
+                    :busy="loading"
                     :fields="fields"
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
@@ -157,7 +158,7 @@
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
             this.loadOfficeUsers();
-            this.loadClients();
+            await this.loadClients();
         },
 
         computed: {
@@ -220,9 +221,8 @@
 
         methods: {
 
-            loadClients() {
+            async loadClients() {
 
-                console.log( 'BEING CALLED WITH URL: ', this.listUrl );
                 this.loading = true;
 
                 axios.get( this.listUrl )
@@ -309,10 +309,9 @@
 
         watch: {
 
-            listUrl() {
+            async listUrl() {
 
-                console.log( 'asdasdasdasd' );
-                this.loadClients();
+                await this.loadClients();
             },
 
             sortBy() {
