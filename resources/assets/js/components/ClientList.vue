@@ -36,8 +36,6 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading"></loading-card>
-        <div v-if="!loading">
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
@@ -47,7 +45,6 @@
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
-                    :filter="filters.search"
                 >
                     <template slot="payment_type" scope="row">
                         {{ paymentTypes.find(type => type.value == row.item.payment_type).text }}
@@ -69,7 +66,6 @@
                     Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                 </b-col>
             </b-row>
-        </div>
     </b-card>
 </template>
 
@@ -91,7 +87,7 @@
                     status: '',
                     client_type: '',
                     business_id: '',
-                    search: null,
+                    search: '',
                     caseManager: '',
                 },
                 sortBy: 'lastname',
@@ -214,6 +210,7 @@
                 query += '&client_type=' + this.filters.client_type;
                 query += '&case_manager_id=' + this.filters.caseManager;
                 query += '&businesses[]=' + this.filters.business_id;
+                query += '&search=' + this.filters.search;
 
                 return query;
             },

@@ -76,6 +76,19 @@ class ClientController extends BaseController
                 $query->with('caseManager');
             }
 
+            $search = $request->input( 'search', null );
+
+            if ( $search ) {
+
+                $query->where( function ($q) use ( $search ) {
+
+                    $q->where( 'users.email', 'LIKE', "%$search%" )
+                        ->orWhere( 'users.id', 'LIKE', "%$search%" )
+                        ->orWhere( 'users.firstname', 'LIKE', "%$search%" )
+                        ->orWhere( 'users.lastname', 'LIKE', "%$search%" );
+                });
+            }
+
             // grab total before pagination
             $total = $query->count();
 
