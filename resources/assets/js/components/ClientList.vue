@@ -43,7 +43,6 @@
                     bordered striped hover show-empty
                     :items="clients"
                     :fields="fields"
-                    :current-page="currentPage"
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
@@ -158,7 +157,7 @@
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
             this.loadOfficeUsers();
-            await this.loadClients();
+            this.loadClients();
         },
 
         computed: {
@@ -221,11 +220,10 @@
 
         methods: {
 
-            async loadClients() {
+            loadClients() {
 
                 console.log( 'BEING CALLED WITH URL: ', this.listUrl );
                 this.loading = true;
-                this.clients = [];
 
                 axios.get( this.listUrl )
                     .then( res => {
