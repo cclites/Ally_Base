@@ -4,34 +4,74 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <b-btn @click="createLicense()" variant="info" class="mb-2">Add Expiration</b-btn>
+        <b-btn @click="createLicense()" variant="info" class="mr-2 mb-2" :disabled=" alreadyCreating ">Add Expiration</b-btn>
+        <b-btn to="/business/settings#expirations" variant="success" class="mb-2">Manage Expirations</b-btn>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
+                :busy="loading"
+                :items=" chainExpirations "
+                :fields="fields"
+                :current-page="currentPage"
+                :per-page="perPage"
+                :filter="filter"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
             >
+
+                <template slot="name" scope="row">
+
+                    <b-form-textarea
+                        v-if=" row.item.isNew "
+                        id="namefield"
+                        v-model=" row.item.name "
+                        placeholder="expiration type"
+                        rows="1"
+                    ></b-form-textarea>
+                    <p class="mb-0" v-else>
+
+                        {{ row.item.name }}
+                    </p>
+                </template>
+                <template slot="description" scope="row">
+
+                    <b-form-textarea id="descriptionfield"
+                        v-model=" row.item.description "
+                        placeholder="optional"
+                        rows="1"
+                    ></b-form-textarea>
+                </template>
                 <template slot="expires_sort" scope="row">
-                    {{ row.item.expires_at }}
+                    <date-picker
+                        v-model=" row.item.expires_at "
+                        placeholder="Expiration Date"
+                    ></date-picker>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click="editLicense(row.item)">Edit</b-btn>
-                    <b-btn size="sm" @click="deleteLicense(row.item)" variant="danger">X</b-btn>
+
+                    <transition name="slide-fade" mode="out-in">
+
+                        <div class="d-flex align-items-center" v-if=" row.item.id " :key=" 'first' ">
+
+                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
+                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
+                        </div>
+                        <div class="d-flex align-items-center" v-else :key=" 'second' ">
+
+                            <b-btn style="flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Add</b-btn>
+                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
+                        </div>
+                    </transition>
                 </template>
             </b-table>
         </div>
-
-        <caregiver-license-modal
-            v-model="licenseModal"
-            :caregiver-id="caregiverId"
-            :selectedItem="selectedLicense"
-            :items.sync="items"
-        ></caregiver-license-modal>
+        <b-row>
+            <b-col lg="6" >
+                <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" currentPage " />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
@@ -44,8 +84,8 @@
 
         data() {
             return {
-                totalRows: 0,
-                perPage: 15,
+                loading: false,
+                perPage: 10,
                 currentPage: 1,
                 sortBy: null,
                 sortDesc: false,
@@ -76,17 +116,21 @@
                     }
                 ],
                 licenseItems: this.licenses, // store to avoid mutating prop
-                licenseModal: false,
+                chainExpirations : [],
                 selectedLicense: null,
             }
         },
 
-        mounted() {
-            this.totalRows = this.items.length;
+        async mounted() {
+
+            // this.totalRows = this.items.length;
+            await this.fetchChainExpirations();
         },
 
         computed: {
+
             items: {
+                // this probably gets deleted ERIK TODO
                 get() {
                     return this.licenseItems.map(function(license) {
                         license.expires_at = moment(license.expires_at).format('MM/DD/YYYY');
@@ -98,35 +142,137 @@
                 set(value) {
                     this.licenseItems = value;
                 }
+            },
+
+            totalRows(){
+
+                return this.chainExpirations.length || 0;
+            },
+
+            alreadyCreating(){
+
+                return !!this.chainExpirations.find( exp => exp.isNew );
             }
         },
 
         methods: {
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
+
+            async fetchChainExpirations() {
+
+                this.loading = true;
+                await axios.get( `/business/expiration-types` )
+                    .then( ( { data } ) => {
+
+                        this.licenses.forEach( license => {
+
+                            let existingLicense = data.find( exp => exp.id == license.chain_expiration_type_id );
+
+                            if( existingLicense ){
+
+                                existingLicense.id                       = license.id;
+                                existingLicense.chain_expiration_type_id = license.chain_expiration_type_id;
+                                existingLicense.name                     = license.name;
+                                existingLicense.description              = license.description;
+                                existingLicense.expires_at               = license.expires_at;
+                                existingLicense.updated_at               = license.updated_at;
+                            }
+                            else data.push( license );
+                        });
+
+                        this.chainExpirations = data.map( exp => {
+
+                            exp.chain_expiration_type_id = exp.expires_at ? exp.chain_expiration_type_id : exp.id;
+                            exp.id                       = exp.expires_at ? exp.id : null;
+                            exp.name                     = exp.expires_at ? exp.name : exp.type;
+                            exp.description              = exp.expires_at ? exp.description : '';
+                            exp.expires_at               = exp.expires_at ? moment( exp.expires_at ).format( 'MM/DD/YYYY' ) : '';
+                            exp.expires_sort             = exp.expires_at ? moment( exp.expires_at ).format( 'YYYYMMDD' ) : '';
+                            exp.updated_at               = exp.expires_at ? moment.utc( exp.updated_at ).local().format( 'MM/DD/YYYY h:mm A' ) : '---';
+
+                            return exp;
+                        }).sort( ( a, b ) => a.id - b.id );
+                    })
+                    .catch( e => {} )
+                    .finally( () => {
+
+                        this.loading = false;
+                    });
             },
-            editLicense(license) {
-                this.selectedLicense = license;
-                this.licenseModal = true;
-            },
+
             createLicense() {
-                this.selectedLicense = {};
-                this.licenseModal = true;
-            },
-            deleteLicense(license) {
-                let component = this;
-                let form = new Form();
-                if (confirm('Are you sure you wish to delete this certification?')) {
-                    form.submit('delete', '/business/caregivers/' + this.caregiverId + '/licenses/' + license.id)
-                        .then(function(response) {
-                            let index = component.licenseItems.findIndex(item => item.id === license.id);
-                            Vue.delete(component.licenseItems, index);
-                        })
-                        .catch(() => {});
+
+                if( !this.alreadyCreating ){
+
+                    const newElement = {
+
+                        isNew       : true,
+                        name        : '',
+                        description : '',
+                        expires_at  : '',
+                        updated_at  : '---',
+                    };
+                    this.chainExpirations.unshift( newElement );
                 }
+            },
+            saveLicense( item ){
+
+                this.loading = true;
+                let form = new Form( item );
+
+                const verb = item.id ? 'patch' : 'post';
+                const url  = '/business/caregivers/' + this.caregiverId + '/licenses' + ( item.id ? '/' + item.id : '' );
+
+                form.submit( verb, url )
+                    .then( response => {
+
+                        item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
+                        item.id         = response.data.data.id;
+                        item.isNew      = false;
+                    })
+                    .catch( () => {} )
+                    .finally( () => this.loading = false );
+            },
+            deleteLicense( license ) {
+
+                let form = new Form();
+                if ( confirm( 'Are you sure you wish to delete this certification?' ) ) {
+
+                    this.loading = true;
+
+                    form.submit( 'delete', '/business/caregivers/' + this.caregiverId + '/licenses/' + license.id )
+                        .then( response => {
+
+                            if( license.chain_expiration_type_id ){
+                                // if it belonged to a chain-type, simply reset the form fields and keep it on screen
+
+                                license.id          = null;
+                                license.expires_at  = '';
+                                license.updated_at  = '---';
+                                license.description = '';
+                            } else {
+                                // else that means this was a one-off expiration, so remove it from the table altogether
+
+                                let i = this.chainExpirations.findIndex( exp => exp.id == license.id );
+                                this.chainExpirations.splice( i, 1 );
+                            }
+                        })
+                        .catch( () => {} )
+                        .finally( () => this.loading = false );
+                }
+            },
+            removeNew(){
+
+                let i = this.chainExpirations.findIndex( exp => exp.isNew )
+                this.chainExpirations.splice( i, 1 );
             }
         }
     }
 </script>
+
+<style>
+
+    td {
+
+        vertical-align: middle !important;
+    }
+</style>

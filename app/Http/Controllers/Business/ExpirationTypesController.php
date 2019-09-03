@@ -18,10 +18,6 @@ class ExpirationTypesController extends BaseController
     {
         $query = ExpirationType::where('chain_id', $this->businessChain()->id);
 
-        if (!$request->has('manage')) {
-            $query->orWhereNull('chain_id');
-        }
-
         return response()->json(
             $query->orderBy('type')
                 ->get()
