@@ -1167,7 +1167,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         $serviceIds = [$this->service_id];
 
         if (filled($this->services)) {
-            $serviceIds = $this->services->pluck('id')->toArray();
+            $serviceIds = $this->services->pluck('service_id')->toArray();
         } else if (empty($this->service_id)) {
             return [];
         }
