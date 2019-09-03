@@ -824,7 +824,7 @@
                     provider_fee: null, // for show
                     ally_fee: null, // for show
                     service_id: shift.service_id || (this.defaultService ? this.defaultService.id : null),
-                    payer_id: shift.payer_id || null,
+                    payer_id: shift.payer_id || shift.payer_id == 0 ? shift.payer_id : null,
                     activities: this.getShiftActivityList(),
                     issues: shift.issues || [],
                     override: false,
