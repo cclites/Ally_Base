@@ -21,22 +21,38 @@ class ClaimInvoiceItemResource extends Resource
             'amount_due' => $this->resource->amount_due,
             'claim_invoice_id' => $this->resource->claim_invoice_id,
             'related_shift_id' => optional($this->resource->claimable)->shift_id,
-            'claimable' => $this->resource->claimable,
+            'claimable' => $this->mapClaimable(),
             'invoiceable' => $this->resource->invoiceable,
             'date' => $this->resource->date,
-//            'claimable_id' => $this->resource->claimable_id,
-//            'claimable_type' => $this->resource->claimable_type,
+            'claimable_id' => $this->resource->claimable_id,
+            'claimable_type' => $this->resource->claimable_type,
             'type' => $this->getType(),
             'created_at' => $this->resource->created_at,
             'id' => $this->resource->id,
-//            'invoiceable_id' => $this->resource->invoiceable_id,
-//            'invoiceable_type' => $this->resource->invoiceable_type,
+            'invoiceable_id' => $this->resource->invoiceable_id,
+            'invoiceable_type' => $this->resource->invoiceable_type,
             'rate' => $this->resource->rate,
             'units' => $this->resource->units,
             'updated_at' => $this->resource->updated_at,
             'summary' => $this->resource->invoiceable->getItemName($this->resource->claim->clientInvoice),
-//            'summary' => optional($this->invoiceable)->getItemGroup($this->resource->claim->clientInvoice),
         ];
+    }
+
+    /**
+     * Map the Claimable object resource.
+     *
+     * @return ClaimableExpenseResource|ClaimableServiceResource
+     */
+    public function mapClaimable()
+    {
+        switch ($this->resource->claimable_type) {
+            case ClaimableService::class:
+                return new ClaimableServiceResource($this->resource->claimable);
+            case ClaimableExpense::class:
+                return new ClaimableExpenseResource($this->resource->claimable);
+            default:
+                throw new \InvalidArgumentException('Unknown claimable type.');
+        }
     }
 
     /**

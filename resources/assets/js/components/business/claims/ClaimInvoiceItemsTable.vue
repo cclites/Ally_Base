@@ -1,5 +1,8 @@
 <template>
     <div class="table-responsive claim-items">
+        <div class="d-flex mb-2">
+            <b-btn class="ml-auto" variant="info" @click="edit({})"><i class="fa fa-plus" /> Add Item</b-btn>
+        </div>
         <b-table bordered striped hover show-empty
             :items="items"
             :fields="fields"
@@ -20,31 +23,45 @@
                 </b-btn>
             </template>
         </b-table>
+
+        <b-modal id="editItemModal"
+            :title="modalTitle"
+            v-model="showEditModal"
+            size="lg"
+            :no-close-on-backdrop="true"
+            hide-footer
+        >
+            <claim-invoice-item-form ref="item-form" @close="hideModal()" :item="current" />
+        </b-modal>
     </div>
 </template>
 
 <script>
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import ClaimInvoiceItemForm from "./ClaimInvoiceItemForm";
+    import { mapGetters } from 'vuex';
+
     export default {
         mixins: [ FormatsDates, FormatsNumbers ],
+        components: { ClaimInvoiceItemForm },
 
-        props: {
-            claim: {
-                type: Object,
-                default: () => {},
-                required: true,
-            },
-            items: {
-                type: Array,
-                default: () => [],
-                required: true,
+        computed: {
+            ...mapGetters({
+                items: 'claims/claimItems',
+                current: 'claims/item',
+            }),
+
+            modalTitle() {
+                return this.current.id ? 'Edit Claimable Item' : 'Create Claimable Item';
             },
         },
 
         data() {
             return {
                 deletingId: null,
+                showEditModal: false,
+                // Table data:
                 sortBy: 'date',
                 sortDesc: false,
                 fields: {
@@ -68,16 +85,23 @@
                 let form = new Form({});
                 form.submit('DELETE', `/business/claims/${this.claim.id}/item/${item.id}`)
                     .then( ({ data }) => {
-                        this.$emit('update:claim', data.data);
+                        this.$store.commit('claims/setClaim', data.data);
                     })
                     .catch(() => {})
                     .finally(() => {
                         this.deletingId = null;
                     });
             },
+
+            edit(item) {
+                this.$store.commit('claims/setItem', item);
+                this.showEditModal = true;
+            },
+
+            hideModal() {
+                this.showEditModal = false;
+                this.$store.commit('claims/setItem', {});
+            },
         },
     }
 </script>
-
-<style>
-</style>

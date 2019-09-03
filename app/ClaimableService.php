@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSSNAttribute;
 
-class ClaimableService extends Model
+class ClaimableService extends AuditableModel
 {
     use HasSSNAttribute;
 

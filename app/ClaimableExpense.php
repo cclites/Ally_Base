@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ClaimableExpense extends Model
+class ClaimableExpense extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.

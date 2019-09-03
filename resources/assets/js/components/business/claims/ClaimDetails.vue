@@ -4,39 +4,36 @@
             <h1>Claim #{{ claim.name }}</h1>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Client" label-for="business_id">
+                    <b-form-group label="Client" label-for="client" class="bold">
                         <label><a :href="`/business/clients/${claim.client_id}`" target="_blank">{{ claim.client.name }}</a></label>
                     </b-form-group>
-<!--                    <b-form-group label="Office Location" label-for="business_id">-->
-<!--                        <label>{{ claim.business.name }}</label>-->
-<!--                    </b-form-group>-->
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Related Client Invoice" label-for="client_invoice_id">
+                    <b-form-group label="Related Client Invoice" label-for="client_invoice_id" class="bold">
                         <label><a :href="`/business/client/invoices/${claim.client_invoice_id}`" target="_blank">#{{ claim.client_invoice.name }}</a></label>
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Payer" label-for="payer_id">
+                    <b-form-group label="Payer" label-for="payer_id" class="bold">
                         <label>{{ claim.payer.name }}</label>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Status" label-for="status">
+                    <b-form-group label="Status" label-for="status" class="bold">
                         <label>{{ snakeToTitleCase(claim.status) }}</label>
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Amount" label-for="amount">
+                    <b-form-group label="Amount" label-for="amount" class="bold">
                         <label>{{ moneyFormat(claim.amount) }}</label>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Amount Due" label-for="amount_due">
+                    <b-form-group label="Amount Due" label-for="amount_due" class="bold">
                         <label>{{ moneyFormat(claim.amount_due) }}</label>
                     </b-form-group>
                 </b-col>
@@ -144,7 +141,7 @@
 
         <hr />
         <h2>Claimable Items</h2>
-        <claim-invoice-items-table :items.sync="claim.items" :claim.sync="claim" />
+        <claim-invoice-items-table />
     </b-card>
 </template>
 
@@ -154,6 +151,7 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import TransmissionMethodDropdown from "./TransmissionMethodDropdown";
     import ClaimInvoiceItemsTable from "./ClaimInvoiceItemsTable";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ClaimInvoiceItemsTable, TransmissionMethodDropdown},
@@ -171,19 +169,21 @@
 
         data() {
             return {
-                claim: {},
                 form: new Form({}),
             };
         },
 
         computed: {
+            ...mapGetters({
+                claim: 'claims/claim',
+            }),
         },
 
         methods: {
             save() {
                 this.form.patch(`/business/claims/${this.claim.id}`)
                     .then( ({ data }) => {
-                        this.claim = data.data;
+                        this.$store.commit('claims/setClaim', data.data);
                     })
                     .catch(() => {});
             },
@@ -202,18 +202,12 @@
             },
         },
 
-        watch: {
-        },
-
         created() {
-            this.claim = this.originalClaim;
+            this.$store.commit('claims/setClaim', this.originalClaim);
             this.initForm(this.claim);
         },
+
+        mounted() {
+        }
     }
 </script>
-
-<style >
-.claim-info .form-group > label {
-    font-weight: 800;
-}
-</style>
