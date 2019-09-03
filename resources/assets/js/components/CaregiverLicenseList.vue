@@ -115,7 +115,6 @@
                         class: 'hidden-print'
                     }
                 ],
-                licenseItems: this.licenses, // store to avoid mutating prop
                 chainExpirations : [],
                 selectedLicense: null,
             }
@@ -128,21 +127,6 @@
         },
 
         computed: {
-
-            items: {
-                // this probably gets deleted ERIK TODO
-                get() {
-                    return this.licenseItems.map(function(license) {
-                        license.expires_at = moment(license.expires_at).format('MM/DD/YYYY');
-                        license.expires_sort = moment(license.expires_at).format('YYYYMMDD');
-                        license.updated_at = moment.utc(license.updated_at).local().format('MM/DD/YYYY h:mm A');
-                        return license;
-                    });
-                },
-                set(value) {
-                    this.licenseItems = value;
-                }
-            },
 
             totalRows(){
 
