@@ -578,6 +578,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Get actual shift duration without using a rounding method.
+     *
+     * @return float
+     */
+    public function getRawDuration() : float
+    {
+        return (float) app(DurationCalculator::class)->noneRoundingMethod($this);
+    }
+
+    /**
      * Get the scheduled end time of the shift
      *
      * @return Carbon
