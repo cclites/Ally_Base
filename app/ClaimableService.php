@@ -1,12 +1,10 @@
 <?php
-
 namespace App;
 
 use App\Billing\Service;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSSNAttribute;
-
 
 class ClaimableService extends Model
 {

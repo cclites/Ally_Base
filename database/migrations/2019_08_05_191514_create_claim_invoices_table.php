@@ -53,6 +53,7 @@ class CreateClaimInvoicesTable extends Migration
             $table->decimal('units', 9, 2);
             $table->decimal('amount', 9, 2);
             $table->decimal('amount_due', 9, 2);
+            $table->dateTime('date');
 
             $table->timestamps();
 

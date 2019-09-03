@@ -60,6 +60,7 @@ class ClaimInvoiceFactoryTest extends TestCase
 
     /**
      * @test
+     * @throws \Exception
      */
     function a_claim_invoice_can_be_created_from_a_client_invoice()
     {

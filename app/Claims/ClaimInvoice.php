@@ -181,6 +181,24 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     // OTHER FUNCTIONS
     // **********************************************************
 
+    /**
+     * Update the amount and amount due from the ClaimInvoiceItem values.
+     */
+    public function updateBalances() : void
+    {
+        $items = $this->fresh()->items;
+
+        $amount = $items->reduce(function(float $carry, ClaimInvoiceItem $item) {
+            return add($carry, (float) $item->amount);
+        }, (float) 0.00);
+
+        $amount_due = $items->reduce(function(float $carry, ClaimInvoiceItem $item) {
+            return add($carry, (float) $item->amount_due);
+        }, (float) 0.00);
+
+        $this->update(compact('amount', 'amount_due'));
+    }
+
     // **********************************************************
     // STATIC METHODS
     // **********************************************************

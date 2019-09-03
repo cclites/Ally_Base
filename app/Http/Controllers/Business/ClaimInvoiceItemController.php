@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceItem;
+use App\Http\Resources\ClaimInvoiceResource;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
@@ -124,29 +126,25 @@ class ClaimInvoiceItemController extends BaseController
     /**
      * Remove a ClaimInvoiceItem.
      *
+     * @param ClaimInvoice $claim
      * @param ClaimInvoiceItem $item
      * @return SuccessResponse|string
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(ClaimInvoiceItem $item)
+    public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item)
     {
-        $this->authorize('update', $item->claim);
+        $this->authorize('update', $claim);
 
         try {
             \DB::beginTransaction();
-                $claim = $item->claim;
-                $claim->amount -= $item->amount;
-                $claim->amount_due -= $item->amount_due;
-                $claim->update();
-
-                $item->claimable->delete();
-                $item->delete();
+            $item->delete();
+            $claim->updateBalances();
             \DB::commit();
         } catch (\Exception $e) {
-            \DB::rollBack();
-            return new ErrorResponse(500, "Error deleting this item: " . $e->getMessage());
+            app('sentry')->captureException($ex);
+            return new ErrorResponse(500, 'An unexpected error occurred while trying to delete this item.  Please try again.');
         }
 
-        return new SuccessResponse('Claim Item has been deleted.');
+        return new SuccessResponse('Claim Item has been deleted.', new ClaimInvoiceResource($claim->fresh()));
     }
 }

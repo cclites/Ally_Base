@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\ClaimService;
 use App\Billing\ClientInvoice;
 use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceFactory;
+use App\Http\Requests\UpdateClaimInvoiceRequest;
+use App\Http\Resources\ClaimInvoiceResource;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidEnum;
 use Illuminate\Http\Request;
 
 class ClaimInvoiceController extends BaseController
@@ -20,15 +25,15 @@ class ClaimInvoiceController extends BaseController
      * @return SuccessResponse
      * @throws \Exception
      */
-    public function store( Request $request, ClaimInvoiceFactory $factory )
+    public function store(Request $request, ClaimInvoiceFactory $factory)
     {
-        $clientInvoice = ClientInvoice::findOrFail( $request->client_invoice_id );
+        $clientInvoice = ClientInvoice::findOrFail($request->client_invoice_id);
 
         $this->authorize('read', $clientInvoice);
 
-        $claim = $factory->createFromClientInvoice( $clientInvoice );
+        $claim = $factory->createFromClientInvoice($clientInvoice);
 
-        return new SuccessResponse( 'Claim has been created.', compact( 'claim' ) );
+        return new SuccessResponse('Claim has been created.', compact('claim'));
     }
 
     /**
@@ -38,13 +43,13 @@ class ClaimInvoiceController extends BaseController
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show( ClaimInvoice $claim )
+    public function show(ClaimInvoice $claim)
     {
         $this->authorize('read', $claim);
 
-        $claim->load([ 'items', 'client' ]);
+        $claim->load(['items', 'client']);
 
-        return response()->json( $claim );
+        return response()->json($claim);
     }
 
     /**
@@ -58,47 +63,30 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('read', $claim);
 
-        $claim->load([
-            'items',
-            'client',
-            'business',
-            'clientInvoice',
-            'payer',
-        ]);
-
-        return view_component('claim-details', 'Edit Claim #'.$claim->id, compact('claim'));
+        return view_component(
+            'claim-details',
+            'Edit Claim #' . $claim->name,
+            ['original-claim' => new ClaimInvoiceResource($claim)]
+        );
     }
 
     /**
      * Update the ClaimInvoice.
      *
      * @param ClaimInvoice $claim
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param UpdateClaimInvoiceRequest $request
+     * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update( ClaimInvoice $claim, Request $request )
+    public function update(ClaimInvoice $claim, UpdateClaimInvoiceRequest $request)
     {
         $this->authorize('update', $claim);
 
-        // validate data
-        $validated = $request->validate([
+        if ($claim->update($request->filtered())) {
+            return new SuccessResponse('Claim information has been saved.', new ClaimInvoiceResource($claim));
+        }
 
-            'client_first_name'               => 'sometimes|required',
-            'client_last_name'                => 'sometimes|required',
-            'client_medicaid_diagnosis_codes' => 'nullable',
-            'client_medicaid_id'              => 'nullable',
-            'payer_code'                      => 'nullable',
-            'payer_name'                      => 'sometimes|required',
-            'plan_code'                       => 'nullable',
-            'transmission_method'             => 'nullable'
-        ]);
-
-        // make the update
-        $claim->update( $validated );
-
-        // return
-        return response()->json( $claim->refresh() );
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to save this claim.  Please try again.');
     }
 
     /**
@@ -109,15 +97,15 @@ class ClaimInvoiceController extends BaseController
      * @return SuccessResponse
      * @throws \Exception
      */
-    public function destroy( Request $request, ClaimInvoiceFactory $factory )
+    public function destroy(Request $request, ClaimInvoiceFactory $factory)
     {
-        $claim = ClaimInvoice::findOrFail( $request->claim );
+        $claim = ClaimInvoice::findOrFail($request->claim);
 
         $this->authorize('delete', $claim);
 
-        $factory->hardDeleteClaimInvoice( $claim );
+        $factory->hardDeleteClaimInvoice($claim);
 
-        return new SuccessResponse( 'Claim has been deleted.' );
+        return new SuccessResponse('Claim has been deleted.');
     }
 
     /**
@@ -129,14 +117,14 @@ class ClaimInvoiceController extends BaseController
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function print( ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW )
+    public function print(ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW)
     {
         $this->authorize('read', $claim);
 
-        $strategy = InvoiceViewFactory::create( $claim, $view );
+        $strategy = InvoiceViewFactory::create($claim, $view);
 
-        $viewGenerator = new InvoiceViewGenerator( $strategy );
+        $viewGenerator = new InvoiceViewGenerator($strategy);
 
-        return $viewGenerator->generateNewClaimInvoice( $claim );
+        return $viewGenerator->generateNewClaimInvoice($claim);
     }
 }

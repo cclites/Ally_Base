@@ -3,8 +3,10 @@
 namespace App\Claims;
 
 use App\Billing\BaseInvoiceItem;
+use App\Billing\Invoiceable\ShiftService;
 use App\ClaimableExpense;
 use App\ClaimableService;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -108,4 +110,14 @@ class ClaimInvoiceItem extends BaseInvoiceItem
         if( $this->claimable instanceof ClaimableService ) return $this->claimable->service;
         return null;
     }
+
+//    public function getRelatedShiftId() : ?int
+//    {
+//        switch ($this->invoiceable_type) {
+//            case Shift::class:
+//                return $this->invoiceable_id;
+//            case ShiftService::class:
+//                return $this->
+//        }
+//    }
 }

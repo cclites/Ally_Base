@@ -109,7 +109,12 @@
                     <span v-else> - </span>
                 </template>
                 <template slot="payer" scope="row">
-                    {{ ( row.item.claim ? row.item.claim.payer_name : row.item.payer.name ) }}
+                    <span v-if="row.item.claim">
+                        {{ row.item.claim.payer_name }}
+                    </span>
+                    <span v-else>
+                        {{ row.item.payer ? row.item.payer.name : 'N/A' }}
+                    </span>
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn v-if=" !row.item.claim " variant="success" class="flex-1 my-1" @click=" createClaim( row.item ) " :disabled=" busy " size="sm">
