@@ -52,13 +52,13 @@
 
                         <div class="d-flex align-items-center" v-if=" row.item.id " :key=" 'first' ">
 
-                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
-                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
+                            <b-btn style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
+                            <b-btn style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
                         </div>
                         <div class="d-flex align-items-center" v-else :key=" 'second' ">
 
-                            <b-btn style="flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Add</b-btn>
-                            <b-btn style="flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
+                            <b-btn style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn>
+                            <b-btn style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
                         </div>
                     </transition>
                 </template>
