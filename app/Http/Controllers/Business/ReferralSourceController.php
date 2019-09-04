@@ -21,11 +21,11 @@ class ReferralSourceController extends BaseController
             ->ordered()
             ->get();
 
-        $referralsources = ReferralSource::orderResources($referralsources);
-
         if (request()->expectsJson()) {
             return response()->json($referralsources);
         }
+
+        $referralsources = ReferralSource::orderResources($referralsources);
 
         return view('business.referral.list', compact('referralsources', 'edit', 'create', 'type'));
     }
