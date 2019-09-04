@@ -130,7 +130,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                 }
 
                 // convert dates and times
-                $timezone = auth()->user()->officeUser->getTimezone();
+                $timezone = $this->getTimezone();
                 $data['scheduled_start_time'] = Carbon::parse($data['shift_start_date'].' '.$data['shift_start_time'], $timezone)->setTimezone('UTC');
                 $data['scheduled_end_time'] = Carbon::parse($data['shift_end_date'].' '.$data['shift_end_time'], $timezone)->setTimezone('UTC');
                 $data['visit_start_time'] = Carbon::parse($data['service_start_date'].' '.$data['service_start_time'], $timezone)->setTimezone('UTC');
@@ -239,6 +239,10 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      */
     public function getTimezone() : string
     {
-        return auth()->user()->officeUser->getTimezone();
+        $timezone = optional(auth()->user()->officeUser)->getTimezone();
+        if (empty($timezone)) {
+            $timezone = 'America/New_York';
+        }
+        return $timezone;
     }
 }

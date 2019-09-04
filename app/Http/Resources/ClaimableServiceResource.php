@@ -15,7 +15,10 @@ class ClaimableServiceResource extends Resource
      */
     public function toArray($request)
     {
-        $timezone = auth()->user()->officeUser->getTimezone();
+        $timezone = optional(auth()->user()->officeUser)->getTimezone();
+        if (empty($timezone)) {
+            $timezone = 'America/New_York';
+        }
 
         return [
 //            'id' => $this->resource->id,
