@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\ClaimableExpense;
+use App\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceItem;
 use App\Http\Requests\UpdateClaimInvoiceItemRequest;
@@ -11,6 +13,79 @@ use App\Responses\SuccessResponse;
 
 class ClaimInvoiceItemController extends BaseController
 {
+    /**
+     * Create a new ClaimInvoiceItem.
+     *
+     * @param ClaimInvoice $claim
+     * @param UpdateClaimInvoiceItemRequest $request
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function store(ClaimInvoice $claim, UpdateClaimInvoiceItemRequest $request)
+    {
+        $this->authorize('update', $claim);
+
+        try {
+            \DB::beginTransaction();
+
+            switch ($request->claimable_type) {
+                case ClaimableService::class:
+                    $claimable = ClaimableService::create($request->getClaimableData());
+                    break;
+                case ClaimableExpense::class:
+                    $claimable = ClaimableExpense::create($request->getClaimableData());
+                    break;
+            }
+
+            $item = $claim->items()->create(array_merge($request->getClaimItemData(), [
+                'claimable_type' => $request->claimable_type,
+                'claimable_id' => $claimable->id,
+                'amount_due' => 0.00,
+            ]));
+
+//                'invoiceable_id' => $shift->id,
+//                'invoiceable_type' => Shift::class,
+//                'claimable_id' => $claimableService->id,
+//                'claimable_type' => ClaimableService::class,
+//                'rate' => $item->rate,
+//                'units' => $item->units,
+//                'amount' => $item->amount_due,
+//                'amount_due' => $item->amount_due,
+//                'date' => $claimableService->visit_start_time,
+
+            // TODO: recalculate amount due based on applied payments for both the item and the claim
+
+            $claim->updateBalances();
+
+            \DB::commit();
+        } catch (\Exception $ex) {
+
+
+
+
+
+
+
+
+
+
+
+            dd($ex->getMessage());
+
+
+
+
+
+
+
+
+            app('sentry')->captureException($ex);
+            return new ErrorResponse(500, 'An unexpected error occurred while trying to create this item.  Please try again.');
+        }
+
+        return new SuccessResponse('Claim Item has been created.', new ClaimInvoiceResource($claim->fresh()));
+    }
+
     /**
      * Update the ClaimInvoiceItem.
      *
@@ -22,13 +97,13 @@ class ClaimInvoiceItemController extends BaseController
      */
     public function update(ClaimInvoice $claim, ClaimInvoiceItem $item, UpdateClaimInvoiceItemRequest $request)
     {
-        $this->authorize('update', $item->claim);
+        $this->authorize('update', $claim);
 
         try {
             \DB::beginTransaction();
 
-            $item->claimable->update($request->getClaimableData($item->claimable_type));
-            $item->update($request->getClaimItemData($item->claimable_type));
+            $item->claimable->update($request->getClaimableData());
+            $item->update($request->getClaimItemData());
 
             // TODO: recalculate amount due based on applied payments for both the item and the claim
 
@@ -36,7 +111,6 @@ class ClaimInvoiceItemController extends BaseController
 
             \DB::commit();
         } catch (\Exception $ex) {
-            dd($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }

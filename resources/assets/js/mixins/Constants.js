@@ -35,7 +35,7 @@ export default {
 
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\ClaimableExpense',
-                Service: 'App\\ClaimableService',
+                SERVICE: 'App\\ClaimableService',
             }
         }
     },

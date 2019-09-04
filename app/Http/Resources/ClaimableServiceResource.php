@@ -41,8 +41,8 @@ class ClaimableServiceResource extends Resource
 //            'scheduled_end_time' => $this->resource->scheduled_end_time,
 //            'visit_start_time' => $this->resource->visit_start_time,
 //            'visit_end_time' => $this->resource->visit_end_time,
-            'evv_start_time' => $this->resource->evv_start_time->toDateTimeString(),
-            'evv_end_time' => $this->resource->evv_end_time->toDateTimeString(),
+            'evv_start_time' => optional($this->resource->evv_start_time)->toDateTimeString(),
+            'evv_end_time' => optional($this->resource->evv_end_time)->toDateTimeString(),
 
             'checked_in_number' => $this->resource->checked_in_number,
             'checked_out_number' => $this->resource->checked_out_number,

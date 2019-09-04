@@ -2,14 +2,13 @@
 
 namespace App\Http\Requests;
 
+use Carbon\Carbon;
+use App\Rules\ValidSSN;
 use App\ClaimableExpense;
 use App\ClaimableService;
-use App\Rules\ValidSSN;
 use App\Services\GeocodeManager;
-use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
-use Packages\GMaps\GeocodeCoordinates;
 
 class UpdateClaimInvoiceItemRequest extends FormRequest
 {
@@ -31,15 +30,14 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required_if:claimable_type,'.ClaimableExpense::class.'|string',
+            'claimable_type' => 'required|in:' . ClaimableExpense::class.','.ClaimableService::class,
+            'name' => 'required_if:claimable_type,'.ClaimableExpense::class.'',
             'date' => 'required_if:claimable_type,'.ClaimableExpense::class.'|date',
             'notes' => 'nullable|string',
 
             'rate' => 'required|numeric|min:0|max:999.99',
             'units' => 'required|numeric|min:0|max:999.99',
 
-//            'shift_id' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'caregiver_id' => 'required_if:claimable_type,'.ClaimableService::class.'',
             'caregiver_first_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
             'caregiver_last_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
             'caregiver_gender' => 'nullable|in:F,M',
@@ -52,25 +50,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'city' => 'nullable|string',
             'state' => 'nullable|string',
             'zip' => 'nullable|string',
-//            'latitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'longitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
 
-//            'scheduled_start_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'scheduled_end_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'visit_start_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'visit_end_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'evv_start_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'evv_end_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-
-//            'checked_in_number' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'checked_out_number' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'checked_in_latitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'checked_in_longitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'checked_out_latitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'checked_out_longitude' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'evv_method_in' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'evv_method_out' => 'required_if:claimable_type,'.ClaimableService::class.'',
-//            'service_id' => 'required_if:claimable_type,'.ClaimableService::class.'',
             'service_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
             'service_code' => 'nullable|string',
             'activities' => 'nullable|string',
@@ -86,17 +66,38 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     }
 
     /**
+     * Get the custom validation messages.
+     *
+     * @return array
+     */
+    public function messages() : array
+    {
+        return [
+            'name.required_if' => 'The :attribute field is required.',
+            'date.required_if' => 'The :attribute field is required.',
+            'caregiver_first_name.required_if' => 'The :attribute field is required.',
+            'caregiver_last_name.required_if' => 'The :attribute field is required.',
+            'service_name.required_if' => 'The :attribute field is required.',
+            'shift_start_date.required_if' => 'The :attribute field is required.',
+            'shift_end_date.required_if' => 'The :attribute field is required.',
+            'shift_start_time.required_if' => 'The :attribute field is required.',
+            'shift_end_time.required_if' => 'The :attribute field is required.',
+            'service_start_date.required_if' => 'The :attribute field is required.',
+            'service_start_time.required_if' => 'The :attribute field is required.',
+        ];
+    }
+
+    /**
      * Get the data to update the ClaimInvoiceItem's Claimable object.
      *
-     * @param string $type
      * @return array
      * @throws ValidationException
      */
-    public function getClaimableData(string $type) : array
+    public function getClaimableData() : array
     {
         $data = collect($this->validated());
 
-        switch ($type) {
+        switch ($data['claimable_type']) {
             case ClaimableService::class:
                 $data = $data->only([
                     'units',
@@ -177,23 +178,22 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     /**
      * Get the data to update the ClaimInvoiceItem.
      *
-     * @param string $type
      * @return array
      */
-    public function getClaimItemData(string $type) : array
+    public function getClaimItemData() : array
     {
-        switch ($type) {
+        $data = collect($this->validated());
+
+        switch ($data['claimable_type']) {
             case ClaimableService::class:
-                $data = collect($this->validated())
-                    ->only(['rate', 'units', 'service_start_date',])
+                $data = $data->only(['rate', 'units', 'service_start_date'])
                     ->toArray();
 
                 $data['date'] = Carbon::parse($data['service_start_date'], $this->getTimezone())->setTimezone('UTC');
                 unset($data['service_start_date']);
                 break;
             case ClaimableExpense::class:
-                $data = collect($this->validated())
-                    ->only(['rate', 'units', 'date'])
+                $data = $data->only(['rate', 'units', 'date'])
                     ->toArray();
 
                 $data['date'] = Carbon::parse($data['date'], $this->getTimezone())->setTimezone('UTC');

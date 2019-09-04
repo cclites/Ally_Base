@@ -2,9 +2,9 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Claims\ClaimableInterface;
 
-class ClaimableExpense extends AuditableModel
+class ClaimableExpense extends AuditableModel implements ClaimableInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -59,4 +59,17 @@ class ClaimableExpense extends AuditableModel
     // OTHER FUNCTIONS
     // **********************************************************
 
+    // **********************************************************
+    // ClaimableInterface
+    // **********************************************************
+
+    /**
+     * Get the name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getName() : string
+    {
+        return $this->name;
+    }
 }

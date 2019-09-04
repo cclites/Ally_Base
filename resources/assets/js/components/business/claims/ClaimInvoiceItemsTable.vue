@@ -42,9 +42,10 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import ClaimInvoiceItemForm from "./ClaimInvoiceItemForm";
     import { mapGetters } from 'vuex';
+    import Constants from "../../../mixins/Constants";
 
     export default {
-        mixins: [ FormatsDates, FormatsNumbers ],
+        mixins: [ FormatsDates, FormatsNumbers, Constants ],
         components: { ClaimInvoiceItemForm },
 
         computed: {
@@ -102,6 +103,61 @@
             hideModal() {
                 this.showEditModal = false;
                 this.$store.commit('claims/setItem', {});
+            },
+
+            add() {
+                this.edit({
+                    id: null,
+                    claimable_type: this.CLAIMABLE_TYPES.SERVICE,
+                //     rate: 0.00,
+                //     units: 0,
+                //     amount: 0.00,
+                //
+                //     // service data
+                //     shift_id: '',
+                //     // caregiver_id: '',
+                //     caregiver_first_name: '',
+                //     caregiver_last_name: '',
+                //     caregiver_gender: '',
+                //     caregiver_dob: '',
+                //     caregiver_ssn: '',
+                //     has_caregiver_ssn: '',
+                //     caregiver_medicaid_id: '',
+                //     address1: '',
+                //     address2: '',
+                //     city: '',
+                //     state: '',
+                //     zip: '',
+                //     latitude: '',
+                //     longitude: '',
+                //     // scheduled_start_time: '',
+                //     // scheduled_end_time: '',
+                //     // visit_start_time: '',
+                //     // visit_end_time: '',
+                //     evv_start_time: '',
+                //     evv_end_time: '',
+                //     checked_in_number: '',
+                //     checked_out_number: '',
+                //     checked_in_latitude: '',
+                //     checked_in_longitude: '',
+                //     checked_out_latitude: '',
+                //     checked_out_longitude: '',
+                //     has_evv: '',
+                //     evv_method_in: '',
+                //     evv_method_out: '',
+                //     // service_id: '',
+                //     service_name: '',
+                //     service_code: '',
+                //     activities: '',
+                //     caregiver_comments: '',
+                //
+                //     shift_start_date: '',
+                //     shift_end_date: '',
+                //     shift_start_time: '',
+                //     shift_end_time: '',
+                //     service_start_date: '',
+                //     service_start_time: '',
+                });
             },
         },
     }

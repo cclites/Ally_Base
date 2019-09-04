@@ -4,7 +4,19 @@
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Claimable Type" label-for="type" class="bold">
-                    <label>{{ item.type }}</label>
+                    <label v-if="item.id">{{ item.type }}</label>
+                    <div v-else>
+                    <b-select
+                        v-model="form.claimable_type"
+                        id="claimable_type"
+                        name="claimable_type"
+                        :disabled="form.busy"
+                    >
+                        <option :value="CLAIMABLE_TYPES.SERVICE">Service</option>
+                        <option :value="CLAIMABLE_TYPES.EXPENSE">Expense</option>
+                    </b-select>
+                        <input-help :form="form" field="claimable_type" text="" />
+                    </div>
                 </b-form-group>
             </b-col>
             <b-col lg="6">
@@ -12,11 +24,11 @@
                     <label v-if="item.related_shift_id">
                         <a :href="`/business/shifts/${item.related_shift_id}`" target="_blank">{{ item.related_shift_id }}</a>
                     </label>
-                    <label v-else>-</label>
+                    <label v-else>N/A</label>
                 </b-form-group>
             </b-col>
         </b-row>
-        <div v-if="item.claimable_type == 'App\\ClaimableExpense'">
+        <div v-if="form.claimable_type == CLAIMABLE_TYPES.EXPENSE">
             <b-row>
                 <b-col sm="4">
                     <b-form-group label="Name" label-for="name" label-class="required">
@@ -580,13 +592,13 @@
                     claimable_type: '',
                     // common data
                     rate: 0.00,
-                    units: 0,
+                    units: 1,
                     amount: 0.00,
 
                     // expense data
                     name: '',
                     notes: '',
-                    date: '',
+                    date: moment().format('MM/DD/YYYY'),
 
                     // service data
                     shift_id: '',
@@ -617,21 +629,21 @@
                     checked_in_longitude: '',
                     checked_out_latitude: '',
                     checked_out_longitude: '',
-                    has_evv: '',
-                    evv_method_in: '',
-                    evv_method_out: '',
+                    has_evv: false,
+                    evv_method_in: null,
+                    evv_method_out: null,
                     // service_id: '',
                     service_name: '',
                     service_code: '',
                     activities: '',
                     caregiver_comments: '',
 
-                    shift_start_date: '',
-                    shift_end_date: '',
-                    shift_start_time: '',
-                    shift_end_time: '',
-                    service_start_date: '',
-                    service_start_time: '',
+                    shift_start_date: moment().format('MM/DD/YYYY'),
+                    shift_end_date: moment().format('MM/DD/YYYY'),
+                    shift_start_time: '12:00',
+                    shift_end_time: '13:00',
+                    service_start_date: moment().format('MM/DD/YYYY'),
+                    service_start_time: '12:00',
                 }),
             };
         },
@@ -648,12 +660,23 @@
 
         methods: {
             save() {
-                this.form.patch(`/business/claims/${this.item.claim_invoice_id}/item/${this.item.id}`)
-                    .then( ({ data }) => {
-                        this.$store.commit('claims/setClaim', data.data);
-                        this.$emit('close');
-                    })
-                    .catch(() => {});
+                if (this.item.id) {
+                    this.form.patch(`/business/claims/${this.claim.id}/item/${this.item.id}`)
+                        .then(({data}) => {
+                            this.$store.commit('claims/setClaim', data.data);
+                            this.$emit('close');
+                        })
+                        .catch(() => {
+                        });
+                } else {
+                    this.form.post(`/business/claims/${this.claim.id}/item`)
+                        .then( ({ data }) => {
+                            this.$store.commit('claims/setClaim', data.data);
+                            this.$emit('close');
+                        })
+                        .catch(() => {
+                        });
+                }
             },
 
             cancel() {
@@ -689,6 +712,8 @@
                     });
                 } else {
                     this.form.reset(true);
+                    this.form.id = null;
+                    this.form.claimable_type = this.CLAIMABLE_TYPES.SERVICE;
                 }
             }
         },

@@ -99,13 +99,13 @@
                     <a :href=" invoiceUrl( row.item ) " target="_blank">{{ row.value }}</a>
                 </template>
                 <template slot="client" scope="row">
-                    <a :href="`/business/clients/${row.item.client.id}`">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
+                    <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
                 <template slot="claim_status" scope="row">
                     {{ row.item.claim ? row.item.claim_status : '-' }}
                 </template>
                 <template slot="claim" scope="row">
-                    <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`">{{ row.item.claim.name }}</a>
+                    <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`" target="_blank">{{ row.item.claim.name }}</a>
                     <span v-else> - </span>
                 </template>
                 <template slot="payer" scope="row">

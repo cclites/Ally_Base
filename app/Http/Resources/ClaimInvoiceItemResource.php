@@ -32,7 +32,7 @@ class ClaimInvoiceItemResource extends Resource
             'invoiceable_type' => $this->resource->invoiceable_type,
             'rate' => number_format($this->resource->rate, 2),
             'units' => number_format($this->resource->units, 2),
-            'summary' => $this->resource->invoiceable->getItemName($this->resource->claim->clientInvoice),
+            'summary' => $this->resource->claimable->getName(),
         ];
     }
 

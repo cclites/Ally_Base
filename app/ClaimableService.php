@@ -2,8 +2,9 @@
 namespace App;
 
 use App\Billing\Service;
+use App\Claims\ClaimableInterface;
 
-class ClaimableService extends AuditableModel
+class ClaimableService extends AuditableModel implements ClaimableInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -124,4 +125,17 @@ class ClaimableService extends AuditableModel
     // OTHER FUNCTIONS
     // **********************************************************
 
+    // **********************************************************
+    // ClaimableInterface
+    // **********************************************************
+
+    /**
+     * Get the name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getName() : string
+    {
+        return $this->service_name . ' ' . $this->service_code;
+    }
 }

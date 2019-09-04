@@ -66,7 +66,8 @@ class ClaimInvoiceController extends BaseController
         return view_component(
             'claim-details',
             'Edit Claim #' . $claim->name,
-            ['original-claim' => new ClaimInvoiceResource($claim)]
+            ['original-claim' => new ClaimInvoiceResource($claim)],
+            ['Home' => '/', 'Claims Queue' => route('business.claims-queue')]
         );
     }
 

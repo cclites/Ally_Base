@@ -47,7 +47,7 @@ class CreateClaimInvoicesTable extends Migration
         Schema::create('claim_invoice_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('claim_invoice_id');
-            $table->morphs('invoiceable'); // links to the original invoiceable item from the Client Invoice.
+            $table->nullableMorphs('invoiceable'); // links to the original invoiceable item from the Client Invoice.
             $table->morphs('claimable'); // links to the new, editable claimable object
             $table->decimal('rate', 9, 2);
             $table->decimal('units', 9, 2);
@@ -76,7 +76,7 @@ class CreateClaimInvoicesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('shift_id')->nullable();
 
-            $table->unsignedInteger('caregiver_id');
+            $table->unsignedInteger('caregiver_id')->nullable();
             $table->string('caregiver_first_name', 35);
             $table->string('caregiver_last_name', 35);
             $table->char('caregiver_gender', 1)->nullable();
@@ -96,8 +96,8 @@ class CreateClaimInvoicesTable extends Migration
             $table->dateTime('scheduled_end_time');
             $table->dateTime('visit_start_time');
             $table->dateTime('visit_end_time');
-            $table->dateTime('evv_start_time');
-            $table->dateTime('evv_end_time');
+            $table->dateTime('evv_start_time')->nullable();
+            $table->dateTime('evv_end_time')->nullable();
             $table->string('checked_in_number', 45)->nullable();
             $table->string('checked_out_number', 45)->nullable();
             $table->decimal('checked_in_latitude', 10, 7)->nullable();
@@ -108,7 +108,7 @@ class CreateClaimInvoicesTable extends Migration
             $table->string('evv_method_in', 25)->nullable();
             $table->string('evv_method_out', 25)->nullable();
 
-            $table->unsignedInteger('service_id');
+            $table->unsignedInteger('service_id')->nullable();
             $table->string('service_name', 70);
             $table->string('service_code', 30)->nullable();
 
