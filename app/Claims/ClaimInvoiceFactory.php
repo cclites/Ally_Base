@@ -59,8 +59,6 @@ class ClaimInvoiceFactory
             'plan_code' => $invoice->getPlanCode(),
         ]);
 
-        $claim->client_name = ucwords(implode(' ', [$client->client_first_name, $client->client_last_name]));
-
         $items = $invoice->items->map(function (ClientInvoiceItem $item) {
 
             switch ($item->invoiceable_type) {
@@ -120,6 +118,9 @@ class ClaimInvoiceFactory
         $shift = $item->getShift();
         $caregiver = $shift->caregiver;
         $evvAddress = $shift->address;
+        if (empty($evvAddress)) {
+            $evvAddress = $shift->client->evvAddress;
+        }
         /** @var Service $service */
         $service = $shift->service;
         if (empty($service)) {
@@ -153,6 +154,9 @@ class ClaimInvoiceFactory
         $shift = $item->shiftService->shift;
         $caregiver = $shift->caregiver;
         $evvAddress = $shift->address;
+        if (empty($evvAddress)) {
+            $evvAddress = $shift->client->evvAddress;
+        }
         /** @var ShiftService $shiftService */
         $shiftService = $item->shiftService;
         /** @var Service $service */
@@ -254,14 +258,31 @@ class ClaimInvoiceFactory
             'checked_in_longitude' => $shift->checked_in_longitude,
             'checked_out_longitude' => $shift->checked_out_longitude,
             'has_evv' => $this->checkShiftForFullEVV($shift),
-            'evv_method_in' => $shift->checked_in_method,
-            'evv_method_out' => $shift->checked_out_method,
+            'evv_method_in' => $this->mapEvvMethod($shift->checked_in_method),
+            'evv_method_out' => $this->mapEvvMethod($shift->checked_out_method),
             'service_id' => $service->id,
             'service_name' => $service->name,
             'service_code' => $service->code,
             'activities' => $shift->activities->implode('code', ','),
             'caregiver_comments' => $shift->caregiver_comments,
         ]);
+    }
+
+    /**
+     * Map Shift clock in/out method to Claimable EVV method.
+     *
+     * @param string|null $method
+     * @return string|null
+     */
+    protected function mapEvvMethod(?string $method) : ?string
+    {
+        if ($method == Shift::METHOD_GEOLOCATION) {
+            return ClaimableService::EVV_METHOD_GEOLOCATION;
+        } else if ($method == Shift::METHOD_TELEPHONY) {
+            return ClaimableService::EVV_METHOD_TELEPHONY;
+        }
+
+        return null;
     }
 
     /**

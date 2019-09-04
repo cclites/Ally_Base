@@ -587,7 +587,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function scheduledStartTime()
     {
         if (filled($this->schedule)) {
-            return $this->schedule->getStartDateTime();
+            return $this->schedule->getStartDateTime()->setTimezone('UTC');
         }
 
         return $this->checked_in_time;
@@ -601,7 +601,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function scheduledEndTime()
     {
         if (filled($this->schedule)) {
-            return $this->schedule->getEndDateTime();
+            return $this->schedule->getEndDateTime()->setTimezone('UTC');
         }
 
         if (filled($this->checked_out_time)) {

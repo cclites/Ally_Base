@@ -51,7 +51,6 @@ class ClaimInvoiceResource extends Resource
             'plan_code' => $this->resource->plan_code,
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
-            'updated_at' => $this->resource->updated_at,
         ];
     }
 }

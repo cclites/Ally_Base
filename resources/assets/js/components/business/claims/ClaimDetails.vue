@@ -207,7 +207,8 @@
             this.initForm(this.claim);
         },
 
-        mounted() {
-        }
+        async mounted() {
+            await this.$store.dispatch('claims/fetchCaregiverList');
+        },
     }
 </script>

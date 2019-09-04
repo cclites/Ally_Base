@@ -105,8 +105,8 @@ class CreateClaimInvoicesTable extends Migration
             $table->decimal('checked_out_latitude', 10, 7)->nullable();
             $table->decimal('checked_out_longitude', 10, 7)->nullable();
             $table->boolean('has_evv')->default(false);
-            $table->string('evv_method_in', 255)->nullable();
-            $table->string('evv_method_out', 255)->nullable();
+            $table->string('evv_method_in', 25)->nullable();
+            $table->string('evv_method_out', 25)->nullable();
 
             $table->unsignedInteger('service_id');
             $table->string('service_name', 70);

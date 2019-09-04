@@ -30,6 +30,7 @@
             size="lg"
             :no-close-on-backdrop="true"
             hide-footer
+            class="modal-fit-more"
         >
             <claim-invoice-item-form ref="item-form" @close="hideModal()" :item="current" />
         </b-modal>

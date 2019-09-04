@@ -27,13 +27,11 @@ class ClaimInvoiceItemResource extends Resource
             'claimable_id' => $this->resource->claimable_id,
             'claimable_type' => $this->resource->claimable_type,
             'type' => $this->getType(),
-            'created_at' => $this->resource->created_at,
             'id' => $this->resource->id,
             'invoiceable_id' => $this->resource->invoiceable_id,
             'invoiceable_type' => $this->resource->invoiceable_type,
-            'rate' => $this->resource->rate,
-            'units' => $this->resource->units,
-            'updated_at' => $this->resource->updated_at,
+            'rate' => number_format($this->resource->rate, 2),
+            'units' => number_format($this->resource->units, 2),
             'summary' => $this->resource->invoiceable->getItemName($this->resource->claim->clientInvoice),
         ];
     }

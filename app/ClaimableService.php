@@ -2,14 +2,9 @@
 namespace App;
 
 use App\Billing\Service;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasSSNAttribute;
 
 class ClaimableService extends AuditableModel
 {
-    use HasSSNAttribute;
-
     /**
      * The attributes that aren't mass assignable.
      *
@@ -29,7 +24,21 @@ class ClaimableService extends AuditableModel
      *
      * @var array
      */
-    protected $appends = [ 'masked_ssn', 'name_last_first' ];
+    protected $appends = [];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'scheduled_start_time',
+        'scheduled_end_time',
+        'visit_start_time',
+        'visit_end_time',
+        'evv_start_time',
+        'evv_end_time',
+    ];
 
     /**
      * The "booting" method of the model.
@@ -42,42 +51,65 @@ class ClaimableService extends AuditableModel
         parent::boot();
     }
 
+    const EVV_METHOD_TELEPHONY = 'telephony';
+    const EVV_METHOD_GEOLOCATION = 'geolocation';
+
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
 
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function shift()
     {
-        return $this->belongsTo( Shift::class );
+        return $this->belongsTo(Shift::class);
     }
 
+    /**
+     * Get the related Caregiver.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function caregiver()
     {
-        return $this->belongsTo( Caregiver::class );
+        return $this->belongsTo(Caregiver::class);
     }
 
+    /**
+     * Get the related Service.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function service()
     {
-        return $this->belongsTo( Service::class );
+        return $this->belongsTo(Service::class);
     }
 
     // **********************************************************
     // ACCESSORS
     // **********************************************************
 
-    public function getCaregiverDobAttribute( $value )
+    /**
+     * Encrypt Caregiver SSN on entry.
+     *
+     * @param $value
+     */
+    public function setCaregiverSsnAttribute($value)
     {
-        return Carbon::parse( $value )->format( 'm/d/Y' );
+        $this->attributes['caregiver_ssn'] = $value ? \Crypt::encrypt($value) : null;
     }
 
-    public function getNameLastFirstAttribute()
+    /**
+     * Decrypt Caregiver SSN on retrieval.
+     *
+     * @return null|string
+     */
+    public function getCaregiverSsnAttribute()
     {
-        return $this->caregiver->nameLastFirst();
-    }
-
-    public function getSsnAttribute()
-    {
-        return $this->caregiver_ssn;
+        return empty($this->attributes['caregiver_ssn']) ? null : \Crypt::decrypt($this->attributes['caregiver_ssn']);
     }
 
     // **********************************************************
