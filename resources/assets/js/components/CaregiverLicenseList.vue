@@ -32,13 +32,12 @@
 
                 <template slot="name" scope="row">
 
-                    <b-form-textarea
+                    <b-form-input
                         v-if=" row.item.isNew "
-                        id="namefield"
                         v-model=" row.item.name "
                         placeholder="expiration type"
-                        rows="1"
-                    ></b-form-textarea>
+                        @blur.native=" onBlurUpdate ? saveLicense( row.item ) : null "
+                    ></b-form-input>
                     <p class="mb-0" v-else>
 
                         {{ row.item.name }}
@@ -204,6 +203,7 @@
                     const newElement = {
 
                         isNew       : true,
+                        isLoading   : false,
                         name        : '',
                         description : '',
                         expires_at  : '',
@@ -214,8 +214,6 @@
             },
             saveLicense( item ){
 
-                console.log( 'saving item: ', item );
-
                 item.isLoading = true;
                 item.expires_at = item.expires_at;
                 let form = new Form( item );
@@ -225,8 +223,6 @@
 
                 form.submit( verb, url )
                     .then( response => {
-
-                        console.log( 'callback: ', response );
 
                         item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                         item.id         = response.data.data.id;
