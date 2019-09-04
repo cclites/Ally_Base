@@ -12,13 +12,23 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     protected $caregiverId;
     protected $activeOnly = false;
     protected $inactiveOnly = false;
-    protected $name;
+    protected $expiration_type;
+    protected $all_expiration_types;
     protected $showExpired;
     protected $days;
+    protected $startDate;
+    protected $endDate;
 
     public function setCaregiver(?int $id) : self
     {
         $this->caregiverId = $id;
+        return $this;
+    }
+
+    public function setBetweenDates( $startDate, $endDate ) : self
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
         return $this;
     }
 
@@ -34,9 +44,15 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
         return $this;
     }
 
-    public function setName(?string $name) : self
+    public function setAllTypes( ?object $expiration_types ) : self
     {
-        $this->name = $name;
+        $this->all_expiration_types = $expiration_types;
+        return $this;
+    }
+
+    public function setExpirationType(?int $expiration_type) : self
+    {
+        $this->expiration_type = $expiration_type;
         return $this;
     }
 
@@ -89,30 +105,56 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
             $query->where('caregiver_id', $this->caregiverId);
         }
 
-        if (isset($this->name)) {
-            $query->where('name', 'LIKE', "%{$this->name}%");
+        if ( $this->startDate ) {
+
+            $query->where( 'expires_at', '>=', Carbon::parse( $this->startDate )->format( 'Y-m-d' ) );
         }
 
-        if ($this->showExpired) {
-            $query->whereBetween('expires_at', [
-                Carbon::now()->subYears(10)->format('Y-m-d'),
-                Carbon::now()->format('Y-m-d'),
-            ]);
+        if ( $this->endDate ) {
+
+            $query->where( 'expires_at', '<=', Carbon::parse( $this->endDate )->format( 'Y-m-d' ) );
+        }
+        if ( isset( $this->expiration_type ) ) {
+
+            $by_caregivers = $query->where( 'chain_expiration_type_id', $this->expiration_type )->get()->groupBy( 'caregiver_id' );
         } else {
-            $query->whereBetween('expires_at', [
-                Carbon::now()->format('Y-m-d'),
-                Carbon::today()->addDays($this->days)->format('Y-m-d'),
-            ]);
+            // if no expiration type is specified, map all to the result set
+
+            $by_caregivers = $query->get()->groupBy( 'caregiver_id' );
+
+            foreach( $this->all_expiration_types as $type ){
+                // for every type of expiration that the chain has..
+
+                foreach( $by_caregivers as $caregiver_id => $caregiver ){
+                    // make sure it is represented for every caregiver returned, blank or not..
+
+                    if( !$caregiver->where( 'chain_expiration_type_id', '=', $type->id )->first() ){
+                        // if the expiration type is not found for this caregiver, add a blank row
+
+                        $caregiver->push( CaregiverLicense::make([
+
+                            'id'                       => null,
+                            'caregiver_id'             => $caregiver_id,
+                            'name'                     => $type->type,
+                            'expires_at'               => null,
+                            'chain_expiration_type_id' => $type->id
+                        ]));
+                    }
+                }
+            }
         }
 
-        return $query->get()->map(function (CaregiverLicense $license) {
+        return $by_caregivers->flatten()->map(function (CaregiverLicense $license) {
+
             return [
-                'id' => $license->id,
-                'name' => $license->name,
-                'expiration_date' => (new Carbon($license->expires_at))->format('Y-m-d'),
-                'caregiver_id' => $license->caregiver->id,
-                'caregiver_name' => $license->caregiver->nameLastFirst(),
-                'caregiver_active' => $license->caregiver->active,
+
+                'id'                 => $license->id,
+                'name'               => $license->name,
+                'expiration_date'    => $license->expires_at ? ( new Carbon( $license->expires_at ) )->format( 'Y-m-d' ) : null,
+                'caregiver_id'       => $license->caregiver->id,
+                'caregiver_name'     => $license->caregiver->nameLastFirst(),
+                'caregiver_active'   => $license->caregiver->active,
+                'expiration_type_id' => $license->chain_expiration_type_id,
             ];
         });
     }

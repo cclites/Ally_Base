@@ -1,14 +1,14 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col md="2">
+            <b-col md="3">
                 <business-location-form-group
                         v-model="form.businesses"
                         label="Office Location"
                         :allow-all="true"
                 />
             </b-col>
-            <b-col lg="2">
+            <b-col lg="3">
                 <b-form-group label="Caregiver">
                     <b-form-select v-model="form.caregiver_id">
                         <option value="">All</option>
@@ -16,7 +16,7 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="2">
+            <b-col lg="3">
                 <b-form-group label="Caregiver Status">
                     <b-form-select v-model="form.active">
                         <option value="">All</option>
@@ -25,28 +25,33 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="2">
-                <b-form-group label="Expiration Name">
-                    <b-form-input v-model="form.name" placeholder="Example: CNA" />
-                </b-form-group>
-            </b-col>
             <b-col lg="3">
-                <b-form-group label="Show licenses expiring:">
-                    <b-form-input
-                        type="number"
-                        v-model="form.days"
-                        placeholder="Number of days"
-                        class="days"
-                        :min="0"
-                        :max="999"
-                        :disabled="form.show_expired"
-                    />
-                    <span class="ml-2">Days from today</span>
+                <b-form-group label="Expiration Name">
+
+                    <b-form-select v-model=" form.expiration_type ">
+                        <option value="">-- Select A Type --</option>
+                        <option :value=" exp.id " v-for=" ( exp, i ) in expirationtypes " :key=" i ">{{ exp.type }}</option>
+                    </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="3" class="vertical-center">
-                <b-form-checkbox v-model="form.show_expired">Show expired Licenses</b-form-checkbox>
+            <b-col lg="12" class="d-block align-items-center d-sm-flex">
+                <date-picker
+                    :disabled=" selectingPast "
+                    v-model=" form.start_date "
+                    placeholder="Start Date"
+                >
+                </date-picker> &nbsp;to&nbsp;
+                <date-picker
+                    v-model=" form.end_date "
+                    placeholder="End Date"
+                >
+                </date-picker>
             </b-col>
+
+            <b-col lg="6" class="vertical-center">
+                <b-form-checkbox @change=" showPast() ">Show all past expired Licenses</b-form-checkbox>
+            </b-col>
+
             <b-col md="12" class="text-right">
                 <b-form-group label="&nbsp;">
                     <b-button-group>
@@ -67,15 +72,22 @@
                 :busy="loading"
             >
                 <template slot="countdown" scope="row">
-                    {{ getCountdown(row.item.expiration_date) }}
+                    {{ row.item.expiration_date ? getCountdown( row.item.expiration_date ) : '-' }}
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/business/caregivers/' + row.item.caregiver_id">View Caregiver</b-btn>
-                    <b-btn size="sm" @click="sendEmailReminder(row.item)" :disabled="row.item.sendingEmail">
-                        <i class="fa fa-spinner fa-spin" v-if="row.item.sendingEmail"></i>
-                        <i class="fa fa-envelope" v-else></i>
-                        Email Reminder
-                    </b-btn>
+
+                    <b-row>
+
+                        <b-col class="d-flex align-items-center flex-wrap">
+
+                            <b-btn style="flex:1;" class="m-1" size="sm" :href="'/business/caregivers/' + row.item.caregiver_id + '#licenses' ">View Caregiver</b-btn>
+                            <b-btn style="flex:1;" class="m-1" size="sm" @click="sendEmailReminder(row.item)" :disabled="row.item.sendingEmail">
+                                <i class="fa fa-spinner fa-spin" v-if="row.item.sendingEmail"></i>
+                                <i class="fa fa-envelope" v-else></i>
+                                Email Reminder
+                            </b-btn>
+                        </b-col>
+                    </b-row>
                 </template>
             </b-table>
         </div>
@@ -104,6 +116,10 @@
                 type: Array,
                 default: () => [],
             },
+            expirationtypes: {
+                type: Array,
+                default: () => []
+            }
         },
 
         mixins: [FormatsDates],
@@ -115,12 +131,16 @@
 
         data() {
             return {
+
+                selectingPast : false,
                 form: new Form({
+
+                    start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end_date: moment().add( 30, 'days' ).format('MM/DD/YYYY'),
                     caregiver_id: '',
-                    days: 30,
                     show_expired: false,
                     active: '',
-                    name: '',
+                    expiration_type: '',
                     businesses: '',
                     json: 1,
                 }),
@@ -162,6 +182,14 @@
         },
 
         methods: {
+
+            showPast(){
+
+                this.selectingPast = !this.selectingPast;
+
+                if( this.selectingPast ) this.form.start_date = '01/01/1900';
+                else this.form.start_date = moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY');
+            },
             sendEmailReminder(item) {
                 if (item.sendingEmail) {
                     return;
@@ -187,13 +215,15 @@
 
             generate() {
                 this.loading = true;
-                this.form.get('/business/reports/caregiver-expirations')
-                    .then(response => {
-                        this.items = response.data;
+                this.form.get( '/business/reports/caregiver-expirations' )
+                    .then( response => {
+
+                        this.items     = response.data;
                         this.totalRows = this.items.length;
                     })
                     .catch(() => {})
                     .finally(() => {
+
                         this.loading = false;
                     });
             },

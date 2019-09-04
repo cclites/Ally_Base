@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\ExpirationType;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\CertificationExpirationReport;
@@ -17,17 +18,27 @@ class BusinessCaregiverExpirationsReportController extends BaseController
      */
     public function index(Request $request, CertificationExpirationReport $report)
     {
+
+        $expirationTypes = ExpirationType::where( 'chain_id', $this->businessChain()->id )
+            ->orderBy( 'type' )
+            ->get()
+            ->values();
+
         if ($request->filled('json')) {
+
             $results = $report->forRequestedBusinesses()
+                ->setAllTypes( $expirationTypes )
                 ->setCaregiver($request->caregiver_id)
                 ->setActiveOnly($request->active === '1' ? true : false)
                 ->setInactiveOnly($request->active === '0' ? true : false)
-                ->setName($request->name)
+                ->setExpirationType($request->expiration_type)
                 ->setExpired($request->show_expired == 1 ? true : false)
-                ->setDays($request->days)
+                ->setBetweenDates($request->start_date, $request->end_date)
                 ->rows();
 
-            return response()->json($results);
+            // dd( $results );
+
+            return response()->json( $results );
         }
 
         $caregivers = $this->businessChain()->caregivers()
@@ -42,7 +53,7 @@ class BusinessCaregiverExpirationsReportController extends BaseController
         return view_component(
             'business-caregiver-expirations-report',
             'Caregiver Expirations Report',
-            compact('caregivers'),
+            compact( 'caregivers', 'expirationTypes' ),
             [
                 'Home' => route('home'),
                 'Reports' => route('business.reports.index')
