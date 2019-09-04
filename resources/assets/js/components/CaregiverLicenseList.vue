@@ -4,8 +4,20 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <b-btn @click="createLicense()" variant="info" class="mr-2 mb-2" :disabled=" alreadyCreating ">Add Expiration</b-btn>
-        <b-btn to="/business/settings#expirations" variant="success" class="mb-2">Manage Expirations</b-btn>
+        <b-row class="align-items-center">
+
+            <b-col>
+
+                <b-btn @click="createLicense()" variant="info" class="mr-2 mb-2" :disabled=" alreadyCreating ">Add Expiration</b-btn>
+                <b-btn to="/business/settings#expirations" variant="success" class="mb-2">Manage Expirations</b-btn>
+            </b-col>
+
+            <b-form-checkbox
+                v-model=" onBlurUpdate "
+            >
+                Update rows on update
+            </b-form-checkbox>
+        </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                 :busy="loading"
@@ -34,16 +46,17 @@
                 </template>
                 <template slot="description" scope="row">
 
-                    <b-form-textarea id="descriptionfield"
+                    <b-form-input
                         v-model=" row.item.description "
                         placeholder="optional"
-                        rows="1"
-                    ></b-form-textarea>
+                        @blur.native=" onBlurUpdate ? saveLicense( row.item ) : null "
+                    ></b-form-input>
                 </template>
                 <template slot="expires_sort" scope="row">
                     <date-picker
                         v-model=" row.item.expires_at "
                         placeholder="Expiration Date"
+                        @input=" onBlurUpdate ? saveLicense( row.item ) : null "
                     ></date-picker>
                 </template>
                 <template slot="actions" scope="row">
@@ -52,13 +65,13 @@
 
                         <div class="d-flex align-items-center" v-if=" row.item.id " :key=" 'first' ">
 
-                            <b-btn style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
-                            <b-btn style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
                         </div>
                         <div class="d-flex align-items-center" v-else :key=" 'second' ">
 
-                            <b-btn style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn>
-                            <b-btn style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
                         </div>
                     </transition>
                 </template>
@@ -84,8 +97,9 @@
 
         data() {
             return {
+                onBlurUpdate : true,
                 loading: false,
-                perPage: 10,
+                perPage: 50,
                 currentPage: 1,
                 sortBy: null,
                 sortDesc: false,
@@ -200,7 +214,10 @@
             },
             saveLicense( item ){
 
-                this.loading = true;
+                console.log( 'saving item: ', item );
+
+                item.isLoading = true;
+                item.expires_at = item.expires_at;
                 let form = new Form( item );
 
                 const verb = item.id ? 'patch' : 'post';
@@ -209,19 +226,25 @@
                 form.submit( verb, url )
                     .then( response => {
 
+                        console.log( 'callback: ', response );
+
                         item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                         item.id         = response.data.data.id;
                         item.isNew      = false;
+                        item.isLoading = false;
                     })
                     .catch( () => {} )
-                    .finally( () => this.loading = false );
+                    .finally( () => {
+
+                        item.isLoading = false;
+                    });
             },
             deleteLicense( license ) {
 
                 let form = new Form();
                 if ( confirm( 'Are you sure you wish to delete this certification?' ) ) {
 
-                    this.loading = true;
+                    license.isLoading = false;
 
                     form.submit( 'delete', '/business/caregivers/' + this.caregiverId + '/licenses/' + license.id )
                         .then( response => {
@@ -241,7 +264,10 @@
                             }
                         })
                         .catch( () => {} )
-                        .finally( () => this.loading = false );
+                        .finally( () => {
+
+                            license.isLoading = false;
+                        });
                 }
             },
             removeNew(){
