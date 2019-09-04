@@ -114,6 +114,35 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
     // **********************************************************
     // MUTATORS
     // **********************************************************
+    public static function orderResources($referralsources){
+        $set = [];
+
+        foreach($referralsources as $item)
+        {
+            $key = $item['organization'];
+
+            if(!isset($set[$key])){
+                $set[$key]['organization'] = $item['organization'];
+                $set[$key]['contact_name'] = $item['contact_name'] . ", ";
+                $set[$key]['phone'] = $item['phone'];
+                $set[$key]['id'] = $item['id'];
+                $set[$key]['created_at'] = $item['created_at']->format('m/d/Y');
+            }else{
+                if(strpos($item['contact_name'], $set[$key]['contact_name']) === false){
+                    $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
+                }
+            }
+        }
+
+        $data = [];
+
+        foreach($set as $key=>$value){
+            $value['contact_name'] = rtrim($value['contact_name'], ', ');
+            $data[] = $value;
+        }
+
+        return json_encode($data);
+    }
     
     // **********************************************************
     // QUERY SCOPES

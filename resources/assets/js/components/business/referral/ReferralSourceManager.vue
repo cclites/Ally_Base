@@ -74,19 +74,13 @@
                     },
                     {
                         key: 'contact_name',
-                        label: 'Name',
-                        sortable: true
+                        label: 'Contacts',
+                        sortable: true,
                     },
                     {
                         key: 'phone',
                         label: 'Phone',
                         sortable: true
-                    },
-                    {
-                        key: 'created_at',
-                        label: 'Created At',
-                        sortable: true,
-                        formatter: val => this.formatDateFromUTC(val),
                     },
                     'actions'
                 ]
@@ -134,6 +128,9 @@
                     })
                     .catch(e => {
                     })
+            },
+            formatContacts(){
+
             },
         }
     }

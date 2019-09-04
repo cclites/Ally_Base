@@ -6,6 +6,7 @@ use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ReferralSourceController extends BaseController
@@ -19,6 +20,8 @@ class ReferralSourceController extends BaseController
             ->forType($type)
             ->ordered()
             ->get();
+
+        $referralsources = ReferralSource::orderResources($referralsources);
 
         if (request()->expectsJson()) {
             return response()->json($referralsources);
