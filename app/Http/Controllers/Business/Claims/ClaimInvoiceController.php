@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Business;
+namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\ClaimService;
-use App\Billing\ClientInvoice;
-use App\Billing\View\InvoiceViewFactory;
+use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
+use App\Claims\Requests\UpdateClaimInvoiceRequest;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Resources\ClaimInvoiceResource;
 use App\Billing\View\InvoiceViewGenerator;
-use App\Claims\ClaimInvoice;
-use App\Claims\ClaimInvoiceFactory;
-use App\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Http\Requests\UpdateClaimInvoiceRequest;
-use App\Http\Resources\ClaimInvoiceResource;
-use App\Responses\ErrorResponse;
+use App\Billing\View\InvoiceViewFactory;
+use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Responses\SuccessResponse;
-use App\Rules\ValidEnum;
+use App\Responses\ErrorResponse;
+use App\Billing\ClientInvoice;
+use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
 
 class ClaimInvoiceController extends BaseController
@@ -38,22 +37,6 @@ class ClaimInvoiceController extends BaseController
     }
 
     /**
-     * grab the data for a specific claim_invoice to populate the edit-modal
-     *
-     * @param ClaimInvoice $claim
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function show(ClaimInvoice $claim)
-    {
-        $this->authorize('read', $claim);
-
-        $claim->load(['items', 'client']);
-
-        return response()->json($claim);
-    }
-
-    /**
      * Edit ClaimInvoice form.
      *
      * @param ClaimInvoice $claim
@@ -65,7 +48,7 @@ class ClaimInvoiceController extends BaseController
         $this->authorize('read', $claim);
 
         return view_component(
-            'claim-details',
+            'claim-editor',
             'Edit Claim #' . $claim->name,
             ['original-claim' => new ClaimInvoiceResource($claim)],
             ['Home' => '/', 'Claims Queue' => route('business.claims-queue')]

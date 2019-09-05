@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Business;
+namespace App\Http\Controllers\Business\Claims;
 
-use App\ClaimableExpense;
-use App\ClaimableService;
-use App\Claims\ClaimInvoice;
-use App\Claims\ClaimInvoiceItem;
-use App\Http\Requests\UpdateClaimInvoiceItemRequest;
-use App\Http\Resources\ClaimInvoiceResource;
-use App\Responses\ErrorResponse;
+use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Resources\ClaimInvoiceResource;
 use App\Responses\SuccessResponse;
+use App\Responses\ErrorResponse;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
+use App\Claims\ClaimInvoiceItem;
+use App\Claims\ClaimInvoice;
 
 class ClaimInvoiceItemController extends BaseController
 {

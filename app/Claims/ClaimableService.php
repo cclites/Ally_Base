@@ -1,8 +1,10 @@
 <?php
-namespace App;
 
+namespace App\Claims;
+
+use App\Claims\Contracts\ClaimableInterface;
 use App\Billing\Service;
-use App\Claims\ClaimableInterface;
+use App\AuditableModel;
 
 class ClaimableService extends AuditableModel implements ClaimableInterface
 {
@@ -134,7 +136,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      *
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->service_name . ' ' . $this->service_code;
     }

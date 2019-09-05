@@ -2,20 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Exceptions\CannotDeleteClaimInvoiceException;
+use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\Exceptions\InvalidClientPayers;
 use Tests\CreatesClientInvoiceResources;
-use App\Claims\ClaimInvoiceFactory;
+use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Claims\ClaimInvoiceItem;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use App\Billing\ClaimStatus;
 use Tests\CreatesBusinesses;
-use App\ClaimableExpense;
-use App\ClaimableService;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
 use Tests\TestCase;
 
 class ClaimInvoiceFactoryTest extends TestCase

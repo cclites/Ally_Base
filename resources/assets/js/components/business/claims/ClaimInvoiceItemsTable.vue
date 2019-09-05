@@ -50,6 +50,7 @@
 
         computed: {
             ...mapGetters({
+                claim: 'claims/claim',
                 items: 'claims/claimItems',
                 current: 'claims/item',
             }),

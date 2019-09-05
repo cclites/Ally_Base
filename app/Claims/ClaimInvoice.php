@@ -2,18 +2,18 @@
 
 namespace App\Claims;
 
-use App\AuditableModel;
-use App\Billing\ClaimPayment;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Billing\Contracts\InvoiceInterface;
+use App\Traits\BelongsToOneBusiness;
+use Illuminate\Support\Collection;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
+use App\Billing\ClaimPayment;
 use App\Billing\ClientPayer;
-use App\Billing\Contracts\InvoiceInterface;
+use App\AuditableModel;
 use App\Billing\Payer;
 use App\Business;
 use App\Client;
-use App\Contracts\BelongsToBusinessesInterface;
-use App\Traits\BelongsToOneBusiness;
-use Illuminate\Support\Collection;
 
 class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsToBusinessesInterface
 {
@@ -59,7 +59,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
      * Get the Business relation.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function business()
     {
         return $this->belongsTo(Business::class);
@@ -69,7 +69,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
      * Get the ClientInvoice relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function clientInvoice()
     {
         return $this->belongsTo(ClientInvoice::class);
@@ -79,7 +79,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
      * Get the ClaimInvoiceItems relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function items()
     {
         return $this->hasMany(ClaimInvoiceItem::class, 'claim_invoice_id', 'id');
@@ -87,22 +87,22 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
 
     function client()
     {
-        return $this->belongsTo( Client::class );
+        return $this->belongsTo(Client::class);
     }
 
     /**
      * Get the Payer relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function payer()
     {
-        return $this->belongsTo( Payer::class );
+        return $this->belongsTo(Payer::class);
     }
 
     public function payments()
     {
-        return $this->hasMany( ClaimPayment::class );
+        return $this->hasMany(ClaimPayment::class);
     }
 
     // **********************************************************
@@ -116,17 +116,17 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
 
     function getAmount(): float
     {
-        return ( float ) $this->amount;
+        return ( float )$this->amount;
     }
 
     function getAmountDue(): float
     {
-        return ( float ) $this->amount_due;
+        return ( float )$this->amount_due;
     }
 
     function getAmountPaid(): float
     {
-        return (float) 0.00;
+        return (float)0.00;
     }
 
     function getName(): string
@@ -136,7 +136,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
 
     function getDate(): string
     {
-        return $this->created_at->format( 'm/d/Y' );
+        return $this->created_at->format('m/d/Y');
     }
 
     /**
@@ -148,26 +148,26 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     }
 
     /**
-     * 
+     *
      * because there is no 'group' column, and this information is more-or-less computed by the editable claim data,
      * I am going to do some manual joining and formatting for the invoice here
-     * 
+     *
      * basically, group by 'shift'..
      *  - the shift row title will be the computed 'group' name..
      *  - each item within it will either be the service rendered or the expense listed
      */
     function getItemGroups(): Collection
     {
-        $items = $this->getItems()->sortBy( 'created_at' );
+        $items = $this->getItems()->sortBy('created_at');
 
         $shifts = [];
 
-        foreach( $items as $item ){
+        foreach ($items as $item) {
 
-            $shifts[ $item->getShiftTitle() ][] = $item;
+            $shifts[$item->getShiftTitle()][] = $item;
         }
 
-        return collect( $shifts );
+        return collect($shifts);
     }
 
     /**
@@ -175,9 +175,9 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
      *
      * @return bool
      */
-    public function hasBeenTransmitted() : bool
+    public function hasBeenTransmitted(): bool
     {
-        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     // **********************************************************
@@ -195,17 +195,17 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     /**
      * Update the amount and amount due from the ClaimInvoiceItem values.
      */
-    public function updateBalances() : void
+    public function updateBalances(): void
     {
         $items = $this->fresh()->items;
 
-        $amount = $items->reduce(function(float $carry, ClaimInvoiceItem $item) {
-            return add($carry, (float) $item->amount);
-        }, (float) 0.00);
+        $amount = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
+            return add($carry, (float)$item->amount);
+        }, (float)0.00);
 
-        $amount_due = $items->reduce(function(float $carry, ClaimInvoiceItem $item) {
-            return add($carry, (float) $item->amount_due);
-        }, (float) 0.00);
+        $amount_due = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
+            return add($carry, (float)$item->amount_due);
+        }, (float)0.00);
 
         $this->update(compact('amount', 'amount_due'));
     }
@@ -220,7 +220,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
      * @param int $businessId
      * @return string
      */
-    public static function getNextName(int $businessId)
+    public static function getNextName(int $businessId): string
     {
         $lastName = self::where('business_id', $businessId)
             ->orderBy('id', 'DESC')
@@ -228,10 +228,10 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
             ->value('name');
 
         $minId = 1000;
-        if (! $lastName) {
+        if (!$lastName) {
             $nextId = $minId;
         } else {
-            $nextId = (int) substr($lastName, strpos($lastName, '-') + 1) + 1;
+            $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;
         }
 
         if ($nextId < $minId) {

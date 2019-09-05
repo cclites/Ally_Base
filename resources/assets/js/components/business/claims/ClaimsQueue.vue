@@ -180,15 +180,6 @@
             <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
 
-        <!-- Details modal -->
-        <edit-claim-modal
-            v-model="editClaimModalOpen"
-            :claim="editingClaim"
-            :transmitUpdate="updateClaim"
-            :transmitDelete="deleteClaimItem"
-            :transmitEditItem="editClaimItem"
-        />
-
         <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete">
             <p>Are you sure you want to delete this claim?</p>
         </confirm-modal>
@@ -203,10 +194,9 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import Constants from '../../../mixins/Constants';
-    import EditClaimModal from "../modals/EditClaimModal";
 
     export default {
-        components: {BusinessLocationFormGroup, EditClaimModal},
+        components: {BusinessLocationFormGroup},
         mixins: [FormatsDates, FormatsNumbers, Constants],
 
         data() {
@@ -311,8 +301,6 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 transmissionPrivate: false,
-
-                editClaimModalOpen: false,
                 editingClaim: {},
             }
         },
@@ -398,24 +386,6 @@
                             this.deletingId = null;
                         })
                 }
-            },
-
-            editClaimModal(claim) {
-                this.busy = true;
-                axios.get('/business/claims/' + claim.id + '/edit')
-                    .then(res => {
-                        let claim = res.data;
-                        claim.items.forEach(item => {
-                            item.removing = false;
-                            item.editing = false;
-                        });
-                        this.editingClaim = claim;
-                        this.editClaimModalOpen = true;
-                    })
-                    .catch(err => {
-                        console.err(err);
-                        alert('Problem loading claim details..');
-                    }).finally(() => this.busy = false);
             },
 
             updateClaim(newData) {
@@ -594,23 +564,6 @@
         },
 
         watch: {
-            // editClaimModalOpen: function( newVal, oldVal ){
-            //     // when the modal closes make sure the editing cliam is up-to-date
-
-            //     if( newVal === false ){
-
-            //         let claim = this.items.find( claim => claim.id == this.editingClaim.id );
-            //         claim = {
-
-            //             ...claim,
-            //             ...this.editingClaim,
-            //             client_name : _.upperFirst( this.editingClaim.client_first_name ) + ' ' + _.upperFirst( this.editingClaim.client_last_name )
-            //         };
-
-            //         console.log( 'editing: ', this.editingClaim );
-            //         console.log( 'claim: ', claim );
-            //     }
-            // }
         },
 
         async mounted() {

@@ -34,8 +34,8 @@ export default {
             SHIFT_MAX_FUTURE_END_DATE: 168, // hours
 
             CLAIMABLE_TYPES: {
-                EXPENSE: 'App\\ClaimableExpense',
-                SERVICE: 'App\\ClaimableService',
+                EXPENSE: 'App\\Claims\\ClaimableExpense',
+                SERVICE: 'App\\Claims\\ClaimableService',
             }
         }
     },

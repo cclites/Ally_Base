@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Claims\Resources;
 
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\Resource;
+use Carbon\Carbon;
 
 class ClaimableServiceResource extends Resource
 {

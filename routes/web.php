@@ -484,10 +484,10 @@ Route::group([
     Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
 
     /* New Claims & AR */
-    Route::get('claims-queue', 'Business\ClaimsQueueController@index')->name('claims-queue');
-    Route::resource( 'claims', 'Business\ClaimInvoiceController');
-    Route::resource( 'claims/{claim}/item', 'Business\ClaimInvoiceItemController');
-    Route::get('claims/{claim}/{view?}', 'Business\ClaimInvoiceController@print');
+    Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');
+    Route::resource( 'claims', 'Business\Claims\ClaimInvoiceController');
+    Route::resource( 'claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
+    Route::get('claims/{claim}/{view?}', 'Business\Claims\ClaimInvoiceController@print');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

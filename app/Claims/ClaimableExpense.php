@@ -1,8 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Claims;
 
-use App\Claims\ClaimableInterface;
+use App\Claims\Contracts\ClaimableInterface;
+use App\AuditableModel;
 
 class ClaimableExpense extends AuditableModel implements ClaimableInterface
 {
@@ -44,7 +45,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
 
     public function shift()
     {
-        return $this->belongsTo( Shift::class );
+        return $this->belongsTo(Shift::class);
     }
 
     // **********************************************************
@@ -68,7 +69,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      *
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }

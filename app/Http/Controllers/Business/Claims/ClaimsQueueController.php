@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Business;
+namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Http\Requests\TransmitClaimRequest;
-use Carbon\Carbon;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Resources\ClaimsQueueResource;
 use Illuminate\Database\Eloquent\Builder;
+use App\Billing\Queries\ClientInvoiceQuery;
 use Illuminate\Http\Request;
-use App\Responses\Resources\ClaimsQueueResource;
+use Carbon\Carbon;
 
 class ClaimsQueueController extends BaseController
 {

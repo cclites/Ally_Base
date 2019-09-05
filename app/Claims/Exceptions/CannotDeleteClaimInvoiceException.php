@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Exceptions;
+namespace App\Claims\Exceptions;
 
 use Exception;
 
 class CannotDeleteClaimInvoiceException extends Exception
 {
-    //
 }

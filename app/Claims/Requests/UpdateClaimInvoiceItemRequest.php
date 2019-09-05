@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Claims\Requests;
 
-use Carbon\Carbon;
-use App\Rules\ValidSSN;
-use App\ClaimableExpense;
-use App\ClaimableService;
-use App\Services\GeocodeManager;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Http\FormRequest;
+use App\Services\GeocodeManager;
+use App\Claims\ClaimableService;
+use App\Claims\ClaimableExpense;
+use App\Rules\ValidSSN;
+use Carbon\Carbon;
 
 class UpdateClaimInvoiceItemRequest extends FormRequest
 {
@@ -30,16 +30,16 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     public function rules()
     {
         return [
-            'claimable_type' => 'required|in:' . ClaimableExpense::class.','.ClaimableService::class,
-            'name' => 'required_if:claimable_type,'.ClaimableExpense::class.'',
-            'date' => 'required_if:claimable_type,'.ClaimableExpense::class.'|date',
+            'claimable_type' => 'required|in:' . ClaimableExpense::class . ',' . ClaimableService::class,
+            'name' => 'required_if:claimable_type,' . ClaimableExpense::class . '',
+            'date' => 'required_if:claimable_type,' . ClaimableExpense::class . '|date',
             'notes' => 'nullable|string',
 
             'rate' => 'required|numeric|min:0|max:999.99',
             'units' => 'required|numeric|min:0|max:999.99',
 
-            'caregiver_first_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
-            'caregiver_last_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
+            'caregiver_first_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'caregiver_last_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'caregiver_gender' => 'nullable|in:F,M',
             'caregiver_dob' => 'nullable|date',
             'caregiver_ssn' => ['nullable', new ValidSSN()],
@@ -51,17 +51,17 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'state' => 'nullable|string',
             'zip' => 'nullable|string',
 
-            'service_name' => 'required_if:claimable_type,'.ClaimableService::class.'',
+            'service_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'service_code' => 'nullable|string',
             'activities' => 'nullable|string',
             'caregiver_comments' => 'nullable|string',
 
-            'shift_start_date' => 'required_if:claimable_type,'.ClaimableService::class.'|date',
-            'shift_end_date' => 'required_if:claimable_type,'.ClaimableService::class.'|date',
-            'shift_start_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-            'shift_end_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
-            'service_start_date' => 'required_if:claimable_type,'.ClaimableService::class.'|date',
-            'service_start_time' => 'required_if:claimable_type,'.ClaimableService::class.'',
+            'shift_start_date' => 'required_if:claimable_type,' . ClaimableService::class . '|date',
+            'shift_end_date' => 'required_if:claimable_type,' . ClaimableService::class . '|date',
+            'shift_start_time' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'shift_end_time' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'service_start_date' => 'required_if:claimable_type,' . ClaimableService::class . '|date',
+            'service_start_time' => 'required_if:claimable_type,' . ClaimableService::class . '',
         ];
     }
 
@@ -70,7 +70,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      *
      * @return array
      */
-    public function messages() : array
+    public function messages(): array
     {
         return [
             'name.required_if' => 'The :attribute field is required.',
@@ -93,7 +93,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      * @return array
      * @throws ValidationException
      */
-    public function getClaimableData() : array
+    public function getClaimableData(): array
     {
         $data = collect($this->validated());
 
@@ -131,22 +131,16 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 // convert dates and times
                 $timezone = $this->getTimezone();
-                $data['scheduled_start_time'] = Carbon::parse($data['shift_start_date'].' '.$data['shift_start_time'], $timezone)->setTimezone('UTC');
-                $data['scheduled_end_time'] = Carbon::parse($data['shift_end_date'].' '.$data['shift_end_time'], $timezone)->setTimezone('UTC');
-                $data['visit_start_time'] = Carbon::parse($data['service_start_date'].' '.$data['service_start_time'], $timezone)->setTimezone('UTC');
+                $data['scheduled_start_time'] = Carbon::parse($data['shift_start_date'] . ' ' . $data['shift_start_time'], $timezone)->setTimezone('UTC');
+                $data['scheduled_end_time'] = Carbon::parse($data['shift_end_date'] . ' ' . $data['shift_end_time'], $timezone)->setTimezone('UTC');
+                $data['visit_start_time'] = Carbon::parse($data['service_start_date'] . ' ' . $data['service_start_time'], $timezone)->setTimezone('UTC');
                 $data['visit_end_time'] = $data['visit_start_time']->copy()->addHours($data['units']);
 
-                unset($data['units']);
-                unset($data['shift_start_date']);
-                unset($data['shift_end_date']);
-                unset($data['shift_start_time']);
-                unset($data['shift_end_time']);
-                unset($data['service_start_date']);
-                unset($data['service_start_time']);
+                unset($data['units'], $data['shift_start_date'], $data['shift_end_date'], $data['shift_start_time'], $data['shift_end_time'], $data['service_start_date'], $data['service_start_time']);
 
                 // Geo lookup on address entered
                 list($lat, $lon) = $this->lookupGeocode(
-                    $this->address1.' '.$this->city.', '.$this->state.' '.$this->country.' '.$this->zip
+                    $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip
                 );
 
                 if (empty($lat) || empty($lon)) {
@@ -180,7 +174,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      *
      * @return array
      */
-    public function getClaimItemData() : array
+    public function getClaimItemData(): array
     {
         $data = collect($this->validated());
 
@@ -215,7 +209,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      * @param string|null $fullAddress
      * @return array
      */
-    public function lookupGeocode(?string $fullAddress) : array
+    public function lookupGeocode(?string $fullAddress): array
     {
         if (empty($fullAddress)) {
             return [null, null];
@@ -237,7 +231,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      *
      * @return string
      */
-    public function getTimezone() : string
+    public function getTimezone(): string
     {
         $timezone = optional(auth()->user()->officeUser)->getTimezone();
         if (empty($timezone)) {

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Claims\Requests;
 
+use Illuminate\Foundation\Http\FormRequest;
 use App\Billing\ClaimService;
 use App\Rules\ValidEnum;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateClaimInvoiceRequest extends FormRequest
 {
@@ -45,7 +45,9 @@ class UpdateClaimInvoiceRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
-        if ($data['client_dob']) $data['client_dob'] = filter_date($data['client_dob']);
+        if ($data['client_dob']) {
+            $data['client_dob'] = filter_date($data['client_dob']);
+        }
         return $data;
     }
 }

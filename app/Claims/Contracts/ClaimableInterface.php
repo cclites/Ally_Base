@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Claims;
+namespace App\Claims\Contracts;
 
 /**
  * Interface ClaimableInterface

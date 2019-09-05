@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Claims;
+namespace App\Claims\Factories;
 
-use App\Address;
-use App\Billing\ClaimStatus;
-use App\Billing\ClientInvoice;
-use App\Billing\ClientInvoiceItem;
+use App\Claims\ClaimInvoiceItem;
+use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\InvoiceableType;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
+use App\Billing\ClientInvoice;
+use App\Billing\ClaimStatus;
+use App\Claims\ClaimInvoice;
 use App\Billing\Service;
 use App\Caregiver;
-use App\ClaimableExpense;
-use App\ClaimableService;
-use App\Exceptions\CannotDeleteClaimInvoiceException;
+use App\Address;
 use App\Shift;
 
 class ClaimInvoiceFactory
@@ -35,7 +37,6 @@ class ClaimInvoiceFactory
         \DB::beginTransaction();
         /** @var ClaimInvoice $claim */
         $claim = ClaimInvoice::create([
-
             'business_id' => $business->id,
             'client_invoice_id' => $invoice->id,
             'name' => $this->getInvoiceName($business->id),
@@ -61,7 +62,6 @@ class ClaimInvoiceFactory
         ]);
 
         $items = $invoice->items->map(function (ClientInvoiceItem $item) {
-
             switch ($item->invoiceable_type) {
                 case InvoiceableType::SHIFT():
                     return $this->convertShift($item);
@@ -252,11 +252,11 @@ class ClaimInvoiceFactory
      * @param string|null $method
      * @return string|null
      */
-    protected function mapEvvMethod(?string $method) : ?string
+    protected function mapEvvMethod(?string $method): ?string
     {
         if ($method == Shift::METHOD_GEOLOCATION) {
             return ClaimableService::EVV_METHOD_GEOLOCATION;
-        } else if ($method == Shift::METHOD_TELEPHONY) {
+        } elseif ($method == Shift::METHOD_TELEPHONY) {
             return ClaimableService::EVV_METHOD_TELEPHONY;
         }
 
@@ -275,7 +275,7 @@ class ClaimInvoiceFactory
             if (!filled($shift->checked_in_number)) {
                 return false;
             }
-        } else if ($shift->checked_in_method == Shift::METHOD_GEOLOCATION) {
+        } elseif ($shift->checked_in_method == Shift::METHOD_GEOLOCATION) {
             if (!filled($shift->checked_in_latitude) || !filled($shift->checked_in_longitude)) {
                 return false;
             }
@@ -287,7 +287,7 @@ class ClaimInvoiceFactory
             if (!filled($shift->checked_out_number)) {
                 return false;
             }
-        } else if ($shift->checked_out_method == Shift::METHOD_GEOLOCATION) {
+        } elseif ($shift->checked_out_method == Shift::METHOD_GEOLOCATION) {
             if (!filled($shift->checked_out_latitude) || !filled($shift->checked_out_longitude)) {
                 return false;
             }
@@ -313,7 +313,7 @@ class ClaimInvoiceFactory
      * @param ClaimInvoice $claim
      * @throws CannotDeleteClaimInvoiceException
      */
-    public function deleteClaimInvoice(ClaimInvoice $claim) : void
+    public function deleteClaimInvoice(ClaimInvoice $claim): void
     {
         if ($claim->hasBeenTransmitted()) {
             throw new CannotDeleteClaimInvoiceException('This claim has already been transmitted.');
