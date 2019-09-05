@@ -71,7 +71,6 @@ Vue.component('confirm-modal', require('./components/modals/ConfirmModal'));
 Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
-Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -245,7 +244,6 @@ Vue.component('business-client-account-setup-report', require('./components/busi
 Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
-Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
 
 Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
@@ -385,6 +383,10 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
+/* Claims */
+Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
+Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
+Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
 
 
 Vue.filter('date', value => {

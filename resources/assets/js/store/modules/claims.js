@@ -5,6 +5,10 @@ const state = {
     claim: {},
     item: {},
     caregivers: [],
+
+    remits: [],
+    remit: {},
+    remitClaimList: [],
 };
 
 // getters
@@ -24,6 +28,15 @@ const getters = {
     caregiverList(state) {
         return state.caregivers ? state.caregivers : [];
     },
+    remits(state) {
+        return state.remits ? state.remits : [];
+    },
+    remit(state) {
+        return state.remit ? state.remit : {};
+    },
+    remitClaimList(state) {
+        return state.remitClaimList ? state.remitClaimList : [];
+    },
 };
 
 // mutations
@@ -36,6 +49,15 @@ const mutations = {
     },
     setCaregiverList(state, data) {
         Vue.set(state, 'caregivers', data);
+    },
+    setRemits(state, data) {
+        Vue.set(state, 'remits', data);
+    },
+    setRemit(state, data) {
+        Vue.set(state, 'remit', data);
+    },
+    setRemitClaimList(state, data) {
+        Vue.set(state, 'remitClaimList', data);
     },
 };
 

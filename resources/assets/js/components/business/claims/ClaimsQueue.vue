@@ -388,56 +388,6 @@
                 }
             },
 
-            updateClaim(newData) {
-                // for when claim-info is edited
-                let invoice = this.items.find(invoice => {
-                    return invoice.claim && invoice.claim.id == newData.id;
-                });
-
-                invoice.claim = {
-                    ...invoice.claim,
-                    ...newData
-                };
-
-                invoice.client_name = _.upperFirst(newData.client_first_name) + ' ' + _.upperFirst(newData.client_last_name);
-            },
-
-            editClaimItem(data) {
-                // for when a claim item is edited, contains the changed amount of the item
-                console.log('transmitted edit item..', data);
-                let invoice = this.items.find(client_invoice => client_invoice.claim && client_invoice.claim.id == data.claim_invoice_id);
-
-                // // the value in the claim is always an int, not formatted
-                let current_claim_total = invoice.claim.amount;
-                let current_claim_balance = invoice.claim.amount_due;
-
-                current_claim_total -= parseFloat(data.changed_amount);
-                current_claim_balance -= parseFloat(data.changed_amount);
-
-                invoice.claim_balance = this.moneyFormat(current_claim_balance, '$', true);
-                invoice.claim_total = this.moneyFormat(current_claim_total, '$', true);
-            },
-
-            deleteClaimItem(item) {
-                // for when a claim item is deleted from a claim
-                let invoice = this.items.find(client_invoice => client_invoice.claim && client_invoice.claim.id == item.claim_invoice_id);
-
-                // the value in the claim is always an int, not formatted
-                let current_claim_total = invoice.claim.amount;
-                let current_claim_balance = invoice.claim.amount_due;
-
-                current_claim_total -= parseFloat(item.amount);
-                current_claim_balance -= parseFloat(item.amount_due);
-                let current_claim_paid = current_claim_total - current_claim_balance;
-
-                invoice.claim.amount = current_claim_total;
-                invoice.claim.amount_due = current_claim_balance;
-
-                invoice.claim_balance = this.moneyFormat(current_claim_balance, '$', true);
-                invoice.claim_total = this.moneyFormat(current_claim_total, '$', true);
-                invoice.claim_paid = this.moneyFormat(current_claim_paid, '$', true);
-            },
-
             transmitClaim(invoice, skipAlert = false) {
                 if (true) return;
 

@@ -36,7 +36,16 @@ export default {
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',
                 SERVICE: 'App\\Claims\\ClaimableService',
-            }
+            },
+
+            CLAIM_REMIT_TYPES: {
+                TAKE_BACK: 'take-back',
+                REMIT: 'remit',
+            },
+            claimRemitTypeOptions: [
+                { value: 'REMIT', text: 'Remit' },
+                { value: 'TAKE_BACK', text: 'Take Back' },
+            ]
         }
     },
 }

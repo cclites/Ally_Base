@@ -60,26 +60,6 @@ class ClaimInvoiceItemController extends BaseController
 
             \DB::commit();
         } catch (\Exception $ex) {
-
-
-
-
-
-
-
-
-
-
-
-            dd($ex->getMessage());
-
-
-
-
-
-
-
-
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to create this item.  Please try again.');
         }

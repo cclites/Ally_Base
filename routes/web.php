@@ -479,7 +479,7 @@ Route::group([
     Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
     Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
-    Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
+    Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\Claims\ClaimInvoiceController@show')->name('claims.invoice.show');
     Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
     Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
 
@@ -488,6 +488,7 @@ Route::group([
     Route::resource( 'claims', 'Business\Claims\ClaimInvoiceController');
     Route::resource( 'claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
     Route::get('claims/{claim}/{view?}', 'Business\Claims\ClaimInvoiceController@print');
+    Route::resource( 'claim-remits', 'Business\Claims\ClaimRemitController');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
