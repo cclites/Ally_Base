@@ -1,69 +1,99 @@
 <template>
-    <b-card :header="title"
-        header-bg-variant="info"
-        header-text-variant="white"
-        >
-        <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
+        <b-modal id="filterColumnsModal" v-model="showEditModal">
             <b-container fluid>
-                    <b-row>
-                        <b-col lg="12">
-                            <b-form-group label="Organization Name" label-for="organization" label-class="required">
-                                <b-form-input v-model="form.organization" type="text" required />
-                                <input-help :form="form" field="organization"></input-help>
-                            </b-form-group>
-                            <b-form-group label="Contact Name" label-for="name" label-class="required">
-                                <b-form-input v-model="form.contact_name" type="text" required />
-                                <input-help :form="form" field="contact_name"></input-help>
-                            </b-form-group>
-                            <b-form-group label="Phone Number" label-for="phone">
-                                <b-form-input v-model="form.phone" type="text" />
-                                <input-help :form="form" field="phone"></input-help>
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Organization Name" label-for="organization" label-class="required">
+                            <b-form-input v-model="form.organization" type="text" required />
+                            <input-help :form="form" field="organization"></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <div class="table-responsive">
+                    <b-table bordered striped hover show-empty
+                             :items="items"
+                             :fields="fields"
+                             :current-page="currentPage"
+                             :per-page="perPage"
+                             :filter="filter"
+                             :sort-by.sync="sortBy"
+                             :sort-desc.sync="sortDesc"
+                    >
+                        <template slot="actions" scope="row">
+                            <!--b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
+                                <i class="fa fa-edit"></i>
+                            </b-btn-->
+                            <b-btn size="sm" @click="save(row)">
+                                <i class="fa fa-edit"></i>
+                            </b-btn>
+                            <b-btn size="sm" @click="destroy(row.item.id)" variant="danger">
+                                <i class="fa fa-trash"></i>
+                            </b-btn>
+                        </template>
+                    </b-table>
+                </div>
             </b-container>
             <div slot="modal-footer">
-                <b-button variant="success"
-                        type="submit"
-                        :disabled="loading"
-                >
-                    {{ buttonText }}
-                </b-button>
+                <b-btn variant="default" @click="hideModal=false">Close</b-btn>
             </div>
-        </form>
-    </b-card>
+        </b-modal>
 </template>
 
 <script>
     export default {
         props: {
-            source: Object,
+            value: Boolean,
+            source: '',
+            sourceType: {
+                type: String,
+                default: 'client',
+            }
         },
 
         data() {
             return {
                 form: this.makeForm(this.source),
                 loading: false,
+                showEditModal: this.value,
+                items: this.source,
+                totalRows: 0,
+                currentPage: 1,
+                perPage: 25,
+                filter: null,
+                search: null,
+                sortBy: 'organization',
+                sortDesc: false,
+                fields: [
+                    {
+                        key: 'organization',
+                        label: 'Organization',
+                        sortable: true
+                    },
+                    {
+                        key: 'contact_name',
+                        label: 'Contacts',
+                        sortable: true,
+                    },
+
+                    'actions'
+                ]
             }
         },
 
         computed: {
-            title() {
-                return (this.source.id) ? 'Edit Referral Source' : 'Add New Referral Source';
-            },
-            buttonText() {
-                return (this.source.id) ? 'Save' : 'Create';
-            },
+
         },
 
         methods: {
             makeForm(defaults = {}) {
+                return new Form({});
+                /*
                 return new Form({
                     organization: defaults.organization,
                     contact_name: defaults.contact_name,
                     phone: defaults.phone,
-                    type: defaults.type,
-                });
+                    type: this.sourceType,
+                });*/
             },
 
             submitForm() {
@@ -73,12 +103,22 @@
                 this.form.submit(method, url)
                     .then(response => {
                         this.$emit('saved', response.data.data);
+                        this.showModal = false;
                     })
                     .finally(() => this.loading = false)
             },
+
         },
 
         watch: {
+            value(val) {
+                this.form = this.makeForm(this.source);
+                this.showModal = val;
+            },
+            showModal(val) {
+                this.$emit('visible', val);
+            }
+
         }
     }
 </script>

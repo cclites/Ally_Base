@@ -37,6 +37,7 @@ class ReferralSourceController extends BaseController
 
     public function edit(ReferralSource $referralSource)
     {
+        \Log::info('Edit referral resource');
         $this->authorize('update', $referralSource);
 
         return $this->index($referralSource->id);
@@ -44,6 +45,7 @@ class ReferralSourceController extends BaseController
 
     public function show(ReferralSource $referralSource)
     {
+        \Log::info('Show referral resource');
         $this->authorize('read', $referralSource);
 
         $referralSource->load([
@@ -58,6 +60,7 @@ class ReferralSourceController extends BaseController
 
     public function store(UpdateReferralSourceRequest $request)
     {
+        \Log::info('Store referral resource');
         $data = $request->validated();
         $this->authorize('create', [ReferralSource::class, $data]);
 

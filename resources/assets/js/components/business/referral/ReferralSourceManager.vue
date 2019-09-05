@@ -1,8 +1,9 @@
+<!-- Referral Sources Left Side Menu Option-->
 <template>
     <b-card>
         <b-row class="mb-2">
             <b-col lg="3">
-                <b-btn variant="info" @click="showModal=true">Add Referral Source</b-btn>
+                <b-btn variant="info" @click="showAddReferralModal=true">Add Referral Source</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -16,7 +17,10 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
+                    <!--b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
+                        <i class="fa fa-edit"></i>
+                    </b-btn-->
+                    <b-btn size="sm" @click="edit(row.item.id)">
                         <i class="fa fa-edit"></i>
                     </b-btn>
                     <b-btn size="sm" @click="destroy(row.item)" variant="danger">
@@ -36,11 +40,20 @@
         </b-row>
 
         <business-referral-source-modal
-            v-model="showModal"
-            :source="editSource" 
+            :value="showAddReferralModal"
+            :source="addSource"
             @saved="updateList"
             :source-type="sourceType"
+            @visible="showAddModal"
         ></business-referral-source-modal>
+
+        <business-referral-source
+                :value="showEditReferralModal"
+                :source="editSource"
+                @saved="updateList"
+                :source-type="sourceType"
+                @visible="showEditModal"
+        ></business-referral-source>
     </b-card>
 </template>
 
@@ -56,8 +69,10 @@
         data() {
             return {
                 items: this.referralSources || [],
-                showModal: !!this.editSourceId || !!this.createSource,
-                editSource: this.find(this.editSourceId, this.referralSources) || {},
+                showAddReferralModal: false,
+                showEditReferralModal: false,
+                editSource: [],
+                addSource: '',
                 active: 'active',
                 totalRows: 0,
                 currentPage: 1,
@@ -77,11 +92,7 @@
                         label: 'Contacts',
                         sortable: true,
                     },
-                    {
-                        key: 'phone',
-                        label: 'Phone',
-                        sortable: true
-                    },
+
                     'actions'
                 ]
             }
@@ -93,16 +104,29 @@
 
         methods: {
             edit(id) {
+
+                //console.log(JSON.stringify(list[id].contacts));
+                //this.editSource = this.referralSources[id];
+                this.showEditReferralModal = true;
+                /*
                 this.editSource = this.find(id);
                 this.showModal = true;
+                */
             },
             create() {
                 this.editSource = {};
-                this.showModal = true;
+                this.showAddReferralModal = true;
             },
             find(id, list=null) {
+
+
+                return;
+                //return list[id].contacts;
+
+                /*
                 if (!list) list = this.items;
-                return list.find(item => item.id == id);
+                return list.find(item => item.contacts.id == id);
+                 */
             },
             updateList(source) {
                 let index = this.items.findIndex(item => item.id == source.id);
@@ -129,9 +153,16 @@
                     .catch(e => {
                     })
             },
-            formatContacts(){
 
+            showAddModal(val){
+                console.log(val);
+                this.showAddReferralModal = val;
             },
+
+            showEditModal(val){
+                console.log(val);
+                this.showEditReferralModal = val;
+            }
         }
     }
 </script>
