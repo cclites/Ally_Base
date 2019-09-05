@@ -26,7 +26,7 @@ class BusinessCaregiverExpirationsReportController extends BaseController
 
         if ($request->filled('json')) {
 
-            $results = $report->forRequestedBusinesses()
+            $report->forRequestedBusinesses()
                 ->setAllTypes( $expirationTypes )
                 ->setCaregiver( $request->caregiver_id != 'scheduled' ? $request->caregiver_id : null )
                 ->setActiveOnly($request->active === '1' ? true : false)
@@ -34,10 +34,15 @@ class BusinessCaregiverExpirationsReportController extends BaseController
                 ->setExpirationType($request->expiration_type)
                 ->setExpired($request->show_expired == 1 ? true : false)
                 ->setBetweenDates($request->start_date, $request->end_date)
-                ->setShowScheduled($request->show_scheduled === 'false' ? false : true )
-                ->rows();
+                ->setShowScheduled($request->show_scheduled === 'false' ? false : true );
 
-            return response()->json( $results );
+            if ( $request->export === '1') {
+
+                return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
+                    ->download();
+            }
+
+            return response()->json( $report->rows() );
         }
 
         $caregivers = $this->businessChain()->caregivers()

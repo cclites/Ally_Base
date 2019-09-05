@@ -58,8 +58,12 @@
             </b-col>
 
             <b-col md="12" class="text-right">
+
                 <b-form-group label="&nbsp;">
+
                     <b-button-group>
+
+                        <b-btn @click=" exportExcel() " variant="success" class="mr-2"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                         <b-button @click="generate()" variant="info" :disabled="loading"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
                     </b-button-group>
                 </b-form-group>
@@ -149,6 +153,7 @@
                     businesses: '',
                     json: 1,
                     show_scheduled : false,
+                    export: 0
                 }),
                 totalRows: 0,
                 perPage: 50,
@@ -234,6 +239,7 @@
             },
 
             generate() {
+
                 this.loading = true;
                 this.form.get( '/business/reports/caregiver-expirations' )
                     .then( response => {
@@ -246,6 +252,12 @@
 
                         this.loading = false;
                     });
+            },
+            exportExcel() {
+
+                this.form.export = 1;
+                window.location = this.form.toQueryString( `/business/reports/caregiver-expirations` );
+                this.form.export = 0;
             },
         }
     }
