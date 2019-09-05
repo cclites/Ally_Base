@@ -1,37 +1,6 @@
 <template>
         <b-modal id="EditReferralModal" v-model="showModal">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12">
-                        <b-form-group label="Organization Name" label-for="organization" label-class="required">
-                            <b-form-input v-model="organization" type="text" required />
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-                <div class="table-responsive">
-                    <b-table bordered striped hover show-empty
-                             :items="items"
-                             :fields="fields"
-                             :current-page="currentPage"
-                             :per-page="perPage"
-                             :filter="filter"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                    >
-                        <template slot="actions" scope="row">
-                            <!--b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
-                                <i class="fa fa-edit"></i>
-                            </b-btn-->
-                            <b-btn size="sm" @click="save(row)">
-                                <i class="fa fa-edit"></i>
-                            </b-btn>
-                            <b-btn size="sm" @click="destroy(row.item.id)" variant="danger">
-                                <i class="fa fa-trash"></i>
-                            </b-btn>
-                        </template>
-                    </b-table>
-                </div>
-            </b-container>
+
             <div slot="modal-footer">
                 <b-btn variant="default" @click="showModal=false">Close</b-btn>
             </div>
@@ -52,7 +21,7 @@
         data() {
             return {
                 //form: this.makeForm(this.source),
-                form: [],
+                //form: [],
                 loading: false,
                 showModal: this.value,
                 organization: '',
@@ -98,6 +67,7 @@
             },
 
             submitForm() {
+                /*
                 this.loading = true;
                 let method = this.source.id ? 'patch' : 'post';
                 let url = this.source.id ? `/business/referral-sources/${this.source.id}` : '/business/referral-sources';
@@ -107,7 +77,16 @@
                         this.showModal = false;
                     })
                     .finally(() => this.loading = false)
+                    */
             },
+
+            save(){
+                //TODO
+            },
+
+            destroy(){
+                //TODO
+            }
 
         },
 
@@ -118,10 +97,12 @@
                 this.showModal = val;
             },
 
-             */
+
             showModal(val) {
                 this.$emit('input', val);
             }
+
+             */
 
         }
     }
