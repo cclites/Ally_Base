@@ -1,6 +1,6 @@
 <template>
     <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-        <b-modal id="filterColumnsModal" :title="title" v-model="showModal">
+        <b-modal id="ReferralSourceModal" :title="title" v-model="showModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
@@ -90,7 +90,7 @@
             },
             showModal(val) {
                 console.log("Show Modal val in Add is " + val);
-                this.$emit('visible', val);
+                this.$emit('input', val);
             }
         }
     }

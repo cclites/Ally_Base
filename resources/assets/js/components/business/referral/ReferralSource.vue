@@ -1,11 +1,10 @@
 <template>
-        <b-modal id="filterColumnsModal" v-model="showEditModal">
+        <b-modal id="EditReferralModal" v-model="showModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Organization Name" label-for="organization" label-class="required">
-                            <b-form-input v-model="form.organization" type="text" required />
-                            <input-help :form="form" field="organization"></input-help>
+                            <b-form-input v-model="organization" type="text" required />
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -34,7 +33,7 @@
                 </div>
             </b-container>
             <div slot="modal-footer">
-                <b-btn variant="default" @click="hideModal=false">Close</b-btn>
+                <b-btn variant="default" @click="showModal=false">Close</b-btn>
             </div>
         </b-modal>
 </template>
@@ -52,9 +51,11 @@
 
         data() {
             return {
-                form: this.makeForm(this.source),
+                //form: this.makeForm(this.source),
+                form: [],
                 loading: false,
-                showEditModal: this.value,
+                showModal: this.value,
+                organization: '',
                 items: this.source,
                 totalRows: 0,
                 currentPage: 1,
@@ -111,12 +112,15 @@
         },
 
         watch: {
+            /*
             value(val) {
                 this.form = this.makeForm(this.source);
                 this.showModal = val;
             },
+
+             */
             showModal(val) {
-                this.$emit('visible', val);
+                this.$emit('input', val);
             }
 
         }

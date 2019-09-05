@@ -20,7 +20,7 @@
                     <!--b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
                         <i class="fa fa-edit"></i>
                     </b-btn-->
-                    <b-btn size="sm" @click="edit(row.item.id)">
+                    <b-btn size="sm" @click="showEditReferralModal=true">
                         <i class="fa fa-edit"></i>
                     </b-btn>
                     <b-btn size="sm" @click="destroy(row.item)" variant="danger">
@@ -40,19 +40,17 @@
         </b-row>
 
         <business-referral-source-modal
-            :value="showAddReferralModal"
+            v-model="showAddReferralModal"
             :source="addSource"
             @saved="updateList"
             :source-type="sourceType"
-            @visible="showAddModal"
         ></business-referral-source-modal>
 
         <business-referral-source
-                :value="showEditReferralModal"
+                v-model="showEditReferralModal"
                 :source="editSource"
                 @saved="updateList"
                 :source-type="sourceType"
-                @visible="showEditModal"
         ></business-referral-source>
     </b-card>
 </template>
@@ -106,7 +104,7 @@
             edit(id) {
 
                 //console.log(JSON.stringify(list[id].contacts));
-                //this.editSource = this.referralSources[id];
+                this.editSource = this.referralSources[id];
                 this.showEditReferralModal = true;
                 /*
                 this.editSource = this.find(id);
@@ -154,6 +152,7 @@
                     })
             },
 
+            /*
             showAddModal(val){
                 console.log(val);
                 this.showAddReferralModal = val;
@@ -162,7 +161,7 @@
             showEditModal(val){
                 console.log(val);
                 this.showEditReferralModal = val;
-            }
+            }*/
         }
     }
 </script>
