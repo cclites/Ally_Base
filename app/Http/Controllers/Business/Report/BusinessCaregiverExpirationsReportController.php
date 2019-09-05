@@ -6,6 +6,7 @@ use App\ExpirationType;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\CertificationExpirationReport;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class BusinessCaregiverExpirationsReportController extends BaseController
 {
@@ -36,10 +37,16 @@ class BusinessCaregiverExpirationsReportController extends BaseController
                 ->setBetweenDates($request->start_date, $request->end_date)
                 ->setShowScheduled($request->show_scheduled === 'false' ? false : true );
 
-            if ( $request->export === '1') {
+            if ( $request->export === '1' ) {
 
                 return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
                     ->download();
+            }
+
+            if ( $request->mail_merge === '1' ) {
+
+                $pdf = PDF::loadView( 'business.caregivers.mail_merge', [ 'licenses' => $report->rows() ] );
+                return $pdf->inline( 'something.pdf' );
             }
 
             return response()->json( $report->rows() );

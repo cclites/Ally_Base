@@ -53,20 +53,15 @@
             <b-col lg="12" class="d-flex mt-2">
                 <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show already expired Licenses</b-form-checkbox>
             </b-col>
-            <b-col lg="12" class="d-flex ">
+            <b-col lg="12" class="d-flex">
                 <b-form-checkbox class="m-0 vertical-center" @change=" showScheduled() ">Show scheduled caregivers</b-form-checkbox>
             </b-col>
 
-            <b-col md="12" class="text-right">
+            <b-col class="mt-2 d-flex align-items-stretch align-items-sm-center justify-content-end flex-column flex-sm-row">
 
-                <b-form-group label="&nbsp;">
-
-                    <b-button-group>
-
-                        <b-btn @click=" exportExcel() " variant="success" class="mr-2"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                        <b-button @click="generate()" variant="info" :disabled="loading"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                    </b-button-group>
-                </b-form-group>
+                <b-btn @click="exportExcel()" variant="success" class="m-1"><i class="fa fa-file-excel-o mr-2"></i>Export to Excel</b-btn>
+                <b-button @click="initMailMerge()" variant="primary" class="m-1" :disabled="loading"><i class="fa fa-file-pdf-o mr-2"></i>Generate Mail Merge</b-button>
+                <b-button @click="generate()" variant="info" class="m-1" :disabled="loading"><i class="fa fa-file-o mr-2"></i>Generate Report</b-button>
             </b-col>
         </b-row>
 
@@ -153,7 +148,8 @@
                     businesses: '',
                     json: 1,
                     show_scheduled : false,
-                    export: 0
+                    export: 0,
+                    mail_merge: 0
                 }),
                 totalRows: 0,
                 perPage: 50,
@@ -194,6 +190,12 @@
 
         methods: {
 
+            initMailMerge(){
+
+                this.form.mail_merge = 1;
+                window.open( this.form.toQueryString( `/business/reports/caregiver-expirations` ) );
+                this.form.mail_merge = 0;
+            },
             showPast(){
 
                 this.selectingPast = !this.selectingPast;
