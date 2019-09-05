@@ -10,9 +10,10 @@
             </b-col>
             <b-col lg="3">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="form.caregiver_id">
+                    <b-form-select v-model=" form.caregiver_id " :disabled=" form.show_scheduled ">
                         <option value="">All</option>
                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
+                        <option disabled value="scheduled">-- Only Scheduled --</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
@@ -34,7 +35,7 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="12" class="d-block align-items-center d-sm-flex">
+            <b-col lg="6" class="d-block align-items-center d-sm-flex">
                 <date-picker
                     :disabled=" selectingPast "
                     v-model=" form.start_date "
@@ -42,14 +43,18 @@
                 >
                 </date-picker> &nbsp;to&nbsp;
                 <date-picker
+                    :disabled=" selectingPast "
                     v-model=" form.end_date "
                     placeholder="End Date"
                 >
                 </date-picker>
             </b-col>
 
-            <b-col lg="6" class="vertical-center">
-                <b-form-checkbox @change=" showPast() ">Show all past expired Licenses</b-form-checkbox>
+            <b-col lg="12" class="d-flex mt-2">
+                <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show already expired Licenses</b-form-checkbox>
+            </b-col>
+            <b-col lg="12" class="d-flex ">
+                <b-form-checkbox class="m-0 vertical-center" @change=" showScheduled() ">Show scheduled caregivers</b-form-checkbox>
             </b-col>
 
             <b-col md="12" class="text-right">
@@ -143,9 +148,10 @@
                     expiration_type: '',
                     businesses: '',
                     json: 1,
+                    show_scheduled : false,
                 }),
                 totalRows: 0,
-                perPage: 25,
+                perPage: 50,
                 currentPage: 1,
                 sortBy: null,
                 sortDesc: false,
@@ -187,8 +193,22 @@
 
                 this.selectingPast = !this.selectingPast;
 
-                if( this.selectingPast ) this.form.start_date = '01/01/1900';
-                else this.form.start_date = moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY');
+                if( this.selectingPast ){
+
+                    this.form.start_date = '01/01/1900';
+                    this.form.end_date = moment().format('MM/DD/YYYY');
+                } else {
+
+                    this.form.start_date = moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY');
+                    this.form.end_date = moment().add( 30, 'days' ).format('MM/DD/YYYY');
+                }
+            },
+            showScheduled(){
+
+                this.form.show_scheduled = !this.form.show_scheduled;
+
+                if( this.form.show_scheduled ) this.form.caregiver_id = 'scheduled';
+                else this.form.caregiver_id = '';
             },
             sendEmailReminder(item) {
                 if (item.sendingEmail) {

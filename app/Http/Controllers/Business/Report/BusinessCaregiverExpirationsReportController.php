@@ -28,15 +28,14 @@ class BusinessCaregiverExpirationsReportController extends BaseController
 
             $results = $report->forRequestedBusinesses()
                 ->setAllTypes( $expirationTypes )
-                ->setCaregiver($request->caregiver_id)
+                ->setCaregiver( $request->caregiver_id != 'scheduled' ? $request->caregiver_id : null )
                 ->setActiveOnly($request->active === '1' ? true : false)
                 ->setInactiveOnly($request->active === '0' ? true : false)
                 ->setExpirationType($request->expiration_type)
                 ->setExpired($request->show_expired == 1 ? true : false)
                 ->setBetweenDates($request->start_date, $request->end_date)
+                ->setShowScheduled($request->show_scheduled === 'false' ? false : true )
                 ->rows();
-
-            // dd( $results );
 
             return response()->json( $results );
         }

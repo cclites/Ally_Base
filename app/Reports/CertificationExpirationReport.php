@@ -18,6 +18,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     protected $days;
     protected $startDate;
     protected $endDate;
+    protected $showScheduled;
 
     public function setCaregiver(?int $id) : self
     {
@@ -29,6 +30,12 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+        return $this;
+    }
+
+    public function setShowScheduled(?bool $showScheduled) : self
+    {
+        $this->showScheduled = $showScheduled;
         return $this;
     }
 
@@ -101,7 +108,8 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
             }
         });
 
-        if ($this->caregiverId) {
+        if ( $this->caregiverId ) {
+
             $query->where('caregiver_id', $this->caregiverId);
         }
 
@@ -114,6 +122,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
 
             $query->where( 'expires_at', '<=', Carbon::parse( $this->endDate )->format( 'Y-m-d' ) );
         }
+
         if ( isset( $this->expiration_type ) ) {
 
             $by_caregivers = $query->where( 'chain_expiration_type_id', $this->expiration_type )->get()->groupBy( 'caregiver_id' );
@@ -141,6 +150,19 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
                         ]));
                     }
                 }
+            }
+        }
+
+        if( $this->showScheduled ){
+            // if flagged, remove the caregivers who do not have future schedules. This may be better to do on the SQL side with extra joins and relationship querying.
+            // I figured it would dramatically alter the query for one specific case and be a lot more work than needed, let me know if this is okay
+
+            foreach( $by_caregivers as $index => $caregiver ){
+
+                if( $caregiver->first()->caregiver->futureSchedules->count() == 0 ){
+
+                    $by_caregivers->forget( $index );
+                };
             }
         }
 
