@@ -8,6 +8,7 @@ use App\Billing\View\InvoiceViewFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimInvoiceFactory;
+use App\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Http\Requests\UpdateClaimInvoiceRequest;
 use App\Http\Resources\ClaimInvoiceResource;
 use App\Responses\ErrorResponse;
@@ -93,20 +94,21 @@ class ClaimInvoiceController extends BaseController
     /**
      * Create a ClaimInvoice.
      *
-     * @param Request $request
+     * @param ClaimInvoice $claim
      * @param ClaimInvoiceFactory $factory
      * @return SuccessResponse
-     * @throws \Exception
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(Request $request, ClaimInvoiceFactory $factory)
+    public function destroy(ClaimInvoice $claim, ClaimInvoiceFactory $factory)
     {
-        $claim = ClaimInvoice::findOrFail($request->claim);
-
         $this->authorize('delete', $claim);
 
-        $factory->hardDeleteClaimInvoice($claim);
-
-        return new SuccessResponse('Claim has been deleted.');
+        try {
+            $factory->deleteClaimInvoice($claim);
+            return new SuccessResponse('Claim has been deleted.');
+        } catch (CannotDeleteClaimInvoiceException $ex) {
+            return new ErrorResponse(500, 'Could not delete this claim: ' . $ex->getMessage());
+        }
     }
 
     /**

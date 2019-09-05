@@ -117,18 +117,15 @@
                     </span>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn v-if=" !row.item.claim " variant="success" class="flex-1 my-1" @click=" createClaim( row.item ) " :disabled=" busy " size="sm">
+                    <b-btn v-if=" !row.item.claim " variant="success" class="mr-1" @click=" createClaim( row.item ) " :disabled=" busy " size="sm">
                         <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner"></i>
                         <span>Create Claim</span>
                     </b-btn>
-                    <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' " class="d-flex">
-<!--                        <b-btn variant="info" style="flex:1" class="m-1" @click.stop=" editClaimModal( row.item.claim ) " :disabled=" busy " size="sm">-->
-<!--                            <i class="fa fa-edit"></i>-->
-<!--                        </b-btn>-->
-                        <b-btn variant="info" class="my-1" :href="`/business/claims/${row.item.claim.id}/edit`" size="sm">
+                    <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' ">
+                        <b-btn variant="info" class="mr-1" :href="`/business/claims/${row.item.claim.id}/edit`" size="sm">
                             <i class="fa fa-edit"></i>
                         </b-btn>
-                        <b-btn variant="danger" class="my-1" @click="deleteClaimModal(row.item)" :disabled="busy" size="sm">
+                        <b-btn variant="danger" class="mr-1" @click="deleteClaimModal(row.item)" :disabled="busy" size="sm">
                             <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
                             <i v-else class="fa fa-times"></i>
                         </b-btn>
@@ -646,10 +643,6 @@
 </script>
 
 <style>
-    td.actions-column {
-        display: flex;
-        flex-direction: column;
-    }
     table:not(.form-check) {
         font-size: 14px;
     }

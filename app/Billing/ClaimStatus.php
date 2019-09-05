@@ -21,4 +21,17 @@ class ClaimStatus extends Enum
     private const RETRANSMITTED = 'RETRANSMITTED';
     private const ACCEPTED = 'ACCEPTED';
     private const REJECTED = 'REJECTED';
+
+    /**
+     * Get the statuses that represent a Claim that
+     * has not been transmitted yet.
+     *
+     * @return array
+     */
+    public static function notTransmittedStatuses()
+    {
+        return [
+            self::NOT_SENT(), self::CREATED()
+        ];
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Claims;
 
 use App\AuditableModel;
 use App\Billing\ClaimPayment;
+use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
 use App\Billing\Contracts\InvoiceInterface;
@@ -167,6 +168,16 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
         }
 
         return collect( $shifts );
+    }
+
+    /**
+     * Get whether or not the claim invoice has been transmitted.
+     *
+     * @return bool
+     */
+    public function hasBeenTransmitted() : bool
+    {
+        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     // **********************************************************

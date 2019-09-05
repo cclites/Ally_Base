@@ -13,6 +13,7 @@ use App\Billing\Service;
 use App\Caregiver;
 use App\ClaimableExpense;
 use App\ClaimableService;
+use App\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Shift;
 
 class ClaimInvoiceFactory
@@ -82,29 +83,6 @@ class ClaimInvoiceFactory
         \DB::commit();
 
         return $claim;
-    }
-
-    /**
-     * Delete a claim invoice permanently, along with all of it's associated data
-     *
-     * @param ClaimInvoice $claim
-     * @throws \Exception
-     */
-    public function hardDeleteClaimInvoice(ClaimInvoice $claim)
-    {
-
-        \DB::beginTransaction();
-
-        // delete each item and it's reference
-        foreach ($claim->items as $item) {
-
-            $item->claimable_type::where('id', $item->claimable_id)->delete();
-            ClaimInvoiceItem::where('id', $item->id)->delete();
-        }
-        // delete the claim itself
-        $claim->delete();
-
-        \DB::commit();
     }
 
     /**
@@ -327,5 +305,37 @@ class ClaimInvoiceFactory
     protected function getInvoiceName(int $businessId): string
     {
         return ClaimInvoice::getNextName($businessId);
+    }
+
+    /**
+     * Delete a claim invoice permanently, along with all of it's associated data.
+     *
+     * @param ClaimInvoice $claim
+     * @throws CannotDeleteClaimInvoiceException
+     */
+    public function deleteClaimInvoice(ClaimInvoice $claim) : void
+    {
+        if ($claim->hasBeenTransmitted()) {
+            throw new CannotDeleteClaimInvoiceException('This claim has already been transmitted.');
+        }
+
+        try {
+            \DB::beginTransaction();
+
+            foreach ($claim->items as $item) {
+                $item->claimable->delete();
+                $item->delete();
+            }
+
+            // TODO: this needs to also handle any AR payments and update remit balances
+
+            $claim->delete();
+
+            \DB::commit();
+        } catch (\Exception $ex) {
+            \DB::rollBack();
+            app('sentry')->captureException($ex);
+            throw new CannotDeleteClaimInvoiceException('An unexpected error occurred.');
+        }
     }
 }
