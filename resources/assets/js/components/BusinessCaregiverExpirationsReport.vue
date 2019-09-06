@@ -51,16 +51,16 @@
             </b-col>
 
             <b-col lg="12" class="d-flex mt-2">
-                <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show already expired Licenses</b-form-checkbox>
+                <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show only expired expirations ( will ignore date range )</b-form-checkbox>
             </b-col>
-            <b-col lg="12" class="d-flex">
-                <b-form-checkbox class="m-0 vertical-center" @change=" showScheduled() ">Show scheduled caregivers</b-form-checkbox>
+            <b-col lg="12" class="d-flex mt-1">
+                <b-form-checkbox class="m-0 vertical-center" @change=" showScheduled() ">Show only caregivers with future schedules</b-form-checkbox>
             </b-col>
 
             <b-col class="mt-2 d-flex align-items-stretch align-items-sm-center justify-content-end flex-column flex-sm-row">
 
                 <b-btn @click="exportExcel()" variant="success" class="m-1"><i class="fa fa-file-excel-o mr-2"></i>Export to Excel</b-btn>
-                <b-button @click="initMailMerge()" variant="primary" class="m-1" :disabled="loading"><i class="fa fa-file-pdf-o mr-2"></i>Generate Mail Merge</b-button>
+                <b-button v-b-modal.deficiency-letters-button variant="primary" class="m-1" :disabled="loading"><i class="fa fa-file-pdf-o mr-2"></i>Generate Deficiency Letters</b-button>
                 <b-button @click="generate()" variant="info" class="m-1" :disabled="loading"><i class="fa fa-file-o mr-2"></i>Generate Report</b-button>
             </b-col>
         </b-row>
@@ -103,6 +103,38 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <b-modal size="xl" id="deficiency-letters-button" title="Deficiency Letters Template" @ok=" createDeficiencyLetter() " ok-variant="primary" ok-title="Generate Deficiency Letters">
+
+            <b-row class="flex-column">
+
+                <b-col style="flex:1">
+
+                    <p class="text-muted">Special variables wrapped in '#' marks are recognized by the system, move them around but don't alter their value</p>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <b-form-textarea
+                        rows="15"
+                        max-rows="15"
+                        v-model=" form.deficiency_letter_template "
+                    ></b-form-textarea>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <h3>Explaination of Variables <small class="text-muted">be sure to replace the values denoted by 'XXXXX'</small></h3>
+                    <p>#Caregiver-Address-Block# - Full name and address of caregiver.</p>
+                    <p>#Caregiver-First-Name# - Caregiver first name.</p>
+                    <p>#Caregiver-Last-Name# - Caregiver last name.</p>
+                    <p>#Today# - Today's date.</p>
+                    <p>#Date-Range-Start# - Results selected start date.</p>
+                    <p>#Date-Range-End# - Results selected end date.</p>
+                    <p>#Expiration-Table# - List of expirations in a table format</p>
+                </b-col>
+            </b-row>
+        </b-modal>
     </b-card>
 </template>
 
@@ -130,26 +162,29 @@
         components: {BusinessLocationFormGroup},
 
         mounted() {
+
             this.totalRows = this.items.length;
         },
 
         data() {
+
             return {
 
                 selectingPast : false,
                 form: new Form({
 
-                    start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
-                    end_date: moment().add( 30, 'days' ).format('MM/DD/YYYY'),
-                    caregiver_id: '',
-                    show_expired: false,
-                    active: '',
-                    expiration_type: '',
-                    businesses: '',
-                    json: 1,
-                    show_scheduled : false,
-                    export: 0,
-                    mail_merge: 0
+                    start_date                 : moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end_date                   : moment().add( 30, 'days' ).format('MM/DD/YYYY'),
+                    caregiver_id               : '',
+                    show_expired               : false,
+                    active                     : '',
+                    expiration_type            : '',
+                    businesses                 : '',
+                    json                       : 1,
+                    show_scheduled             : false,
+                    export                     : 0,
+                    deficiency_letter          : 0,
+                    deficiency_letter_template : `#Caregiver-Address-Block#\n\nDear #Caregiver-First-Name#\n\nRecently, we performed a routine audit of all our Independent Caregiver folders. The following listed items have expired or will be expiring soon.\n\nIn accordance with State Regulations, we need you to provide copies of these documents. We are requesting that you return the documents within fourteen (14) days of the date of this letter.  Please provide these documents by email to XXXXXXXXXXXXX or fax to XXXXXXXXXXXXX or mail to XXXXXXXXXXXX or come in person to our office.\n\n#Expiration-Table#\n\nAudited on #Today#. Includes items expiring on #Date-Range-Start# through #Date-Range-End#.\n\nAs per XXXXXXXXX State Statute XXXXXXXX, when a deficiency in credentials comes to the attention of the nurse registry, the nurse registry shall advise the client to terminate the referred caregiver.  Furthermore, we will not be able to continue to refer you to new clients unless all required documents in your folder are current.\n\nPlease comply with this request so you can continue to serve your clients with their home care needs.\n\nSincerely,\n\nXXXXXXX\nXXXXXXXX`,
                 }),
                 totalRows: 0,
                 perPage: 50,
@@ -190,11 +225,11 @@
 
         methods: {
 
-            initMailMerge(){
+            createDeficiencyLetter(){
 
-                this.form.mail_merge = 1;
+                this.form.deficiency_letter = 1;
                 window.open( this.form.toQueryString( `/business/reports/caregiver-expirations` ) );
-                this.form.mail_merge = 0;
+                this.form.deficiency_letter = 0;
             },
             showPast(){
 

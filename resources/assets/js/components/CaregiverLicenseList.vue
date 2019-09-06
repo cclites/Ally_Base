@@ -6,19 +6,14 @@
     >
         <b-row class="align-items-center">
 
-            <b-col>
+            <b-col class="mb-2 flex-column flex-sm-row">
 
-                <b-btn @click="createLicense()" variant="info" class="mr-2 mb-2" :disabled=" alreadyCreating ">Add Expiration</b-btn>
-                <b-btn to="/business/settings#expirations" variant="success" class="mb-2">Manage Expirations</b-btn>
+                <b-btn @click="createLicense()" variant="info" style="flex:1" class="my-1 d-flex d-sm-inline-block" :disabled=" alreadyCreating ">Add Custom Expiration ( this caregiver only )</b-btn>
+                <b-btn to="/business/settings#expirations" variant="success" style="flex:1" class="my-1 d-flex d-sm-inline-block">Manage Default Expirations</b-btn>
             </b-col>
-
-            <b-form-checkbox
-                v-model=" onBlurUpdate "
-            >
-                Update rows on update
-            </b-form-checkbox>
         </b-row>
         <div class="table-responsive">
+
             <b-table bordered striped hover show-empty
                 :busy="loading"
                 :items=" chainExpirations "
@@ -35,8 +30,6 @@
                     <b-form-input
                         v-if=" row.item.isNew "
                         v-model=" row.item.name "
-                        placeholder="expiration type"
-                        @blur.native=" onBlurUpdate ? saveLicense( row.item ) : null "
                     ></b-form-input>
                     <p class="mb-0" v-else>
 
@@ -47,15 +40,16 @@
 
                     <b-form-input
                         v-model=" row.item.description "
-                        placeholder="optional"
-                        @blur.native=" onBlurUpdate ? saveLicense( row.item ) : null "
+                        :state=" nameState( row.item.description ) "
+                        trim
                     ></b-form-input>
+                    <b-form-invalid-feedback id="input-live-feedback">
+                        Maximum 52 characters
+                    </b-form-invalid-feedback>
                 </template>
                 <template slot="expires_sort" scope="row">
                     <date-picker
                         v-model=" row.item.expires_at "
-                        placeholder="Expiration Date"
-                        @input=" onBlurUpdate ? saveLicense( row.item ) : null "
                     ></date-picker>
                 </template>
                 <template slot="actions" scope="row">
@@ -64,12 +58,12 @@
 
                         <div class="d-flex align-items-center" v-if=" row.item.id " :key=" 'first' ">
 
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn>
+                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn> -->
                             <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
                         </div>
                         <div class="d-flex align-items-center" v-else :key=" 'second' ">
 
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn>
+                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn> -->
                             <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
                         </div>
                     </transition>
@@ -96,9 +90,9 @@
 
         data() {
             return {
-                onBlurUpdate : true,
+
                 loading: false,
-                perPage: 50,
+                perPage: 25,
                 currentPage: 1,
                 sortBy: null,
                 sortDesc: false,
@@ -107,6 +101,13 @@
                     {
                         key: 'name',
                         label: 'Name',
+                        class: 'name-column',
+                        sortable: true,
+                    },
+                    {
+                        key: 'expires_sort',
+                        class: 'expiration-column',
+                        label: 'Expiration Date',
                         sortable: true,
                     },
                     {
@@ -114,18 +115,14 @@
                         label: "Notes"
                     },
                     {
-                        key: 'expires_sort',
-                        label: 'Expiration Date',
-                        sortable: true,
-                    },
-                    {
                         key: 'updated_at',
+                        class: 'updated-column',
                         label: 'Last Updated',
                         sortable: true,
                     },
                     {
                         key: 'actions',
-                        class: 'hidden-print'
+                        class: 'actions-column hidden-print'
                     }
                 ],
                 chainExpirations : [],
@@ -136,7 +133,7 @@
         async mounted() {
 
             // this.totalRows = this.items.length;
-            await this.fetchChainExpirations();
+            this.fetchChainExpirations();
         },
 
         computed: {
@@ -154,6 +151,11 @@
 
         methods: {
 
+            nameState( value ) {
+
+                if( [ null, '' ].includes( value ) || value.length <= 52 ) return null;
+                return false;
+            },
             async fetchChainExpirations() {
 
                 this.loading = true;
@@ -280,5 +282,22 @@
     td {
 
         vertical-align: middle !important;
+    }
+
+    .name-column {
+
+        width: 205px;
+    }
+    .expiration-column {
+
+        width: 145px;
+    }
+    .updated-column {
+
+        width: 185px;
+    }
+    .actions-column {
+
+        width: 85px;
     }
 </style>

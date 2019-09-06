@@ -43,10 +43,10 @@ class BusinessCaregiverExpirationsReportController extends BaseController
                     ->download();
             }
 
-            if ( $request->mail_merge === '1' ) {
+            if ( $request->deficiency_letter === '1' ) {
 
-                $pdf = PDF::loadView( 'business.caregivers.mail_merge', [ 'licenses' => $report->rows() ] );
-                return $pdf->inline( 'something.pdf' );
+                return PDF::loadView( 'business.caregivers.deficiency_letters', [ 'pages' => $report->rows()->groupBy( 'caregiver_id' ), 'template' => $request->deficiency_letter_template ] )
+                    ->inline( 'deficiency_letters.pdf' );
             }
 
             return response()->json( $report->rows() );
