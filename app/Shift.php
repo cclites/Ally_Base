@@ -16,6 +16,7 @@ use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
+use App\Contracts\HasTimezone;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
@@ -170,7 +171,7 @@ use App\Data\ScheduledRates;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  * @property int $quickbooks_service_id
  */
-class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
+class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface, HasTimezone
 {
     use BelongsToOneBusiness;
     use HasAllyFeeTrait;
@@ -869,9 +870,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
 
     /**
+     * Get the shift's timezone.
+     *
      * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
         return Timezone::getTimezone($this->business_id);
     }

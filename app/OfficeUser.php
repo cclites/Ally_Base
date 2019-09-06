@@ -1,7 +1,9 @@
 <?php
 namespace App;
 
+use App\Businesses\Timezone;
 use App\Contracts\BelongsToChainsInterface;
+use App\Contracts\HasTimezone;
 use App\Contracts\UserRole;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
@@ -54,7 +56,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
  */
-class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface
+class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface, HasTimezone
 {
     use IsUserRole, BelongsToBusinesses, BelongsToOneChain;
 
@@ -165,13 +167,17 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      *
      * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
         if (! empty($this->timezone)) {
             return $this->timezone;
         }
         
-        return $this->businesses->first()->timezone ?? 'America/New_York';
+        if ($business = $this->businesses->first()) {
+            return Timezone::getTimezone($business->id);
+        }
+
+        return config('ally.local_timezone');
     }
 
     ////////////////////////////////////
