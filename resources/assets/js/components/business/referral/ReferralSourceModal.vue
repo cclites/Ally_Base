@@ -71,15 +71,12 @@
             },
 
             submitForm() {
-                this.loading = true;
-                let method = this.source.id ? 'patch' : 'post';
-                let url = this.source.id ? `/business/referral-sources/${this.source.id}` : '/business/referral-sources';
-                this.form.submit(method, url)
+                let url = '/business/referral-sources';
+                this.form.submit('post', url)
                     .then(response => {
                         this.$emit('saved', response.data.data);
-                        this.showModal = false;
                     })
-                    .finally(() => this.loading = false)
+                    .finally(() => this.showModal=false)
             },
         },
 
@@ -89,7 +86,6 @@
                 this.showModal = val;
             },
             showModal(val) {
-                console.log("Show Modal val in Add is " + val);
                 this.$emit('input', val);
             }
         }

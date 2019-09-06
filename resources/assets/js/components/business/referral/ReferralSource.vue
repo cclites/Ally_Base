@@ -1,7 +1,45 @@
 <template>
-        <b-modal id="EditReferralModal" v-model="showModal">
+        <b-modal id="EditReferralModal" v-model="showModal" class="edit-modal" size="lg">
+
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group label="Organization Name" label-for="organization">
+                        <b-form-input v-model="source.organization" type="text" required disabled/>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                         :items="items"
+                         :fields="fields"
+                         :current-page="currentPage"
+                         :per-page="perPage"
+                         :filter="filter"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                >
+                    <template slot="contact_name" scope="row">
+                        <b-form-input :value="row.item.contact_name" v-model="row.item.contact_name"></b-form-input>
+                    </template>
+
+                    <template slot="phone" scope="row">
+                        <b-form-input :value="row.item.phone" v-model="row.item.phone"></b-form-input>
+                    </template>
+
+                    <template slot="actions" scope="row">
+                        <b-btn size="sm" @click="update(row.item)">
+                            <i class="fa fa-save"></i>
+                        </b-btn>
+                        <b-btn size="sm" @click="destroy(row.item.id)" variant="danger">
+                            <i class="fa fa-trash"></i>
+                        </b-btn>
+                    </template>
+                </b-table>
+            </div>
 
             <div slot="modal-footer">
+                <b-btn variant="info" @click="add">New Source</b-btn>
                 <b-btn variant="default" @click="showModal=false">Close</b-btn>
             </div>
         </b-modal>
@@ -20,12 +58,10 @@
 
         data() {
             return {
-                //form: this.makeForm(this.source),
-                //form: [],
                 loading: false,
                 showModal: this.value,
-                organization: '',
-                items: this.source,
+                items: [],
+                item: '',
                 totalRows: 0,
                 currentPage: 1,
                 perPage: 25,
@@ -35,13 +71,13 @@
                 sortDesc: false,
                 fields: [
                     {
-                        key: 'organization',
-                        label: 'Organization',
-                        sortable: true
+                        key: 'contact_name',
+                        label: 'Contact Name',
+                        sortable: true,
                     },
                     {
-                        key: 'contact_name',
-                        label: 'Contacts',
+                        key: 'phone',
+                        label: 'Phone',
                         sortable: true,
                     },
 
@@ -55,84 +91,74 @@
         },
 
         methods: {
-            makeForm(defaults = {}) {
-                return new Form({});
-                /*
-                return new Form({
-                    organization: defaults.organization,
-                    contact_name: defaults.contact_name,
-                    phone: defaults.phone,
-                    type: this.sourceType,
-                });*/
-            },
+            update(resource){
+                let form = new Form({
+                    contact_name: resource.contact_name,
+                    phone: resource.phone,
+                    id: resource.id,
+                    organization: this.source.organization,
+                    chain_id: this.source.id,
+                    type: this.sourceType
+                });
 
-            submitForm() {
-                /*
                 this.loading = true;
-                let method = this.source.id ? 'patch' : 'post';
-                let url = this.source.id ? `/business/referral-sources/${this.source.id}` : '/business/referral-sources';
-                this.form.submit(method, url)
+                let method = resource.id ? 'patch' : 'post';
+                let url = resource.id ? `/business/referral-sources/${resource.id}` : '/business/referral-sources';
+                form.submit(method, url)
                     .then(response => {
-                        this.$emit('saved', response.data.data);
-                        this.showModal = false;
+                        if(method === 'post'){
+                            resource.id = response.data.data.id;
+                            let data = {response: response.data.data, item_id: this.source.id};
+                            this.$emit('saved', data);
+                        }
                     })
                     .finally(() => this.loading = false)
-                    */
             },
 
-            save(){
-                //TODO
+            destroy(id){
+
+                if (! confirm('Are you sure you want to delete this referral source?')) {
+                    return;
+                }
+
+                let form = new Form({});
+                form.submit('DELETE', '/business/referral-sources/' + id)
+                    .then(response => {
+                        let index = this.items.findIndex(x => x.id == id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1);
+                        }
+                        this.$emit('deleted', {item_id: this.source.id, id: id});
+                    })
+                    .catch(e => {
+                    })
             },
 
-            destroy(){
-                //TODO
+            add(){
+               this.items.push({
+                    contact_name: '',
+                    phone: '',
+                    id: ''
+                });
             }
 
         },
 
         watch: {
-            /*
             value(val) {
-                this.form = this.makeForm(this.source);
+                this.items = this.source.contacts;
                 this.showModal = val;
             },
-
 
             showModal(val) {
                 this.$emit('input', val);
             }
-
-             */
-
         }
     }
 </script>
 
 <style scoped>
-    .loader {
-        border: 8px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 8px solid #3498db;
-        width: 50px;
-        height: 50px;
-        -webkit-animation: spin-data-v-7012acc5 2s linear infinite;
-        animation: spin-data-v-7012acc5 2s linear infinite;
-        margin: 0 auto;
-    }
-
-    /* Safari */
-    @-webkit-keyframes spin {
-        0% { -webkit-transform: rotate(0deg); }
-        100% { -webkit-transform: rotate(360deg); }
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .error-msg {
-        margin-top: 7px;
-        color: red;
+    .modal-dialog {
+        max-width: 900px !important;
     }
 </style>

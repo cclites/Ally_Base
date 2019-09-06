@@ -471,6 +471,7 @@ Route::group([
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
+    Route::delete('referral-sources/organization/{organization}', 'Business\ReferralSourceController@removeOrganization');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
 
     Route::resource('payers', 'Business\PayerController');

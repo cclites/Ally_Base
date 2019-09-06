@@ -37,7 +37,6 @@ class ReferralSourceController extends BaseController
 
     public function edit(ReferralSource $referralSource)
     {
-        \Log::info('Edit referral resource');
         $this->authorize('update', $referralSource);
 
         return $this->index($referralSource->id);
@@ -45,7 +44,6 @@ class ReferralSourceController extends BaseController
 
     public function show(ReferralSource $referralSource)
     {
-        \Log::info('Show referral resource');
         $this->authorize('read', $referralSource);
 
         $referralSource->load([
@@ -60,7 +58,6 @@ class ReferralSourceController extends BaseController
 
     public function store(UpdateReferralSourceRequest $request)
     {
-        \Log::info('Store referral resource');
         $data = $request->validated();
         $this->authorize('create', [ReferralSource::class, $data]);
 
@@ -85,6 +82,7 @@ class ReferralSourceController extends BaseController
 
     public function destroy(ReferralSource $referralSource) 
     {
+
         $this->authorize('delete', $referralSource);
 
         try {
@@ -92,7 +90,25 @@ class ReferralSourceController extends BaseController
                 return new SuccessResponse('The referral source was successfully removed.', $referralSource);
             }
         } catch (\Illuminate\Database\QueryException $e) {
+            \Log::info('Cannot delete that referral source because it is currently in use.');
             return new ErrorResponse(400, 'Cannot delete that referral source because it is currently in use.');
+        }
+
+        return new ErrorResponse(500, 'An unexpected error occurred.');
+    }
+
+    public function removeOrganization($organization){
+
+        $referralSources = ReferralSource::where('organization', $organization)->get();
+
+        try{
+            foreach($referralSources as $referralSource){
+                $this->destroy($referralSource);
+            }
+            return new SuccessResponse('The referral organization was successfully removed.', $organization);
+
+        }catch (\Illuminate\Database\QueryException $e) {
+            return new ErrorResponse(400, 'Cannot delete that referral organization because it is currently in use.');
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred.');

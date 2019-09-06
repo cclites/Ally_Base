@@ -15,17 +15,15 @@
                      :filter="filter"
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
+                     ref="table"
             >
                 <template slot="actions" scope="row">
-                    <!--b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
-                        <i class="fa fa-edit"></i>
-                    </b-btn-->
-                    <b-btn size="sm" @click="showEditReferralModal=true">
+                    <b-btn size="sm" @click="edit(row.item.id)">
                         <i class="fa fa-edit"></i>
                     </b-btn>
-                    <b-btn size="sm" @click="destroy(row.item)" variant="danger">
+                    <!--b-btn size="sm" @click="destroy(row.item)" variant="danger">
                         <i class="fa fa-trash"></i>
-                    </b-btn>
+                    </b-btn-->
                 </template>
             </b-table>
         </div>
@@ -49,8 +47,9 @@
         <business-referral-source
                 v-model="showEditReferralModal"
                 :source="editSource"
-                @saved="updateList"
+                @saved="updateAfterAddEdit"
                 :source-type="sourceType"
+                @deleted="updateAfterResourceDelete"
         ></business-referral-source>
     </b-card>
 </template>
@@ -103,65 +102,79 @@
         methods: {
             edit(id) {
 
-                //console.log(JSON.stringify(list[id].contacts));
                 this.editSource = this.referralSources[id];
                 this.showEditReferralModal = true;
-                /*
-                this.editSource = this.find(id);
-                this.showModal = true;
-                */
             },
             create() {
                 this.editSource = {};
                 this.showAddReferralModal = true;
             },
-            find(id, list=null) {
 
-
-                return;
-                //return list[id].contacts;
-
-                /*
-                if (!list) list = this.items;
-                return list.find(item => item.contacts.id == id);
-                 */
-            },
-            updateList(source) {
-                let index = this.items.findIndex(item => item.id == source.id);
-                if (index === -1) {
-                    this.items.push(source);
-                }
-                else {
-                    Vue.set(this.items, index, source);
-                }
-            },
             destroy(item) {
                 if (! confirm('Are you sure you want to delete this referral source?')) {
                     return;
                 }
                 
                 let form = new Form({});
-                form.submit('DELETE', `/business/referral-sources/${item.id}`)
+                form.submit('DELETE', `/business/referral-sources/organization/${item.organization}`)
                     .then(response => {
-                        let index = this.items.findIndex(x => x.id == item.id);
-                        if (index >= 0) {
-                            this.items.splice(index, 1);
-                        }
+                        this.items.splice(item.id, 1);
+                        this.$refs.table.refresh();
                     })
                     .catch(e => {
                     })
             },
+            updateList(response){
 
-            /*
-            showAddModal(val){
-                console.log(val);
-                this.showAddReferralModal = val;
+                let index = this.items.findIndex(x => x.organization == response.organization);
+
+                if (index >= 0){
+                    let data = {
+                        contact_name: response.contact_name,
+                        phone: response.phone,
+                        id: response.id
+                    };
+
+                    this.items[index].contacts.push(data);
+                    this.items[index].contact_name = this.stringifyContactNames(this.items[index].contacts);
+                }else{
+                    let data = {
+                        organization: response.organization,
+                        contact_name: response.contact_name,
+                        chain_id: response.chain_id,
+                        contacts: {
+                            contact_name: response.contact_name,
+                            phone: response.phone,
+                            id: response.id
+                        }
+                    };
+
+                    this.items.push(data);
+                }
             },
+            updateAfterAddEdit(data) {
+                this.items[data.item_id].contacts.push(data.response);
+                this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
+            },
+            updateAfterResourceDelete(data){
 
-            showEditModal(val){
-                console.log(val);
-                this.showEditReferralModal = val;
-            }*/
+                let resource = this.items[data.item_id];
+                let index = resource.contacts.findIndex(x => x.id == data.id);
+
+                if (index >= 0) {
+                    this.items[data.item_id].contacts.splice(index, 1);
+                }
+
+                this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
+            },
+            stringifyContactNames(contacts)
+            {
+                let contact_name = contacts.map(function(x){
+                    return x.contact_name ;
+                });
+
+                return contact_name.toString();
+            }
         }
     }
 </script>
