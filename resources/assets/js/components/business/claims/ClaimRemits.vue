@@ -32,6 +32,15 @@
                             <option value="">-- Any Payment Type --</option>
                         </template>
                     </b-form-select>
+                    <b-form-select
+                        v-model="filters.status"
+                        :options="claimRemitStatusOptions"
+                        class="mr-1 mt-1"
+                    >
+                        <template slot="first">
+                            <option value="">-- Any Status --</option>
+                        </template>
+                    </b-form-select>
                     <b-form-select v-model="filters.payer_id" class="mr-1 mt-1">
                         <option value="">-- Any Payer --</option>
                         <option value="0">(Client)</option>
@@ -103,27 +112,28 @@
     import Constants from '../../../mixins/Constants';
     import { mapGetters } from 'vuex';
     import ClaimRemitForm from "./ClaimRemitForm";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
         components: {BusinessLocationFormGroup, ClaimRemitForm},
-        mixins: [FormatsDates, FormatsNumbers, Constants],
+        mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
 
         data() {
             return {
                 sortBy: 'date',
                 sortDesc: false,
                 filter: '',
-                items: [],
                 fields: {
-                    id: { sortable: true, label: 'Remit ID' },
+                    id: { sortable: true, label: 'ID' },
                     office_location: { sortable: true },
                     date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDateFromUTC(x) },
-                    payment_type: { sortable: true },
-                    payer: { sortable: true },
+                    payment_type: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitTypeOptions) },
+                    payer_name: { label: 'Payer', sortable: true, formatter: x => x ? x : '-' },
                     reference: { sortable: true, label: 'Reference #' },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_available: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    status: { sortable: true },
+                    status: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitStatusOptions) },
+                    created_at: { sortable: true, label: 'Date Added', formatter: x => this.formatDateFromUTC(x) },
                     actions: { sortable: false },
                 },
                 filters: new Form({
@@ -133,6 +143,8 @@
                     reference: '',
                     payer_id: '',
                     businesses: '',
+                    status: '',
+                    json: 1,
                 }),
                 payers: [],
                 showEditModal: false,
@@ -152,7 +164,11 @@
 
         methods: {
             async fetch() {
-
+                this.filters.get(`/business/claim-remits`)
+                    .then( ({ data }) => {
+                        this.$store.commit('claims/setRemits', data.data);
+                    })
+                    .catch(() => {});
             },
 
             async fetchPayers() {

@@ -33,18 +33,30 @@ export default {
             EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',
             SHIFT_MAX_FUTURE_END_DATE: 168, // hours
 
+            /**
+             * Claims
+             */
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',
                 SERVICE: 'App\\Claims\\ClaimableService',
             },
-
             CLAIM_REMIT_TYPES: {
                 TAKE_BACK: 'take-back',
                 REMIT: 'remit',
             },
             claimRemitTypeOptions: [
-                { value: 'REMIT', text: 'Remit' },
-                { value: 'TAKE_BACK', text: 'Take Back' },
+                { value: 'remit', text: 'Remit' },
+                { value: 'take-back', text: 'Take Back' },
+            ],
+            CLAIM_REMIT_STATUS: {
+                NOT_APPLIED: 'not_applied',                
+                PARTIALLY_APPLIED: 'partially_applied',                
+                FULLY_APPLIED: 'fully_applied',                
+            },
+            claimRemitStatusOptions: [
+                { value: 'not_applied', text: 'Not Applied' },
+                { value: 'partially_applied', text: 'Partially Applied' },
+                { value: 'fully_applied', text: 'Fully Applied' },
             ]
         }
     },

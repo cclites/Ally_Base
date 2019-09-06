@@ -2,25 +2,36 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimRemit;
-use App\Claims\Requests\CreateClaimRemitRequest;
+use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Responses\ErrorResponse;
+use App\Claims\Requests\CreateClaimRemitRequest;
+use App\Claims\Requests\GetClaimRemitsRequest;
 use App\Responses\SuccessResponse;
-use Illuminate\Http\Request;
+use App\Responses\ErrorResponse;
+use App\Claims\ClaimRemit;
 
 class ClaimRemitController extends BaseController
 {
     /**
      * Get a list of ClaimRemits.
      *
-     * @param Request $request
+     * @param GetClaimRemitsRequest $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(Request $request)
+    public function index(GetClaimRemitsRequest $request)
     {
-        if ($request->filled('json') || $request->expectsJson()) {
+        if ($request->forJson()) {
+            $filters = $request->filtered();
 
+            $results = ClaimRemit::forRequestedBusinesses()
+                ->forDateRange($filters['start_date'], $filters['end_date'])
+                ->forPayer($filters['payer_id'])
+                ->withReferenceId($filters['reference'])
+                ->withType($filters['type'])
+                ->withStatus($filters['status'])
+                ->get();
+
+            return ClaimRemitResource::collection($results);
         }
 
         return view_component(
