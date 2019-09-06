@@ -63,6 +63,51 @@
 
         <hr>
 
+        <b-form-group label="Functional Limitations" class="mb-2 mr-2" label-class="required">
+            <b-form-checkbox-group v-model="form.functional" required>
+                <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
+            </b-form-checkbox-group>
+            <b-form-input
+                    id="functional_other"
+                    name="functional_other"
+                    type="text"
+                    v-model="form.functional_other"
+                    placeholder="Other functional limitations"
+            >
+            </b-form-input>
+        </b-form-group>
+
+        <b-form-group label="Client Mobility" label-class="required">
+            <checkbox-group v-model="form.mobility" :items="options.mobility"/>
+            <b-form-input
+                    id="mobility_other"
+                    name="mobility_other"
+                    type="text"
+                    v-model="form.mobility_other"
+                    placeholder="Other Activities Permitted"
+            >
+            </b-form-input>
+        </b-form-group>
+
+        <b-form-group label="Special instructions:" class="ml-4">
+            <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
+        </b-form-group>
+
+        <b-form-group label="Mental Status" label-class="required">
+            <b-form-checkbox-group v-model="form.mental_status">
+                <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
+            </b-form-checkbox-group>
+        </b-form-group>
+
+        <b-form-group label="Prognosis" class="mb-2 mr-2" label-class="required">
+            <b-form-radio-group v-model="form.prognosis" required>
+                <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
+            </b-form-radio-group>
+        </b-form-group>
+
+
+        <hr>
+
         <b-row>
             <div class="h5 pl-3 pt-2">Principal Diagnosis</div>
         </b-row>
@@ -75,6 +120,7 @@
                             name="principal_diagnosis_icd_cm"
                             type="text"
                             v-model="form.principal_diagnosis_icd_cm"
+                            maxlength="10"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -111,6 +157,7 @@
                             name="surgical_procedure_icd_cm"
                             type="text"
                             v-model="form.surgical_procedure_icd_cm"
+                            maxlength="10"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -147,6 +194,7 @@
                             name="other_diagnosis_icd_cm"
                             type="text"
                             v-model="form.other_diagnosis_icd_cm"
+                            maxlength="10"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -179,6 +227,7 @@
                             name="other_diagnosis_icd_cm1"
                             type="text"
                             v-model="form.other_diagnosis_icd_cm1"
+                            maxlength="10"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -211,6 +260,7 @@
                             name="other_diagnosis_icd_cm2"
                             type="text"
                             v-model="form.other_diagnosis_icd_cm2"
+                            maxlength="10"
                     >
                     </b-form-input>
                 </b-form-group>
@@ -236,142 +286,6 @@
         </b-row>
 
         <hr>
-
-        <!--b-row>
-            <div class="h5 pl-3 pt-2">Medications</div>
-        </b-row>
-
-        <b-row>
-            <b-col>
-                <b-form-group label="Medications: Dose/Frequency/Route (N)ew (C)hanged" class="mb-2 mr-2">
-                    <p v-for="m in client.medications">
-                        {{ m.type }}/{{ m.dose }}/{{ m.frequency }}/{{ m.route }}/{{m.new_changed}}
-                    </p>
-                </b-form-group>
-            </b-col>
-        </b-row-->
-
-        <hr>
-
-        <!--b-row>
-            <div class="h5 pl-3 pt-2">Additional</div>
-        </b-row>
-
-        <b-row>
-            <b-col lg="6">
-                <b-form-group label="DME and Supplies" class="mb-2 mr-2">
-                    <b-form-input
-                            id="dme_and_supplies"
-                            name="dme_and_supplies"
-                            type="text"
-                            :value="supplies"
-                            disabled
-                    >
-                    </b-form-input>
-                </b-form-group>
-            </b-col>
-            <b-col lg="6">
-                <b-form-group label="Safety Measures" class="mb-2 mr-2">
-                    <b-form-input
-                            id="safety_measures"
-                            name="safety_measures"
-                            type="text"
-                            :value="safety_measures"
-                            disabled
-                    >
-                    </b-form-input>
-                </b-form-group>
-            </b-col>
-        </b-row>
-
-        <b-row>
-            <b-col lg="6">
-                <b-form-group label="Nutritional Requirements" class="mb-2 mr-2">
-                    <b-form-input
-                            id="nutritional_req"
-                            name="nutritional_req"
-                            type="text"
-                            :value="nutritional"
-                            disabled
-                    >
-                    </b-form-input>
-                </b-form-group>
-            </b-col>
-            <b-col lg="6">
-                <b-form-group label="Allergies" class="mb-2 mr-2">
-                    <b-form-input
-                            id="allergies"
-                            name="allergies"
-                            type="text"
-                            v-model="client.care_details.allergies"
-                            disabled
-                    >
-                    </b-form-input>
-                </b-form-group>
-            </b-col>
-        </b-row-->
-
-        <!--b-row>
-            <b-col>
-                <b-form-group label="Functional Limitations" class="mb-2 mr-2">
-                    <b-form-checkbox-group id="functional" v-model="client.care_details.functional" disabled>
-                        <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
-                        <b-form-input v-model="client.care_details.functional_other" disabled></b-form-input>
-                    </b-form-checkbox-group>
-                </b-form-group>
-            </b-col>
-        </b-row>
-
-        <b-row>
-            <b-col>
-                <b-form-group label="Activities Permitted" class="mb-2 mr-2">
-                    <b-form-checkbox-group  v-model="client.care_details.mobility" disabled>
-                        <b-form-checkbox v-for="(label, key) in options.mobility" :key="key" :value="key">{{ label }}</b-form-checkbox>
-                    </b-form-checkbox-group>
-                    <b-form-input v-model="client.care_details.mobility_other" disabled></b-form-input>
-                </b-form-group>
-            </b-col>
-        </b-row>
-
-        <b-row>
-            <b-col>
-                <b-form-group label="Mental Status" class="mb-2 mr-2">
-                    <b-form-checkbox-group v-model="client.care_details.mental_status" disabled>
-                        <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
-                    </b-form-checkbox-group>
-                </b-form-group>
-
-            </b-col>
-        </b-row>
-
-        <b-row>
-            <b-col>
-                <b-form-group label="Prognosis" class="mb-2 mr-2">
-                    <b-form-radio-group v-model="client.care_details.prognosis" disabled>
-                        <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
-                    </b-form-radio-group>
-                </b-form-group>
-            </b-col>
-        </b-row-->
-
-        <!--b-row>
-            <b-col>
-                <b-form-group label="Orders for Discipline and Treatments (Specify Amount/Frequency/Duration)" class="mb-2 mr-2">
-                    <b-form-textarea v-model="form.orders" rows="10">
-                    </b-form-textarea>
-                </b-form-group>
-            </b-col>
-        </b-row-->
-
-        <!--b-row>
-            <b-col>
-                <b-form-group label="Goals/Rehabilitation Potential/Discharge Plans" class="mb-2 mr-2">
-                    <p v-for="g in client.care_details.goals">
-                        {{ g.question }}
-                    </p>
-                </b-form-group>
-            </b-col>
-        </b-row-->
 
         <b-row>
             <div class="h5 pl-3 pt-2">Physician's Information</div>
@@ -461,6 +375,15 @@
                     physician_name: '',
                     physician_address: '',
                     physician_phone: '',
+
+                    mobility: [],
+                    mobility_instructions: '',
+                    mobility_other: '',
+                    functional: [],
+                    functional_other: '',
+                    prognosis: '',
+                    mental_status: [],
+
                 }),
                 options: {
                     functional: {

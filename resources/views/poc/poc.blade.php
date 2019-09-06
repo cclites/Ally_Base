@@ -1,18 +1,18 @@
 <html>
     <head>
         <style>
-            span.cls_002{font-family:Arial,serif;font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
-            div.cls_002{font-family:Arial,serif;font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
-            span.cls_003{font-family:Arial,serif;font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
-            div.cls_003{font-family:Arial,serif;font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
-            span.cls_004{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; display:inline-block; width: 100%;}
-            div.cls_004{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; width: 100px;}
-            span.cls_005{font-family:Arial,serif;font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;}
-            div.cls_005{font-family:Arial,serif;font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_002{font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            div.cls_002{font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_003{font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            div.cls_003{font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_004{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; display:inline-block; width: 100%;}
+            div.cls_004{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; width: 100px;}
+            span.cls_005{font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;}
+            div.cls_005{font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
             div.cls_005 span.selected{font-size: 11px;position:absolute;color:blue;left:-6px;top:0px;}
             span.cls_005.gender-label{position:relative;left: 8px;}
-            span.cls_006{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;display:inline-block; width: 100%;}
-            div.cls_006{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_006{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;display:inline-block; width: 100%;}
+            div.cls_006{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
 
             .checked{color:blue;position:absolute;left:-11px;top:0px;font-size:7.8px;}
             .prognosis{padding-left:6px;}

@@ -42,8 +42,6 @@ class UpdateClientCareDetailsRequest extends FormRequest
             'pharmacy_number' => 'nullable|string',
             'safety_measures' => ['present', 'array', Rule::in(CareDetails::SAFETY)],
             'safety_instructions' => 'nullable|string',
-            'mobility' => ['present', 'array', Rule::in(CareDetails::MOBILITY)],
-            'mobility_instructions' => 'nullable|string',
             'toileting' => ['present', 'array', Rule::in(CareDetails::TOILETING)],
             'toileting_instructions' => 'nullable|string',
             'bathing' => ['present', 'array', Rule::in(CareDetails::BATHING)],
@@ -70,13 +68,8 @@ class UpdateClientCareDetailsRequest extends FormRequest
             'errands' => ['present', 'array', Rule::in(CareDetails::ERRANDS)],
             'supplies' => ['present', 'array', Rule::in(CareDetails::SUPPLIES)],
             'supplies_instructions' => 'nullable|string',
-            'prognosis' => ['required', Rule::in(CareDetails::PROGNOSIS)],
-            'functional' => ['required', 'array', Rule::in(CareDetails::FUNCTIONAL)],
-            'functional_other' => 'nullable|string',
-            'mobility_other' => 'nullable|string',
             'comments' => 'nullable|string',
             'instructions' => 'nullable|string',
-            'mental_status' => ['present', 'array', Rule::in(CareDetails::MENTAL_STATUS)],
         ];
     }
 }

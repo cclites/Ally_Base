@@ -187,43 +187,6 @@ class CareDetails extends AuditableModel
         self::SAFETY_OTHER,
     ];
 
-    const MOBILITY_BEDREST = 'bedrest';
-    const MOBILITY_BEDREST_BRP = 'bedrest_brp';
-    const MOBILITY_HOYER_LIFT = 'hoyer_lift';
-    const MOBILITY_INDEPENDENT = 'independent';
-    const MOBILITY_WHEELCHAIR = 'wheelchair';
-    const MOBILITY_NO_RESTRICTIONS = 'no_restrictions';
-    const MOBILITY_TURN = 'turn';
-    const MOBILITY_ASSIST_TRANSFERS = 'assist_transfers';
-    const MOBILITY_ASSIST_AMBULATION = 'assist_ambulation';
-    const MOBILITY_CANE = 'cane';
-    const MOBILITY_UP_AS_TOLERATED = 'up_as_tolerated';
-    const MOBILITY_PARTIAL_WEIGHT = 'partial_weight';
-    const MOBILITY_WALKER = 'walker';
-    const MOBILITY_HOSPITAL_BED = 'hospital_bed';
-    const MOBILITY_CRUTCHES = 'crutches';
-    const MOBILITY_EXERCISES_PRESCRIBED = 'exercises_prescribed';
-    const MOBILITY_OTHER = 'other';
-    const MOBILITY = [
-        self::MOBILITY_BEDREST,
-        self::MOBILITY_BEDREST_BRP,
-        self::MOBILITY_HOYER_LIFT,
-        self::MOBILITY_INDEPENDENT,
-        self::MOBILITY_WHEELCHAIR,
-        self::MOBILITY_NO_RESTRICTIONS,
-        self::MOBILITY_TURN,
-        self::MOBILITY_ASSIST_TRANSFERS,
-        self::MOBILITY_ASSIST_AMBULATION,
-        self::MOBILITY_CANE,
-        self::MOBILITY_UP_AS_TOLERATED,
-        self::MOBILITY_PARTIAL_WEIGHT,
-        self::MOBILITY_WALKER,
-        self::MOBILITY_HOSPITAL_BED,
-        self::MOBILITY_CRUTCHES,
-        self::MOBILITY_EXERCISES_PRESCRIBED,
-        self::MOBILITY_OTHER,
-    ];
-
     const TOILETING_CONTINENT = 'continent';
     const TOILETING_CATHETER = 'catheter';
     const TOILETING_BEDPAN = 'bedpan';
@@ -434,77 +397,6 @@ class CareDetails extends AuditableModel
         self::SUPPLIES_OTHER,
     ];
 
-    /**
-     * For Nursing Plan of Care ALLY-1312
-     */
-    const FUNCTIONAL_AMPUTATION = 'amputation';
-    const FUNCTIONAL_INCONTINENCE = 'incontinence';
-    const FUNCTIONAL_CONTRACTURE = 'contracture';
-    const FUNCTIONAL_HEARING = 'hearing';
-    const FUNCTIONAL_PARALYSIS = 'paralysis';
-    const FUNCTIONAL_ENDURANCE = 'endurance';
-    const FUNCTIONAL_AMBULATION = 'ambulation';
-    const FUNCTIONAL_SPEECH = 'speech';
-    const FUNCTIONAL_BLIND = 'blind';
-    const FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION = 'dyspnea';
-    const FUNCTIONAL_OTHER = 'other';
-    const FUNCTIONAL = [
-        self::FUNCTIONAL_AMPUTATION,
-        self::FUNCTIONAL_CONTRACTURE,
-        self::FUNCTIONAL_PARALYSIS,
-        self::FUNCTIONAL_ENDURANCE,
-        self::FUNCTIONAL_AMBULATION,
-        self::FUNCTIONAL_SPEECH,
-        self::FUNCTIONAL_DYSPNEA_WITH_MINIMAL_EXERTION,
-        self::FUNCTIONAL_OTHER,
-        self::FUNCTIONAL_HEARING,
-        self::FUNCTIONAL_BLIND,
-        self::FUNCTIONAL_INCONTINENCE,
-    ];
-
-
-    /**
-     * For Nursing Plan of Care ALLY-1312
-     */
-    const PROGNOSIS_POOR = 'poor';
-    const PROGNOSIS_GUARDED = 'guarded';
-    const PROGNOSIS_FAIR = 'fair';
-    const PROGNOSIS_GOOD = 'good';
-    const PROGNOSIS_EXCELLENT = 'excellent';
-    const PROGNOSIS = [
-        self::PROGNOSIS_POOR,
-        self::PROGNOSIS_GUARDED,
-        self::PROGNOSIS_FAIR,
-        self::PROGNOSIS_GOOD,
-        self::PROGNOSIS_EXCELLENT
-    ];
-
-    const MENTAL_STATUS_ORIENTED = 'oriented';
-    const MENTAL_STATUS_DEPRESSED = 'depressed';
-    const MENTAL_STATUS_DISORIENTED = 'disoriented';
-    const MENTAL_STATUS_LETHARGIC = 'lethargic';
-    const MENTAL_STATUS_COMATOSE = 'comatose';
-    const MENTAL_STATUS_AGITATED = 'agitated';
-    const MENTAL_STATUS_POOR = 'poor';
-    const MENTAL_STATUS_GOOD = 'good';
-    const MENTAL_STATUS_FAIR = 'fair';
-    const MENTAL_STATUS_FORGETFUL = 'forgetful';
-    const MENTAL_STATUS_EXCELLENT = 'excellent';
-    const MENTAL_STATUS_OTHER = 'other';
-    const MENTAL_STATUS = [
-        self::MENTAL_STATUS_ORIENTED,
-        self::MENTAL_STATUS_DEPRESSED,
-        self::MENTAL_STATUS_DISORIENTED,
-        self::MENTAL_STATUS_LETHARGIC,
-        self::MENTAL_STATUS_COMATOSE,
-        self::MENTAL_STATUS_AGITATED,
-        self::MENTAL_STATUS_POOR,
-        self::MENTAL_STATUS_GOOD,
-        self::MENTAL_STATUS_EXCELLENT,
-        self::MENTAL_STATUS_FAIR,
-        self::MENTAL_STATUS_FORGETFUL,
-        self::MENTAL_STATUS_OTHER,
-    ];
 
 
     // **********************************************************
@@ -533,11 +425,6 @@ class CareDetails extends AuditableModel
     public function getSafetyMeasuresAttribute()
     {
         return self::stringToArray($this->attributes['safety_measures']);
-    }
-
-    public function getMobilityAttribute()
-    {
-        return self::stringToArray($this->attributes['mobility']);
     }
 
     public function getToiletingAttribute()
@@ -590,21 +477,6 @@ class CareDetails extends AuditableModel
         return self::stringToArray($this->attributes['supplies']);
     }
 
-
-    /**
-     * For Nursing Plan of Care ALLY-1312
-     */
-    public function getFunctionalAttribute()
-    {
-        return self::stringToArray($this->attributes['functional']);
-    }
-
-    public function getMentalStatusAttribute()
-    {
-        return self::stringToArray($this->attributes['mental_status']);
-    }
-
-
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
@@ -628,7 +500,6 @@ class CareDetails extends AuditableModel
     protected static $arrayKeys = [
         'pets',
         'safety_measures',
-        'mobility',
         'toileting',
         'bathing',
         'diet',
@@ -639,8 +510,7 @@ class CareDetails extends AuditableModel
         'housekeeping',
         'errands',
         'supplies',
-        'functional',
-        'mental_status'
+
     ];
 
     /**

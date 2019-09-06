@@ -644,3 +644,4 @@ Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function(
     Route::get('done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
     Route::post('apply', 'CaregiverApplicationController@store');
 });
+

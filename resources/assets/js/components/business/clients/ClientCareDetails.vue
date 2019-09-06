@@ -11,55 +11,6 @@
             <b-btn variant="success" @click.prevent="save()" :disabled="busy" class="float-right mr-2">Save Changes</b-btn>
         </b-form-group>
 
-        <b-form-group>
-            <span class="d-block p-2 bg-secondary text-white rounded">The following sections are required for the Skilled Nursing Plan of Care</span>
-        </b-form-group>
-
-        <b-form-group label="Functional Limitations" class="mb-2 mr-2" label-class="required">
-            <b-form-checkbox-group v-model="form.functional" required>
-                <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
-            </b-form-checkbox-group>
-            <b-form-input
-                    id="functional_other"
-                    name="functional_other"
-                    type="text"
-                    v-model="form.functional_other"
-                    placeholder="Other functional limitations"
-            >
-            </b-form-input>
-        </b-form-group>
-
-        <b-form-group label="Client Mobility" label-class="required">
-            <checkbox-group v-model="form.mobility" :items="options.mobility"/>
-            <b-form-input
-                    id="mobility_other"
-                    name="mobility_other"
-                    type="text"
-                    v-model="form.mobility_other"
-                    placeholder="Other Activities Permitted"
-            >
-            </b-form-input>
-        </b-form-group>
-
-        <b-form-group label="Special instructions:" class="ml-4">
-            <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
-        </b-form-group>
-
-        <b-form-group label="Mental Status" label-class="required">
-            <b-form-checkbox-group v-model="form.mental_status">
-                <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
-            </b-form-checkbox-group>
-        </b-form-group>
-
-        <b-form-group label="Prognosis" class="mb-2 mr-2" label-class="required">
-            <b-form-radio-group v-model="form.prognosis" required>
-                <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
-            </b-form-radio-group>
-        </b-form-group>
-
-
-        <hr>
-
         <h2>
             General
         </h2>
@@ -294,25 +245,6 @@
                         stair_lift: 'Stair lift',
                         other: 'Other'
                     },
-                    mobility: {
-                        bedrest: 'Complete bedrest',
-                        bedrest_brp: 'Bedrest BRP',
-                        hoyer_lift: 'Hoyer lift',
-                        independent: 'Independent at home',
-                        wheelchair: 'Wheelchair',
-                        no_restrictions: 'No restrictions',
-                        turn: 'Turn/reposition every 2 hours',
-                        assist_transfers: 'Assist with transfers',
-                        assist_ambulation: 'Assist with ambulation',
-                        cane: 'Cane',
-                        up_as_tolerated: 'Up as tolerated',
-                        partial_weight: 'Partial weight bearing',
-                        walker: 'Walker',
-                        hospital_bed: 'Hospital bed',
-                        crutches: 'Crutches',
-                        exercises_prescribed: 'Exercises Prescribed',
-                        other: 'Other'
-                    },
                     toileting: {
                         continent: 'Continent',
                         catheter: 'Catheter',
@@ -425,39 +357,8 @@
                         caregiver: 'Caregiver must bring own',
                         other: 'Other',
                     },
-                    functional: {
-                        amputation: 'Amputation',
-                        incontinence: 'Bowel/Bladder (Incontinence)',
-                        contracture: "Contracture",
-                        hearing: 'Hearing',
-                        paralysis: "Paralysis",
-                        endurance: "Endurance",
-                        ambulation: "Ambulation",
-                        speech: "Speech",
-                        blind: 'Legally Blind',
-                        dyspnea: 'Dyspnea with Minimal Exertion',
-                        other: 'Other'
-                    },
-                    prognosis: {
-                        poor: 'Poor',
-                        guarded: 'Guarded',
-                        fair: 'Fair',
-                        good: 'Good',
-                        excellent: 'Excellent',
-                    },
 
-                    mental_status: {
-                        oriented: "Oriented",
-                        comatose: "Comatose",
-                        forgetful: "Forgetful",
-                        depressed: "Depressed",
-                        disoriented: "Disoriented",
-                        lethargic: "Lethargic",
-                        agitated: "Agitated",
-                        other: "Other",
-                    },
                 },
-                //html: this.$parent.$refs.innerHTML,
             }
         },
 
@@ -542,12 +443,7 @@
                 errands: [],
                 supplies: [],
                 supplies_instructions: '',
-                functional: [],
-                functional_other: '',
-                prognosis: '',
-                comments: '',
-                instructions: '',
-                mental_status: [],
+
             });
         },
     }
