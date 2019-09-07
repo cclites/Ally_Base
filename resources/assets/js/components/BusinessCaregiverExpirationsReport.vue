@@ -110,16 +110,59 @@
 
                 <b-col style="flex:1">
 
-                    <p class="text-muted">Special variables wrapped in '#' marks are recognized by the system, move them around but don't alter their value</p>
+                    <p>#Caregiver-Address-Block#<br/> 123 example road, <br/><br/> City, State, Zipcode</p>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <p>Dear #Caregiver-First-Name#,</p>
                 </b-col>
 
                 <b-col style="flex:1">
 
                     <b-form-textarea
-                        rows="15"
-                        max-rows="15"
-                        v-model=" form.deficiency_letter_template "
+                        rows="3"
+                        v-model=" form.intro_paragraph "
                     ></b-form-textarea>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <b-form-textarea
+                        rows="4"
+                        v-model=" form.middle_paragraph "
+                    ></b-form-textarea>
+                </b-col>
+
+                <b-col style="flex:1" class="mt-2">
+
+                    <p class="mb-3">#Expiration-Table#</p>
+                    <p>Audited on #Today#. Includes items expiring on #Date-Range-Start# through #Date-Range-End#.</p>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <b-form-textarea
+                        rows="4"
+                        v-model=" form.outro_paragraph "
+                    ></b-form-textarea>
+                </b-col>
+
+                <b-col style="flex:1">
+
+                    <b-form-input
+                        id="farewell-input"
+                        v-model=" form.final_words "
+                    ></b-form-input>
+                </b-col>
+
+                <b-col style="flex:1" class="my-4">
+
+                    <label for="farewell-input">Sincerely,</label>
+                    <b-form-input
+                        id="farewell-input"
+                        v-model=" form.farewell "
+                    ></b-form-input>
                 </b-col>
 
                 <b-col style="flex:1">
@@ -127,7 +170,6 @@
                     <h3>Explaination of Variables <small class="text-muted">be sure to replace the values denoted by 'XXXXX'</small></h3>
                     <p>#Caregiver-Address-Block# - Full name and address of caregiver.</p>
                     <p>#Caregiver-First-Name# - Caregiver first name.</p>
-                    <p>#Caregiver-Last-Name# - Caregiver last name.</p>
                     <p>#Today# - Today's date.</p>
                     <p>#Date-Range-Start# - Results selected start date.</p>
                     <p>#Date-Range-End# - Results selected end date.</p>
@@ -173,18 +215,24 @@
                 selectingPast : false,
                 form: new Form({
 
-                    start_date                 : moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
-                    end_date                   : moment().add( 30, 'days' ).format('MM/DD/YYYY'),
-                    caregiver_id               : '',
-                    show_expired               : false,
-                    active                     : '',
-                    expiration_type            : '',
-                    businesses                 : '',
-                    json                       : 1,
-                    show_scheduled             : false,
-                    export                     : 0,
-                    deficiency_letter          : 0,
-                    deficiency_letter_template : `#Caregiver-Address-Block#\n\nDear #Caregiver-First-Name#\n\nRecently, we performed a routine audit of all our Independent Caregiver folders. The following listed items have expired or will be expiring soon.\n\nIn accordance with State Regulations, we need you to provide copies of these documents. We are requesting that you return the documents within fourteen (14) days of the date of this letter.  Please provide these documents by email to XXXXXXXXXXXXX or fax to XXXXXXXXXXXXX or mail to XXXXXXXXXXXX or come in person to our office.\n\n#Expiration-Table#\n\nAudited on #Today#. Includes items expiring on #Date-Range-Start# through #Date-Range-End#.\n\nAs per XXXXXXXXX State Statute XXXXXXXX, when a deficiency in credentials comes to the attention of the nurse registry, the nurse registry shall advise the client to terminate the referred caregiver.  Furthermore, we will not be able to continue to refer you to new clients unless all required documents in your folder are current.\n\nPlease comply with this request so you can continue to serve your clients with their home care needs.\n\nSincerely,\n\nXXXXXXX\nXXXXXXXX`,
+                    start_date          : moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                    end_date            : moment().add( 30, 'days' ).format('MM/DD/YYYY'),
+                    caregiver_id        : '',
+                    show_expired        : false,
+                    active              : '',
+                    expiration_type     : '',
+                    businesses          : '',
+                    json                : 1,
+                    show_scheduled      : false,
+                    export              : 0,
+
+                    deficiency_letter   : 0,
+
+                    intro_paragraph  : 'Recently, we performed a routine audit of all our Independent Caregiver folders. The following listed items have expired or will be expiring soon.',
+                    middle_paragraph : 'In accordance with State Regulations, we need you to provide copies of these documents. We are requesting that you return the documents within fourteen (14) days of the date of this letter. Please provide these documents by email to XXXXXXXXXXXXX or fax to XXXXXXXXXXXXX or mail to XXXXXXXXXXXX or come in person to our office.',
+                    outro_paragraph  : 'As per XXXXXXXXX State Statute XXXXXXXX, when a deficiency in credentials comes to the attention of the nurse registry, the nurse registry shall advise the client to terminate the referred caregiver.  Furthermore, we will not be able to continue to refer you to new clients unless all required documents in your folder are current.',
+                    final_words      : 'Please comply with this request so you can continue to serve your clients with their home care needs.',
+                    farewell         : '',
                 }),
                 totalRows: 0,
                 perPage: 50,

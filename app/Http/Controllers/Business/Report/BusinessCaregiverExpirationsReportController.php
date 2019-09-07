@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\Caregiver;
 use App\ExpirationType;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\CertificationExpirationReport;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Carbon\Carbon;
 
 class BusinessCaregiverExpirationsReportController extends BaseController
 {
@@ -45,8 +47,27 @@ class BusinessCaregiverExpirationsReportController extends BaseController
 
             if ( $request->deficiency_letter === '1' ) {
 
-                return PDF::loadView( 'business.caregivers.deficiency_letters', [ 'pages' => $report->rows()->groupBy( 'caregiver_id' ), 'template' => $request->deficiency_letter_template ] )
-                    ->inline( 'deficiency_letters.pdf' );
+                $pages = $report->rows()->groupBy( 'caregiver_id' );
+
+                foreach( $pages as $caregiverId => $deficiencyLetter ){
+
+                    $deficiencyLetter->caregiver = Caregiver::with( 'address' )->find( $caregiverId );
+                }
+
+                // dd( $pages );
+
+                return PDF::loadView( 'business.caregivers.deficiency_letters', [
+
+                    'pages'       => $pages,
+                    'intro'       => $request->intro_paragraph,
+                    'middle'      => $request->middle_paragraph,
+                    'outro'       => $request->outro_paragraph,
+                    'final_words' => $request->final_words,
+                    'farewell'    => $request->farewell,
+                    'start_date'  => $request->start_date,
+                    'end_date'    => $request->end_date,
+                    'today'       => Carbon::now()->format( 'm/d/Y' )
+                ])->inline( 'deficiency_letters.pdf' );
             }
 
             return response()->json( $report->rows() );

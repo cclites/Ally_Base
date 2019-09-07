@@ -4,14 +4,47 @@
 
 @section( 'content' )
 
-    @foreach( $pages as $caregiver )
+    @foreach( $pages as $deficiencyLetter )
 
-        <div class="row">
+        <div class="page">
 
-            <div class="col-lg-12">
 
-                <?php var_dump( $caregiver ); ?>
+            @include( 'invoices.partials.address', [ 'address' => $deficiencyLetter->caregiver->address ] )
+
+            <p style="margin-top:45px; margin-bottom: 35px">Dear {{ explode( ' ', $deficiencyLetter->caregiver->name )[ 0 ] }}</p>
+
+            <p style="margin:20px 0px">{{ $intro }}</p>
+
+            <p style="margin:20px 0px">{{ $middle }}</p>
+
+            <div style="margin:25px 0px">
+
+                <table class="expirations-table">
+
+                    <caption>Expirations Table</caption>
+                    <tr>
+
+                        <th>Expiring Item</th>
+                        <th>Expiring Date</th>
+                    </tr>
+                    @foreach ( $deficiencyLetter as $expiration )
+
+                         <tr>
+
+                            <td>{{ $expiration[ 'name' ] }}</td>
+                            <td>{{ Carbon\Carbon::parse( $expiration[ 'expiration_date' ] )->format( 'm/d/Y' ) }}</td>
+                        </tr>
+                    @endforeach
+                </table>
             </div>
+
+            <p style="margin:20px 0px">Audited on <strong>{{ $today }}</strong>. Includes items expiring on <strong>{{ $start_date }}</strong> through <strong>{{ $end_date }}</strong>.</p>
+
+            <p style="margin:20px 0px">{{ $outro }}</p>
+
+            <p style="margin:20px 0px">{{ $final_words }}</p>
+
+            <p style="margin:20px 0px">Sincerely, <br/> {{ $farewell }}</p>
         </div>
     @endforeach
 @endsection

@@ -44,7 +44,7 @@
                         trim
                     ></b-form-input>
                     <b-form-invalid-feedback id="input-live-feedback">
-                        Maximum 52 characters
+                        Maximum 80 characters
                     </b-form-invalid-feedback>
                 </template>
                 <template slot="expires_sort" scope="row">
@@ -153,7 +153,7 @@
 
             nameState( value ) {
 
-                if( [ null, '' ].includes( value ) || value.length <= 52 ) return null;
+                if( [ null, '' ].includes( value ) || value.length <= 80 ) return null;
                 return false;
             },
             async fetchChainExpirations() {
