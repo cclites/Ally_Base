@@ -247,8 +247,6 @@
                 form.submit( 'post', '/business/caregivers/' + this.caregiverId + '/licenses/saveMany' )
                     .then( res => {
                         // sync the data, id is not always present so match by name
-                        console.log( 'response: ', res );
-                        console.log( 'expirations: ', this.chainExpirations );
 
                         res.data.data.forEach( updated => {
 
@@ -257,17 +255,6 @@
                             exp.id         = updated.id;
                             exp.isNew      = false;
                         });
-
-                        // this.chainExpirations = this.chainExpirations.map( exp => {
-
-                        //     let returned = res.data.data.find( updated => updated.name == exp.name );
-                        //     console.log( 'found: ', returned );
-                        //     exp.updated_at = moment.utc( returned.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
-                        //     exp.id         = returned.id;
-                        //     exp.isNew      = false;
-
-                        //     return exp;
-                        // });
                     })
                     .catch( () => {} )
                     .finally( () => {
