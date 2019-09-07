@@ -56,26 +56,29 @@
 
                     <transition name="slide-fade" mode="out-in">
 
-                        <div class="d-flex align-items-center" v-if=" row.item.id " :key=" 'first' ">
+                        <div class="d-flex align-items-center justify-content-center" v-if=" row.item.id " :key=" 'first' ">
 
                             <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn> -->
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " variant="danger"><i class="fa fa-times"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) "><i class="fa fa-trash"></i></b-btn>
                         </div>
-                        <div class="d-flex align-items-center" v-else :key=" 'second' ">
+                        <div class="d-flex align-items-center justify-content-center" v-else :key=" 'second' ">
 
                             <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn> -->
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 35px; flex:1" class="mx-1" size="sm" @click=" removeNew " variant="danger" v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-times"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" removeNew " v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-trash"></i></b-btn>
                         </div>
                     </transition>
                 </template>
             </b-table>
         </div>
-        <b-row>
+        <b-row class="align-items-center">
             <b-col lg="6" >
-                <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" currentPage " />
+                <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" currentPage " class="mb-0" />
             </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
+
+                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
+
+                <b-btn :disabled=" loading " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
     </b-card>
@@ -132,7 +135,6 @@
 
         async mounted() {
 
-            // this.totalRows = this.items.length;
             this.fetchChainExpirations();
         },
 
@@ -215,6 +217,7 @@
                 }
             },
             saveLicense( item ){
+                // not in use, save-all instead
 
                 item.isLoading = true;
                 item.expires_at = item.expires_at;
@@ -229,12 +232,47 @@
                         item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                         item.id         = response.data.data.id;
                         item.isNew      = false;
-                        item.isLoading = false;
                     })
                     .catch( () => {} )
                     .finally( () => {
 
                         item.isLoading = false;
+                    });
+            },
+            saveLicenses(){
+
+                this.loading = true;
+
+                let form = new Form( this.chainExpirations );
+                form.submit( 'post', '/business/caregivers/' + this.caregiverId + '/licenses/saveMany' )
+                    .then( res => {
+                        // sync the data, id is not always present so match by name
+                        console.log( 'response: ', res );
+                        console.log( 'expirations: ', this.chainExpirations );
+
+                        res.data.data.forEach( updated => {
+
+                            let exp = this.chainExpirations.find( exp => exp.name == updated.name );
+                            exp.updated_at = moment.utc( updated.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
+                            exp.id         = updated.id;
+                            exp.isNew      = false;
+                        });
+
+                        // this.chainExpirations = this.chainExpirations.map( exp => {
+
+                        //     let returned = res.data.data.find( updated => updated.name == exp.name );
+                        //     console.log( 'found: ', returned );
+                        //     exp.updated_at = moment.utc( returned.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
+                        //     exp.id         = returned.id;
+                        //     exp.isNew      = false;
+
+                        //     return exp;
+                        // });
+                    })
+                    .catch( () => {} )
+                    .finally( () => {
+
+                        this.loading = false;
                     });
             },
             deleteLicense( license ) {
@@ -298,6 +336,6 @@
     }
     .actions-column {
 
-        width: 85px;
+        width: 55px;
     }
 </style>
