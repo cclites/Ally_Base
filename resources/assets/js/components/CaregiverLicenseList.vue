@@ -30,6 +30,7 @@
                     <b-form-input
                         v-if=" row.item.isNew "
                         v-model=" row.item.name "
+                        @change.native=" addToUpdateList( row.item ) "
                     ></b-form-input>
                     <p class="mb-0" v-else>
 
@@ -41,6 +42,7 @@
                     <b-form-input
                         v-model=" row.item.description "
                         :state=" nameState( row.item.description ) "
+                        @change.native=" addToUpdateList( row.item ) "
                         trim
                     ></b-form-input>
                     <b-form-invalid-feedback id="input-live-feedback">
@@ -50,6 +52,7 @@
                 <template slot="expires_sort" scope="row">
                     <date-picker
                         v-model=" row.item.expires_at "
+                        @input=" addToUpdateList( row.item ) "
                     ></date-picker>
                 </template>
                 <template slot="actions" scope="row">
@@ -78,7 +81,7 @@
 
                 <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
 
-                <b-btn :disabled=" loading " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
+                <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
     </b-card>
@@ -94,6 +97,7 @@
         data() {
             return {
 
+                updateList : [],
                 loading: false,
                 perPage: 25,
                 currentPage: 1,
@@ -153,6 +157,10 @@
 
         methods: {
 
+            addToUpdateList( item ){
+
+                if( !this.updateList.includes( item.tempId ) ) this.updateList.push( item.tempId );
+            },
             nameState( value ) {
 
                 if( [ null, '' ].includes( value ) || value.length <= 80 ) return null;
@@ -182,6 +190,7 @@
 
                         this.chainExpirations = data.map( exp => {
 
+                            exp.tempId                   = Math.floor( Math.random() * 10000 ),
                             exp.chain_expiration_type_id = exp.expires_at ? exp.chain_expiration_type_id : exp.id;
                             exp.id                       = exp.expires_at ? exp.id : null;
                             exp.name                     = exp.expires_at ? exp.name : exp.type;
@@ -199,13 +208,13 @@
                         this.loading = false;
                     });
             },
-
             createLicense() {
 
                 if( !this.alreadyCreating ){
 
                     const newElement = {
 
+                        tempId      : Math.floor( Math.random() * 10000 ),
                         isNew       : true,
                         isLoading   : false,
                         name        : '',
@@ -243,18 +252,24 @@
 
                 this.loading = true;
 
-                let form = new Form( this.chainExpirations );
+                let expirationsToSave = this.chainExpirations.filter( exp => {
+
+                    if( this.updateList.find( tempId => exp.tempId == tempId ) ) return exp;
+                })
+
+                let form = new Form( expirationsToSave );
                 form.submit( 'post', '/business/caregivers/' + this.caregiverId + '/licenses/saveMany' )
                     .then( res => {
                         // sync the data, id is not always present so match by name
 
                         res.data.data.forEach( updated => {
 
-                            let exp = this.chainExpirations.find( exp => exp.name == updated.name );
+                            let exp        = this.chainExpirations.find( exp => exp.name == updated.name );
                             exp.updated_at = moment.utc( updated.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                             exp.id         = updated.id;
                             exp.isNew      = false;
                         });
+                        this.updateList = [];
                     })
                     .catch( () => {} )
                     .finally( () => {
@@ -284,6 +299,9 @@
 
                                 let i = this.chainExpirations.findIndex( exp => exp.id == license.id );
                                 this.chainExpirations.splice( i, 1 );
+
+                                let j = this.updateList.findIndex( tempId => tempId == license.tempId );
+                                this.updateList.splice( j, 1 );
                             }
                         })
                         .catch( () => {} )

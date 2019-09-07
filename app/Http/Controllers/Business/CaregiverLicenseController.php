@@ -60,7 +60,7 @@ class CaregiverLicenseController extends BaseController
 
     public function saveMany( Request $request, Caregiver $caregiver )
     {
-        // $this->authorize( 'update', $caregiver );
+        $this->authorize( 'update', $caregiver );
 
         $expirations = $request->all();
 
