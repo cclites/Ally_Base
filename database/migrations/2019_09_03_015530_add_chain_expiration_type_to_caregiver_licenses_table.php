@@ -17,7 +17,7 @@ class AddChainExpirationTypeToCaregiverLicensesTable extends Migration
 
             $table->unsignedInteger( 'chain_expiration_type_id' )->nullable();
 
-            $table->foreign( 'chain_expiration_type_id' )->references( 'id' )->on( 'chain_expiration_types' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'chain_expiration_type_id' )->references( 'id' )->on( 'chain_expiration_types' )->onDelete( 'set null' );
         });
     }
 
@@ -30,6 +30,7 @@ class AddChainExpirationTypeToCaregiverLicensesTable extends Migration
     {
         Schema::table( 'caregiver_licenses', function ( Blueprint $table ) {
 
+            $table->dropForeign( 'caregiver_licenses_chain_expiration_type_id_foreign' );
             $table->dropColumn( 'chain_expiration_type_id' );
         });
     }
