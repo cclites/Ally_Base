@@ -248,18 +248,20 @@ class ScheduleWarningAggregator
      */
     public function checkCaregiverDaysOff()
     {
-        $dateRange = [
-            $this->schedule->starts_at->format('Y-m-d'),
-            $this->schedule->getEndDateTime()->format('Y-m-d')
-        ];
+        $scheduleStart = $this->schedule->starts_at->format('Y-m-d');
+        $scheduleEnd = $this->schedule->getEndDateTime()->format('Y-m-d');
 
         $warnings = $this->schedule->caregiver->daysOff()
-            ->whereBetween('date', $dateRange)
-            ->get()
-            ->map(function ($dayOff) {
-                $date = Carbon::parse($dayOff->date)->format('m/d/Y');
-                return "{$this->schedule->caregiver->name} has marked themselves unavailable on $date ({$dayOff->description}).";
-            });
+                    ->whereBetween('start_date', [$scheduleStart, $scheduleEnd])
+                    ->orWhereBetween('end_date', [$scheduleStart, $scheduleEnd])
+                    ->orWhereRaw('? BETWEEN start_date and end_date', [$scheduleStart])
+                    ->orWhereRaw('? BETWEEN start_date and end_date', [$scheduleEnd])
+                    ->get()
+                    ->map(function ($dayOff) {
+                        $start_date = Carbon::parse($dayOff->start_date)->format('m/d/Y');
+                        $end_date = Carbon::parse($dayOff->end_date)->format('m/d/Y');
+                        return "{$this->schedule->caregiver->name} has marked themselves unavailable for dates $start_date to $end_date ({$dayOff->description}).";
+                    });
 
         if (empty($warnings)) {
             return false;
