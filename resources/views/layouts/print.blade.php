@@ -53,23 +53,6 @@
             page-break-after: avoid;
         }
 
-        .expirations-table {
-
-            width: 100%;
-        }
-
-        .expirations-table td, .expirations-table th {
-
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        .expirations-table tr:nth-child(even) {
-
-            background-color: #dddddd;
-        }
-
         table { page-break-inside:auto }
         tr    { page-break-inside:avoid; page-break-after:auto }
         thead { display:table-header-group }

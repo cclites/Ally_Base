@@ -10,21 +10,20 @@ use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\CreatesBusinesses;
+
 
 class CaregiverExpirationsTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesBusinesses;
 
-    protected $officeUser;
+    // protected $officeUser;
 
     public function setUp()
     {
         parent::setUp();
 
-        $business = factory( Business::class )->create();
-        $this->officeUser = factory( OfficeUser::class )->create();
-        $this->actingAs( $this->officeUser->user );
-        $this->officeUser->businesses()->attach( $business->id );
+        $this->createBusinessWithUsers();
     }
 
     /**
@@ -42,6 +41,7 @@ class CaregiverExpirationsTest extends TestCase
             'expires_at'   => now()->format( 'Y-m-d' ),
         ]);
 
+        // probably could have used a factory, i just grabbed actual data from the network tab to test it directly
         $data = [
             [
                 // 'id'                       => null,
@@ -160,8 +160,8 @@ class CaregiverExpirationsTest extends TestCase
                 'expires_sort'             => "20190924"
             ]
         ];
-        $res = $this->post( route( 'business.caregivers.licenses.saveMany', [ 'caregiver' => $caregiver->id ] ), $data );
-
-        dd( $res );
+        $res = $this->post( route( 'business.caregivers.licenses.saveMany', [ 'caregiver' => $caregiver->id ] ), $data )
+            ->assertStatus( 302 );
+        // dd( $res );
     }
 }
