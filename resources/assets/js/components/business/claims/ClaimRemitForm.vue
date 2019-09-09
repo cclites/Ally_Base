@@ -53,7 +53,7 @@
 
                 <b-form-group label="Payer" label-for="payer_id">
                     <b-select name="payer_id" id="payer_id" v-model="form.payer_id" :disabled="form.busy">
-                        <option value="">-- Select a Payer --</option>
+                        <option :value="null">-- Select a Payer --</option>
                         <option v-for="payer in payers" :key="payer.id" :value="payer.id">{{ payer.name }}</option>
                         <template slot="first">
                         </template>
@@ -118,7 +118,7 @@
                     business_id: '',
                     date: moment().format('MM/DD/YYYY'),
                     payment_type: '',
-                    payer_id: '',
+                    payer_id: null,
                     reference: '',
                     amount: 0.00,
                     notes: '',
@@ -139,6 +139,7 @@
                         .then( ({ data }) => {
                             // this.$store.commit('claims/setRemit', data.data);
                             // TODO: handle update of remit
+                            this.$emit('updated', data.data);
                             this.$emit('close');
                         })
                         .catch(() => {});
@@ -147,6 +148,7 @@
                         .then( ({ data }) => {
                             // this.$store.commit('claims/setClaim', data.data);
                             // TODO: handle add update of remit
+                            this.$emit('added', data.data);
                             this.$emit('close');
                         })
                         .catch(() => {});

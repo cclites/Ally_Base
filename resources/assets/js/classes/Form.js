@@ -20,6 +20,7 @@ class Form {
         this.errorMods = 0;
         this.hideErrors = [];
         this.busy = false;
+        this.hasBeenSubmitted = false;
     }
 
     disableRedirects() {
@@ -145,6 +146,7 @@ class Form {
      */
     submit(method, url, multipart = false) {
         this.busy = true;
+        this.hasBeenSubmitted = true;
         const verb = method.toLowerCase();
         let Form = this;
         return new Promise((resolve, reject) => {

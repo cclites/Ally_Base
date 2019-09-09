@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\Requests\UpdateClaimRemitRequest;
 use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\CreateClaimRemitRequest;
@@ -49,9 +50,23 @@ class ClaimRemitController extends BaseController
     public function store(CreateClaimRemitRequest $request)
     {
         if ($remit = ClaimRemit::create($request->filtered())) {
-            return new SuccessResponse('Remit has been created.', $remit);
+            return new SuccessResponse('Remit has been created.', new ClaimRemitResource($remit));
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to create a Remit.  Please try again.');
+    }
+
+    /**
+     * Update a ClaimRemit.
+     *
+     * @param UpdateClaimRemitRequest $request
+     * @param ClaimRemit $claimRemit
+     * @return SuccessResponse
+     */
+    public function update(UpdateClaimRemitRequest $request, ClaimRemit $claimRemit)
+    {
+        $claimRemit->update($request->filtered());
+
+        return new SuccessResponse('Remit has been updated.', new ClaimRemitResource($claimRemit->fresh()));
     }
 }

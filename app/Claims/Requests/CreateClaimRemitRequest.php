@@ -16,7 +16,7 @@ class CreateClaimRemitRequest extends BusinessRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'date' => 'required|date',
             'payment_type' => ['required', new ValidEnum(ClaimRemitType::class)],
             'payer_id' => ['nullable',
@@ -25,9 +25,33 @@ class CreateClaimRemitRequest extends BusinessRequest
                 }),
             ],
             'reference' => 'nullable|string|max:255',
-            'amount' => 'required|numeric|min:0|max:999999.99',
+            'amount' => 'required|numeric|min:0.01|max:999999.99',
             'notes' => 'nullable|string|max:255',
         ];
+
+        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
+            $rules['amount'] = 'required|numeric|min:-9999999.99|max:-0.01';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Custom validation messages.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        $messages = [
+            'amount.*' => 'Remit amount must have a value.',
+        ];
+
+        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
+            $messages['amount.*'] = 'Take-back remits must have a negative amount.';
+        }
+
+        return array_merge(parent::messages(), $messages);
     }
 
     /**

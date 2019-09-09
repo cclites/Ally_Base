@@ -71,15 +71,18 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-if="filters.busy" />
+        <div v-else class="table-responsive">
             <b-table bordered striped hover show-empty
                 :items="remits"
                 :fields="fields"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
                 :filter="filter"
+                :empty-text="emptyText"
             >
                 <template slot="actions" scope="row">
+                    <b-btn variant="secondary" size="sm" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
                 </template>
             </b-table>
         </div>
@@ -100,6 +103,8 @@
                 @close="hideEdit()"
                 :remit="remit"
                 :payers="payers"
+                @added="fetch()"
+                @updated="fetch()"
             />
         </b-modal>
     </b-card>
@@ -160,6 +165,10 @@
             modalTitle() {
                 return this.remit.id ? 'Edit Remit' : 'Add Remit';
             },
+
+            emptyText() {
+                return this.filters.hasBeenSubmitted ? 'There are no results to display.' : 'Select filters and press Generate.';
+            }
         },
 
         methods: {
@@ -197,6 +206,14 @@
                     type: this.CLAIM_REMIT_TYPES.REMIT,
                 });
             },
+
+            handleAddedRemit(item) {
+
+            },
+
+            handleUpdatedRemit(item) {
+
+            }
         },
 
         async mounted() {
