@@ -251,6 +251,12 @@
 
                 return ( this.showSummary ) ? 'Hide Summary' : 'Show Summary';
             },
+            queryString(){
+
+                return '?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
+                    '&businesses=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
+                    '&method=' + this.filter_method + '&verified=' + this.filter_verified;
+            }
         },
 
         mounted() {
@@ -276,7 +282,7 @@
 
                 this.loadingSummaries = true;
 
-                await axios.get( this.urlPrefix + 'caregiver_payments' + this.queryString )
+                await axios.get( 'business/reports/caregiver_payments' + this.queryString )
                     .then( res => {
 
                         console.log( 'first response: ', res );
@@ -288,7 +294,7 @@
                         // }
                     });
 
-                await axios.get( this.urlPrefix + 'client_charges' + this.queryString )
+                await axios.get( 'business/reports/client_charges' + this.queryString )
                     .then( res => {
 
                         console.log( 'second response: ', res );
@@ -306,9 +312,7 @@
 
             loadItems() {
                 this.loaded = 0;
-                let url = '/business/reports/evv?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&businesses=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
-                    '&method=' + this.filter_method + '&verified=' + this.filter_verified;
+                let url = '/business/reports/evv' + this.queryString;
                 axios.get(url)
                     .then(response => {
                         this.items = response.data.map(function (item) {
