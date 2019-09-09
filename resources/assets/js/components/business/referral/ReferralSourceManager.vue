@@ -49,7 +49,6 @@
                 :source="editSource"
                 @saved="updateAfterAddEdit"
                 :source-type="sourceType"
-                @deleted="updateAfterResourceDelete"
         ></business-referral-source>
     </b-card>
 </template>
@@ -101,7 +100,6 @@
 
         methods: {
             edit(id) {
-
                 this.editSource = this.referralSources[id];
                 this.showEditReferralModal = true;
             },
@@ -132,7 +130,8 @@
                     let data = {
                         contact_name: response.contact_name,
                         phone: response.phone,
-                        id: response.id
+                        id: response.id,
+                        active: response.active
                     };
 
                     this.items[index].contacts.push(data);
@@ -145,27 +144,23 @@
                         contacts: {
                             contact_name: response.contact_name,
                             phone: response.phone,
-                            id: response.id
+                            id: response.id,
+                            active: response.active
                         }
                     };
-
                     this.items.push(data);
                 }
             },
             updateAfterAddEdit(data) {
-                this.items[data.item_id].contacts.push(data.response);
-                this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
-            },
-            updateAfterResourceDelete(data){
-
                 let resource = this.items[data.item_id];
-                let index = resource.contacts.findIndex(x => x.id == data.id);
+                let index = resource.contacts.findIndex(x => x.id === data.response.id);
 
                 if (index >= 0) {
-                    this.items[data.item_id].contacts.splice(index, 1);
+                    this.items[data.item_id].contacts[index] = data.response;
+                } else{
+                    this.items[data.item_id].contacts.push(data.response);
+                    this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
                 }
-
-                this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
             },
             stringifyContactNames(contacts)
             {

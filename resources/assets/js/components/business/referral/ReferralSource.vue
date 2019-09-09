@@ -18,6 +18,7 @@
                          :filter="filter"
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
+                         ref="table"
                 >
                     <template slot="contact_name" scope="row">
                         <b-form-input :value="row.item.contact_name" v-model="row.item.contact_name"></b-form-input>
@@ -31,8 +32,11 @@
                         <b-btn size="sm" @click="update(row.item)">
                             <i class="fa fa-save"></i>
                         </b-btn>
-                        <b-btn size="sm" @click="destroy(row.item.id)" variant="danger">
+                        <b-btn v-if="row.item.active" size="sm" @click="deactivate(row.item, 0)" variant="danger">
                             <i class="fa fa-trash"></i>
+                        </b-btn>
+                        <b-btn v-else size="sm" @click="deactivate(row.item, 1)" variant="success">
+                            <i class="fa fa-plus-square"></i>
                         </b-btn>
                     </template>
                 </b-table>
@@ -91,47 +95,56 @@
         },
 
         methods: {
-            update(resource){
+            update(resourceData){
                 let form = new Form({
-                    contact_name: resource.contact_name,
-                    phone: resource.phone,
-                    id: resource.id,
+                    contact_name: resourceData.contact_name,
+                    phone: resourceData.phone,
+                    id: resourceData.id,
+                    active: resourceData.active,
                     organization: this.source.organization,
                     chain_id: this.source.id,
                     type: this.sourceType
                 });
 
                 this.loading = true;
-                let method = resource.id ? 'patch' : 'post';
-                let url = resource.id ? `/business/referral-sources/${resource.id}` : '/business/referral-sources';
+                let method = resourceData.id ? 'patch' : 'post';
+                let url = resourceData.id ? `/business/referral-sources/${resourceData.id}` : '/business/referral-sources';
                 form.submit(method, url)
                     .then(response => {
+
                         if(method === 'post'){
-                            resource.id = response.data.data.id;
+                            resourceData.id = response.data.data.id;
                             let data = {response: response.data.data, item_id: this.source.id};
                             this.$emit('saved', data);
+                        }else{
+                            let index = this.items.findIndex(x => x.id == response.data.data.id);
+                            let originalItems = this.items;
+
+                            if(index >= 0){
+                                originalItems[index] = response.data.data;
+                            }
+
+                            this.items = originalItems;
                         }
+
                     })
                     .finally(() => this.loading = false)
             },
 
-            destroy(id){
+            deactivate(resourceData, active){
 
-                if (! confirm('Are you sure you want to delete this referral source?')) {
+                if (!active && ! confirm('Are you sure you want to deactivate this referral source?')) {
                     return;
                 }
 
-                let form = new Form({});
-                form.submit('DELETE', '/business/referral-sources/' + id)
-                    .then(response => {
-                        let index = this.items.findIndex(x => x.id == id);
-                        if (index >= 0) {
-                            this.items.splice(index, 1);
-                        }
-                        this.$emit('deleted', {item_id: this.source.id, id: id});
-                    })
-                    .catch(e => {
-                    })
+                let resource = {
+                    contact_name: resourceData.contact_name,
+                    phone: resourceData.phone,
+                    id: resourceData.id,
+                    active: active,
+                };
+
+                this.update(resource);
             },
 
             add(){
@@ -141,18 +154,19 @@
                     id: ''
                 });
             }
-
         },
 
         watch: {
             value(val) {
+                console.log("watching val");
                 this.items = this.source.contacts;
                 this.showModal = val;
             },
 
             showModal(val) {
                 this.$emit('input', val);
-            }
+            },
+
         }
     }
 </script>

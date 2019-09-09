@@ -73,7 +73,14 @@ class ReferralSourceController extends BaseController
         $this->authorize('update', $referralSource);
         $data = $request->validated();
 
+
+        \Log::info($data);
+        \Log::info($referralSource);
+
         if ($referralSource->update($data)) {
+
+
+
             return new SuccessResponse('The referral source has been saved!', $referralSource);
         }
 
@@ -82,35 +89,18 @@ class ReferralSourceController extends BaseController
 
     public function destroy(ReferralSource $referralSource) 
     {
-
-        $this->authorize('delete', $referralSource);
-
-        try {
-            if ($referralSource->delete()) {
-                return new SuccessResponse('The referral source was successfully removed.', $referralSource);
-            }
-        } catch (\Illuminate\Database\QueryException $e) {
-            \Log::info('Cannot delete that referral source because it is currently in use.');
-            return new ErrorResponse(400, 'Cannot delete that referral source because it is currently in use.');
-        }
-
-        return new ErrorResponse(500, 'An unexpected error occurred.');
+        $referralSource->active = false;
+        $referralSource->save();
+        return new SuccessResponse('The referral source was successfully deactivated.', $referralSource);
     }
 
     public function removeOrganization($organization){
 
         $referralSources = ReferralSource::where('organization', $organization)->get();
 
-        try{
-            foreach($referralSources as $referralSource){
-                $this->destroy($referralSource);
-            }
-            return new SuccessResponse('The referral organization was successfully removed.', $organization);
-
-        }catch (\Illuminate\Database\QueryException $e) {
-            return new ErrorResponse(400, 'Cannot delete that referral organization because it is currently in use.');
+        foreach($referralSources as $referralSource){
+            $this->destroy($referralSource);
         }
-
-        return new ErrorResponse(500, 'An unexpected error occurred.');
+        return new SuccessResponse('The referral source was successfully deactivated.', $organization);
     }
 }
