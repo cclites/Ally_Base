@@ -24,6 +24,8 @@ class CaregiverExpirationsTest extends TestCase
         parent::setUp();
 
         $this->createBusinessWithUsers();
+
+        $this->actingAs( $this->officeUser->user );
     }
 
     /**
@@ -31,11 +33,9 @@ class CaregiverExpirationsTest extends TestCase
      */
     function an_invoice_can_be_generated_from_shifts()
     {
-        $caregiver = factory( Caregiver::class )->create();
-
         CaregiverLicense::create([
 
-            'caregiver_id' => $caregiver->id,
+            'caregiver_id' => $this->caregiver->id,
             'description'  => 'testing description',
             'name'         => 'testing name',
             'expires_at'   => now()->format( 'Y-m-d' ),
@@ -55,42 +55,42 @@ class CaregiverExpirationsTest extends TestCase
                 'expires_at'               => "09/24/2019",
                 'expires_sort'             => ""
             ],
-            [
-                'id'                       => null,
-                'type'                     => "Drivers License",
-                'chain_id'                 => 1,
-                'created_at'               => "2019-09-03 20:44:08",
-                'updated_at'               => "---",
-                'chain_expiration_type_id' => 244,
-                'name'                     => "Drivers License",
-                'description'              => "",
-                'expires_at'               => "",
-                'expires_sort'             => ""
-            ],
-            [
-                'id'                       => null,
-                'type'                     => "Industry Standard",
-                'chain_id'                 => 1,
-                'created_at'               => "2019-09-03 20:44:34",
-                'updated_at'               => "---",
-                'chain_expiration_type_id' => 246,
-                'name'                     => "Industry Standard",
-                'description'              => "",
-                'expires_at'               => "",
-                'expires_sort'             => ""
-            ],
-            [
-                'id'                       => null,
-                'type'                     => "Olive Tree Chopper",
-                'chain_id'                 => 1,
-                'created_at'               => "2019-09-03 22:06:17",
-                'updated_at'               => "---",
-                'chain_expiration_type_id' => 247,
-                'name'                     => "Olive Tree Chopper",
-                'description'              => "",
-                'expires_at'               => "",
-                'expires_sort'             => ""
-            ],
+            // [
+            //     'id'                       => null,
+            //     'type'                     => "Drivers License",
+            //     'chain_id'                 => 1,
+            //     'created_at'               => "2019-09-03 20:44:08",
+            //     'updated_at'               => "---",
+            //     'chain_expiration_type_id' => 244,
+            //     'name'                     => "Drivers License",
+            //     'description'              => "",
+            //     'expires_at'               => "",
+            //     'expires_sort'             => ""
+            // ],
+            // [
+            //     'id'                       => null,
+            //     'type'                     => "Industry Standard",
+            //     'chain_id'                 => 1,
+            //     'created_at'               => "2019-09-03 20:44:34",
+            //     'updated_at'               => "---",
+            //     'chain_expiration_type_id' => 246,
+            //     'name'                     => "Industry Standard",
+            //     'description'              => "",
+            //     'expires_at'               => "",
+            //     'expires_sort'             => ""
+            // ],
+            // [
+            //     'id'                       => null,
+            //     'type'                     => "Olive Tree Chopper",
+            //     'chain_id'                 => 1,
+            //     'created_at'               => "2019-09-03 22:06:17",
+            //     'updated_at'               => "---",
+            //     'chain_expiration_type_id' => 247,
+            //     'name'                     => "Olive Tree Chopper",
+            //     'description'              => "",
+            //     'expires_at'               => "",
+            //     'expires_sort'             => ""
+            // ],
             [
                 'id'                       => null,
                 'caregiver_id'             => 3,
@@ -160,8 +160,9 @@ class CaregiverExpirationsTest extends TestCase
                 'expires_sort'             => "20190924"
             ]
         ];
-        $res = $this->post( route( 'business.caregivers.licenses.saveMany', [ 'caregiver' => $caregiver->id ] ), $data )
-            ->assertStatus( 302 );
-        // dd( $res );
+        $res = $this->post( route( 'business.caregivers.licenses.saveMany', [ 'caregiver' => $this->caregiver->id ] ), $data )
+            ->assertSuccessful();
+
+        // $res = CaregiverLicense::with( 'caregiver', 'caregiver.address' )->get();
     }
 }

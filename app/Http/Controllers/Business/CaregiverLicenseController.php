@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
 use App\ExpirationType;
+use App\Http\Requests\SaveCaregiverExpirationsRequest;
 use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -58,63 +59,34 @@ class CaregiverLicenseController extends BaseController
         return new ErrorResponse( 500, 'The license could not be saved.' );
     }
 
-    public function saveMany( Request $request, Caregiver $caregiver )
+    public function saveMany( SaveCaregiverExpirationsRequest $request, Caregiver $caregiver )
     {
         $this->authorize( 'update', $caregiver );
 
-        $expirations = $request->all();
-
-        // Validate data and filter out unneccesary rows
-        for( $i = count( $expirations ) - 1; $i >= 0; $i-- ) {
-
-            // if there is no id or expiration date, but there is a chain_expiration_type_id, then this is a default type that is not being set yet. Remove it
-            if( empty( $expirations[ $i ][ 'id' ] ) && in_array( $expirations[ $i ][ 'expires_at' ], [ null, '', 'null' ] ) && $expirations[ $i ][ 'chain_expiration_type_id' ] ) array_splice( $expirations, $i, 1 );
-            else if( in_array( $expirations[ $i ][ 'expires_at' ], [ '', null, 'null' ] ) ) return new ErrorResponse( 400, "Expiration {$expirations[ $i ][ 'name' ]} needs an expiration date" );
-            else if( in_array( $expirations[ $i ][ 'name' ], [ '', null, 'null' ] ) ) return new ErrorResponse( 400, "All Expirations need a name" );
-        }
+        $expirations = $request->validated()[ '*' ];
 
         \DB::beginTransaction();
         try {
 
-            foreach( $expirations as $exp ){
+            $results = $caregiver->licenses()->saveMany( array_map( function( $exp ) use ( $caregiver ){
 
-                if( !empty( $exp[ 'id' ] ) ){
+                $element = CaregiverLicense::findOrNew( $exp[ 'id' ] ?? null );
+                $element[ 'name'         ] = $exp[ 'name' ];
+                $element[ 'description'  ] = $exp[ 'description' ] ?? null;
+                $element[ 'caregiver_id' ] = $caregiver->id;
+                $element[ 'expires_at'   ] = Carbon::parse( $exp[ 'expires_at' ] )->format( 'Y-m-d' );
+                $element[ 'updated_at'   ] = now()->format( 'Y-m-d H:i:s' );
 
-                    $expiration = CaregiverLicense::find( $exp[ 'id' ] );
-
-                    $expiration->update([
-
-                        'caregiver_id'             => $caregiver->id,
-                        'description'              => $exp[ 'description' ] ?? null,
-                        'name'                     => $exp[ 'name' ],
-                        'expires_at'               => Carbon::parse( $exp[ 'expires_at' ] )->format( 'Y-m-d' ),
-                        'updated_at'               => now()->format( 'Y-m-d H:i:s' ),
-                        'chain_expiration_type_id' => $exp[ 'chain_expiration_type_id' ] ?? null
-                    ]);
-
-                    $return[] = $expiration->fresh()->toArray();
-                } else {
-
-                    $element = CaregiverLicense::create([
-
-                        'caregiver_id'             => $caregiver->id,
-                        'description'              => $exp[ 'description' ] ?? null,
-                        'name'                     => $exp[ 'name' ],
-                        'expires_at'               => Carbon::parse( $exp[ 'expires_at' ] )->format( 'Y-m-d' ),
-                        'chain_expiration_type_id' => $exp[ 'chain_expiration_type_id' ] ?? null
-                    ]);
-
-                    $return[] = $element->toArray();
-                }
-            }
+                return $element;
+            }, $expirations ));
 
             \DB::commit();
-            return new SuccessResponse( 'Caregiver expirations saved successfully.', $return );
+            return new SuccessResponse( 'Caregiver expirations saved successfully.', $results );
         } catch ( \Exception $ex ) {
 
             \Log::debug($ex->getMessage());
             \DB::rollBack();
-            return new ErrorResponse( 500, 'An unexpected error occurred. Please try again.' );
+            return new ErrorResponse( 500, $ex->getMessage() );
         }
     }
 

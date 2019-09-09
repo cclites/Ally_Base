@@ -80,7 +80,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
      */
     public function __construct()
     {
-        $this->query = CaregiverLicense::with('caregiver');
+        $this->query = CaregiverLicense::with('caregiver', 'caregiver.address');
     }
 
     /**

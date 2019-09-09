@@ -4,12 +4,17 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <b-row class="align-items-center">
+        <b-row class="mb-2 align-items-center">
 
-            <b-col class="mb-2 flex-column flex-sm-row">
+            <b-col lg="6" class="flex-column flex-sm-row">
 
                 <b-btn @click="createLicense()" variant="info" style="flex:1" class="my-1 d-flex d-sm-inline-block" :disabled=" alreadyCreating ">Add Custom Expiration ( this caregiver only )</b-btn>
                 <b-btn to="/business/settings#expirations" variant="success" style="flex:1" class="my-1 d-flex d-sm-inline-block">Manage Default Expirations</b-btn>
+            </b-col>
+            <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
+
+                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
+                <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -19,7 +24,6 @@
                 :items=" chainExpirations "
                 :fields="fields"
                 :current-page="currentPage"
-                :per-page="perPage"
                 :filter="filter"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
@@ -74,13 +78,10 @@
             </b-table>
         </div>
         <b-row class="align-items-center">
-            <b-col lg="6" >
-                <b-pagination :total-rows=" totalRows " :per-page=" perPage " v-model=" currentPage " class="mb-0" />
-            </b-col>
-            <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
+
+            <b-col lg="12" class="text-right d-flex justify-content-end align-items-center">
 
                 <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
-
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
