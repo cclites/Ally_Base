@@ -196,8 +196,8 @@
                             exp.id                       = exp.expires_at ? exp.id : null;
                             exp.name                     = exp.expires_at ? exp.name : exp.type;
                             exp.description              = exp.expires_at ? exp.description : '';
-                            exp.expires_at               = exp.expires_at ? moment( exp.expires_at ).format( 'MM/DD/YYYY' ) : '';
-                            exp.expires_sort             = exp.expires_at ? moment( exp.expires_at ).format( 'YYYYMMDD' ) : '';
+                            exp.expires_at               = exp.expires_at ? moment.utc( exp.expires_at ).local().format( 'MM/DD/YYYY' ) : '';
+                            exp.expires_sort             = exp.expires_at ? moment.utc( exp.expires_at ).local().format( 'YYYYMMDD' ) : '';
                             exp.updated_at               = exp.expires_at ? moment.utc( exp.updated_at ).local().format( 'MM/DD/YYYY h:mm A' ) : '---';
 
                             return exp;
