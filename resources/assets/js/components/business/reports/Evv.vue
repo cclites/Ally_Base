@@ -1,63 +1,105 @@
 <template>
+
     <b-card class="mt-5">
+
         <b-row>
+
             <b-col lg="12" class="mt-3">
+
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()" class="mt-2">
-                        <date-picker
-                                v-model="start_date"
-                                placeholder="Start Date"
-                        >
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                                v-model="end_date"
-                                placeholder="End Date"
-                        >
-                        </date-picker>
-                        <business-location-select v-model="business_id" :allow-all="true" :hideable="false" class=""></business-location-select>
-                        <b-form-select
-                                id="caregiver_id"
-                                name="caregiver_id"
-                                v-model="caregiver_id"
-                        >
-                            <option value="">--Select a Caregiver--</option>
-                            <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                        </b-form-select>
-                        <b-form-select
-                                id="client_id"
-                                name="client_id"
-                                v-model="client_id"
-                        >
-                            <option value="">--Select a Client--</option>
-                            <option value="">All Clients</option>
-                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
-                        </b-form-select>
-                        <b-form-select
-                                id="method"
-                                name="method"
-                                v-model="filter_method"
-                        >
-                            <option value="">--Filter by Method--</option>
-                            <option value="">ANY</option>
-                            <option value="geolocation">Geolocation</option>
-                            <option value="telephony">Telephony</option>
-                        </b-form-select>
-                        <b-form-select
-                                id="method"
-                                name="method"
-                                v-model="filter_verified"
-                        >
-                            <option value="">--Filter by Verified--</option>
-                            <option value="">ANY</option>
-                            <option value="0">Unverified</option>
-                            <option value="1">Verified</option>
-                        </b-form-select>
-                        <br />
-                        <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                    <b-form inline @submit.prevent="loadItems()" class="d-flex flex-column align-items-stretch">
+
+                        <b-row>
+
+                            <b-col sm="12" md="6" class="d-flex my-1 align-items-center">
+
+                                <date-picker
+                                        style="flex:1"
+                                        v-model="start_date"
+                                        placeholder="Start Date"
+                                >
+                                </date-picker>
+
+                                    &nbsp;to&nbsp;
+
+                                <date-picker
+                                        style="flex:1"
+                                        v-model="end_date"
+                                        placeholder="End Date"
+                                >
+                                </date-picker>
+                            </b-col>
+
+                            <b-col class="d-flex my-1" sm="6" md="3">
+
+                                <business-location-select v-model="business_id" :allow-all="true" :hideable="false" style="flex:1"></business-location-select>
+                            </b-col>
+
+                            <b-col class="d-flex my-1" sm="6" md="3">
+
+                                <b-form-select
+                                        id="caregiver_id"
+                                        name="caregiver_id"
+                                        v-model="caregiver_id"
+                                >
+                                    <option value="">--Select a Caregiver--</option>
+                                    <option value="">All Caregivers</option>
+                                    <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-col>
+                            <b-col class="d-flex my-1" sm="6" md="3">
+
+                                <b-form-select
+                                        id="client_id"
+                                        name="client_id"
+                                        v-model="client_id"
+                                        style="flex:1"
+                                >
+                                    <option value="">--Select a Client--</option>
+                                    <option value="">All Clients</option>
+                                    <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-col>
+                            <b-col class="d-flex my-1" sm="6" md="3">
+
+                                <b-form-select
+                                        id="method"
+                                        name="method"
+                                        v-model="filter_method"
+                                        style="flex:1"
+                                >
+                                    <option value="">--Filter by Method--</option>
+                                    <option value="">ANY</option>
+                                    <option value="geolocation">Geolocation</option>
+                                    <option value="telephony">Telephony</option>
+                                </b-form-select>
+                            </b-col>
+                            <b-col class="d-flex my-1" sm="6" md="3">
+
+                                <b-form-select
+                                        id="method"
+                                        name="method"
+                                        v-model="filter_verified"
+                                        style="flex:1"
+                                >
+                                    <option value="">--Filter by Verified--</option>
+                                    <option value="">ANY</option>
+                                    <option value="0">Unverified</option>
+                                    <option value="1">Verified</option>
+                                </b-form-select>
+                            </b-col>
+                        </b-row>
+                        <b-row class="mt-4">
+
+                            <b-col class="d-flex align-items-center justify-content-end">
+
+                                <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                                <b-button type="button" @click=" showHideSummary() " variant="primary" class="ml-2" v-show=" loaded > 0 ">{{ summaryButtonText }}</b-button>
+                            </b-col>
+                        </b-row>
                     </b-form>
                 </b-card>
             </b-col>
@@ -107,6 +149,8 @@
 
         data() {
             return {
+
+                showSummary : false,
                 sortBy: 'shift_time',
                 sortDesc: false,
                 filter: null,
@@ -201,14 +245,63 @@
             }
         },
 
+        computed: {
+
+            summaryButtonText() {
+
+                return ( this.showSummary ) ? 'Hide Summary' : 'Show Summary';
+            },
+        },
+
         mounted() {
             this.loadFilters();
         },
 
         methods: {
+
             loadFilters() {
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
                 axios.get('/business/clients').then(response => this.clients = response.data);
+            },
+
+            async showHideSummary() {
+
+                this.showSummary = !this.showSummary;
+                if ( this.showSummary ) {
+
+                    await this.loadSummaries();
+                }
+            },
+            async loadSummaries() {
+
+                this.loadingSummaries = true;
+
+                await axios.get( this.urlPrefix + 'caregiver_payments' + this.queryString )
+                    .then( res => {
+
+                        console.log( 'first response: ', res );
+                        // if ( Array.isArray(response.data)) {
+                        //     this.items.caregiverPayments = response.data;
+                        // }
+                        // else {
+                        //     this.items.caregiverPayments = [];
+                        // }
+                    });
+
+                await axios.get( this.urlPrefix + 'client_charges' + this.queryString )
+                    .then( res => {
+
+                        console.log( 'second response: ', res );
+                        // if ( Array.isArray( response.data ) ) {
+
+                        //     this.items.clientCharges = response.data;
+                        // }
+                        // else {
+
+                        //     this.items.clientCharges = [];
+                        // }
+                    });
+                this.loadingSummaries = false;
             },
 
             loadItems() {
