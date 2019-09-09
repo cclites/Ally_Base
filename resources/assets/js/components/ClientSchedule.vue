@@ -18,21 +18,19 @@
                             </tr>
                             <tr>
                                 <th>Caregiver:</th>
-                                <th>
-                                    {{ viewTitle }}
-                                    <br>
-                                    <b-button size="sm" @click="fetchCaregiver(selectedEvent.caregiver_id)" v-if="!selectedCaregiver.id">Show Details</b-button>
-                                    <b-button size="sm" @click="selectedCaregiver = {}">Hide Details</b-button>
-                                </th>
+                                <td>
+                                    <div class="mb-2">{{ viewTitle }}</div>
+                                    <b-button v-if="!selectedCaregiver.id" size="sm" @click="fetchCaregiver(selectedEvent.caregiver_id)">Show Details</b-button>
+                                    <b-button v-else size="sm" @click="selectedCaregiver = {}">Hide Details</b-button>
+                                </td>
                             </tr>
 
                         </table>
-                        <loading-card v-show="loadingCaregiver"></loading-card>
+                        <loading-card v-show="loadingCaregiver" text=""></loading-card>
                         <client-caregiver-details v-if="selectedCaregiver.id"
                                                   :caregiver="selectedCaregiver"
                                                   :address="selectedCaregiver.address || {}"
                                                   :phone="selectedCaregiver.phone_number ? selectedCaregiver.phone_number.number : ''"
-
                         />
                     </b-col>
                 </b-row>
@@ -51,8 +49,7 @@
     export default {
         components: {ClientCaregiverDetails, AuthUser},
 
-        props: {
-        },
+        props: {},
 
         data() {
             return {
@@ -78,14 +75,11 @@
                     'Saturday': 'sa',
                 },
                 header: {
-                    left:   'prev,next today',
+                    left: 'prev,next today',
                     center: 'title',
-                    right:  'listDay,agendaWeek'
+                    right: 'listDay,agendaWeek'
                 }
             }
-        },
-
-        mounted() {
         },
 
         methods: {
@@ -97,6 +91,7 @@
             },
 
             viewDetails(event, jsEvent, view) {
+                this.selectedCaregiver = {};
                 this.selectedEvent = event;
                 this.viewModal = true;
             },
@@ -104,18 +99,18 @@
             fetchCaregiver(id) {
                 this.selectedCaregiver = {};
                 this.loadingCaregiver = true;
-                axios.get('/caregiver/' + id).then(response => {
-                    this.selectedCaregiver = response.data.caregiver;
-                }).finally(() => this.loadingCaregiver = false);
+                axios.get('/caregiver/' + id)
+                    .then(response => {
+                        this.selectedCaregiver = response.data.caregiver;
+                    })
+                    .catch(() => {
+                    })
+                    .finally(() => this.loadingCaregiver = false);
             }
         },
 
-        watch: {
-        },
-
         computed: {
-
-            events(){
+            events() {
                 return 'scheduled-shifts/' + this.authUser.id + '/schedule';
             },
 
@@ -133,8 +128,6 @@
                 if (!this.selectedEvent) return '';
                 return this.selectedEvent.title;
             },
-
-
         }
     }
 </script>
