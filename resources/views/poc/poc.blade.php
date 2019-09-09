@@ -22,7 +22,7 @@
     <body>
         <div style="position:absolute;left:50%;margin-left:-306px;top:0px;height:792px;width:660px; border-style:outset;overflow:hidden">
             <div style="position:absolute;left:0px;top:-1px;" class="img_container">
-                <img src="{{$image}}" style="height:792px;width:611px;">
+                <img src="{{$image}}" style="height:792px;width:612px;">
             </div>
 
             <div style="position:absolute;left:11.50px;top:14.12px" class="cls_002"><span class="cls_002">Department of Health and Human Services</span></div>
