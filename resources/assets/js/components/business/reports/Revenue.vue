@@ -130,7 +130,7 @@
                                     </div>
                                     <div class="d-flex align-items-end justify-content-between">
                                         <span>Total profit</span>
-                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{displayedProfitCurrent}}</span>
+                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{displayedProfitPrior}}</span>
                                     </div>
                                     <hr/>
                                     <h2>Comparison to prior period</h2>
