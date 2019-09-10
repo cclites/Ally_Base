@@ -3,6 +3,7 @@ import * as Vue from "vue";
 const state = {
     queue: [],
     claim: {},
+    claims: [],
     item: {},
     caregivers: [],
 
@@ -15,6 +16,9 @@ const state = {
 const getters = {
     queue(state) {
         return state.queue;
+    },
+    claims(state) {
+        return state.claims;
     },
     claim(state) {
         return state.claim;
@@ -43,6 +47,9 @@ const getters = {
 const mutations = {
     setClaim(state, claim) {
         Vue.set(state, 'claim', claim);
+    },
+    setClaims(state, claims) {
+        Vue.set(state, 'claims', claims);
     },
     setItem(state, item) {
         Vue.set(state, 'item', item);

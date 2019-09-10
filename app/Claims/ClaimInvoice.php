@@ -188,6 +188,62 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     // QUERY SCOPES
     // **********************************************************
 
+    /**
+     * Filter by payer_id (optional).
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param null|int|string $payerId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForPayer($query, $payerId = null)
+    {
+        if (empty($payerId)) {
+            return $query;
+        }
+
+        return $query->where('payer_id', $payerId);
+    }
+
+    /**
+     * Filter by client_id (optional).
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param null|int|string $clientId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClient($query, $clientId = null)
+    {
+        if (empty($clientId)) {
+            return $query;
+        }
+
+        return $query->where('client_id', $clientId);
+    }
+
+    /**
+     * Filter by date range.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param \Carbon\Carbon $start
+     * @param \Carbon\Carbon $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForDateRange($query, $start, $end)
+    {
+        return $query->whereBetween('created_at', [$start, $end]);
+    }
+
+    /**
+     * Filter to only Claims that have a balance.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeHasBalance($query)
+    {
+        return $query->where('amount_due', '<>', '0');
+    }
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************

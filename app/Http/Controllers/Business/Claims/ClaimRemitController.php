@@ -69,4 +69,20 @@ class ClaimRemitController extends BaseController
 
         return new SuccessResponse('Remit has been updated.', new ClaimRemitResource($claimRemit->fresh()));
     }
+
+    /**
+     * Show the Claim Remit page.
+     *
+     * @param ClaimRemit $claimRemit
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(ClaimRemit $claimRemit)
+    {
+        $init = ['remit' => new ClaimRemitResource($claimRemit)];
+
+        return view_component('claim-remit-details', 'Apply Remit', compact('init'), [
+            'Home' => '/',
+            'Claim Remits' => route('business.claim-remits.index'),
+        ]);
+    }
 }

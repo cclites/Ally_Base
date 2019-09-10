@@ -17,7 +17,7 @@ class ClaimRemitResource extends Resource
         return [
             'id' => $this->resource->id,
             'amount' => $this->amount,
-            'amount_applied' => $this->amount,
+            'amount_applied' => $this->amount_applied,
             'amount_available' => $this->getAmountAvailable(),
             'business_id' => $this->business->id,
             'business' => [

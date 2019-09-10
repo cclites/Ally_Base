@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimRemit;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
+use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
+use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Billing\View\InvoiceViewGenerator;
 use App\Billing\View\InvoiceViewFactory;
-use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
@@ -17,6 +20,30 @@ use Illuminate\Http\Request;
 
 class ClaimInvoiceController extends BaseController
 {
+    /**
+     * Get a list of Claim Invoices.
+     *
+     * @param GetClaimInvoicesRequest $request
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function index(GetClaimInvoicesRequest $request)
+    {
+        $filters = $request->filtered();
+
+        $query = ClaimInvoice::forRequestedBusinesses()
+            ->forDateRange($filters['start_date'], $filters['end_date'])
+            ->forPayer($filters['payer_id'])
+            ->forClient($filters['client_id']);
+
+        if ($request->status == 'unpaid') {
+            $query = $query->hasBalance();
+        }
+
+        $results = $query->get();
+
+        return ClaimInvoiceResource::collection($results);
+    }
+
     /**
      * Create a ClaimInvoice.
      *

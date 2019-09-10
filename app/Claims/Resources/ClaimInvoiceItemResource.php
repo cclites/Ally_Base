@@ -16,6 +16,8 @@ class ClaimInvoiceItemResource extends Resource
      */
     public function toArray($request)
     {
+        list($startTime, $endTime) = $this->getServiceTimes();
+
         return [
             'amount' => $this->resource->amount,
             'amount_due' => $this->resource->amount_due,
@@ -33,6 +35,8 @@ class ClaimInvoiceItemResource extends Resource
             'rate' => number_format($this->resource->rate, 2),
             'units' => number_format($this->resource->units, 2),
             'summary' => $this->resource->claimable->getName(),
+            'start_time' => $startTime,
+            'end_time' => $endTime,
         ];
     }
 
@@ -68,5 +72,22 @@ class ClaimInvoiceItemResource extends Resource
             default:
                 return 'ERROR';
         }
+    }
+
+    /**
+     * Get the start and end times of the claimable service.
+     *
+     * @return array
+     */
+    public function getServiceTimes() : array
+    {
+        if ($this->resource->claimable_type != ClaimableService::class) {
+            return [null, null];
+        }
+
+        return [
+            optional($this->resource->claimable->visit_start_time)->toDateTimeString(),
+            optional($this->resource->claimable->visit_end_time)->toDateTimeString(),
+        ];
     }
 }

@@ -33,7 +33,9 @@ class ClaimInvoiceResource extends Resource
             'client_id' => $this->resource->client_id,
             'client_invoice' => [
                 'name' => $this->resource->clientInvoice->name,
+                'date' => $this->resource->clientInvoice->created_at->toDateTimeString(),
             ],
+            'client_invoice_date' => $this->resource->clientInvoice->created_at->toDateTimeString(),
             'client_invoice_id' => $this->resource->client_invoice_id,
             'client_last_name' => $this->resource->client_last_name,
             'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,

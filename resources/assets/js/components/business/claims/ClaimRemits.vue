@@ -82,6 +82,7 @@
                 :empty-text="emptyText"
             >
                 <template slot="actions" scope="row">
+                    <b-btn variant="success" size="sm" :href="`/business/claim-remits/${row.item.id}`">Apply</b-btn>
                     <b-btn variant="secondary" size="sm" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
                 </template>
             </b-table>

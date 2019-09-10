@@ -57,7 +57,18 @@ export default {
                 { value: 'not_applied', text: 'Not Applied' },
                 { value: 'partially_applied', text: 'Partially Applied' },
                 { value: 'fully_applied', text: 'Fully Applied' },
-            ]
+            ],
+            claimRemitPaymentTypeOptions: [
+                { value: 'denial', text: 'Denial' },
+                { value: 'discount', text: 'Discount' },
+                { value: 'interest', text: 'Interest' },
+                { value: 'overpayment', text: 'Overpayment / Surplus' },
+                { value: 'partial', text: 'Partial Payment Applied' },
+                { value: 'payment', text: 'Payment Applied' },
+                { value: 'supplier-contribution', text: 'Supplier Contribution' },
+                { value: 'take-back', text: 'Take Back' },
+                { value: 'write-off', text: 'Write Off / Uncollectible' },
+            ],
         }
     },
 }
