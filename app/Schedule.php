@@ -768,11 +768,11 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      * @param string $fromDate
      * @return void
      */
-    public function scopeFuture($query, $timezone, $fromDate = 'now')
+    public function scopeFuture($query, $timezone, $toDate)
     {
-        $from = Carbon::parse($fromDate, $timezone)->subHour();
-
-        $query->where('starts_at', '>=', $from);
+        $to = Carbon::parse($toDate, $timezone);
+        $from = Carbon::now()->setTimezone($timezone);
+        $query->whereBetween('starts_at', [$from, $to]);
     }
 
     /**

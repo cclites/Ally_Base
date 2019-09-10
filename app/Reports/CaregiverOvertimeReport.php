@@ -67,7 +67,7 @@ class CaregiverOvertimeReport extends BaseReport
         $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
         $this->query->whereHas('shifts', function ($q) use ($start, $end) {
-            $q->whereBetween('shifts.checked_in_time', [$start, $end]);
+            $q->whereBetween('checked_in_time', [$start, $end]);
         });
 
         if(filled($caregiver_id)){
@@ -96,6 +96,11 @@ class CaregiverOvertimeReport extends BaseReport
                     $worked = 0;
                     $scheduled = 0;
                     $total = 0;
+                    $totalScheduled = 0;
+
+                    foreach($caregiver->shifts as $shift){
+                        $totalScheduled += $shift->hours;
+                    }
 
                     foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
                         $worked += $shift->duration();
@@ -106,16 +111,15 @@ class CaregiverOvertimeReport extends BaseReport
                         $scheduled += $shift->remaining();
                     }
 
-                    $scheduledHrs =  Schedule::future($this->timezone)
+                    $scheduledHrs =  Schedule::future($this->timezone, $this->end)
                             ->where('caregiver_id', $caregiver->id)
-                            ->where('starts_at', '<=', $this->end)
                             ->sum('duration');
 
                     $scheduled += $scheduledHrs;
 
                     $worked = round($worked / 60, 2);
                     $scheduled = round($scheduled / 60, 2);
-                    $total = round($worked - $scheduled, 2);
+                    $total = round($worked + $scheduled, 2);
 
 
                     return [
