@@ -104,14 +104,27 @@
                 </b-card>
             </b-col>
         </b-row>
+
+        <loading-card v-show=" showSummary && loadingSummaries "></loading-card>
+
+        <evv-summaries v-show=" showSummary && !loadingSummaries"
+            :summary=" summary "
+        />
+
         <b-row>
+
             <b-col lg="12" class="text-right">
+
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
-        <loading-card v-if="loaded == 0"></loading-card>
+
+        <loading-card v-if="loaded == 0 "></loading-card>
+
         <b-row v-if="loaded < 0">
+
             <b-col lg="12">
+
                 <b-card class="text-center text-muted">
                     Select filters and press Generate Report
                 </b-card>
@@ -138,6 +151,7 @@
     import FormatsDistance from "../../../mixins/FormatsDistance"
     import FormatsDates from '../../../mixins/FormatsDates'
     import BusinessLocationSelect from "../BusinessLocationSelect";
+    import EvvSummaries from './EvvSummaries';
 
     export default {
         mixins: [
@@ -145,12 +159,14 @@
             FormatsDates
         ],
 
-        components: { BusinessLocationSelect },
+        components: { BusinessLocationSelect, EvvSummaries },
 
         data() {
+
             return {
 
                 showSummary : false,
+                loadingSummaries : false,
                 sortBy: 'shift_time',
                 sortDesc: false,
                 filter: null,
@@ -165,6 +181,7 @@
                 client_id: "",
                 clients: [],
                 items: [],
+                summary : {},
                 fields: [
                     {
                         key: 'date',
@@ -254,8 +271,8 @@
             queryString(){
 
                 return '?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&businesses=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
-                    '&method=' + this.filter_method + '&verified=' + this.filter_verified;
+                    '&businesses=' + this.business_id + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id +
+                    '&method=' + this.filter_method + '&verified=' + this.filter_verified + '&summarize=' + ( this.loadingSummaries ? 1 : 0 );
             }
         },
 
@@ -282,31 +299,13 @@
 
                 this.loadingSummaries = true;
 
-                await axios.get( 'business/reports/caregiver_payments' + this.queryString )
+                await axios.get( '/business/reports/evv' + this.queryString )
                     .then( res => {
 
-                        console.log( 'first response: ', res );
-                        // if ( Array.isArray(response.data)) {
-                        //     this.items.caregiverPayments = response.data;
-                        // }
-                        // else {
-                        //     this.items.caregiverPayments = [];
-                        // }
+                        console.log( 'response: ', res );
+                        this.summary = res.data;
                     });
 
-                await axios.get( 'business/reports/client_charges' + this.queryString )
-                    .then( res => {
-
-                        console.log( 'second response: ', res );
-                        // if ( Array.isArray( response.data ) ) {
-
-                        //     this.items.clientCharges = response.data;
-                        // }
-                        // else {
-
-                        //     this.items.clientCharges = [];
-                        // }
-                    });
                 this.loadingSummaries = false;
             },
 
