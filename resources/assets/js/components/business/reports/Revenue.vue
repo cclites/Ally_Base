@@ -52,7 +52,7 @@
                         </b-col>
                         <b-col lg="2">
                             <b-button variant="info" @click="fetchData()" class="mb-2">Generate</b-button>
-                            <b-button v-if="dataIsReady && ! loading" @click="print">Print</b-button>
+                            <b-button v-if="dataIsReady && ! loading" @click="print" class="mb-2">Print</b-button>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -114,7 +114,7 @@
                                     <span>Total profit</span>
 
                                     <span class="display-6 text-success mr-2"
-                                          :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
+                                          :style="`color: ${profitColor}`">{{displayedProfitCurrent}}</span>
                                 </div>
                                 <hr/>
                                 <div v-if="priorTableData.length > 0">
@@ -130,7 +130,7 @@
                                     </div>
                                     <div class="d-flex align-items-end justify-content-between">
                                         <span>Total profit</span>
-                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
+                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{displayedProfitCurrent}}</span>
                                     </div>
                                     <hr/>
                                     <h2>Comparison to prior period</h2>
@@ -251,6 +251,8 @@
             return {
                 loading: false,
                 dataIsReady: false,
+                displayedProfitCurrent: '',
+                displayedProfitPrior: '',
                 form: new Form ({
                     start_date: '09/01/2018',
                     end_date: '11/01/2018',
@@ -404,11 +406,16 @@
                                 this[prop].growth = this.calculateGrowth (prop);
                             }
                         });
+
+                        this.displayedProfitCurrent = this['profit'].total.current;
+                        this.displayedProfitPrior = this['profit'].total.prior;
                     })
                     .catch ((err) => {
                         console.error (err);
                         this.loading = false;
                     })
+
+
             },
 
             calculateTotalOf (metric, period = 'current') {
@@ -436,6 +443,20 @@
 
             print () {
                 $ ('#revenue_report').print ()
+            }
+        },
+        watch: {
+            includeCaregiverWages(){
+                if(this.includeCaregiverWages){
+                    this.displayedProfitCurrent = this['profit'].total.current;
+                }else{
+                    const profitTotal =  Number (this['profit'].total.current .replace ('$', '').replace (',', ''));
+                    const wagesTotal = Number (this['wages'].total.current .replace ('$', '').replace (',', ''));
+
+                    this.displayedProfitCurrent = this.formatPrice(profitTotal + wagesTotal);
+
+                }
+
             }
         }
     }
