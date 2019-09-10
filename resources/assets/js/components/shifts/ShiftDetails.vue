@@ -99,9 +99,14 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="business.co_signature && shift.signature != null" class="mb-2">
-            <b-col sm="12">
+        <b-row class="mb-2">
+            <b-col sm="6" v-if="business.co_signature && shift.signature != null">
                 <strong>Client Signature</strong>
+                <div v-html="shift.signature.content" class="signature"></div>
+            </b-col>
+
+            <b-col sm="6" v-if="business.co_caregiver_signature && shift.signature != null">
+                <strong>Caregiver Signature</strong>
                 <div v-html="shift.signature.content" class="signature"></div>
             </b-col>
         </b-row>

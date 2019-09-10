@@ -108,6 +108,12 @@ class ClockOutController extends BaseController
             ]);
         }
 
+        if ($shift->business->co_caregiver_signature) {
+            $request->validate([
+                'caregiver_signature' => 'required'
+            ]);
+        }
+
         // If not private pay, ADL and comments are required
         if ($shift->client->client_type != ClientType::PRIVATE_PAY) {
             $request->validate(
@@ -151,6 +157,7 @@ class ClockOutController extends BaseController
                     $shift->issues()->save($issue);
                 }
                 Signature::onModelInstance($shift, request('signature'));
+                Signature::onModelInstance($shift, request('caregiver_signature'));
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }
