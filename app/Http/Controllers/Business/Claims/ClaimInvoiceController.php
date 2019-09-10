@@ -30,7 +30,9 @@ class ClaimInvoiceController extends BaseController
     {
         $filters = $request->filtered();
 
-        $query = ClaimInvoice::forRequestedBusinesses()
+        $query = ClaimInvoice::with(['items' => function ($q) {
+                $q->orderByRaw('claimable_type desc, date asc');
+            }])->forRequestedBusinesses()
             ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id']);

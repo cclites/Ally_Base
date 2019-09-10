@@ -58,6 +58,17 @@ export default {
                 { value: 'partially_applied', text: 'Partially Applied' },
                 { value: 'fully_applied', text: 'Fully Applied' },
             ],
+            CLAIM_REMIT_PAYMENT_TYPES: {
+                DENIAL: 'denial',
+                DISCOUNT: 'discount',
+                INTEREST: 'interest',
+                OVERPAYMENT: 'overpayment',
+                PARTIAL: 'partial',
+                PAYMENT: 'payment',
+                SUPPLIED_CONTRIBUTION: 'supplier-contribution',
+                TAKE_BACK: 'take-back',
+                WRITE_OFF: 'write-off',
+            },
             claimRemitPaymentTypeOptions: [
                 { value: 'denial', text: 'Denial' },
                 { value: 'discount', text: 'Discount' },

@@ -15,9 +15,11 @@ class CreateClaimRemitApplicationsTable extends Migration
     {
         Schema::create('claim_remit_applications', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('claim_remit_id')->nullable();
+            $table->unsignedInteger('claim_remit_id');
+            $table->unsignedInteger('claim_invoice_id')->nullable();
+            $table->unsignedInteger('claim_invoice_item_id')->nullable();
             $table->string('application_type', 30);
-            $table->decimal('amount', 9, 2)->default(0.00);
+            $table->decimal('amount_applied', 9, 2)->default(0.00);
             $table->boolean('is_interest')->default(false);
 
             $table->timestamps();

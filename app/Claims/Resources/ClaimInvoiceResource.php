@@ -14,12 +14,23 @@ class ClaimInvoiceResource extends Resource
      */
     public function toArray($request)
     {
-        $this->resource->load([
-            'items',
-            'client',
-            'clientInvoice',
-            'payer',
-        ]);
+        if (! $this->resource->relationLoaded('items')) {
+            $this->resource->load(['items' => function ($q) {
+                $q->orderByRaw('claimable_type desc, date asc');
+            }]);
+        }
+
+        if (! $this->resource->relationLoaded('client')) {
+            $this->resource->load('client');
+        }
+
+        if (! $this->resource->relationLoaded('clientInvoice')) {
+            $this->resource->load('clientInvoice');
+        }
+
+        if (! $this->resource->relationLoaded('payer')) {
+            $this->resource->load('payer');
+        }
 
         return [
             'amount' => $this->resource->amount,

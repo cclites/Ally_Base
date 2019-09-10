@@ -36,7 +36,7 @@
 
         <h2>
             <strong>Available to Apply: </strong>
-            {{ moneyFormat(remit.amount_available) }}
+            ${{ amountAvailable }}
         </h2>
 
         <b-form inline class="mb-4">
@@ -77,14 +77,15 @@
 
         <loading-card v-if="filters.busy" />
         <div v-else>
-            <b-row>
+            <b-row v-if="form.applications['interest']">
                 <b-col md="3">
                     <b-form-group label="Interest" label-for="interest">
                         <b-form-input
-                            v-model="form.interest"
+                            v-model="form.applications['interest'].amount_applied"
                             id="interest"
                             name="interest"
-                            type="text"
+                            type="number"
+                            step="0.01"
                             :disabled="form.busy"
                         />
                         <input-help :form="form" field="interest" text="The amount to apply towards interest."></input-help>
@@ -92,7 +93,7 @@
                 </b-col>
             </b-row>
 
-            <div class="table-responsive">
+            <div class="table-responsive claims-table">
                 <b-table bordered striped hover show-empty
                     :items="claims"
                     :fields="fields"
@@ -101,126 +102,88 @@
                     :filter="filter"
                     :empty-text="emptyText"
                 >
+                    <template slot="expand" scope="row">
+                        <b-btn variant="secondary" size="sm" @click.stop="row.toggleDetails">
+                            <i v-if="row.detailsShowing" class="fa fa-caret-down" />
+                            <i v-else class="fa fa-caret-right" />
+                        </b-btn>
+                    </template>
+                    <template slot="selected" scope="row">
+                        <b-form-checkbox v-model="form.applications[row.item.id].selected" @change="selectMaster(row.item)" />
+                    </template>
                     <template slot="id" scope="row">
                         <a :href="`/business/claims/${row.item.id}/edit`" target="_blank">{{ row.item.name }}</a>
                     </template>
                     <template slot="client_invoice_id" scope="row">
                         <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice.name }}</a>
                     </template>
-                    <template slot="apply_amount" scope="row">
+                    <template slot="amount_applied" scope="row">
+                        <div class="d-flex">
                         <b-form-input
-                            v-model="form.amount_to_apply"
-                            id="amount_to_apply"
-                            name="amount_to_apply"
-                            type="text"
-                            :disabled="form.busy"
+                            class="mr-1"
+                            v-model="form.applications[row.item.id].amount_applied"
+                            id="amount_applied"
+                            name="amount_applied"
+                            type="number"
+                            step="0.01"
+                            :disabled="true"
                         />
-                    </template>
-                    <template slot="apply_type" scope="row">
-                        <b-select name="application_type" id="application_type" v-model="form.application_type" :options="claimRemitPaymentTypeOptions">
+                        <b-select name="application_type" id="application_type" v-model="form.applications[row.item.id].application_type" :options="claimRemitPaymentTypeOptions" :disabled="form.busy || !form.applications[row.item.id].selected" @change="(val) => changeMasterType(row.item, val)">
                             <template slot="first">
-                                <option value="">-- Type --</option>
+                                <option value="">-- Select Type --</option>
                             </template>
                         </b-select>
+                        </div>
                     </template>
                     <template slot="row-details" scope="row">
                       <b-card>
+                          <!---------- SUB TABLE --------------->
                           <b-table bordered striped show-empty
                               :items="row.item.items"
                               :fields="subFields"
                           >
+                              <template slot="selected" scope="row">
+                                  <b-form-checkbox v-model="form.applications[row.item.claim_invoice_id+'_'+row.item.id].selected"
+                                                   :disabled="form.applications[row.item.claim_invoice_id].selected" />
+                              </template>
                               <template slot="start_time" scope="row">
                                   <span v-if="row.item.start_time">
                                     {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
                                   </span>
                                   <span v-else>-</span>
                               </template>
-                              <template slot="apply_amount" scope="row">
+                              <template slot="amount_applied" scope="row">
+                                  <div class="d-flex">
                                   <b-form-input
-                                      v-model="form.amount_to_apply"
-                                      id="amount_to_apply"
-                                      name="amount_to_apply"
-                                      type="text"
-                                      :disabled="form.busy"
+                                      class="mr-1"
+                                      v-model="form.applications[row.item.claim_invoice_id+'_'+row.item.id].amount_applied"
+                                      id="amount_applied"
+                                      name="amount_applied"
+                                      type="number"
+                                      step="0.01"
+                                      :disabled="form.busy || row.item.disabled"
                                   />
-                              </template>
-                              <template slot="apply_type" scope="row">
-                                  <b-select name="application_type" id="application_type" v-model="form.application_type" :options="claimRemitPaymentTypeOptions">
+                                  <b-select name="application_type" id="application_type" v-model="row.item.application_type" :options="claimRemitPaymentTypeOptions" :disabled="form.busy || form.applications[row.item.claim_invoice_id].selected">
                                       <template slot="first">
-                                          <option value="">-- Type --</option>
+                                          <option value="">-- Select Type --</option>
                                       </template>
                                   </b-select>
+                                  </div>
                               </template>
                           </b-table>
+                          <!---------- /END SUB TABLE --------------->
                       </b-card>
                     </template>
                 </b-table>
             </div>
-
-<!--            <div class="table-responsive mb-3">-->
-<!--                <table class="table table-bordered table-striped">-->
-<!--                    <thead>-->
-<!--                        <tr>-->
-<!--                            <th>Invoice #</th>-->
-<!--                            <th>Claim #</th>-->
-<!--                            <th>Invoice Date</th>-->
-<!--                            <th>Client</th>-->
-<!--                            <th>Payer</th>-->
-<!--                            <th>Claim Total</th>-->
-<!--                            <th>Claim Balance</th>-->
-<!--                            <th>Amount to Apply</th>-->
-<!--                            <th>Type</th>-->
-<!--                        </tr>-->
-<!--                    </thead>-->
-<!--                    <tbody>-->
-<!--                        <tr v-for="claim in claims" :key="claim.id">-->
-<!--                            <td><a :href="`/business/client/invoices/${claim.client_invoice_id}`" target="_blank">{{ claim.client_invoice.name }}</a></td>-->
-<!--                            <td><a :href="`/business/claims/${claim.id}/edit`" target="_blank">{{ claim.name }}</a></td>-->
-<!--                            <td>{{ formatDateFromUTC(claim.client_invoice.date) }}</td>-->
-<!--                            <td>{{ claim.client_first_name + ' ' + claim.client_last_name }}</td>-->
-<!--                            <td>{{ claim.payer ? claim.payer.name : '-' }}</td>-->
-<!--                            <td>{{ moneyFormat(claim.amount) }}</td>-->
-<!--                            <td>{{ moneyFormat(claim.amount_due) }}</td>-->
-<!--                            <td>-->
-<!--                                <b-form-input-->
-<!--                                    v-model="form.amount_to_apply"-->
-<!--                                    id="amount_to_apply"-->
-<!--                                    name="amount_to_apply"-->
-<!--                                    type="text"-->
-<!--                                    :disabled="form.busy"-->
-<!--                                />-->
-<!--                            </td>-->
-<!--                            <td>-->
-<!--                                <b-select name="application_type" id="application_type" v-model="form.application_type" :options="claimRemitPaymentTypeOptions">-->
-<!--                                    <template slot="first">-->
-<!--                                        <option value="">&#45;&#45; Type &#45;&#45;</option>-->
-<!--                                    </template>-->
-<!--                                </b-select>-->
-<!--                            </td>-->
-<!--                        </tr>-->
-<!--                    </tbody>-->
-<!--                </table>-->
-<!--            </div>-->
             <div>
-                <b-btn variant="info">Apply Remit</b-btn>
+                <b-btn variant="info" @click="submit()">Apply Remit to Claim(s)</b-btn>
             </div>
         </div>
-<!--        <div v-else class="table-responsive">-->
-<!--            <b-table bordered striped hover show-empty-->
-<!--                :items="remits"-->
-<!--                :fields="fields"-->
-<!--                :sort-by.sync="sortBy"-->
-<!--                :sort-desc.sync="sortDesc"-->
-<!--                :filter="filter"-->
-<!--                :empty-text="emptyText"-->
-<!--            >-->
-<!--                <template slot="actions" scope="row">-->
-<!--                    <b-btn variant="success" size="sm" :href="`/business/claim-remits/${row.item.id}`">Apply</b-btn>-->
-<!--                    <b-btn variant="secondary" size="sm" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>-->
-<!--                </template>-->
-<!--            </b-table>-->
-<!--        </div>-->
-
+        <div v-if="isScrolling" id="floating-amount">
+            <strong>Available to Apply: </strong>
+            ${{ amountAvailable }}
+        </div>
     </b-card>
 </template>
 
@@ -231,6 +194,8 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import { mapGetters } from 'vuex';
+    import { Decimal } from 'decimal.js';
+
     export default {
         mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers ],
         components: { BusinessLocationFormGroup },
@@ -245,12 +210,45 @@
         computed: {
             ...mapGetters({
                 remit: 'claims/remit',
-                claims: 'claims/claims',
             }),
 
             emptyText() {
                 return this.filters.hasBeenSubmitted ? 'There are no results to display.' : 'Select filters and press Generate.';
-            }
+            },
+
+            amountAvailable() {
+                let amount = new Decimal(this.remit.amount_available);
+
+                let interest = new Decimal(0.00);
+                if (this.form.applications['interest'] != '' && !isNaN(this.form.applications['interest'])) {
+                    interest = new Decimal(this.form.applications['interest']);
+                }
+
+                return this.numberFormat(amount.sub(this.amountApplied).sub(interest).toFixed(2));
+            },
+
+            amountApplied() {
+                return this.claims.reduce((carry, claim) => {
+                    return carry.add(
+                        claim.items.reduce((itemTotal, item) => {
+                            if (item.amount_applied == '' || isNaN(item.amount_applied)) {
+                                return itemTotal;
+                            }
+                            return itemTotal.add(new Decimal(item.amount_applied));
+                        }, new Decimal(0.00))
+                    );
+                }, new Decimal(0.00));
+            },
+
+            submit() {
+                this.form.post(`/business/claim-remit-applications/${this.remit.id}`)
+                    .then( ({ data }) => {
+
+                    })
+                    .catch(() => {
+
+                    });
+            },
         },
 
         data() {
@@ -267,17 +265,21 @@
                 }),
                 payers: [],
                 clients: [],
+                isScrolling: false,
 
                 // Form data
                 form: new Form({
-                    interest: 0.00,
+                    applications: {},
                 }),
 
                 // Table data
+                claims: [],
                 filter: '',
                 sortBy: 'client_invoice_date',
                 sortDesc: false,
                 fields: {
+                    expand: { label: ' ', sortable: false, },
+                    selected: { label: ' ', sortable: false, },
                     client_invoice_id: { label: 'Invoice #', sortable: true },
                     id: { label: 'Claim #', sortable: true },
                     client_invoice_date: { label: 'Invoice Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
@@ -285,34 +287,135 @@
                     payer: { sortable: true, formatter: x => x ? x.name : '-' },
                     amount: { label: 'Claim Total', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
-                    apply_amount: { label: 'Amount to Apply', sortable: true },
-                    apply_type: { label: 'Type', sortable: true },
+                    amount_applied: { label: 'Amount to Apply', sortable: false },
                 },
                 subFields: {
+                    selected: { label: ' ', sortable: false, },
                     type: { label: 'Type', sortable: true },
                     summary: { label: 'Summary', sortable: true },
                     date: { label: 'Service Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     start_time: { label: 'Time', sortable: true },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    apply_amount: { label: 'Amount to Apply', sortable: true },
-                    apply_type: { label: 'Type', sortable: true },
+                    amount_applied: { label: 'Amount to Apply', sortable: false },
                 },
             }
         },
 
         methods: {
+            /**
+             * Initialize the form from the current claims objects.
+             */
+            initForm() {
+                this.form = new Form({
+                    applications: {
+                        interest: {
+                            selected: false,
+                            claim_remit_id: this.remit.id,
+                            claim_invoice_id: null,
+                            claim_invoice_item_id: null,
+                            application_type: this.CLAIM_REMIT_PAYMENT_TYPES.INTEREST,
+                            amount_applied: '',
+                            is_interest: true,
+                        },
+                    },
+                });
+
+                this.claims.forEach(claim => {
+                    this.form.applications[claim.id] = {
+                        selected: false,
+                        claim_remit_id: this.remit.id,
+                        claim_invoice_id: claim.id,
+                        claim_invoice_item_id: null, // <- this creates an invalid item to get posted
+                        application_type: '',
+                        amount_applied: '',
+                        is_interest: false,
+                    };
+
+                    claim.items.forEach(item => {
+                        this.form.applications[claim.id+'_'+item.id] = {
+                            selected: false,
+                            claim_remit_id: this.remit.id,
+                            claim_invoice_id: claim.id,
+                            claim_invoice_item_id: item.id,
+                            application_type: '',
+                            amount_applied: '',
+                            is_interest: false,
+                        };
+                    });
+                })
+            },
+
+            /**
+             * Handle toggle of selection to master items.
+             * @param claim Object
+             */
+            selectMaster(claim) {
+                console.log('change select for claim: ', claim, this.form.applications[claim.id].selected);
+                if (this.form.applications[claim.id].selected) {
+                    // When the claim record is selected, all sub items
+                    // should be set to the full amount and disabled.
+                    claim.items.forEach(item => {
+                        this.form.applications[claim.id+'_'+item.id].amount_applied = item.amount_due;
+                        this.form.applications[claim.id+'_'+item.id].application_type = '';
+                        this.form.applications[claim.id+'_'+item.id].selected = true;
+                    });
+                    this.form.applications[claim.id].amount_applied = claim.amount_due;
+                    // Force view of details (sub-items)
+                    this.$set(claim, '_showDetails', true);
+                } else {
+                    claim.items.forEach(item => {
+                        // this.$set(this.form.applications[claim.id+'_'+item.id], 'amount_applied', '');
+                        // this.$set(this.form.applications[claim.id+'_'+item.id], 'application_type', '');
+                        // this.$set(this.form.applications[claim.id+'_'+item.id], 'selected', false);
+                        this.form.applications[claim.id+'_'+item.id].amount_applied = '';
+                        this.form.applications[claim.id+'_'+item.id].application_type = '';
+                        this.form.applications[claim.id+'_'+item.id].selected = false;
+                    });
+                    this.form.applications[claim.id].amount_applied = '';
+                    this.form.applications[claim.id].application_type = '';
+                }
+            },
+
+            /**
+             * Handle change to application_type for master items.
+             * @param claim Object
+             * @param value String
+             */
+            changeMasterType(claim, value) {
+                console.log('changed application type', value);
+                // if (! claim.selected) {
+                //     return;
+                // }
+                //
+                // claim.items = claim.items.map(item => {
+                //     item.application_type = value;
+                //     return item;
+                // })
+            },
+
             fetch() {
                 this.filters.get(`/business/claims`)
                     .then( ({ data }) => {
-                        this.$store.commit('claims/setClaims', data.data.map(x => {
-                            x['_showDetails'] = true;
+                        this.claims = data.data.map(x => {
+                            // x['_showDetails'] = false;
+                            // x.amount_applied = '';
+                            // x.application_type = '';
+                            // x.items = x.items.map(y => {
+                            //     y.amount_applied = '';
+                            //     y.application_type = '';
+                            //     y.disabled = false;
+                            //     return y;
+                            // });
                             return x;
-                        }));
+                        });
                     })
                     .catch(() => {
-                        this.$store.commit('claims/setClaims', []);
+                        this.claims = [];
                     })
+                    .finally(() => {
+                        this.initForm();
+                    });
             },
 
             async fetchClients() {
@@ -335,15 +438,43 @@
                     });
             },
 
+            /**
+             * Handle tracking of window scroll event
+             */
+            handleScroll () {
+              this.isScrolling = window.scrollY > 0;
+            },
         },
 
         async mounted() {
             await this.fetchPayers();
             await this.fetchClients();
+            this.fetch();
         },
 
         created() {
             this.$store.commit('claims/setRemit', this.init.remit);
+            // window.addEventListener('scroll', this.handleScroll);
+        },
+
+        destroyed() {
+            // window.removeEventListener('scroll', this.handleScroll);
         },
     }
 </script>
+
+<style>
+    .claims-table input.form-control { max-width: 135px; }
+    #floating-amount {
+        position: fixed;
+        right: 25px;
+        bottom: 25px;
+        display: block;
+        background-color: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-size: 24px;
+        border: 1px solid darkgrey;
+        z-index: 2;
+    }
+</style>
