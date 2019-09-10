@@ -254,9 +254,7 @@ class ScheduleWarningAggregator
         $scheduleStart = $this->schedule->starts_at->format('Y-m-d');
         $scheduleEnd = $this->schedule->getEndDateTime()->format('Y-m-d');
 
-        $id = $this->schedule->caregiver->id;
-
-        $warnings = CaregiverDayOff::where('caregiver_id', $id)
+        $warnings = $this->schedule->caregiver->daysOff()
                     ->where(function ($q) use($scheduleStart, $scheduleEnd) {
                         $q->where([
                             ['start_date', '<=', $scheduleStart],
