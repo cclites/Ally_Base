@@ -934,7 +934,7 @@ class ReportsController extends BaseController
      */
     public function evv(EVVReport $report)
     {
-        if ( request()->input( 'json' ) ) {
+        if ( request()->expectsJson() && request()->input( 'json' ) ) {
 
             $report->forRequestedBusinesses();
 
