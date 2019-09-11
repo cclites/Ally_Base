@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Billing\Contracts\InvoiceInterface;
 use App\Claims\ClaimRemit;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimRemitResource;
+use App\Contracts\ContactableInterface;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
@@ -17,6 +19,7 @@ use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ClaimInvoiceController extends BaseController
 {
@@ -132,14 +135,14 @@ class ClaimInvoiceController extends BaseController
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function print(ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW)
+    public function show(ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW)
     {
         $this->authorize('read', $claim);
 
-        $strategy = InvoiceViewFactory::create($claim, $view);
+        return view('claims.invoice-formats.ally', compact('claim'));
 
-        $viewGenerator = new InvoiceViewGenerator($strategy);
-
-        return $viewGenerator->generateNewClaimInvoice($claim);
+//            $pdfWrapper = app('snappy.pdf.wrapper');
+//            $this->pdfWrapper->loadHTML($view->render());
+//            return $this->pdfWrapper->download($this->filename);
     }
 }

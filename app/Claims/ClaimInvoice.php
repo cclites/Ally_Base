@@ -110,6 +110,11 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     // ACCESSORS
     // **********************************************************
 
+    function getName(): string
+    {
+        return $this->name;
+    }
+
     function getClientPayer(): ?ClientPayer
     {
         return $this->clientPayer;
@@ -128,11 +133,6 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     function getAmountPaid(): float
     {
         return subtract(floatval($this->amount), floatval($this->amount_due));
-    }
-
-    function getName(): string
-    {
-        return $this->name;
     }
 
     function getDate(): string
