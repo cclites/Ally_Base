@@ -6,14 +6,6 @@
     >
 
         <b-row>
-
-            <!--b-col lg="4">
-                <b-form-group label="Select A Client To Auto-Populate Fields" label-for="provider_number" class="mb-2 mr-2">
-                    <b-select v-model="client">
-                        <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
-                    </b-select>
-                </b-form-group>
-            </b-col-->
             <b-col>
                 <b-form-group class="float-lg-right action-buttons">
                     <b-btn @click="generatePdf()" variant="primary" class="text-right"><i class="fa fa-print"></i> Print</b-btn>
@@ -513,6 +505,15 @@
                 this.form.physician_name = details.physician_name;
                 this.form.physician_address = details.physician_address;
                 this.form.physician_phone = details.physician_phone;
+
+                this.form.functional = details.functional;
+                this.form.functional_other = details.functional_other;
+                this.form.mobility = details.mobility;
+                this.form.mobility_other = details.mobility_other;
+                this.form.mobility.mobility_instructions = details.mobility.other;
+                this.form.mental_status = details.mental_status;
+
+                this.form.prognosis = details.prognosis;
 
                 return;
             }

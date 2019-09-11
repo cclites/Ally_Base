@@ -395,8 +395,6 @@
                 return;
             }
 
-
-
             this.fillForm({
                 height: '',
                 weight: '',

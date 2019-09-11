@@ -37,6 +37,8 @@ class SkilledNursingPocController extends BaseController
 
         $data = SkilledNursingPoc::convertFormData($request->validated());
 
+        \Log::info($data);
+
         if ($client->skilledNursingPoc()->update($data)) {
             return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc);
         }
@@ -67,7 +69,11 @@ class SkilledNursingPocController extends BaseController
         $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->safety_measures);
         $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->diet);
 
-        //$client->goals_as_string = $client->goals->implode('question', '<br/>');
+        $client->skilledNursingPoc->functional = implode(",", $client->skilledNursingPoc->functional);
+        $client->skilledNursingPoc->mobility = implode(",", $client->skilledNursingPoc->mobility);
+        $client->skilledNursingPoc->mental_status = implode(",", $client->skilledNursingPoc->mental_status);
+
+        \Log::info($client);
 
         $image = asset('/images/background1.jpg');
 
