@@ -249,7 +249,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
+        $shift->load( 'activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business' );
 
         $timezone = $this->business()->timezone;
 
