@@ -159,7 +159,7 @@
                         <signature-pad
                             class="mr-2 my-1"
                             v-if="business.co_signature"
-                            v-model="form.signature"
+                            v-model="form.client_signature"
                             :buttonTitle=" 'Add Client Signature' ">
                         </signature-pad>
 
@@ -217,7 +217,7 @@
                     caregiver_injury: 0,
                     issue_text: null,
                     other_expenses_desc: null,
-                    signature: null,
+                    client_signature: null,
                     caregiver_signature: null,
                     goals: {},
                     questions: {},

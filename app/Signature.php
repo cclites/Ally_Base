@@ -35,13 +35,15 @@ class Signature extends AuditableModel
         return $this->morphTo();
     }
     
-    public static function onModelInstance(Model $model, $content)
+    public static function onModelInstance( Model $model, $content, $type = null )
     {
         if ($content) {
             return Signature::create([
-                'signable_id' => $model->getKey(),
+
+                'signable_id'   => $model->getKey(),
                 'signable_type' => $model->getMorphClass(),
-                'content' => $content,
+                'content'       => $content,
+                'meta_type'     => $type
             ]);
         }
         return null;
