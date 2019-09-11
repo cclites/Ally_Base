@@ -9,6 +9,37 @@ use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 
+/**
+ * App\Claims\ClaimRemit
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property \Illuminate\Support\Carbon $date
+ * @property string $payment_type
+ * @property int|null $payer_id
+ * @property string|null $reference
+ * @property float $amount
+ * @property float $amount_applied
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimRemitApplication[] $applications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
+ * @property-read \App\Billing\Payer|null $payer
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit forDateRange($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit forPayer($payerId = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit withReferenceId($referenceId = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit withStatus(\App\Claims\ClaimRemitStatus $remitStatus = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit withType($remitType = null)
+ * @mixin \Eloquent
+ */
 class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;

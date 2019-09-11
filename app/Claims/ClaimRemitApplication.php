@@ -4,6 +4,25 @@ namespace App\Claims;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Claims\ClaimRemitApplication
+ *
+ * @property int $id
+ * @property int $claim_remit_id
+ * @property int|null $claim_invoice_id
+ * @property int|null $claim_invoice_item_id
+ * @property string $application_type
+ * @property float $amount_applied
+ * @property int $is_interest
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Claims\ClaimInvoice|null $claimInvoice
+ * @property-read \App\Claims\ClaimInvoiceItem|null $claimInvoiceItem
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication query()
+ * @mixin \Eloquent
+ */
 class ClaimRemitApplication extends Model
 {
     /**

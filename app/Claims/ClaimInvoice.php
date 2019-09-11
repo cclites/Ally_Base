@@ -16,6 +16,48 @@ use App\Billing\Payer;
 use App\Business;
 use App\Client;
 
+/**
+ * App\Claims\ClaimInvoice
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property int $client_invoice_id
+ * @property string $name
+ * @property float $amount
+ * @property float $amount_due
+ * @property string $status
+ * @property string|null $transmission_method
+ * @property int $client_id
+ * @property string $client_first_name
+ * @property string $client_last_name
+ * @property string|null $client_dob
+ * @property string|null $client_medicaid_id
+ * @property string|null $client_medicaid_diagnosis_codes
+ * @property int $payer_id
+ * @property string $payer_name
+ * @property string|null $payer_code
+ * @property string|null $plan_code
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
+ * @property-read \App\Client $client
+ * @property-read \App\Billing\ClientInvoice $clientInvoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceItem[] $items
+ * @property-read \App\Billing\Payer $payer
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClaimPayment[] $payments
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice forClient($clientId = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice forDateRange($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice forPayer($payerId = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice hasBalance()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice query()
+ * @mixin \Eloquent
+ */
 class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;

@@ -6,6 +6,32 @@ use App\AuditableModel;
 use App\Claims\Exceptions\ClaimBalanceException;
 use Carbon\Carbon;
 
+/**
+ * App\Claims\ClaimInvoiceItem
+ *
+ * @property int $id
+ * @property int $claim_invoice_id
+ * @property int|null $invoiceable_id
+ * @property string|null $invoiceable_type
+ * @property int $claimable_id
+ * @property string $claimable_type
+ * @property float $rate
+ * @property float $units
+ * @property float $amount
+ * @property float $amount_due
+ * @property string $date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Claims\ClaimInvoice $claim
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $claimable
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimRemitApplication[] $remitApplications
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem query()
+ * @mixin \Eloquent
+ */
 class ClaimInvoiceItem extends AuditableModel
 {
     /**
