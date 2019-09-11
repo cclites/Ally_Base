@@ -77,11 +77,11 @@
 
         <loading-card v-if="filters.busy" />
         <div v-else>
-            <b-row v-if="applications['interest']">
+            <b-row>
                 <b-col md="3">
                     <b-form-group label="Interest" label-for="interest">
                         <b-form-input
-                            v-model="applications['interest'].amount_applied"
+                            v-model="form.interest"
                             id="interest"
                             name="interest"
                             type="number"
@@ -109,7 +109,7 @@
                         </b-btn>
                     </template>
                     <template slot="selected" scope="row">
-                        <b-form-checkbox v-model="applications[row.item.id].selected" @change="selectMaster(row.item)" />
+                        <b-form-checkbox v-model="row.item.selected" @change="selectMaster(row.item)" />
                     </template>
                     <template slot="id" scope="row">
                         <a :href="`/business/claims/${row.item.id}/edit`" target="_blank">{{ row.item.name }}</a>
@@ -121,16 +121,16 @@
                         <div class="d-flex">
                         <b-form-input
                             class="mr-1"
-                            v-model="applications[row.item.id].amount_applied"
+                            v-model="row.item.amount_applied"
                             name="amount_applied"
                             type="number"
                             step="0.01"
                             :disabled="true"
                         />
                         <b-select name="application_type"
-                            v-model="applications[row.item.id].application_type"
+                            v-model="row.item.application_type"
                             :options="claimRemitPaymentTypeOptions"
-                            :disabled="form.busy || !applications[row.item.id].selected"
+                            :disabled="form.busy || !row.item.selected"
                             @change="(val) => changeMasterType(row.item, val)"
                         >
                             <template slot="first">
@@ -147,8 +147,8 @@
                           :fields="subFields"
                         >
                         <template slot="selected" scope="row">
-                            <b-form-checkbox v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].selected"
-                                :disabled="applications[row.item.claim_invoice_id].selected"
+                            <b-form-checkbox v-model="row.item.selected"
+                                :disabled="row.item.disabled"
                                 @change="selectSub(row.item)"/>
                         </template>
                         <template slot="start_time" scope="row">
@@ -161,17 +161,17 @@
                             <div class="d-flex">
                                 <b-form-input
                                     class="mr-1"
-                                    v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].amount_applied"
+                                    v-model="row.item.amount_applied"
                                     name="amount_applied"
                                     type="number"
                                     step="0.01"
-                                    :disabled="form.busy || applications[row.item.claim_invoice_id].selected"
+                                    :disabled="form.busy || row.item.disabled"
                                     @change="x => subAmountChanged(row.item, x)"
                                 />
                                 <b-select name="application_type"
-                                    v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].application_type"
+                                    v-model="row.item.application_type"
                                     :options="claimRemitPaymentTypeOptions"
-                                    :disabled="form.busy || applications[row.item.claim_invoice_id].selected"
+                                    :disabled="form.busy || row.item.disabled"
                                     @change="x => subTypeChanged(row.item, x)"
                                 >
                                     <template slot="first">
@@ -227,34 +227,27 @@
             },
 
             amountAvailable() {
-                console.log('amountAvailable triggered');
                 let amount = new Decimal(this.remit.amount_available);
-                return this.numberFormat(amount.sub(this.amountApplied).toFixed(2));
+
+                let interest = new Decimal(0.00);
+                if (this.form.interest != '' && !isNaN(this.form.interest)) {
+                    interest = new Decimal(this.form.interest);
+                }
+
+                return this.numberFormat(amount.sub(this.amountApplied).sub(interest).toFixed(2));
             },
 
             amountApplied() {
-                console.log('amountApplied triggered');
-                return Object.values(this.applications)
-                    // .filter(item => {
-                    //     // Filter out the master claim records.
-                    //     return item.is_interest || !!item.claim_invoice_item_id;
-                    // })
-                    .reduce((carry, item) => {
-                        if (item.amount_applied == '' || isNaN(item.amount_applied)) {
-                            return carry;
-                        }
-                        return carry.add(new Decimal(item.amount_applied));
-                    }, new Decimal(0.00));
-            },
-
-            submit() {
-                this.form.post(`/business/claim-remit-applications/${this.remit.id}`)
-                    .then( ({ data }) => {
-
-                    })
-                    .catch(() => {
-
-                    });
+                return this.claims.reduce((carry, claim) => {
+                    return carry.add(
+                        claim.items.reduce((itemTotal, item) => {
+                            if (item.amount_applied == '' || isNaN(item.amount_applied)) {
+                                return itemTotal;
+                            }
+                            return itemTotal.add(new Decimal(item.amount_applied));
+                        }, new Decimal(0.00))
+                    );
+                }, new Decimal(0.00));
             },
         },
 
@@ -273,11 +266,10 @@
                 payers: [],
                 clients: [],
                 isScrolling: false,
-                applications: {},
 
                 // Form data
                 form: new Form({
-                    applications: {},
+                    interest: '',
                 }),
 
                 // Table data
@@ -312,59 +304,120 @@
 
         methods: {
             /**
-             * Initialize the form from the current claims objects.
+             * Fetch transmitted claims using the filters form.
              */
-            initApplications() {
-                this.applications = {
-                    interest: {
-                        selected: false,
-                        claim_remit_id: this.remit.id,
-                        claim_invoice_id: null,
-                        claim_invoice_item_id: null,
-                        application_type: this.CLAIM_REMIT_PAYMENT_TYPES.INTEREST,
-                        amount_applied: '',
-                        is_interest: true,
-                    },
-                };
-
-                this.claims.forEach(claim => {
-                    this.applications[claim.id] = {
-                        selected: false,
-                        claim_remit_id: this.remit.id,
-                        claim_invoice_id: claim.id,
-                        claim_invoice_item_id: null, // <- this creates an invalid item to get posted
-                        application_type: '',
-                        amount_applied: '',
-                        is_interest: false,
-                    };
-
-                    claim.items.forEach(item => {
-                        this.applications[claim.id+'_'+item.id] = {
-                            selected: false,
-                            claim_remit_id: this.remit.id,
-                            claim_invoice_id: claim.id,
-                            claim_invoice_item_id: item.id,
-                            application_type: '',
-                            amount_applied: '',
-                            is_interest: false,
-                        };
+            fetch() {
+                this.filters.get(`/business/claims`)
+                    .then( ({ data }) => {
+                        this.claims = data.data.map(claim => {
+                            claim.selected = false;
+                            claim.application_type = '';
+                            claim.amount_applied = '';
+                            claim.items = claim.items.map(item => {
+                                item.selected = false;
+                                item.disabled = false;
+                                item.application_type = '';
+                                item.amount_applied = '';
+                                return item;
+                            });
+                            return claim;
+                        });
+                    })
+                    .catch(() => {
+                        this.claims = [];
+                    })
+                    .finally(() => {
                     });
-                })
             },
 
+            /**
+             * Submit the main apply remit form.
+             */
+            submit() {
+                this.form.post(`/business/claim-remit-applications/${this.remit.id}`)
+                    .then( ({ data }) => {
+
+                    })
+                    .catch(() => {
+
+                    });
+            },
+
+            /**
+             * Handle toggle of selection to master items.
+             *
+             * @param {Object} claim
+             */
+            selectMaster(claim)  {
+                console.log('change select for claim: ', claim);
+
+                if (claim.selected) {
+                    // When the claim record is selected, all sub items
+                    // should be set to the full amount and disabled.
+                    this.$set(claim, 'items', claim.items.map(item => {
+                        item.amount_applied = item.amount_due;
+                        item.application_type = '';
+                        item.selected = true;
+                        item.disabled = true;
+                        return item;
+                    }));
+                    this.$set(claim, 'amount_applied', claim.amount_due);
+                    // Force view of details (sub-items)
+                    this.$set(claim, '_showDetails', true);
+                } else {
+                    // When the claim record is un-selected, we should clear
+                    // all progress from it and it's sub items.
+                    this.$set(claim, 'items', claim.items.map(item => {
+                        item.amount_applied = '';
+                        item.application_type = '';
+                        item.selected = false;
+                        item.disabled = false;
+                        return item;
+                    }));
+                    this.$set(claim, 'amount_applied', '');
+                    this.$set(claim, 'application_type', '');
+                    console.log('after app type cleared: ', claim);
+                }
+            },
+
+            /**
+             * Handle change to application_type for master items.
+             *
+             * @param claim Object
+             * @param value String
+             */
+            changeMasterType(claim, value) {
+                console.log('changed application type', value);
+                if (! claim.selected) {
+                    return;
+                }
+
+                this.$set(claim, 'items', claim.items.map(item => {
+                    item.application_type = value;
+                    return item;
+                }));
+            },
+
+            /**
+             * Handle selection of sub (claim) items.
+             *
+             * @param {Object} claimItem
+             */
             selectSub(claimItem) {
                 console.log('change select for claim item: ', claimItem);
 
-                let claimId = claimItem.claim_invoice_id;
-                if (this.applications[claimId+'_'+claimItem.id].selected) {
-                    if (this.applications[claimId+'_'+claimItem.id].amount_applied == '') {
-                        this.applications[claimId+'_'+claimItem.id].amount_applied = '0.00';
+                if (claimItem.selected) {
+                    // Claim items should always have a numeric value when selected.
+                    if (claimItem.amount_applied == '') {
+                        this.$set(claimItem, 'amount_applied', '0.00');
                     }
                 } else {
-                    this.applications[claimId+'_'+claimItem.id].amount_applied = '';
+                    // Claim items that are not selected should always be empty.
+                    this.$set(claimItem, 'amount_applied', '');
+                    this.$set(claimItem, 'application_type', '');
                 }
 
-                this.forceRowUpdate(claimId);
+                this.forceRowUpdate(claimItem.claim_invoice_id);
             },
 
             /**
@@ -376,36 +429,38 @@
             subAmountChanged(claimItem, value) {
                 console.log('sub item amount changed:', claimItem, value);
 
-                let claimId = claimItem.claim_invoice_id;
                 if (isNaN(value) || value == '') {
                     // Clear the value / selection if invalid value.
-                    this.applications[claimId+'_'+claimItem.id].selected = false;
-                    this.applications[claimId+'_'+claimItem.id].amount_applied = '';
+                    this.$set(claimItem, 'amount_applied', '');
+                    this.$set(claimItem, 'selected', false);
                 } else {
-                    // Make sure item is selected.
-                    this.applications[claimId+'_'+claimItem.id].selected = true;
+                    // Make sure item is selected when it has an amount.
+                    this.$set(claimItem, 'selected', true);
                 }
 
-                this.forceRowUpdate(claimId);
+                this.forceRowUpdate(claimItem.claim_invoice_id);
             },
 
+            /**
+             * Handle sub (claim) item changed payment table dropdown.
+             *
+             * @param {Object} claimItem
+             * @param {string} value
+             */
             subTypeChanged(claimItem, value) {
                 console.log('sub item type changed:', claimItem, value);
 
-                let claimId = claimItem.claim_invoice_id;
                 if (value == '') {
                     return;
                 }
 
-                // Make sure item is selected.
-                this.applications[claimId+'_'+claimItem.id].selected = true;
-
-                // Make sure there is a numeric amount set.
-                if (this.applications[claimId+'_'+claimItem.id].amount_applied == '') {
-                    this.applications[claimId+'_'+claimItem.id].amount_applied = '0.00';
+                // Make sure item is selected and has a numeric amount set.
+                this.$set(claimItem, 'selected', true);
+                if (claimItem.amount_applied == '') {
+                    this.$set(claimItem, 'amount_applied', '0.00');
                 }
 
-                this.forceRowUpdate(claimId);
+                this.forceRowUpdate(claimItem.claim_invoice_id);
             },
 
             /**
@@ -415,10 +470,10 @@
              */
             forceRowUpdate(claimId) {
                 // This was implemented because BootstrapVue was having issues knowing
-                // that it should update the table rows because we are not modifying the
-                // row items, we are modifying the applications object.  Doing this after
-                // the nextTick() will ensure the row triggers an update after we have
-                // updated any values prior to this method call.
+                // that it should update the table rows unless we $set the claim row
+                // explicitly.  Doing this after the nextTick() will ensure the row
+                // triggers an update after we have updated any values prior
+                // to this method call.
                 this.$nextTick(x => {
                     let index = this.claims.findIndex(x => x.id == claimId);
                     // Set the claim item to itself to force and update but not change values.
@@ -427,70 +482,8 @@
             },
 
             /**
-             * Handle toggle of selection to master items.
-             *
-             * @param claim Object
+             * Fetch data the Clients dropdown resource.
              */
-            selectMaster(claim) {
-                console.log('change select for claim: ', claim, this.applications[claim.id].selected);
-                if (this.applications[claim.id].selected) {
-                    // When the claim record is selected, all sub items
-                    // should be set to the full amount and disabled.
-                    claim.items.forEach(item => {
-                        this.applications[claim.id+'_'+item.id].amount_applied = item.amount_due;
-                        this.applications[claim.id+'_'+item.id].application_type = '';
-                        this.applications[claim.id+'_'+item.id].selected = true;
-                    });
-                    this.applications[claim.id].amount_applied = claim.amount_due;
-                    // Force view of details (sub-items)
-                    this.$set(claim, '_showDetails', true);
-                } else {
-                    // When the claim record is un-selected, we should clear
-                    // all progress from it and it's sub items.
-                    claim.items.forEach(item => {
-                        this.applications[claim.id+'_'+item.id].amount_applied = '';
-                        this.applications[claim.id+'_'+item.id].application_type = '';
-                        this.applications[claim.id+'_'+item.id].selected = false;
-                    });
-                    this.applications[claim.id].amount_applied = '';
-                    this.applications[claim.id].application_type = '';
-                }
-
-                this.forceRowUpdate(claim.id);
-            },
-
-            /**
-             * Handle change to application_type for master items.
-             *
-             * @param claim Object
-             * @param value String
-             */
-            changeMasterType(claim, value) {
-                console.log('changed application type', value);
-                if (! this.applications[claim.id].selected) {
-                    return;
-                }
-
-                claim.items.forEach(item => {
-                    this.applications[claim.id+'_'+item.id].application_type = value;
-                });
-
-                this.forceRowUpdate(claim.id);
-            },
-
-            fetch() {
-                this.filters.get(`/business/claims`)
-                    .then( ({ data }) => {
-                        this.claims = data.data;
-                    })
-                    .catch(() => {
-                        this.claims = [];
-                    })
-                    .finally(() => {
-                        this.initApplications();
-                    });
-            },
-
             async fetchClients() {
                 await axios.get(`/business/dropdown/clients?businesses=${this.filters.businesses}`)
                     .then( ({ data }) => {
@@ -501,6 +494,9 @@
                     });
             },
 
+            /**
+             * Fetch data the Payers dropdown resource.
+             */
             async fetchPayers() {
                 await axios.get(`/business/dropdown/payers`)
                     .then( ({ data }) => {
