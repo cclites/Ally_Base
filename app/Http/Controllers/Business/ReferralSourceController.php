@@ -62,7 +62,7 @@ class ReferralSourceController extends BaseController
         $this->authorize('create', [ReferralSource::class, $data]);
 
         if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
-        return new CreatedResponse('The referral source has been created!', $referralSource);
+            return new CreatedResponse('The referral source has been created!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to create referral source.');
@@ -73,25 +73,28 @@ class ReferralSourceController extends BaseController
         $this->authorize('update', $referralSource);
         $data = $request->validated();
 
-
-        \Log::info($data);
-        \Log::info($referralSource);
-
         if ($referralSource->update($data)) {
-
-
-
             return new SuccessResponse('The referral source has been saved!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to save referral source.');
     }
 
+    /**
+     * Not used since we don't want to
+     *
+     * @param ReferralSource $referralSource
+     * @return SuccessResponse
+     */
     public function destroy(ReferralSource $referralSource) 
     {
-        $referralSource->active = false;
+        $referralSource->active = !$referralSource->active;
         $referralSource->save();
-        return new SuccessResponse('The referral source was successfully deactivated.', $referralSource);
+
+        $slug = $referralSource->active ? 'activated' : 'deactivated';
+        $message = "The referral source was successfully $slug.";
+
+        return new SuccessResponse($message, $referralSource);
     }
 
     public function removeOrganization($organization){

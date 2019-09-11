@@ -29,13 +29,13 @@
                     </template>
 
                     <template slot="actions" scope="row">
-                        <b-btn size="sm" @click="update(row.item)">
+                        <b-btn size="sm" @click="update(row.item)" class="mt-1">
                             <i class="fa fa-save"></i>
                         </b-btn>
-                        <b-btn v-if="row.item.active" size="sm" @click="deactivate(row.item, 0)" variant="danger">
+                        <b-btn v-if="row.item.active" size="sm" @click="deactivate(row.item, 0)" variant="danger"  class="mt-1">
                             <i class="fa fa-trash"></i>
                         </b-btn>
-                        <b-btn v-else size="sm" @click="deactivate(row.item, 1)" variant="success">
+                        <b-btn v-else size="sm" @click="deactivate(row.item, 1)" variant="success" class="mt-1">
                             <i class="fa fa-plus-square"></i>
                         </b-btn>
                     </template>
@@ -103,7 +103,8 @@
                     active: resourceData.active,
                     organization: this.source.organization,
                     chain_id: this.source.id,
-                    type: this.sourceType
+                    type: this.sourceType,
+                    deactivate: resourceData.deactivate ? resourceData.deactivate : null,
                 });
 
                 this.loading = true;
@@ -114,6 +115,7 @@
 
                         if(method === 'post'){
                             resourceData.id = response.data.data.id;
+
                             let data = {response: response.data.data, item_id: this.source.id};
                             this.$emit('saved', data);
                         }else{
@@ -125,6 +127,9 @@
                             }
 
                             this.items = originalItems;
+
+                            let data = {response: response.data.data, item_id: this.source.id};
+                            this.$emit('saved', data);
                         }
 
                     })
@@ -137,21 +142,30 @@
                     return;
                 }
 
-                let resource = {
+                let form = new Form({
                     contact_name: resourceData.contact_name,
                     phone: resourceData.phone,
                     id: resourceData.id,
                     active: active,
-                };
+                });
 
-                this.update(resource);
+                form.submit('DELETE', `/business/referral-sources/${resourceData.id}`)
+                    .then(response => {
+                        resourceData.active = active;
+                        let data = {response: this.items, id: this.source.id}
+                        this.$emit('deactivated', data);
+                    })
+                    .catch(e => {
+                    })
+
             },
 
             add(){
                this.items.push({
                     contact_name: '',
                     phone: '',
-                    id: ''
+                    id: '',
+                    active: true,
                 });
             }
         },

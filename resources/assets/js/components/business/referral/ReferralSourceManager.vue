@@ -17,7 +17,7 @@
                      :sort-desc.sync="sortDesc"
                      ref="table"
             >
-                <template slot="actions" scope="row">
+                <template slot="edit" scope="row">
                     <b-btn size="sm" @click="edit(row.item.id)">
                         <i class="fa fa-edit"></i>
                     </b-btn>
@@ -49,6 +49,7 @@
                 :source="editSource"
                 @saved="updateAfterAddEdit"
                 :source-type="sourceType"
+                @deactivated="deactivated"
         ></business-referral-source>
     </b-card>
 </template>
@@ -89,7 +90,7 @@
                         sortable: true,
                     },
 
-                    'actions'
+                    'edit'
                 ]
             }
         },
@@ -108,6 +109,7 @@
                 this.showAddReferralModal = true;
             },
 
+            /*
             destroy(item) {
                 if (! confirm('Are you sure you want to delete this referral source?')) {
                     return;
@@ -122,35 +124,11 @@
                     .catch(e => {
                     })
             },
+             */
             updateList(response){
-
-                let index = this.items.findIndex(x => x.organization == response.organization);
-
-                if (index >= 0){
-                    let data = {
-                        contact_name: response.contact_name,
-                        phone: response.phone,
-                        id: response.id,
-                        active: response.active
-                    };
-
-                    this.items[index].contacts.push(data);
-                    this.items[index].contact_name = this.stringifyContactNames(this.items[index].contacts);
-                }else{
-                    let data = {
-                        organization: response.organization,
-                        contact_name: response.contact_name,
-                        chain_id: response.chain_id,
-                        contacts: {
-                            contact_name: response.contact_name,
-                            phone: response.phone,
-                            id: response.id,
-                            active: response.active
-                        }
-                    };
-                    this.items.push(data);
-                }
+                window.location.reload();
             },
+
             updateAfterAddEdit(data) {
                 let resource = this.items[data.item_id];
                 let index = resource.contacts.findIndex(x => x.id === data.response.id);
@@ -159,16 +137,32 @@
                     this.items[data.item_id].contacts[index] = data.response;
                 } else{
                     this.items[data.item_id].contacts.push(data.response);
-                    this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
                 }
+
+                this.items[data.item_id].contact_name = this.stringifyContactNames(this.items[data.item_id].contacts);
+
             },
+            deactivated(data){
+                this.items[data.id].contacts = data.response;
+                this.items[data.id].contact_name = this.stringifyContactNames(this.items[data.id].contacts);
+            },
+
             stringifyContactNames(contacts)
             {
                 let contact_name = contacts.map(function(x){
-                    return x.contact_name ;
+                    if(x.active){
+                        return x.contact_name ;
+                    }
+                    return '';
                 });
 
-                return contact_name.toString();
+                contact_name = contact_name.toString().replace(/,\s*$/, "");
+
+                if (contact_name[0] == ',') {
+                    contact_name = contact_name.substring(1);
+                }
+
+                return contact_name;
             }
         }
     }

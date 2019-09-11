@@ -123,16 +123,22 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         {
             $key = $item['organization'];
 
-
             if(!isset($set[$key])){
                 $set[$key]['organization'] = $item['organization'];
-                $set[$key]['contact_name'] = $item['contact_name'] . ", ";
+
+                if($item['active']){
+                    $set[$key]['contact_name'] = $item['contact_name'] . ", ";
+                }else{
+                    $set[$key]['contact_name'] = '';
+                }
                 $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
                 $set[$key]['phone'] = $item['phone'];
                 $set[$key]['id'] = $cnt++;
                 $set[$key]['created_at'] = $item['created_at']->format('m/d/Y');
             }else{
-                $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
+                if($item['active']){
+                    $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
+                }
                 $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
             }
         }
