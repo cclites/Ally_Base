@@ -95,7 +95,6 @@
                         <th>Client</th>
                         <th>View</th>
                     </tr>
-
                     </thead>
                     <tbody>
                     <tr v-for="shift in dateShifts">

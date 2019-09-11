@@ -20,8 +20,7 @@ $factory->define(Shift::class, function(Faker $faker) {
 
     // Attach a random caregiver to a client if client does not have caregivers already
     $client = Client::inRandomOrder()->first();
-    if ( $client && !$client->caregivers->count() ) {
-
+    if ($client && !$client->caregivers->count()) {
         $caregiver = $client->business->caregivers()->inRandomOrder()->first() ?? null;
 
         if ( $caregiver ) {
