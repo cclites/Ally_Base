@@ -6,6 +6,7 @@ use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Traits\BelongsToOneBusiness;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
@@ -58,7 +59,7 @@ use App\Client;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice query()
  * @mixin \Eloquent
  */
-class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsToBusinessesInterface
+class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 
@@ -152,34 +153,45 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     // ACCESSORS
     // **********************************************************
 
-    function getName(): string
+    public function getName(): string
     {
         return $this->name;
     }
+
+    public function getStatus() : string
+    {
+        return $this->status;
+    }
+
+    function getDate() : Carbon
+    {
+        return $this->created_at;
+    }
+
+    function getAmount() : float
+    {
+        return floatval($this->amount);
+    }
+
+    function getAmountDue() : float
+    {
+        return floatval($this->amount_due);
+    }
+
+
+
+
+
+
 
     function getClientPayer(): ?ClientPayer
     {
         return $this->clientPayer;
     }
 
-    function getAmount(): float
-    {
-        return ( float )$this->amount;
-    }
-
-    function getAmountDue(): float
-    {
-        return ( float )$this->amount_due;
-    }
-
     function getAmountPaid(): float
     {
         return subtract(floatval($this->amount), floatval($this->amount_due));
-    }
-
-    function getDate(): string
-    {
-        return $this->created_at->format('m/d/Y');
     }
 
     /**

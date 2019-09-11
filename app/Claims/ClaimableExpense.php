@@ -5,6 +5,7 @@ namespace App\Claims;
 use App\Claims\Contracts\ClaimableInterface;
 use App\AuditableModel;
 use App\Shift;
+use Carbon\Carbon;
 
 /**
  * App\Claims\ClaimableExpense
@@ -91,5 +92,39 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Get the Caregiver's name that performed the service.
+     *
+     * @return string
+     */
+    public function getCaregiverName() : string
+    {
+        if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
+            return '';
+        }
+
+        return $this->caregiver_first_name . ' ' . $this->caregiver_last_name;
+    }
+
+    /**
+     * Get the start time of the Claimable item.
+     *
+     * @return null|Carbon
+     */
+    public function getStartTime() : ?Carbon
+    {
+        return null;
+    }
+
+    /**
+     * Get the end time of the Claimable item.
+     *
+     * @return null|Carbon
+     */
+    public function getEndTime() : ?Carbon
+    {
+        return null;
     }
 }

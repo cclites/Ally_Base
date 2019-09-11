@@ -1,6 +1,9 @@
 <?php
 /**
- * @var $sender \App\Contracts\ContactableInterface
+ * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
+ * @var \App\Business $sender The related Business
+ * @var \App\Billing\Payer $recipient The related Payer
+ * @var \App\Client $client The related Client
  */
 ?>
 <div class="row print-header">
@@ -15,80 +18,60 @@
         @endif
     </div>
     <div class="text-right header-right">
-        <div class="h1">Invoice #{{ $invoice->getName() }}</div>
+        <div class="h1">Claim #{{ $claim->getName() }}</div>
         <br>
         <table class="header-right-table">
             <tr>
-                <td>Invoice Date: </td>
-                <td>{{ $invoice->getDate() }}</td>
+                <td>Claim Date: </td>
+                <td>{{ $claim->getDate()->format('m/d/Y') }}</td>
             </tr>
             <tr>
-                <td><strong>Invoice Status: </strong></td>
+                <td><strong>Claim Status: </strong></td>
                 <td>
-                    @if ($invoice->getAmountDue() > 0)
-                        <span style="color: darkred">Unpaid</span>
-                    @else
-                        <span style="color: green">Paid</span>
-                    @endif
+                    {{ snake_to_title_case($claim->getStatus()) }}
                 </td>
             </tr>
         </table>
     </div>
 </div>
 
-@if ($subject->name())
-    <div class="row print-header">
-        <div style="width: 50%; float:left">
-            <table class="" style="margin-left: 3rem; margin: auto">
-                <tr>
-                    <td colspan="2">
-                        <strong>Bill To:</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ $recipient->name() }}</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div style="width: 50%; float:right">
-            <table class="" style="margin-right: 3rem; margin: auto">
-                <tr>
-                    <td colspan="2">
-                        <strong>Client:</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ $subject->name() }}</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
-                    </td>
-                </tr>
-                @if( filled($subject->getBirthdate()))
-                <tr>
-                    <td colspan="2">
-                        {{ \Carbon\Carbon::parse($subject->getBirthdate())->format('m/d/Y') }}
-                    </td>
-                </tr>
-                @endif
-                @if( filled($subject->getHic()))
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ $subject->getHic() }}</strong>
-                    </td>
-                </tr>
-                @endif
-            </table>
-        </div>
+<div class="row print-header">
+    <div style="width: 50%; float:left">
+        <table class="" style="margin-left: 3rem; margin: auto">
+            <tr>
+                <td colspan="2">
+                    <strong>Bill To:</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <strong>{{ $claim->payer_name }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
+                </td>
+            </tr>
+        </table>
     </div>
-@endif
+    <div style="width: 50%; float:right">
+        <table class="" style="margin-right: 3rem; margin: auto">
+            <tr>
+                <td colspan="2">
+                    <strong>Client:</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <strong>{{ $client->name() }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    @include('invoices.partials.address', ['address' => $client->getAddress(), 'phone' => $client->getPhoneNumber()])
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

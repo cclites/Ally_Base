@@ -1,8 +1,12 @@
-
+<?php
+/**
+ * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
+ * @var \App\Business $sender The related Business
+ */
+?>
 <div class="row">
     <div class="footer-left">
         &nbsp;
-        {{--<p>This is a statement. Your payment was processed on {{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }} using your payment information on file.</p>--}}
     </div>
     <div class="footer-right" style="padding-right: 15px;">
         <table class="table">
@@ -10,23 +14,22 @@
             <tr>
                 <th>Invoiced Amount:</th>
                 <td>
-                    &dollar;{{ number_format($invoice->getAmount(), 2) }}
+                    &dollar;{{ number_format($claim->getAmount(), 2) }}
                 </td>
             </tr>
             <tr>
                 <th>Amount Due:</th>
                 <td>
-                    &dollar;{{ number_format($invoice->getAmountDue(), 2) }}
+                    &dollar;{{ number_format($claim->getAmountDue(), 2) }}
                 </td>
             </tr>
-            @if ($invoice->getAmountDue() <= 0)
+            @if ($claim->getAmountDue() === floatval(0))
             <tr>
                 <td colspan="2">
-                    <div class="h2">NOTHING DUE - THIS INVOICE HAS BEEN PAID</div>
+                    <div class="h2">NOTHING DUE - THIS CLAIM HAS BEEN PAID</div>
                 </td>
             </tr>
             @endif
-
             </tbody>
         </table>
     </div>

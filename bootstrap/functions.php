@@ -322,3 +322,16 @@ if (! function_exists('throw_validation_exception')) {
         throw ValidationException::withMessages($messages);
     }
 }
+
+if (! function_exists('snake_to_title_case')) {
+    /**
+     * Convert snake_case to Title Case.
+     *
+     * @param string $str
+     * @return string
+     */
+    function snake_to_title_case(string $str): string
+    {
+        return title_case(preg_replace('/_/', ' ', $str));
+    }
+}

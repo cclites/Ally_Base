@@ -139,7 +139,22 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('read', $claim);
 
-        return view('claims.invoice-formats.ally', compact('claim'));
+        $groups = $claim->items->groupBy('type');
+
+        if (! isset($groups['Expense'])) {
+            $groups['Expense'] = [];
+        }
+        if (! isset($groups['Service'])) {
+            $groups['Service'] = [];
+        }
+
+        return view('claims.claim_invoice', [
+            'claim' => $claim,
+            'sender' => $claim->business,
+            'recipient' => $claim->payer,
+            'client' => $claim->client,
+            'itemGroups' => $groups,
+        ]);
 
 //            $pdfWrapper = app('snappy.pdf.wrapper');
 //            $this->pdfWrapper->loadHTML($view->render());

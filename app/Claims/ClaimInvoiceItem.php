@@ -104,6 +104,23 @@ class ClaimInvoiceItem extends AuditableModel
     // MUTATORS
     // **********************************************************
 
+    /**
+     * Get the a formatted claimable type string.
+     *
+     * @return string
+     */
+    public function getTypeAttribute() : string
+    {
+        switch ($this->claimable_type) {
+            case ClaimableService::class:
+                return 'Service';
+            case ClaimableExpense::class:
+                return 'Expense';
+            default:
+                return 'ERROR';
+        }
+    }
+
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
@@ -111,37 +128,6 @@ class ClaimInvoiceItem extends AuditableModel
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
-
-    public function getShift()
-    {
-        return $this->claimable->shift;
-    }
-
-    public function getShiftName()
-    {
-        if ($this->claimable instanceof ClaimableExpense) return $this->claimable->name;
-
-        return $this->getService()->name;
-    }
-
-    public function getShiftTitle()
-    {
-        $shift = $this->getShift();
-
-        return Carbon::parse($shift->checked_in_time)->format('M d') . ' ' . Carbon::parse($shift->checked_in_time)->format('h:iA') . ' - ' . Carbon::parse($shift->checked_out_time)->format('h:iA') . ': ' . $shift->caregiver->name;
-    }
-
-    public function getCaregiver()
-    {
-        if ($this->claimable instanceof ClaimableService) return $this->claimable->caregiver;
-        return null;
-    }
-
-    public function getService()
-    {
-        if ($this->claimable instanceof ClaimableService) return $this->claimable->service;
-        return null;
-    }
 
     /**
      * Calculate the amount due for this ClaimInvoiceItem
@@ -165,5 +151,31 @@ class ClaimInvoiceItem extends AuditableModel
         }
 
         $this->update(['amount_due' => $amountDue]);
+    }
+
+    /**
+     * Get the start and end times of the claimable service.
+     *
+     * @param string $timezone
+     * @return array
+     */
+    public function getServiceTimes(string $timezone = null) : array
+    {
+        if ($this->claimable_type != ClaimableService::class) {
+            return [null, null];
+        }
+
+        if (empty($this->claimable->visit_start_time) || empty($this->claimable->visit_end_time)) {
+            return [null, null];
+        }
+
+        if (empty($timezone)) {
+            $timezone = $this->claim->business->getTimezone();
+        }
+
+        return [
+            $this->claimable->visit_start_time->setTimezone($timezone)->toDateTimeString(),
+            $this->claimable->visit_end_time->setTimezone($timezone)->toDateTimeString(),
+        ];
     }
 }
