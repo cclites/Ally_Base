@@ -42,6 +42,26 @@ class ClaimRemitApplication extends Model
     // RELATIONSHIPS
     // **********************************************************
 
+    /**
+     * Get the ClaimInvoice relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function claimInvoice()
+    {
+        return $this->belongsTo(ClaimInvoice::class);
+    }
+
+    /**
+     * Get the ClaimInvoiceItem relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function claimInvoiceItem()
+    {
+        return $this->belongsTo(ClaimInvoiceItem::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************

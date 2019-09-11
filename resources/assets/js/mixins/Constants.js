@@ -58,7 +58,7 @@ export default {
                 { value: 'partially_applied', text: 'Partially Applied' },
                 { value: 'fully_applied', text: 'Fully Applied' },
             ],
-            CLAIM_REMIT_PAYMENT_TYPES: {
+            CLAIM_REMIT_APPLICATION_TYPES: {
                 DENIAL: 'denial',
                 DISCOUNT: 'discount',
                 INTEREST: 'interest',
@@ -69,7 +69,7 @@ export default {
                 TAKE_BACK: 'take-back',
                 WRITE_OFF: 'write-off',
             },
-            claimRemitPaymentTypeOptions: [
+            claimRemitApplicationTypeOptions: [
                 { value: 'denial', text: 'Denial' },
                 { value: 'discount', text: 'Discount' },
                 { value: 'interest', text: 'Interest' },

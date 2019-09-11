@@ -5,6 +5,7 @@ namespace App\Claims;
 use App\AuditableModel;
 use App\Billing\Payer;
 use App\Business;
+use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 
@@ -64,6 +65,16 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the ClaimRemitApplication relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function applications()
+    {
+        return $this->hasMany(ClaimRemitApplication::class);
     }
 
     // **********************************************************
@@ -193,4 +204,34 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
     // OTHER FUNCTIONS
     // **********************************************************
 
+    /**
+     * Calculate the balance of the ClaimRemit by adding up
+     * all of it's applications.
+     *
+     * @return void
+     * @throws ClaimBalanceException
+     */
+    public function updateBalance() : void
+    {
+        $totalApplied = $this->applications->reduce(function ($carry, $application) {
+            return add($carry, floatval($application->amount_applied));
+        }, floatval(0));
+
+        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
+            // Take-back remits have negative amounts.
+
+            if ($totalApplied < floatval($this->amount) || $totalApplied > floatval(0)) {
+                throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
+            }
+
+        } else {
+
+            if ($totalApplied > floatval($this->amount) || $totalApplied < floatval(0)) {
+                throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
+            }
+
+        }
+
+        $this->update(['amount_applied' => $totalApplied]);
+    }
 }

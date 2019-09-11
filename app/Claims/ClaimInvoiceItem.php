@@ -3,6 +3,7 @@
 namespace App\Claims;
 
 use App\AuditableModel;
+use App\Claims\Exceptions\ClaimBalanceException;
 use Carbon\Carbon;
 
 class ClaimInvoiceItem extends AuditableModel
@@ -63,6 +64,16 @@ class ClaimInvoiceItem extends AuditableModel
         return $this->morphTo('claimable', 'claimable_type', 'claimable_id');
     }
 
+    /**
+     * Get the ClaimRemitApplications relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function remitApplications()
+    {
+        return $this->hasMany(ClaimRemitApplication::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -104,5 +115,29 @@ class ClaimInvoiceItem extends AuditableModel
     {
         if ($this->claimable instanceof ClaimableService) return $this->claimable->service;
         return null;
+    }
+
+    /**
+     * Calculate the amount due for this ClaimInvoiceItem
+     * from all the remit amounts applied to it.
+     *
+     * @return void
+     * @throws ClaimBalanceException
+     */
+    public function updateBalance() : void
+    {
+        $totalApplied = $this->remitApplications->reduce(function ($carry, $application) {
+            return add($carry, floatval($application->amount_applied));
+        }, floatval(0));
+
+        $amountDue = subtract(floatval($this->amount), $totalApplied);
+
+        if ($amountDue < floatval(0)) {
+            throw new ClaimBalanceException('Claim invoice items cannot have a negative balance.');
+        } else if ($amountDue > floatval($this->amount)) {
+            throw new ClaimBalanceException('Claim invoice items cannot have a balance greater than their total amount.');
+        }
+
+        $this->update(['amount_due' => $amountDue]);
     }
 }

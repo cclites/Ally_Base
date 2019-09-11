@@ -36,7 +36,7 @@
 
         <h2>
             <strong>Available to Apply: </strong>
-            ${{ amountAvailable }}
+            ${{ numberFormat(amountAvailable.toFixed(2)) }}
         </h2>
 
         <b-form inline class="mb-4">
@@ -81,7 +81,7 @@
                 <b-col md="3">
                     <b-form-group label="Interest" label-for="interest">
                         <b-form-input
-                            v-model="form.interest"
+                            v-model="interest"
                             id="interest"
                             name="interest"
                             type="number"
@@ -129,7 +129,7 @@
                         />
                         <b-select name="application_type"
                             v-model="row.item.application_type"
-                            :options="claimRemitPaymentTypeOptions"
+                            :options="claimRemitApplicationTypeOptions"
                             :disabled="form.busy || !row.item.selected"
                             @change="(val) => changeMasterType(row.item, val)"
                         >
@@ -170,7 +170,7 @@
                                 />
                                 <b-select name="application_type"
                                     v-model="row.item.application_type"
-                                    :options="claimRemitPaymentTypeOptions"
+                                    :options="claimRemitApplicationTypeOptions"
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subTypeChanged(row.item, x)"
                                 >
@@ -187,12 +187,12 @@
                 </b-table>
             </div>
             <div>
-                <b-btn variant="info" @click="submit()">Apply Remit to Claim(s)</b-btn>
+                <b-btn variant="info" @click="submit()" :disabled="form.busy || !canSubmit">Apply Remit to Claim(s)</b-btn>
             </div>
         </div>
         <div v-if="isScrolling" id="floating-amount">
             <strong>Available to Apply: </strong>
-            ${{ amountAvailable }}
+            ${{ numberFormat(amountAvailable.toFixed(2)) }}
         </div>
     </b-card>
 </template>
@@ -222,23 +222,31 @@
                 remit: 'claims/remit',
             }),
 
+            /**
+             * Get the text for an empty claims table.
+             *
+             * @return {string}
+             */
             emptyText() {
                 return this.filters.hasBeenSubmitted ? 'There are no results to display.' : 'Select filters and press Generate.';
             },
 
+            /**
+             * Get the total amount available to apply for the current Remit.
+             *
+             * @return {Decimal}
+             */
             amountAvailable() {
-                let amount = new Decimal(this.remit.amount_available);
-
-                let interest = new Decimal(0.00);
-                if (this.form.interest != '' && !isNaN(this.form.interest)) {
-                    interest = new Decimal(this.form.interest);
-                }
-
-                return this.numberFormat(amount.sub(this.amountApplied).sub(interest).toFixed(2));
+                return new Decimal(this.remit.amount_available).sub(this.amountApplied);
             },
 
+            /**
+             * Get the total amount applied from the claims table.
+             *
+             * @return {Decimal}
+             */
             amountApplied() {
-                return this.claims.reduce((carry, claim) => {
+                let total = this.claims.reduce((carry, claim) => {
                     return carry.add(
                         claim.items.reduce((itemTotal, item) => {
                             if (item.amount_applied == '' || isNaN(item.amount_applied)) {
@@ -248,6 +256,35 @@
                         }, new Decimal(0.00))
                     );
                 }, new Decimal(0.00));
+
+                let interest = new Decimal(0.00);
+                if (this.interest != '' && !isNaN(this.interest)) {
+                    interest = new Decimal(this.interest);
+                }
+
+                return total.add(interest);
+            },
+
+            /**
+             * Determines if the form can be submitted.
+             *
+             * @return {boolean}
+             */
+            canSubmit() {
+                // Check if we are exceeding the amount available to apply.
+                if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.REMIT && this.amountAvailable.lt(0)) {
+                    return false;
+                }
+
+                if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK && this.amountAvailable.gt(0)) {
+                    return false;
+                }
+
+                if (this.amountApplied.equals(0)) {
+                    return false;
+                }
+
+                return true;
             },
         },
 
@@ -266,10 +303,9 @@
                 payers: [],
                 clients: [],
                 isScrolling: false,
-
-                // Form data
+                interest: '',
                 form: new Form({
-                    interest: '',
+                    applications: [],
                 }),
 
                 // Table data
@@ -293,10 +329,10 @@
                     selected: { label: ' ', sortable: false, },
                     type: { label: 'Type', sortable: true },
                     summary: { label: 'Summary', sortable: true },
-                    date: { label: 'Service Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    date: { label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     start_time: { label: 'Time', sortable: true },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    amount_due: { sortable: true, formatter: x => this.moneyFormat(x) },
+                    amount_due: { label: 'Due', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_applied: { label: 'Amount to Apply', sortable: false },
                 },
             }
@@ -334,13 +370,46 @@
              * Submit the main apply remit form.
              */
             submit() {
+                this.populateFormFromTable();
+
                 this.form.post(`/business/claim-remit-applications/${this.remit.id}`)
                     .then( ({ data }) => {
-
                     })
                     .catch(() => {
-
                     });
+            },
+
+            /**
+             * Loop through the table data and update the form
+             * to contain proper ClaimRemitApplication objects.
+             */
+            populateFormFromTable() {
+                this.form.applications = this.claims.map(claim => {
+                    return claim.items.map(item => {
+                        if (! item.selected || parseFloat(item.amount_applied) === parseFloat('0')) {
+                            return null;
+                        }
+
+                        return {
+                            claim_invoice_id: claim.id,
+                            claim_invoice_item_id: item.id,
+                            application_type: item.application_type,
+                            amount_applied: item.amount_applied,
+                            is_interest: false,
+                        };
+                    })
+                })
+                .flat(1)
+                .filter(x => x != null);
+
+                // Add the interest field.
+                if (this.interest != '' && !isNaN(this.interest)) {
+                    this.form.applications.push({
+                        application_type: this.CLAIM_REMIT_APPLICATION_TYPES.INTEREST,
+                        amount_applied: this.interest,
+                        is_interest: true,
+                    });
+                }
             },
 
             /**
@@ -349,19 +418,18 @@
              * @param {Object} claim
              */
             selectMaster(claim)  {
-                console.log('change select for claim: ', claim);
-
                 if (claim.selected) {
                     // When the claim record is selected, all sub items
                     // should be set to the full amount and disabled.
                     this.$set(claim, 'items', claim.items.map(item => {
                         item.amount_applied = item.amount_due;
-                        item.application_type = '';
+                        item.application_type = this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT;
                         item.selected = true;
                         item.disabled = true;
                         return item;
                     }));
                     this.$set(claim, 'amount_applied', claim.amount_due);
+                    this.$set(claim, 'application_type', this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT);
                     // Force view of details (sub-items)
                     this.$set(claim, '_showDetails', true);
                 } else {
@@ -376,7 +444,7 @@
                     }));
                     this.$set(claim, 'amount_applied', '');
                     this.$set(claim, 'application_type', '');
-                    console.log('after app type cleared: ', claim);
+                    this.forceRowUpdate(claim.id);
                 }
             },
 
@@ -387,7 +455,6 @@
              * @param value String
              */
             changeMasterType(claim, value) {
-                console.log('changed application type', value);
                 if (! claim.selected) {
                     return;
                 }
@@ -404,12 +471,11 @@
              * @param {Object} claimItem
              */
             selectSub(claimItem) {
-                console.log('change select for claim item: ', claimItem);
-
                 if (claimItem.selected) {
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
-                        this.$set(claimItem, 'amount_applied', '0.00');
+                        this.$set(claimItem, 'amount_applied', claimItem.amount_due);
+                        this.$set(claimItem, 'application_type', this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT);
                     }
                 } else {
                     // Claim items that are not selected should always be empty.
@@ -427,8 +493,6 @@
              * @param {number} value
              */
             subAmountChanged(claimItem, value) {
-                console.log('sub item amount changed:', claimItem, value);
-
                 if (isNaN(value) || value == '') {
                     // Clear the value / selection if invalid value.
                     this.$set(claimItem, 'amount_applied', '');
@@ -448,8 +512,6 @@
              * @param {string} value
              */
             subTypeChanged(claimItem, value) {
-                console.log('sub item type changed:', claimItem, value);
-
                 if (value == '') {
                     return;
                 }

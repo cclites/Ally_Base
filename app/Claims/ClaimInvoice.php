@@ -2,6 +2,7 @@
 
 namespace App\Claims;
 
+use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Traits\BelongsToOneBusiness;
@@ -249,9 +250,11 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
     // **********************************************************
 
     /**
-     * Update the amount and amount due from the ClaimInvoiceItem values.
+     * Update the amount and amount due from the ClaimInvoiceItem values
+     *
+     * @throws ClaimBalanceException
      */
-    public function updateBalances(): void
+    public function updateBalances() : void
     {
         $items = $this->fresh()->items;
 
@@ -262,6 +265,10 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
         $amount_due = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
             return add($carry, (float)$item->amount_due);
         }, (float)0.00);
+
+        if ($amount_due < floatval(0)) {
+            throw new ClaimBalanceException('Claim invoices cannot have a negative balance.');
+        }
 
         $this->update(compact('amount', 'amount_due'));
     }
