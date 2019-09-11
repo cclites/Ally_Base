@@ -36,6 +36,23 @@ export default {
             /**
              * Claims
              */
+            CLAIM_STATUSES: {
+                NOT_SENT: 'NOT_SENT',
+                CREATED: 'CREATED',
+                TRANSMITTED: 'TRANSMITTED',
+                RETRANSMITTED: 'RETRANSMITTED',
+                ACCEPTED: 'ACCEPTED',
+                REJECTED: 'REJECTED',
+            },
+            claimStatusOptions: [
+                { value: 'NOT_SENT', text: 'Not Sent' },
+                { value: 'CREATED', text: 'Created' },
+                { value: 'TRANSMITTED', text: 'Transmitted' },
+                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
+                { value: 'ACCEPTED', text: 'Accepted' },
+                { value: 'REJECTED', text: 'Rejected' },
+            ],
+
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',
                 SERVICE: 'App\\Claims\\ClaimableService',

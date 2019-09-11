@@ -101,9 +101,6 @@
                 <template slot="client" scope="row">
                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
-                <template slot="claim_status" scope="row">
-                    {{ row.item.claim ? row.item.claim_status : '-' }}
-                </template>
                 <template slot="claim" scope="row">
                     <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`" target="_blank">{{ row.item.claim.name }}</a>
                     <span v-else> - </span>
@@ -189,15 +186,15 @@
 </template>
 
 <script>
-
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import Constants from '../../../mixins/Constants';
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
         components: {BusinessLocationFormGroup},
-        mixins: [FormatsDates, FormatsNumbers, Constants],
+        mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
 
         data() {
 
@@ -267,7 +264,7 @@
                     },
                     {
                         key: 'claim_status',
-                        formatter: (x) => _.capitalize(_.startCase(x)),
+                        formatter: (x) => this.resolveOption(x, this.claimStatusOptions),
                         sortable: true,
                     },
                     {
