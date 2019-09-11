@@ -140,46 +140,49 @@
                         </div>
                     </template>
                     <template slot="row-details" scope="row">
-                      <b-card>
-                          <!---------- SUB TABLE --------------->
-                          <b-table bordered striped show-empty
-                              :items="row.item.items"
-                              :fields="subFields"
-                          >
-                              <template slot="selected" scope="row">
-                                  <b-form-checkbox v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].selected"
-                                       :disabled="applications[row.item.claim_invoice_id].selected" />
-                              </template>
-                              <template slot="start_time" scope="row">
-                                  <span v-if="row.item.start_time">
-                                    {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
-                                  </span>
-                                  <span v-else>-</span>
-                              </template>
-                              <template slot="amount_applied" scope="row">
-                                  <div class="d-flex">
-                                  <b-form-input
-                                      class="mr-1"
-                                      v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].amount_applied"
-                                      name="amount_applied"
-                                      type="number"
-                                      step="0.01"
-                                      :disabled="form.busy || applications[row.item.claim_invoice_id].selected"
-                                  />
-                                  <b-select name="application_type"
+                    <b-card>
+                        <!---------- SUB TABLE --------------->
+                        <b-table bordered striped show-empty
+                          :items="row.item.items"
+                          :fields="subFields"
+                        >
+                        <template slot="selected" scope="row">
+                            <b-form-checkbox v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].selected"
+                                :disabled="applications[row.item.claim_invoice_id].selected"
+                                @change="selectSub(row.item)"/>
+                        </template>
+                        <template slot="start_time" scope="row">
+                            <span v-if="row.item.start_time">
+                                {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
+                            </span>
+                            <span v-else>-</span>
+                        </template>
+                        <template slot="amount_applied" scope="row">
+                            <div class="d-flex">
+                                <b-form-input
+                                    class="mr-1"
+                                    v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].amount_applied"
+                                    name="amount_applied"
+                                    type="number"
+                                    step="0.01"
+                                    :disabled="form.busy || applications[row.item.claim_invoice_id].selected"
+                                    @change="x => subAmountChanged(row.item, x)"
+                                />
+                                <b-select name="application_type"
                                     v-model="applications[row.item.claim_invoice_id+'_'+row.item.id].application_type"
                                     :options="claimRemitPaymentTypeOptions"
                                     :disabled="form.busy || applications[row.item.claim_invoice_id].selected"
-                                  >
-                                      <template slot="first">
-                                          <option value="">-- Select Type --</option>
-                                      </template>
-                                  </b-select>
-                                  </div>
-                              </template>
-                          </b-table>
-                          <!---------- /END SUB TABLE --------------->
-                      </b-card>
+                                    @change="x => subTypeChanged(row.item, x)"
+                                >
+                                    <template slot="first">
+                                        <option value="">-- Select Type --</option>
+                                    </template>
+                                </b-select>
+                            </div>
+                        </template>
+                      </b-table>
+                      <!---------- /END SUB TABLE --------------->
+                    </b-card>
                     </template>
                 </b-table>
             </div>
@@ -224,16 +227,18 @@
             },
 
             amountAvailable() {
+                console.log('amountAvailable triggered');
                 let amount = new Decimal(this.remit.amount_available);
                 return this.numberFormat(amount.sub(this.amountApplied).toFixed(2));
             },
 
             amountApplied() {
+                console.log('amountApplied triggered');
                 return Object.values(this.applications)
-                    .filter(item => {
-                        // Filter out the master claim records.
-                        return item.is_interest || !!item.claim_invoice_item_id;
-                    })
+                    // .filter(item => {
+                    //     // Filter out the master claim records.
+                    //     return item.is_interest || !!item.claim_invoice_item_id;
+                    // })
                     .reduce((carry, item) => {
                         if (item.amount_applied == '' || isNaN(item.amount_applied)) {
                             return carry;
@@ -347,6 +352,80 @@
                 })
             },
 
+            selectSub(claimItem) {
+                console.log('change select for claim item: ', claimItem);
+
+                let claimId = claimItem.claim_invoice_id;
+                if (this.applications[claimId+'_'+claimItem.id].selected) {
+                    if (this.applications[claimId+'_'+claimItem.id].amount_applied == '') {
+                        this.applications[claimId+'_'+claimItem.id].amount_applied = '0.00';
+                    }
+                } else {
+                    this.applications[claimId+'_'+claimItem.id].amount_applied = '';
+                }
+
+                this.forceRowUpdate(claimId);
+            },
+
+            /**
+             * Handle change of claim item amount applied.
+             *
+             * @param {Object} claimItem
+             * @param {number} value
+             */
+            subAmountChanged(claimItem, value) {
+                console.log('sub item amount changed:', claimItem, value);
+
+                let claimId = claimItem.claim_invoice_id;
+                if (isNaN(value) || value == '') {
+                    // Clear the value / selection if invalid value.
+                    this.applications[claimId+'_'+claimItem.id].selected = false;
+                    this.applications[claimId+'_'+claimItem.id].amount_applied = '';
+                } else {
+                    // Make sure item is selected.
+                    this.applications[claimId+'_'+claimItem.id].selected = true;
+                }
+
+                this.forceRowUpdate(claimId);
+            },
+
+            subTypeChanged(claimItem, value) {
+                console.log('sub item type changed:', claimItem, value);
+
+                let claimId = claimItem.claim_invoice_id;
+                if (value == '') {
+                    return;
+                }
+
+                // Make sure item is selected.
+                this.applications[claimId+'_'+claimItem.id].selected = true;
+
+                // Make sure there is a numeric amount set.
+                if (this.applications[claimId+'_'+claimItem.id].amount_applied == '') {
+                    this.applications[claimId+'_'+claimItem.id].amount_applied = '0.00';
+                }
+
+                this.forceRowUpdate(claimId);
+            },
+
+            /**
+             * Force the BootstrapVue table to update the claim row.
+             *
+             * @param {number} claimId
+             */
+            forceRowUpdate(claimId) {
+                // This was implemented because BootstrapVue was having issues knowing
+                // that it should update the table rows because we are not modifying the
+                // row items, we are modifying the applications object.  Doing this after
+                // the nextTick() will ensure the row triggers an update after we have
+                // updated any values prior to this method call.
+                this.$nextTick(x => {
+                    let index = this.claims.findIndex(x => x.id == claimId);
+                    // Set the claim item to itself to force and update but not change values.
+                    this.$set(this.claims, index, this.claims[index]);
+                });
+            },
+
             /**
              * Handle toggle of selection to master items.
              *
@@ -377,10 +456,7 @@
                     this.applications[claim.id].application_type = '';
                 }
 
-                // This was implemented because BootstrapVue was having issues knowing
-                // that it should update the table rows because we are not modifying the
-                // row items, we are modifying the applications object.
-                this.$forceUpdate();
+                this.forceRowUpdate(claim.id);
             },
 
             /**
@@ -399,10 +475,7 @@
                     this.applications[claim.id+'_'+item.id].application_type = value;
                 });
 
-                // This was implemented because BootstrapVue was having issues knowing
-                // that it should update the table rows because we are not modifying the
-                // row items, we are modifying the applications object.
-                this.$forceUpdate();
+                this.forceRowUpdate(claim.id);
             },
 
             fetch() {
