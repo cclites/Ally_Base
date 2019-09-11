@@ -32,7 +32,7 @@ class CaregiverOvertimeReport extends BaseReport
     public function __construct()
     {
         $this->query = Caregiver::forRequestedBusinesses()
-                        ->with('shifts')
+                        ->with('shifts', 'schedules')
                         ->ordered();
     }
 
@@ -94,13 +94,8 @@ class CaregiverOvertimeReport extends BaseReport
                     ->get()->map(function(Caregiver $caregiver){
 
                     $worked = 0;
-                    $scheduled = 0;
+                    $futureScheduled = 0;
                     $total = 0;
-                    $totalScheduled = 0;
-
-                    foreach($caregiver->shifts as $shift){
-                        $totalScheduled += $shift->hours;
-                    }
 
                     foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
                         $worked += $shift->duration();
@@ -108,26 +103,25 @@ class CaregiverOvertimeReport extends BaseReport
 
                     foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
                         $worked += $shift->duration();
-                        $scheduled += $shift->remaining();
+                        $futureScheduled += $shift->remaining();
                     }
 
-                    $scheduledHrs =  Schedule::future($this->timezone, $this->end)
+                    $duration = Schedule::future($this->timezone, $this->end)
                             ->where('caregiver_id', $caregiver->id)
                             ->sum('duration');
 
-                    $scheduled += $scheduledHrs;
+                    $futureScheduled += $duration;
 
                     $worked = round($worked / 60, 2);
-                    $scheduled = round($scheduled / 60, 2);
-                    $total = round($worked + $scheduled, 2);
-
+                    $futureScheduled = round($futureScheduled / 60, 2);
+                    $total = round($worked + $futureScheduled, 2);
 
                     return [
                         'firstname'=>$caregiver->first_name,
                         'lastname'=>$caregiver->last_name,
                         'worked' => $worked,
-                        'scheduled' => $scheduled,
-                        'total' => $total
+                        'future_scheduled' => $futureScheduled, //future scheduled
+                        'total' => $total,
                     ];
 
             });
