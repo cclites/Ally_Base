@@ -127,7 +127,7 @@ class ClaimInvoice extends AuditableModel implements InvoiceInterface, BelongsTo
 
     function getAmountPaid(): float
     {
-        return (float)0.00;
+        return subtract(floatval($this->amount), floatval($this->amount_due));
     }
 
     function getName(): string
