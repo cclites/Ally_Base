@@ -200,20 +200,19 @@ class ManageUserStatusTest extends TestCase
         $client2->update(['status_alias_id' => $status2->id, 'active' => 1]);
         $client3->update(['status_alias_id' => $status3->id, 'active' => 0]);
 
-        // because now the result returns a nested structure, the assertJsonCount had to be nested as well
         $this->getJson(route('business.clients.index')."?active=1&status={$status->id}")
             ->assertStatus(200)
-            ->assertJsonCount( 1, 'clients' )
+            ->assertJsonCount(1)
             ->assertJsonFragment(['id' => $this->client->id]);
 
             $this->getJson(route('business.clients.index')."?active=1&status={$status2->id}")
             ->assertStatus(200)
-            ->assertJsonCount( 1, 'clients' )
+            ->assertJsonCount(1)
             ->assertJsonFragment(['id' => $client2->id]);
 
-        $tits = $this->getJson(route('business.clients.index')."?active=0&status={$status3->id}")
+        $this->getJson(route('business.clients.index')."?active=0&status={$status3->id}")
             ->assertStatus(200)
-            ->assertJsonCount( 1, 'clients' )
+            ->assertJsonCount(1)
             ->assertJsonFragment(['id' => $client3->id]);
     }
 }

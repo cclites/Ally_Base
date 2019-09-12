@@ -38,14 +38,8 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        if ( $request->filled( 'json' ) || $request->expectsJson() ) {
-
-            $query = Client::forRequestedBusinesses();
-
-            // sorting controls using the BaseModel class
-            $this->orderedColumn = $request->input( 'sortBy', 'users.lastname' ); // Erik TODO => this may need adjustments
-            $order = $request->input( 'sortDirection', 'asc' );
-            $query->ordered( $order );
+        if ($request->expectsJson()) {
+            $query = Client::forRequestedBusinesses()->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -76,38 +70,8 @@ class ClientController extends BaseController
                 $query->with('caseManager');
             }
 
-            $search = $request->input( 'search', null );
-
-            if ( $search ) {
-
-                $query->where( function ($q) use ( $search ) {
-
-                    $q->where( 'users.email', 'LIKE', "%$search%" )
-                        ->orWhere( 'users.id', 'LIKE', "%$search%" )
-                        ->orWhere( 'users.firstname', 'LIKE', "%$search%" )
-                        ->orWhere( 'users.lastname', 'LIKE', "%$search%" );
-                });
-            }
-
-            // grab total before pagination
-            $total = $query->count();
-
-            // pagination controls
-            $per_page     = $request->input( 'perPage', 50 );
-            $current_page = $request->input( 'page', 1 );
-            $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
-
             $clients = $query->get();
-
-            // dd( $clients->first()->id );
-
-            $data = [
-
-                'total'   => $total,
-                'clients' => $clients
-            ];
-
-            return $data;
+            return $clients;
         }
 
         return view('business.clients.index');
