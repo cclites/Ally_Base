@@ -66,6 +66,12 @@
                         name: 'General',
                         fields: [
                             {
+                              key: 'height',
+                            },
+                            {
+                                key: 'weight',
+                            },
+                            {
                                 key: 'lives_alone',
                             },
                             {
@@ -80,9 +86,6 @@
                             {
                                 key: 'incompetent',
                                 title: 'Deemed Incompetent:',
-                            },
-                            {
-                                key: 'competency_level'
                             },
                         ]
                     },

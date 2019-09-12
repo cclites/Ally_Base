@@ -191,11 +191,11 @@
                                         </table>
                                     </div>
                                 </div>
-                                @if($shift->signature)
+                                @if($shift->clientSignature)
                                     <div class="row with-padding-bottom">
                                         <div class="col-sm-12">
                                             <span style="font-weight: 500;">Client Signature</span>
-                                            {!! $shift->signature->content !!}
+                                            {!! $shift->clientSignature->content !!}
                                         </div>
                                     </div>
                                 @endif

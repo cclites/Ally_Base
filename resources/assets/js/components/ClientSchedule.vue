@@ -99,7 +99,7 @@
             fetchCaregiver(id) {
                 this.selectedCaregiver = {};
                 this.loadingCaregiver = true;
-                axios.get('/caregiver/' + id)
+                axios.get('/clients/caregiver/' + id)
                     .then(response => {
                         this.selectedCaregiver = response.data.caregiver;
                     })

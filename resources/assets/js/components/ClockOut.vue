@@ -155,12 +155,20 @@
                     </b-col>
                 </b-row>
                 <b-row v-if="business.co_signature">
-                    <b-col lg="12">
-                        <b-form-group>
-                            <signature-pad
-                                    v-model="form.signature">
-                            </signature-pad>
-                        </b-form-group>
+                    <b-col class="d-flex mb-2 flex-wrap align-content-stretch">
+                        <signature-pad
+                            class="mr-2 my-1"
+                            v-if="business.co_signature"
+                            v-model="form.client_signature"
+                            :buttonTitle=" 'Add Client Signature' ">
+                        </signature-pad>
+
+                        <signature-pad
+                            class="mr-2 my-1"
+                            v-if="business.co_caregiver_signature"
+                            v-model="form.caregiver_signature"
+                            :buttonTitle=" 'Add Caregiver Signature' ">
+                        </signature-pad>
                     </b-col>
                 </b-row>
 
@@ -209,7 +217,8 @@
                     caregiver_injury: 0,
                     issue_text: null,
                     other_expenses_desc: null,
-                    signature: null,
+                    client_signature: null,
+                    caregiver_signature: null,
                     goals: {},
                     questions: {},
                     narrative_notes: '',

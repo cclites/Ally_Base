@@ -21,7 +21,7 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiverSignature', 'clientSignature', 'statusHistory']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
