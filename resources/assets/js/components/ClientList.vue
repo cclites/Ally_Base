@@ -152,6 +152,7 @@
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
             this.loadOfficeUsers();
+            await this.loadClients();
         },
 
         computed: {
