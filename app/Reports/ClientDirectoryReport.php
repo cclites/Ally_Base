@@ -4,18 +4,25 @@ namespace App\Reports;
 use App\Client;
 use App\Traits\IsDirectoryReport;
 use App\CustomField;
+use App\User;
 
 class ClientDirectoryReport extends BusinessResourceReport
 {
     use IsDirectoryReport;
 
-    private $per_page = 10; // simple default for 'limit'
-    private $current_page = 1; // simple default.. maybe it should start at zero?
+    // Pagination
+    private $per_page = 50;
+    private $current_page = 1;
     private $total_count;
+    private $sortBy;
+    private $sortOrder;
 
+    // Filters / Other
     private $alias_filter;
     private $active_filter;
     private $client_type;
+    private $for_export;
+    private $customFields = [];
 
     /**
      * @var bool
@@ -37,7 +44,8 @@ class ClientDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Client::with([ 'user', 'address' ]);
+        $this->query = Client::with(['user', 'addresses', 'creator', 'updator', 'statusAlias', 'evvPhone', 'salesperson', 'caseManager', 'referralSource', 'evvAddress', 'business'])
+            ->leftJoin('users', 'clients.id', '=', 'users.id');
     }
 
     /**
@@ -53,10 +61,10 @@ class ClientDirectoryReport extends BusinessResourceReport
     /**
      * Filter by client type.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param $type
+     * @return ClientDirectoryReport
      */
-    public function setClientTypeFilter( $type ) : self
+    public function setClientTypeFilter($type): self
     {
         $this->client_type = $type;
 
@@ -64,12 +72,25 @@ class ClientDirectoryReport extends BusinessResourceReport
     }
 
     /**
+     * Filter by client type.
+     *
+     * @param $flag
+     * @return ClientDirectoryReport
+     */
+    public function setForExport($flag): self
+    {
+        $this->for_export = $flag;
+
+        return $this;
+    }
+
+    /**
      * Filter by status alias.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param $alias_id
+     * @return ClientDirectoryReport
      */
-    public function setStatusAliasFilter( $alias_id ) : self
+    public function setStatusAliasFilter($alias_id): self
     {
         $this->alias_filter = $alias_id;
 
@@ -79,10 +100,10 @@ class ClientDirectoryReport extends BusinessResourceReport
     /**
      * Filter by active status.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param $active
+     * @return ClientDirectoryReport
      */
-    public function setActiveFilter( $active ) : self
+    public function setActiveFilter($active): self
     {
         $this->active_filter = $active;
 
@@ -90,12 +111,25 @@ class ClientDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Set number of records to pagniate per page
+     * Set the custom fields that should be returned.
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param iterable $customFields
+     * @return ClientDirectoryReport
      */
-    public function setPageCount( $count ) : self
+    public function setCustomFields(iterable $customFields): self
+    {
+        $this->customFields = $customFields;
+
+        return $this;
+    }
+
+    /**
+     * Set number of records to paginate per page
+     *
+     * @param int|string $count
+     * @return ClientDirectoryReport
+     */
+    public function setPageCount($count): self
     {
         $this->per_page = $count;
 
@@ -103,20 +137,35 @@ class ClientDirectoryReport extends BusinessResourceReport
     }
 
     /**
-     * Set number of records to pagniate per page
+     * Set current page
      *
-     * @param $status
-     * @return CaregiverAccountSetupReport
+     * @param int|string $page
+     * @return ClientDirectoryReport
      */
-    public function setCurrentPage( $page ) : self
+    public function setCurrentPage($page): self
     {
         $this->current_page = $page;
 
         return $this;
     }
-   
+
     /**
-     * 
+     * Set sorting field and direction.
+     *
+     * @param string $sortBy
+     * @param string $sortOrder
+     * @return ClientDirectoryReport
+     */
+    public function setSort(string $sortBy, string $sortOrder) : self
+    {
+        $this->sortBy = $sortBy;
+        $this->sortOrder = $sortOrder;
+
+        return $this;
+    }
+
+    /**
+     *
      * public accessor for the total count
      */
     public function getTotalCount()
@@ -131,69 +180,85 @@ class ClientDirectoryReport extends BusinessResourceReport
      */
     protected function results()
     {
-
-        switch( $this->active_filter ){
-
+        switch ($this->active_filter) {
             case 'true':
-
                 $this->query()->active();
                 break;
             case 'false':
-
                 $this->query()->inactive();
                 break;
             default:
-
                 break;
         }
 
-        if( $this->client_type  ) $this->query()->where( 'client_type', $this->client_type );
-        if( $this->alias_filter ) $this->query()->where( 'status_alias_id', $this->alias_filter );
+        if ($this->client_type) {
+            $this->query()->where('client_type', $this->client_type);
+        }
 
-        $this->total_count = $this->query()->with( 'meta' )
+        if ($this->alias_filter) {
+            $this->query()->where('status_alias_id', $this->alias_filter);
+        }
+
+        if ($this->sortBy == 'lastname' || !$this->sortBy) {
+            $this->query()->orderByRaw("users.lastname {$this->sortOrder}, users.firstname {$this->sortOrder}");
+        } else if (in_array($this->sortBy, [
+            'firstname', 'id', 'username', 'email', 'date_of_birth', 'gender', 'active', 'created_at', 'updated_at',
+        ])) {
+            $this->query()->orderBy('users.'.$this->sortBy, $this->sortOrder);
+        } else {
+            $this->query()->orderBy('clients.'.$this->sortBy, $this->sortOrder);
+        }
+
+        // perform count-query first
+        $this->total_count = $this->query()->with('meta')
             ->count();
 
-
-        $this->query()->limit( $this->per_page )->offset( $this->per_page * ( $this->current_page - 1 ) );
-
-        $clients = $this->query()->get();
-
+        // implement pagination manually
+        if (! $this->for_export) {
+            $this->query()->limit($this->per_page)->offset($this->per_page * ($this->current_page - 1));
+        }
 
         $this->generated = true;
-        $customFields = CustomField::forAuthorizedChain()->where( 'user_type', 'client' )->get();
+        return $this->query()->get()->map(function (Client $client) {
+            $data = [
+                'id' => $client->id,
+                'firstname' => $client->firstname,
+                'lastname' => $client->lastname,
+                'username' => starts_with($client->username, 'no_login_') ? null : $client->username,
+                'date_of_birth' => $client->date_of_birth,
+                'gender' => $client->gender,
+                'email' => str_contains($client->email, '@noemail.allyms.com') ? null : $client->email,
+                'active' => $client->active,
+                'office_location' => $client->business->name,
+                'address' => optional($client->getAddress())->full_address,
+                'phone' => optional($client->getPhoneNumber())->number(),
+                'client_type' => str_replace('_', ' ', ucwords($client->client_type)),
+                'status_alias' => optional($client->statusAlias)->name,
 
-        $rows = $clients->map( function( Client $client ) use( &$customFields ) {
+                'created_at' => $client->created_at->toDateTimeString(),
+                'created_by' => optional($client->creator)->name,
+                'updated_at' => optional($client->updated_at)->toDateTimeString(),
+                'updated_by' => optional($client->updator)->name,
 
-            $result = [
-
-                'id'           => $client->id,
-                'first_name'   => $client->user->firstname,
-                'last_name'    => $client->user->lastname,
-                'email'        => $client->user->email,
-                'active'       => $client->active,
-                'address'      => $client->address ? $client->address->full_address : '',
-                'client_type'  => $client->client_type,
-                'status_alias' => $client->statusAlias ? $client->statusAlias->name : '',
-                'date_added'   => $client->user->created_at->format( 'm-d-Y' )
+                'services_coordinator' => optional($client->caseManager)->name,
+                'salesperson' => optional($client->salesperson)->fullName(),
+                'inquiry_date' => optional($client->inquiry_date)->toDateTimeString(),
+                'service_start_date' => optional($client->service_start_date)->toDateTimeString(),
+                'referral' => optional($client->referralSource)->organization,
+                'ambulatory' => $client->ambulatory ? 'Yes' : 'No',
+                'caregiver_1099' => $client->caregiver_1099,
+                'agreement_status' => str_replace('_', ' ', ucwords($client->agreement_status)),
+                'hic' => $client->hic,
+                'diagnosis' => $this->for_export ? $client->diagnosis : str_limit($client->diagnosis, 15),
             ];
 
-            // Add the custom fields to the report row
-            foreach( $customFields as $field ) {
-
-                if( $meta = $client->meta->where( 'key', $field->key )->first() ) {
-
-                    $result[ 'meta' ][ $field->key ] = $meta->display();
-                    continue;
-                }
-
-                $result[ 'meta' ][ $field->key ] = $field->default;
+            $meta = [];
+            foreach ($this->customFields as $field) {
+                $meta[$field->key] = $this->mapMetaField($field, $client->meta);
             }
+            $data = array_merge($data, $meta);
 
-            return $result;
+            return $data;
         });
-
-        $rows = $this->filterColumns( $rows );
-
-        return $rows;
     }
 }

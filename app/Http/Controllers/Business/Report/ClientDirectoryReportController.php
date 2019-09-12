@@ -3,13 +3,13 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\CustomField;
 use App\Http\Controllers\Business\BaseController;
-use App\Reports\CaregiverDirectoryReport;
+use App\Reports\ClientDirectoryReport;
 use Illuminate\Http\Request;
 
-class CaregiverDirectoryReportController extends BaseController
+class ClientDirectoryReportController extends BaseController
 {
     /**
-     * Shows the page to generate the caregiver directory
+     * Get the Client directory.
      *
      * @param Request $request
      * @return Response
@@ -17,7 +17,7 @@ class CaregiverDirectoryReportController extends BaseController
     public function index(Request $request)
     {
         $fields = CustomField::forAuthorizedChain()
-            ->where('user_type', 'caregiver')
+            ->where('user_type', 'client')
             ->with('options')
             ->get();
 
@@ -26,13 +26,12 @@ class CaregiverDirectoryReportController extends BaseController
             $sortBy = $request->input('sort', 'lastname');
             $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
 
-            \DB::enableQueryLog();
-
-            $report = new CaregiverDirectoryReport();
+            $report = new ClientDirectoryReport();
             $report->forRequestedBusinesses()
                 ->setCustomFields($fields)
-                ->setActiveFilter($request->active)
+                ->setClientTypeFilter($request->client_type)
                 ->setStatusAliasFilter($request->status_alias_id)
+                ->setActiveFilter($request->active)
                 ->setPageCount(50)
                 ->setCurrentPage($page)
                 ->setSort($sortBy, $sortOrder)
@@ -47,11 +46,9 @@ class CaregiverDirectoryReportController extends BaseController
             $rows = $report->rows();
             $total = $report->getTotalCount();
 
-            \Log::info(\DB::getQueryLog());
-
             return response()->json(['rows' => $rows, 'total' => $total]);
         }
 
-        return view('business.reports.caregiver_directory', compact('fields'));
+        return view('business.reports.client_directory', compact('fields'));
     }
 }

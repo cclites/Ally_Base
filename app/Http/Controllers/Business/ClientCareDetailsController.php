@@ -7,8 +7,6 @@ use App\Http\Requests\UpdateClientCareDetailsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Client;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ClientCareDetailsController extends BaseController
 {
@@ -34,27 +32,5 @@ class ClientCareDetailsController extends BaseController
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
-    }
-
-    protected function print($client){
-
-        $client = Client::where('id', $client)->with([
-            'careDetails',
-            'skilledNursingPoc',
-            'address'
-        ])->first();
-
-        $html = response(view('business.clients.client_care_details',['client'=>$client]))->getContent();
-
-        $snappy = \App::make('snappy.pdf');
-        return new Response(
-            $snappy->getOutputFromHtml($html),
-            200,
-            array(
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="testReport.pdf"'
-            )
-        );
-
     }
 }

@@ -139,9 +139,11 @@ class GenerateShiftFlagsTest extends TestCase
     {
         $this->expectsEvents(ShiftFlagsCouldChange::class);
 
-        $schedule = $this->createSchedule(Carbon::now()->subDays(1));
+        // this is still a monday-only problem.. follow 'convertAllThisWeek' to see how it grabs schedules compared to how this creates a schedule
+        $schedule = $this->createSchedule(Carbon::now()->subHours(12));
 
         $converter = new ScheduleConverter($this->business);
+
         $converter->convertAllThisWeek();
     }
 

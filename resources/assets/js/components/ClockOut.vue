@@ -32,9 +32,9 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12" class="with-padding-top">
-                        <h5>Additional Activities Performed</h5>
+                        <h5>Activities Performed</h5>
                         <div class="form-check">
-                            <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
+                            <input-help :form="form" field="activities" text="Check off any activities of daily living performed."></input-help>
                             <label class="large-checkbox" v-for="activity in additionalActivities()" :key="activity.id">
                                 <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
@@ -296,9 +296,9 @@
             },
 
             setTimes() {
-                this.time = this.formatTime();
+                this.time = this.formatTime( new Date() );
                 this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
-                setInterval(() => this.time = this.formatTime(), 1000 * 15)
+                setInterval(() => this.time = this.formatTime( new Date() ), 1000 * 15)
             },
 
             setupGoalsForm() {

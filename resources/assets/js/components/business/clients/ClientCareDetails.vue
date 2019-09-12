@@ -1,14 +1,12 @@
 <template>
-    <b-card class="clientCareNeeds"
+    <b-card class="client-care-needs"
             header="Detailed Client Care Needs"
             header-text-variant="white"
             header-bg-variant="info"
-            ref="clientCareNeeds"
     >
 
         <b-form-group class="pb-2">
-            <b-btn @click="printForm()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
-            <b-btn variant="success" @click.prevent="save()" :disabled="busy" class="float-right mr-2">Save Changes</b-btn>
+            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
         </b-form-group>
 
         <h2>
@@ -105,6 +103,10 @@
 
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
+        </b-form-group>
+
+        <b-form-group label="Special instructions:" class="ml-4">
+            <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
         </b-form-group>
 
         <checkbox-group label="Toileting" v-model="form.toileting" :items="options.toileting" />
@@ -211,7 +213,6 @@
     </b-card>
 </template>
 
-
 <script>
     export default {
         props: {
@@ -242,7 +243,7 @@
                         contact_guard: 'Contact guard',
                         gait_belt: 'Gait belt',
                         can_use_stairs: 'Client may use stairs',
-                        stair_lift: 'Stair lift',
+                        stair_lift: 'Stair life',
                         other: 'Other'
                     },
                     toileting: {
@@ -358,7 +359,21 @@
                         other: 'Other',
                     },
 
+<<<<<<< HEAD
                 },
+=======
+                    mental_status: {
+                        oriented: "Oriented",
+                        comatose: "Comatose",
+                        forgetful: "Forgetful",
+                        depressed: "Depressed",
+                        disoriented: "Disoriented",
+                        lethargic: "Lethargic",
+                        agitated: "Agitated",
+                        other: "Other",
+                    }
+                }
+>>>>>>> db6838fc367c6aebfc0fd3a8204ccf4b059b7fcf
             }
         },
 
@@ -384,8 +399,8 @@
                 this.form = new Form(data);
             },
 
-            printForm(){
-                window.location = this.form.toQueryString(this.url + '/print');
+            print(){
+                $('.client-care-needs').print();
             },
         },
 

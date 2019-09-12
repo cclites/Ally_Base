@@ -73,6 +73,9 @@ Route::group([
     'roles' => ['client'],
 ], function () {
     Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
+    Route::get('caregiver/{caregiver}','Clients\CaregiverController@show')->name('clients.caregivers.show');
+    Route::get('scheduled-shifts', 'Clients\ScheduleController@index')->name('client.scheduled-shifts');
+    Route::get('scheduled-shifts/{client}/schedule', 'Clients\ScheduleController@schedule')->name('client.scheduled-shifts');
     Route::get('unconfirmed-shifts', 'Clients\UnconfirmedShiftsController@index')->name('client.unconfirmed-shifts');
     Route::post('unconfirmed-shifts/{shift}/confirm', 'Clients\UnconfirmedShiftsController@confirm')->name('client.unconfirmed-shifts.confirm');
     Route::patch('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@update')->name('client.unconfirmed-shifts.update');
@@ -221,7 +224,6 @@ Route::group([
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
-    Route::get('clients/{client}/care-details/print', 'Business\ClientCareDetailsController@print')->name('clients.care-details.print');
     Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
     Route::get('clients/{client}/skilled-nursing-poc/print', 'Business\SkilledNursingPocController@generatePdf')->name('clients.skilled-nursing-poc.generate-pdf');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
@@ -338,7 +340,7 @@ Route::group([
     Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
-    Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
+    Route::get('reports/client-directory', 'Business\Report\ClientDirectoryReportController@index')->name('reports.client_directory');
     Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
