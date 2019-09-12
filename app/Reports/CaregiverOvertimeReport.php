@@ -106,7 +106,7 @@ class CaregiverOvertimeReport extends BaseReport
                         $futureScheduled += $shift->remaining();
                     }
 
-                    $duration = Schedule::future($this->timezone, $this->end)
+                    $duration = Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
                             ->where('caregiver_id', $caregiver->id)
                             ->sum('duration');
 
@@ -120,7 +120,7 @@ class CaregiverOvertimeReport extends BaseReport
                         'firstname'=>$caregiver->first_name,
                         'lastname'=>$caregiver->last_name,
                         'worked' => $worked,
-                        'future_scheduled' => $futureScheduled, //future scheduled
+                        'future_scheduled' => $futureScheduled,
                         'total' => $total,
                     ];
 

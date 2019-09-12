@@ -768,11 +768,10 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      * @param string $fromDate
      * @return void
      */
-    public function scopeFuture($query, $timezone, $toDate)
+    public function scopeFuture($query, $timezone, $fromDate)
     {
-        $to = Carbon::parse($toDate, $timezone);
-        $from = Carbon::now()->setTimezone($timezone);
-        $query->whereBetween('starts_at', [$from, $to]);
+        $from = Carbon::parse($fromDate, $timezone)->subHour();
+        $query->where('starts_at', '>=', $from);
     }
 
     /**
@@ -791,4 +790,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         });
     }
 
+    /**
+     * Get only schedules that start between the two given dates.
+     * Adjusts to timezone.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $start
+     * @param string $end
+     * @return void
+     */
+    public function scopeStartsBetweenDates($query, $timezone, $start, $end)
+    {
+        $query->whereBetween('starts_at', [
+            Carbon::parse($start, $timezone),
+            Carbon::parse($end, $timezone)
+        ]);
+    }
 }
