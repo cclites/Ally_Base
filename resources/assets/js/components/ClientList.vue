@@ -169,7 +169,7 @@
 
                 // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
 
-                let query = '/business/clients?json=1';
+                let query = '/business/clients/paginate?json=1';
                 query += '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
                 // pagination controls
