@@ -11,7 +11,6 @@
                     {{ address.city }}, {{ address.state }} {{ address.zip }}
 
                     <span class="d-block mt-2">
-
                         Notes:<br/>
                         {{ address.notes }}
                     </span>
@@ -33,7 +32,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="careDetails.id" class="with-padding-top">
+        <b-row v-if="careDetails.id" class="with-padding-top care-details-scrollable">
             <b-col sm="12">
                 <b-card title="Detailed Client Care Needs">
                     <care-details-display :care-details="careDetails"></care-details-display>
@@ -83,5 +82,8 @@
 </script>
 
 <style scoped>
-
+    .care-details-scrollable{
+        max-height:300px;
+        overflow:auto;
+    }
 </style>
