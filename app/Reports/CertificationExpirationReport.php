@@ -15,6 +15,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     protected $expiration_type;
     protected $all_expiration_types;
     protected $showExpired;
+    protected $showEmptyExpirations;
     protected $days;
     protected $startDate;
     protected $endDate;
@@ -36,6 +37,12 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
     public function setShowScheduled(?bool $showScheduled) : self
     {
         $this->showScheduled = $showScheduled;
+        return $this;
+    }
+
+    public function setShowEmptyExpirations(?bool $showEmptyExpirations) : self
+    {
+        $this->showEmptyExpirations = $showEmptyExpirations;
         return $this;
     }
 
@@ -80,7 +87,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
      */
     public function __construct()
     {
-        $this->query = CaregiverLicense::with('caregiver', 'caregiver.address');
+        $this->query = CaregiverLicense::with('caregiver', 'caregiver.address', 'caregiver.schedules' );
     }
 
     /**
@@ -131,23 +138,26 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
 
             $by_caregivers = $query->get()->groupBy( 'caregiver_id' );
 
-            foreach( $this->all_expiration_types as $type ){
-                // for every type of expiration that the chain has..
+            if( $this->showEmptyExpirations ){
 
-                foreach( $by_caregivers as $caregiver_id => $caregiver ){
-                    // make sure it is represented for every caregiver returned, blank or not..
+                foreach( $this->all_expiration_types as $type ){
+                    // for every type of expiration that the chain has..
 
-                    if( !$caregiver->where( 'chain_expiration_type_id', '=', $type->id )->first() ){
-                        // if the expiration type is not found for this caregiver, add a blank row
+                    foreach( $by_caregivers as $caregiver_id => $caregiver ){
+                        // make sure it is represented for every caregiver returned, blank or not..
 
-                        $caregiver->push( CaregiverLicense::make([
+                        if( !$caregiver->where( 'chain_expiration_type_id', '=', $type->id )->first() ){
+                            // if the expiration type is not found for this caregiver, add a blank row
 
-                            'id'                       => null,
-                            'caregiver_id'             => $caregiver_id,
-                            'name'                     => $type->type,
-                            'expires_at'               => null,
-                            'chain_expiration_type_id' => $type->id
-                        ]));
+                            $caregiver->push( CaregiverLicense::make([
+
+                                'id'                       => null,
+                                'caregiver_id'             => $caregiver_id,
+                                'name'                     => $type->type,
+                                'expires_at'               => null,
+                                'chain_expiration_type_id' => $type->id
+                            ]));
+                        }
                     }
                 }
             }

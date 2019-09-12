@@ -36,6 +36,7 @@ class BusinessCaregiverExpirationsReportController extends BaseController
                 ->setInactiveOnly($request->active === '0' ? true : false)
                 ->setExpirationType($request->expiration_type)
                 ->setExpired($request->show_expired == 1 ? true : false)
+                ->setShowEmptyExpirations($request->show_empty_expirations === 'true' ? true : false)
                 ->setBetweenDates($request->start_date, $request->end_date)
                 ->setShowScheduled($request->show_scheduled === 'false' ? false : true );
 
