@@ -934,18 +934,60 @@ class ReportsController extends BaseController
      */
     public function evv(EVVReport $report)
     {
-        if (request()->expectsJson() && request()->input('json')) {
+        if ( request()->expectsJson() && request()->input( 'json' ) ) {
+
             $report->forRequestedBusinesses();
 
-            if ($method = request()->input('method')) {
+            if ( $method = request()->input('method') ) {
                 if ($method === 'geolocation') $report->geolocationOnly();
                 if ($method === 'telephony') $report->telephonyOnly();
             }
             if (strlen(request()->input('verified'))) {
                 $report->where('verified', request()->input('verified'));
             }
-            $this->addShiftReportFilters($report, request());
-            return $report->rows();
+            $this->addShiftReportFilters( $report, request() );
+
+            $rows = $report->rows();
+
+            if( request()->input( 'summarize', false ) === '1' ){
+
+                // process the rows data as a summary
+                $summary[ 'client' ] = $rows->groupBy( 'client_id' )->map( function( $client ){
+
+                    $data[ 'clientId'              ] = $client->first()->client->id;
+                    $data[ 'clientName'            ] = $client->first()->client->name;
+                    $data[ 'totalShifts'           ] = $client->count();
+                    $data[ 'totalVerifiedShifts'   ] = $client->whereStrict( 'verified', 1 )->count();
+                    $data[ 'totalUnverifiedShifts' ] = $client->whereStrict( 'verified', 0 )->count();
+
+                    $data[ 'verifiedPercentage'    ] = $data[ 'totalVerifiedShifts' ] / $data[ 'totalShifts' ];
+
+                    $data[ 'totalBlocked'          ] = $client->whereStrict( 'checked_in_distance', 0 )->count();
+                    $data[ 'totalOutsideRange'     ] = $client->whereStrict( 'checked_in_distance', '>', \App\Shifts\ClockIn::MAXIMUM_DISTANCE_METERS )->count();
+
+                    return $data;
+                });
+
+                $summary[ 'caregiver' ] = $rows->groupBy( 'caregiver_id' )->map( function( $caregiver ){
+
+                    $data[ 'caregiverId'           ] = $caregiver->first()->caregiver->id;
+                    $data[ 'caregiverName'         ] = $caregiver->first()->caregiver->name;
+                    $data[ 'totalShifts'           ] = $caregiver->count();
+                    $data[ 'totalVerifiedShifts'   ] = $caregiver->whereStrict( 'verified', 1 )->count();
+                    $data[ 'totalUnverifiedShifts' ] = $caregiver->whereStrict( 'verified', 0 )->count();
+
+                    $data[ 'verifiedPercentage'    ] = $data[ 'totalVerifiedShifts' ] / $data[ 'totalShifts' ];
+
+                    $data[ 'totalBlocked'          ] = $caregiver->whereStrict( 'checked_in_distance', 0 )->count();
+                    $data[ 'totalOutsideRange'     ] = $caregiver->whereStrict( 'checked_in_distance', '>', \App\Shifts\ClockIn::MAXIMUM_DISTANCE_METERS )->count();
+
+                    return $data;
+                });
+
+                return response()->json( $summary );
+            }
+
+            return $rows;
         }
 
         return view('business.reports.evv');
