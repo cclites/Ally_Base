@@ -32,9 +32,9 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12" class="with-padding-top">
-                        <h5>Additional Activities Performed</h5>
+                        <h5>Activities Performed</h5>
                         <div class="form-check">
-                            <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
+                            <input-help :form="form" field="activities" text="Check off any activities of daily living performed."></input-help>
                             <label class="large-checkbox" v-for="activity in additionalActivities()" :key="activity.id">
                                 <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
@@ -155,12 +155,20 @@
                     </b-col>
                 </b-row>
                 <b-row v-if="business.co_signature">
-                    <b-col lg="12">
-                        <b-form-group>
-                            <signature-pad
-                                    v-model="form.signature">
-                            </signature-pad>
-                        </b-form-group>
+                    <b-col class="d-flex mb-2 flex-wrap align-content-stretch">
+                        <signature-pad
+                            class="mr-2 my-1"
+                            v-if="business.co_signature"
+                            v-model="form.client_signature"
+                            :buttonTitle=" 'Add Client Signature' ">
+                        </signature-pad>
+
+                        <signature-pad
+                            class="mr-2 my-1"
+                            v-if="business.co_caregiver_signature"
+                            v-model="form.caregiver_signature"
+                            :buttonTitle=" 'Add Caregiver Signature' ">
+                        </signature-pad>
                     </b-col>
                 </b-row>
 
@@ -209,7 +217,8 @@
                     caregiver_injury: 0,
                     issue_text: null,
                     other_expenses_desc: null,
-                    signature: null,
+                    client_signature: null,
+                    caregiver_signature: null,
                     goals: {},
                     questions: {},
                     narrative_notes: '',
@@ -296,9 +305,9 @@
             },
 
             setTimes() {
-                this.time = this.formatTime();
+                this.time = this.formatTime( new Date() );
                 this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
-                setInterval(() => this.time = this.formatTime(), 1000 * 15)
+                setInterval(() => this.time = this.formatTime( new Date() ), 1000 * 15)
             },
 
             setupGoalsForm() {

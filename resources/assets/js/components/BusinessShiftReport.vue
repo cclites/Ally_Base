@@ -695,8 +695,7 @@
             },
 
             hourlyFormat(item, amount, type) {
-
-                if(item.services.length > 1 && type == 'caregiver'){
+                if(item.services && item.services.length > 1 && type == 'caregiver'){
                     return 'M';
                 }
 

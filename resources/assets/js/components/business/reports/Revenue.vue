@@ -52,7 +52,7 @@
                         </b-col>
                         <b-col lg="2">
                             <b-button variant="info" @click="fetchData()" class="mb-2">Generate</b-button>
-                            <b-button v-if="dataIsReady && ! loading" @click="print">Print</b-button>
+                            <b-button v-if="dataIsReady && ! loading" @click="print" class="mb-2">Print</b-button>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -114,7 +114,7 @@
                                     <span>Total profit</span>
 
                                     <span class="display-6 text-success mr-2"
-                                          :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
+                                          :style="`color: ${profitColor}`">{{displayedProfitCurrent}}</span>
                                 </div>
                                 <hr/>
                                 <div v-if="priorTableData.length > 0">
@@ -130,7 +130,7 @@
                                     </div>
                                     <div class="d-flex align-items-end justify-content-between">
                                         <span>Total profit</span>
-                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
+                                        <span class="display-6 text-success" :style="`color: ${profitColor}`">{{displayedProfitPrior}}</span>
                                     </div>
                                     <hr/>
                                     <h2>Comparison to prior period</h2>
@@ -377,6 +377,20 @@
                     {label: 'CG Wages Growth', value: this.wages.growth, key: 'wages'},
                     {label: 'Profit Growth', value: this.profit.growth, key: 'profit'},
                 ];
+            },
+
+            displayedProfitCurrent() {
+                if(this.includeCaregiverWages){
+                    return this['profit'].total.current;
+                }else{
+                    const profitTotal =  Number (this['profit'].total.current .replace ('$', '').replace (',', ''));
+                    const wagesTotal = Number (this['wages'].total.current .replace ('$', '').replace (',', ''));
+                    return this.formatPrice(profitTotal + wagesTotal);
+                }
+            },
+
+            displayedProfitPrior() {
+                return this['profit'].total.prior;
             }
         },
         methods: {
@@ -409,6 +423,8 @@
                         console.error (err);
                         this.loading = false;
                     })
+
+
             },
 
             calculateTotalOf (metric, period = 'current') {
@@ -437,7 +453,7 @@
             print () {
                 $ ('#revenue_report').print ()
             }
-        }
+        },
     }
 </script>
 

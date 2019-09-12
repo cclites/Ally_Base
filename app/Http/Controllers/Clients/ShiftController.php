@@ -36,7 +36,7 @@ class ShiftController extends Controller
         $shifts_verified = false;
 
         if ($shifts->count()) {
-            $shifts_verified = !is_null($shifts->first()->signature) && !is_null($shifts->last()->signature);
+            $shifts_verified = !is_null($shifts->first()->clientSignature) && !is_null($shifts->last()->clientSignature);
         }
 
         if (request()->expectsJson()) {
@@ -74,8 +74,8 @@ class ShiftController extends Controller
             ->get();
 
         foreach($shifts as $shift) {
-            if (!$shift->signature) {
-                $shift->signature()->save(new Signature(['content' => $name]));
+            if (!$shift->clientSignature) {
+                $shift->clientSignature()->save(new Signature(['content' => $name, 'type' => 'client']));
             }
         }
 

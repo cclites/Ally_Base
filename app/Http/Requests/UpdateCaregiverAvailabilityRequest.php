@@ -40,7 +40,8 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
             'maximum_shift_hours' => 'required|numeric|min:1',
             'maximum_miles' => 'required|numeric|min:1',
             'days_off' => 'nullable|array',
-            'days_off.*.date' => 'required|date',
+            'days_off.*.start_date' => 'required|date',
+            'days_off.*.end_date' => 'required|date',
             'days_off.*.description' => 'required|string|max:156',
         ];
     }
