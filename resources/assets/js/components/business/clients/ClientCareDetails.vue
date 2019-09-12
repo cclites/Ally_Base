@@ -104,9 +104,7 @@
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
         </b-form-group>
-
         
-
         <checkbox-group label="Toileting" v-model="form.toileting" :items="options.toileting" />
 
         <b-form-group label="Special instructions:" class="ml-4">
@@ -356,7 +354,6 @@
                         caregiver: 'Caregiver must bring own',
                         other: 'Other',
                     },
-
                     mental_status: {
                         oriented: "Oriented",
                         comatose: "Comatose",
@@ -455,8 +452,6 @@
         },
     }
 </script>
-
-/*******************************************************************************************************/
 
 <style lang="scss">
     .client-care-needs {
