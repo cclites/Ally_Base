@@ -220,6 +220,7 @@ Route::group([
     Route::get('clients/referral-service-agreement/{rsa}/agreement-pdf', 'Business\ClientReferralServiceAgreementController@agreementPdf')->name('clients.referral-service-agreement.pdf');
     Route::post('clients/referral-service-agreement', 'Business\ClientReferralServiceAgreementController@store')->name('clients.referral-service-agreement.store');
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
+    Route::get('clients/paginate', 'Business\PaginatedClientController@index');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
