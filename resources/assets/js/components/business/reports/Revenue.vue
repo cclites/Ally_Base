@@ -251,8 +251,6 @@
             return {
                 loading: false,
                 dataIsReady: false,
-                displayedProfitCurrent: '',
-                displayedProfitPrior: '',
                 form: new Form ({
                     start_date: '09/01/2018',
                     end_date: '11/01/2018',
@@ -379,6 +377,20 @@
                     {label: 'CG Wages Growth', value: this.wages.growth, key: 'wages'},
                     {label: 'Profit Growth', value: this.profit.growth, key: 'profit'},
                 ];
+            },
+
+            displayedProfitCurrent() {
+                if(this.includeCaregiverWages){
+                    return this['profit'].total.current;
+                }else{
+                    const profitTotal =  Number (this['profit'].total.current .replace ('$', '').replace (',', ''));
+                    const wagesTotal = Number (this['wages'].total.current .replace ('$', '').replace (',', ''));
+                    return this.formatPrice(profitTotal + wagesTotal);
+                }
+            },
+
+            displayedProfitPrior() {
+                return this['profit'].total.prior;
             }
         },
         methods: {
@@ -406,9 +418,6 @@
                                 this[prop].growth = this.calculateGrowth (prop);
                             }
                         });
-
-                        this.displayedProfitCurrent = this['profit'].total.current;
-                        this.displayedProfitPrior = this['profit'].total.prior;
                     })
                     .catch ((err) => {
                         console.error (err);
@@ -445,20 +454,6 @@
                 $ ('#revenue_report').print ()
             }
         },
-        watch: {
-            includeCaregiverWages(){
-                if(this.includeCaregiverWages){
-                    this.displayedProfitCurrent = this['profit'].total.current;
-                }else{
-                    const profitTotal =  Number (this['profit'].total.current .replace ('$', '').replace (',', ''));
-                    const wagesTotal = Number (this['wages'].total.current .replace ('$', '').replace (',', ''));
-
-                    this.displayedProfitCurrent = this.formatPrice(profitTotal + wagesTotal);
-
-                }
-
-            }
-        }
     }
 </script>
 
