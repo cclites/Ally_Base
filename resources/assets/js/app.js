@@ -285,6 +285,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-rates-tab', require('./components/business/clients/ClientRatesTab'));
 Vue.component('client-setup-wizard', require('./components/account-setup/ClientSetupWizard.vue'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));

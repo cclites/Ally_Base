@@ -105,7 +105,8 @@ class ClientOnboardingController extends Controller
                 $data
             );
 
-            Signature::onModelInstance($onboarding, $request->signature);
+            $type = 'client_onboarding';
+            Signature::attachToModel($onboarding, $request->signature, $type);
 
             foreach ($activities as $key => $value) {
                 if (!$onboarding->activities()->where('onboarding_activity_id', $key)->exists()) {

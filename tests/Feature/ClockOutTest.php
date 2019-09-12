@@ -269,7 +269,7 @@ class ClockOutTest extends TestCase
         $this->assertCount(1, $this->business->fresh()->questions()->forType($this->client->client_type)->get());
 
         $data = [
-            'signature' => 'test',
+            'clientSignature' => 'test',
             'caregiver_comments' => 'test',
             'activities' => [$activity->id],
             'questions' => [$question->id => 'answer'],
@@ -294,7 +294,7 @@ class ClockOutTest extends TestCase
         $question = factory(\App\Question::class)->create(['required' => 1, 'business_id' => $this->business->id, 'client_type' => $this->client->client_type]);
 
         $data = [
-            'signature' => 'test',
+            'clientSignature' => 'test',
             'caregiver_comments' => 'test',
             'activities' => [$activity->id],
             'questions' => [$question->id => ''],

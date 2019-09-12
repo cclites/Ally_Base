@@ -299,6 +299,16 @@
                                 <input-help :form="businessSettings" field="co_signature" text=""></input-help>
                             </b-form-group>
                         </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Caregiver Signature" label-for="caregiverSignatureOption" label-class="required">
+                                <b-form-select id="caregiverSignatureOption"
+                                               v-model="businessSettings.co_caregiver_signature">
+                                    <option :value="1">Show</option>
+                                    <option :value="0">Do Not Show</option>
+                                </b-form-select>
+                                <input-help :form="businessSettings" field="co_caregiver_signature" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
                     </b-row>
                     <b-row>
                         <b-col lg="12">
@@ -651,6 +661,7 @@
                     co_expenses: business.co_expenses,
                     co_issues: business.co_issues,
                     co_signature: business.co_signature,
+                    co_caregiver_signature: business.co_caregiver_signature,
                     ein: business.ein,
                     medicaid_id: business.medicaid_id,
                     medicaid_npi_number: business.medicaid_npi_number,
@@ -704,7 +715,9 @@
         },
 
         watch: {
+
             signatureOption() {
+
                 this.updateSignatureValues()
             },
 

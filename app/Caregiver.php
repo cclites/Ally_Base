@@ -351,7 +351,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function daysOff()
     {
         return $this->hasMany(CaregiverDayOff::class)
-            ->where('date', '>', Carbon::today()->subWeek(1));
+            ->where('start_date', '>', Carbon::today()->subWeek(1));
     }
 
     /**
