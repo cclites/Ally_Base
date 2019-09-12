@@ -343,6 +343,10 @@
                         this.loaded = 1;
                     })
                     .catch(error => this.loaded = -1);
+                
+                if ( this.showSummary ) {
+                    this.loadSummaries();
+                }
             },
 
             dayFormat(date) {
