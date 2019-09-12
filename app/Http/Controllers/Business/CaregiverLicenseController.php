@@ -77,6 +77,8 @@ class CaregiverLicenseController extends BaseController
                 $element[ 'expires_at'   ] = Carbon::parse( $exp[ 'expires_at' ] )->format( 'Y-m-d' );
                 $element[ 'updated_at'   ] = now()->format( 'Y-m-d H:i:s' );
 
+                $element[ 'chain_expiration_type_id' ] = $exp[ 'chain_expiration_type_id' ] ?? null;
+
                 return $element;
             }, $expirations ));
 

@@ -163,6 +163,8 @@ class CaregiverExpirationsTest extends TestCase
         $res = $this->post( route( 'business.caregivers.licenses.saveMany', [ 'caregiver' => $this->caregiver->id ] ), $data )
             ->assertSuccessful();
 
+        dd( $res );
+
         // $res = CaregiverLicense::with( 'caregiver', 'caregiver.address' )->get();
     }
 }
