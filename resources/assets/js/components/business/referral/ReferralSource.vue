@@ -1,6 +1,10 @@
 <template>
         <b-modal id="EditReferralModal" v-model="showModal" class="edit-modal" size="lg">
-
+            <b-row>
+                <b-col>
+                    <b-btn variant="info" @click="add" class="float-right">Add New Source</b-btn>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
                     <b-form-group label="Organization Name" label-for="organization">
@@ -32,18 +36,17 @@
                         <b-btn size="sm" @click="update(row.item)" class="mt-1">
                             <i class="fa fa-save"></i>
                         </b-btn>
-                        <b-btn v-if="row.item.active" size="sm" @click="deactivate(row.item, 0)" variant="danger"  class="mt-1">
-                            <i class="fa fa-trash"></i>
-                        </b-btn>
-                        <b-btn v-else size="sm" @click="deactivate(row.item, 1)" variant="success" class="mt-1">
-                            <i class="fa fa-plus-square"></i>
-                        </b-btn>
+                            <b-btn v-if="row.item.active && row.item.id" size="sm" @click="deactivate(row.item, 0)" variant="danger"  class="mt-1">
+                                <i class="fa fa-trash"></i>
+                            </b-btn>
+                            <b-btn v-else-if="row.item.id" size="sm" @click="deactivate(row.item, 1)" variant="success" class="mt-1">
+                                <i class="fa fa-plus-square"></i>
+                            </b-btn>
                     </template>
                 </b-table>
             </div>
 
             <div slot="modal-footer">
-                <b-btn variant="info" @click="add">New Source</b-btn>
                 <b-btn variant="default" @click="showModal=false">Close</b-btn>
             </div>
         </b-modal>
