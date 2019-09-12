@@ -43,12 +43,12 @@
                                     >Include CG Wages as COGS
                                     </b-form-checkbox>
                             </b-form-group>
-                            <b-form-group v-if="includeCaregiverWages">
+                            <!--b-form-group v-if="includeCaregiverWages">
                                 <b-form-checkbox-group>
                                     <b-form-checkbox v-model="form.compare_to_prior">Compare to previous period
                                     </b-form-checkbox>
                                 </b-form-checkbox-group>
-                            </b-form-group>
+                            </b-form-group-->
                         </b-col>
                         <b-col lg="2">
                             <b-button variant="info" @click="fetchData()" class="mb-2">Generate</b-button>
@@ -252,8 +252,8 @@
                 loading: false,
                 dataIsReady: false,
                 form: new Form ({
-                    start_date: '09/01/2018',
-                    end_date: '11/01/2018',
+                    start_date: moment().subtract(1, 'months').format('MM/DD/YYYY'),
+                    end_date: moment().format('MM/DD/YYYY'),
                     compare_to_prior: 0,
                     wages_as_cogs: 1,
                     business_id: '',
