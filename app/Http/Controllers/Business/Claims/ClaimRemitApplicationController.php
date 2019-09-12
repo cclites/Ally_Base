@@ -39,6 +39,6 @@ class ClaimRemitApplicationController extends BaseController
 
         \DB::commit();
 
-        return new SuccessResponse('Remit has been applied to the selected Claims successfully.', null, '.');
+        return new SuccessResponse('Remit has been applied to the selected Claims successfully.', null, route('business.claim-remits.index'));
     }
 }

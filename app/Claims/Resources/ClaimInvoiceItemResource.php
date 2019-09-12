@@ -39,8 +39,8 @@ class ClaimInvoiceItemResource extends Resource
             'rate' => number_format($this->resource->rate, 2),
             'units' => number_format($this->resource->units, 2),
             'summary' => $this->resource->claimable->getName(),
-            'start_time' => $this->resource->claimable->getStartTime(),
-            'end_time' => $this->resource->claimable->getEndTime(),
+            'start_time' => optional($this->resource->claimable->getStartTime())->toDateTimeString(),
+            'end_time' => optional($this->resource->claimable->getEndTime())->toDateTimeString(),
         ];
     }
 

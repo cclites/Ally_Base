@@ -2,7 +2,7 @@
 
 namespace App\Claims;
 
-use MyCLabs\Enum\Enum;
+use App\BaseEnum;
 
 /**
  * ClaimRemitStatus Enum
@@ -11,7 +11,7 @@ use MyCLabs\Enum\Enum;
  * @method static ClaimRemitStatus PARTIALLY_APPLIED()
  * @method static ClaimRemitStatus FULLY_APPLIED()
  */
-class ClaimRemitStatus extends Enum
+class ClaimRemitStatus extends BaseEnum
 {
     private const NOT_APPLIED = 'not_applied';
     private const PARTIALLY_APPLIED = 'partially_applied';

@@ -2,7 +2,7 @@
 
 namespace App\Claims;
 
-use Illuminate\Database\Eloquent\Model;
+use App\AuditableModel;
 
 /**
  * App\Claims\ClaimRemitApplication
@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication query()
  * @mixin \Eloquent
  */
-class ClaimRemitApplication extends Model
+class ClaimRemitApplication extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.

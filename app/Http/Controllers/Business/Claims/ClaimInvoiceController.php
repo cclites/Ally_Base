@@ -40,7 +40,7 @@ class ClaimInvoiceController extends BaseController
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id']);
 
-        if ($request->status == 'unpaid') {
+        if ($request->claim_status == 'unpaid') {
             $query = $query->hasBalance();
         }
 

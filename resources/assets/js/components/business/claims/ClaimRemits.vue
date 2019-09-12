@@ -5,7 +5,10 @@
     >
         <b-row>
             <b-col lg="12">
-                <b-form inline class="mb-4">
+                <b-form-checkbox v-model="filters.all">
+                    Show all Remits with amount available to apply
+                </b-form-checkbox>
+                <b-form v-show="! filters.all" inline class="mb-4">
                     <business-location-form-group
                         v-model="filters.businesses"
                         :label="null"
@@ -55,6 +58,9 @@
 
                     <b-btn variant="info" class="mt-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
                 </b-form>
+                <div v-show="filters.all" class="mb-3">
+                    <b-btn variant="info" class="mt-1" :disabled="filters.busy" @click.prevent="fetch()">Refresh</b-btn>
+                </div>
             </b-col>
         </b-row>
 
@@ -143,6 +149,7 @@
                     actions: { sortable: false },
                 },
                 filters: new Form({
+                    all: true,
                     type: '',
                     start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
@@ -174,6 +181,11 @@
 
         methods: {
             async fetch() {
+                if (this.filters.all) {
+                    // Ensure business dropdown is set to all locations.
+                    this.filters.businesses = '';
+                }
+
                 this.filters.get(`/business/claim-remits`)
                     .then( ({ data }) => {
                         this.$store.commit('claims/setRemits', data.data);
@@ -221,6 +233,9 @@
             this.loading = true;
             await this.fetchPayers();
             this.loading = false;
+
+            this.filters.businesses = '';
+            this.fetch();
         }
     }
 </script>

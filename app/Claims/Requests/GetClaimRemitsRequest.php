@@ -15,6 +15,7 @@ class GetClaimRemitsRequest extends FilteredResourceRequest
     public function rules()
     {
         return [
+            'all' => 'required|in:true,false',
             'businesses' => 'nullable',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
@@ -41,6 +42,8 @@ class GetClaimRemitsRequest extends FilteredResourceRequest
         } else {
             $data['status'] = null;
         }
+
+        $data['all'] = $data['all'] == 'true';
 
         return $data;
     }

@@ -387,7 +387,7 @@ Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'))
 Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
 Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
 Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
-Vue.component('claim-remit-details', require('./components/business/claims/ClaimRemitDetails'));
+Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
 
 
 Vue.filter('date', value => {

@@ -24,13 +24,20 @@ class ClaimRemitController extends BaseController
         if ($request->forJson()) {
             $filters = $request->filtered();
 
-            $results = ClaimRemit::forRequestedBusinesses()
-                ->forDateRange($filters['start_date'], $filters['end_date'])
-                ->forPayer($filters['payer_id'])
-                ->withReferenceId($filters['reference'])
-                ->withType($filters['type'])
-                ->withStatus($filters['status'])
-                ->get();
+            $query = ClaimRemit::forRequestedBusinesses();
+
+            if ($filters['all']) {
+                // Show all with a balance.
+                $query->whereColumn('amount', '<>', 'amount_applied');
+            } else {
+                $query->forDateRange($filters['start_date'], $filters['end_date'])
+                    ->forPayer($filters['payer_id'])
+                    ->withReferenceId($filters['reference'])
+                    ->withType($filters['type'])
+                    ->withStatus($filters['status']);
+            }
+
+            $results = $query->get();
 
             return ClaimRemitResource::collection($results);
         }
@@ -80,7 +87,7 @@ class ClaimRemitController extends BaseController
     {
         $init = ['remit' => new ClaimRemitResource($claimRemit)];
 
-        return view_component('claim-remit-details', 'Apply Remit', compact('init'), [
+        return view_component('apply-remit-page', 'Apply Remit', compact('init'), [
             'Home' => '/',
             'Claim Remits' => route('business.claim-remits.index'),
         ]);

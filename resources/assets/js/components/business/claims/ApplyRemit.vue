@@ -580,6 +580,11 @@
         async mounted() {
             await this.fetchPayers();
             await this.fetchClients();
+
+            // Set default filters
+            this.filters.businesses = this.remit.business_id;
+            this.filters.payer_id = this.remit.payer_id ? this.remit.payer_id : '';
+
             this.fetch();
         },
 
