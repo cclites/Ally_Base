@@ -157,9 +157,9 @@ class ClockOutController extends BaseController
                     $shift->issues()->save($issue);
                 }
 
-                Signature::onModelInstance($shift, request('client_signature'), 'client' );
+                Signature::attachToModel($shift, request('client_signature'), 'client' );
 
-                Signature::onModelInstance($shift, request('caregiver_signature'), 'caregiver' );
+                Signature::attachToModel($shift, request('caregiver_signature'), 'caregiver' );
 
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
