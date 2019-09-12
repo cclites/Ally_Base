@@ -26,7 +26,7 @@ class DropColumnMobilityFromCareDetails extends Migration
      */
     public function down()
     {
-        Schema::table('articles', function($table) {
+        Schema::table('client_care_details', function($table) {
             $table->string('mobility', 255)->nullable();
             $table->string('mobility_instructions', 255)->nullable();
         });
