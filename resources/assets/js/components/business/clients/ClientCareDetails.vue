@@ -358,22 +358,7 @@
                         caregiver: 'Caregiver must bring own',
                         other: 'Other',
                     },
-
-<<<<<<< HEAD
-                },
-=======
-                    mental_status: {
-                        oriented: "Oriented",
-                        comatose: "Comatose",
-                        forgetful: "Forgetful",
-                        depressed: "Depressed",
-                        disoriented: "Disoriented",
-                        lethargic: "Lethargic",
-                        agitated: "Agitated",
-                        other: "Other",
-                    }
                 }
->>>>>>> db6838fc367c6aebfc0fd3a8204ccf4b059b7fcf
             }
         },
 
