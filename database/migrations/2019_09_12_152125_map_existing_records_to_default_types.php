@@ -18,17 +18,15 @@ class MapExistingRecordsToDefaultTypes extends Migration
      */
     public function up()
     {
-        // iterate over each chain,
-        // then iterate over all its expirations
-        // then run query update caregivers for matching chain with a string match to the exp id
-
         BusinessChain::select( 'id' )
             ->get()
             ->each( function( $chain ){
+                // iterate through each chain
 
                 $caregivers = Caregiver::forChains( $chain->id )
                     ->with( 'licenses' )
                     ->pluck( 'id' );
+                    // grab all of its caregivers
 
                 DB::table( 'caregiver_licenses as exp' )
                     ->rightJoin( 'chain_expiration_types as exp_type', 'exp.name', '=', 'exp_type.type' )
@@ -37,9 +35,11 @@ class MapExistingRecordsToDefaultTypes extends Migration
                     ->where( 'exp_type.chain_id', $chain->id )
                     ->get()
                     ->each( function( $record ){
+                        // join every existing license for all caregivers and match them to the chain's expiration types
 
                         CaregiverLicense::where( 'id', $record->exp_id )
                             ->update([
+                                // then update each record that was matched
 
                                 'chain_expiration_type_id' => $record->exp_type_id
                             ]);
