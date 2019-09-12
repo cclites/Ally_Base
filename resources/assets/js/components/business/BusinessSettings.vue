@@ -605,19 +605,21 @@
 
             tabs() {
                 if (this.business.type == 'agency') {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#sales-people', '#custom-fields', '#deactivation-reasons', '#expirations', '#status-aliases', '#overtime', '#claims', '#communications' ];
                 } else {
-                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons', '#status-aliases', '#overtime', '#claims', '#expirations'];
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#sales-people', '#custom-fields', '#deactivation-reasons', '#expirations', '#status-aliases', '#overtime', '#claims', '#communications' ];
                 }
             },
         },
 
         mounted() {
             let index = this.tabs.findIndex(tab => tab === window.location.hash);
+
             if (index >= 0) {
-                if (index > 3 && this.business.type != 'agency') {
-                    index++;
-                }
+                // this doesn't seem necessary, and was actually causing a problem with linking here for a non-agency business. Keeping in case this is actually used
+                // if (index > 3 && this.business.type != 'agency') {
+                //     index++;
+                // }
                 this.tabIndex = index;
             }
         },
