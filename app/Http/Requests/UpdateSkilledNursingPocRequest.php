@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\CareDetails;
 
+use App\SkilledNursingPoc;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -50,6 +51,13 @@ class UpdateSkilledNursingPocRequest extends FormRequest
             'physician_name' => 'required|string',
             'physician_address' => 'required|string',
             'physician_phone' => 'required|string',
+            'prognosis' => ['present', Rule::in(SkilledNursingPoc::PROGNOSIS)],
+            'functional' => ['present', 'array', Rule::in(SkilledNursingPoc::FUNCTIONAL)],
+            'functional_other' => 'nullable|string',
+            'mental_status' => ['present', 'array', Rule::in(SkilledNursingPoc::MENTAL_STATUS)],
+            'mobility' => ['present', 'array', Rule::in(SkilledNursingPoc::MOBILITY)],
+            'mobility_instructions' => 'nullable|string',
+            'mobility_other' => 'nullable|string',
         ];
     }
 }
