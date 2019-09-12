@@ -308,7 +308,10 @@
 
             async listUrl() {
 
-                await this.loadClients();
+                if( !this.loading ){
+
+                    await this.loadClients();
+                }
             },
 
             sortBy() {
