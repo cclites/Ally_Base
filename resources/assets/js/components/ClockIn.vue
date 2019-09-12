@@ -226,16 +226,16 @@
                 console.log(error);
                 switch (error.code) {
                     case 1:
-                        this.displayLocationWarning('Location services are disabled.  You may still clock in but the shift will need to be verified by the provider.');
+                        this.displayLocationWarning('Location services are disabled.  You may still clock in but the shift will need to be verified by the client or home care company.');
                         break;
                     default:
-                        this.displayLocationWarning('Your device\'s location could not be found.  You may still clock in but the shift will need to be verified by the provider.');
+                        this.displayLocationWarning('Your device\'s location could not be found.  You may still clock in but the shift will need to be verified by the client or home care company.');
                 }
             },
 
             displayLocationWarning(text) {
                 if (!text) {
-                    text = 'Your current location does not match the client’s address.  You may still clock in but the shift will need to be verified by the provider.';
+                    text = 'Your current location does not match the client’s address.  You may still clock in but the shift will need to be verified by the client or home care company.';
                 }
                 this.locationWarning = text;
             },

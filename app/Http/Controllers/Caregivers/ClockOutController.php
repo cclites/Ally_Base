@@ -104,7 +104,13 @@ class ClockOutController extends BaseController
 
         if ($shift->business->require_signatures) {
             $request->validate([
-                'signature' => 'required'
+                'client_signature' => 'required'
+            ]);
+        }
+
+        if ($shift->business->co_caregiver_signature) {
+            $request->validate([
+                'caregiver_signature' => 'required'
             ]);
         }
 
@@ -150,7 +156,11 @@ class ClockOutController extends BaseController
                     ]);
                     $shift->issues()->save($issue);
                 }
-                Signature::onModelInstance($shift, request('signature'));
+
+                Signature::attachToModel($shift, request('client_signature'), 'client' );
+
+                Signature::attachToModel($shift, request('caregiver_signature'), 'caregiver' );
+
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }

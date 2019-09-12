@@ -40,7 +40,6 @@
                 <b-table 
                     bordered striped hover show-empty
                     :items="clients"
-                    :busy="loading"
                     :fields="fields"
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
@@ -60,7 +59,7 @@
 
             <b-row>
                 <b-col lg="6" >
-                    <b-pagination :total-rows=" totalRows " :per-page="perPage" v-model="currentPage" />
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
                 </b-col>
                 <b-col lg="6" class="text-right">
                     Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
@@ -150,11 +149,9 @@
         },
 
         async mounted() {
-
             this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
             this.loadOfficeUsers();
-            await this.loadClients();
         },
 
         computed: {
