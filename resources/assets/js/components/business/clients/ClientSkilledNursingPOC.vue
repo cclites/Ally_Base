@@ -55,8 +55,8 @@
 
         <hr>
 
-        <b-form-group label="Functional Limitations" class="mb-2 mr-2" label-class="required">
-            <b-form-checkbox-group v-model="form.functional" required>
+        <b-form-group label="Functional Limitations" class="mb-2 mr-2">
+            <b-form-checkbox-group v-model="form.functional">
                 <b-form-checkbox v-for="(label, key) in options.functional" :key="key" :value="key">{{ label }}</b-form-checkbox>
             </b-form-checkbox-group>
             <b-form-input
@@ -69,7 +69,7 @@
             </b-form-input>
         </b-form-group>
 
-        <b-form-group label="Client Mobility" label-class="required">
+        <b-form-group label="Client Mobility">
             <checkbox-group v-model="form.mobility" :items="options.mobility"/>
             <b-form-input
                     id="mobility_other"
@@ -85,14 +85,14 @@
             <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
         </b-form-group>
 
-        <b-form-group label="Mental Status" label-class="required">
+        <b-form-group label="Mental Status">
             <b-form-checkbox-group v-model="form.mental_status">
                 <b-form-checkbox v-for="(label, key) in options.mental_status" :key="key" :value="key">{{ label }}</b-form-checkbox>
             </b-form-checkbox-group>
         </b-form-group>
 
-        <b-form-group label="Prognosis" class="mb-2 mr-2" label-class="required">
-            <b-form-radio-group v-model="form.prognosis" required>
+        <b-form-group label="Prognosis" class="mb-2 mr-2">
+            <b-form-radio-group v-model="form.prognosis">
                 <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
             </b-form-radio-group>
         </b-form-group>
@@ -403,6 +403,7 @@
                         cane: "Cane",
                         wheelchair: "Wheelchair",
                         walker: "Walker",
+                        no_restrictions: "No Restrictions",
                         other: "Other",
                     },
                     prognosis: {
@@ -509,6 +510,7 @@
                 this.form.functional = details.functional;
                 this.form.functional_other = details.functional_other;
                 this.form.mobility = details.mobility;
+                this.form.mobility_instructions = details.mobility_instructions;
                 this.form.mobility_other = details.mobility_other;
                 this.form.mobility.mobility_instructions = details.mobility.other;
                 this.form.mental_status = details.mental_status;

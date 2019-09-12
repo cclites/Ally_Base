@@ -105,9 +105,7 @@
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
         </b-form-group>
 
-        <b-form-group label="Special instructions:" class="ml-4">
-            <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
-        </b-form-group>
+        
 
         <checkbox-group label="Toileting" v-model="form.toileting" :items="options.toileting" />
 
@@ -359,9 +357,6 @@
                         other: 'Other',
                     },
 
-<<<<<<< HEAD
-                },
-=======
                     mental_status: {
                         oriented: "Oriented",
                         comatose: "Comatose",
@@ -373,7 +368,6 @@
                         other: "Other",
                     }
                 }
->>>>>>> db6838fc367c6aebfc0fd3a8204ccf4b059b7fcf
             }
         },
 
