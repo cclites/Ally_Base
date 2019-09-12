@@ -195,13 +195,8 @@
         },
 
         computed: {
-            fetchReferralSources() {
-                axios.get(`/business/referral-sources?type=${this.sourceType}`)
-                    .then( ({ data }) => {
-                        this.sources = data;
-                    })
-                    .catch(() => {});
-            },
+
+
 
             referralSourceData() {
                 return this.items.map(stats => ({
@@ -382,7 +377,15 @@
                 } finally {
                     this.busy = false;
                 }
-            }
+            },
+
+            fetchReferralSources() {
+                axios.get(`/business/referral-sources?type=${this.sourceType}`)
+                    .then( ({ data }) => {
+                        this.sources = data;
+                    })
+                    .catch(() => {});
+            },
         }
     }
 </script>

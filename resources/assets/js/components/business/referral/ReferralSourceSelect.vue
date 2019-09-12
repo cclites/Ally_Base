@@ -6,11 +6,11 @@
                                v-model="selectedValue"
                 >
                     <option value="">No Referral Source</option>
-                    <option v-for="source in filteredSources" :value="source.id" :key="source.id">{{ source.organization }}</option>
+                    <option v-for="source in filteredSources" :value="source.id" :key="source.id">{{ source.organization }} - {{ source.contact_name }}</option>
                 </b-form-select>
             </b-form-group>
         </b-col>
-        <b-col md="4" class="pad-top">
+        <b-col md="4" class="mt-1">
             <b-form-group label="Add">
                 <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
             </b-form-group>
@@ -34,7 +34,7 @@
         data() {
             return {
                 showReferralModal: false,
-                referralSources: [],
+                referralSources: null,
             }
         },
 
@@ -62,7 +62,7 @@
             },
             async loadReferralSources() {
                 const response = await axios(`/business/referral-sources?type=${this.sourceType}`);
-                this.referralSources = response.data || [];
+                this.referralSources = response.data || null;
             }
         },
 
