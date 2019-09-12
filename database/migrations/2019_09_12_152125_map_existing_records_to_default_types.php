@@ -21,29 +21,13 @@ class MapExistingRecordsToDefaultTypes extends Migration
         BusinessChain::select( 'id' )
             ->get()
             ->each( function( $chain ){
-                // iterate through each chain
+                $caregiverIds = $chain->caregivers()->select('caregivers.id')->get()->pluck('id');
 
-                $caregivers = Caregiver::forChains( $chain->id )
-                    ->with( 'licenses' )
-                    ->pluck( 'id' );
-                    // grab all of its caregivers
-
-                DB::table( 'caregiver_licenses as exp' )
-                    ->rightJoin( 'chain_expiration_types as exp_type', 'exp.name', '=', 'exp_type.type' )
-                    ->select( 'exp_type.id as exp_type_id', 'exp.id as exp_id', 'exp_type.chain_id' )
-                    ->whereIn( 'caregiver_id', $caregivers )
-                    ->where( 'exp_type.chain_id', $chain->id )
-                    ->get()
-                    ->each( function( $record ){
-                        // join every existing license for all caregivers and match them to the chain's expiration types
-
-                        CaregiverLicense::where( 'id', $record->exp_id )
-                            ->update([
-                                // then update each record that was matched
-
-                                'chain_expiration_type_id' => $record->exp_type_id
-                            ]);
-                    });
+                $chain->expirationTypes->each(function (ExpirationType $expirationType) use ($caregiverIds) {
+                    CaregiverLicense::whereIn('caregiver_id', $caregiverIds)
+                        ->where('name','=', $expirationType->type)
+                        ->update(['chain_expiration_type_id' => $expirationType->id]);
+                });
             });
     }
 
@@ -55,7 +39,6 @@ class MapExistingRecordsToDefaultTypes extends Migration
     public function down()
     {
         DB::table( 'caregiver_licenses' )->update([
-
             'chain_expiration_type_id' => null
         ]);
     }
