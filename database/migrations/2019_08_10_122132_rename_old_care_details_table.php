@@ -15,10 +15,7 @@ class RenameOldCareDetailsTable extends Migration
     {
         Schema::table('client_care_details', function (Blueprint $table) {
             $table->dropForeign(['client_id']);
-            try {
-                $table->dropUnique(['client_id']);
-            } catch (\Exception $ex) {
-            }
+            $table->dropUnique(['client_id']);
         });
         Schema::rename('client_care_details', 'client_care_details_old');
     }
@@ -33,6 +30,7 @@ class RenameOldCareDetailsTable extends Migration
         Schema::rename('client_care_details_old', 'client_care_details');
         Schema::table('client_care_details', function (Blueprint $table) {
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->unique('client_id');
         });
     }
 }

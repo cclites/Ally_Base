@@ -139,14 +139,22 @@
         </div>
     </div>
 
-    @if($shift->signature)
+    @if($shift->clientSignature)
         <div class="row with-padding-bottom">
-            <div>
+            <div @if( $shift->business->co_caregiver_signature ) class="col-sm-6" @endif>
                 <strong>Client Signature</strong>
                 <div class="signature">
-                    {!! $shift->signature->content !!}
+                    {!! $shift->clientSignature->content !!}
                 </div>
             </div>
+            @if( $shift->business->co_caregiver_signature )
+                <div class="col-sm-6">
+                    <strong>Caregiver Signature</strong>
+                    <div class="signature">
+                        {!! $shift->caregiverSignature->content !!}
+                    </div>
+                </div>
+            @endif
         </div>
     @endif
 

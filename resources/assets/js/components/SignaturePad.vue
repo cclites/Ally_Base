@@ -6,7 +6,7 @@
             <span v-if="signature.length">
                 <i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;Signed
             </span>
-            <span v-else>Add a Signature</span>
+            <span v-else>{{ buttonTitle }}</span>
         </button>
         
         <input type="hidden" name="signature" v-model="signature" />
@@ -56,6 +56,10 @@
             h:{
                 type:String,
                 default:"100%"
+            },
+            buttonTitle:{
+                type:String,
+                default:'Add a Signature'
             }
         },
         data:() => ({

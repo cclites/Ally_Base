@@ -331,9 +331,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasOne(ShiftCostHistory::class, 'id');
     }
 
-    public function signature()
+    public function clientSignature()
     {
-        return $this->morphOne(Signature::class, 'signable');
+        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'client' );
+    }
+    public function caregiverSignature()
+    {
+        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'caregiver' );
     }
 
     public function statusHistory()

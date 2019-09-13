@@ -32,7 +32,6 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
             padding: 15px;
         }
 
@@ -51,7 +50,7 @@
     <div>
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
             </div>
             <div class="text-right header-right">
             </div>

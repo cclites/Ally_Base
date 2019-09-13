@@ -45,7 +45,7 @@
 
         methods: {
             async fetchChainExpirations() {
-                await axios.get(`/business/expiration-types?manage=true`)
+                await axios.get(`/business/expiration-types`)
                     .then(({data}) => {
                         this.types = data;
                     })

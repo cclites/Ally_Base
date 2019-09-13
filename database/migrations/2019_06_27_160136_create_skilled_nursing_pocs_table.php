@@ -45,6 +45,14 @@ class CreateSkilledNursingPocsTable extends Migration
 
             $table->string('physician_phone')->nullable();
             $table->text('orders')->nullable();
+
+            $table->string('mental_status', 255)->nullable();
+            $table->string('prognosis', 255)->nullable();
+            $table->text('functional')->nullable();
+            $table->string('functional_other', 255)->nullable();
+            $table->string('mobility', 255)->nullable();
+            $table->string('mobility_instructions', 255)->nullable();
+            $table->string('mobility_other', 255)->nullable();
         });
     }
 

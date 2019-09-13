@@ -41,6 +41,7 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         'contact_name',
         'phone',
         'type',
+        'active'
     ];
     
     /**
@@ -114,6 +115,43 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
     // **********************************************************
     // MUTATORS
     // **********************************************************
+    public static function orderResources($referralsources){
+        $set = [];
+        $cnt = 0;
+
+        foreach($referralsources as $item)
+        {
+            $key = $item['organization'];
+
+            if(!isset($set[$key])){
+                $set[$key]['organization'] = $item['organization'];
+
+                if($item['active']){
+                    $set[$key]['contact_name'] = $item['contact_name'] . ", ";
+                }else{
+                    $set[$key]['contact_name'] = '';
+                }
+                $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
+                $set[$key]['phone'] = $item['phone'];
+                $set[$key]['id'] = $cnt++;
+                $set[$key]['created_at'] = $item['created_at']->format('m/d/Y');
+            }else{
+                if($item['active']){
+                    $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
+                }
+                $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
+            }
+        }
+
+        $data = [];
+
+        foreach($set as $key=>$value){
+            $value['contact_name'] = rtrim($value['contact_name'], ', ');
+            $data[] = $value;
+        }
+
+        return json_encode($data);
+    }
     
     // **********************************************************
     // QUERY SCOPES

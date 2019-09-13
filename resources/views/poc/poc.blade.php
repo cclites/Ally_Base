@@ -1,18 +1,18 @@
 <html>
     <head>
         <style>
-            span.cls_002{font-family:Arial,serif;font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
-            div.cls_002{font-family:Arial,serif;font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
-            span.cls_003{font-family:Arial,serif;font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
-            div.cls_003{font-family:Arial,serif;font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
-            span.cls_004{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; display:inline-block; width: 100%;}
-            div.cls_004{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; width: 100px;}
-            span.cls_005{font-family:Arial,serif;font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;}
-            div.cls_005{font-family:Arial,serif;font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_002{font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            div.cls_002{font-size:7.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_003{font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            div.cls_003{font-size:11.0px;color:rgb(0,0,0);font-weight:bold;font-style:normal;text-decoration: none}
+            span.cls_004{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; display:inline-block; width: 100%;}
+            div.cls_004{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none; width: 100px;}
+            span.cls_005{font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;}
+            div.cls_005{font-size:6.0px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
             div.cls_005 span.selected{font-size: 11px;position:absolute;color:blue;left:-6px;top:0px;}
             span.cls_005.gender-label{position:relative;left: 8px;}
-            span.cls_006{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;display:inline-block; width: 100%;}
-            div.cls_006{font-family:Arial,serif;font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
+            span.cls_006{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none;display:inline-block; width: 100%;}
+            div.cls_006{font-size:7.8px;color:rgb(0,0,0);font-weight:normal;font-style:normal;text-decoration: none}
 
             .checked{color:blue;position:absolute;left:-11px;top:0px;font-size:7.8px;}
             .prognosis{padding-left:6px;}
@@ -188,7 +188,7 @@
 
             <div style="position:absolute;left:46.24px;top:296.82px" class="cls_005">
                 <span class="cls_005">
-                    @if( in_array('amputation', $client->careDetails['functional'])  )
+                    @if( in_array('amputation', $client->skilledNursingPoc['functional'])  )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Amputation
@@ -196,35 +196,35 @@
             </div>
 
             <div style="position:absolute;left:161.82px;top:296.82px" class="cls_005">
-                @if( in_array('paralysis', $client->careDetails['functional'])  )
+                @if( in_array('paralysis', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Paralysis</span>
             </div>
 
             <div style="position:absolute;left:233.24px;top:297.54px" class="cls_005">
-                @if( in_array('blind', $client->careDetails['functional'])  )
+                @if( in_array('blind', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Legally Blind</span>
             </div>
 
             <div style="position:absolute;left:327.56px;top:296.82px" class="cls_005">
-                @if( in_array('bedrest', $client->careDetails['mobility'])  )
+                @if( in_array('bedrest', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Complete Bedrest</span>
             </div>
 
             <div style="position:absolute;left:427.66px;top:296.82px" class="cls_005">
-                @if( in_array('partial_weight', $client->careDetails['mobility'])  )
+                @if( in_array('partial_weight', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Partial Weight Bearing</span>
             </div>
 
             <div style="position:absolute;left:528.26px;top:296.82px" class="cls_005">
-                @if( in_array('wheelchair', $client->careDetails['mobility'])  )
+                @if( in_array('wheelchair', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Wheelchair</span>
@@ -237,14 +237,14 @@
             <div style="position:absolute;left:502.18px;top:296.44px" class="cls_004"><span class="cls_004">A</span></div>
 
             <div style="position:absolute;left:161.78px;top:308.88px" class="cls_005">
-                @if( in_array('endurance', $client->careDetails['functional'])  )
+                @if( in_array('endurance', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Endurance</span>
             </div>
 
             <div style="position:absolute;left:232.72px;top:308.70px" class="cls_005">
-                @if( in_array('dyspnea', $client->careDetails['functional'])  )
+                @if( in_array('dyspnea', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
 
                 @endif
@@ -252,14 +252,14 @@
             </div>
 
             <div style="position:absolute;left:427.64px;top:308.88px" class="cls_005">
-                @if( in_array('independent', $client->careDetails['mobility'])  )
+                @if( in_array('independent', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Independent At Home</span>
             </div>
 
             <div style="position:absolute;left:527.72px;top:309.98px" class="cls_005">
-                @if( in_array('walker', $client->careDetails['mobility'])  )
+                @if( in_array('walker', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Walker</span>
@@ -268,7 +268,7 @@
             <div style="position:absolute;left:20.32px;top:308.86px" class="cls_004"><span class="cls_004">2</span></div>
 
             <div style="position:absolute;left:45.36px;top:309.78px" class="cls_005">
-                @if( in_array('incontinence', $client->careDetails['functional'])  )
+                @if( in_array('incontinence', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Bowel/Bladder (Incontinence)</span>
@@ -279,7 +279,7 @@
             <div style="position:absolute;left:301.48px;top:308.86px" class="cls_004"><span class="cls_004">2</span></div>
 
             <div style="position:absolute;left:326.52px;top:309.78px" class="cls_005">
-                @if( in_array('bedrest_brp', $client->careDetails['mobility'])  )
+                @if( in_array('bedrest_brp', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Bedrest BRP</span>
@@ -293,42 +293,42 @@
             </div>
 
             <div style="position:absolute;left:45.88px;top:321.30px" class="cls_005">
-                @if( in_array('contracture', $client->careDetails['functional'])  )
+                @if( in_array('contracture', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Contracture</span>
             </div>
 
             <div style="position:absolute;left:161.24px;top:320.76px" class="cls_005">
-                @if( in_array('ambulation', $client->careDetails['functional'])  )
+                @if( in_array('ambulation', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Ambulation</span>
             </div>
 
             <div style="position:absolute;left:232.72px;top:321.48px" class="cls_005">
-                @if( in_array('other', $client->careDetails['functional'])  )
+                @if( in_array('other', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Other (Specify)</span>
             </div>
 
             <div style="position:absolute;left:327.04px;top:321.30px" class="cls_005">
-                @if( in_array('up_as_tolerated', $client->careDetails['mobility'])  )
+                @if( in_array('up_as_tolerated', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Up As Tolerated</span>
             </div>
 
             <div style="position:absolute;left:427.28px;top:320.76px" class="cls_005">
-                @if( in_array('crutches', $client->careDetails['mobility'])  )
+                @if( in_array('crutches', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Crutches</span>
             </div>
 
             <div style="position:absolute;left:527.76px;top:320.76px" class="cls_005">
-                @if( in_array('no_restrictions', $client->careDetails['mobility'])  )
+                @if( in_array('no_restrictions', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">No Restrictions</span>
@@ -339,42 +339,42 @@
 
             <div style="position:absolute;left:207.34px;top:321.10px" class="cls_004">
                 <span class="cls_004">B</span>
-                <span class="cls_004 functional_other">{{ $client->careDetails['functional_other'] }}</span>
+                <span class="cls_004 functional_other">{{ $client->skilledNursingPoc['functional_other'] }}</span>
             </div>
             <div style="position:absolute;left:301.48px;top:320.92px" class="cls_004"><span class="cls_004">3</span></div>
             <div style="position:absolute;left:401.74px;top:320.38px" class="cls_004"><span class="cls_004">8</span></div>
             <div style="position:absolute;left:502.18px;top:320.38px" class="cls_004"><span class="cls_004">C</span></div>
 
             <div style="position:absolute;left:45.86px;top:333.36px" class="cls_005">
-                @if( in_array('hearing', $client->careDetails['functional'])  )
+                @if( in_array('hearing', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Hearing</span>
             </div>
 
             <div style="position:absolute;left:161.25px;top:333.72px" class="cls_005">
-                @if( in_array('speech', $client->careDetails['functional'])  )
+                @if( in_array('speech', $client->skilledNursingPoc['functional'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Speech</span>
             </div>
 
             <div style="position:absolute;left:327.06px;top:333.36px" class="cls_005">
-                @if( in_array('assist_transfers', $client->careDetails['mobility'])  )
+                @if( in_array('assist_transfers', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Transfer Bed/Chair</span>
             </div>
 
             <div style="position:absolute;left:427.30px;top:332.82px" class="cls_005">
-                @if( in_array('cane', $client->careDetails['mobility'])  )
+                @if( in_array('cane', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Cane</span>
             </div>
 
             <div style="position:absolute;left:527.73px;top:333.00px" class="cls_005">
-                @if( in_array('other', $client->careDetails['mobility'])  )
+                @if( in_array('other', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Other (Specify)</span>
@@ -387,13 +387,13 @@
 
             <div style="position:absolute;left:502.18px;top:332.62px" class="cls_004">
                 <span class="cls_004">D</span>
-                <span class="cls_004 mobility_other">{{ $client->careDetails['mobility_other'] }}</span>
+                <span class="cls_004 mobility_other">{{ $client->skilledNursingPoc['mobility_other'] }}</span>
             </div>
 
             <div style="position:absolute;left:301.48px;top:344.86px" class="cls_004"><span class="cls_004">5</span></div>
 
             <div style="position:absolute;left:327.03px;top:345.24px" class="cls_005">
-                @if( in_array('exercises_prescribed', $client->careDetails['mobility'])  )
+                @if( in_array('exercises_prescribed', $client->skilledNursingPoc['mobility'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Exercises Prescribed</span>
@@ -403,7 +403,7 @@
             <div style="position:absolute;left:136.06px;top:356.74px" class="cls_004"><span class="cls_004">1</span></div>
 
             <div style="position:absolute;left:162.13px;top:357.12px" class="cls_005">
-                @if( in_array('oriented', $client->careDetails['mental_status'])  )
+                @if( in_array('oriented', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Oriented</span>
@@ -411,7 +411,7 @@
             <div style="position:absolute;left:207.34px;top:356.74px" class="cls_004"><span class="cls_004">3</span></div>
 
             <div style="position:absolute;left:233.27px;top:357.12px" class="cls_005">
-                @if( in_array('forgetful', $client->careDetails['mental_status'])  )
+                @if( in_array('forgetful', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Forgetful</span>
@@ -419,7 +419,7 @@
             <div style="position:absolute;left:300.94px;top:356.74px" class="cls_004"><span class="cls_004">5</span></div>
 
             <div style="position:absolute;left:327.03px;top:357.12px" class="cls_005">
-                @if( in_array('disoriented', $client->careDetails['mental_status'])  )
+                @if( in_array('disoriented', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Disoriented</span>
@@ -427,7 +427,7 @@
             <div style="position:absolute;left:401.92px;top:357.82px" class="cls_004"><span class="cls_004">7</span></div>
 
             <div style="position:absolute;left:427.99px;top:358.38px" class="cls_005">
-                @if( in_array('agitated', $client->careDetails['mental_status'])  )
+                @if( in_array('agitated', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Agitated</span>
@@ -436,7 +436,7 @@
             <div style="position:absolute;left:136.06px;top:368.98px" class="cls_004"><span class="cls_004">2</span></div>
 
             <div style="position:absolute;left:161.62px;top:369.54px" class="cls_005">
-                @if( in_array('comatose', $client->careDetails['mental_status'])  )
+                @if( in_array('comatose', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Comatose</span>
@@ -445,7 +445,7 @@
             <div style="position:absolute;left:207.34px;top:369.34px" class="cls_004"><span class="cls_004">4</span></div>
 
             <div style="position:absolute;left:232.34px;top:369.72px" class="cls_005">
-                @if( in_array('depressed', $client->careDetails['mental_status'])  )
+                @if( in_array('depressed', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Depressed</span>
@@ -453,7 +453,7 @@
             <div style="position:absolute;left:300.94px;top:368.98px" class="cls_004"><span class="cls_004">6</span></div>
 
             <div style="position:absolute;left:326.51px;top:369.00px" class="cls_005">
-                @if( in_array('lethargic', $client->careDetails['mental_status'])  )
+                @if( in_array('lethargic', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Lethargic</span>
@@ -462,7 +462,7 @@
             <div style="position:absolute;left:401.92px;top:368.98px" class="cls_004"><span class="cls_004">8</span></div>
 
             <div style="position:absolute;left:427.47px;top:369.36px" class="cls_005">
-                @if( in_array('other', $client->careDetails['mental_status'])  )
+                @if( in_array('other', $client->skilledNursingPoc['mental_status'])  )
                     <span class="checked">X&nbsp;</span>
                 @endif
                 <span class="cls_005">Other</span>
@@ -472,7 +472,7 @@
 
             <div style="position:absolute;left:163.16px;top:381.22px" class="cls_004">
                 <span class="cls_004 prognosis">
-                    @if( 'poor' == $client->careDetails['prognosis'] )
+                    @if( 'poor' == $client->skilledNursingPoc['prognosis'] )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Poor
@@ -483,7 +483,7 @@
 
             <div style="position:absolute;left:234.10px;top:381.76px" class="cls_004">
                 <span class="cls_004 prognosis">
-                    @if( 'guarded' == $client->careDetails['prognosis'] )
+                    @if( 'guarded' == $client->skilledNursingPoc['prognosis'] )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Guarded
@@ -494,7 +494,7 @@
 
             <div style="position:absolute;left:328.61px;top:380.50px" class="cls_004">
                 <span class="cls_004 prognosis">
-                    @if( 'fair' == $client->careDetails['prognosis'] )
+                    @if( 'fair' == $client->skilledNursingPoc['prognosis'] )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Fair
@@ -506,7 +506,7 @@
             <div style="position:absolute;left:429.22px;top:380.32px" class="cls_004">
 
                 <span class="cls_004 prognosis">
-                    @if( 'good' == $client->careDetails['prognosis'] )
+                    @if( 'good' == $client->skilledNursingPoc['prognosis'] )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Good
@@ -517,7 +517,7 @@
 
             <div style="position:absolute;left:528.43px;top:380.32px" class="cls_004">
                 <span class="cls_004 prognosis">
-                    @if( 'excellent' == $client->careDetails['prognosis'] )
+                    @if( 'excellent' == $client->skilledNursingPoc['prognosis'] )
                         <span class="checked">X&nbsp;</span>
                     @endif
                     Excellent

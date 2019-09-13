@@ -2,6 +2,7 @@
 
 namespace App\Scheduling;
 
+use App\CaregiverDayOff;
 use App\Schedule;
 use App\Shifts\ServiceAuthValidator;
 use Carbon\Carbon;
@@ -41,6 +42,8 @@ class ScheduleWarningAggregator
      */
     public function getAll() : array
     {
+        $this->warnings = collect([]);
+
         if (! empty($this->schedule->caregiver)) {
             $this->checkCaregiverScheduleConflicts();
             $this->checkPreferenceMismatches();
@@ -248,18 +251,30 @@ class ScheduleWarningAggregator
      */
     public function checkCaregiverDaysOff()
     {
-        $dateRange = [
-            $this->schedule->starts_at->format('Y-m-d'),
-            $this->schedule->getEndDateTime()->format('Y-m-d')
-        ];
+        $scheduleStart = $this->schedule->starts_at->format('Y-m-d');
+        $scheduleEnd = $this->schedule->getEndDateTime()->format('Y-m-d');
 
         $warnings = $this->schedule->caregiver->daysOff()
-            ->whereBetween('date', $dateRange)
-            ->get()
-            ->map(function ($dayOff) {
-                $date = Carbon::parse($dayOff->date)->format('m/d/Y');
-                return "{$this->schedule->caregiver->name} has marked themselves unavailable on $date ({$dayOff->description}).";
-            });
+                    ->where(function ($q) use($scheduleStart, $scheduleEnd) {
+                        $q->where([
+                            ['start_date', '<=', $scheduleStart],
+                            ['end_date', '>=', $scheduleStart],
+                        ])
+                        ->orWhere([
+                            ['start_date', '<=', $scheduleStart],
+                            ['start_date', '>=', $scheduleEnd],
+                        ])
+                        ->orWhere([
+                            ['start_date', $scheduleStart],
+                            ['end_date', $scheduleEnd],
+                        ]);
+                    })
+                    ->get()
+                    ->map(function ($dayOff) {
+                        $start_date = Carbon::parse($dayOff->start_date)->format('m/d/Y');
+                        $end_date = Carbon::parse($dayOff->end_date)->format('m/d/Y');
+                        return "{$this->schedule->caregiver->name} has marked themselves unavailable on $start_date to $end_date ({$dayOff->description}).";
+                    });
 
         if (empty($warnings)) {
             return false;

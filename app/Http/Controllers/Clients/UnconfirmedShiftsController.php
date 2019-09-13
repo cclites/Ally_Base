@@ -145,7 +145,7 @@ class UnconfirmedShiftsController extends Controller
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'clientSignature', 'caregiverSignature', 'statusHistory', 'goals', 'questions']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info

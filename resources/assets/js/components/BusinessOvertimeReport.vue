@@ -118,13 +118,13 @@
                         sortable: true,
                     },
                     {
-                        key: 'scheduled',
-                        label: 'Scheduled Hours',
+                        key: 'worked',
+                        label: 'Worked Hours (In Shift History confirmed or unconfirmed)',
                         sortable: true,
                     },
                     {
-                        key: 'worked',
-                        label: 'Worked Hours',
+                        key: 'future_scheduled',
+                        label: 'Future Scheduled Hours',
                         sortable: true,
                     },
                     {

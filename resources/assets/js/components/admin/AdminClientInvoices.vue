@@ -45,7 +45,7 @@
                             </b-form-select>
                         </b-form-group>
 
-                        <b-form-group label="Clients" class="mb-2 mr-2" v-if="chain_id">
+                        <b-form-group label="Clients" class="mb-2 mr-2">
                             <b-form-select
                                     name="client_id"
                                     v-model="client_id"
@@ -195,6 +195,8 @@
             },
 
             getClients(){
+
+
                 axios.get('/business/dropdown/clients-for-chain?chain=' + this.chain_id)
                     .then( ({ data }) => {
                         this.clients = data;
