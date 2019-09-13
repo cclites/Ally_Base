@@ -73,6 +73,9 @@ Route::group([
     'roles' => ['client'],
 ], function () {
     Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
+    Route::get('clients/caregiver/{caregiver}','Clients\CaregiverController@show')->name('clients.caregivers.show');
+    Route::get('scheduled-shifts', 'Clients\ScheduleController@index')->name('client.scheduled-shifts');
+    Route::get('scheduled-shifts/{client}/schedule', 'Clients\ScheduleController@schedule')->name('client.scheduled-shifts');
     Route::get('unconfirmed-shifts', 'Clients\UnconfirmedShiftsController@index')->name('client.unconfirmed-shifts');
     Route::post('unconfirmed-shifts/{shift}/confirm', 'Clients\UnconfirmedShiftsController@confirm')->name('client.unconfirmed-shifts.confirm');
     Route::patch('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@update')->name('client.unconfirmed-shifts.update');
@@ -196,6 +199,7 @@ Route::group([
     Route::post('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
+    Route::post('caregivers/{caregiver}/licenses/saveMany', 'Business\CaregiverLicenseController@saveMany' )->name( 'caregivers.licenses.saveMany' );
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
     Route::patch('caregivers/{caregiver}/notification-options', 'Business\CaregiverController@updateNotificationOptions');
@@ -216,11 +220,14 @@ Route::group([
     Route::get('clients/referral-service-agreement/{rsa}/agreement-pdf', 'Business\ClientReferralServiceAgreementController@agreementPdf')->name('clients.referral-service-agreement.pdf');
     Route::post('clients/referral-service-agreement', 'Business\ClientReferralServiceAgreementController@store')->name('clients.referral-service-agreement.store');
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
+    Route::get('clients/paginate', 'Business\PaginatedClientController@index');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
+    Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
+    Route::get('clients/{client}/skilled-nursing-poc/print', 'Business\SkilledNursingPocController@generatePdf')->name('clients.skilled-nursing-poc.generate-pdf');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
     Route::patch('clients/{client}/exclude-caregiver/{clientExcludedCaregiver}', 'Business\ClientExcludedCaregiverController@update')->name('clients.exclude-caregiver');
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');
@@ -320,10 +327,10 @@ Route::group([
     Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
     Route::post('reports/claims-report', 'Business\ClaimController@data');
     Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
-    Route::get('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources')->name('reports.client_referral_sources');
-    Route::post('reports/client-referral-sources', 'Business\ReportsController@clientReferralSources');
-    Route::get('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources')->name('reports.caregiver_referral_sources');
-    Route::post('reports/caregiver-referral-sources', 'Business\ReportsController@caregiverReferralSources');
+    Route::get('reports/client-referral-sources', 'Business\Report\ClientReferralSourcesController@index')->name('reports.client_referral_sources');
+    Route::post('reports/client-referral-sources', 'Business\Report\ClientReferralSourcesController@index');
+    Route::get('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index')->name('reports.caregiver_referral_sources');
+    Route::post('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index');
     Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
 
@@ -335,10 +342,8 @@ Route::group([
     Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
-    Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
-    Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
+    Route::get('reports/client-directory', 'Business\Report\ClientDirectoryReportController@index')->name('reports.client_directory');
     Route::get('reports/caregiver-directory', 'Business\Report\CaregiverDirectoryReportController@index')->name('reports.caregiver_directory');
-    Route::get('reports/caregiver-directory/download', 'Business\Report\CaregiverDirectoryReportController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
@@ -370,7 +375,7 @@ Route::group([
 
     Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
     Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
-    Route::get('reports/invoice-summary-by-marketing', 'Business\Report\InvoiceSummaryByMarketingController@index')->name('reports.invoice-summary-by-marketing');
+    Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
@@ -471,6 +476,7 @@ Route::group([
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
+    Route::delete('referral-sources/organization/{organization}', 'Business\ReferralSourceController@removeOrganization');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
 
     Route::resource('payers', 'Business\PayerController');
@@ -481,6 +487,7 @@ Route::group([
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
     Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
     Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
+    Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
@@ -574,6 +581,7 @@ Route::group([
     Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
 
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
+    Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');
@@ -641,3 +649,4 @@ Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function(
     Route::get('done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
     Route::post('apply', 'CaregiverApplicationController@store');
 });
+

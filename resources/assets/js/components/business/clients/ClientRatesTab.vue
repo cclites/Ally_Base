@@ -78,6 +78,7 @@
                         <td>
                             <b-select v-model="item.payer_id" size="sm" @change="(e) => onChangePayer(e, item)">
                                 <option :value="null">(All)</option>
+                                <option :value="0">({{ client.name }})</option>
                                 <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-select>
                         </td>
@@ -469,7 +470,7 @@
                 this.items.push({
                     caregiver_name: this.getCaregiverName(rateObject.caregiver_id),
                     service_id: rateObject.service_id || null,
-                    payer_id: rateObject.payer_id || null,
+                    payer_id: rateObject.payer_id || rateObject.payer_id === 0 ? rateObject.payer_id : null,
                     caregiver_id: rateObject.caregiver_id || null,
                     effective_start: rateObject.effective_start || moment().subtract(1, 'week').format('MM/DD/YYYY'),
                     effective_end: rateObject.effective_end || moment('9999-12-31').format('MM/DD/YYYY'),

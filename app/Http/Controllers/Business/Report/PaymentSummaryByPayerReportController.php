@@ -9,13 +9,14 @@ use App\Client;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Reports\PaymentSummaryByPayerReport;
+use Illuminate\Http\Response;
 
 class PaymentSummaryByPayerReportController extends BaseController
 {
     public function index(Request $request, PaymentSummaryByPayerReport $report){
 
 
-        if ($request->filled('json')) {
+        if ($request->filled('json') || $request->filled('print')) {
 
             $timezone = auth()->user()->role->getTimezone();
 
@@ -33,27 +34,27 @@ class PaymentSummaryByPayerReportController extends BaseController
 
             $data = $report->rows();
 
-            $clientType = $request->client_type ? ucfirst(str_replace("_", " ", $request->client_type)) : "All Client Types";
             $location = Business::find($request->business)->name;
             $clientName = $request->client ? Client::find($request->client)->nameLastFirst : 'All Clients';
-            $payerName = $request->payer ? ClientPayer::find($request->payer)->payer->name : 'All Payers';
 
             $totals = [
                 'location'=>$location,
-                'client_type'=>$clientType,
                 'client_name'=>$clientName,
-                'payer'=>$payerName,
                 'total'=>$data->sum('amount')
             ];
 
             $data = $this->createSummary($data);
+
+            if ($request->filled('print')) {
+                return $this->printReport($data, $totals);
+            }
 
             return response()->json(['data'=>$data, 'totals'=>$totals]);
         }
 
         return view_component(
             'payment-summary-by-payer',
-            'Payment Summary By Payer Report',
+            'Payment Summary By Private Pay Clients',
              [],
             [
                 'Home' => route('home'),
@@ -70,29 +71,45 @@ class PaymentSummaryByPayerReportController extends BaseController
      */
     protected function createSummary($data): array
     {
-
         $set = [];
 
         foreach($data as $item){
 
-            $key = $item['client_name'] . $item['payer'] . $item['date'] . $item['client_type'];
+            $key = $item['client_name'] . $item['invoice'] . $item['date'];
 
             if(!isset($set[$key])){
-
                 $set[$key] = [
-                    'payer'=>$item['payer'],
                     'client_name'=>$item['client_name'],
                     'date'=>$item['date'],
-                    'client_type'=>$item['client_type'],
+                    'invoice'=>$item['invoice'],
                     'amount'=>$item['amount']
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];
             }
-
         }
 
         return array_values($set);
+    }
+
+    /**
+     * Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function printReport($data, $totals) : \Illuminate\Http\Response
+    {
+        $html = response(view('business.reports.print.payment_summary_by_private_payer',['data'=>$data, 'totals'=>$totals]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="payment_summary_by_private_payer.pdf"'
+            )
+        );
     }
 
 

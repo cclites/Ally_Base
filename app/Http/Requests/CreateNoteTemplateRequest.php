@@ -11,7 +11,7 @@ class CreateNoteTemplateRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'short_name' => 'required|string|max:100',
+            'short_name' => 'required|string|max:32',
             'active' => 'required|boolean',
             'note' => 'required|string',
         ];

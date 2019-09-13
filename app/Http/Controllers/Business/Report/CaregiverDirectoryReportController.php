@@ -1,15 +1,9 @@
 <?php
-
-
 namespace App\Http\Controllers\Business\Report;
 
-
-use App\Caregiver;
 use App\CustomField;
 use App\Http\Controllers\Business\BaseController;
 use App\Reports\CaregiverDirectoryReport;
-use App\Responses\ErrorResponse;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CaregiverDirectoryReportController extends BaseController
@@ -17,58 +11,47 @@ class CaregiverDirectoryReportController extends BaseController
     /**
      * Shows the page to generate the caregiver directory
      *
+     * @param Request $request
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $caregivers = Caregiver::forRequestedBusinesses()
-            ->with(['address', 'user', 'user.emergencyContacts', 'user.phoneNumbers'])
-            ->with('meta')
-            ->get()->map(function($caregiver){
-
-                $caregiver->phone = $caregiver->user->notification_phone;
-                $caregiver->emergency_contact = $caregiver->user->emergency_contact ? $caregiver->user->formatEmergencyContact() : '-';
-                $caregiver->referral = $caregiver->referralSource ? $caregiver->referralSource->name : '-';
-                $caregiver->certification = $caregiver->certification ? $caregiver->certification : '-';
-                $caregiver->smoking_okay = $caregiver->smoking_okay ? "Yes" : "No";
-                $caregiver->ethnicity = $caregiver->ethnicity ? $caregiver->ethnicity : '-';
-                $caregiver->medicaid_id = $caregiver->medicaid_id ? $caregiver->medicaid_id : '-';
-                $caregiver->gender = $caregiver->user->gender ? $caregiver->user->gender : '-';
-
-                return $caregiver;
-
-            });
-
         $fields = CustomField::forAuthorizedChain()
             ->where('user_type', 'caregiver')
             ->with('options')
             ->get();
 
-        return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
-    }
+        if ($request->filled('json')) {
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sort', 'lastname');
+            $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
 
-    /**
-     * Handle the request to generate the caregiver directory
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
-     */
-    public function generateCaregiverDirectoryReport(Request $request)
-    {
-        $report = new CaregiverDirectoryReport();
-        $report->forRequestedBusinesses();
-        $report->query()->join('users','caregivers.id','=','users.id');
+            \DB::enableQueryLog();
 
-        if($request->has('filter_active')) {
-            $report->where('users.active', $request->filter_active);
+            $report = new CaregiverDirectoryReport();
+            $report->forRequestedBusinesses()
+                ->setCustomFields($fields)
+                ->setActiveFilter($request->active)
+                ->setStatusAliasFilter($request->status_alias_id)
+                ->setPageCount(50)
+                ->setCurrentPage($page)
+                ->setSort($sortBy, $sortOrder)
+                ->setForExport($request->export == '1');
+
+            if ($request->export == '1') {
+                return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
+                    ->download();
+            }
+
+            // rows() has to be called for the private variable total_count to be set within the report
+            $rows = $report->rows();
+            $total = $report->getTotalCount();
+
+            \Log::info(\DB::getQueryLog());
+
+            return response()->json(['rows' => $rows, 'total' => $total]);
         }
 
-        $report->applyColumnFilters($request->except(['filter_start_date','filter_end_date','filter_active']));
-
-        if ($request->has('export') && $request->export == true) {
-            return $report->download();
-        }
-
-        return $report->rows();
+        return view('business.reports.caregiver_directory', compact('fields'));
     }
 }

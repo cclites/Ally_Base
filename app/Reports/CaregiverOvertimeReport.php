@@ -32,7 +32,7 @@ class CaregiverOvertimeReport extends BaseReport
     public function __construct()
     {
         $this->query = Caregiver::forRequestedBusinesses()
-                        ->with('shifts')
+                        ->with('shifts', 'schedules')
                         ->ordered();
     }
 
@@ -67,7 +67,7 @@ class CaregiverOvertimeReport extends BaseReport
         $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
         $this->query->whereHas('shifts', function ($q) use ($start, $end) {
-            $q->whereBetween('shifts.checked_in_time', [$start, $end]);
+            $q->whereBetween('checked_in_time', [$start, $end]);
         });
 
         if(filled($caregiver_id)){
@@ -94,7 +94,7 @@ class CaregiverOvertimeReport extends BaseReport
                     ->get()->map(function(Caregiver $caregiver){
 
                     $worked = 0;
-                    $scheduled = 0;
+                    $futureScheduled = 0;
                     $total = 0;
 
                     foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
@@ -103,27 +103,25 @@ class CaregiverOvertimeReport extends BaseReport
 
                     foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
                         $worked += $shift->duration();
-                        $scheduled += $shift->remaining();
+                        $futureScheduled += $shift->remaining();
                     }
 
-                    $scheduledHrs =  Schedule::future($this->timezone)
+                    $duration = Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
                             ->where('caregiver_id', $caregiver->id)
-                            ->where('starts_at', '<=', $this->end)
                             ->sum('duration');
 
-                    $scheduled += $scheduledHrs;
+                    $futureScheduled += $duration;
 
                     $worked = round($worked / 60, 2);
-                    $scheduled = round($scheduled / 60, 2);
-                    $total = round($worked - $scheduled, 2);
-
+                    $futureScheduled = round($futureScheduled / 60, 2);
+                    $total = round($worked + $futureScheduled, 2);
 
                     return [
                         'firstname'=>$caregiver->first_name,
                         'lastname'=>$caregiver->last_name,
                         'worked' => $worked,
-                        'scheduled' => $scheduled,
-                        'total' => $total
+                        'future_scheduled' => $futureScheduled,
+                        'total' => $total,
                     ];
 
             });

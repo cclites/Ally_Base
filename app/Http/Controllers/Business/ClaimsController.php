@@ -7,7 +7,8 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
-use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
+use App\Client;
 use App\Http\Requests\PayClaimRequest;
 use App\Http\Requests\TransmitClaimRequest;
 use App\Http\Requests\UpdateMissingClaimsFieldsRequest;
@@ -24,10 +25,10 @@ class ClaimsController extends BaseController
      * Get claims listing.
      *
      * @param Request $request
-     * @param OnlineClientInvoiceQuery $invoiceQuery
+     * @param ClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
 
@@ -39,10 +40,22 @@ class ClaimsController extends BaseController
                         });
                         break;
                     case 'paid':
-                        $invoiceQuery->paidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '=', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '=', 'amount');
+                            });
+                        });
                         break;
                     case 'unpaid':
-                        $invoiceQuery->notPaidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', false)->whereColumn('amount_paid', '<', 'amount');
+                            })->orWhere(function ($q) {
+                                $q->where('offline', true)->whereColumn('offline_amount_paid', '<', 'amount');
+                            });
+                        });
                         break;
                     case 'has_claim':
                         $invoiceQuery->whereHas('claim');
@@ -225,5 +238,22 @@ class ClaimsController extends BaseController
         \DB::commit();
 
         return new SuccessResponse('Required fields have been saved.  You can now transmit the invoice.', $invoice);
+    }
+
+    /**
+     * Get the response results from an HHA transmission.
+     *
+     * @param Claim $claim
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hhaResults(Claim $claim)
+    {
+        $hhaFile = $claim->hhaFiles()->with('results')->latest()->first();
+
+        if (empty($hhaFile)) {
+            return response()->json([]);
+        }
+
+        return response()->json($hhaFile->results);
     }
 }

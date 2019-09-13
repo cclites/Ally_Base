@@ -62,8 +62,8 @@ class PaymentSummaryByPayerReport extends BaseReport
 
     public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $client, ?int $payer): self
     {
-        $startDate = new Carbon($start . ' 00:00:00', $this->timezone);
-        $endDate = new Carbon($end . ' 23:59:59', $this->timezone);
+        $startDate = (new Carbon($start . ' 00:00:00', $this->timezone))->timezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', $this->timezone))->timezone('UTC');
 
         //need to actually query by payment date maybe?
         $this->query->whereBetween('created_at', [$startDate, $endDate]);
@@ -134,10 +134,9 @@ class PaymentSummaryByPayerReport extends BaseReport
     protected function mapShiftRecord(ClientInvoice $invoice, Shift $shift) : array
     {
         return [
-            'payer'=>$invoice->clientPayer->payer->name,
             'client_name'=>$invoice->client->nameLastFirst,
             'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
-            'client_type'=>ucwords(str_replace('_', ' ', $invoice->client->client_type)),
+            'invoice'=> $invoice->id,
             'amount'=>$shift->getAmountCharged()
         ];
     }
@@ -152,13 +151,11 @@ class PaymentSummaryByPayerReport extends BaseReport
     protected function mapShiftServiceRecord(ClientInvoice $invoice, ShiftService $shiftService) : array
     {
         return [
-            'payer'=>$invoice->clientPayer->payer->name,
             'client_name'=>$invoice->client->nameLastFirst,
             'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
-            'client_type'=>ucwords(str_replace('_', ' ', $invoice->client->client_type)),
+            'invoice'=> $invoice->id,
             'amount'=>$shiftService->getAmountCharged()
         ];
     }
-
 
 }

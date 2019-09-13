@@ -24,6 +24,9 @@ export default {
         {
             if (typeof(str) !== "string") return "";
             return (str.length > 70) ? str.substr(0, 70) + '..' : str;
+        },
+        fromSnakeCase(str){
+           return str.replace(/_/g, ' ');
         }
     }
 }

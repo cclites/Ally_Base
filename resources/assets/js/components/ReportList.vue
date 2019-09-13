@@ -18,6 +18,10 @@
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
                         </template>
+                        <template slot="description" scope="row">
+                            {{ row.item.description }}
+                            <div v-if="row.item.hidden === true" class="text-danger">This is only shown for admins impersonating office users.</div>
+                        </template>
                     </b-table>
                 </div>
             </b-card>
@@ -157,19 +161,33 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Bad SSN Report (Clients)',
+                        url: 'reports/bad-ssn-report?type=clients',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Bad SSN Report (Caregivers)',
+                        url: 'reports/bad-ssn-report?type=caregivers',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Unpaid Shifts',
                         url: 'reports/unpaid_shifts',
                         description: '',
                         category: 5,
                         allowed: ['admin'],
                     },
-                    // { Removed as per ALLY-1394
-                    //     name: 'Missing Deposit Accounts',
-                    //     url: 'reports/caregivers/deposits-missing-bank-account',
-                    //     description: '',
-                    //     category: 3,
-                    //     allowed: [],
-                    // },
+                    {
+                        name: 'Missing Deposit Accounts',
+                        url: 'reports/caregivers/deposits-missing-bank-account',
+                        description: '',
+                        category: 3,
+                        allowed: ['admin'],
+                    },
                     {
                         name: 'Financial Summary',
                         url: 'reports/finances',
@@ -412,14 +430,14 @@
                     //     url: 'reports/clients-missing-payment-methods',
                     //     description: 'Shows all clients missing a payment method',
                     //     category: 2,
-                    //     allowed: [],
+                    //     allowed: [['office_user'],
                     // },
                     // { Removed as per ALLY-1394
                     //     name: 'Caregivers Missing Bank Accounts',
                     //     url: 'reports/caregivers-missing-bank-accounts',
                     //     description: 'Shows all caregivers missing bank accounts',
                     //     category: 3,
-                    //     allowed: [],
+                    //     allowed: [['office_user'],
                     // },
                     {
                         name: 'Client & Caregiver Onboard Status',
@@ -515,6 +533,7 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
                     {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
@@ -569,6 +588,7 @@
                             description: 'Total caregiver payments over a specified date range',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Client Referrals',
@@ -576,13 +596,15 @@
                             description: 'Client Referrals Report',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
-                            name: 'Invoice Summary By Marketing',
-                            url: 'reports/invoice-summary-by-marketing',
-                            description: 'Invoice Summary By Marketing Report',
+                            name: 'Invoice Summary By Salesperson',
+                            url: 'reports/invoice-summary-by-salesperson',
+                            description: 'Total Client Charges By Salesperson',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
                             name: 'Invoice Summary By County',
@@ -590,13 +612,23 @@
                             description: 'Invoice Summary Report By County',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
                         },
                         {
-                            name: 'Payment Summary By Payer',
+                            name: 'Payment Summary By Private Pay Clients',
                             url: 'reports/payment-summary-by-payer',
-                            description: 'Payment Summary By Payer Report',
+                            description: 'See all payments made by private pay clients',
                             category: 5,
                             allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Client Charges By County',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
                         },
                     )
                 }

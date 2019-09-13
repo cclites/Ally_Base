@@ -7,10 +7,10 @@
         </div>
         <div class="row">
             <div class="col-lg-6 col-sm-12">
-                <user-address :hasNotes="true" title="Service Address <small class='d-block text-right'>* EVV GPS Verification checks against this address.</small>" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
+                <user-address :hasNotes="true" title="Service Address <small class='text-right float-right'>* EVV GPS Verification checks against this address.</small>" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
             </div>
             <div class="col-lg-6 col-sm-12">
-                <user-address title="Billing Address <small class='d-block mb-3'></small>" type="billing" :action="'/business/clients/'+clientId+'/address/billing'" :address="billingAddress"></user-address>
+                <user-address title="Billing Address <small class='mb-3'></small>" type="billing" :action="'/business/clients/'+clientId+'/address/billing'" :address="billingAddress"></user-address>
             </div>
         </div>
     </div>
