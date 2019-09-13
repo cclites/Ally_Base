@@ -179,6 +179,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return floatval($this->amount_due);
     }
 
+    public function getAmountPaid(): float
+    {
+        return subtract(floatval($this->amount), floatval($this->amount_due));
+    }
+
+    public function getStatus() : string
+    {
+        return $this->status;
+    }
+
     /**
      * Get whether or not the claim invoice has been transmitted.
      *

@@ -23,11 +23,6 @@ class ClaimsQueueController extends BaseController
         if ($request->filled('json') || $request->expectsJson()) {
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
-                    case 'overpaid':
-                        $invoiceQuery->whereHas('claim', function (Builder $q) {
-                            $q->whereColumn('amount_paid', '>', 'amount');
-                        });
-                        break;
                     case 'paid':
                         $invoiceQuery->paidInFull();
                         break;
@@ -35,19 +30,19 @@ class ClaimsQueueController extends BaseController
                         $invoiceQuery->notPaidInFull();
                         break;
                     case 'has_claim':
-                        $invoiceQuery->whereHas('claim');
+                        $invoiceQuery->whereHas('claimInvoice');
                         break;
                     case 'no_claim':
-                        $invoiceQuery->whereDoesntHave('claim');
+                        $invoiceQuery->whereDoesntHave('claimInvoice');
                         break;
                     case 'has_balance':
-                        $invoiceQuery->whereHas('claim', function (Builder $q) {
-                            $q->whereColumn('amount', '>', 'amount_paid');
+                        $invoiceQuery->whereHas('claimInvoice', function (Builder $q) {
+                            $q->where('amount_due', '<>', '0');
                         });
                         break;
                     case 'no_balance':
-                        $invoiceQuery->whereHas('claim', function (Builder $q) {
-                            $q->whereColumn('amount', '<=', 'amount_paid');
+                        $invoiceQuery->whereHas('claimInvoice', function (Builder $q) {
+                            $q->where('amount_due', '=', 0);
                         });
                         break;
                 }

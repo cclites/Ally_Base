@@ -99,13 +99,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->belongsTo(ClientPayer::class);
     }
 
-    // a part of the old system? lava flow? keeping because i dont know
     public function claim()
     {
         return $this->hasOne(Claim::class);
     }
 
-    // a shiny new relationship for the updated Claims & AR system
     public function claimInvoice()
     {
         return $this->hasOne( ClaimInvoice::class );

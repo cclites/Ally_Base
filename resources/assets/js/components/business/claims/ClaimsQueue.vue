@@ -47,7 +47,6 @@
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
-                            <option value="overpaid">Overpaid Invoices</option>
                             <option value="has_claim">Has Claim</option>
                             <option value="no_claim">Does Not Have Claim</option>
                             <option value="has_balance">Has Claim Balance</option>
