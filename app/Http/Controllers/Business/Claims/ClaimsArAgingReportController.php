@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Business\Report;
+namespace App\Http\Controllers\Business\Claims;
 
 use App\Http\Controllers\Controller;
 use App\Reports\BusinessClaimsArAgingReport;
 use Illuminate\Http\Request;
 
-class BusinessClaimsArAgingReportController extends Controller
+class ClaimsArAgingReportController extends Controller
 {
     /**
      * Get the Payroll Export Report

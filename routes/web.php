@@ -492,7 +492,7 @@ Route::group([
     Route::get('claims/{claim}/{view?}', 'Business\Claims\ClaimInvoiceController@print');
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
-    Route::get('reports/claims/ar-aging', 'Business\Claims\Reports\ArAgingReportController@index')->name('reports.claims.ar-aging');
+    Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimsArAgingReportController@index')->name('reports.claims.ar-aging');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
