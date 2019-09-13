@@ -487,6 +487,7 @@ Route::group([
     /* New Claims & AR */
     Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
+    Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
     Route::resource('claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
     Route::get('claims/{claim}/{view?}', 'Business\Claims\ClaimInvoiceController@print');
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');

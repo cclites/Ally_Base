@@ -9,8 +9,6 @@ use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\OfflineInvoicePayment;
 use App\Billing\Payer;
 use App\Businesses\NullContact;
-use App\Claims\ClaimInvoice;
-use App\Contracts\ViewStrategy;
 use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
 
@@ -70,34 +68,6 @@ class InvoiceViewGenerator
             $subject,
             $clientInvoice,
             $payments
-        );
-    }
-
-    // new overhauled function
-    function generateNewClaimInvoice( ClaimInvoice $claim )
-    {
-        $client      = $claim->client;
-        $clientPayer = $claim->getClientPayer();
-        $business    = $client->business;
-        // $payments    = $claim->payments;
-
-        if ( $clientPayer == null || $clientPayer->payer_id === Payer::PRIVATE_PAY_ID ) {
-
-            $recipient = $client;
-            $subject   = new NullContact();
-        } else {
-
-            $recipient = $clientPayer->payer;
-            $subject   = $client;
-        }
-
-        return $this->generate(
-
-            $business,
-            $recipient,
-            $subject,
-            $claim,
-            collect( null ) // $payments
         );
     }
 

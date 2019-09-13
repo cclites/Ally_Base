@@ -2,6 +2,12 @@
 
 namespace App\Claims;
 
+use App\Billing\Claims\HhaClaimTransmitter;
+use App\Billing\Claims\ManualClaimTransmitter;
+use App\Billing\Claims\TellusClaimTransmitter;
+use App\Billing\ClaimService;
+use App\Billing\Contracts\ClaimTransmitterInterface;
+use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\InvoiceInterface;
@@ -158,71 +164,19 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->name;
     }
 
-    public function getStatus() : string
-    {
-        return $this->status;
-    }
-
-    function getDate() : Carbon
+    public function getDate() : Carbon
     {
         return $this->created_at;
     }
 
-    function getAmount() : float
+    public function getAmount() : float
     {
         return floatval($this->amount);
     }
 
-    function getAmountDue() : float
+    public function getAmountDue() : float
     {
         return floatval($this->amount_due);
-    }
-
-
-
-
-
-
-
-    function getClientPayer(): ?ClientPayer
-    {
-        return $this->clientPayer;
-    }
-
-    function getAmountPaid(): float
-    {
-        return subtract(floatval($this->amount), floatval($this->amount_due));
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection|\App\Billing\ClaimInvoiceItem[]
-     */
-    function getItems(): Collection
-    {
-        return $this->items;
-    }
-
-    /**
-     *
-     * because there is no 'group' column, and this information is more-or-less computed by the editable claim data,
-     * I am going to do some manual joining and formatting for the invoice here
-     *
-     * basically, group by 'shift'..
-     *  - the shift row title will be the computed 'group' name..
-     *  - each item within it will either be the service rendered or the expense listed
-     */
-    function getItemGroups(): Collection
-    {
-        $items = $this->getItems()->sortBy('created_at');
-
-        $shifts = [];
-
-        foreach ($items as $item) {
-
-            $shifts[$item->getShiftTitle()][] = $item;
-        }
-
-        return collect($shifts);
     }
 
     /**
@@ -356,5 +310,33 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return "${businessId}-${nextId}";
+    }
+
+    /**
+     * Get the ClaimTransmitter for the given service.
+     *
+     * @param ClaimService $service
+     * @return ClaimTransmitterInterface
+     * @throws ClaimTransmissionException
+     */
+    public static function getTransmitter(ClaimService $service) : ClaimTransmitterInterface
+    {
+        switch ($service) {
+            case ClaimService::HHA():
+                return new HhaClaimTransmitter();
+                break;
+            case ClaimService::TELLUS():
+                return new TellusClaimTransmitter();
+                break;
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
+                return new ManualClaimTransmitter();
+                break;
+            default:
+                throw new ClaimTransmissionException('Claim service not supported.');
+        }
     }
 }
