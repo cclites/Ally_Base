@@ -584,6 +584,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Get actual shift duration without using a rounding method.
+     *
+     * @return float
+     */
+    public function getRawDuration() : float
+    {
+        return (float) app(DurationCalculator::class)->noneRoundingMethod($this);
+    }
+
+    /**
      * Get the scheduled end time of the shift
      *
      * @return Carbon
@@ -1163,7 +1173,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         $serviceIds = [$this->service_id];
 
         if (filled($this->services)) {
-            $serviceIds = $this->services->pluck('id')->toArray();
+            $serviceIds = $this->services->pluck('service_id')->toArray();
         } else if (empty($this->service_id)) {
             return [];
         }
