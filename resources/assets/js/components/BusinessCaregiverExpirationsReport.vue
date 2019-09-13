@@ -51,13 +51,13 @@
             </b-col>
 
             <b-col lg="12" class="d-flex mt-2">
-                <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show only expired expirations ( will ignore date range )</b-form-checkbox>
+                <b-form-checkbox class="m-0 vertical-center" @change=" showPast() ">Show only expired expirations (will ignore date range)</b-form-checkbox>
             </b-col>
             <b-col lg="12" class="d-flex mt-1">
                 <b-form-checkbox class="m-0 vertical-center" @change=" showScheduled() ">Show only caregivers with future schedules</b-form-checkbox>
             </b-col>
             <b-col lg="12" class="d-flex mt-1">
-                <b-form-checkbox class="m-0 vertical-center" v-model=" form.show_empty_expirations ">Show any expirations the caregivers don't have filled out</b-form-checkbox>
+                <b-form-checkbox class="m-0 vertical-center" v-model=" form.show_empty_expirations ">Show expirations missing (no expiration date)</b-form-checkbox>
             </b-col>
 
             <b-col class="mt-2 d-flex align-items-stretch align-items-sm-center justify-content-end flex-column flex-sm-row">
