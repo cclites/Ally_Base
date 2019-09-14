@@ -1,9 +1,12 @@
 <template>
     <b-card>
         <div class="claim-info">
-            <div class="d-flex">
+            <div class="d-flex mb-3">
                 <h1>Claim #{{ claim.name }}</h1>
                 <div class="ml-auto">
+                    <div class="text-right mb-2">
+                        <b-btn variant="info" :href="`/business/claims/${claim.id}/`" target="_blank"><i class="fa fa-print mr-2" />Print</b-btn>
+                    </div>
                     <strong>Last Modified:</strong>
                     {{ claim.modified_at ? formatDateTimeFromUTC(claim.modified_at) : 'Never' }}
                 </div>
@@ -75,15 +78,9 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Payer Code" label-for="payer_code">
-                        <b-form-input
-                            v-model="form.payer_code"
-                            id="payer_code"
-                            name="payer_code"
-                            type="text"
-                            :disabled="form.busy"
-                        ></b-form-input>
-                        <input-help :form="form" field="payer_code" text=""></input-help>
+                    <b-form-group label="Client Date of Birth" label-for="client_dob">
+                        <mask-input v-model="form.client_dob" id="client_dob" type="date" :disabled="form.busy"></mask-input>
+                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -101,9 +98,15 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Client Date of Birth" label-for="client_dob">
-                        <mask-input v-model="form.client_dob" id="client_dob" type="date" :disabled="form.busy"></mask-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
+                    <b-form-group label="Payer Code" label-for="payer_code">
+                        <b-form-input
+                            v-model="form.payer_code"
+                            id="payer_code"
+                            name="payer_code"
+                            type="text"
+                            :disabled="form.busy"
+                        ></b-form-input>
+                        <input-help :form="form" field="payer_code" text=""></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -121,7 +124,7 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Plan Code" label-for="plan_code">
+                    <b-form-group label="Payer Plan Identifier" label-for="plan_code">
                         <b-form-input
                             v-model="form.plan_code"
                             id="plan_code"
@@ -140,7 +143,7 @@
             </b-row>
             <b-row>
                 <b-col class="d-flex">
-                    <b-btn class="ml-auto" variant="success" @click="save()" :disabled="form.busy">Save Changes</b-btn>
+                    <b-btn class="ml-auto" variant="success" @click="save()" :disabled="form.busy">Update Claim Information</b-btn>
                 </b-col>
             </b-row>
         </div>

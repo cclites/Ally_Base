@@ -9,6 +9,12 @@
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
         >
+            <template slot="start_time" scope="row">
+                <span v-if="row.item.start_time">
+                    {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
+                </span>
+                <span v-else>-</span>
+            </template>
             <template slot="related_shift_id" scope="row">
                 <a v-if="row.item.related_shift_id" :href="`/business/shifts/${row.item.related_shift_id}`" target="_blank">{{ row.item.related_shift_id }}</a>
                 <span v-else>-</span>
@@ -34,6 +40,10 @@
         >
             <claim-invoice-item-form ref="item-form" @close="hideModal()" :item="current" />
         </b-modal>
+
+        <confirm-modal title="Delete Item" ref="confirmDeleteItem" yesButton="Delete" yesVariant="danger">
+            <p>Are you sure you want to delete this item from the Claim?  This is a permanent action and cannot be undone.</p>
+        </confirm-modal>
     </div>
 </template>
 
@@ -71,6 +81,7 @@
                     type: { sortable: true },
                     summary: { sortable: true },
                     date: { sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    start_time: { label: 'Time', sortable: true },
                     related_shift_id: { sortable: true, label: 'Related Shift' },
                     rate: { sortable: true, formatter: x => this.moneyFormat(x) },
                     units: { sortable: true },
@@ -83,17 +94,19 @@
 
         methods: {
             destroy(item) {
-                this.deletingId = item.id;
+                this.$refs.confirmDeleteItem.confirm(() => {
+                    this.deletingId = item.id;
 
-                let form = new Form({});
-                form.submit('DELETE', `/business/claims/${this.claim.id}/item/${item.id}`)
-                    .then( ({ data }) => {
-                        this.$store.commit('claims/setClaim', data.data);
-                    })
-                    .catch(() => {})
-                    .finally(() => {
-                        this.deletingId = null;
-                    });
+                    let form = new Form({});
+                    form.submit('DELETE', `/business/claims/${this.claim.id}/item/${item.id}`)
+                        .then( ({ data }) => {
+                            this.$store.commit('claims/setClaim', data.data);
+                        })
+                        .catch(() => {})
+                        .finally(() => {
+                            this.deletingId = null;
+                        });
+                });
             },
 
             edit(item) {
