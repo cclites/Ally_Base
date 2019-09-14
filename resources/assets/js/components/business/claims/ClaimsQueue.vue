@@ -72,7 +72,7 @@
                 <b-form-input v-model=" filter " placeholder="Type to Search" />
             </b-col>
             <b-col lg="6" class="text-right">
-                <a href="/business/reports/claims-ar-aging" target="_blank">View Aging Report</a>
+                <a href="/business/reports/claims/ar-aging" target="_blank">View Aging Report</a>
             </b-col>
         </b-row>
 

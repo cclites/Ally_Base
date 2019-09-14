@@ -24,10 +24,30 @@ class ClaimsQueueController extends BaseController
             if ($request->filled('invoiceType')) {
                 switch ($request->invoiceType) {
                     case 'paid':
-                        $invoiceQuery->paidInFull();
+//                        $invoiceQuery->paidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', 0)
+                                    ->whereColumn('amount_paid', '=', 'amount');
+                            })
+                            ->orWhere(function ($q) {
+                                $q->where('offline', 1)
+                                    ->whereColumn('offline_amount_paid', '=', 'amount');
+                            });
+                        });
                         break;
                     case 'unpaid':
-                        $invoiceQuery->notPaidInFull();
+//                        $invoiceQuery->notPaidInFull();
+                        $invoiceQuery->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->where('offline', 0)
+                                    ->whereColumn('amount_paid', '!=', 'amount');
+                            })
+                            ->orWhere(function ($q) {
+                                $q->where('offline', 1)
+                                    ->whereColumn('offline_amount_paid', '<', 'amount');
+                            });
+                        });
                         break;
                     case 'has_claim':
                         $invoiceQuery->whereHas('claimInvoice');

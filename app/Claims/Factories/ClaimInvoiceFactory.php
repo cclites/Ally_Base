@@ -30,6 +30,11 @@ class ClaimInvoiceFactory
     public function createFromClientInvoice(ClientInvoice $invoice): ClaimInvoice
     {
         $invoice->load('items', 'items.shift', 'items.shiftService', 'items.shiftService.shift');
+
+        if (empty($invoice->clientPayer)) {
+            throw new \InvalidArgumentException('Invoice has no payer and cannot be used for a claim.');
+        }
+
         $client = $invoice->client;
         $business = $invoice->client->business;
         $payer = $invoice->clientPayer->payer;

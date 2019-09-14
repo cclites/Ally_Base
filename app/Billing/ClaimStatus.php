@@ -1,7 +1,7 @@
 <?php
 namespace App\Billing;
 
-use MyCLabs\Enum\Enum;
+use App\BaseEnum;
 
 /**
  * ClaimService Enum
@@ -13,7 +13,7 @@ use MyCLabs\Enum\Enum;
  * @method static ClaimStatus ACCEPTED()
  * @method static ClaimStatus REJECTED()
  */
-class ClaimStatus extends Enum
+class ClaimStatus extends BaseEnum
 {
     private const NOT_SENT = 'NOT_SENT';
     private const CREATED = 'CREATED';
@@ -32,6 +32,22 @@ class ClaimStatus extends Enum
     {
         return [
             self::NOT_SENT(), self::CREATED()
+        ];
+    }
+
+    /**
+     * Get the statuses that represent a Claim that
+     * has been transmitted.
+     *
+     * @return array
+     */
+    public static function transmittedStatuses()
+    {
+        return [
+            self::TRANSMITTED()->getValue(),
+            self::RETRANSMITTED()->getValue(),
+            self::ACCEPTED()->getValue(),
+            self::REJECTED()->getValue(),
         ];
     }
 }
