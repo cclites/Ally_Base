@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
+use Illuminate\Validation\ValidationException;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
@@ -11,7 +12,6 @@ use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
-use Illuminate\Validation\ValidationException;
 
 class ClaimInvoiceItemController extends BaseController
 {
@@ -58,6 +58,7 @@ class ClaimInvoiceItemController extends BaseController
             // TODO: recalculate amount due based on applied payments for both the item and the claim
 
             $claim->updateBalances();
+            $claim->markAsModified();
 
             \DB::commit();
         } catch (\Exception $ex) {
@@ -91,6 +92,7 @@ class ClaimInvoiceItemController extends BaseController
             // TODO: recalculate amount due based on applied payments for both the item and the claim
 
             $claim->updateBalances();
+            $claim->markAsModified();
 
             \DB::commit();
         } catch (ValidationException $ex) {
@@ -120,6 +122,7 @@ class ClaimInvoiceItemController extends BaseController
             \DB::beginTransaction();
             $item->delete();
             $claim->updateBalances();
+            $claim->markAsModified();
             \DB::commit();
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);

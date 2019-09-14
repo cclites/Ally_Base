@@ -2,24 +2,18 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\Contracts\InvoiceInterface;
-use App\Claims\ClaimRemit;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Claims\Requests\UpdateClaimInvoiceRequest;
-use App\Claims\Resources\ClaimRemitResource;
-use App\Contracts\ContactableInterface;
 use App\Http\Controllers\Business\BaseController;
+use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
-use App\Billing\View\InvoiceViewGenerator;
 use App\Billing\View\InvoiceViewFactory;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class ClaimInvoiceController extends BaseController
 {
@@ -100,6 +94,7 @@ class ClaimInvoiceController extends BaseController
         $this->authorize('update', $claim);
 
         if ($claim->update($request->filtered())) {
+            $claim->markAsModified();
             return new SuccessResponse('Claim information has been saved.', new ClaimInvoiceResource($claim));
         }
 

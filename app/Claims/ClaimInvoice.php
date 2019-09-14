@@ -46,6 +46,7 @@ use App\Client;
  * @property string|null $plan_code
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $modified_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Client $client
@@ -289,6 +290,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         $this->update(compact('amount', 'amount_due'));
+    }
+
+    /**
+     * Mark that the Claim has been modified.
+     *
+     * @return void
+     */
+    public function markAsModified() : void
+    {
+        $this->update(['modified_at' => Carbon::now()]);
     }
 
     // **********************************************************

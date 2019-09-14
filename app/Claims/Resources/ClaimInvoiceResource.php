@@ -70,8 +70,7 @@ class ClaimInvoiceResource extends Resource
             'plan_code' => $this->resource->plan_code,
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
-            'updated_at' => $this->resource->updated_at->toDateTimeString(),
-            'modified_at' => $this->resource->updated_at->greaterThan($this->resource->created_at) ? $this->resource->updated_at->toDateTimeString() : null,
+            'modified_at' => $this->resource->modified_at,
         ];
     }
 }
