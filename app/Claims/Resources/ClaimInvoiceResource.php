@@ -2,10 +2,16 @@
 
 namespace App\Claims\Resources;
 
+use App\Claims\ClaimInvoice;
 use Illuminate\Http\Resources\Json\Resource;
 
 class ClaimInvoiceResource extends Resource
 {
+    /**
+     * @var ClaimInvoice
+     */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -64,6 +70,8 @@ class ClaimInvoiceResource extends Resource
             'plan_code' => $this->resource->plan_code,
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
+            'updated_at' => $this->resource->updated_at->toDateTimeString(),
+            'modified_at' => $this->resource->updated_at->greaterThan($this->resource->created_at) ? $this->resource->updated_at->toDateTimeString() : null,
         ];
     }
 }

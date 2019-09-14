@@ -1,7 +1,13 @@
 <template>
     <b-card>
         <div class="claim-info">
-            <h1>Claim #{{ claim.name }}</h1>
+            <div class="d-flex">
+                <h1>Claim #{{ claim.name }}</h1>
+                <div class="ml-auto">
+                    <strong>Last Modified:</strong>
+                    {{ claim.modified_at ? formatDateTimeFromUTC(claim.modified_at) : 'Never' }}
+                </div>
+            </div>
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Client" label-for="client" class="bold">

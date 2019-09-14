@@ -103,6 +103,7 @@
                 <template slot="claim" scope="row">
                     <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`" target="_blank">{{ row.item.claim.name }}</a>
                     <span v-else> - </span>
+                    <i v-if="row.item.claim.modified_at" class="fa fa-code-fork text-danger"></i>
                 </template>
                 <template slot="payer" scope="row">
                     <span v-if="row.item.claim">

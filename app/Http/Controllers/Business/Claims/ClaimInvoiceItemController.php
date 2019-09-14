@@ -11,6 +11,7 @@ use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
+use Illuminate\Validation\ValidationException;
 
 class ClaimInvoiceItemController extends BaseController
 {
@@ -75,6 +76,7 @@ class ClaimInvoiceItemController extends BaseController
      * @param UpdateClaimInvoiceItemRequest $request
      * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws ValidationException
      */
     public function update(ClaimInvoice $claim, ClaimInvoiceItem $item, UpdateClaimInvoiceItemRequest $request)
     {
@@ -91,7 +93,10 @@ class ClaimInvoiceItemController extends BaseController
             $claim->updateBalances();
 
             \DB::commit();
+        } catch (ValidationException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }

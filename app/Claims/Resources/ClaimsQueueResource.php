@@ -25,7 +25,7 @@ class ClaimsQueueResource extends Resource
             'payments' => $this->resource->payments,
             'client_name' => empty($claim) ? $this->resource->client->name : ucwords(implode(' ', [$claim->client_first_name, $claim->client_last_name])),
             'balance' => $this->resource->amount - $this->resource->getAmountPaid(),
-            'claim' => $claim,
+            'claim' => new ClaimInvoiceResource($claim),
             'claim_total' => empty($claim) ? 0.00 : $claim->getAmount(),
             'claim_paid' => empty($claim) ? 0.00 : $claim->getAmountPaid(),
             'claim_balance' => empty($claim) ? 0.00 : $claim->getAmountDue(),

@@ -49,6 +49,14 @@ class ClaimInvoiceItem extends AuditableModel
     public $with = ['claimable'];
 
     /**
+     * The relationships that should be marked as updated_at when
+     * this resource is updated.
+     *
+     * @var array
+     */
+    protected $touches = ['claim'];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
