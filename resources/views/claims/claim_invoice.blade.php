@@ -69,7 +69,7 @@
                         <td>{{ $claimable->getName() }}</td>
                         <td class="text-nowrap">{{ local_date($item->date, 'm/d/Y', auth()->user()->getTimezone()) }}</td>
                         <td class="text-nowrap">{{ local_date($item->date, 'H:i A', auth()->user()->getTimezone()) }}</td>
-                        <td class="text-nowrap">-</td>
+                        <td class="text-nowrap">{{ $claimable->getCaregiverName() }}</td>
                         <td class="text-nowrap">{{ $item->units }}</td>
                         <td class="text-nowrap">{{ rate_format($item->rate) }}</td>
                         <td class="text-nowrap">{{ number_format($item->amount, 2) }}</td>

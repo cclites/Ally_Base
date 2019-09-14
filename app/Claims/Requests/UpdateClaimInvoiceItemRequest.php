@@ -38,8 +38,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'rate' => 'required|numeric|min:0|max:999.99',
             'units' => 'required|numeric|min:0|max:999.99',
 
-            'caregiver_first_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
-            'caregiver_last_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'caregiver_first_name' => 'required',
+            'caregiver_last_name' => 'required',
             'caregiver_gender' => 'nullable|in:F,M',
             'caregiver_dob' => 'nullable|date',
             'caregiver_ssn' => ['nullable', new ValidSSN()],
@@ -158,7 +158,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 break;
             case ClaimableExpense::class:
-                $data = $data->only(['name', 'notes', 'date'])
+                $data = $data->only(['name', 'notes', 'date', 'caregiver_first_name', 'caregiver_last_name'])
                     ->toArray();
                 $data['date'] = filter_date($data['date']);
                 break;

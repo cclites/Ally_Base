@@ -12,6 +12,9 @@ use Carbon\Carbon;
  *
  * @property int $id
  * @property int|null $shift_id
+ * @property int|null $caregiver_id
+ * @property string $caregiver_first_name
+ * @property string $caregiver_last_name
  * @property string $name
  * @property string $date
  * @property string|null $notes

@@ -176,11 +176,14 @@ class ClaimInvoiceFactory
      */
     protected function convertExpense(ClientInvoiceItem $item): ClaimInvoiceItem
     {
-        /** @var \App\ShiftExpense $shiftExpense */
+        /** @var ShiftExpense $shiftExpense */
         $shiftExpense = $item->shiftExpense;
 
         $claimableExpense = ClaimableExpense::create([
             'shift_id' => $shiftExpense->shift_id,
+            'caregiver_id' => $shiftExpense->shift->caregiver->id,
+            'caregiver_first_name' => $shiftExpense->shift->caregiver->first_name,
+            'caregiver_last_name' => $shiftExpense->shift->caregiver->last_name,
             'name' => $shiftExpense->name,
             'date' => $item->date,
             'notes' => $shiftExpense->notes,

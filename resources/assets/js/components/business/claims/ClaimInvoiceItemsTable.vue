@@ -75,7 +75,7 @@
                 deletingId: null,
                 showEditModal: false,
                 // Table data:
-                sortBy: 'date',
+                sortBy: '',
                 sortDesc: false,
                 fields: {
                     type: { sortable: true },

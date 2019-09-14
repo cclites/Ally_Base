@@ -3,7 +3,6 @@
 namespace App\Claims\Requests;
 
 use App\Http\Requests\FilteredResourceRequest;
-use App\Claims\ClaimRemitStatus;
 
 class GetClaimInvoicesRequest extends FilteredResourceRequest
 {

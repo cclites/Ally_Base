@@ -30,6 +30,33 @@
         </b-row>
         <div v-if="form.claimable_type == CLAIMABLE_TYPES.EXPENSE">
             <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Caregiver First Name" label-for="caregiver_first_name" label-class="required">
+                        <b-form-input
+                            v-model="form.caregiver_first_name"
+                            id="caregiver_first_name"
+                            name="caregiver_first_name"
+                            type="text"
+                            :disabled="form.busy"
+                        />
+                        <input-help :form="form" field="caregiver_first_name" text="" />
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Caregiver Last Name" label-for="caregiver_last_name" label-class="required">
+                        <b-form-input
+                            v-model="form.caregiver_last_name"
+                            id="caregiver_last_name"
+                            name="caregiver_last_name"
+                            type="text"
+                            :disabled="form.busy"
+                        />
+                        <input-help :form="form" field="caregiver_last_name" text="" />
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
                 <b-col sm="4">
                     <b-form-group label="Name" label-for="name" label-class="required">
                         <b-form-input
