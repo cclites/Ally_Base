@@ -112,6 +112,10 @@ class ClientInvoiceController extends Controller
             return new ErrorResponse(400, "This invoice cannot be removed because it has payments assigned.");
         }
 
+        if (filled($invoice->claimInvoice)) {
+            return new ErrorResponse(400, "This invoice cannot be removed because it has a Claim attached.");
+        }
+
         if ($invoice->delete()) {
             return new SuccessResponse("The invoice has been removed.");
         }
