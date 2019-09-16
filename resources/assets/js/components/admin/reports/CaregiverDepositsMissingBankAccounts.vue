@@ -28,7 +28,7 @@
             </b-col>
         </b-row>
 
-        <loading-card v-if="loading" text="Loading profile..."></loading-card>
+        <loading-card v-if="loading" text="Loading report..."></loading-card>
 
         <b-row>
             <b-table :items="items"
@@ -36,6 +36,7 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
                      :tbody-tr-class="rowClass"
+                     :empty-text="emptyText"
             >
             </b-table>
         </b-row>
@@ -60,6 +61,7 @@
                 loading: false,
                 caregivers: [],
                 items: [],
+                emptyText: "'No results to display",
                 rowClass: '',
                 fields: [
                     {
@@ -104,12 +106,16 @@
 
         methods: {
             fetch(){
+
+                this.loading = true;
+
                 axios.get(this.url)
                     .then( ({ data }) => {
                         this.caregivers = data;
                     })
                     .catch(e => {})
                     .finally(() => {
+                        this.loading = false;
                     })
             }
         },
