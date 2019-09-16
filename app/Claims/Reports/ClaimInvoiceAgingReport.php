@@ -2,6 +2,7 @@
 
 namespace App\Claims\Reports;
 
+use App\Billing\ClaimStatus;
 use App\Claims\Resources\ClaimAgingReportItemResource;
 use App\Claims\ClaimInvoice;
 use App\Reports\BaseReport;
@@ -29,7 +30,8 @@ class ClaimInvoiceAgingReport extends BaseReport
     {
         $this->query = ClaimInvoice::query()
             ->with('client', 'payer', 'business', 'clientInvoice')
-            ->where('amount_due', '<>', '0');
+            ->where('amount_due', '<>', '0')
+            ->whereIn('status', ClaimStatus::transmittedStatuses());
     }
 
     /**

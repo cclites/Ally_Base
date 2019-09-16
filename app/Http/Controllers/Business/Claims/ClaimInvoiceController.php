@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Billing\ClaimStatus;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimsQueueResource;
@@ -32,7 +33,8 @@ class ClaimInvoiceController extends BaseController
             }])->forRequestedBusinesses()
             ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
-            ->forClient($filters['client_id']);
+            ->forClient($filters['client_id'])
+            ->whereIn('status', ClaimStatus::transmittedStatuses());
 
         if ($request->claim_status == 'unpaid') {
             $query = $query->hasBalance();
