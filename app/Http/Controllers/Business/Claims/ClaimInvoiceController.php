@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimRemitApplication;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Http\Controllers\Business\BaseController;
@@ -113,11 +114,15 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('delete', $claim);
 
+        if ($claim->remitApplications()->count() > 0) {
+            return new ErrorResponse(500, 'Cannot delete Claims that have remits applied.');
+        }
+
         try {
             $factory->deleteClaimInvoice($claim);
             return new SuccessResponse('Claim has been deleted.');
         } catch (CannotDeleteClaimInvoiceException $ex) {
-            return new ErrorResponse(500, 'Could not delete this claim: ' . $ex->getMessage());
+            return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
         }
     }
 

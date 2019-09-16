@@ -153,6 +153,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->hasMany(ClaimPayment::class);
     }
 
+    /**
+     * Get the ClaimRemitApplications relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function remitApplications()
+    {
+        return $this->hasMany(ClaimRemitApplication::class);
+    }
+
     // **********************************************************
     // ACCESSORS
     // **********************************************************

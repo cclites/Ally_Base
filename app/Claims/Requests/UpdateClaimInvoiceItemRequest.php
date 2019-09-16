@@ -29,6 +29,10 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
      */
     public function rules()
     {
+        // We are not validating the amount based on remit applications/adjustments
+        // because this is handled when the balance is adjust after the save.
+        // See the ClaimInvoiceItemController@update method for more details.
+
         return [
             'claimable_type' => 'required|in:' . ClaimableExpense::class . ',' . ClaimableService::class,
             'name' => 'required_if:claimable_type,' . ClaimableExpense::class . '',
@@ -197,8 +201,6 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
         }
 
         $data['amount'] = multiply(floatval($data['rate']), floatval($data['units']));
-
-        // TODO: Validate amount against the total amount of payments applied towards this item, this value cannot be be less.
 
         return $data;
     }

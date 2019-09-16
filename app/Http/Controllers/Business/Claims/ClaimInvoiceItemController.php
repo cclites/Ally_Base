@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Validation\ValidationException;
@@ -45,18 +46,7 @@ class ClaimInvoiceItemController extends BaseController
                 'amount_due' => 0.00,
             ]));
 
-//                'invoiceable_id' => $shift->id,
-//                'invoiceable_type' => Shift::class,
-//                'claimable_id' => $claimableService->id,
-//                'claimable_type' => ClaimableService::class,
-//                'rate' => $item->rate,
-//                'units' => $item->units,
-//                'amount' => $item->amount_due,
-//                'amount_due' => $item->amount_due,
-//                'date' => $claimableService->visit_start_time,
-
-            // TODO: recalculate amount due based on applied payments for both the item and the claim
-
+            $item->updateBalance();
             $claim->updateBalance();
             $claim->markAsModified();
 
@@ -81,6 +71,10 @@ class ClaimInvoiceItemController extends BaseController
      */
     public function update(ClaimInvoice $claim, ClaimInvoiceItem $item, UpdateClaimInvoiceItemRequest $request)
     {
+        // This method validates amounts based on remits/adjustments during
+        // the updateBalance() call.  This method throws a ClaimBalanceException
+        // if the amount is less than what was applied.
+
         $this->authorize('update', $claim);
 
         try {
@@ -89,16 +83,16 @@ class ClaimInvoiceItemController extends BaseController
             $item->claimable->update($request->getClaimableData());
             $item->update($request->getClaimItemData());
 
-            // TODO: recalculate amount due based on applied payments for both the item and the claim
-
+            $item->updateBalance();
             $claim->updateBalance();
             $claim->markAsModified();
 
             \DB::commit();
+        } catch (ClaimBalanceException $ex) {
+            return new ErrorResponse(500, 'Could not update Claim Item.  When changing the total cost of an item, it cannot be less than what has already been applied.');
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
-            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }
@@ -117,6 +111,10 @@ class ClaimInvoiceItemController extends BaseController
     public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item)
     {
         $this->authorize('update', $claim);
+
+        if ($item->remitApplications()->count() > 0) {
+            return new ErrorResponse(412, 'Could not delete this Claim Item because it has one or more remits applied to it.');
+        }
 
         try {
             \DB::beginTransaction();

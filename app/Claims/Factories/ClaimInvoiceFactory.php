@@ -335,8 +335,6 @@ class ClaimInvoiceFactory
                 $item->delete();
             }
 
-            // TODO: this needs to also handle any AR payments and update remit balances
-
             $claim->delete();
 
             \DB::commit();
