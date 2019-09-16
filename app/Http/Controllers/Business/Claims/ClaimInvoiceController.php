@@ -131,11 +131,12 @@ class ClaimInvoiceController extends BaseController
      * Show a claim_invoice
      *
      * @param ClaimInvoice $claim
-     * @param string $view
+     * @param Request $request
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
      */
-    public function show(ClaimInvoice $claim, string $view = InvoiceViewFactory::HTML_VIEW)
+    public function show(ClaimInvoice $claim, Request $request)
     {
         $this->authorize('read', $claim);
 
@@ -148,7 +149,7 @@ class ClaimInvoiceController extends BaseController
             $groups['Service'] = [];
         }
 
-        return view('claims.claim_invoice', [
+        $view = view('claims.claim_invoice', [
             'claim' => $claim,
             'sender' => $claim->business,
             'recipient' => $claim->payer,
@@ -156,8 +157,12 @@ class ClaimInvoiceController extends BaseController
             'itemGroups' => $groups,
         ]);
 
-//            $pdfWrapper = app('snappy.pdf.wrapper');
-//            $this->pdfWrapper->loadHTML($view->render());
-//            return $this->pdfWrapper->download($this->filename);
+        if ($request->filled('download')) {
+            $pdfWrapper = app('snappy.pdf.wrapper');
+            $pdfWrapper->loadHTML($view->render());
+            return $pdfWrapper->download('Claim-Invoice-'.snake_case($claim->name));
+        }
+
+        return $view;
     }
 }

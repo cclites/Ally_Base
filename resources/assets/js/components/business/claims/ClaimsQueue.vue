@@ -101,7 +101,7 @@
                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
                 <template slot="claim" scope="row">
-                    <a v-if=" row.item.claim " :href="`/business/claims/${row.item.claim.id}/`" target="_blank">{{ row.item.claim.name }}</a>
+                    <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/`" target="_blank">{{ row.item.claim.name }}</a>
                     <span v-else> - </span>
                     <i v-if="row.item.claim && row.item.claim.modified_at" class="fa fa-code-fork text-danger"></i>
                 </template>
@@ -114,17 +114,22 @@
                     </span>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn v-if=" !row.item.claim " variant="success" class="mr-1" @click=" createClaim( row.item ) " :disabled=" busy " size="sm">
+                    <b-btn v-if="! row.item.claim" variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy" size="sm">
                         <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner"></i>
                         <span>Create Claim</span>
                     </b-btn>
-                    <div v-else-if=" row.item.claim && row.item.claim.status == 'CREATED' ">
-                        <b-btn variant="info" class="mr-1" :href="`/business/claims/${row.item.claim.id}/edit`" size="sm">
-                            <i class="fa fa-edit"></i>
-                        </b-btn>
-                        <b-btn variant="danger" class="mr-1" @click="deleteClaimModal(row.item)" :disabled="busy" size="sm">
-                            <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
-                            <i v-else class="fa fa-times"></i>
+                    <div v-else>
+                        <div v-if="row.item.claim.status == 'CREATED'">
+                            <b-btn variant="info" class="mr-1 mb-1" :href="`/business/claims/${row.item.claim.id}/edit`" size="sm">
+                                <i class="fa fa-edit"></i>
+                            </b-btn>
+                            <b-btn variant="danger" class="mr-1 mb-1" @click="deleteClaimModal(row.item)" :disabled="busy" size="sm">
+                                <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
+                                <i v-else class="fa fa-times"></i>
+                            </b-btn>
+                        </div>
+                        <b-btn variant="primary" class="mr-1 mb-1" :href="`/business/claims/${row.item.claim.id}?download=1`" size="sm">
+                            <i class="fa fa-download"></i>
                         </b-btn>
                     </div>
                     <!--
@@ -247,19 +252,19 @@
                     {
                         key: 'claim_total',
                         label: 'Claim Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
+                        formatter: (val) => this.moneyFormat(val, '$', false),
                         sortable: true
                     },
                     {
                         key: 'claim_paid',
                         label: 'Amt Paid',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
+                        formatter: (val) => this.moneyFormat(val, '$', false),
                         sortable: true
                     },
                     {
                         key: 'claim_balance',
                         label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
+                        formatter: (val) => this.moneyFormat(val, '$', false),
                         sortable: true,
                     },
                     {
