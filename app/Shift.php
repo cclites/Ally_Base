@@ -211,6 +211,8 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         });
     }
 
+    const MAX_FUTURE_END_DATE = 168; // hours
+
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////
@@ -328,9 +330,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasOne(ShiftCostHistory::class, 'id');
     }
 
-    public function signature()
+    public function clientSignature()
     {
-        return $this->morphOne(Signature::class, 'signable');
+        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'client' );
+    }
+    public function caregiverSignature()
+    {
+        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'caregiver' );
     }
 
     public function statusHistory()
@@ -578,6 +584,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Get actual shift duration without using a rounding method.
+     *
+     * @return float
+     */
+    public function getRawDuration() : float
+    {
+        return (float) app(DurationCalculator::class)->noneRoundingMethod($this);
+    }
+
+    /**
      * Get the scheduled end time of the shift
      *
      * @return Carbon
@@ -643,6 +659,20 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function isReadOnly()
     {
         return $this->statusManager()->isReadOnly();
+    }
+
+    /**
+     * Determine if the Shift was ever Invoiced.
+     *
+     * @return bool
+     */
+    public function wasInvoiced() : bool
+    {
+        if ($status = $this->statusHistory->where('new_status', Shift::WAITING_FOR_CHARGE)->first()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1131,6 +1161,44 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
         // TODO: this does not properly handle shifts that expand more than two days
         return [$start, $end];
+    }
+
+    /**
+     * Get service authorizations effected by this shift.
+     *
+     * @return iterable|null
+     */
+    public function getEffectedServiceAuthorizations() : ?iterable
+    {
+        $serviceIds = [$this->service_id];
+
+        if (filled($this->services)) {
+            $serviceIds = $this->services->pluck('service_id')->toArray();
+        } else if (empty($this->service_id)) {
+            return [];
+        }
+
+        $auths = collect([]);
+        foreach ($this->getDateSpan() as $date) {
+            $auths = $auths->merge($this->client->getActiveServiceAuths($date, $serviceIds));
+        }
+
+        return $auths->unique('id');
+    }
+
+    /**
+     * Add an activity to the Shift, preventing duplicates.
+     *
+     * @param Activity $activity
+     */
+    public function addActivity(Activity $activity) : void
+    {
+        if ($this->activities()->where('activity_id', $activity->id)->exists()) {
+            // already exists -> skip.
+            return;
+        }
+
+        $this->activities()->attach($activity->id);
     }
 
     ///////////////////////////////////////////

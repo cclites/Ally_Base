@@ -56,7 +56,7 @@ class CreateScheduleRequest extends BusinessClientRequest
                     $query->where('business_id', $this->getBusinessId());
                 }),
             ],
-            'status' => 'required|in:' . join(',', [Schedule::OK, Schedule::ATTENTION_REQUIRED, Schedule::CAREGIVER_CANCELED, Schedule::CLIENT_CANCELED, Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT]),
+            'status' => 'required|in:' . join(',', [Schedule::OK, Schedule::ATTENTION_REQUIRED, Schedule::CAREGIVER_CANCELED, Schedule::CLIENT_CANCELED, Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT, Schedule::HOSPITAL_HOLD]),
         ];
     }
 

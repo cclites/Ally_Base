@@ -45,7 +45,7 @@ class ConvertOnboardStatusHistoryToAgreementStatusHistory extends Migration
                     $data['status'] = Client::SIGNED_ELECTRONICALLY;
                     break;
                 default:
-                    continue;
+                    break;
             }
 
             \DB::table('client_agreement_status_history')->insert($data);
@@ -82,7 +82,7 @@ class ConvertOnboardStatusHistoryToAgreementStatusHistory extends Migration
                     $data['status'] = 'reconfirmed_checkbox';
                     break;
                 default:
-                    continue;
+                    break;
             }
 
             \DB::table('onboard_status_history')->insert($data);

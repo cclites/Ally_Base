@@ -7,6 +7,7 @@ use App\Schedule;
 use App\Shift;
 use App\Shifts\ServiceAuthValidator;
 use Tests\CreatesBusinesses;
+use Tests\CreatesClientAuthorizations;
 use Tests\CreatesSchedules;
 use Tests\CreatesShifts;
 use Tests\TestCase;
@@ -21,6 +22,7 @@ use App\Billing\Payer;
 class ServiceAuthValidatorTest extends TestCase
 {
     use RefreshDatabase, CreatesBusinesses, CreatesSchedules, CreatesShifts;
+    use CreatesClientAuthorizations;
 
     /**
      * @var \App\Service
@@ -49,24 +51,6 @@ class ServiceAuthValidatorTest extends TestCase
         ]);
 
         $this->validator = new ServiceAuthValidator($this->client);
-    }
-
-    /**
-     * Helper to create a ClientAuthorization.
-     *
-     * @param array $data
-     * @return ClientAuthorization
-     */
-    public function createClientAuth(array $data) : ClientAuthorization
-    {
-        return factory(ClientAuthorization::class)->create(array_merge([
-            'client_id' => $this->client->id,
-            'service_id' => $this->service->id,
-            'units' => 0.0,
-            'unit_type' => ClientAuthorization::UNIT_TYPE_HOURLY,
-            'period' => ClientAuthorization::PERIOD_MONTHLY,
-            'effective_start' => Carbon::now()->subYears(1)->toDateString(),
-        ], $data));
     }
 
     public function assertExceedsServiceAuth(object $shiftOrSchedule) : void
@@ -692,8 +676,8 @@ class ServiceAuthValidatorTest extends TestCase
     /** @test */
     function it_should_check_service_auths_for_all_days_an_actual_hours_schedule_exists_on()
     {
-        $month1 = Carbon::parse('last month', $this->client->getTimezone())->startOfMonth();
-        $month2 = Carbon::parse('this month', $this->client->getTimezone())->startOfMonth();
+        $month1 = Carbon::parse('05/01/2019', $this->client->getTimezone())->startOfMonth();
+        $month2 = Carbon::parse('06/01/2019', $this->client->getTimezone())->startOfMonth();
 
         $this->createClientAuth([
             'units' => 9,

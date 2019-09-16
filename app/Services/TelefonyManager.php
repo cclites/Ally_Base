@@ -27,9 +27,11 @@ class TelefonyManager
             return $cached;
         }
 
-        $client = Client::whereHas('phoneNumbers', function ($q) use ($national_number) {
-            $q->where('national_number', $national_number);
-        })->first();
+        $client = Client::active()
+            ->whereHas('phoneNumbers', function ($q) use ($national_number) {
+                $q->where('national_number', $national_number);
+            })
+            ->first();
 
         Cache::put('telefony_client_' . $national_number, $client, 2);
         return $client;

@@ -18,9 +18,10 @@ class ClientRatesController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  Request  $request
-     * @param  \App\Client  $client
+     * @param Request $request
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Request $request, Client $client)
     {
@@ -34,9 +35,11 @@ class ClientRatesController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateClientRatesRequest  $request
-     * @param  \App\Client  $client
+     * @param UpdateClientRatesRequest $request
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientRatesRequest $request, Client $client)
     {

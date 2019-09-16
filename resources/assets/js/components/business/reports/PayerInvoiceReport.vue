@@ -27,20 +27,6 @@
                                 </option>
                             </b-form-select>
                         </b-form-group>
-                        <!--b-form-group label="Shift Type" class="col-md-2">
-                            <b-form-select v-model="form.confirmed">
-                                <option value="">All</option>
-                                <option value="true">Confirmed</option>
-                                <option value="false">Unconfirmed</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <b-form-group label="Shift Charged" class="col-md-2">
-                            <b-form-select v-model="form.charged">
-                                <option value="">All</option>
-                                <option value="true">Charged</option>
-                                <option value="false">Uncharged</option>
-                            </b-form-select>
-                        </b-form-group-->
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
@@ -50,13 +36,12 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-
                     <div class="d-flex justify-content-center" v-if="loading">
                         <div class="my-5">
                             <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                         </div>
                     </div>
-                    <div v-else>
+                    <div>
                         <b-row>
                             <b-col>
                                 <b-table
@@ -64,13 +49,19 @@
                                         :items="items"
                                         :fields="fields"
                                         sort-by="payer"
-                                        empty-text="No Results"
+                                        :empty-text="emptyText"
                                         :busy="loading"
                                         :current-page="currentPage"
                                         :per-page="perPage"
                                 />
                             </b-col>
                         </b-row>
+                    </div>
+
+                    <div v-if="totalRows == 0" class="m-4">
+                        <div role="alert" aria-live="polite">
+                            <div class="text-center my-2">There are no records to show</div>
+                        </div>
                     </div>
 
                     <b-row v-if="this.items.length > 0">
@@ -174,6 +165,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
+                emptyText: "No Results",
 
             }
         },

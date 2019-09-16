@@ -12,6 +12,8 @@ use App\Client;
  * @property mixed $type
  * @property mixed $dose
  * @property mixed $frequency
+ * @property mixed $route
+ * @property mixed $new_changed
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -96,6 +98,26 @@ class ClientMedication extends BaseModel
     public function getTrackingAttribute()
     {
         return empty($this->attributes['tracking']) ? null : Crypt::decrypt($this->attributes['tracking']);
+    }
+
+    public function setRouteAttribute($value)
+    {
+        $this->attributes['route'] = Crypt::encrypt($value);
+    }
+
+    public function getRouteAttribute()
+    {
+        return empty($this->attributes['route']) ? null : Crypt::decrypt($this->attributes['route']);
+    }
+
+    public function setNewChangedAttribute($value)
+    {
+        $this->attributes['new_changed'] = Crypt::encrypt($value);
+    }
+
+    public function getNewChangedAttribute()
+    {
+        return empty($this->attributes['new_changed']) ? null : Crypt::decrypt($this->attributes['new_changed']);
     }
 
     public function client()

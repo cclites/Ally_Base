@@ -2,6 +2,7 @@
 namespace App;
 
 use App\Billing\ScheduleService;
+use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
@@ -136,6 +137,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
     const CAREGIVER_NOSHOW = 'CAREGIVER_NOSHOW';
     const OPEN_SHIFT = 'OPEN_SHIFT';
+    const HOSPITAL_HOLD = 'HOSPITAL_HOLD';
 
     ///////////////////////////////////////////
     /// Related Shift Statuses
@@ -195,6 +197,11 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     public function services()
     {
         return $this->hasMany(ScheduleService::class);
+    }
+
+    public function service()
+    {
+        return $this->hasOne(Service::class, 'id', 'service_id');
     }
 
     public function group()
@@ -784,4 +791,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         });
     }
 
+    /**
+     * Get only schedules that start between the two given dates.
+     * Adjusts to timezone.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $start
+     * @param string $end
+     * @return void
+     */
+    public function scopeStartsBetweenDates($query, $timezone, $start, $end)
+    {
+        $query->whereBetween('starts_at', [
+            Carbon::parse($start, $timezone),
+            Carbon::parse($end, $timezone)
+        ]);
+    }
 }

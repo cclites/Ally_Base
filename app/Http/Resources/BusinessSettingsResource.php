@@ -45,6 +45,7 @@ class BusinessSettingsResource extends Resource
             'co_expenses',
             'co_issues',
             'co_signature',
+            'co_caregiver_signature',
             'calendar_next_day_threshold',
             'multi_location_registry',
             'shift_rounding_method',

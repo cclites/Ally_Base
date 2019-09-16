@@ -98,8 +98,8 @@ class NoteController extends Controller
      */
     public function search(Request $request)
     {
-        $notes = Note::with('caregiver', 'client', 'prospect', 'referral_source')
-            ->where('business_id', OfficeUser::find(auth()->id())->businesses[0]->id)
+        $notes = Note::forRequestedBusinesses()
+            ->with('caregiver', 'client', 'prospect', 'referral_source')
             ->when($request->filled('start_date'), function ($query) use ($request) {
                 return $query->where('created_at', '>=', Carbon::parse($request->start_date)->subDay());
             })

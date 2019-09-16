@@ -29,6 +29,10 @@ class ClientInvoiceController extends Controller
                 }
             }
 
+            if($clientId = $request->input('client_id')){
+                $invoiceQuery->where('client_id', $clientId);
+            }
+
             if ($businessId = $request->input('business_id')) {
                 $invoiceQuery->forBusiness($businessId);
             }
@@ -43,7 +47,12 @@ class ClientInvoiceController extends Controller
                 $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items'])->get();
+            $invoices = $invoiceQuery->with(['client', 'client.user.paymentHold', 'client.business', 'client.business.chain', 'clientPayer.payer', 'payments', 'items', 'claim'])
+            ->get()
+            ->map(function(ClientInvoice $invoice){
+                $invoice['has_partial_payment'] = $invoice->getHasPartialPayment();
+                return $invoice;
+            });
 
             return ClientInvoiceResponse::collection($invoices);
         }

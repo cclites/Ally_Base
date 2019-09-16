@@ -44,6 +44,7 @@ class TestCommand extends Command
         if (config('app.env') == 'production') {
             return;
         }
+<<<<<<< HEAD
 
         \DB::beginTransaction();
         $invoice = ClientInvoice::find(30269);
@@ -60,5 +61,7 @@ class TestCommand extends Command
         }
 
 //        \DB::commit();
+=======
+>>>>>>> origin/master
     }
 }

@@ -217,7 +217,7 @@
                      v-show="!loading"
             >
                 <template slot="distance" scope="row">
-                    {{ convertToMiles(row.item.distance) }}
+                    {{ row.item.distance == 'Unavailable' ? row.item.distance : convertToMiles(row.item.distance) }}
                 </template>
                 <template slot="actions" scope="row">
                     <slot :item="row.item">

@@ -9,9 +9,12 @@
 @endsection
 
 @section('content')
+
     <div class="row">
+
         <div class="col-lg-12">
-            <caregiver-directory :caregivers="{{ $caregivers }}" :custom-fields="{{ $fields }}"></caregiver-directory>
+
+            <caregiver-directory :custom-fields="{{ $fields }}"></caregiver-directory>
         </div>
     </div>
 @endsection

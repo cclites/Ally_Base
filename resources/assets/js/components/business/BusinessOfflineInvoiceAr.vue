@@ -48,6 +48,7 @@
                             <option value="">All Invoices</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
+                            <option value="overpaid">Overpaid Invoices</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -98,6 +99,7 @@
                 <date-picker v-model="form.payment_date" placeholder="Payment Date" :disabled="form.busy"></date-picker>
                 <input-help :form="form" field="payment_date" text="" />
             </b-form-group>
+
             <b-form-group label="Payment Type">
                 <b-form-input
                     name="type"
@@ -108,6 +110,26 @@
                 />
                 <input-help :form="form" field="type" text="" />
             </b-form-group>
+
+            <b-form-group label="Payment Description">
+                <b-form-select
+                        name="type"
+                        v-model="form.description"
+                        class="mt-1"
+                        :disabled="form.busy"
+                >
+                    <option value="payment_applied">Payment Applied</option>
+                    <option value="partial_payment_applied">Partial Payment Applied</option>
+                    <option value="overpayment">Overpayment/Surplus</option>
+                    <option value="write_off">Write Off/Uncollectable</option>
+                    <option value="denial">Denial</option>
+                    <option value="supplier_contribution">Supplier Contribution</option>
+                    <option value="interest">Interest</option>
+                    <option value="discount">Discount</option>
+                </b-form-select>
+            </b-form-group>
+
+
             <b-form-group label="Reference #">
                 <b-form-input
                     name="reference"
@@ -128,6 +150,14 @@
                     :disabled="form.busy || payFullBalance"
                 />
                 <input-help :form="form" field="amount" text="" />
+            </b-form-group>
+            <b-form-group label="Notes">
+                <b-form-textarea
+                        id="notes"
+                        name="notes"
+                        :rows="4"
+                        v-model="form.notes"
+                ></b-form-textarea>
             </b-form-group>
             <label class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input" v-model="payFullBalance" @change="updateFullBalance()" />
@@ -216,6 +246,8 @@
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
                     reference: '',
+                    description: 'payment_applied',
+                    notes: '',
                 }),
                 selectedInvoice: {},
                 busy: false,

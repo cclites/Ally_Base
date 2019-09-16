@@ -25,6 +25,7 @@
                     <b-form-group label="Account Status" label-for="status" class="mr-2">
                         <b-select name="status" id="status" v-model="form.status" class="ml-2">
                             <option value="not_setup">Active but Not Setup</option>
+                            <option value="active_no_bank">Active but No Bank Account</option>
                             <option value="scheduled">Scheduled but Not Setup</option>
                             <option value="no_bank">Scheduled but No Bank Account</option>
                         </b-select>

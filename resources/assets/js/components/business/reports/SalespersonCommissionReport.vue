@@ -9,6 +9,13 @@
             </b-col>
         </b-row>
         <b-row>
+            <b-col md="2">
+                <business-location-form-group
+                        v-model="filters.business"
+                        label="Office Location"
+                        :allow-all="true"
+                />
+            </b-col>
             <b-col md="3">
                 <b-row>
                     <b-col>
@@ -23,13 +30,6 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-            </b-col>
-            <b-col md="2">
-                <business-location-form-group
-                        v-model="filters.business"
-                        label="Office Location"
-                        :allow-all="true"
-                />
             </b-col>
             <b-col md="2">
                 <b-form-group label="Salesperson">
@@ -62,7 +62,7 @@
                             :items="salespersons"
                             :fields="fields"
                             sort-by="name"
-                            empty-text="No Results"
+                            :empty-text='emptyText'
                             :busy="loading"
                     >
                         <template slot="show_details" scope="row">
@@ -137,6 +137,7 @@
                     'show_details',
                 ],
                 loading: false,
+                emptyText: "No Results",
             }
         },
 

@@ -22,6 +22,7 @@ class UpdateReferralSourceRequest extends FormRequest
             'organization' => 'required',
             'contact_name' => 'required',
             'phone' => 'nullable|max:32',
+            'active' => 'boolean',
             'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
         ];
     }

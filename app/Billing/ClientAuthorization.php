@@ -119,11 +119,30 @@ class ClientAuthorization extends AuditableModel
 
     /**
      * Get the number of units this instance authorizes and automatically
-     * pull from the proper day of the week for specific days period types.
-     * Note: This should be used instead of directly accessing the units property
+     * convert to hours.
      *
      * @param null|\Carbon\Carbon $date
      * @return null|float
+     */
+    public function getHours(?Carbon $date = null): ?float
+    {
+        $units = $this->getUnits($date);
+
+        if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
+            // Convert to hourly units
+            return divide($units, 4);
+        }
+
+        return $units;
+    }
+
+    /**
+     * Get the number of units this instance authorizes and automatically
+     * pull from the proper day of the week for specific days period types.
+     * Note: This should be used instead of directly accessing the units property
+     *
+     * @param Carbon|null $date
+     * @return float|null
      */
     public function getUnits(?Carbon $date = null): ?float
     {
@@ -132,11 +151,6 @@ class ClientAuthorization extends AuditableModel
                 return floatval(0);
             }
             return $this->unitsForDay(strtolower($date->format('l')));
-        }
-
-        if ($this->unit_type === self::UNIT_TYPE_FIFTEEN) {
-            // Convert to hourly units
-            return divide($this->units, 4);
         }
 
         return $this->units;

@@ -187,35 +187,6 @@ class CareDetails extends AuditableModel
         self::SAFETY_OTHER,
     ];
 
-    const MOBILITY_BEDREST = 'bedrest';
-    const MOBILITY_HOYER_LIFT = 'hoyer_lift';
-    const MOBILITY_INDEPENDENT = 'independent';
-    const MOBILITY_WHEELCHAIR = 'wheelchair';
-    const MOBILITY_NO_RESTRICTIONS = 'no_restrictions';
-    const MOBILITY_TURN = 'turn';
-    const MOBILITY_ASSIST_TRANSFERS = 'assist_transfers';
-    const MOBILITY_ASSIST_AMBULATION = 'assist_ambulation';
-    const MOBILITY_CANE = 'cane';
-    const MOBILITY_UP_AS_TOLERATED = 'up_as_tolerated';
-    const MOBILITY_PARTIAL_WEIGHT = 'partial_weight';
-    const MOBILITY_WALKER = 'walker';
-    const MOBILITY_HOSPITAL_BED = 'hospital_bed';
-    const MOBILITY = [
-        self::MOBILITY_BEDREST,
-        self::MOBILITY_HOYER_LIFT,
-        self::MOBILITY_INDEPENDENT,
-        self::MOBILITY_WHEELCHAIR,
-        self::MOBILITY_NO_RESTRICTIONS,
-        self::MOBILITY_TURN,
-        self::MOBILITY_ASSIST_TRANSFERS,
-        self::MOBILITY_ASSIST_AMBULATION,
-        self::MOBILITY_CANE,
-        self::MOBILITY_UP_AS_TOLERATED,
-        self::MOBILITY_PARTIAL_WEIGHT,
-        self::MOBILITY_WALKER,
-        self::MOBILITY_HOSPITAL_BED,
-    ];
-
     const TOILETING_CONTINENT = 'continent';
     const TOILETING_CATHETER = 'catheter';
     const TOILETING_BEDPAN = 'bedpan';
@@ -261,12 +232,16 @@ class CareDetails extends AuditableModel
     const VISION_GLASSES = 'glasses';
     const VISION_NORMAL = 'normal';
     const VISION_PERIPHERAL = 'peripheral';
+    const VISION_NO_PERIPHERAL = 'no_peripheral';
+    const VISION_BLIND = 'blind';
     const VISION = [
         self::VISION_RIGHT,
         self::VISION_LEFT,
         self::VISION_GLASSES,
         self::VISION_NORMAL,
         self::VISION_PERIPHERAL,
+        self::VISION_NO_PERIPHERAL,
+        self::VISION_BLIND,
     ];
 
     const HEARING_NORMAL = 'normal';
@@ -422,6 +397,8 @@ class CareDetails extends AuditableModel
         self::SUPPLIES_OTHER,
     ];
 
+
+
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -448,11 +425,6 @@ class CareDetails extends AuditableModel
     public function getSafetyMeasuresAttribute()
     {
         return self::stringToArray($this->attributes['safety_measures']);
-    }
-
-    public function getMobilityAttribute()
-    {
-        return self::stringToArray($this->attributes['mobility']);
     }
 
     public function getToiletingAttribute()
@@ -528,7 +500,6 @@ class CareDetails extends AuditableModel
     protected static $arrayKeys = [
         'pets',
         'safety_measures',
-        'mobility',
         'toileting',
         'bathing',
         'diet',
@@ -539,6 +510,7 @@ class CareDetails extends AuditableModel
         'housekeeping',
         'errands',
         'supplies',
+
     ];
 
     /**

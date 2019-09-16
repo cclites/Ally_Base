@@ -9,6 +9,11 @@
                     {{ address.address1 }}<br />
                     <span v-if="address.address2">{{ address.address2 }}<br /></span>
                     {{ address.city }}, {{ address.state }} {{ address.zip }}
+
+                    <span class="d-block mt-2">
+                        Notes:<br/>
+                        {{ address.notes }}
+                    </span>
                 </p>
                 <p v-if="phone">
                     {{ phone }}
@@ -27,7 +32,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="careDetails.id" class="with-padding-top">
+        <b-row v-if="careDetails.id" class="with-padding-top care-details-scrollable">
             <b-col sm="12">
                 <b-card title="Detailed Client Care Needs">
                     <care-details-display :care-details="careDetails"></care-details-display>
@@ -35,8 +40,8 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="client.medications">
-            <client-medication :client="client" :medications="client.medications" />
+        <b-row v-if="client.medications" class="mt-5">
+            <client-medication :client="client" :medications="client.medications" class="w-100" />
         </b-row>
     </div>
 
@@ -77,5 +82,8 @@
 </script>
 
 <style scoped>
-
+    .care-details-scrollable{
+        max-height:300px;
+        overflow:auto;
+    }
 </style>

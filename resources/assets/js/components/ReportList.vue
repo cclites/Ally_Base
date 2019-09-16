@@ -18,6 +18,10 @@
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
                         </template>
+                        <template slot="description" scope="row">
+                            {{ row.item.description }}
+                            <div v-if="row.item.hidden === true" class="text-danger">This is only shown for admins impersonating office users.</div>
+                        </template>
                     </b-table>
                 </div>
             </b-card>
@@ -157,6 +161,20 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Bad SSN Report (Clients)',
+                        url: 'reports/bad-ssn-report?type=clients',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Bad SSN Report (Caregivers)',
+                        url: 'reports/bad-ssn-report?type=caregivers',
+                        description: '',
+                        category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Unpaid Shifts',
                         url: 'reports/unpaid_shifts',
                         description: '',
@@ -199,6 +217,13 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Paid Billed Audit Report',
+                        url: '/admin/reports/paid-billed-audit-report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Emails Report',
                         url: 'reports/emails',
                         description: '',
@@ -210,6 +235,13 @@
                         url: 'audit-log',
                         description: '',
                         category: 7,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Total Charges Report',
+                        url: 'reports/total_charges_report',
+                        description: '',
+                        category: 5,
                         allowed: ['admin'],
                     },
 
@@ -393,20 +425,20 @@
                         category: 6,
                         allowed: ['office_user'],
                     },
-                    {
-                        name: 'Clients Missing Payment Methods',
-                        url: 'reports/clients-missing-payment-methods',
-                        description: 'Shows all clients missing a payment method',
-                        category: 2,
-                        allowed: ['office_user'],
-                    },
-                    {
-                        name: 'Caregivers Missing Bank Accounts',
-                        url: 'reports/caregivers-missing-bank-accounts',
-                        description: 'Shows all caregivers missing bank accounts',
-                        category: 3,
-                        allowed: ['office_user'],
-                    },
+                    // { Removed as per ALLY-1394
+                    //     name: 'Clients Missing Payment Methods',
+                    //     url: 'reports/clients-missing-payment-methods',
+                    //     description: 'Shows all clients missing a payment method',
+                    //     category: 2,
+                    //     allowed: [['office_user'],
+                    // },
+                    // { Removed as per ALLY-1394
+                    //     name: 'Caregivers Missing Bank Accounts',
+                    //     url: 'reports/caregivers-missing-bank-accounts',
+                    //     description: 'Shows all caregivers missing bank accounts',
+                    //     category: 3,
+                    //     allowed: [['office_user'],
+                    // },
                     {
                         name: 'Client & Caregiver Onboard Status',
                         url: 'reports/onboard-status',
@@ -472,7 +504,6 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
-
                     {
                         name: 'Claims AR Aging',
                         url: 'reports/claims-ar-aging',
@@ -502,12 +533,21 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
                     {
                         name: 'Caregiver Account Setup Status',
                         url: 'reports/account-setup',
                         description: 'Shows a list of caregivers with incomplete account data.',
                         category: 3,
                         allowed: ['office_user'],
+                    },
+
+                    { // added as per ALLY-1394
+                        name        : 'Client Account Setup Status',
+                        url         : 'reports/client-account-setup',
+                        description : 'Shows a list of clients with incomplete account data.',
+                        category    : 2,
+                        allowed     : [ 'office_user' ],
                     },
                     {
                         name: 'Service Authorization Ending Report',
@@ -523,13 +563,13 @@
                         category: 2,
                         allowed: ['office_user'],
                     },
-                    {
-                        name: 'Batch Invoice',
-                        url: 'reports/batch-invoice',
-                        description: 'Print Batch invoices to PDF',
-                        category: 2,
-                        allowed: ['office_user'],
-                    },
+                    // {
+                    //     name: 'Batch Invoice',
+                    //     url: 'reports/batch-invoice',
+                    //     description: 'Print Batch invoices to PDF',
+                    //     category: 2,
+                    //     allowed: ['office_user'],
+                    // },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },
@@ -538,6 +578,61 @@
                     // { name: 'Client Online Setup', url: 'reports/clients-onboarded', description: '' },
                     // { name: 'Caregiver Online Setup', url: 'reports/caregivers-onboarded', description: '' },
                 ];
+
+                // Add temporary hidden reports for Admins when impersonating
+                if (this.isAdmin) {
+                    reports.push(
+                        {
+                            name: 'Payroll Summary',
+                            url: 'reports/payroll-summary-report',
+                            description: 'Total caregiver payments over a specified date range',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Client Referrals',
+                            url: 'reports/client-referrals',
+                            description: 'Client Referrals Report',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By Salesperson',
+                            url: 'reports/invoice-summary-by-salesperson',
+                            description: 'Total Client Charges By Salesperson',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Invoice Summary Report By County',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Payment Summary By Private Pay Clients',
+                            url: 'reports/payment-summary-by-payer',
+                            description: 'See all payments made by private pay clients',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                        {
+                            name: 'Invoice Summary By County',
+                            url: 'reports/invoice-summary-by-county',
+                            description: 'Client Charges By County',
+                            category: 5,
+                            allowed: ['office_user'],
+                            hidden: true,
+                        },
+                    )
+                }
+
                 const {role_type} = this.role;
                 const filteredByRole = reports.filter(({allowed}) => allowed.find(role => role == role_type));
 

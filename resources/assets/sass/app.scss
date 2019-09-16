@@ -15,6 +15,7 @@ File: scss
  *	6. Posts
  *	7. Widgets
  *	8. Custom Templates
+ *	9. Animation Classes
  */
 /*******************
 Global Styles
@@ -1726,7 +1727,6 @@ dropdown-item
 Custom-select
 ******************/
 .custom-select{
-  background: url(../../assets/images/custom-select.png) right .75rem center no-repeat;
 }
 /*******************
 textarea
@@ -1837,4 +1837,22 @@ Layouts
   width: 100%;
   max-width: 1170px;
   margin: 0 auto;
+}
+
+/*******************
+Animation Classes
+*******************/
+
+/* Enter and leave animations can use different */
+/* durations and timing functions.              */
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .4s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
 }

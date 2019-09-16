@@ -36,19 +36,14 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading"></loading-card>
-        <div v-if="!loading">
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
                     :items="clients"
                     :fields="fields"
-                    :current-page="currentPage"
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
-                    :filter="filters.search"
-                    @filtered="onFiltered"
                 >
                     <template slot="payment_type" scope="row">
                         {{ paymentTypes.find(type => type.value == row.item.payment_type).text }}
@@ -70,7 +65,6 @@
                     Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
                 </b-col>
             </b-row>
-        </div>
     </b-card>
 </template>
 
@@ -80,24 +74,25 @@
     import business from "../store/modules/business";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import Constants from '../mixins/Constants';
+    import LocalStorage from "../mixins/LocalStorage";
 
     export default {
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsListData, Constants],
+        mixins: [FormatsListData, Constants, LocalStorage],
 
         data() {
             return {
                 filters: {
-                    status: 'active',
+                    status: '',
                     client_type: '',
                     business_id: '',
-                    search: null,
+                    search: '',
                     caseManager: '',
                 },
+                sortBy: 'lastname',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
                 modalDetails: { index:'', data:'' },
@@ -149,57 +144,109 @@
                 ],
                 loading: false,
                 statuses: {caregiver: [], client: []},
+                localStoragePrefix: 'client_list_',
             }
         },
 
         async mounted() {
+            this.loadFiltersFromStorage();
             await this.fetchStatusAliases();
-            this.loadClients();
             this.loadOfficeUsers();
+            await this.loadClients();
         },
 
         computed: {
-            listUrl() {
-                const {client_type, business_id, status, caseManager} = this.filters;
-
-                let active = '';
-                let aliasId = '';
-                if (status === '') {
-                    active = '';
-                } else if (status === 'active') {
-                    active = 1;
-                } else if (status === 'inactive') {
-                    active = 0;
-                } else {
-                    aliasId = status;
-                    let alias = this.statuses.client.find(x => x.id == this.filters.status);
-                    if (alias) {
-                        aliasId = alias.id;
-                        active = alias.active;
-                    }
-                }
-
-                return `/business/clients?json=1&address=1&case_managers=1&businesses[]=${business_id}&active=${active}&status=${aliasId}&client_type=${client_type}&case_manager_id=${caseManager}`;
-            },
 
             filteredCaseManagers() {
                 return (!this.filters.business_id)
                     ? this.caseManagers
                     : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
-            }
+            },
 
+            listUrl() {
+
+                // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
+
+                let query = '/business/clients/paginate?json=1';
+                query += '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
+
+                // pagination controls
+                query += '&page=' + this.currentPage;
+                query += '&perPage=' + this.perPage;
+                query += '&sortBy=' + this.sortBy;
+                query += '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
+
+                let active = this.filters.status;
+                let aliasId = '';
+                switch( active ){
+
+                    case '':
+
+                        active = '';
+                        break;
+                    case 'active':
+
+                        active = 1;
+                        break;
+                    case 'inactive':
+
+                        active = 0;
+                        break;
+                    default:
+
+                        aliasId = this.filters.status;
+                        let alias = this.statuses.client.find( x => x.id == this.filters.status );
+                        if ( alias ) {
+
+                            aliasId = alias.id;
+                            active  = alias.active;
+                        }
+                        break;
+                }
+
+                query += '&active=' + active;
+                query += '&status=' + aliasId;
+
+                query += '&client_type=' + this.filters.client_type;
+                query += '&case_manager_id=' + this.filters.caseManager;
+                query += '&businesses[]=' + this.filters.business_id;
+                query += '&search=' + this.filters.search;
+
+                return query;
+            },
         },
 
         methods: {
+
             async loadClients() {
+
                 this.loading = true;
-                const response = await axios.get(this.listUrl);
-                this.clients = response.data.map(client => {
-                    client.county = client.address ? client.address.county : '';
-                    client.case_manager_name = client.case_manager ? client.case_manager.name : null;
-                    return client;
-                });
-                this.loading = false;
+
+                axios.get( this.listUrl )
+                    .then( res => {
+
+                        console.log( 'response: ', res );
+                        this.totalRows = res.data[ 'total' ];
+
+                        console.log( 'total rows: ', this.totalRows );
+
+                        this.clients = res.data[ 'clients' ].map( client => {
+
+                            client.county = client.address ? client.address.county : '';
+                            client.case_manager_name = client.case_manager ? client.case_manager.name : null;
+                            return client;
+                        });
+
+                        this.updateSavedFormFilters();
+                    })
+                    .catch( err => {
+
+                        console.error( err );
+                    })
+                    .finally( () => {
+
+                        this.loading = false;
+                    });
             },
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
@@ -215,11 +262,6 @@
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
-            },
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
             },
             async fetchStatusAliases() {
                 this.loading = true;
@@ -237,12 +279,44 @@
                         this.loading = false;
                     })
             },
+            loadFiltersFromStorage() {
+                if (typeof(Storage) !== "undefined") {
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value) this.filters[filter] = value;
+                    }
+                    // Sorting/show UI
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) this.sortBy = sortBy;
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                }
+            },
+            updateSavedFormFilters() {
+                for (let filter of Object.keys(this.filters)) {
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+            },
+
+            updateSortOrder(){
+                this.setLocalStorage('sortBy', this.sortBy);
+            }
         },
 
         watch: {
-            listUrl() {
-                this.loadClients();
+
+            async listUrl() {
+
+                if( !this.loading ){
+
+                    await this.loadClients();
+                }
             },
+
+            sortBy() {
+                this.updateSortOrder();
+            }
         }
     }
 </script>

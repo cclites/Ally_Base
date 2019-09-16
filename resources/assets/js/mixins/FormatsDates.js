@@ -1,6 +1,9 @@
 export default {
     methods: {
         formatDate(date, format='MM/DD/YYYY', fromFormat = null) {
+
+            if(!date) {return '-';}
+
             return moment(date, fromFormat).format(format);
         },
 

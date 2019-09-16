@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
 use App\ExpirationType;
+use App\Http\Requests\SaveCaregiverExpirationsRequest;
 use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CaregiverLicenseController extends BaseController
 {
@@ -36,25 +39,57 @@ class CaregiverLicenseController extends BaseController
      */
     public function store(Request $request, Caregiver $caregiver)
     {
-        $this->authorize('update', $caregiver);
-
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
+        $this->authorize( 'update', $caregiver );
 
         $data = $request->validate([
-            'name' => 'required|max:200',
-            'description' => 'nullable',
-            'expires_at' => 'required|date',
+
+            'name'                     => 'required|max:200',
+            'description'              => 'nullable',
+            'expires_at'               => 'required|date',
+            'chain_expiration_type_id' => 'nullable',
         ]);
 
-        $data['expires_at'] = filter_date($data['expires_at']);
+        $data[ 'expires_at' ] = filter_date( $data[ 'expires_at' ] );
 
-        $license = new CaregiverLicense($data);
-        if ($caregiver->licenses()->save($license)) {
-            return new SuccessResponse('The license has been added.', $license->toArray());
+        $license = new CaregiverLicense( $data );
+        if ( $caregiver->licenses()->save( $license ) ) {
+
+            return new SuccessResponse( 'The license has been added.', $license->toArray() );
         }
-        return new ErrorResponse(500, 'The license could not be saved.');
+        return new ErrorResponse( 500, 'The license could not be saved.' );
+    }
+
+    public function saveMany( SaveCaregiverExpirationsRequest $request, Caregiver $caregiver )
+    {
+        $this->authorize( 'update', $caregiver );
+
+        $expirations = $request->validated()[ '*' ];
+
+        \DB::beginTransaction();
+        try {
+
+            $results = $caregiver->licenses()->saveMany( array_map( function( $exp ) use ( $caregiver ){
+
+                $element = CaregiverLicense::findOrNew( $exp[ 'id' ] ?? null );
+                $element[ 'name'         ] = $exp[ 'name' ];
+                $element[ 'description'  ] = $exp[ 'description' ] ?? null;
+                $element[ 'caregiver_id' ] = $caregiver->id;
+                $element[ 'expires_at'   ] = Carbon::parse( $exp[ 'expires_at' ] )->format( 'Y-m-d' );
+                $element[ 'updated_at'   ] = now()->format( 'Y-m-d H:i:s' );
+
+                $element[ 'chain_expiration_type_id' ] = $exp[ 'chain_expiration_type_id' ] ?? null;
+
+                return $element;
+            }, $expirations ));
+
+            \DB::commit();
+            return new SuccessResponse( 'Caregiver expirations saved successfully.', $results );
+        } catch ( \Exception $ex ) {
+
+            \Log::debug($ex->getMessage());
+            \DB::rollBack();
+            return new ErrorResponse( 500, $ex->getMessage() );
+        }
     }
 
     /**
@@ -66,26 +101,24 @@ class CaregiverLicenseController extends BaseController
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
+    public function update( Request $request, Caregiver $caregiver, CaregiverLicense $license )
     {
-        $this->authorize('update', $caregiver);
-
-        if (! ExpirationType::existsForChain($this->businessChain(), $request->name)) {
-            $this->businessChain()->expirationTypes()->create(['type' => $request->name]);
-        }
+        $this->authorize( 'update', $caregiver );
 
         $data = $request->validate([
-            'name' => 'required|max:200',
+
+            'name'        => 'required|max:200',
             'description' => 'nullable',
-            'expires_at' => 'required|date',
+            'expires_at'  => 'required|date',
         ]);
 
-        $data['expires_at'] = filter_date($data['expires_at']);
+        $data[ 'expires_at' ] = filter_date( $data[ 'expires_at' ] );
 
-        if ($license->update($data)) {
-            return new SuccessResponse('The license has been updated.', $license->toArray());
+        if ( $license->update( $data ) ) {
+
+            return new SuccessResponse( 'The license has been updated.', $license->toArray() );
         }
-        return new ErrorResponse(500, 'The license could not be updated.');
+        return new ErrorResponse( 500, 'The license could not be updated.' );
     }
 
     /**

@@ -96,7 +96,10 @@
             },
 
             confirm(shift, confirmed=true) {
-                if (!confirm('Are you sure you want to confirm this shift?')) {
+
+                let slug = confirmed ? 'confirm' : 'unconfirm';
+
+                if (!confirm('Are you sure you want to ' + slug + ' this shift?')) {
                     return;
                 }
 

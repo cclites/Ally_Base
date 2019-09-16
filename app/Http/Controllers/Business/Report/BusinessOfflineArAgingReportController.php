@@ -17,11 +17,16 @@ class BusinessOfflineArAgingReportController extends Controller
      */
     public function index(Request $request, BusinessOfflineArAgingReport $report)
     {
-        if ($request->filled('json')) {
+        if ($request->filled('json')  || $request->input('export')) {
             $report->query()->forRequestedBusinesses();
 
             $report->forClient($request->client_id ?? null)
                 ->forPayer($request->payer_id ?? null);
+
+            if ($request->input('export')) {
+                return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
+                    ->download();
+            }
 
             return response()->json($report->rows());
         }

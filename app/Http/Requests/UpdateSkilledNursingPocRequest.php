@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\CareDetails;
+
+use App\SkilledNursingPoc;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateSkilledNursingPocRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'certification_start' => 'required|string',
+            'certification_end' => 'required|string',
+            'medical_record_number' => 'required|numeric',
+            'provider_number' => 'required|string',
+            'principal_diagnosis_icd_cm' => 'nullable|string',
+            'principal_diagnosis' => 'nullable|string',
+            'principal_diagnosis_date' => 'nullable|string',
+            'surgical_procedure_icd_cm' => 'nullable|string',
+            'surgical_procedure' => 'nullable|string',
+            'surgical_procedure_date' => 'nullable|string',
+            'other_diagnosis_icd_cm' => 'nullable|string',
+            'other_diagnosis' => 'nullable|string',
+            'other_diagnosis_date' => 'nullable|string',
+            'other_diagnosis_icd_cm1' => 'nullable|string',
+            'other_diagnosis1' => 'nullable|string',
+            'other_diagnosis_date1' => 'nullable|string',
+            'other_diagnosis_icd_cm2' => 'nullable|string',
+            'other_diagnosis2' => 'nullable|string',
+            'other_diagnosis_date2' => 'nullable|string',
+            'orders' => 'nullable|string',
+            'physician_name' => 'required|string',
+            'physician_address' => 'required|string',
+            'physician_phone' => 'required|string',
+            'prognosis' => ['present', Rule::in(SkilledNursingPoc::PROGNOSIS)],
+            'functional' => ['present', 'array', Rule::in(SkilledNursingPoc::FUNCTIONAL)],
+            'functional_other' => 'nullable|string',
+            'mental_status' => ['present', 'array', Rule::in(SkilledNursingPoc::MENTAL_STATUS)],
+            'mobility' => ['present', 'array', Rule::in(SkilledNursingPoc::MOBILITY)],
+            'mobility_instructions' => 'nullable|string',
+            'mobility_other' => 'nullable|string',
+        ];
+    }
+}

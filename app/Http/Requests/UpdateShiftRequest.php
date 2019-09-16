@@ -24,6 +24,7 @@ class UpdateShiftRequest extends BusinessClientRequest
      */
     public function rules()
     {
+        $maxEndDate = Carbon::now()->addHours(Shift::MAX_FUTURE_END_DATE);
         return [
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'required|exists:caregivers,id',
@@ -32,7 +33,7 @@ class UpdateShiftRequest extends BusinessClientRequest
             'other_expenses' => 'nullable|numeric|max:1000|min:0',
             'other_expenses_desc' => 'nullable',
             'checked_in_time' => 'required|date',
-            'checked_out_time' => 'required|date|after_or_equal:' . $this->input('checked_in_time'),
+            'checked_out_time' => 'required|date|after_or_equal:' . $this->input('checked_in_time') . '|before:'.$maxEndDate,
             'fixed_rates' => 'required|boolean',
             'client_rate' => 'nullable|required_with:caregiver_rate|numeric|max:1000|min:0',
             'caregiver_rate' => 'nullable|required_with:client_rate|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
@@ -80,6 +81,7 @@ class UpdateShiftRequest extends BusinessClientRequest
             'caregiver_rate.max' => 'The caregiver rate cannot be greater than the total rate.',
             'client_rate.*' => 'The total rate is required and must be a number.',
             'services.*.client_rate.*' => 'The total rate is required and must be a number.',
+            'checked_out_time.before' => 'The clock out time cannot be more than '.Shift::MAX_FUTURE_END_DATE.' hours from now.',
         ];
     }
 

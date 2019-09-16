@@ -18,6 +18,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasMetaData;
+use App\PhoneNumber;
 
 /**
  * App\User
@@ -81,6 +82,7 @@ use Packages\MetaData\HasMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUsername($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User withMeta()
+ * @property \App\User formatEmergencyContact()
  * @mixin \Eloquent
  * @property-read mixed $masked_name
  * @property-read \App\PhoneNumber $smsNumber
@@ -369,6 +371,24 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return null;
     }
 
+    public function getFormattedGenderAttribute()
+    {
+        switch( strtolower( $this->gender ) ){
+
+            case 'm':
+
+                return 'Male';
+                break;
+            case 'f':
+
+                return 'Female';
+                break;
+            default:
+
+                return null;
+        }
+    }
+
     /**
      * Return the fully-qualified name of the role class
      *
@@ -550,5 +570,22 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 $this->notificationPreferences()->create($data);
             }
         }
+    }
+
+    /**
+     * Format emergency contact info
+     *
+     * @return string
+     */
+    public function formatEmergencyContact(){
+
+        $record = $this->emergencyContacts->where('priority', 1)->first();
+
+        if(filled($record)){
+            return $record->name . "; " . $record->phone_number . "; " . $record->relationship;
+        }
+
+        return '';
+
     }
 }

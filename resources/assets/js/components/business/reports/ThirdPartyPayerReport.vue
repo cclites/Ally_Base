@@ -56,9 +56,12 @@
             <b-col>
                 <b-card>
                     <div class="d-flex mb-2">
-                        <b-btn class="ml-auto" variant="success" @click="printTable()">
-                            <i class="fa fa-print"></i> Print
-                        </b-btn>
+                        <div class="ml-auto">
+                            <b-btn @click="download()" variant="success">Export to Excel</b-btn>
+                            <b-btn variant="primary" @click="printTable()">
+                                <i class="fa fa-print"></i> Print
+                            </b-btn>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
@@ -72,6 +75,9 @@
                                  :empty-text="emptyText"
                                  class="report-table"
                         >
+                            <template slot="invoice_name" scope="row">
+                                <a :href="`/business/client/invoices/${row.item.invoice_id}`">{{ row.item.invoice_name }}</a>
+                            </template>
                             <template slot="client_name" scope="row">
                                 <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
                             </template>
@@ -87,6 +93,11 @@
                                     <i class="fa fa-times-rectangle-o"></i>
                                 </span>
                             </template>
+                            <template slot="actions" scope="row">
+                                <a :href="`/business/claims-ar?start_date=${form.start}&end_date=${form.end}&filter=${row.item.invoice_name}`" target="_blank">
+                                    <b-btn variant="secondary">Go to Claims</b-btn>
+                                </a>
+                            </template>
                         </b-table>
                     </div>
                     <b-row>
@@ -100,7 +111,7 @@
                 </b-card>
             </b-col>
         </b-row>
-    </b-container>
+     </b-container>
 </template>
 
 <script>
@@ -146,12 +157,13 @@
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 30,
+                perPage: 50,
                 currentPage: 1,
                 sortBy: 'client_name',
                 sortDesc: false,
                 fields: [
                     { key: 'client_name', label: 'Client', sortable: true, },
+                    { key: 'invoice_name', label: 'Invoice', sortable: true, },
                     { key: 'hic', label: 'HIC#', sortable: true, },
                     { key: 'dob', label: 'Client DOB', sortable: true, },
                     { key: 'code', label: 'Diagnosis Code', sortable: true, },
@@ -160,15 +172,15 @@
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
                     { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x) },
-                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTime(x) },
-                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTime(x) },
+                    { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
+                    { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'units', label: 'Units', sortable: true },
                     { key: 'hours', label: 'Hours', sortable: true },
                     { key: 'rate', label: 'Cost/Hour', sortable: true, formatter: x => this.moneyFormat(x) },
                     { key: 'evv', label: 'EVV', sortable: true },
                     { key: 'billable', label: 'Total Billable', sortable: true, formatter: x => this.moneyFormat(x) },
+                    { key: 'actions', label: '-', sortable: false },
                 ],
-
                 items: [],
                 item:'',
                 hasRun: false,
@@ -177,6 +189,10 @@
         },
 
         methods: {
+            download() {
+                window.location = this.form.toQueryString('/business/reports/third-party-payer?export=1')
+            },
+
             fetch() {
                 this.busy = true;
                 this.form.get('/business/reports/third-party-payer')
@@ -193,7 +209,7 @@
             },
 
             printTable() {
-                $(".report-table").print();
+                window.location = this.form.toQueryString(`/business/reports/third-party-payer?print=1`);
             },
         },
 

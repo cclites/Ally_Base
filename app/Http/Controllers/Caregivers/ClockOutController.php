@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\ClientType;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -103,19 +104,23 @@ class ClockOutController extends BaseController
 
         if ($shift->business->require_signatures) {
             $request->validate([
-                'signature' => 'required'
+                'client_signature' => 'required'
+            ]);
+        }
+
+        if ($shift->business->co_caregiver_signature) {
+            $request->validate([
+                'caregiver_signature' => 'required'
             ]);
         }
 
         // If not private pay, ADL and comments are required
-        if ($shift->client->client_type != 'private_pay') {
+        if ($shift->client->client_type != ClientType::PRIVATE_PAY) {
             $request->validate(
                 [
-                    'caregiver_comments' => 'required',
                     'activities' => 'min:1',
                 ],
                 [
-                    'caregiver_comments.required' => 'Care notes are required for this client.',
                     'activities.min' => 'A minimum of one activity is required for this client.',
                 ]
             );
@@ -137,7 +142,7 @@ class ClockOutController extends BaseController
             $clockOut = new ClockOut($this->caregiver());
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
-            if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
+            if (array_key_exists('caregiver_comments', $data)) $clockOut->setComments($data['caregiver_comments']);
             $clockOut->setGoals($data['goals']);
             $clockOut->setQuestions($data['questions'], $allQuestions);
             $clockOut->setGeocode($data['latitude'] ?? null, $data['longitude'] ?? null);
@@ -151,7 +156,11 @@ class ClockOutController extends BaseController
                     ]);
                     $shift->issues()->save($issue);
                 }
-                Signature::onModelInstance($shift, request('signature'));
+
+                Signature::attachToModel($shift, request('client_signature'), 'client' );
+
+                Signature::attachToModel($shift, request('caregiver_signature'), 'caregiver' );
+
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }

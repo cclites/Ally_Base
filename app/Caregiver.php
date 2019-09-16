@@ -202,9 +202,10 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         'pets_birds_okay',
         'ethnicity',
     ];
-    protected $appends = ['masked_ssn'];
+    protected $appends = [ 'masked_ssn' ];
+    protected $attributes = [];
 
-    public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
+    public $dates = [ 'onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date' ];
 
     /**
      * The notification classes related to this user role.
@@ -350,7 +351,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function daysOff()
     {
         return $this->hasMany(CaregiverDayOff::class)
-            ->where('date', '>', Carbon::today()->subWeek(1));
+            ->where('start_date', '>', Carbon::today()->subWeek(1));
     }
 
     /**
@@ -375,6 +376,12 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function getSetupUrlAttribute()
     {
         return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
+    }
+
+
+    public function getStatusAliasNameAttribute()
+    {
+        return $this->statusAlias ? $this->statusAlias->name : null;
     }
 
     ///////////////////////////////////////////

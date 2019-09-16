@@ -1,11 +1,18 @@
 <template>
-    <b-card
-        header="Detailed Client Care Needs"
-        header-text-variant="white"
-        header-bg-variant="info"
-        class="client-care-needs"
+    <b-card class="client-care-needs"
+            header="Detailed Client Care Needs"
+            header-text-variant="white"
+            header-bg-variant="info"
     >
-        <h2>General</h2>
+
+        <b-form-group class="pb-2">
+            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+        </b-form-group>
+
+        <h2>
+            General
+        </h2>
+
         <b-row>
             <b-col lg="6">
             <b-form-group label="Height">
@@ -18,6 +25,13 @@
             </b-form-group>
             </b-col>
         </b-row>
+
+        <b-form-group label="Level of competency">
+            <b-form-radio-group v-model="form.competency_level">
+                <b-form-radio v-for="(label, key) in options.competency_level" :key="key" :value="key">{{ label }}</b-form-radio>
+            </b-form-radio-group>
+        </b-form-group>
+
         <b-form-group label="Living Arrangements">
             <b-form-radio-group id="lives_alone" v-model="form.lives_alone">
                 <b-form-radio value="1">Lives alone</b-form-radio>
@@ -45,12 +59,6 @@
             <b-form-radio-group id="incompetent" v-model="form.incompetent">
                 <b-form-radio value="1">Yes</b-form-radio>
                 <b-form-radio value="0">No</b-form-radio>
-            </b-form-radio-group>
-        </b-form-group>
-
-        <b-form-group label="Level of competency">
-            <b-form-radio-group id="competency_level" v-model="form.competency_level">
-                <b-form-radio v-for="(label, key) in options.competency_level" :key="key" :value="key">{{ label }}</b-form-radio>
             </b-form-radio-group>
         </b-form-group>
 
@@ -96,13 +104,7 @@
         <b-form-group label="Special instructions:" class="ml-4">
             <b-form-textarea id="safety_instructions" v-model="form.safety_instructions" :rows="3" />
         </b-form-group>
-
-        <checkbox-group label="Client Mobility" v-model="form.mobility" :items="options.mobility" />
-
-        <b-form-group label="Special instructions:" class="ml-4">
-            <b-form-textarea id="mobility_instructions" v-model="form.mobility_instructions" :rows="3" />
-        </b-form-group>
-
+        
         <checkbox-group label="Toileting" v-model="form.toileting" :items="options.toileting" />
 
         <b-form-group label="Special instructions:" class="ml-4">
@@ -206,7 +208,7 @@
         <b-btn variant="success" @click.prevent="save()" :disabled="busy">Save Changes</b-btn>
     </b-card>
 </template>
-3
+
 <script>
     export default {
         props: {
@@ -219,7 +221,7 @@
         data() {
             return {
                 busy: false,
-                form: {},
+                form: new Form({}),
                 options: {
                     pets: {
                         cats: 'Cats',
@@ -239,21 +241,6 @@
                         can_use_stairs: 'Client may use stairs',
                         stair_lift: 'Stair life',
                         other: 'Other'
-                    },
-                    mobility: {
-                        bedrest: 'Complete bedrest',
-                        hoyer_lift: 'Hoyer lift',
-                        independent: 'Independent at home',
-                        wheelchair: 'Wheelchair',
-                        no_restrictions: 'No restrictions',
-                        turn: 'Turn/reposition every 2 hours',
-                        assist_transfers: 'Assist with transfers',
-                        assist_ambulation: 'Assist with ambulation',
-                        cane: 'Cane',
-                        up_as_tolerated: 'Up as tolerated',
-                        partial_weight: 'Partial weight bearing',
-                        walker: 'Walker',
-                        hospital_bed: 'Hospital bed',
                     },
                     toileting: {
                         continent: 'Continent',
@@ -282,6 +269,8 @@
                         glasses: 'Wears glasses',
                         normal: 'Normal vision',
                         peripheral: 'Peripheral only',
+                        no_peripheral: 'No Peripheral Vision',
+                        blind: 'Blind'
                     },
                     hearing: {
                         normal: 'Normal hearing',
@@ -365,6 +354,16 @@
                         caregiver: 'Caregiver must bring own',
                         other: 'Other',
                     },
+                    mental_status: {
+                        oriented: "Oriented",
+                        comatose: "Comatose",
+                        forgetful: "Forgetful",
+                        depressed: "Depressed",
+                        disoriented: "Disoriented",
+                        lethargic: "Lethargic",
+                        agitated: "Agitated",
+                        other: "Other",
+                    }
                 }
             }
         },
@@ -380,8 +379,7 @@
                 this.busy = true;
                 this.form.post(this.url)
                     .then( ({ data }) => {
-                        this.fillForm(data.data);
-                        this.busy = false;
+                        window.location.reload();
                     })
                     .catch(e => {
                         this.busy = false;
@@ -390,6 +388,10 @@
 
             fillForm(data) {
                 this.form = new Form(data);
+            },
+
+            print(){
+                $('.client-care-needs').print();
             },
         },
 
@@ -418,6 +420,7 @@
                 safety_instructions: '',
                 mobility: [],
                 mobility_instructions: '',
+                mobility_other: '',
                 toileting: [],
                 toileting_instructions: '',
                 bathing: [],
@@ -444,8 +447,7 @@
                 errands: [],
                 supplies: [],
                 supplies_instructions: '',
-                comments: '',
-                instructions: '',
+
             });
         },
     }

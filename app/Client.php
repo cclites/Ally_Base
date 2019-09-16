@@ -31,6 +31,7 @@ use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
+use App\SalesPerson;
 
 /**
  * App\Client
@@ -490,6 +491,16 @@ class Client extends AuditableModel implements
     }
 
     /**
+     * Get the client's skilled nursing POC relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function skilledNursingPoc()
+    {
+        return $this->hasOne(SkilledNursingPoc::class, 'client_id', 'id');
+    }
+
+    /**
      * Get the ClientNarrative relation.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -553,6 +564,10 @@ class Client extends AuditableModel implements
     public function quickbooksCustomer()
     {
         return $this->belongsTo(QuickbooksCustomer::class);
+    }
+
+    public function salesperson(){
+        return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
     }
 
     ///////////////////////////////////////////
@@ -852,20 +867,31 @@ class Client extends AuditableModel implements
 
     /**
      * Get the client's service authorizations active on the
-     * specified date.  Defaults to today.
+     * specified date for a specific set of services.
+     * Defaults to today and any/all services.
      *
      * @param null|\Carbon\Carbon $date
+     * @param null|int|array
      * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[]
      */
-    public function getActiveServiceAuths(?Carbon $date = null) : Collection
+    public function getActiveServiceAuths(?Carbon $date = null, $serviceIds = null) : Collection
     {
         if (empty($date)) {
             $date = Carbon::now();
         }
 
-        return $this->serviceAuthorizations()
-            ->effectiveOn($date)
-            ->get();
+        $query = $this->serviceAuthorizations()
+            ->effectiveOn($date);
+
+        if (filled($serviceIds)) {
+            if (is_array($serviceIds)) {
+                $query->whereIn('service_id', $serviceIds);
+            } else {
+                $query->where('service_id', $serviceIds);
+            }
+        }
+
+        return $query->get();
     }
 
     /**

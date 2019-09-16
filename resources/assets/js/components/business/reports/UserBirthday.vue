@@ -9,7 +9,10 @@
         <div v-show="! loading" class="table-responsive">
             <ally-table id="user-birthday" :columns="fields" :items="items" sort-by="nameLastFirst">
                 <template slot="name" scope="data">
-                    <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.name }}</a>
+                    <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.nameLastFirst }}</a>
+                </template>
+                <template slot="date_of_birth" scope="data">
+                    {{ data.item.formatted_date }}
                 </template>
             </ally-table>
         </div>
@@ -50,7 +53,6 @@
                         label: 'Birthday',
                         sortable: true,
                         shouldShow: true,
-                        formatter: (v) => v ? moment(v).format('MM/DD/YYYY') : '-',
                     },
                 ],
             };
@@ -58,13 +60,18 @@
 
         computed: {
             items() {
-                let result = [ ...this.data];
-
-                if(!this.showEmpty) {
-                    result = result.filter(user => user.date_of_birth);
-                }
-
-                return result;
+                return this.data.filter(user => {
+                    if (this.showEmpty) {
+                        return true;
+                    }
+                    return !!user.date_of_birth;
+                }).map((item) => {
+                    return {
+                        ...item,
+                        formatted_date: item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '-',
+                        date_of_birth: moment(item.date_of_birth).format('MMDD'),
+                    };
+                });
             }
         },
 

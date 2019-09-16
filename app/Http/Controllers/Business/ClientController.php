@@ -6,7 +6,9 @@ use App\Actions\CreateClient;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\ClientInvoice;
+use App\Business;
 use App\Client;
+use App\CareDetails;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
@@ -175,6 +177,8 @@ class ClientController extends BaseController
             'carePlans',
             'caseManager',
             'deactivationReason',
+            'skilledNursingPoc',
+            'goals',
             'payers',
             'rates',
             'notes' => function ($query) {
@@ -183,6 +187,14 @@ class ClientController extends BaseController
             'contacts',
         ])
         ->append('last_service_date');
+
+        if (empty($client->careDetails)) {
+            $careDetails = new CareDetails();
+            $careDetails->client_id = $client->id;
+            $careDetails->save();
+            $client->load('careDetails');
+        }
+
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
@@ -253,6 +265,18 @@ class ClientController extends BaseController
         }
 
         \DB::beginTransaction();
+        if ($data['business_id'] != $client->business_id) {
+            // Handle changing of business location.
+            $business = Business::findOrFail($data['business_id']);
+
+            // All future schedules should be converted to the new location.
+            $client->schedules()->future($client->getTimezone())
+                ->update(['business_id' => $business->id]);
+
+            // All client notes should move with the client.
+            $client->notes()->update(['business_id' => $business->id]);
+        }
+
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
