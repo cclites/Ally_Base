@@ -57,7 +57,7 @@ class ClaimInvoiceItemController extends BaseController
 
             // TODO: recalculate amount due based on applied payments for both the item and the claim
 
-            $claim->updateBalances();
+            $claim->updateBalance();
             $claim->markAsModified();
 
             \DB::commit();
@@ -91,7 +91,7 @@ class ClaimInvoiceItemController extends BaseController
 
             // TODO: recalculate amount due based on applied payments for both the item and the claim
 
-            $claim->updateBalances();
+            $claim->updateBalance();
             $claim->markAsModified();
 
             \DB::commit();
@@ -121,7 +121,7 @@ class ClaimInvoiceItemController extends BaseController
         try {
             \DB::beginTransaction();
             $item->delete();
-            $claim->updateBalances();
+            $claim->updateBalance();
             $claim->markAsModified();
             \DB::commit();
         } catch (\Exception $ex) {

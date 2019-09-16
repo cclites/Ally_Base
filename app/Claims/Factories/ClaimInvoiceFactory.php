@@ -83,7 +83,7 @@ class ClaimInvoiceFactory
 
         $claim->items()->saveMany($items);
 
-        $claim->updateBalances();
+        $claim->updateBalance();
 
         \DB::commit();
 

@@ -2,12 +2,13 @@
 
 namespace App\Claims;
 
+use App\Claims\Exceptions\ClaimBalanceException;
+use App\Contracts\BelongsToBusinessesInterface;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\BelongsToOneBusiness;
 use App\AuditableModel;
 use App\Billing\Payer;
 use App\Business;
-use App\Claims\Exceptions\ClaimBalanceException;
-use App\Contracts\BelongsToBusinessesInterface;
-use App\Traits\BelongsToOneBusiness;
 
 /**
  * App\Claims\ClaimRemit
@@ -42,7 +43,7 @@ use App\Traits\BelongsToOneBusiness;
  */
 class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use BelongsToOneBusiness;
+    use SoftDeletes, BelongsToOneBusiness;
 
     /**
      * The attributes that aren't mass assignable.

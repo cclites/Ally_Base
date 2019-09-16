@@ -2,9 +2,8 @@
 
 namespace App\Claims;
 
-use App\AuditableModel;
 use App\Claims\Exceptions\ClaimBalanceException;
-use Carbon\Carbon;
+use App\AuditableModel;
 
 /**
  * App\Claims\ClaimInvoiceItem
@@ -146,6 +145,8 @@ class ClaimInvoiceItem extends AuditableModel
      */
     public function updateBalance() : void
     {
+        $this->refresh();
+
         $totalApplied = $this->remitApplications->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));

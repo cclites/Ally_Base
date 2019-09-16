@@ -2,6 +2,7 @@
 
 namespace App\Claims;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\AuditableModel;
 
 /**
@@ -25,6 +26,8 @@ use App\AuditableModel;
  */
 class ClaimRemitApplication extends AuditableModel
 {
+    use SoftDeletes;
+
     /**
      * The attributes that aren't mass assignable.
      *

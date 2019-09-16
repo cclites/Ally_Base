@@ -32,7 +32,7 @@ class ClaimRemitApplicationController extends BaseController
             }
 
             $application->claimInvoiceItem->updateBalance();
-            $application->claimInvoice->updateBalances();
+            $application->claimInvoice->updateBalance();
         });
 
         $claimRemit->updateBalance();

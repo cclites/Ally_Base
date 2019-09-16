@@ -2,24 +2,21 @@
 
 namespace App\Claims;
 
-use App\Billing\Claims\HhaClaimTransmitter;
-use App\Billing\Claims\ManualClaimTransmitter;
-use App\Billing\Claims\TellusClaimTransmitter;
-use App\Billing\ClaimService;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Billing\Contracts\InvoiceInterface;
+use App\Billing\Claims\ManualClaimTransmitter;
+use App\Billing\Claims\TellusClaimTransmitter;
+use App\Billing\Claims\HhaClaimTransmitter;
 use App\Traits\BelongsToOneBusiness;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\ClaimPayment;
-use App\Billing\ClientPayer;
 use App\AuditableModel;
 use App\Billing\Payer;
+use Carbon\Carbon;
 use App\Business;
 use App\Client;
 
@@ -273,7 +270,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @throws ClaimBalanceException
      */
-    public function updateBalances() : void
+    public function updateBalance() : void
     {
         $items = $this->fresh()->items;
 

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Policies;
+namespace App\Claims\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Policies\BasePolicy;
 use App\Claims\ClaimInvoice;
 use App\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClaimInvoicePolicy extends BasePolicy
 {

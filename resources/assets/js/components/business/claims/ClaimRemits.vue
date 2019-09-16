@@ -88,15 +88,19 @@
                 :empty-text="emptyText"
             >
                 <template slot="actions" scope="row">
-                    <b-btn variant="success" size="sm" :href="`/business/claim-remits/${row.item.id}`">Apply</b-btn>
-                    <b-btn variant="secondary" size="sm" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
+                    <b-btn variant="success" size="sm" class="mb-1 mr-1" :href="`/business/claim-remits/${row.item.id}`">Apply</b-btn>
+                    <b-btn variant="secondary" size="sm" class="mb-1 mr-1" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
+                    <b-btn variant="danger" size="sm" class="mb-1 mr-1" @click="destroy(row.item)" :disabled="!!deletingId">
+                        <i v-if="deletingId == row.item.id" class="fa fa-spinner fa-spin" />
+                        <i v-else class="fa fa-trash-o" />
+                    </b-btn>
                 </template>
             </b-table>
         </div>
 
-<!--        <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete">-->
-<!--            <p>Are you sure you want to delete this claim?</p>-->
-<!--        </confirm-modal>-->
+        <confirm-modal title="Delete Remit" ref="confirmDelete" yesButton="Delete" yesVariant="danger">
+            <p>Are you sure you want to delete this Remit?  This is a permanent action and cannot be undone.</p>
+        </confirm-modal>
 
         <b-modal id="editRemitModal"
             :title="modalTitle"
@@ -161,6 +165,7 @@
                 }),
                 payers: [],
                 showEditModal: false,
+                deletingId: null,
             }
         },
 
@@ -220,13 +225,20 @@
                 });
             },
 
-            handleAddedRemit(item) {
-
+            destroy(item) {
+                this.$refs.confirmDelete.confirm(() => {
+                    this.deletingId = item.id;
+                    let form = new Form({});
+                    form.delete(`/business/claim-remits/${item.id}`)
+                        .then(() => {
+                            this.$store.commit('claims/deleteRemit', item.id);
+                        })
+                        .catch(() => {})
+                        .finally(() => {
+                            this.deletingId = null;
+                        });
+                });
             },
-
-            handleUpdatedRemit(item) {
-
-            }
         },
 
         async mounted() {

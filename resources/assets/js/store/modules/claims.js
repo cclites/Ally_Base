@@ -60,6 +60,13 @@ const mutations = {
     setRemits(state, data) {
         Vue.set(state, 'remits', data);
     },
+    deleteRemit(state, remitId) {
+        let index = state.remits.findIndex(x => x.id == remitId);
+        if (index >= 0) {
+            state.remits.splice(index, 1);
+        }
+        // Vue.set(state, 'remits', data);
+    },
     setRemit(state, data) {
         Vue.set(state, 'remit', data);
     },
