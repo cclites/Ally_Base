@@ -6,7 +6,7 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent=" loadItems() ">
+                    <b-form inline @submit.prevent="fetch()">
                         <business-location-form-group
                             v-model="businesses"
                             :label="null"
@@ -85,8 +85,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive" v-if=" loaded > 0 ">
-
+        <div class="table-responsive" v-if="loaded > 0">
             <b-table bordered striped hover show-empty
                 :items="filteredItems"
                 :fields="fields"
@@ -95,7 +94,7 @@
                 :filter="filter"
             >
                 <template slot="name" scope="row">
-                    <a :href=" invoiceUrl( row.item ) " target="_blank">{{ row.value }}</a>
+                    <a :href="`/business/client/invoices/${row.item.id}/`" target="_blank">{{ row.value }}</a>
                 </template>
                 <template slot="client" scope="row">
                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
@@ -113,38 +112,42 @@
                         {{ row.item.payer ? row.item.payer.name : 'N/A' }}
                     </span>
                 </template>
-                <template slot="actions" scope="row">
-                    <b-btn v-if="! row.item.claim" variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy" size="sm">
-                        <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner"></i>
-                        <span>Create Claim</span>
-                    </b-btn>
-                    <div v-else>
-                        <div v-if="row.item.claim.status == 'CREATED'">
-                            <b-btn variant="info" class="mr-1 mb-1" :href="`/business/claims/${row.item.claim.id}/edit`" size="sm">
-                                <i class="fa fa-edit"></i>
-                            </b-btn>
-                            <b-btn variant="danger" class="mr-1 mb-1" @click="deleteClaimModal(row.item)" :disabled="busy" size="sm">
-                                <i v-if="row.item.id === deletingId" class="fa fa-spin fa-spinner"></i>
-                                <i v-else class="fa fa-times"></i>
-                            </b-btn>
-                        </div>
-                        <b-btn variant="primary" class="mr-1 mb-1" :href="`/business/claims/${row.item.claim.id}?download=1`" size="sm">
-                            <i class="fa fa-download"></i>
+                <template slot="actions" scope="row" class="text-nowrap">
+                    <!-- CREATE BUTTON -->
+                    <div v-if="! row.item.claim">
+                        <b-btn variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy || row.item.id === creatingId" size="sm">
+                            <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner" />&nbsp;Create Claim
                         </b-btn>
                     </div>
-                    <!--
-                    <b-btn v-else-if=" row.item.claim.status == 'CREATED' " variant="primary" class="flex-1 my-1" @click=" transmitClaim( row.item ) " :disabled="busy">
-                        <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
-                        <span>Transmit Claim</span>
-                    </b-btn>
-                    <b-btn v-else-if="( row.item.claim && row.item.claim.status != 'CREATED' ) && isAdmin " variant="primary" class="flex-1 my-1" @click=" transmitClaim( row.item ) " :disabled="busy">
-                        <i v-if="row.item.id === transmittingId" class="fa fa-spin fa-spinner"></i>
-                        <span>Re-Transmit Claim</span>
-                    </b-btn>
-                    <b-btn v-if="row.item.claim && row.item.claim.status != 'CREATED'" variant="success" class="flex-1 my-1" @click=" showPaymentModal( row.item )">Apply Payment</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="flex-1 my-1" :href="claimInvoiceUrl(row.item)" target="_blank">View Claim Invoice</b-btn>
-                    <b-btn v-if="row.item.claim" variant="secondary" class="flex-1 my-1" :href="claimInvoiceUrl(row.item, 'pdf')" target="_blank">Download Claim Invoice</b-btn>
-                    -->
+                    <div class="text-nowrap" v-else>
+                        <!-- EDIT BUTTON -->
+                        <b-btn v-if="row.item.claim.status == 'CREATED'"
+                               variant="info"
+                               class="mr-1"
+                               :href="`/business/claims/${row.item.claim.id}/edit`"
+                               size="sm"
+                        >
+                            <i class="fa fa-edit" />
+                        </b-btn>
+                        <b-dropdown right size="sm" text="..." class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
+                            <b-dropdown-item :href="`/business/claims/${row.item.claim.id}?download=1`">
+                                <i class="fa fa-download" />&nbsp;Download PDF
+                            </b-dropdown-item>
+                            <b-dropdown-item v-if="row.item.claim.status == 'CREATED'" @click="transmit(row.item)">
+                                <i class="fa fa-send-o" />&nbsp;Transmit Claim
+                            </b-dropdown-item>
+                            <b-dropdown-item v-if="row.item.claim.status != 'CREATED'" @click="transmit(row.item)">
+                                <i class="fa fa-send-o" />&nbsp;Re-transmit Claim
+                            </b-dropdown-item>
+                            <b-dropdown-item>
+                                <i class="fa fa-usd" />&nbsp;Adjust Claim
+                            </b-dropdown-item>
+                            <b-dropdown-divider />
+                            <b-dropdown-item @click="deleteClaimModal(row.item)" variant="danger">
+                                <i class="fa fa-times" />&nbsp;Delete Claim
+                            </b-dropdown-item>
+                        </b-dropdown>
+                    </div>
                 </template>
             </b-table>
         </div>
@@ -155,13 +158,8 @@
             yesButton="Transmit"
             :yes-disabled="!selectedTransmissionMethod"
         >
-            <div v-if="transmissionPrivate">
-                <p>Private and Offline Payer types do not have a default transmission method.</p>
-                <p>Please select the method would you like to use to submit this invoice.</p>
-            </div>
-            <div v-else>
-                <p>A transmission method has not been set for this payer.  We recommend you go into the Payer record and assign a transmission method.</p>
-                <p>For now, please choose how you would like to send:</p>
+            <div>
+                <p>A transmission method could not be inferred for this Claim.  Please check the method you would like to use:</p>
             </div>
             <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
                 <b-select v-model="selectedTransmissionMethod">
@@ -179,10 +177,10 @@
         </confirm-modal>
 
         <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
-            <p>Based on the transmission type for this Invoice, this will assume you have sent in via E-Mail/Fax.</p>
+            <p>Based on the transmission type for this Claim, this will assume you have sent in via E-Mail/Fax.</p>
         </confirm-modal>
 
-        <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete">
+        <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete" yesVariant="danger">
             <p>Are you sure you want to delete this claim?</p>
         </confirm-modal>
 
@@ -235,7 +233,7 @@
                     {
                         key: 'amount',
                         label: 'Invoiced Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
+                        formatter: (val) => this.moneyFormat(val, '$', false),
                         sortable: true,
                     },
                     {
@@ -302,7 +300,6 @@
                 deletingId: null,
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
-                transmissionPrivate: false,
                 editingClaim: {},
             }
         },
@@ -334,30 +331,17 @@
             },
 
             createClaim(invoice) {
-
                 this.creatingId = invoice.id;
                 let form = new Form({client_invoice_id: invoice.id});
                 form.post(`/business/claims`)
-                    .then(({data}) => {
-                        let claim = data.data.claim;
-                        console.log('created claim: ', claim);
-
-                        let item = this.items.find(item => item.id == claim.client_invoice_id);
-                        // manually set the attributes that the claim-resource does..
-                        item.claim_total = this.moneyFormat(claim.amount, '$', true);
-                        item.claim_paid = this.moneyFormat(claim.amount - claim.amount_due, '$', true);
-                        item.claim_balance = this.moneyFormat(claim.amount_due, '$', true);
-                        item.claim_status = claim.status;
-                        item.claim_status = claim.status;
-                        item.claim_date = this.formatDateFromUTC(claim.created_at, 'MM/DD/YYYY h:mm a', null, true);
-                        item.claim = claim;
-                        item.client_name = _.upperFirst(claim.client_first_name) + ' ' + _.upperFirst(claim.client_last_name);
+                    .then( ({ data }) => {
+                        let index = this.items.findIndex(x => x.id == data.data.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data);
+                        }
                     })
-                    .catch(() => {
-
-                    })
+                    .catch(() => {})
                     .finally(() => {
-
                         this.creatingId = null;
                     })
             },
@@ -369,72 +353,51 @@
             },
 
             deleteClaim(invoice) {
-                if (invoice.claim && invoice.claim.status == 'CREATED') {
-                    this.deletingId = invoice.id;
-                    let form = new Form({});
-                    form.submit('delete', `/business/claims/${invoice.claim.id}`)
-                        .then( ({ data }) => {
-                            let item = this.items.find(item => item.id == invoice.id);
-                            item.claim_total = null;
-                            item.claim_paid = null;
-                            item.claim_balance = null;
-                            item.claim_status = null;
-                            item.client_name = null;
-                            item.claim_date = null;
-                            item.claim = null;
-                        })
-                        .catch(() => {})
-                        .finally(() => {
-                            this.deletingId = null;
-                        })
+                if (! invoice.claim) {
+                    return;
                 }
+
+                this.deletingId = invoice.id;
+                let form = new Form({});
+                form.submit('delete', `/business/claims/${invoice.claim.id}`)
+                    .then( ({ data }) => {
+                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1);
+                        }
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        this.deletingId = null;
+                    })
             },
 
-            transmitClaim(invoice, skipAlert = false) {
-                if (true) return;
-
-                if (!skipAlert) {
-
-                    if (invoice.payer && [this.PRIVATE_PAY_ID, this.OFFLINE_PAY_ID].includes(invoice.payer.id)) {
-                        // offline and private pay Payer objects have no transmission method set
-                        // so we allow the user to select which method they would like to use
+            transmit(invoice, skipAlert = false) {
+                if (! skipAlert) {
+                    if (! invoice.claim.transmission_method) {
                         this.selectedTransmissionMethod = '';
-                        this.transmissionPrivate = true;
-
                         this.$refs.confirmTransmissionMethod.confirm(() => {
-                            this.transmitClaim(invoice, true);
+                            this.transmit(invoice, true);
                         });
                         return;
                     }
 
-                    if (invoice.payer && !invoice.payer.transmission_method) {
-                        // if no transmission method set up for the payer, allow them to choose
-                        this.selectedTransmissionMethod = '';
-                        this.transmissionPrivate = false;
-                        this.$refs.confirmTransmissionMethod.confirm(() => {
-
-                            this.transmitClaim(invoice, true);
-                        });
-                        return;
-                    }
-
-                    if (invoice.payer && [this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.payer.transmission_method)) {
+                    if ([this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.claim.transmission_method)) {
                         this.$refs.confirmManualTransmission.confirm(() => {
-                            this.transmitClaim(invoice, true);
+                            this.transmit(invoice, true);
                         });
                         return;
                     }
                 }
 
                 this.busy = true;
-                this.transmittingId = invoice.id;
+                this.transmittingId = invoice.claim.id;
                 let form = new Form({
-
                     method: this.selectedTransmissionMethod,
                 });
 
-                form.post(`/business/claims-ar/${invoice.id}/transmit`)
-                    .then(({data}) => {
+                form.post(`/business/claims/${invoice.claim.id}/transmit`)
+                    .then( ({ data }) => {
                         // success
                         if (data.data.test_result) {
                             // test mode
@@ -443,7 +406,7 @@
                         }
                         let index = this.items.findIndex(x => x.id == invoice.id);
                         if (index >= 0) {
-                            this.items.splice(index, 1, data.data.claim);
+                            this.items.splice(index, 1, data.data.invoice);
                         }
                     })
                     .catch(e => {
@@ -458,68 +421,52 @@
                     });
             },
 
-            async loadItems() {
+            async fetch() {
                 this.loaded = 0;
                 let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then(({data}) => {
-
                         this.items = data.data;
                     })
                     .catch(e => {
-
                         this.items = [];
                     })
                     .finally(() => {
-
                         this.loaded = 1;
                     });
             },
 
             async fetchPayers() {
-                this.payers = [];
                 this.loadingPayers = true;
-                let response = await axios.get('/business/payers?json=1');
-                if (Array.isArray(response.data)) {
-
-                    this.payers = response.data;
-                } else {
-
-                    this.payers = [];
-                }
-                this.loadingPayers = false;
+                await axios.get(`/business/dropdown/payers`)
+                    .then( ({ data }) => {
+                        this.payers = data;
+                    })
+                    .catch(() => {
+                        this.payers = [];
+                    })
+                    .finally(() => {
+                        this.loadingPayers = false;
+                    });
             },
 
-            async loadClients() {
-                this.clients = [];
+            async fetchClients() {
                 this.loadingClients = true;
-                const response = await axios.get('/business/clients?json=1');
-                this.clients = response.data;
-                this.loadingClients = false;
+                await axios.get(`/business/dropdown/clients`)
+                    .then( ({ data }) => {
+                        this.clients = data;
+                    })
+                    .catch(() => {
+                        this.payers = [];
+                    })
+                    .finally(() => {
+                        this.loadingClients = false;
+                    });
             },
-
-            invoiceUrl(invoice, view = "") {
-                return `/business/client/invoices/${invoice.id}/${view}`;
-            },
-
-            claimInvoiceUrl(invoice, view = "") {
-                if (!invoice.claim) {
-
-                    return;
-                }
-
-                return `/business/claims-ar/invoices/${invoice.claim.id}/${view}`;
-            },
-
-            updateFullBalance() {
-            },
-        },
-
-        watch: {
         },
 
         async mounted() {
-            await this.loadClients();
+            await this.fetchClients();
             await this.fetchPayers();
 
             // load filters from query
@@ -541,7 +488,7 @@
             }
 
             if (autoLoad) {
-                this.loadItems();
+                this.fetch();
             }
         }
     }
@@ -557,4 +504,13 @@
     .fa-times-rectangle-o {
         color: darkred;
     }
+    .claim-dropdown button {
+        font-weight: 700;
+        letter-spacing: 3px;
+    }
+    .claim-dropdown button::after {
+        border: none;
+        margin: 0;
+    }
+
 </style>

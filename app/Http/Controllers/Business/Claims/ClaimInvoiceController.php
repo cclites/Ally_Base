@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimRemitApplication;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
+use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
-use App\Billing\View\InvoiceViewFactory;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
@@ -60,7 +59,7 @@ class ClaimInvoiceController extends BaseController
 
         $claim = $factory->createFromClientInvoice($clientInvoice);
 
-        return new SuccessResponse('Claim has been created.', compact('claim'));
+        return new SuccessResponse('Claim has been created.', new ClaimsQueueResource($claim->clientInvoice->fresh()));
     }
 
     /**
@@ -103,30 +102,6 @@ class ClaimInvoiceController extends BaseController
     }
 
     /**
-     * Create a ClaimInvoice.
-     *
-     * @param ClaimInvoice $claim
-     * @param ClaimInvoiceFactory $factory
-     * @return SuccessResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function destroy(ClaimInvoice $claim, ClaimInvoiceFactory $factory)
-    {
-        $this->authorize('delete', $claim);
-
-        if ($claim->remitApplications()->count() > 0) {
-            return new ErrorResponse(500, 'Cannot delete Claims that have remits applied.');
-        }
-
-        try {
-            $factory->deleteClaimInvoice($claim);
-            return new SuccessResponse('Claim has been deleted.');
-        } catch (CannotDeleteClaimInvoiceException $ex) {
-            return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
-        }
-    }
-
-    /**
      *
      * Show a claim_invoice
      *
@@ -164,5 +139,33 @@ class ClaimInvoiceController extends BaseController
         }
 
         return $view;
+    }
+
+    /**
+     * Delete a ClaimInvoice.
+     *
+     * @param ClaimInvoice $claim
+     * @param ClaimInvoiceFactory $factory
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function destroy(ClaimInvoice $claim, ClaimInvoiceFactory $factory)
+    {
+        $this->authorize('delete', $claim);
+
+        if ($claim->remitApplications()->count() > 0) {
+            return new ErrorResponse(500, 'Cannot delete Claims that have remits applied.');
+        }
+
+        if ($claim->hasBeenTransmitted()) {
+            return new ErrorResponse(500, 'Cannot delete Claims that have been transmitted.');
+        }
+
+        try {
+            $factory->deleteClaimInvoice($claim);
+            return new SuccessResponse('Claim has been deleted.');
+        } catch (CannotDeleteClaimInvoiceException $ex) {
+            return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
+        }
     }
 }

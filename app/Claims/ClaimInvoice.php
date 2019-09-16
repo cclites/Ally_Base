@@ -2,18 +2,15 @@
 
 namespace App\Claims;
 
-use App\Billing\Contracts\ClaimTransmitterInterface;
-use App\Billing\Exceptions\ClaimTransmissionException;
+use App\Claims\Exceptions\ClaimTransmissionException;
+use App\Claims\Transmitters\ManualClaimTransmitter;
+use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Billing\Claims\ManualClaimTransmitter;
-use App\Billing\Claims\TellusClaimTransmitter;
-use App\Billing\Claims\HhaClaimTransmitter;
 use App\Traits\BelongsToOneBusiness;
+use App\Billing\ClientInvoice;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
-use App\Billing\ClientInvoice;
-use App\Billing\ClaimPayment;
 use App\AuditableModel;
 use App\Billing\Payer;
 use Carbon\Carbon;
@@ -133,6 +130,11 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->hasMany(ClaimInvoiceItem::class, 'claim_invoice_id', 'id');
     }
 
+    /**
+     * Get the Client relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     function client()
     {
         return $this->belongsTo(Client::class);
@@ -148,11 +150,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->belongsTo(Payer::class);
     }
 
-    public function payments()
-    {
-        return $this->hasMany(ClaimPayment::class);
-    }
-
     /**
      * Get the ClaimRemitApplications relationship.
      *
@@ -161,6 +158,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     public function remitApplications()
     {
         return $this->hasMany(ClaimRemitApplication::class);
+    }
+
+    /**
+     * Get the status relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function statuses()
+    {
+        return $this->hasMany(ClaimInvoiceStatusHistory::class);
     }
 
     // **********************************************************
@@ -309,6 +316,62 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         $this->update(['modified_at' => Carbon::now()]);
     }
 
+    /**
+     * Set the status of the claim, and add to it's status history.
+     *
+     * @param \App\Billing\ClaimStatus $status
+     * @param array $otherUpdates
+     */
+    public function updateStatus(ClaimStatus $status, array $otherUpdates = []) : void
+    {
+        $this->update(array_merge(['status' => $status], $otherUpdates));
+        $this->statuses()->create(['status' => $status]);
+    }
+
+    /**
+     * Get the transmission method that should be used
+     * for the ClaimInvoice.
+     *
+     * @return null|ClaimService
+     */
+    public function getTransmissionMethod() : ?ClaimService
+    {
+        if (empty($this->transmission_method)) {
+            return null;
+        }
+
+        return ClaimService::fromValue($this->transmission_method);
+    }
+
+    /**
+     * Get the ClaimTransmitter for the given service.
+     *
+     * @param ClaimService $service
+     * @return ClaimTransmitterInterface
+     * @throws ClaimTransmissionException
+     */
+    public function getTransmitter(ClaimService $service) : ClaimTransmitterInterface
+    {
+        switch ($service) {
+            case ClaimService::HHA():
+                throw new ClaimTransmissionException('Claim service "HHAeXchange" not yet supported.');
+//                return new HhaClaimTransmitter();
+                break;
+            case ClaimService::TELLUS():
+                throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
+//                return new TellusClaimTransmitter();
+                break;
+            case ClaimService::CLEARINGHOUSE():
+                throw new ClaimTransmissionException('Claim service not yet supported.');
+                break;
+            case ClaimService::FAX():
+            case ClaimService::EMAIL():
+                return new ManualClaimTransmitter();
+                break;
+            default:
+                throw new ClaimTransmissionException('Claim service not supported.');
+        }
+    }
     // **********************************************************
     // STATIC METHODS
     // **********************************************************
@@ -340,31 +403,4 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return "${businessId}-${nextId}";
     }
 
-    /**
-     * Get the ClaimTransmitter for the given service.
-     *
-     * @param ClaimService $service
-     * @return ClaimTransmitterInterface
-     * @throws ClaimTransmissionException
-     */
-    public static function getTransmitter(ClaimService $service) : ClaimTransmitterInterface
-    {
-        switch ($service) {
-            case ClaimService::HHA():
-                return new HhaClaimTransmitter();
-                break;
-            case ClaimService::TELLUS():
-                return new TellusClaimTransmitter();
-                break;
-            case ClaimService::CLEARINGHOUSE():
-                throw new ClaimTransmissionException('Claim service not supported.');
-                break;
-            case ClaimService::FAX():
-            case ClaimService::EMAIL():
-                return new ManualClaimTransmitter();
-                break;
-            default:
-                throw new ClaimTransmissionException('Claim service not supported.');
-        }
-    }
 }
