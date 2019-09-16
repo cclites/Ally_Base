@@ -163,10 +163,50 @@ class ReportsController extends Controller
         return view('admin.reports.shared_shifts');
     }
 
-    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
+    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator, Request $request)
     {
+
+        if($request->business){
+
+
+
+            if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
+
+                $caregivers = Caregiver::active()
+                                ->forBusinesses([$request->business])
+                                ->with('businessChains')
+                                ->doesntHave('bankAccount')
+                                ->get();
+
+
+
+                $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
+                    $array = $caregiver->toArray();
+                    $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
+                        || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
+                    return $array;
+                });
+
+                \Log::info(json_encode($caregivers));
+
+                \Cache::put('caregivers_missing_accounts', $caregivers, 60);
+            }
+
+            return $caregivers;
+            //return response()->json(compact('caregivers'));
+        }
+
+        return view_component('business-caregiver-deposits-missing-bank-account', 'Deposits without bank account', [], [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+
+        //business-caregiver-deposits-missing-bank-account
+        /*
         if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
+
             $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
+
             $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
                 $array = $caregiver->toArray();
                 $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
@@ -178,6 +218,7 @@ class ReportsController extends Controller
         }
 
         return view('admin.reports.caregivers.deposits_without_bank_account', compact('caregivers'));
+        */
     }
 
     public function finances()
