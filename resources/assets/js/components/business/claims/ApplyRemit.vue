@@ -91,6 +91,20 @@
                         <input-help :form="form" field="interest" text="The amount to apply towards interest."></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col md="3">
+                    <b-form-group label="&nbsp;" label-for="interest">
+                    <b-form-input
+                        v-model="interest_note"
+                        id="interest_note"
+                        name="interest_note"
+                        type="text"
+                        :disabled="form.busy"
+                        placeholder="Note..."
+                        maxlength="255"
+                    />
+                    <input-help :form="form" field="interest" text="" />
+                </b-form-group>
+                </b-col>
             </b-row>
 
             <div class="table-responsive claims-table">
@@ -178,6 +192,15 @@
                                         <option value="">-- Select Type --</option>
                                     </template>
                                 </b-select>
+                                <b-form-input
+                                    v-model="row.item.note"
+                                    placeholder="Note..."
+                                    name="note"
+                                    maxlength="255"
+                                    type="text"
+                                    :disabled="form.busy || row.item.disabled"
+                                    style="max-width: none!important;"
+                                />
                             </div>
                         </template>
                       </b-table>
@@ -304,6 +327,7 @@
                 clients: [],
                 isScrolling: false,
                 interest: '',
+                interest_note: '',
                 form: new Form({
                     applications: [],
                 }),
@@ -354,6 +378,7 @@
                                 item.disabled = false;
                                 item.adjustment_type = '';
                                 item.amount_applied = '';
+                                item.note = '';
                                 return item;
                             });
                             return claim;
@@ -394,6 +419,7 @@
                             claim_invoice_id: claim.id,
                             claim_invoice_item_id: item.id,
                             adjustment_type: item.adjustment_type,
+                            note: item.note,
                             amount_applied: item.amount_applied,
                             is_interest: false,
                         };
@@ -408,6 +434,7 @@
                         adjustment_type: this.CLAIM_ADJUSTMENT_TYPES.INTEREST,
                         amount_applied: this.interest,
                         is_interest: true,
+                        note: this.interest_note,
                     });
                 }
             },
@@ -419,11 +446,13 @@
              */
             selectMaster(claim)  {
                 if (claim.selected) {
+                    console.log('claim selected', claim);
                     // When the claim record is selected, all sub items
                     // should be set to the full amount and disabled.
                     this.$set(claim, 'items', claim.items.map(item => {
                         item.amount_applied = item.amount_due;
                         item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
+                        item.note = '';
                         item.selected = true;
                         item.disabled = true;
                         return item;
@@ -433,11 +462,13 @@
                     // Force view of details (sub-items)
                     this.$set(claim, '_showDetails', true);
                 } else {
+                    console.log('claim un-selected', claim);
                     // When the claim record is un-selected, we should clear
                     // all progress from it and it's sub items.
                     this.$set(claim, 'items', claim.items.map(item => {
                         item.amount_applied = '';
                         item.adjustment_type = '';
+                        item.note = '';
                         item.selected = false;
                         item.disabled = false;
                         return item;
@@ -472,15 +503,19 @@
              */
             selectSub(claimItem) {
                 if (claimItem.selected) {
+                    console.log('sub selected');
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
                         this.$set(claimItem, 'amount_applied', claimItem.amount_due);
                         this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
+                        this.$set(claimItem, 'note', '');
                     }
                 } else {
+                    console.log('sub un-selected');
                     // Claim items that are not selected should always be empty.
                     this.$set(claimItem, 'amount_applied', '');
                     this.$set(claimItem, 'adjustment_type', '');
+                    this.$set(claimItem, 'note', '');
                 }
 
                 this.forceRowUpdate(claimItem.claim_invoice_id);
@@ -539,7 +574,7 @@
                 this.$nextTick(x => {
                     let index = this.claims.findIndex(x => x.id == claimId);
                     // Set the claim item to itself to force and update but not change values.
-                    this.$set(this.claims, index, this.claims[index]);
+                    this.$set(this.claims, index, JSON.parse(JSON.stringify(this.claims[index])));
                 });
             },
 

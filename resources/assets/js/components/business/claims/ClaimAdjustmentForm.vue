@@ -10,7 +10,7 @@
             <template slot="selected" scope="row">
                 <b-form-checkbox v-model="row.item.selected"
                     :disabled="form.busy"
-                    @change="selectItem(row.item)"/>
+                    @change="selectItem(row.item.id)"/>
             </template>
             <template slot="start_time" scope="row">
                 <span v-if="row.item.start_time">
@@ -41,11 +41,11 @@
                         </template>
                     </b-select>
                     <b-form-input
-                        v-model="row.item.note"
-                        placeholder="Note..."
                         name="note"
+                        v-model="row.item.note"
                         type="text"
                         :disabled="form.busy || !row.item.selected"
+                        maxlength="255"
                         style="max-width: none!important;"
                     />
                 </div>
@@ -111,8 +111,8 @@
                 this.items = claim.items.map(item => {
                     item.selected = false;
                     item.adjustment_type = '';
-                    item.note = '';
                     item.amount_applied = '';
+                    item.note = '';
                     return item;
                 });
             },
@@ -161,22 +161,25 @@
             /**
              * Handle selection of items.
              *
-             * @param {Object} claimItem
+             * @param {number} id
              */
-            selectItem(claimItem) {
+            selectItem(id) {
+                let claimItem = this.items.find(x => x.id == id);
+
+                console.log('select item:', claimItem);
                 if (claimItem.selected) {
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
                         this.$set(claimItem, 'amount_applied', (new Decimal(-1)).times(new Decimal(claimItem.amount_due)).toFixed(2));
                         this.$set(claimItem, 'adjustment_type', '');
-                        this.$set(claimItem, 'note', '');
                     }
                 } else {
                     // Claim items that are not selected should always be empty.
                     this.$set(claimItem, 'amount_applied', '');
                     this.$set(claimItem, 'adjustment_type', '');
-                    this.$set(claimItem, 'note', '');
                 }
+                this.$set(claimItem, 'note', '');
+                console.log(claimItem.note);
 
                 this.forceRowUpdate(claimItem);
             },
@@ -191,7 +194,6 @@
                 if (isNaN(value) || value == '') {
                     // Clear the value / selection if invalid value.
                     this.$set(claimItem, 'amount_applied', '');
-                    this.$set(claimItem, 'selected', false);
                 } else {
                     // Make sure item is selected when it has an amount.
                     this.$set(claimItem, 'selected', true);
@@ -234,7 +236,7 @@
                 this.$nextTick(x => {
                     let index = this.items.findIndex(x => x.id == claimItem.id);
                     // Set the claim item to itself to force and update but not change values.
-                    this.$set(this.items, index, this.items[index]);
+                    this.$set(this.items, index, JSON.parse(JSON.stringify(this.items[index])));
                 });
             },
         },
