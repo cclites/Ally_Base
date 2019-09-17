@@ -36,9 +36,10 @@ class CreateClaimAdjustmentsAndRemitsTables extends Migration
             $table->unsignedBigInteger('claim_remit_id')->nullable();
             $table->unsignedBigInteger('claim_invoice_id')->nullable();
             $table->unsignedBigInteger('claim_invoice_item_id')->nullable();
-            $table->string('adjustment_type', 30);
             $table->decimal('amount_applied', 9, 2)->default(0.00);
+            $table->string('adjustment_type', 30);
             $table->boolean('is_interest')->default(false);
+            $table->string('note', 255)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

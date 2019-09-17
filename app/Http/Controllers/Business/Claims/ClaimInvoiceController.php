@@ -104,43 +104,14 @@ class ClaimInvoiceController extends BaseController
     }
 
     /**
-     *
-     * Show a claim_invoice
+     * View a Claim Invoice.
      *
      * @param ClaimInvoice $claim
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Throwable
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(ClaimInvoice $claim, Request $request)
+    public function show(ClaimInvoice $claim)
     {
-        $this->authorize('read', $claim);
-
-        $groups = $claim->items->groupBy('type');
-
-        if (! isset($groups['Expense'])) {
-            $groups['Expense'] = [];
-        }
-        if (! isset($groups['Service'])) {
-            $groups['Service'] = [];
-        }
-
-        $view = view('claims.claim_invoice', [
-            'claim' => $claim,
-            'sender' => $claim->business,
-            'recipient' => $claim->payer,
-            'client' => $claim->client,
-            'itemGroups' => $groups,
-        ]);
-
-        if ($request->filled('download')) {
-            $pdfWrapper = app('snappy.pdf.wrapper');
-            $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('Claim-Invoice-'.snake_case($claim->name));
-        }
-
-        return $view;
+        return response()->json(new ClaimInvoiceResource($claim));
     }
 
     /**
@@ -171,5 +142,44 @@ class ClaimInvoiceController extends BaseController
         } catch (CannotDeleteClaimInvoiceException $ex) {
             return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
         }
+    }
+
+    /**
+     * Print a ClaimInvoice.
+     *
+     * @param ClaimInvoice $claim
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
+     */
+    public function print(ClaimInvoice $claim, Request $request)
+    {
+        $this->authorize('read', $claim);
+
+        $groups = $claim->items->groupBy('type');
+
+        if (! isset($groups['Expense'])) {
+            $groups['Expense'] = [];
+        }
+        if (! isset($groups['Service'])) {
+            $groups['Service'] = [];
+        }
+
+        $view = view('claims.claim_invoice', [
+            'claim' => $claim,
+            'sender' => $claim->business,
+            'recipient' => $claim->payer,
+            'client' => $claim->client,
+            'itemGroups' => $groups,
+        ]);
+
+        if ($request->filled('download')) {
+            $pdfWrapper = app('snappy.pdf.wrapper');
+            $pdfWrapper->loadHTML($view->render());
+            return $pdfWrapper->download('Claim-Invoice-'.snake_case($claim->name));
+        }
+
+        return $view;
     }
 }

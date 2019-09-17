@@ -97,6 +97,18 @@ export default {
                 { value: 'take-back', text: 'Take Back' },
                 { value: 'write-off', text: 'Write Off / Uncollectible' },
             ],
+            /**
+             * Apply Remit form should not have Denial and Write Off options
+             */
+            claimRemitAdjustmentTypeOptions: [
+                { value: 'discount', text: 'Discount' },
+                { value: 'interest', text: 'Interest' },
+                { value: 'overpayment', text: 'Overpayment / Surplus' },
+                { value: 'partial', text: 'Partial Payment Applied' },
+                { value: 'payment', text: 'Payment Applied' },
+                { value: 'supplier-contribution', text: 'Supplier Contribution' },
+                { value: 'take-back', text: 'Take Back' },
+            ],
         }
     },
 }

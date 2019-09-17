@@ -4,7 +4,7 @@ namespace App\Claims\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Auth\Access\Gate;
-use App\Claims\ClaimRemitApplicationType;
+use App\Claims\ClaimAdjustmentType;
 use App\Claims\ClaimInvoiceItem;
 use App\Rules\ValidEnum;
 
@@ -31,7 +31,7 @@ class CreateClaimRemitApplicationsRequest extends FormRequest
             'applications' => 'required|array',
             'applications.*.is_interest' => 'required|boolean',
             'applications.*.amount_applied' => 'required|numeric|not_in:0|min:-9999999.99|max:9999999.99',
-            'applications.*.adjustment_type' => ['required', new ValidEnum(ClaimRemitApplicationType::class)],
+            'applications.*.adjustment_type' => ['required', new ValidEnum(ClaimAdjustmentType::class)],
             'applications.*.claim_invoice_item_id' => 'required_unless:applications.*.is_interest,true|exists:claim_invoice_items,id',
         ];
 
@@ -72,6 +72,7 @@ class CreateClaimRemitApplicationsRequest extends FormRequest
 
                 app(Gate::class)->authorize('update', $claimItem->claim);
 
+                // TODO: do we need this? clean this up
                 $applied = floatval($application['amount_applied']);
                 $due = floatval($claimItem->amount_due);
                 if ($applied === floatval(0)) {

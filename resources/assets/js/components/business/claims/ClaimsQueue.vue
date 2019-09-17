@@ -121,7 +121,7 @@
                     </div>
                     <div class="text-nowrap" v-else>
                         <!-- EDIT BUTTON -->
-                        <b-btn v-if="row.item.claim.status == 'CREATED'"
+                        <b-btn
                                variant="info"
                                class="mr-1"
                                :href="`/business/claims/${row.item.claim.id}/edit`"
@@ -139,7 +139,7 @@
                             <b-dropdown-item v-if="row.item.claim.status != 'CREATED'" @click="transmit(row.item)">
                                 <i class="fa fa-send-o" />&nbsp;Re-transmit Claim
                             </b-dropdown-item>
-                            <b-dropdown-item>
+                            <b-dropdown-item @click="adjust(row.item)">
                                 <i class="fa fa-usd" />&nbsp;Adjust Claim
                             </b-dropdown-item>
                             <b-dropdown-divider />
@@ -184,6 +184,16 @@
             <p>Are you sure you want to delete this claim?</p>
         </confirm-modal>
 
+        <b-modal id="adjustmentModal"
+            title="Adjust Claim Balance"
+            v-model="showAdjustmentModal"
+            :no-close-on-backdrop="true"
+            hide-footer
+            size="lg"
+        >
+            <claim-adjustment-form @close="hideAdjustmentModal()" @update="updateRecord" />
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -194,13 +204,13 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import Constants from '../../../mixins/Constants';
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import ClaimAdjustmentForm from "./ClaimAdjustmentForm";
 
     export default {
-        components: {BusinessLocationFormGroup},
+        components: {BusinessLocationFormGroup, ClaimAdjustmentForm},
         mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
 
         data() {
-
             return {
                 sortBy: 'shift_time',
                 sortDesc: false,
@@ -285,7 +295,6 @@
                 loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
-
                     type: '',
                     payment_date: moment().format('MM/DD/YYYY'),
                     amount: 0.00,
@@ -301,6 +310,7 @@
                 selectedTransmissionMethod: '',
                 payFullBalance: false,
                 editingClaim: {},
+                showAdjustmentModal: false,
             }
         },
 
@@ -313,6 +323,27 @@
         },
 
         methods: {
+            adjust(invoice) {
+                axios.get(`/business/claims/${invoice.claim.id}`)
+                    .then( ({ data }) => {
+                        this.$store.commit('claims/setClaim', data);
+                        this.showAdjustmentModal = true;
+                    })
+                    .catch(() => {});
+            },
+
+            hideAdjustmentModal() {
+                this.showAdjustmentModal = false;
+                this.$store.commit('claims/setClaim', {});
+            },
+
+            updateRecord(invoice) {
+                let index = this.items.findIndex(x => x.id == invoice.id);
+                if (index >= 0) {
+                    this.items.splice(index, 1, invoice);
+                }
+            },
+
             serviceLabel(serviceValue) {
                 switch (serviceValue) {
                     case this.CLAIM_SERVICE.HHA:

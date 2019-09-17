@@ -487,11 +487,13 @@ Route::group([
     /* New Claims & AR */
     Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
+    Route::get('claims/{claim}/print', 'Business\Claims\ClaimInvoiceController@print');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
     Route::resource('claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
+    Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

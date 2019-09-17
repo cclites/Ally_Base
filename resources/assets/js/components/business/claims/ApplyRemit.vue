@@ -129,7 +129,7 @@
                         />
                         <b-select name="adjustment_type"
                             v-model="row.item.adjustment_type"
-                            :options="claimAdjustmentTypeOptions"
+                            :options="claimRemitAdjustmentTypeOptions"
                             :disabled="form.busy || !row.item.selected"
                             @change="(val) => changeMasterType(row.item, val)"
                         >
@@ -170,7 +170,7 @@
                                 />
                                 <b-select name="adjustment_type"
                                     v-model="row.item.adjustment_type"
-                                    :options="claimAdjustmentTypeOptions"
+                                    :options="claimRemitAdjustmentTypeOptions"
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subTypeChanged(row.item, x)"
                                 >
@@ -381,7 +381,7 @@
 
             /**
              * Loop through the table data and update the form
-             * to contain proper ClaimRemitApplication objects.
+             * to contain proper ClaimAdjustment objects.
              */
             populateFormFromTable() {
                 this.form.applications = this.claims.map(claim => {
@@ -506,7 +506,7 @@
             },
 
             /**
-             * Handle sub (claim) item changed payment table dropdown.
+             * Handle sub (claim) item changed adjustment type dropdown.
              *
              * @param {Object} claimItem
              * @param {string} value
