@@ -1,4 +1,7 @@
+import store from '../store/index';
+
 export default {
+
     computed: {
         computedPrefix() {
             if (this.localStoragePrefix) {
@@ -17,6 +20,18 @@ export default {
                     if (val.toLowerCase() === 'false') return false;
                     if (val.toLowerCase() === 'true') return true;
                 }
+
+                if( item == 'business_id' && Object.values( store.getters.getBusiness( val ) ).length == 0 ){
+                    // local storage saved a business id that we do not have as this user..
+                    // this can be extended for more values other than business id in the future
+
+                    // clear the storage value
+                    this.setLocalStorage( item, null );
+
+                    // return null
+                    return null;
+                }
+
                 return val;
             }
             catch (e) {
