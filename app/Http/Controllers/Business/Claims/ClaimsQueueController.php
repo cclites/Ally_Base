@@ -68,6 +68,9 @@ class ClaimsQueueController extends BaseController
 
             $invoiceQuery->forRequestedBusinesses();
 
+            // Only return invoices that have a payer (adjustment invoices should not show)
+            $invoiceQuery->whereNotNull('client_payer_id');
+
             if ($request->has('start_date')) {
                 $startDate = Carbon::parse($request->start_date)->toDateTimeString();
                 $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
