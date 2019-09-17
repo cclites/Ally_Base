@@ -140,7 +140,7 @@ class ClockOutController extends BaseController
         try {
             $clockOut = new ClockOut($this->caregiver());
             if (isset($data['other_expenses'])) {
-                $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
+                $clockOut->setOtherExpenses($data['other_expenses'], isset($data['other_expenses_desc']) ? $data['other_expenses_desc'] : null);
             }
             if (isset($data['mileage'])) {
                 $clockOut->setMileage($data['mileage']);
