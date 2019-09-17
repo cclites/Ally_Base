@@ -194,6 +194,11 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return floatval($this->amount_due);
     }
 
+    /**
+     * Get the total amount paid/adjusted.
+     *
+     * @return float
+     */
     public function getAmountPaid(): float
     {
         return subtract(floatval($this->amount), floatval($this->amount_due));

@@ -198,7 +198,7 @@
                                     name="note"
                                     maxlength="255"
                                     type="text"
-                                    :disabled="form.busy || row.item.disabled"
+                                    :disabled="form.busy"
                                     style="max-width: none!important;"
                                 />
                             </div>
@@ -446,23 +446,34 @@
              */
             selectMaster(claim)  {
                 if (claim.selected) {
-                    console.log('claim selected', claim);
                     // When the claim record is selected, all sub items
                     // should be set to the full amount and disabled.
                     this.$set(claim, 'items', claim.items.map(item => {
-                        item.amount_applied = item.amount_due;
-                        item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
+                        if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
+                            item.amount_applied = this.makeNegative(item.amount_paid);
+                            item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK;
+                        } else {
+                            item.amount_applied = item.amount_due;
+                            item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
+                        }
+
                         item.note = '';
                         item.selected = true;
                         item.disabled = true;
                         return item;
                     }));
-                    this.$set(claim, 'amount_applied', claim.amount_due);
-                    this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
+
+                    if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
+                        this.$set(claim, 'amount_applied', this.makeNegative(claim.amount_paid));
+                        this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK);
+                    } else {
+                        this.$set(claim, 'amount_applied', claim.amount_due);
+                        this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
+                    }
+
                     // Force view of details (sub-items)
                     this.$set(claim, '_showDetails', true);
                 } else {
-                    console.log('claim un-selected', claim);
                     // When the claim record is un-selected, we should clear
                     // all progress from it and it's sub items.
                     this.$set(claim, 'items', claim.items.map(item => {
@@ -503,15 +514,19 @@
              */
             selectSub(claimItem) {
                 if (claimItem.selected) {
-                    console.log('sub selected');
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
-                        this.$set(claimItem, 'amount_applied', claimItem.amount_due);
-                        this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
+                        if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
+                            this.$set(claimItem, 'amount_applied', this.makeNegative(claimItem.amount_paid));
+                            this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK);
+                        } else {
+                            this.$set(claimItem, 'amount_applied', claimItem.amount_due);
+                            this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
+                        }
+
                         this.$set(claimItem, 'note', '');
                     }
                 } else {
-                    console.log('sub un-selected');
                     // Claim items that are not selected should always be empty.
                     this.$set(claimItem, 'amount_applied', '');
                     this.$set(claimItem, 'adjustment_type', '');

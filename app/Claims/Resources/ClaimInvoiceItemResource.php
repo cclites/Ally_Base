@@ -25,6 +25,7 @@ class ClaimInvoiceItemResource extends Resource
         return [
             'amount' => $this->resource->amount,
             'amount_due' => $this->resource->amount_due,
+            'amount_paid' => $this->resource->getAmountPaid(),
             'claim_invoice_id' => $this->resource->claim_invoice_id,
             'related_shift_id' => optional($this->resource->claimable)->shift_id,
             'claimable' => $this->mapClaimable(),

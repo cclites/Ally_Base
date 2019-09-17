@@ -137,6 +137,16 @@ class ClaimInvoiceItem extends AuditableModel
     // **********************************************************
 
     /**
+     * Get the total amount paid/adjusted.
+     *
+     * @return float
+     */
+    public function getAmountPaid(): float
+    {
+        return subtract(floatval($this->amount), floatval($this->amount_due));
+    }
+
+    /**
      * Calculate the amount due for this ClaimInvoiceItem
      * from all the remit amounts applied to it.
      *
