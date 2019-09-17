@@ -24,7 +24,7 @@ use App\AuditableModel;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Claims\ClaimInvoice $claim
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $claimable
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimRemitApplication[] $remitApplications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimAdjustment[] $adjustments
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -98,13 +98,13 @@ class ClaimInvoiceItem extends AuditableModel
     }
 
     /**
-     * Get the ClaimRemitApplications relationship.
+     * Get the ClaimAdjustments relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-    public function remitApplications()
+    public function adjustments()
     {
-        return $this->hasMany(ClaimRemitApplication::class);
+        return $this->hasMany(ClaimAdjustment::class);
     }
 
     // **********************************************************
@@ -147,7 +147,7 @@ class ClaimInvoiceItem extends AuditableModel
     {
         $this->refresh();
 
-        $totalApplied = $this->remitApplications->reduce(function ($carry, $application) {
+        $totalApplied = $this->adjustments->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));
 
@@ -155,7 +155,7 @@ class ClaimInvoiceItem extends AuditableModel
 
         if ($amountDue < floatval(0)) {
             throw new ClaimBalanceException('Claim invoice items cannot have a negative balance.');
-        } else if ($amountDue > floatval($this->amount)) {
+        } elseif ($amountDue > floatval($this->amount)) {
             throw new ClaimBalanceException('Claim invoice items cannot have a balance greater than their total amount.');
         }
 

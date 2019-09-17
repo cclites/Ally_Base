@@ -112,8 +112,8 @@ class ClaimInvoiceItemController extends BaseController
     {
         $this->authorize('update', $claim);
 
-        if ($item->remitApplications()->count() > 0) {
-            return new ErrorResponse(412, 'Could not delete this Claim Item because it has one or more remits applied to it.');
+        if ($item->adjustments()->count() > 0) {
+            return new ErrorResponse(412, 'Could not delete this Claim Item because it has one or more adjustments applied to it.');
         }
 
         try {

@@ -26,10 +26,10 @@ class ClaimsQueueResource extends Resource
             'client_name' => empty($claim) ? $this->resource->client->name : ucwords(implode(' ', [$claim->client_first_name, $claim->client_last_name])),
             'balance' => $this->resource->amount - $this->resource->getAmountPaid(),
             'claim' => new ClaimInvoiceResource($claim),
-            'claim_total' => empty($claim) ? 0.00 : $claim->getAmount(),
-            'claim_paid' => empty($claim) ? 0.00 : $claim->getAmountPaid(),
-            'claim_balance' => empty($claim) ? 0.00 : $claim->getAmountDue(),
-            'claim_status' => empty($claim) ? ClaimStatus::NOT_SENT() : $claim->status,
+            'claim_total' => empty($claim) ? null : $claim->getAmount(),
+            'claim_paid' => empty($claim) ? null : $claim->getAmountPaid(),
+            'claim_balance' => empty($claim) ? null : $claim->getAmountDue(),
+            'claim_status' => empty($claim) ? null : $claim->status,
             'claim_date' => empty($claim) ? null : Carbon::parse($claim->created_at)->format('m/d/Y h:i A'),
             'claim_service' => optional($claim)->service
         ]);

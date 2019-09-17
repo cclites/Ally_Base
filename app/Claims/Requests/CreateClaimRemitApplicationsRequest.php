@@ -31,7 +31,7 @@ class CreateClaimRemitApplicationsRequest extends FormRequest
             'applications' => 'required|array',
             'applications.*.is_interest' => 'required|boolean',
             'applications.*.amount_applied' => 'required|numeric|not_in:0|min:-9999999.99|max:9999999.99',
-            'applications.*.application_type' => ['required', new ValidEnum(ClaimRemitApplicationType::class)],
+            'applications.*.adjustment_type' => ['required', new ValidEnum(ClaimRemitApplicationType::class)],
             'applications.*.claim_invoice_item_id' => 'required_unless:applications.*.is_interest,true|exists:claim_invoice_items,id',
         ];
 
@@ -48,7 +48,7 @@ class CreateClaimRemitApplicationsRequest extends FormRequest
         return [
             'applications.required' => 'You have not selected an amount to apply.',
             'applications.*.amount_applied.*' => 'Amount to apply field is required for all selected items.',
-            'applications.*.application_type.*d' => 'Payment type field is required for all selected items.',
+            'applications.*.adjustment_type.*d' => 'Adjustment type field is required for all selected items.',
             'applications.*.claim_invoice_item_id.*' => 'Invalid claim data, please refresh the page and try again.',
         ];
     }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateClaimInvoicesTable extends Migration
+class CreateClaimInvoicesTables extends Migration
 {
     /**
      * Run the migrations.
@@ -37,6 +37,7 @@ class CreateClaimInvoicesTable extends Migration
             $table->string('plan_code', 255)->nullable();
 
             $table->timestamps();
+            $table->timestamp('modified_at')->nullable();
 
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('RESTRICT')->onUpdate('CASCADE');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('RESTRICT')->onUpdate('CASCADE');
@@ -61,8 +62,11 @@ class CreateClaimInvoicesTable extends Migration
         });
 
         Schema::create('claimable_expenses', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
             $table->unsignedInteger('shift_id')->nullable();
+            $table->unsignedInteger('caregiver_id')->nullable();
+            $table->string('caregiver_first_name', 35)->nullable();
+            $table->string('caregiver_last_name', 35)->nullable();
             $table->string('name');
             $table->dateTime('date');
             $table->string('notes')->nullable();
@@ -73,7 +77,7 @@ class CreateClaimInvoicesTable extends Migration
         });
 
         Schema::create('claimable_services', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
             $table->unsignedInteger('shift_id')->nullable();
 
             $table->unsignedInteger('caregiver_id')->nullable();
@@ -121,6 +125,15 @@ class CreateClaimInvoicesTable extends Migration
             $table->foreign('caregiver_id')->references('id')->on('caregivers')->onDelete('RESTRICT')->onUpdate('CASCADE');
             $table->foreign('service_id')->references('id')->on('services')->onDelete('RESTRICT')->onUpdate('CASCADE');
         });
+
+        Schema::create('claim_invoice_status_history', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedBigInteger('claim_invoice_id');
+            $table->string('status', 35)->index();
+            $table->timestamps();
+
+            $table->foreign('claim_invoice_id')->references('id')->on('claim_invoices')->onDelete('restrict')->onUpdate('cascade');
+        });
     }
 
     /**
@@ -130,6 +143,7 @@ class CreateClaimInvoicesTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('claim_invoice_status_history');
         Schema::dropIfExists('claimable_expenses');
         Schema::dropIfExists('claimable_services');
         Schema::dropIfExists('claim_invoice_items');

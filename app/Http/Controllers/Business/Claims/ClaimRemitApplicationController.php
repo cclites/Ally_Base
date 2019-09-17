@@ -1,10 +1,10 @@
 <?php
-namespace App\Http\Controllers\Business\Claims;
 
+namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Requests\CreateClaimRemitApplicationsRequest;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\ClaimRemitApplication;
+use App\Claims\ClaimAdjustment;
 use App\Responses\SuccessResponse;
 use App\Claims\ClaimRemit;
 
@@ -22,17 +22,17 @@ class ClaimRemitApplicationController extends BaseController
     {
         \DB::beginTransaction();
 
-        $applications = $claimRemit->applications()->createMany($request->filtered()['applications']);
+        $adjustments = $claimRemit->adjustments()->createMany($request->filtered()['applications']);
 
-        $applications->each(function (ClaimRemitApplication $application) {
-            $application->load(['claimInvoice', 'claimInvoiceItem']);
+        $adjustments->each(function (ClaimAdjustment $adjustment) {
+            $adjustment->load(['claimInvoice', 'claimInvoiceItem']);
 
-            if ($application->is_interest) {
+            if ($adjustment->is_interest) {
                 return;
             }
 
-            $application->claimInvoiceItem->updateBalance();
-            $application->claimInvoice->updateBalance();
+            $adjustment->claimInvoiceItem->updateBalance();
+            $adjustment->claimInvoice->updateBalance();
         });
 
         $claimRemit->updateBalance();

@@ -127,9 +127,9 @@
                             step="0.01"
                             :disabled="true"
                         />
-                        <b-select name="application_type"
-                            v-model="row.item.application_type"
-                            :options="claimRemitApplicationTypeOptions"
+                        <b-select name="adjustment_type"
+                            v-model="row.item.adjustment_type"
+                            :options="claimAdjustmentTypeOptions"
                             :disabled="form.busy || !row.item.selected"
                             @change="(val) => changeMasterType(row.item, val)"
                         >
@@ -168,9 +168,9 @@
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subAmountChanged(row.item, x)"
                                 />
-                                <b-select name="application_type"
-                                    v-model="row.item.application_type"
-                                    :options="claimRemitApplicationTypeOptions"
+                                <b-select name="adjustment_type"
+                                    v-model="row.item.adjustment_type"
+                                    :options="claimAdjustmentTypeOptions"
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subTypeChanged(row.item, x)"
                                 >
@@ -347,12 +347,12 @@
                     .then( ({ data }) => {
                         this.claims = data.data.map(claim => {
                             claim.selected = false;
-                            claim.application_type = '';
+                            claim.adjustment_type = '';
                             claim.amount_applied = '';
                             claim.items = claim.items.map(item => {
                                 item.selected = false;
                                 item.disabled = false;
-                                item.application_type = '';
+                                item.adjustment_type = '';
                                 item.amount_applied = '';
                                 return item;
                             });
@@ -393,7 +393,7 @@
                         return {
                             claim_invoice_id: claim.id,
                             claim_invoice_item_id: item.id,
-                            application_type: item.application_type,
+                            adjustment_type: item.adjustment_type,
                             amount_applied: item.amount_applied,
                             is_interest: false,
                         };
@@ -405,7 +405,7 @@
                 // Add the interest field.
                 if (this.interest != '' && !isNaN(this.interest)) {
                     this.form.applications.push({
-                        application_type: this.CLAIM_REMIT_APPLICATION_TYPES.INTEREST,
+                        adjustment_type: this.CLAIM_ADJUSTMENT_TYPES.INTEREST,
                         amount_applied: this.interest,
                         is_interest: true,
                     });
@@ -423,13 +423,13 @@
                     // should be set to the full amount and disabled.
                     this.$set(claim, 'items', claim.items.map(item => {
                         item.amount_applied = item.amount_due;
-                        item.application_type = this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT;
+                        item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
                         item.selected = true;
                         item.disabled = true;
                         return item;
                     }));
                     this.$set(claim, 'amount_applied', claim.amount_due);
-                    this.$set(claim, 'application_type', this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT);
+                    this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
                     // Force view of details (sub-items)
                     this.$set(claim, '_showDetails', true);
                 } else {
@@ -437,19 +437,19 @@
                     // all progress from it and it's sub items.
                     this.$set(claim, 'items', claim.items.map(item => {
                         item.amount_applied = '';
-                        item.application_type = '';
+                        item.adjustment_type = '';
                         item.selected = false;
                         item.disabled = false;
                         return item;
                     }));
                     this.$set(claim, 'amount_applied', '');
-                    this.$set(claim, 'application_type', '');
+                    this.$set(claim, 'adjustment_type', '');
                     this.forceRowUpdate(claim.id);
                 }
             },
 
             /**
-             * Handle change to application_type for master items.
+             * Handle change to adjustment_type for master items.
              *
              * @param claim Object
              * @param value String
@@ -460,7 +460,7 @@
                 }
 
                 this.$set(claim, 'items', claim.items.map(item => {
-                    item.application_type = value;
+                    item.adjustment_type = value;
                     return item;
                 }));
             },
@@ -475,12 +475,12 @@
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
                         this.$set(claimItem, 'amount_applied', claimItem.amount_due);
-                        this.$set(claimItem, 'application_type', this.CLAIM_REMIT_APPLICATION_TYPES.PAYMENT);
+                        this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
                     }
                 } else {
                     // Claim items that are not selected should always be empty.
                     this.$set(claimItem, 'amount_applied', '');
-                    this.$set(claimItem, 'application_type', '');
+                    this.$set(claimItem, 'adjustment_type', '');
                 }
 
                 this.forceRowUpdate(claimItem.claim_invoice_id);

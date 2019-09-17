@@ -233,7 +233,7 @@
                     {
                         key: 'amount',
                         label: 'Invoiced Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', false),
+                        formatter: (val) => this.moneyFormat(val, '$', true),
                         sortable: true,
                     },
                     {
@@ -250,19 +250,19 @@
                     {
                         key: 'claim_total',
                         label: 'Claim Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', false),
+                        formatter: (val) => this.moneyFormat(val, '$', true),
                         sortable: true
                     },
                     {
                         key: 'claim_paid',
                         label: 'Amt Paid',
-                        formatter: (val) => this.moneyFormat(val, '$', false),
+                        formatter: (val) => this.moneyFormat(val, '$', true),
                         sortable: true
                     },
                     {
                         key: 'claim_balance',
                         label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val, '$', false),
+                        formatter: (val) => this.moneyFormat(val, '$', true),
                         sortable: true,
                     },
                     {
@@ -363,7 +363,7 @@
                     .then( ({ data }) => {
                         let index = this.items.findIndex(x => x.id == invoice.id);
                         if (index >= 0) {
-                            this.items.splice(index, 1);
+                            this.items.splice(index, 1, data.data);
                         }
                     })
                     .catch(() => {})

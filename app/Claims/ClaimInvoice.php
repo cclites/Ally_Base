@@ -135,7 +135,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    function client()
+    public function client()
     {
         return $this->belongsTo(Client::class);
     }
@@ -151,13 +151,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Get the ClaimRemitApplications relationship.
+     * Get the ClaimAdjustments relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-    public function remitApplications()
+    public function adjustments()
     {
-        return $this->hasMany(ClaimRemitApplication::class);
+        return $this->hasMany(ClaimAdjustment::class);
     }
 
     /**
@@ -211,7 +211,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     // **********************************************************
@@ -372,6 +372,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
                 throw new ClaimTransmissionException('Claim service not supported.');
         }
     }
+
     // **********************************************************
     // STATIC METHODS
     // **********************************************************
@@ -390,7 +391,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (!$lastName) {
+        if (! $lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;
@@ -402,5 +403,4 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
 
         return "${businessId}-${nextId}";
     }
-
 }

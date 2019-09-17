@@ -6,25 +6,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\AuditableModel;
 
 /**
- * App\Claims\ClaimRemitApplication
+ * App\Claims\ClaimAdjustment
  *
  * @property int $id
  * @property int $claim_remit_id
  * @property int|null $claim_invoice_id
  * @property int|null $claim_invoice_item_id
- * @property string $application_type
+ * @property string $adjustment_type
  * @property float $amount_applied
  * @property int $is_interest
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Claims\ClaimInvoice|null $claimInvoice
  * @property-read \App\Claims\ClaimInvoiceItem|null $claimInvoiceItem
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemitApplication query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimAdjustment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimAdjustment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimAdjustment query()
  * @mixin \Eloquent
  */
-class ClaimRemitApplication extends AuditableModel
+class ClaimAdjustment extends AuditableModel
 {
     use SoftDeletes;
 
@@ -82,6 +82,16 @@ class ClaimRemitApplication extends AuditableModel
     public function claimInvoiceItem()
     {
         return $this->belongsTo(ClaimInvoiceItem::class);
+    }
+
+    /**
+     * Get the ClaimRemit relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function remit()
+    {
+        return $this->belongsTo(ClaimRemit::class, 'claim_remit_id');
     }
 
     // **********************************************************

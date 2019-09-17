@@ -24,7 +24,7 @@ use App\Business;
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimRemitApplication[] $applications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimAdjustment[] $adjustments
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Billing\Payer|null $payer
@@ -100,13 +100,13 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * Get the ClaimRemitApplication relationship.
+     * Get the ClaimAdjustment relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-    public function applications()
+    public function adjustments()
     {
-        return $this->hasMany(ClaimRemitApplication::class);
+        return $this->hasMany(ClaimAdjustment::class);
     }
 
     // **********************************************************
@@ -238,14 +238,14 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
 
     /**
      * Calculate the balance of the ClaimRemit by adding up
-     * all of it's applications.
+     * all of it's adjustments.
      *
      * @return void
      * @throws ClaimBalanceException
      */
     public function updateBalance() : void
     {
-        $totalApplied = $this->applications->reduce(function ($carry, $application) {
+        $totalApplied = $this->adjustments->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));
 

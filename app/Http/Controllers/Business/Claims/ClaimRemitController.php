@@ -123,7 +123,7 @@ class ClaimRemitController extends BaseController
             $updatedItems = collect([]);
             $updatedClaims = collect([]);
             // Soft-delete all related payments.
-            foreach ($claimRemit->applications as $item) {
+            foreach ($claimRemit->adjustments as $item) {
                 $updatedItems->push($item->claimInvoiceItem);
                 $updatedClaims->push($item->claimInvoice);
                 $item->delete();
