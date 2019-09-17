@@ -5,7 +5,7 @@
                 <h1>Claim #{{ claim.name }}</h1>
                 <div class="ml-auto">
                     <div class="text-right mb-2">
-                        <b-btn variant="info" :href="`/business/claims/${claim.id}/`" target="_blank"><i class="fa fa-print mr-2" />Print</b-btn>
+                        <b-btn variant="info" :href="`/business/claims/${claim.id}/print`" target="_blank"><i class="fa fa-print mr-2" />Print</b-btn>
                     </div>
                     <strong>Last Modified:</strong>
                     {{ claim.modified_at ? formatDateTimeFromUTC(claim.modified_at) : 'Never' }}

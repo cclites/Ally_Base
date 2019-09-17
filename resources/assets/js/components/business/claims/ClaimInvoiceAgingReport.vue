@@ -53,7 +53,7 @@
                                 :footClone="footClone"
                             >
                                 <template slot="claim_name" scope="row">
-                                    <a :href="`/business/claims/${row.item.claim_id}`" target="_blank">{{ row.item.claim_name }}</a>
+                                    <a :href="`/business/claims/${row.item.claim_id}/print`" target="_blank">{{ row.item.claim_name }}</a>
                                 </template>
                                 <template slot="invoice_name" scope="row">
                                     <a :href="`/business/client/invoices/${row.item.invoice_id}`" target="_blank">{{ row.item.invoice_name }}</a>
