@@ -115,7 +115,7 @@
                 <template slot="actions" scope="row" class="text-nowrap">
                     <!-- CREATE BUTTON -->
                     <div v-if="! row.item.claim">
-                        <b-btn variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy || row.item.id === creatingId" size="sm">
+                        <b-btn variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy || creatingId != null" size="sm">
                             <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner" />&nbsp;Create Claim
                         </b-btn>
                     </div>
