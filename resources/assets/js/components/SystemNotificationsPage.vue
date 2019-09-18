@@ -1,24 +1,29 @@
 <template>
     <b-card
-        :header="title"
+        header="System Notifications"
         header-text-variant="white"
         header-bg-variant="info"
-        >
+    >
         <div class="d-flex mb-2">
+            <div class="f-1">
+                <b-form-checkbox v-model="show_acknowledged" unchecked-value="0" value="1">
+                    Show Acknowledged Notifications
+                </b-form-checkbox>
+            </div>
             <div class="ml-auto">
                 <b-button variant="primary" @click="acknowledgeAll()">Acknowledge All My Notifications</b-button>
             </div>
         </div>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
+                :items="itemProvider"
+                :fields="fields"
+                :current-page="currentPage"
+                :per-page="perPage"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :busy="loading"
+                ref="table"
             >
                 <template slot="actions" scope="row">
                     <b-btn size="sm" :href="'/business/notifications/' + row.item.id">Details</b-btn>
@@ -44,24 +49,15 @@
     export default {
         mixins: [FormatsDates],
 
-        props: {
-            'notifications': {
-                default() {
-                    return [];
-                }
-            },
-            'title': String,
-            'hideAcknowledged': Number,
-        },
-
         data() {
             return {
+                loading: false,
+                show_acknowledged: 0,
                 totalRows: 0,
                 perPage: 25,
                 currentPage: 1,
                 sortBy: 'created_at',
                 sortDesc: true,
-                filter: null,
                 selectedItem: {},
                 fields: [
                     {
@@ -84,47 +80,67 @@
                         key: 'acknowledged_at',
                         label: 'Acknowledged',
                         sortable: false,
-                        formatter: (val) => val ? this.formatDateTimeFromUTC(val) : null,
+                        formatter: (val) => val ? this.formatDateTimeFromUTC(val) : '-',
                     },
                     {
                         key: 'actions',
                         class: 'hidden-print'
                     }
                 ],
-                items: this.notifications,
-
             }
         },
 
         mounted() {
-            if (this.hideAcknowledged) {
-                Vue.delete(this.fields, 3);
-            }
-            this.totalRows = this.items.length;
+            this.loadTable();
+        },
+
+        render() {
+            console.log('render');
         },
 
         computed: {
-
+            listUrl() {
+                return `/business/notifications?json=1&acknowledged=${this.show_acknowledged}`;
+            },
         },
 
         methods: {
-            onFiltered(filteredItems) {
-                // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length;
-                this.currentPage = 1;
+            loadTable() {
+                this.$refs.table.refresh();
             },
 
-            formatType(str) {
-                return str.replace("App\\", "");
+            itemProvider(ctx) {
+                this.loading = true;
+
+                let sort = ctx.sortBy == null ? 'created_at' : ctx.sortBy;
+                let desc = ctx.sortDesc == true ? '1' : '0';
+                return axios.get(this.listUrl + `&page=${ctx.currentPage}&per_page=${ctx.perPage}&sort=${sort}&desc=${desc}`)
+                    .then( ({ data }) => {
+                        this.totalRows = data.total;
+                        return data.results || [];
+                    })
+                    .catch(() => {
+                        return [];
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
             },
 
             acknowledgeAll() {
                 let form = new Form({});
                 form.post(`notifications/acknowledge-all`)
                     .then(() => {
+                        this.loadTable();
                     })
                     .catch(() => {});
             },
-        }
+        },
+
+        watch: {
+            show_acknowledged(newValue, oldValue) {
+                this.loadTable();
+            }
+        },
     }
 </script>
