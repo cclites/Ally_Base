@@ -389,6 +389,7 @@ Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'
 Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
 Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
+Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
 
 Vue.component('payer-dropdown-filter', require('./components/filters/PayerDropdownFilter'));
 

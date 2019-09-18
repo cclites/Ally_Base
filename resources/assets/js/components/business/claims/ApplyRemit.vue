@@ -28,7 +28,9 @@
                         <td><strong>Total Amount</strong></td>
                         <td>{{ moneyFormat(remit.amount) }}</td>
                         <td><strong>Amount Applied</strong></td>
-                        <td>{{ moneyFormat(remit.amount_applied) }}</td>
+                        <td>
+                            <a :href="`/business/claim-remits/${remit.id}`" target="_blank">{{ moneyFormat(remit.amount_applied) }}</a>
+                        </td>
                     </tr>
                 </tbody>
             </table>

@@ -63,6 +63,13 @@ class ClaimInvoiceItem extends AuditableModel
     protected $appends = [];
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['date'];
+
+    /**
      * The "booting" method of the model.
      *
      * @return void
@@ -193,8 +200,29 @@ class ClaimInvoiceItem extends AuditableModel
         }
 
         return [
-            $this->claimable->visit_start_time->setTimezone($timezone)->toDateTimeString(),
-            $this->claimable->visit_end_time->setTimezone($timezone)->toDateTimeString(),
+            $this->claimable->visit_start_time->setTimezone($timezone),
+            $this->claimable->visit_end_time->setTimezone($timezone),
         ];
+    }
+
+    public function getItemSummary(string $timezone = null) : string
+    {
+        if (empty($timezone)) {
+            $timezone = $this->claim->business->getTimezone();
+        }
+
+        // Service CODE - Caregiver - 1/23/19 1:00 PM - 3:00 PM
+        list($start, $end) = $this->getServiceTimes($timezone);
+
+        $time = '';
+        if (filled($start) && filled($end)) {
+            $time = ' ' . $start->format('g:i A') . ' - ' . $end->format('g:i A');
+        }
+
+        $service = $this->claimable->getName();
+        $caregiver = $this->claimable->getCaregiverName();
+        $date = $this->date->setTimezone($timezone)->format('m/d/y');
+
+        return "$service - $caregiver - $date{$time}";
     }
 }

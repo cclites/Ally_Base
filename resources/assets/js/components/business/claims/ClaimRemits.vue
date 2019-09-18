@@ -82,8 +82,14 @@
                 :filter="filter"
                 :empty-text="emptyText"
             >
+                <template slot="amount_applied" scope="row">
+                    <span v-if="!row.item.amount_applied || row.item.amount_applied == 0">
+                        {{ moneyFormat(row.item.amount_applied) }}
+                    </span>
+                    <a v-else :href="`/business/claim-remits/${row.item.id}`" target="_blank">{{ moneyFormat(row.item.amount_applied) }}</a>
+                </template>
                 <template slot="actions" scope="row">
-                    <b-btn variant="success" size="sm" class="mb-1 mr-1" :href="`/business/claim-remits/${row.item.id}`">Apply</b-btn>
+                    <b-btn variant="success" size="sm" class="mb-1 mr-1" :href="`/business/claim-remit-applications/${row.item.id}`">Apply</b-btn>
                     <b-btn variant="secondary" size="sm" class="mb-1 mr-1" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
                     <b-btn variant="danger" size="sm" class="mb-1 mr-1" @click="destroy(row.item)" :disabled="!!deletingId">
                         <i v-if="deletingId == row.item.id" class="fa fa-spinner fa-spin" />
@@ -141,6 +147,7 @@
                     payer_name: { label: 'Payer', sortable: true, formatter: x => x ? x : '-' },
                     reference: { sortable: true, label: 'Reference #' },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
+                    amount_applied: { sortable: true },
                     amount_available: { sortable: true, formatter: x => this.moneyFormat(x) },
                     status: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitStatusOptions) },
                     created_at: { sortable: true, label: 'Date Added', formatter: x => this.formatDateFromUTC(x) },

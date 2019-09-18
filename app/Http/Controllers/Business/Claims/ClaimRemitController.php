@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business\Claims;
 use App\Claims\ClaimRemitType;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Requests\UpdateClaimRemitRequest;
+use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\CreateClaimRemitRequest;
@@ -93,9 +94,12 @@ class ClaimRemitController extends BaseController
     {
         $this->authorize('view', $claimRemit);
 
-        $init = ['remit' => new ClaimRemitResource($claimRemit)];
+        $init = [
+            'remit' => new ClaimRemitResource($claimRemit),
+            'adjustments' => ClaimAdjustmentResource::collection($claimRemit->adjustments),
+        ];
 
-        return view_component('apply-remit-page', 'Apply Remit', compact('init'), [
+        return view_component('remit-application-history', 'Remit Application History', compact('init'), [
             'Home' => '/',
             'Claim Remits' => route('business.claim-remits.index'),
         ]);
