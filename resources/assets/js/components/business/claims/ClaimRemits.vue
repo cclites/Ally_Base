@@ -44,12 +44,7 @@
                             <option value="">-- Any Status --</option>
                         </template>
                     </b-form-select>
-                    <b-form-select v-model="filters.payer_id" class="mr-1 mt-1">
-                        <option value="">-- Any Payer --</option>
-                        <option value="0">(Client)</option>
-                        <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                        </option>
-                    </b-form-select>
+                    <payer-dropdown-filter v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --" />
                     <b-input
                         v-model="filters.reference"
                         placeholder="Reference #"
@@ -113,7 +108,6 @@
                 ref="remit-form"
                 @close="hideEdit()"
                 :remit="remit"
-                :payers="payers"
                 @added="fetch()"
                 @updated="fetch()"
             />
@@ -163,7 +157,6 @@
                     status: '',
                     json: 1,
                 }),
-                payers: [],
                 showEditModal: false,
                 deletingId: null,
             }
@@ -196,16 +189,6 @@
                         this.$store.commit('claims/setRemits', data.data);
                     })
                     .catch(() => {});
-            },
-
-            async fetchPayers() {
-                await axios.get(`/business/dropdown/payers`)
-                    .then( ({ data }) => {
-                        this.payers = data;
-                    })
-                    .catch(() => {
-                        this.payers = [];
-                    });
             },
 
             edit(item) {
@@ -243,7 +226,6 @@
 
         async mounted() {
             this.loading = true;
-            await this.fetchPayers();
             this.loading = false;
 
             this.filters.businesses = '';

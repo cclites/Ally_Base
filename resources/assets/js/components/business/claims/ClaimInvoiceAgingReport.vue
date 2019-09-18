@@ -19,12 +19,7 @@
                         </option>
                     </b-form-select>
 
-                    <b-form-select v-model="form.payer_id" class="mr-1 mt-1" :disabled="loading">
-                        <option value="">-- All Payers --</option>
-                        <option value="0">(Client)</option>
-                        <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                        </option>
-                    </b-form-select>
+                    <payer-dropdown-filter v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
 
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
@@ -129,7 +124,6 @@
             return {
                 loading: false,
                 clients: [],
-                payers: [],
                 form: new Form({
                     businesses: '',
                     client_id: '',
@@ -177,17 +171,6 @@
                     })
             },
 
-            async fetchPayers() {
-                this.payers = [];
-                await axios.get('/business/payers?json=1')
-                    .then( ({ data }) => {
-                        if (Array.isArray(data)) {
-                            this.payers = data;
-                        }
-                    })
-                    .catch(() => {});
-            },
-
             async loadClients() {
                 this.clients = [];
                 await axios.get('/business/clients?json=1')
@@ -205,7 +188,6 @@
         async mounted() {
             this.loading = true;
             await this.loadClients();
-            await this.fetchPayers();
             this.loading = false;
         },
     }

@@ -52,13 +52,8 @@
                 />
 
                 <b-form-group label="Payer" label-for="payer_id">
-                    <b-select name="payer_id" id="payer_id" v-model="form.payer_id" :disabled="form.busy">
-                        <option :value="null">-- Select a Payer --</option>
-                        <option v-for="payer in payers" :key="payer.id" :value="payer.id">{{ payer.name }}</option>
-                        <template slot="first">
-                        </template>
-                    </b-select>
-                    <input-help :form="form" field="payer_id" text=""></input-help>
+                    <payer-dropdown-filter v-model="form.payer_id" :disabled="form.busy" />
+                    <input-help :form="form" field="payer_id" text="" />
                 </b-form-group>
 
                 <b-form-group label="Notes" label-for="notes">
@@ -104,11 +99,6 @@
                 type: Object,
                 default: () => {},
             },
-            payers: {
-                type: Array,
-                default: () => [],
-                required: true,
-            },
         },
 
         data() {
@@ -118,7 +108,7 @@
                     business_id: '',
                     date: moment().format('MM/DD/YYYY'),
                     payment_type: '',
-                    payer_id: null,
+                    payer_id: '',
                     reference: '',
                     amount: 0.00,
                     notes: '',

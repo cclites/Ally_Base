@@ -31,13 +31,9 @@
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
-                        <b-form-select v-model="payerFilter" class="mr-1 mt-1">
-                            <option v-if="loadingPayers" selected>Loading...</option>
-                            <option v-else value="">-- Select a Payer --</option>
-                            <option value="0">(Client)</option>
-                            <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                            </option>
-                        </b-form-select>
+
+                        <payer-dropdown-filter v-model="payerFilter" class="mr-1 mt-1" />
+
                         <b-form-select
                             id="invoiceType"
                             name="invoiceType"
@@ -289,10 +285,8 @@
                 loadingClients: false,
                 clients: [],
                 clientFilter: '',
-                payers: [],
                 payerFilter: '',
                 businesses: '',
-                loadingPayers: false,
                 paymentModal: false,
                 form: new Form({
                     type: '',
@@ -467,20 +461,6 @@
                     });
             },
 
-            async fetchPayers() {
-                this.loadingPayers = true;
-                await axios.get(`/business/dropdown/payers`)
-                    .then( ({ data }) => {
-                        this.payers = data;
-                    })
-                    .catch(() => {
-                        this.payers = [];
-                    })
-                    .finally(() => {
-                        this.loadingPayers = false;
-                    });
-            },
-
             async fetchClients() {
                 this.loadingClients = true;
                 await axios.get(`/business/dropdown/clients`)
@@ -488,7 +468,7 @@
                         this.clients = data;
                     })
                     .catch(() => {
-                        this.payers = [];
+                        this.clients = [];
                     })
                     .finally(() => {
                         this.loadingClients = false;
@@ -498,7 +478,6 @@
 
         async mounted() {
             await this.fetchClients();
-            await this.fetchPayers();
 
             // load filters from query
             let autoLoad = false;
@@ -529,12 +508,6 @@
     table:not(.form-check) {
         font-size: 14px;
     }
-    .fa-check-square-o {
-        color: green;
-    }
-    .fa-times-rectangle-o {
-        color: darkred;
-    }
     .claim-dropdown button {
         font-weight: 700;
         letter-spacing: 3px;
@@ -543,5 +516,4 @@
         border: none;
         margin: 0;
     }
-
 </style>

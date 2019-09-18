@@ -57,12 +57,9 @@
                 class="mr-1 mt-1"
                 :allow-all="true"
             />
-            <b-form-select v-model="filters.payer_id" class="mr-1 mt-1">
-                <option value="">-- Any Payer --</option>
-                <option value="0">(Client)</option>
-                <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                </option>
-            </b-form-select>
+
+            <payer-dropdown-filter v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
+
             <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
                 <option value="">-- All Clients --</option>
                 <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
@@ -323,7 +320,6 @@
                     claim_status: 'unpaid',
                     json: 1,
                 }),
-                payers: [],
                 clients: [],
                 isScrolling: false,
                 interest: '',
@@ -607,19 +603,6 @@
             },
 
             /**
-             * Fetch data the Payers dropdown resource.
-             */
-            async fetchPayers() {
-                await axios.get(`/business/dropdown/payers`)
-                    .then( ({ data }) => {
-                        this.payers = data;
-                    })
-                    .catch(() => {
-                        this.payers = [];
-                    });
-            },
-
-            /**
              * Handle tracking of window scroll event
              */
             handleScroll () {
@@ -628,7 +611,6 @@
         },
 
         async mounted() {
-            await this.fetchPayers();
             await this.fetchClients();
 
             // Set default filters
