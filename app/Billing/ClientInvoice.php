@@ -6,6 +6,7 @@ use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Events\InvoiceablePaymentAdded;
 use App\Billing\Events\InvoiceablePaymentRemoved;
 use App\Billing\Events\InvoiceableUninvoiced;
+use App\Claims\ClaimInvoice;
 use App\Client;
 use App\QuickbooksClientInvoice;
 use Illuminate\Support\Collection;
@@ -101,6 +102,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     public function claim()
     {
         return $this->hasOne(Claim::class);
+    }
+
+    public function claimInvoice()
+    {
+        return $this->hasOne( ClaimInvoice::class );
     }
 
     /**

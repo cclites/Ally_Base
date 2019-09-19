@@ -1,5 +1,5 @@
 <template>
-    <b-form-group :label="localLabel" v-show="showGroup" :class="{'debug-mode': locationCount < 2 && debugMode}" style="position: relative;">
+    <b-form-group :label="localLabel" v-show="showGroup" :class="{'debug-mode': locationCount < 2 && debugMode}" style="position: relative;" :label-class="required ? 'required' : ''">
         <!-- Debug Notice Allowing Developers to Manually Hide This Form Group To Mimic Single Business Registries -->
         <div class="debug-notice" v-if="debugMode && !hideDebugNotice">
             <span class="hidden-xs-down">This is hidden on production for single business registries.</span><br />
@@ -18,7 +18,7 @@
     export default {
         name: "BusinessLocationFormGroup",
         components: {BusinessLocationSelect},
-        props: ['label', 'name', 'form', 'field', 'value', 'helpText', 'allowAll'],
+        props: ['label', 'name', 'form', 'field', 'value', 'helpText', 'allowAll', 'required'],
         computed: {
             localLabel() {
                 return this.label || this.label === null ? this.label : "Office Location";

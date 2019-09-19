@@ -16,6 +16,7 @@ use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
+use App\Contracts\HasTimezone;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
@@ -170,7 +171,7 @@ use App\Data\ScheduledRates;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  * @property int $quickbooks_service_id
  */
-class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
+class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface, HasTimezone
 {
     use BelongsToOneBusiness;
     use HasAllyFeeTrait;
@@ -195,7 +196,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         parent::boot();
         self::recalculateDurationOnChange();
-        self::deleted(function(Shift $shift) {
+        self::deleted(function (Shift $shift) {
             event(new ShiftDeleted($shift));
         });
     }
@@ -332,11 +333,12 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
     public function clientSignature()
     {
-        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'client' );
+        return $this->morphOne(Signature::class, 'signable')->where('meta_type', 'client');
     }
+
     public function caregiverSignature()
     {
-        return $this->morphOne(Signature::class, 'signable')->where( 'meta_type', 'caregiver' );
+        return $this->morphOne(Signature::class, 'signable')->where('meta_type', 'caregiver');
     }
 
     public function statusHistory()
@@ -406,7 +408,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->belongsTo(Service::class);
     }
 
-
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -457,7 +458,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function setCheckedInTimeAttribute($value)
     {
-        if (!$this->checked_in_time || $this->checked_in_time->copy()->second(0) != $value) {
+        if (! $this->checked_in_time || $this->checked_in_time->copy()->second(0) != $value) {
             $this->attributes['checked_in_time'] = $value;
         }
     }
@@ -468,7 +469,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function setCheckedOutTimeAttribute($value)
     {
-        if (!$this->checked_out_time || $this->checked_out_time->copy()->second(0) != $value) {
+        if (! $this->checked_out_time || $this->checked_out_time->copy()->second(0) != $value) {
             $this->attributes['checked_out_time'] = $value;
         }
     }
@@ -512,7 +513,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function addData(ShiftDataInterface ...$dataObjects): void
     {
-        foreach($dataObjects as $data) {
+        foreach ($dataObjects as $data) {
             $this->fill($data->toArray());
         }
     }
@@ -533,12 +534,12 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function syncServices(iterable $services)
     {
         $savedIds = [];
-        foreach($services as $data) {
+        foreach ($services as $data) {
             $service = null;
             if (isset($data['id'])) {
                 $service = $this->services()->find($data['id']);
             }
-            if (!$service) {
+            if (! $service) {
                 $service = new ShiftService();
             }
 
@@ -576,11 +577,25 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function duration($forceRecalculation = false)
     {
-        if (!$forceRecalculation && $this->hours) {
+        if (! $forceRecalculation && $this->hours) {
             return $this->hours;
         }
 
         return app(DurationCalculator::class)->getDuration($this);
+    }
+
+    /**
+     * Get the scheduled start time of the shift.
+     *
+     * @return Carbon|null
+     */
+    public function scheduledStartTime()
+    {
+        if (filled($this->schedule)) {
+            return $this->schedule->getStartDateTime()->setTimezone('UTC');
+        }
+
+        return $this->checked_in_time;
     }
 
     /**
@@ -600,12 +615,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function scheduledEndTime()
     {
-        if (!$this->schedule) {
-            // Return now if no schedule
-            return Carbon::now();
+        if (filled($this->schedule)) {
+            return $this->schedule->getEndDateTime()->setTimezone('UTC');
         }
 
-        return $this->schedule->getEndDateTime();
+        if (filled($this->checked_out_time)) {
+            return $this->checked_out_time;
+        }
+
+        // Return now if no schedule and still clocked in.
+        return Carbon::now();
     }
 
     /**
@@ -615,11 +634,15 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function remaining()
     {
-        if ($this->checked_out_time) return 0;
+        if ($this->checked_out_time) {
+            return 0;
+        }
         $end = $this->scheduledEndTime();
         $now = Carbon::now();
 
-        if ($now >= $end) return 0;
+        if ($now >= $end) {
+            return 0;
+        }
         return round($now->diffInMinutes($end) / 60, 2);
     }
 
@@ -701,7 +724,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function syncIssues($issues)
     {
         $new = collect($issues)->filter(function ($item) {
-            return !isset($item['id']);
+            return ! isset($item['id']);
         });
 
         $existing = collect($issues)->filter(function ($item) {
@@ -863,11 +886,12 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
     }
 
-
     /**
+     * Get the shift's timezone.
+     *
      * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
         return Timezone::getTimezone($this->business_id);
     }
@@ -882,8 +906,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'rate' => $this->other_expenses,
                 'notes' => str_limit($this->other_expenses_desc, 253, '..'),
             ]);
-        }
-        else if ($this->other_expenses < 0) {
+        } elseif ($this->other_expenses < 0) {
             return ShiftExpense::create([
                 'shift_id' => $this->id,
                 'name' => 'Expense Adjustment',
@@ -927,12 +950,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             ->get();
 
         $collection = new Collection();
-        foreach($shifts as $shift) {
+        foreach ($shifts as $shift) {
             $expense = $shift->breakOutExpenses();
-            if ($expense) $collection->push($expense);
+            if ($expense) {
+                $collection->push($expense);
+            }
 
             $mileage = $shift->breakOutMileage();
-            if ($mileage) $collection->push($mileage);
+            if ($mileage) {
+                $collection->push($mileage);
+            }
 
             if ($shift->services->count()) {
                 $collection = $collection->merge($shift->services);
@@ -981,7 +1008,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         $name = optional($this->client)->name() . ' - ' . optional($this->caregiver)->name();
 
-        switch($invoiceModel) {
+        switch ($invoiceModel) {
             case ClientInvoice::class:
                 $name = optional($this->caregiver)->name();
                 break;
@@ -1093,7 +1120,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 return 0;
             }
             return $this->duration(true);
-        } else if ($this->services->isNotEmpty()) {
+        } elseif ($this->services->isNotEmpty()) {
             // service breakout shift
             $services = $this->services;
 
@@ -1174,7 +1201,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
         if (filled($this->services)) {
             $serviceIds = $this->services->pluck('service_id')->toArray();
-        } else if (empty($this->service_id)) {
+        } elseif (empty($this->service_id)) {
             return [];
         }
 
@@ -1340,5 +1367,4 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             $q->whereIn('flag', $flags);
         });
     }
-
 }

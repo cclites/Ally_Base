@@ -50,7 +50,17 @@ class DropdownResourceController extends BaseController
 
     protected function caregivers(Request $request)
     {
-        $caregivers = new CaregiverDropdownResource(Caregiver::forBusinesses([$request->business])->active()->get());
+        $query = Caregiver::forBusinesses([$request->business]);
+
+        if ($request->active == 'all') {
+            // no active scope
+        } else if ($request->active == '0') {
+            $query->inactive();
+        } else {
+            $query->active();
+        }
+
+        $caregivers = new CaregiverDropdownResource($query->get());
         return response()->json($caregivers);
     }
 

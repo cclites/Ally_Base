@@ -8,6 +8,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\View\Html\HtmlInvoiceView;
 use App\Billing\View\Html\PdfInvoiceView;
+use App\Claims\ClaimInvoice;
 
 /**
  * Class InvoiceViewFactory
@@ -22,13 +23,16 @@ class InvoiceViewFactory
     const PDF_VIEW = "pdf";
 
     private static $invoiceTypes = [
+
         CaregiverInvoice::class,
         ClientInvoice::class,
         BusinessInvoice::class,
         Claim::class,
+        ClaimInvoice::class
     ];
 
     private static $viewTypes = [
+
         self::HTML_VIEW,
         self::PDF_VIEW,
     ];
@@ -52,6 +56,9 @@ class InvoiceViewFactory
                 break;
             case Claim::class:
                 $view = 'invoices.claim_invoice';
+                break;
+            case ClaimInvoice::class:
+                $view = 'invoices.claim_invoice_template';
                 break;
             default:
                 $view = 'invoices.client_invoice' . ($batch ? '_nude' : '');

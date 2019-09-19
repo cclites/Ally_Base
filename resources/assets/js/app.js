@@ -71,6 +71,7 @@ Vue.component('confirm-modal', require('./components/modals/ConfirmModal'));
 Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
+Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -383,7 +384,13 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
-
+/* Claims */
+Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
+Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
+Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
+Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
+Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
+Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
