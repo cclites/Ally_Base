@@ -30,7 +30,7 @@ class ClaimInvoiceItemResource extends Resource
             'related_shift_id' => optional($this->resource->claimable)->shift_id,
             'claimable' => $this->mapClaimable(),
             'invoiceable' => $this->resource->invoiceable,
-            'date' => $this->resource->date,
+            'date' => optional($this->resource->date)->toDateTimeString(),
             'claimable_id' => $this->resource->claimable_id,
             'claimable_type' => $this->resource->claimable_type,
             'type' => $this->type,
