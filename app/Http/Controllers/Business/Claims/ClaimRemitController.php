@@ -26,7 +26,9 @@ class ClaimRemitController extends BaseController
         if ($request->forJson()) {
             $filters = $request->filtered();
 
-            $query = ClaimRemit::forRequestedBusinesses();
+            $query = ClaimRemit::with('business')
+                ->withCount('adjustments')
+                ->forRequestedBusinesses();
 
             if ($filters['all']) {
                 // Show all with a balance.
@@ -127,8 +129,12 @@ class ClaimRemitController extends BaseController
             $updatedClaims = collect([]);
             // Soft-delete all related payments.
             foreach ($claimRemit->adjustments as $item) {
-                $updatedItems->push($item->claimInvoiceItem);
-                $updatedClaims->push($item->claimInvoice);
+                if (filled($item->claimInvoiceItem)) {
+                    $updatedItems->push($item->claimInvoiceItem);
+                }
+                if (filled($item->claimInvoice)) {
+                    $updatedClaims->push($item->claimInvoice);
+                }
                 $item->delete();
             }
 

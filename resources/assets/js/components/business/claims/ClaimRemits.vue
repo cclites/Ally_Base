@@ -83,7 +83,7 @@
                 :empty-text="emptyText"
             >
                 <template slot="amount_applied" scope="row">
-                    <span v-if="!row.item.amount_applied || row.item.amount_applied == 0">
+                    <span v-if="row.item.adjustments_count == 0">
                         {{ moneyFormat(row.item.amount_applied) }}
                     </span>
                     <a v-else :href="`/business/claim-remits/${row.item.id}`" target="_blank">{{ moneyFormat(row.item.amount_applied) }}</a>
