@@ -54,9 +54,9 @@ class CaregiverLicenseController extends BaseController
         $license = new CaregiverLicense( $data );
         if ( $caregiver->licenses()->save( $license ) ) {
 
-            return new SuccessResponse( 'The license has been added.', $license->toArray() );
+            return new SuccessResponse( 'Action Successful.', $license->toArray() );
         }
-        return new ErrorResponse( 500, 'The license could not be saved.' );
+        return new ErrorResponse( 500, 'Action Unsuccessful.' );
     }
 
     public function saveMany( SaveCaregiverExpirationsRequest $request, Caregiver $caregiver )

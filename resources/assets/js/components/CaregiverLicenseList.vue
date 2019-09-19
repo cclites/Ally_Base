@@ -10,6 +10,7 @@
 
                 <b-btn @click="createLicense()" variant="info" style="flex:1" class="my-1 d-flex d-sm-inline-block" :disabled=" alreadyCreating ">Add Custom Expiration ( this caregiver only )</b-btn>
                 <b-btn to="/business/settings#expirations" variant="success" style="flex:1" class="my-1 d-flex d-sm-inline-block">Manage Default Expirations</b-btn>
+                <b-form-checkbox class="m-0 vertical-center" v-model=" hide_inapplicables ">Hide any expirations inapplicable to the caregiver</b-form-checkbox>
             </b-col>
             <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
 
@@ -21,7 +22,7 @@
 
             <b-table bordered striped hover show-empty
                 :busy="loading"
-                :items=" chainExpirations "
+                :items=" filteredExpirations "
                 :fields="fields"
                 :current-page="currentPage"
                 :filter="filter"
@@ -36,7 +37,7 @@
                         v-model=" row.item.name "
                         @change.native=" addToUpdateList( row.item ) "
                     ></b-form-input>
-                    <p class="mb-0" v-else>
+                    <p class="mb-0" :class=" row.item.applicable ? '' : 'text-muted' " v-else>
 
                         {{ row.item.name }}
                     </p>
@@ -44,6 +45,7 @@
                 <template slot="description" scope="row">
 
                     <b-form-input
+                        v-if=" row.item.applicable "
                         v-model=" row.item.description "
                         :state=" nameState( row.item.description ) "
                         @change.native=" addToUpdateList( row.item ) "
@@ -55,23 +57,42 @@
                 </template>
                 <template slot="expires_sort" scope="row">
                     <date-picker
+                        v-if=" row.item.applicable "
                         v-model=" row.item.expires_at "
                         @input=" addToUpdateList( row.item ) "
                     ></date-picker>
+                </template>
+                <template slot="updated_at" scope="row">
+
+                    <p class="mb-0 text-center" :class=" row.item.applicable ? '' : 'text-muted' ">
+
+                        {{ row.item.updated_at }}
+                    </p>
                 </template>
                 <template slot="actions" scope="row">
 
                     <transition name="slide-fade" mode="out-in">
 
-                        <div class="d-flex align-items-center justify-content-center" v-if=" row.item.id " :key=" 'first' ">
-
-                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn> -->
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) "><i class="fa fa-trash"></i></b-btn>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-center" v-else :key=" 'second' ">
+                        <div class="d-flex align-items-center justify-content-center" v-if=" !row.item.applicable " :key=" 'fourth' ">
 
                             <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn> -->
-                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" removeNew " v-if=" row.item.isNew && alreadyCreating "><i class="fa fa-trash"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" toggleApplicable( row.item ) " title="Mark Applicable for this Caregiver" v-b-tooltip.hover><i class="fa fa-eye"></i></b-btn>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center" v-else-if=" row.item.id " :key=" 'first' ">
+
+                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:1" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Update</b-btn> -->
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" deleteLicense( row.item ) " title="Remove Expiration" v-b-tooltip.hover><i class="fa fa-trash"></i></b-btn>
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" v-if=" row.item.chain_expiration_type_id " @click=" toggleApplicable( row.item ) " title="Mark Unapplicable for this Caregiver" v-b-tooltip.hover><i class="fa fa-times"></i></b-btn>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center" v-else-if=" row.item.isNew && alreadyCreating " :key=" 'second' ">
+
+                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn> -->
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" removeNew " title="Remove Expiration" v-b-tooltip.hover><i class="fa fa-trash"></i></b-btn>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center" v-else-if=" row.item.applicable " :key=" 'third' ">
+
+                            <!-- <b-btn :disabled=" row.item.isLoading " style="max-width: 60px; flex:3" class="mx-1" size="sm" @click=" saveLicense( row.item ) " variant="info">Create</b-btn> -->
+                            <b-btn :disabled=" row.item.isLoading " style="max-width: 30px; flex:1" class="mx-1" size="sm" @click=" toggleApplicable( row.item ) " title="Mark Unapplicable for this Caregiver" v-b-tooltip.hover><i class="fa fa-times"></i></b-btn>
                         </div>
                     </transition>
                 </template>
@@ -98,6 +119,7 @@
         data() {
             return {
 
+                hide_inapplicables : true,
                 updateList : [],
                 loading: false,
                 perPage: 25,
@@ -153,11 +175,40 @@
             alreadyCreating(){
 
                 return !!this.chainExpirations.find( exp => exp.isNew );
+            },
+
+            filteredExpirations(){
+
+                return this.chainExpirations.filter( exp => {
+
+                    return this.hide_inapplicables ? exp.applicable : exp;
+                });
             }
         },
 
         methods: {
 
+            toggleApplicable( item ){
+                // only 'default expirations' can be appliable or inapplicable.
+                // applicability is tracked by a specific relationship between the caregiver and the expiration.
+
+                let j = this.updateList.findIndex( tempId => tempId == item.tempId );
+                if( j >= 0 ) this.updateList.splice( j, 1 );
+
+                item.applicable  = !item.applicable;
+
+                if( item.applicable ){
+                    // if applicable, delete the specific relationship so that the record could show up as a blank expiration ready to set
+
+                    this.deleteLicense( item, true );
+                } else {
+                    // if inapplicable, create the specific relationship that denotes this.
+
+                    item.expires_at  = '01/01/1337';
+                    item.description = 'inapplicable';
+                    this.saveLicense( item );
+                }
+            },
             addToUpdateList( item ){
 
                 if( !this.updateList.includes( item.tempId ) ) this.updateList.push( item.tempId );
@@ -196,9 +247,12 @@
                             exp.id                       = exp.expires_at ? exp.id : null;
                             exp.name                     = exp.expires_at ? exp.name : exp.type;
                             exp.description              = exp.expires_at ? exp.description : '';
-                            exp.expires_at               = exp.expires_at ? moment.utc( exp.expires_at ).local().format( 'MM/DD/YYYY' ) : '';
-                            exp.expires_sort             = exp.expires_at ? moment.utc( exp.expires_at ).local().format( 'YYYYMMDD' ) : '';
+                            exp.expires_at               = exp.expires_at ? moment( exp.expires_at ).local().format( 'MM/DD/YYYY' ) : '';
+                            exp.expires_sort             = exp.expires_at ? moment( exp.expires_at ).local().format( 'YYYYMMDD' ) : '';
                             exp.updated_at               = exp.expires_at ? moment.utc( exp.updated_at ).local().format( 'MM/DD/YYYY h:mm A' ) : '---';
+
+                            exp.isLoading                = false;
+                            exp.applicable               = exp.description == 'inapplicable' ? false : true;
 
                             return exp;
                         }).sort( ( a, b ) => a.id - b.id );
@@ -222,15 +276,16 @@
                         description : '',
                         expires_at  : '',
                         updated_at  : '---',
+                        applicable  : true
                     };
                     this.chainExpirations.unshift( newElement );
                 }
             },
             saveLicense( item ){
-                // not in use, save-all instead
+                // only in use for the toggling applicable status
 
                 item.isLoading = true;
-                item.expires_at = item.expires_at;
+                item.expires_at = item.expires_at; // is this necessary?
                 let form = new Form( item );
 
                 const verb = item.id ? 'patch' : 'post';
@@ -278,12 +333,12 @@
                         this.loading = false;
                     });
             },
-            deleteLicense( license ) {
+            deleteLicense( license, goahead = false ) {
 
                 let form = new Form();
-                if ( confirm( 'Are you sure you wish to delete this certification?' ) ) {
+                if ( goahead || confirm( 'Are you sure you wish to delete this certification?' ) ) {
 
-                    license.isLoading = false;
+                    license.isLoading = true;
 
                     form.submit( 'delete', '/business/caregivers/' + this.caregiverId + '/licenses/' + license.id )
                         .then( response => {
