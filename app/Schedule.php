@@ -57,6 +57,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $shift_status
  * @property-read \App\ScheduleNote|null $note
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @property-read \App\Audit $auditTrail
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forClient($client)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
@@ -807,5 +808,18 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             Carbon::parse($start, $timezone),
             Carbon::parse($end, $timezone)
         ]);
+    }
+
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        return Audit::where('auditable_id' , $this->id)
+                ->orWhere('url' , 'like', '%' . 'business/schedule/' . $this->id . '%')
+                ->get();
     }
 }

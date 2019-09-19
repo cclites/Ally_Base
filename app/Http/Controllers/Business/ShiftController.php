@@ -92,7 +92,6 @@ class ShiftController extends BaseController
         }
 
         $activities = $shift->business->allActivities();
-
         return view('business.shifts.show', compact('shift', 'activities'));
     }
 

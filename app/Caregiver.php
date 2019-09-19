@@ -812,6 +812,6 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
                     ->where('auditable_id', $this->id);
             })
             ->get();
-        return $audits->merge($this->audits);
+        return $audits;
     }
 }

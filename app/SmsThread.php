@@ -212,15 +212,4 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
         return $this->recipients()->where('user_id', $user_id)->exists();
     }
 
-    /**
-     * Gets a formatted list of audits.
-     *
-     * @return array
-     */
-    public function auditTrail()
-    {
-        $audits = Audit::where('new_values', 'like', '%"caregiver_id":' . $this->id . '%')
-            ->get();
-        return $audits->merge($this->audits);
-    }
 }

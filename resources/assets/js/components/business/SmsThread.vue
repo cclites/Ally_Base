@@ -112,7 +112,7 @@ export default {
             return unique.sort( (a, b) => a.name > b.name ? 1 : -1);
         },
         messageSender(){
-
+            return this.thread.audits[0].user.nameLastFirst;
         }
     },
 

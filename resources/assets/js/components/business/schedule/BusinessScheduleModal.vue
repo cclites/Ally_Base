@@ -425,6 +425,23 @@
                             </template>
                         </business-care-match>
                     </b-tab>
+                    <b-tab title="Audit Log" id="audit-log">
+                        <b-row>
+                            <b-col md-12>
+                                <b-table
+                                        class="log-table"
+                                        :items="auditLogItems"
+                                        :fields="audit.fields"
+                                        :sort-by="sortBy"
+                                        :empty-text="emptyText"
+                                >
+                                    <template slot="user" scope="row">
+                                        {{ row.item.user.nameLastFirst }}
+                                    </template>
+                                </b-table>
+                            </b-col>
+                        </b-row>
+                    </b-tab>
                 </b-tabs>
             </b-card>
 
@@ -466,10 +483,11 @@
     import ShiftServices from "../../../mixins/ShiftServices";
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
     import { mapGetters } from 'vuex';
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings],
 
         props: {
             model: Boolean,
@@ -520,6 +538,18 @@
                 groupModal: false,
                 warnings: [],
                 loadingQuickbooksConfig: false,
+                auditLogItems: [],
+                audit: {
+                    fields: [
+                    { label: 'Type', key: 'auditable_title', sortable: true, formatter: (val) => this.stringFormat(val) },
+                    { label: 'Event', key: 'event', sortable: true, formatter: (val) => this.stringFormat(val) },
+                    { label: 'By', key: 'user', sortable: true },
+                    { label: 'Date', key: 'updated_at', sortable: true, formatter: (val) => this.formatDateTimeFromUTC(val) },
+                    { label: 'Old Values', key: 'old_values', formatter: (val) => JSON.stringify(val) },
+                    { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
+                ]},
+                sortBy: '',
+                emptyText: '',
             }
         },
 
@@ -772,7 +802,6 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = this.caregiverAssignmentMode ? false : schedule.client_rate == null;
-                console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
                 // Initialize form
@@ -1050,9 +1079,14 @@
             onChangeHoursType(newVal, oldVal) {
                 this.handleChangedHoursType(this.form, newVal, oldVal);
             },
-        },
 
+            async fetchAuditLog(){
+                let response =  await axios.get(`/business/reports/audit-log?schedule_id=${this.selectedSchedule.id}`);
+                this.auditLogItems = response.data;
+            }
+        },
         watch: {
+
             form: {
                 handler(obj){
                     this.checkForWarnings(this);
@@ -1078,6 +1112,7 @@
             },
 
             selectedSchedule(val) {
+
                 // Force back to first tab
                 this.resetTabs();
 
@@ -1093,6 +1128,11 @@
                 } else {
                     this.cgMode = 'client';
                 }
+
+                if(this.selectedSchedule.id){
+                    this.fetchAuditLog();
+                }
+
             },
 
             scheduleModal(val) {
@@ -1123,10 +1163,17 @@
                 }
             },
         },
+
     }
 </script>
 
 <style scoped>
+
+    #audit-log .table{
+        table-layout: fixed;
+        max-height: 300px;
+        overflow: auto;
+    }
     .table th, .table td {
         padding: 0.35rem 0.5rem;
         min-width: 80px;
