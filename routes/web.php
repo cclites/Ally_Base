@@ -412,6 +412,7 @@ Route::group([
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
     Route::get('notifications', 'Business\SystemNotificationController@index')->name('notifications.index');
+    Route::get('notifications/preview', 'Business\SystemNotificationController@preview')->name('notifications.preview');
     Route::get('notifications/{notification}', 'Business\SystemNotificationController@show')->name('notifications.show');
     Route::post('notifications/{notification}/acknowledge', 'Business\SystemNotificationController@acknowledge')->name('notifications.acknowledge');
     Route::post('notifications/acknowledge-all', 'Business\SystemNotificationController@acknowledgeAll')->name('notifications.acknowledge-all');

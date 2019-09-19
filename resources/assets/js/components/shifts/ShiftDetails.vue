@@ -184,7 +184,7 @@
                         let service = this.services.find(x => x.id === item.service_id);
                         let rate = this.authRole == 'caregiver' ? item.caregiver_rate : item.client_rate;
                         return {
-                            service: service ? service.name : 'General',
+                            service: item.service ? item.service.name : (service ? service.name : 'General'),
                             rate: rate,
                             hours_type: item.hours_type,
                             hours: item.duration,
@@ -197,7 +197,7 @@
                     let defaultServiceName = this.defaultService && this.defaultService.name ? this.defaultService.name : 'General';
                     let rate = this.authRole == 'caregiver' ? this.shift.caregiver_rate : this.shift.client_rate;
                     return [{
-                        service: service ? service.name : defaultServiceName,
+                        service: this.shift.service ? this.shift.service.name : (service ? service.name : defaultServiceName),
                         rate: rate,
                         hours_type: this.shift.hours_type,
                         hours: this.shift.hours,
