@@ -55,6 +55,7 @@ use Illuminate\Notifications\Notifiable;
  * @property-read \App\Address $address
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Audit $auditTrail
  * @property-read \App\CaregiverAvailability $availability
  * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
@@ -796,5 +797,17 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function scopeNotOnboarded(Builder $builder)
     {
         $builder->whereNull('onboarded')->doesntHave('shifts');
+    }
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        $audits = Audit::where('new_values', 'like', '%"caregiver_id":' . $this->id . '%')
+            ->get();
+        return $audits->merge($this->audits);
     }
 }

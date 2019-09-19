@@ -80,6 +80,7 @@ use App\Data\ScheduledRates;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \App\Address|null $address
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Audit $auditTrail
  * @property-read \App\Business|null $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
@@ -1339,6 +1340,24 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         $query->whereHas('shiftFlags', function ($q) use ($flags) {
             $q->whereIn('flag', $flags);
         });
+    }
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        $url = '/business/schedule/' . $this->id;
+
+        $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
+            ->orWhere(function($q){
+                $q->whereIn('auditable_type', ['App\User', 'clients'])
+                    ->where('auditable_id', $this->id);
+            })
+            ->get();
+        return $audits;
     }
 
 }

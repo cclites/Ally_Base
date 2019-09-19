@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <b-card>
         <b-row>
             <b-col>
                 <b-card header="Miscellaneous"
@@ -19,19 +19,53 @@
                 <custom-field-form :user-id="caregiver.id" user-role="caregiver" :meta="caregiver.meta" />
             </b-col>
         </b-row>
-    </div>
+        <h4>Audit Log</h4>
+        <b-row>
+            <b-col md-12>
+                <b-table
+                        class="log-table"
+                        :items="auditLogItems"
+                        :fields="fields"
+                        :sort-by="sortBy"
+                        :empty-text="emptyText"
+                >
+                    <template slot="user" scope="row">
+                        {{ row.item.user.nameLastFirst }}
+                    </template>
+                </b-table>
+            </b-col>
+        </b-row>
+    </b-card>
 </template>
 
 <script>
+
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
+
     export default {
         props: ['misc', 'caregiver'],
-
+        mixins: [ FormatsDates, FormatsStrings],
         data() {
             return{
                 form: new Form({
                     misc: this.misc,
                 }),
+                auditLogItems: [],
+                fields: [
+                    { label: 'Type', key: 'auditable_title', sortable: true },
+                    { label: 'Event', key: 'event', sortable: true, formatter: (val) => this.stringFormat(val) },
+                    { label: 'By', key: 'user', sortable: true },
+                    { label: 'Date', key: 'updated_at', sortable: true, formatter: (val) => this.formatDateTimeFromUTC(val) },
+                    { label: 'Old Values', key: 'old_values', formatter: (val) => JSON.stringify(val) },
+                    { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
+                ],
+                sortBy: '',
+                emptyText: 'No records to display'
             };
+        },
+        async mounted() {
+            this.fetchAuditLog();
         },
 
         methods: {
@@ -40,7 +74,24 @@
                     .then(response => {
                     })
                     .catch(() => {});
+            },
+            async fetchAuditLog(){
+                let response = await axios.get(`/business/reports/audit-log?caregiver_id=${this.caregiver.id}`);
+                this.auditLogItems = response.data;
             }
-        }
+        },
+
     }
 </script>
+
+<style scoped>
+    table.table tbody tr td{
+        overflow-wrap: break-all;
+    }
+
+    table.table{
+        overflow: auto;
+        width: 100vw;
+        table-layout: fixed;
+    }
+</style>
