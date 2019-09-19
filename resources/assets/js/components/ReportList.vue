@@ -181,13 +181,13 @@
                         category: 5,
                         allowed: ['admin'],
                     },
-                    // { Removed as per ALLY-1394
-                    //     name: 'Missing Deposit Accounts',
-                    //     url: 'reports/caregivers/deposits-missing-bank-account',
-                    //     description: '',
-                    //     category: 3,
-                    //     allowed: [],
-                    // },
+                    {
+                        name: 'Missing Deposit Accounts',
+                        url: 'reports/caregivers/deposits-missing-bank-account',
+                        description: '',
+                        category: 3,
+                        allowed: ['admin'],
+                    },
                     {
                         name: 'Financial Summary',
                         url: 'reports/finances',
@@ -430,14 +430,14 @@
                     //     url: 'reports/clients-missing-payment-methods',
                     //     description: 'Shows all clients missing a payment method',
                     //     category: 2,
-                    //     allowed: [],
+                    //     allowed: [['office_user'],
                     // },
                     // { Removed as per ALLY-1394
                     //     name: 'Caregivers Missing Bank Accounts',
                     //     url: 'reports/caregivers-missing-bank-accounts',
                     //     description: 'Shows all caregivers missing bank accounts',
                     //     category: 3,
-                    //     allowed: [],
+                    //     allowed: [['office_user'],
                     // },
                     {
                         name: 'Client & Caregiver Onboard Status',

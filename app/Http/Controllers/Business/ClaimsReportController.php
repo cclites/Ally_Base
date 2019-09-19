@@ -40,7 +40,7 @@ class ClaimsReportController extends BaseController
         $this->authorize('read', $client);
 
         $summary = [];
-        foreach ($client->shifts as $shift) {
+        foreach ($client->shifts()->ordered()->get() as $shift) {
             $summary[] = [
                 'date' => $shift->checked_in_time->format('Y-m-d'),
                 'total' => (float) $shift->shift_total = $shift->costs()->getTotalCost(),

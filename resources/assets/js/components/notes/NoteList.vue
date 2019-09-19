@@ -6,6 +6,9 @@
         <b-form @submit.prevent="filter" class="mb-2">
             <b-row>
                 <b-col lg="2">
+                    <business-location-select v-model="searchForm.businesses" :allow-all="true" :hideable="false" name="businesses" />
+                </b-col>
+                <b-col lg="2">
                     <date-picker class="mb-2" v-model="searchForm.start_date"  placeholder="Start Date" />
                 </b-col>
                 <b-col lg="2">
@@ -114,10 +117,11 @@
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsStrings from "../../mixins/FormatsStrings";
+    import BusinessLocationSelect from "../business/BusinessLocationSelect";
 
     export default {      
         mixins: [ FormatsDates, FormatsStrings ],
-
+        components: { BusinessLocationSelect },
         props: {
         },
 
@@ -132,6 +136,7 @@
                 referral_sources: [],
                 items: [],
                 searchForm: {
+                    businesses: '',
                     start_date: moment().utc().subtract(1, 'days').format('MM/DD/YYYY'), // todo, make this local, but backend needs to know what the local timezone is
                     end_date: moment.utc().format('MM/DD/YYYY'),
                     caregiver: null,

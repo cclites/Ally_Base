@@ -186,9 +186,11 @@
                         break;
                     case 'active':
 
+                        active = 1;
                         break;
                     case 'inactive':
 
+                        active = 0;
                         break;
                     default:
 
