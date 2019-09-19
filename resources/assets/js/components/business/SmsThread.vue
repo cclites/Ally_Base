@@ -35,6 +35,11 @@
                 </div>
             </b-col>
         </b-row>
+        <b-row class="mb-4">
+            <b-col>
+                Sent By: {{ messageSender }}
+            </b-col>
+        </b-row>
         <b-row>
             <b-col>
                 <h4>Replies</h4>
@@ -105,6 +110,9 @@ export default {
             });
 
             return unique.sort( (a, b) => a.name > b.name ? 1 : -1);
+        },
+        messageSender(){
+
         }
     },
 

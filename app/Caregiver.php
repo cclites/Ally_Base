@@ -807,6 +807,10 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function auditTrail()
     {
         $audits = Audit::where('new_values', 'like', '%"caregiver_id":' . $this->id . '%')
+            ->orWhere(function($q){
+                $q->whereIn('auditable_type', ['App\User', 'caregivers'])
+                    ->where('auditable_id', $this->id);
+            })
             ->get();
         return $audits->merge($this->audits);
     }

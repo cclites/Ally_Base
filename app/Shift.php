@@ -1349,14 +1349,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function auditTrail()
     {
-        $url = '/business/schedule/' . $this->id;
-
-        $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
-            ->orWhere(function($q){
-                $q->whereIn('auditable_type', ['App\User', 'clients'])
-                    ->where('auditable_id', $this->id);
-            })
-            ->get();
+        $audits = Audit::where('auditable_id' , $this->id)
+                        ->orWhere('url' , 'like', '%' . 'business/schedule/' . $this->id . '%')
+                        ->get();
         return $audits;
     }
 

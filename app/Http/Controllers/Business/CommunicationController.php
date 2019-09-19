@@ -140,7 +140,7 @@ class CommunicationController extends Controller
         }
 
         if (count($failed) > 0) {
-            //return new ErrorResponse(500, "Message was sent but failed for the following users:\r\n" . join("\r\n", $failed));
+            return new ErrorResponse(500, "Message was sent but failed for the following users:\r\n" . join("\r\n", $failed));
         }
 
         if ($debugMode) {
