@@ -88,12 +88,6 @@
                 }
             }
         },
-
-        mounted() {
-
-
-        },
-
         methods: {
             refreshEvents(hideModals = true) {
                 this.$refs.calendar.fireMethod('refetchEvents');
