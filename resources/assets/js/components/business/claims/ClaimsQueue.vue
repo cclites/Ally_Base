@@ -83,7 +83,7 @@
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
             <b-table bordered striped hover show-empty
-                :items="filteredItems"
+                :items="items"
                 :fields="fields"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
@@ -139,7 +139,7 @@
                                 <i class="fa fa-usd" />&nbsp;Adjust Claim
                             </b-dropdown-item>
                             <b-dropdown-divider />
-                            <b-dropdown-item @click="deleteClaimModal(row.item)" variant="danger">
+                            <b-dropdown-item @click="deleteClaim(row.item)" variant="danger">
                                 <i class="fa fa-times" />&nbsp;Delete Claim
                             </b-dropdown-item>
                         </b-dropdown>
@@ -158,17 +158,7 @@
                 <p>A transmission method could not be inferred for this Claim.  Please check the method you would like to use:</p>
             </div>
             <b-form-group label="Transmission Method" label-for="selectedTransmissionMethod" label-class="required">
-                <b-select v-model="selectedTransmissionMethod">
-                    <option value="">-- Select Transmission Method --</option>
-                    <option value="-" disabled>Direct Transmission:</option>
-                    <option :value="CLAIM_SERVICE.HHA">{{ serviceLabel(CLAIM_SERVICE.HHA) }}</option>
-                    <option :value="CLAIM_SERVICE.TELLUS">{{ serviceLabel(CLAIM_SERVICE.TELLUS) }}</option>
-<!--                    <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>-->
-                    <option value="-" disabled>-</option>
-                    <option value="-" disabled>Offline:</option>
-                    <option :value="CLAIM_SERVICE.EMAIL">{{ serviceLabel(CLAIM_SERVICE.EMAIL) }}</option>
-                    <option :value="CLAIM_SERVICE.FAX">{{ serviceLabel(CLAIM_SERVICE.FAX) }}</option>
-                </b-select>
+                <transmission-method-dropdown v-model="selectedTransmissionMethod" />
             </b-form-group>
         </confirm-modal>
 
@@ -196,14 +186,15 @@
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
-    import FormatsDates from "../../../mixins/FormatsDates";
+    import TransmissionMethodDropdown from "./TransmissionMethodDropdown";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
-    import Constants from '../../../mixins/Constants';
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import ClaimAdjustmentForm from "./ClaimAdjustmentForm";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from '../../../mixins/Constants';
 
     export default {
-        components: {BusinessLocationFormGroup, ClaimAdjustmentForm},
+        components: {BusinessLocationFormGroup, ClaimAdjustmentForm, TransmissionMethodDropdown},
         mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
 
         data() {
@@ -308,15 +299,11 @@
             }
         },
 
-        computed: {
-            filteredItems() {
-                return this.items.map(item => {
-                    return item;
-                });
-            },
-        },
-
         methods: {
+            /**
+             * Show the Claim adjustment modal.
+             * @param {Object} invoice
+             */
             adjust(invoice) {
                 axios.get(`/business/claims/${invoice.claim.id}`)
                     .then( ({ data }) => {
@@ -326,11 +313,18 @@
                     .catch(() => {});
             },
 
+            /**
+             * Hide the Claim adjustment modal.
+             */
             hideAdjustmentModal() {
                 this.showAdjustmentModal = false;
                 this.$store.commit('claims/setClaim', {});
             },
 
+            /**
+             * Handle updating the table item after it is successfully adjusted.
+             * @param {Object} invoice
+             */
             updateRecord(invoice) {
                 let index = this.items.findIndex(x => x.id == invoice.id);
                 if (index >= 0) {
@@ -338,23 +332,10 @@
                 }
             },
 
-            serviceLabel(serviceValue) {
-                switch (serviceValue) {
-                    case this.CLAIM_SERVICE.HHA:
-                        return 'HHAeXchange';
-                    case this.CLAIM_SERVICE.TELLUS:
-                        return 'Tellus';
-                    case this.CLAIM_SERVICE.CLEARINGHOUSE:
-                        return 'CareExchange LTC Clearinghouse';
-                    case this.CLAIM_SERVICE.EMAIL:
-                        return 'E-Mail';
-                    case this.CLAIM_SERVICE.FAX:
-                        return 'Fax';
-                    default:
-                        return '-';
-                }
-            },
-
+            /**
+             * Handle creation of the Claim invoice and update the record.
+             * @param {Object} invoice
+             */
             createClaim(invoice) {
                 this.creatingId = invoice.id;
                 let form = new Form({client_invoice_id: invoice.id});
@@ -371,32 +352,37 @@
                     })
             },
 
-            deleteClaimModal(invoice) {
-                this.$refs.confirmDeleteClaim.confirm(() => {
-                    this.deleteClaim(invoice);
-                });
-            },
-
+            /**
+             * Handle deleting the Claim Invoice and update the record.
+             * @param {Object} invoice
+             */
             deleteClaim(invoice) {
                 if (! invoice.claim) {
                     return;
                 }
 
-                this.deletingId = invoice.id;
-                let form = new Form({});
-                form.submit('delete', `/business/claims/${invoice.claim.id}`)
-                    .then( ({ data }) => {
-                        let index = this.items.findIndex(x => x.id == invoice.id);
-                        if (index >= 0) {
-                            this.items.splice(index, 1, data.data);
-                        }
-                    })
-                    .catch(() => {})
-                    .finally(() => {
-                        this.deletingId = null;
-                    })
+                this.$refs.confirmDeleteClaim.confirm(() => {
+                    this.deletingId = invoice.id;
+                    let form = new Form({});
+                    form.submit('delete', `/business/claims/${invoice.claim.id}`)
+                        .then( ({ data }) => {
+                            let index = this.items.findIndex(x => x.id == invoice.id);
+                            if (index >= 0) {
+                                this.items.splice(index, 1, data.data);
+                            }
+                        })
+                        .catch(() => {})
+                        .finally(() => {
+                            this.deletingId = null;
+                        })
+                });
             },
 
+            /**
+             * Transmit a Claim.
+             * @param {Object} invoice
+             * @param {Boolean} skipAlert
+             */
             transmit(invoice, skipAlert = false) {
                 if (! skipAlert) {
                     if (! invoice.claim.transmission_method) {
@@ -446,6 +432,10 @@
                     });
             },
 
+            /**
+             * Fetch Client Invoice and Claim records for the Queue.
+             * @returns {Promise<void>}
+             */
             async fetch() {
                 this.loaded = 0;
                 let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
@@ -461,6 +451,10 @@
                     });
             },
 
+            /**
+             * Fetch client list for the dropdown filter.
+             * @returns {Promise<void>}
+             */
             async fetchClients() {
                 this.loadingClients = true;
                 await axios.get(`/business/dropdown/clients`)

@@ -97,17 +97,6 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
         'evv_end_time',
     ];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-
     const EVV_METHOD_TELEPHONY = 'telephony';
     const EVV_METHOD_GEOLOCATION = 'geolocation';
 
@@ -200,7 +189,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      *
      * @return string
      */
-    public function getCaregiverName() : string
+    public function getCaregiverName(): string
     {
         if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
             return '';
@@ -214,7 +203,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      *
      * @return null|Carbon
      */
-    public function getStartTime() : ?Carbon
+    public function getStartTime(): ?Carbon
     {
         return $this->visit_start_time;
     }
@@ -224,7 +213,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      *
      * @return null|Carbon
      */
-    public function getEndTime() : ?Carbon
+    public function getEndTime(): ?Carbon
     {
         return $this->visit_end_time;
     }

@@ -69,17 +69,6 @@ class ClaimInvoiceItem extends AuditableModel
      */
     protected $dates = ['date'];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -108,7 +97,7 @@ class ClaimInvoiceItem extends AuditableModel
      * Get the ClaimAdjustments relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function adjustments()
     {
         return $this->hasMany(ClaimAdjustment::class);
@@ -123,7 +112,7 @@ class ClaimInvoiceItem extends AuditableModel
      *
      * @return string
      */
-    public function getTypeAttribute() : string
+    public function getTypeAttribute(): string
     {
         switch ($this->claimable_type) {
             case ClaimableService::class:
@@ -160,7 +149,7 @@ class ClaimInvoiceItem extends AuditableModel
      * @return void
      * @throws ClaimBalanceException
      */
-    public function updateBalance() : void
+    public function updateBalance(): void
     {
         $this->refresh();
 
@@ -185,7 +174,7 @@ class ClaimInvoiceItem extends AuditableModel
      * @param string $timezone
      * @return array
      */
-    public function getServiceTimes(string $timezone = null) : array
+    public function getServiceTimes(string $timezone = null): array
     {
         if ($this->claimable_type != ClaimableService::class) {
             return [null, null];
@@ -205,7 +194,13 @@ class ClaimInvoiceItem extends AuditableModel
         ];
     }
 
-    public function getItemSummary(string $timezone = null) : string
+    /**
+     * Get a string summary of the claimable item.
+     *
+     * @param string|null $timezone
+     * @return string
+     */
+    public function getItemSummary(string $timezone = null): string
     {
         if (empty($timezone)) {
             $timezone = $this->claim->business->getTimezone();

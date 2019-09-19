@@ -154,7 +154,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the ClaimAdjustments relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function adjustments()
     {
         return $this->hasMany(ClaimAdjustment::class);
@@ -164,7 +164,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the status relation.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function statuses()
     {
         return $this->hasMany(ClaimInvoiceStatusHistory::class);
@@ -174,22 +174,42 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     // ACCESSORS
     // **********************************************************
 
+    /**
+     * Get the claim name.
+     *
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    public function getDate() : Carbon
+    /**
+     * Get the date of the claim.
+     *
+     * @return Carbon
+     */
+    public function getDate(): Carbon
     {
         return $this->created_at;
     }
 
-    public function getAmount() : float
+    /**
+     * Get the total amount of the claim.
+     *
+     * @return float
+     */
+    public function getAmount(): float
     {
         return floatval($this->amount);
     }
 
-    public function getAmountDue() : float
+    /**
+     * Get the claim balance..
+     *
+     * @return float
+     */
+    public function getAmountDue(): float
     {
         return floatval($this->amount_due);
     }
@@ -204,7 +224,12 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return subtract(floatval($this->amount), floatval($this->amount_due));
     }
 
-    public function getStatus() : string
+    /**
+     * Get the ClaimStatus.
+     *
+     * @return string
+     */
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -216,7 +241,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     // **********************************************************
@@ -292,7 +317,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @throws ClaimBalanceException
      */
-    public function updateBalance() : void
+    public function updateBalance(): void
     {
         $items = $this->fresh()->items;
 
@@ -316,7 +341,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @return void
      */
-    public function markAsModified() : void
+    public function markAsModified(): void
     {
         $this->update(['modified_at' => Carbon::now()]);
     }
@@ -327,7 +352,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * @param \App\Billing\ClaimStatus $status
      * @param array $otherUpdates
      */
-    public function updateStatus(ClaimStatus $status, array $otherUpdates = []) : void
+    public function updateStatus(ClaimStatus $status, array $otherUpdates = []): void
     {
         $this->update(array_merge(['status' => $status], $otherUpdates));
         $this->statuses()->create(['status' => $status]);
@@ -339,7 +364,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @return null|ClaimService
      */
-    public function getTransmissionMethod() : ?ClaimService
+    public function getTransmissionMethod(): ?ClaimService
     {
         if (empty($this->transmission_method)) {
             return null;
@@ -355,7 +380,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * @return ClaimTransmitterInterface
      * @throws ClaimTransmissionException
      */
-    public function getTransmitter(ClaimService $service) : ClaimTransmitterInterface
+    public function getTransmitter(ClaimService $service): ClaimTransmitterInterface
     {
         switch ($service) {
             case ClaimService::HHA():
@@ -396,7 +421,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (! $lastName) {
+        if (!$lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;

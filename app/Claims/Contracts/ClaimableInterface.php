@@ -22,19 +22,19 @@ interface ClaimableInterface
      *
      * @return string
      */
-    public function getCaregiverName() : string;
+    public function getCaregiverName(): string;
 
     /**
      * Get the start time of the Claimable item.
      *
      * @return null|Carbon
      */
-    public function getStartTime() : ?Carbon;
+    public function getStartTime(): ?Carbon;
 
     /**
      * Get the end time of the Claimable item.
      *
      * @return null|Carbon
      */
-    public function getEndTime() : ?Carbon;
+    public function getEndTime(): ?Carbon;
 }

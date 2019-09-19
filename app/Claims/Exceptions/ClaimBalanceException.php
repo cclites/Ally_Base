@@ -2,8 +2,13 @@
 
 namespace App\Claims\Exceptions;
 
-use Exception;
-
-class ClaimBalanceException extends Exception
+/**
+ * Class ClaimBalanceException
+ * This exception is thrown when the balance of a claim
+ * fails to add up.
+ *
+ * @package App\Claims\Exceptions
+ */
+class ClaimBalanceException extends \Exception
 {
 }

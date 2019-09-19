@@ -51,17 +51,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      */
     protected $appends = [];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -102,7 +91,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      *
      * @return string
      */
-    public function getCaregiverName() : string
+    public function getCaregiverName(): string
     {
         if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
             return '';
@@ -116,7 +105,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      *
      * @return null|Carbon
      */
-    public function getStartTime() : ?Carbon
+    public function getStartTime(): ?Carbon
     {
         return null;
     }
@@ -126,7 +115,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      *
      * @return null|Carbon
      */
-    public function getEndTime() : ?Carbon
+    public function getEndTime(): ?Carbon
     {
         return null;
     }

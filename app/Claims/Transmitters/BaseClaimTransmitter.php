@@ -2,9 +2,9 @@
 
 namespace App\Claims\Transmitters;
 
-use App\Claims\ClaimInvoiceItem;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
+use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
 abstract class BaseClaimTransmitter implements ClaimTransmitterInterface

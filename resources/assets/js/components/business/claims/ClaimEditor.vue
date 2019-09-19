@@ -155,11 +155,11 @@
 </template>
 
 <script>
-    import FormatsDates from "../../../mixins/FormatsDates";
-    import FormatsStrings from "../../../mixins/FormatsStrings";
-    import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import TransmissionMethodDropdown from "./TransmissionMethodDropdown";
     import ClaimInvoiceItemsTable from "./ClaimInvoiceItemsTable";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
     import { mapGetters } from 'vuex';
 
     export default {

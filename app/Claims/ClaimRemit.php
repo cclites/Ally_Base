@@ -64,17 +64,6 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      */
     protected $dates = ['date', 'created_at', 'updated_at'];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -103,7 +92,7 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      * Get the ClaimAdjustment relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function adjustments()
     {
         return $this->hasMany(ClaimAdjustment::class);
@@ -122,9 +111,9 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @return float
      */
-    public function getAmountAvailable() : float
+    public function getAmountAvailable(): float
     {
-        return subtract((float) $this->amount, (float) $this->amount_applied);
+        return subtract((float)$this->amount, (float)$this->amount_applied);
     }
 
     /**
@@ -132,7 +121,7 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @return ClaimRemitStatus
      */
-    public function getStatus() : ClaimRemitStatus
+    public function getStatus(): ClaimRemitStatus
     {
         if ((float)$this->amount === (float)$this->amount_applied) {
             return ClaimRemitStatus::FULLY_APPLIED();
@@ -243,7 +232,7 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      * @return void
      * @throws ClaimBalanceException
      */
-    public function updateBalance() : void
+    public function updateBalance(): void
     {
         $totalApplied = $this->adjustments->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));

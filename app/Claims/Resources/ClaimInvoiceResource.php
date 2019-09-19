@@ -2,13 +2,14 @@
 
 namespace App\Claims\Resources;
 
-use App\Claims\ClaimInvoice;
 use Illuminate\Http\Resources\Json\Resource;
 
 class ClaimInvoiceResource extends Resource
 {
     /**
-     * @var ClaimInvoice
+     * The resource instance.
+     *
+     * @var \App\Claims\ClaimInvoice
      */
     public $resource;
 
@@ -20,21 +21,21 @@ class ClaimInvoiceResource extends Resource
      */
     public function toArray($request)
     {
-        if (! $this->resource->relationLoaded('items')) {
+        if (!$this->resource->relationLoaded('items')) {
             $this->resource->load(['items' => function ($q) {
                 $q->orderByRaw('claimable_type desc, date asc');
             }]);
         }
 
-        if (! $this->resource->relationLoaded('client')) {
+        if (!$this->resource->relationLoaded('client')) {
             $this->resource->load('client');
         }
 
-        if (! $this->resource->relationLoaded('clientInvoice')) {
+        if (!$this->resource->relationLoaded('clientInvoice')) {
             $this->resource->load('clientInvoice');
         }
 
-        if (! $this->resource->relationLoaded('payer')) {
+        if (!$this->resource->relationLoaded('payer')) {
             $this->resource->load('payer');
         }
 

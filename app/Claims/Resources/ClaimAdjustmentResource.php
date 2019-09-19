@@ -16,7 +16,7 @@ class ClaimAdjustmentResource extends Resource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function toArray($request)
@@ -43,7 +43,7 @@ class ClaimAdjustmentResource extends Resource
             'created_at' => $this->resource->created_at->toDateTimeString(),
         ];
 
-        if (! $this->resource->is_interest) {
+        if (!$this->resource->is_interest) {
             $data = array_merge($data, [
                 'claim_invoice_date' => $this->resource->claimInvoice->getDate()->toDateTimeString(),
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),

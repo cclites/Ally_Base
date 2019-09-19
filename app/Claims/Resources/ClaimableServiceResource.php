@@ -8,6 +8,13 @@ use Carbon\Carbon;
 class ClaimableServiceResource extends Resource
 {
     /**
+     * The resource instance.
+     *
+     * @var \App\Claims\ClaimableService
+     */
+    public $resource;
+
+    /**
      * Transform the resource into an array.
      *
      * @param \Illuminate\Http\Request $request
@@ -21,7 +28,6 @@ class ClaimableServiceResource extends Resource
         }
 
         return [
-//            'id' => $this->resource->id,
             'shift_id' => $this->resource->shift_id,
             'caregiver_id' => $this->resource->caregiver_id,
             'caregiver_first_name' => $this->resource->caregiver_first_name,
@@ -29,7 +35,6 @@ class ClaimableServiceResource extends Resource
             'caregiver_gender' => $this->resource->caregiver_gender,
             'caregiver_dob' => Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y'),
             'caregiver_ssn' => filled($this->resource->caregiver_ssn) ? '***-**-****' : '',
-//            'has_caregiver_ssn' => filled($this->resource->caregiver_ssn),
             'caregiver_medicaid_id' => $this->resource->caregiver_medicaid_id,
 
             'address1' => $this->resource->address1,
@@ -40,10 +45,6 @@ class ClaimableServiceResource extends Resource
             'latitude' => $this->resource->latitude,
             'longitude' => $this->resource->longitude,
 
-//            'scheduled_start_time' => $this->resource->scheduled_start_time,
-//            'scheduled_end_time' => $this->resource->scheduled_end_time,
-//            'visit_start_time' => $this->resource->visit_start_time,
-//            'visit_end_time' => $this->resource->visit_end_time,
             'evv_start_time' => optional($this->resource->evv_start_time)->toDateTimeString(),
             'evv_end_time' => optional($this->resource->evv_end_time)->toDateTimeString(),
 

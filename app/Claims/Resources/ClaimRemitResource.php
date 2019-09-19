@@ -7,6 +7,13 @@ use Illuminate\Http\Resources\Json\Resource;
 class ClaimRemitResource extends Resource
 {
     /**
+     * The resource instance.
+     *
+     * @var \App\Claims\ClaimRemit
+     */
+    public $resource;
+
+    /**
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -16,23 +23,23 @@ class ClaimRemitResource extends Resource
     {
         return [
             'id' => $this->resource->id,
-            'amount' => $this->amount,
-            'amount_applied' => $this->amount_applied,
-            'amount_available' => $this->getAmountAvailable(),
-            'business_id' => $this->business->id,
+            'amount' => $this->resource->amount,
+            'amount_applied' => $this->resource->amount_applied,
+            'amount_available' => $this->resource->getAmountAvailable(),
+            'business_id' => $this->resource->business->id,
             'business' => [
-                'id' => $this->business->id,
-                'name' => $this->business->name,
+                'id' => $this->resource->business->id,
+                'name' => $this->resource->business->name,
             ],
-            'office_location' => $this->business->name,
-            'notes' => $this->notes,
-            'payer_id' => optional($this->payer)->id,
-            'payer_name' => optional($this->payer)->name,
-            'payment_type' => $this->payment_type,
-            'reference' => $this->reference,
-            'date' => $this->date->toDateTimeString(),
-            'created_at' => $this->created_at->toDateTimeString(),
-            'status' => $this->getStatus(),
+            'office_location' => $this->resource->business->name,
+            'notes' => $this->resource->notes,
+            'payer_id' => optional($this->resource->payer)->id,
+            'payer_name' => optional($this->resource->payer)->name,
+            'payment_type' => $this->resource->payment_type,
+            'reference' => $this->resource->reference,
+            'date' => $this->resource->date->toDateTimeString(),
+            'created_at' => $this->resource->created_at->toDateTimeString(),
+            'status' => $this->resource->getStatus(),
             'adjustments_count' => $this->resource->adjustments_count,
         ];
     }

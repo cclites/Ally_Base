@@ -2,8 +2,8 @@
 
 namespace App\Claims\Requests;
 
-use App\Claims\ClaimRemitStatus;
 use App\Http\Requests\FilteredResourceRequest;
+use App\Claims\ClaimRemitStatus;
 
 class GetClaimRemitsRequest extends FilteredResourceRequest
 {
@@ -31,7 +31,7 @@ class GetClaimRemitsRequest extends FilteredResourceRequest
      *
      * @return array
      */
-    public function filtered() : array
+    public function filtered(): array
     {
         $data = $this->validated();
 

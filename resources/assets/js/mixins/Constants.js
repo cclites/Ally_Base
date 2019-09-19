@@ -11,6 +11,13 @@ export default {
                 EMAIL: 'EMAIL',
                 FAX: 'FAX',
             },
+            claimServiceOptions: [
+                { value: 'HHA', text: 'HHAeXchange' },
+                { value: 'TELLUS', text: 'Tellus' },
+                { value: 'CLEARINGHOUSE', text: 'CareExchange LTC Clearinghouse' },
+                { value: 'EMAIL', text: 'E-mail' },
+                { value: 'FAX', text: 'Fax' },
+            ],
 
             ethnicityOptions: [
                 { value: 'american_indian', text: 'American Indian or Alaska Native' },

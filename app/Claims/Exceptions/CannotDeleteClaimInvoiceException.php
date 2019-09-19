@@ -2,8 +2,12 @@
 
 namespace App\Claims\Exceptions;
 
-use Exception;
-
-class CannotDeleteClaimInvoiceException extends Exception
+/**
+ * Class CannotDeleteClaimInvoiceException
+ * This exception is thrown to indicate a Claim cannot be deleted.
+ *
+ * @package App\Claims\Exceptions
+ */
+class CannotDeleteClaimInvoiceException extends \Exception
 {
 }

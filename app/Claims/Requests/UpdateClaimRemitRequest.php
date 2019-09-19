@@ -2,8 +2,6 @@
 
 namespace App\Claims\Requests;
 
-use App\Claims\ClaimRemitType;
-
 class UpdateClaimRemitRequest extends CreateClaimRemitRequest
 {
     /**
@@ -15,7 +13,7 @@ class UpdateClaimRemitRequest extends CreateClaimRemitRequest
     {
         $rules = parent::rules();
 
-        $rules['amount'] = 'required|numeric|min:'.$this->claim_remit->amount_applied.'|max:999999.99';
+        $rules['amount'] = 'required|numeric|min:' . $this->claim_remit->amount_applied . '|max:999999.99';
 
         return $rules;
     }

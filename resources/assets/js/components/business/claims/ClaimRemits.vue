@@ -123,12 +123,12 @@
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
-    import FormatsDates from "../../../mixins/FormatsDates";
-    import FormatsNumbers from "../../../mixins/FormatsNumbers";
-    import Constants from '../../../mixins/Constants';
-    import { mapGetters } from 'vuex';
-    import ClaimRemitForm from "./ClaimRemitForm";
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from '../../../mixins/Constants';
+    import ClaimRemitForm from "./ClaimRemitForm";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {BusinessLocationFormGroup, ClaimRemitForm},

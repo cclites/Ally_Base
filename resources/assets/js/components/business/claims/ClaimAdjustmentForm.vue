@@ -67,12 +67,12 @@
 </template>
 
 <script>
-    import { mapGetters } from 'vuex';
-    import Constants from "../../../mixins/Constants";
-    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
     import { Decimal } from 'decimal.js';
+    import { mapGetters } from 'vuex';
 
     export default {
         mixins: [ Constants, FormatsDates, FormatsNumbers, FormatsStrings ],
@@ -103,6 +103,9 @@
         },
 
         methods: {
+            /**
+             * Map items with extra fields required.
+             */
             initItems(claim) {
                 if (! claim || ! claim.items) {
                     return [];
@@ -166,7 +169,6 @@
             selectItem(id) {
                 let claimItem = this.items.find(x => x.id == id);
 
-                console.log('select item:', claimItem);
                 if (claimItem.selected) {
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
@@ -179,7 +181,6 @@
                     this.$set(claimItem, 'adjustment_type', '');
                 }
                 this.$set(claimItem, 'note', '');
-                console.log(claimItem.note);
 
                 this.forceRowUpdate(claimItem);
             },

@@ -2,15 +2,16 @@
 
 namespace App\Claims\Resources;
 
-use App\Claims\ClaimInvoice;
 use Illuminate\Http\Resources\Json\Resource;
-use App\Claims\ClaimInvoiceItem;
+use App\Claims\ClaimInvoice;
 use Carbon\Carbon;
 
 class ClaimAgingReportItemResource extends Resource
 {
     /**
-     * @var ClaimInvoiceItem $resource
+     * The resource instance.
+     *
+     * @var \App\Claims\ClaimInvoice
      */
     public $resource;
 
@@ -28,7 +29,7 @@ class ClaimAgingReportItemResource extends Resource
     /**
      * ClaimAgingReportItemResource Constructor.
      *
-     * @param  mixed  $resource
+     * @param mixed $resource
      * @return void
      */
     public function __construct(ClaimInvoice $resource)
@@ -74,7 +75,7 @@ class ClaimAgingReportItemResource extends Resource
      * @param array $period
      * @return bool
      */
-    protected function inDateRange(array $period) : bool
+    protected function inDateRange(array $period): bool
     {
         return $this->resource->created_at->between($period['start'], $period['end']);
     }

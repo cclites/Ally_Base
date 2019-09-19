@@ -48,11 +48,11 @@
 </template>
 
 <script>
-    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import ClaimInvoiceItemForm from "./ClaimInvoiceItemForm";
-    import { mapGetters } from 'vuex';
+    import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from "../../../mixins/Constants";
+    import { mapGetters } from 'vuex';
 
     export default {
         mixins: [ FormatsDates, FormatsNumbers, Constants ],

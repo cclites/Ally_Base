@@ -2,9 +2,9 @@
 
 namespace App\Claims\Reports;
 
-use App\Billing\ClaimStatus;
 use App\Claims\Resources\ClaimAgingReportItemResource;
 use App\Claims\ClaimInvoice;
+use App\Billing\ClaimStatus;
 use App\Reports\BaseReport;
 
 class ClaimInvoiceAgingReport extends BaseReport
@@ -40,7 +40,7 @@ class ClaimInvoiceAgingReport extends BaseReport
      * @param null|int $clientId
      * @return self
      */
-    public function forClient(?int $clientId) : self
+    public function forClient(?int $clientId): self
     {
         $this->clientId = $clientId;
 
@@ -53,7 +53,7 @@ class ClaimInvoiceAgingReport extends BaseReport
      * @param null|int $payerId
      * @return self
      */
-    public function forPayer(?int $payerId) : self
+    public function forPayer(?int $payerId): self
     {
         $this->payerId = $payerId;
 
@@ -75,7 +75,7 @@ class ClaimInvoiceAgingReport extends BaseReport
      *
      * @return \Illuminate\Support\Collection
      */
-    protected function results() : ?iterable
+    protected function results(): ?iterable
     {
         $query = clone $this->query;
 

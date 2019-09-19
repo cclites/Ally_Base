@@ -3,11 +3,17 @@
 namespace App\Claims\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
-use App\Billing\ClaimStatus;
 use Carbon\Carbon;
 
 class ClaimsQueueResource extends Resource
 {
+    /**
+     * The resource instance.
+     *
+     * @var \App\Billing\ClientInvoice
+     */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -16,6 +22,7 @@ class ClaimsQueueResource extends Resource
      */
     public function toArray($request)
     {
+        /** @var \App\Claims\ClaimInvoice $claim */
         $claim = $this->resource->claimInvoice;
 
         return array_merge(parent::toArray($request), [

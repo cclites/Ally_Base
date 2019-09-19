@@ -7,6 +7,13 @@ use Illuminate\Http\Resources\Json\Resource;
 class ClaimableExpenseResource extends Resource
 {
     /**
+     * The resource instance.
+     *
+     * @var \App\Claims\ClaimableExpense
+     */
+    public $resource;
+
+    /**
      * Transform the resource into an array.
      *
      * @param \Illuminate\Http\Request $request

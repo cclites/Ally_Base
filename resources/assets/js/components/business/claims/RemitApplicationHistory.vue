@@ -63,12 +63,12 @@
 </template>
 
 <script>
-    import Constants from "../../../mixins/Constants";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import FormatsNumbers from "../../../mixins/FormatsNumbers";
-    import { mapGetters } from 'vuex';
+    import Constants from "../../../mixins/Constants";
     import { Decimal } from 'decimal.js';
+    import { mapGetters } from 'vuex';
 
     export default {
         mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers ],
@@ -113,12 +113,6 @@
                     created_at: { label: 'Date', sortable: true, formatter: x => this.formatDateTimeFromUTC(x) },
                 },
             }
-        },
-
-        methods: {
-        },
-
-        async mounted() {
         },
 
         created() {

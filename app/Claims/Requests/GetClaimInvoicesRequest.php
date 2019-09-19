@@ -28,7 +28,7 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
      *
      * @return array
      */
-    public function filtered() : array
+    public function filtered(): array
     {
         $data = $this->validated();
 

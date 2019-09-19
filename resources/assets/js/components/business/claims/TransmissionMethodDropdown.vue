@@ -2,20 +2,22 @@
     <b-select v-model="transmission_method" :change="updateValue()">
         <option value="">-- Select Transmission Method --</option>
         <option value="-" disabled>Direct Transmission:</option>
-        <option :value="CLAIM_SERVICE.HHA">{{ serviceLabel(CLAIM_SERVICE.HHA) }}</option>
-        <option :value="CLAIM_SERVICE.TELLUS">{{ serviceLabel(CLAIM_SERVICE.TELLUS) }}</option>
-<!--        <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ serviceLabel(CLAIM_SERVICE.CLEARINGHOUSE) }}</option>-->
+        <option :value="CLAIM_SERVICE.HHA">{{ resolveOption(CLAIM_SERVICE.HHA, claimServiceOptions) }}</option>
+        <option :value="CLAIM_SERVICE.TELLUS">{{ resolveOption(CLAIM_SERVICE.TELLUS, claimServiceOptions) }}</option>
+<!--        <option :value="CLAIM_SERVICE.CLEARINGHOUSE">{{ resolveOption(CLAIM_SERVICE.CLEARINGHOUSE, claimServiceOptions) }}</option>-->
         <option value="-" disabled>-</option>
         <option value="-" disabled>Offline:</option>
-        <option :value="CLAIM_SERVICE.EMAIL">{{ serviceLabel(CLAIM_SERVICE.EMAIL) }}</option>
-        <option :value="CLAIM_SERVICE.FAX">{{ serviceLabel(CLAIM_SERVICE.FAX) }}</option>
+        <option :value="CLAIM_SERVICE.EMAIL">{{ resolveOption(CLAIM_SERVICE.EMAIL, claimServiceOptions) }}</option>
+        <option :value="CLAIM_SERVICE.FAX">{{ resolveOption(CLAIM_SERVICE.FAX, claimServiceOptions) }}</option>
     </b-select>
 </template>
 
 <script>
+    import FormatsStrings from "../../../mixins/FormatsStrings";
     import Constants from "../../../mixins/Constants";
+
     export default {
-        mixins: [ Constants ],
+        mixins: [ Constants, FormatsStrings ],
 
         props: {
             value: {

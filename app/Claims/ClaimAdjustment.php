@@ -49,17 +49,6 @@ class ClaimAdjustment extends AuditableModel
      */
     protected $appends = [];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
@@ -68,7 +57,7 @@ class ClaimAdjustment extends AuditableModel
      * Get the ClaimInvoice relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function claimInvoice()
     {
         return $this->belongsTo(ClaimInvoice::class);
@@ -78,7 +67,7 @@ class ClaimAdjustment extends AuditableModel
      * Get the ClaimInvoiceItem relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function claimInvoiceItem()
     {
         return $this->belongsTo(ClaimInvoiceItem::class);
@@ -88,7 +77,7 @@ class ClaimAdjustment extends AuditableModel
      * Get the ClaimRemit relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function remit()
     {
         return $this->belongsTo(ClaimRemit::class, 'claim_remit_id');

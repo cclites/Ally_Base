@@ -85,10 +85,9 @@
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
-    import Constants from "../../../mixins/Constants";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import { mapGetters } from 'vuex';
+    import Constants from "../../../mixins/Constants";
     import AuthUser from '../../../mixins/AuthUser';
 
     export default {
@@ -127,8 +126,6 @@
                 if (this.remit.id) {
                     this.form.patch(`/business/claim-remits/${this.remit.id}`)
                         .then( ({ data }) => {
-                            // this.$store.commit('claims/setRemit', data.data);
-                            // TODO: handle update of remit
                             this.$emit('updated', data.data);
                             this.$emit('close');
                         })
@@ -136,8 +133,6 @@
                 } else {
                     this.form.post(`/business/claim-remits`)
                         .then( ({ data }) => {
-                            // this.$store.commit('claims/setClaim', data.data);
-                            // TODO: handle add update of remit
                             this.$emit('added', data.data);
                             this.$emit('close');
                         })

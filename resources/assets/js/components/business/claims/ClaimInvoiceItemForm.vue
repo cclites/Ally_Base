@@ -598,10 +598,10 @@
 </template>
 
 <script>
-    import { Decimal } from 'decimal.js';
-    import Constants from "../../../mixins/Constants";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
+    import { Decimal } from 'decimal.js';
     import { mapGetters } from 'vuex';
 
     export default {

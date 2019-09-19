@@ -2,12 +2,12 @@
 
 namespace App\Claims\Factories;
 
-use App\Claims\ClaimInvoiceItem;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\InvoiceableType;
+use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Billing\ClientInvoice;
