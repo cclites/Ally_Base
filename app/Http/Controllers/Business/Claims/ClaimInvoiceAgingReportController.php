@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Http\Controllers\Controller;
 use App\Claims\Reports\ClaimInvoiceAgingReport;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ClaimInvoiceAgingReportController extends Controller

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Requests\CreateClaimRemitApplicationsRequest;
-use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\ClaimAdjustment;
+use App\Claims\Resources\ClaimRemitResource;
 use App\Responses\SuccessResponse;
+use App\Claims\ClaimAdjustment;
 use App\Claims\ClaimRemit;
 
 class ClaimRemitApplicationController extends BaseController

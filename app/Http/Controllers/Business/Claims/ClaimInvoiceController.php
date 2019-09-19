@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\ClaimStatus;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimsQueueResource;
@@ -13,6 +12,7 @@ use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
+use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
 
@@ -29,8 +29,8 @@ class ClaimInvoiceController extends BaseController
         $filters = $request->filtered();
 
         $query = ClaimInvoice::with(['items' => function ($q) {
-                $q->orderByRaw('claimable_type desc, date asc');
-            }])->forRequestedBusinesses()
+            $q->orderByRaw('claimable_type desc, date asc');
+        }])->forRequestedBusinesses()
             ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id'])
@@ -159,10 +159,10 @@ class ClaimInvoiceController extends BaseController
 
         $groups = $claim->items->groupBy('type');
 
-        if (! isset($groups['Expense'])) {
+        if (!isset($groups['Expense'])) {
             $groups['Expense'] = [];
         }
-        if (! isset($groups['Service'])) {
+        if (!isset($groups['Service'])) {
             $groups['Service'] = [];
         }
 
@@ -177,7 +177,7 @@ class ClaimInvoiceController extends BaseController
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');
             $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('Claim-Invoice-'.snake_case($claim->name).'.pdf');
+            return $pdfWrapper->download('Claim-Invoice-' . snake_case($claim->name) . '.pdf');
         }
 
         return $view;

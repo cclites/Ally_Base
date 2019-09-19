@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Requests\CreateClaimAdjustmentRequest;
-use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Responses\ErrorResponse;
+use App\Claims\Exceptions\ClaimBalanceException;
+use App\Claims\Resources\ClaimsQueueResource;
 use App\Responses\SuccessResponse;
+use App\Responses\ErrorResponse;
 use App\Claims\ClaimAdjustment;
 use App\Claims\ClaimInvoice;
 
