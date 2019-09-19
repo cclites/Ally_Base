@@ -105,7 +105,6 @@ class PayrollSummaryReport extends BusinessResourceReport
                         'invoice_items' => $invoice->items,
                         'deposits' => $invoice->deposits->first(),
                     ];
-          });
-
+          })->sortBy('caregiver');
     }
 }
