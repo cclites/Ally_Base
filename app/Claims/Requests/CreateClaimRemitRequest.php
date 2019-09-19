@@ -29,10 +29,6 @@ class CreateClaimRemitRequest extends BusinessRequest
             'notes' => 'nullable|string|max:255',
         ];
 
-        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
-            $rules['amount'] = 'required|numeric|min:-9999999.99|max:-0.01';
-        }
-
         return $rules;
     }
 
@@ -46,10 +42,6 @@ class CreateClaimRemitRequest extends BusinessRequest
         $messages = [
             'amount.*' => 'Remit amount must have a value.',
         ];
-
-        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
-            $messages['amount.*'] = 'Take-back remits must have a negative amount.';
-        }
 
         return array_merge(parent::messages(), $messages);
     }

@@ -221,12 +221,12 @@
 
 <script>
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
-    import Constants from "../../../mixins/Constants";
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
-    import { mapGetters } from 'vuex';
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
     import { Decimal } from 'decimal.js';
+    import { mapGetters } from 'vuex';
 
     export default {
         mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers ],
@@ -294,15 +294,7 @@
              */
             canSubmit() {
                 // Check if we are exceeding the amount available to apply.
-                if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.REMIT && this.amountAvailable.lt(0)) {
-                    return false;
-                }
-
-                if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK && this.amountAvailable.gt(0)) {
-                    return false;
-                }
-
-                if (this.amountApplied.equals(0)) {
+                if (this.amountAvailable.lt(0) || this.amountApplied.equals(0)) {
                     return false;
                 }
 
@@ -447,27 +439,16 @@
                     // When the claim record is selected, all sub items
                     // should be set to the full amount and disabled.
                     this.$set(claim, 'items', claim.items.map(item => {
-                        if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
-                            item.amount_applied = this.makeNegative(item.amount_paid);
-                            item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK;
-                        } else {
-                            item.amount_applied = item.amount_due;
-                            item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
-                        }
-
+                        item.amount_applied = item.amount_due;
+                        item.adjustment_type = this.CLAIM_ADJUSTMENT_TYPES.PAYMENT;
                         item.note = '';
                         item.selected = true;
                         item.disabled = true;
                         return item;
                     }));
 
-                    if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
-                        this.$set(claim, 'amount_applied', this.makeNegative(claim.amount_paid));
-                        this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK);
-                    } else {
-                        this.$set(claim, 'amount_applied', claim.amount_due);
-                        this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
-                    }
+                    this.$set(claim, 'amount_applied', claim.amount_due);
+                    this.$set(claim, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
 
                     // Force view of details (sub-items)
                     this.$set(claim, '_showDetails', true);
@@ -514,14 +495,8 @@
                 if (claimItem.selected) {
                     // Claim items should always have a numeric value when selected.
                     if (claimItem.amount_applied == '') {
-                        if (this.remit.payment_type == this.CLAIM_REMIT_TYPES.TAKE_BACK) {
-                            this.$set(claimItem, 'amount_applied', this.makeNegative(claimItem.amount_paid));
-                            this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.TAKE_BACK);
-                        } else {
-                            this.$set(claimItem, 'amount_applied', claimItem.amount_due);
-                            this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
-                        }
-
+                        this.$set(claimItem, 'amount_applied', claimItem.amount_due);
+                        this.$set(claimItem, 'adjustment_type', this.CLAIM_ADJUSTMENT_TYPES.PAYMENT);
                         this.$set(claimItem, 'note', '');
                     }
                 } else {

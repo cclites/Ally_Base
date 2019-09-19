@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimRemitType;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Requests\UpdateClaimRemitRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;

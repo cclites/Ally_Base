@@ -52,13 +52,11 @@ export default {
                 { value: 'ACCEPTED', text: 'Accepted' },
                 { value: 'REJECTED', text: 'Rejected' },
             ],
-
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',
                 SERVICE: 'App\\Claims\\ClaimableService',
             },
             CLAIM_REMIT_TYPES: {
-                TAKE_BACK: 'take-back',
                 REMIT: 'remit',
                 ACH: 'ach',
                 CC: 'cc',
@@ -66,7 +64,6 @@ export default {
             },
             claimRemitTypeOptions: [
                 { value: 'remit', text: 'Remit' },
-                { value: 'take-back', text: 'Take Back' },
                 { value: 'ach', text: 'ACH' },
                 { value: 'cc', text: 'CC' },
                 { value: 'check', text: 'Check' },

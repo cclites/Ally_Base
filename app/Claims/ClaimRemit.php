@@ -249,19 +249,8 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));
 
-        if (ClaimRemitType::fromValue($this->payment_type) == ClaimRemitType::TAKE_BACK()) {
-            // Take-back remits have negative amounts.
-
-            if ($totalApplied < floatval($this->amount) || $totalApplied > floatval(0)) {
-                throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
-            }
-
-        } else {
-
-            if ($totalApplied > floatval($this->amount) || $totalApplied < floatval(0)) {
-                throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
-            }
-
+        if ($totalApplied > floatval($this->amount) || $totalApplied < floatval(0)) {
+            throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
         }
 
         $this->update(['amount_applied' => $totalApplied]);
