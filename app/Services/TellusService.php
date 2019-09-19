@@ -55,11 +55,15 @@ class TellusService
     {
         $xml = $this->convertArrayToXML($records);
 
+        // dd( $xml );
+
         list($httpCode, $response) = $this->sendXml($xml);
 
         dd($response);
 
         $xml = new SimpleXMLElement($response);
+
+        dd( $xml );
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
             throw new TellusApiException('Claim XML failed validation.');
@@ -161,10 +165,23 @@ class TellusService
             $service = $parent->addChild('RenderedService');
         }
 
-        foreach($record as $key => $value) {
-            if (is_array($value) && count($value) >= 2) {
+        $tasks = null;
+
+        foreach( $record as $key => $value ) {
+
+            if( $key == 'Tasks' ){
+
+                $tasks = $service->addChild( $key );
+            }
+            else if( $key == 'Task' ){
+
+                $child = $tasks->addChild( $key, $value[0] );
+                $child->addAttribute('tc', $value[1]);
+            }
+            else if (is_array($value) && count($value) >= 2) {
                 // Handle adding tc="" attribute
-                $child = $service->addChild($key, $value[0]);
+
+                $child = $service->addChild( $key, $value[0] );
                 $child->addAttribute('tc', $value[1]);
             } else {
                 $service->addChild($key, $value);

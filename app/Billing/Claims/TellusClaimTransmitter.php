@@ -105,16 +105,22 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
+
             if ($tellus->submitClaim($this->getData($claim))) {
                 // Success
+                dd( 'hey' );
+
                 return true;
             }
         } catch (TellusApiException $ex) {
+
             throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
         } catch (\Exception $ex) {
+
             \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
-            throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
+            throw new ClaimTransmissionException( $ex );
+            // throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
@@ -182,74 +188,78 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $clientInvoice = $claim->invoice;
 
         return [
-            'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
-            'Jurisdiction' => $this->tcLookup('Jurisdiction', $address->state ?? 'None'),
-            'Payer' => $this->tcLookup('Payer', $clientInvoice->getPayerCode()),
-            'Plan' => $this->tcLookup('Plan', $clientInvoice->getPlanCode()),
-            'Program' => $this->tcLookup('Program', 'None'), // N/A
-            'DeliverySystem' => 'ALLY',
-            'ProviderName' => $business->name,
-            'ProviderMedicaidId' => $business->medicaid_id,
-            'ProviderNpi' => $business->medicaid_npi_number,
-            'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy,
-            'ProviderNPIZipCode' => $business->zip,
-            'ProviderEin' => $business->ein,
-            'CaregiverFirstName' => $caregiver->firstname,
-            'CaregiverLastName' => $caregiver->lastname,
+
+            'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
+            'Jurisdiction'           => $this->tcLookup('Jurisdiction', $address->state ?? 'None'),
+            'Payer'                  => $this->tcLookup('Payer', $clientInvoice->getPayerCode() ?? 'UHTH'),
+            'Plan'                   => $this->tcLookup('Plan', $clientInvoice->getPlanCode() ?? 'FMSP'),
+            'Program'                => $this->tcLookup('Program', 'PACE'), // N/A
+            'DeliverySystem'         => $this->tcLookup( 'DeliverySystem', 'FFFS'), // 'ALLY',
+            'ProviderName'           => $business->name,
+            'ProviderMedicaidId'     => $business->medicaid_id,
+            'ProviderNPI'            => $business->medicaid_npi_number,
+            'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy,
+            'ProviderNPIZipCode'     => $business->zip,
+            'ProviderEin'            => $business->ein,
+            'CaregiverFirstName'     => $caregiver->firstname,
+            'CaregiverLastName'      => $caregiver->lastname,
             'CaregiverLicenseNumber' => $caregiver->medicaid_id,
-            'RecipientMedicaidId' => $client->medicaid_id,
-            'RecipientMemberId' => '', // N/A
-            'RecipientFirstName' => $client->firstname,
-            'RecipientLastName' => $client->lastname,
-            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'),
-            'ServiceAddress1' => $address->address1,
-            'ServiceAddress2' => $address->address2,
-            'ServiceCity' => $address->city,
-            'ServiceState' => $address->state,
-            'ServiceZip' => $address->zip,
-            'VisitId' => $shift->id,
-            'ServiceCode' => optional($shift->service)->code,
-            'ServiceCodeMod1' => '', // N/A
-            'ServiceCodeMod2' => '', // N/A
-            'DiagnosisCode1' => $diagnosisCodes[0],
-            'DiagnosisCode2' => $diagnosisCodes[1],
-            'DiagnosisCode3' => $diagnosisCodes[2],
-            'DiagnosisCode4' => $diagnosisCodes[3],
-            'StartVerificationType' => $this->getVerificationType($shift->checked_in_method),
-            'EndVerificationType' => $this->getVerificationType($shift->checked_out_method),
+            'RecipientMedicaidId'    => $client->medicaid_id,
+            'RecipientMemberId'      => '', // N/A
+            'RecipientFirstName'     => $client->firstname,
+            'RecipientLastName'      => $client->lastname,
+            'RecipientDob'           => Carbon::parse($client->date_of_birth)->format('m/d/Y'),
+            'ServiceAddress1'        => $address->address1,
+            'ServiceAddress2'        => $address->address2,
+            'ServiceCity'            => $address->city,
+            'ServiceState'           => $address->state,
+            'ServiceZip'             => $address->zip,
+            'VisitId'                => $shift->id,
+            'ServiceCode'            => optional($shift->service)->code,
+            'ServiceCodeMod1'        => '', // N/A
+            'ServiceCodeMod2'        => '', // N/A
+            'DiagnosisCode1'         => $diagnosisCodes[0],
+            'DiagnosisCode2'         => $diagnosisCodes[1],
+            'DiagnosisCode3'         => $diagnosisCodes[2],
+            'DiagnosisCode4'         => $diagnosisCodes[3],
+            'StartVerificationType'  => $this->tcLookup( 'StartVerificationType', $this->getVerificationType($shift->checked_in_method) ),
+            'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($shift->checked_out_method) ),
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
-            'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
-            'ScheduledLatitude' => optional($geocode)->latitude ?? '',
-            'ScheduledLongitude' => optional($geocode)->longitude ?? '',
-            'ActualStartDatetime' => $shift->checked_in_time->format($this->timeFormat),
-            'ActualEndDatetime' => $shift->checked_out_time->format($this->timeFormat),
-            'ActualStartLatitude' => $shift->checked_in_latitude ?? '',
-            'ActualStartLongitude' => $shift->checked_in_longitude ?? '',
-            'ActualEndLatitude' => $shift->checked_out_latitude ?? '',
-            'ActualEndLongitude' => $shift->checked_out_longitude ?? '',
-            'UserField1' => '', // N/A
-            'UserField2' => '', // N/A
-            'UserField3' => '', // N/A
-            'ReasonCode1' => '', // N/A
-            'ReasonCode2' => '', // N/A
-            'ReasonCode3' => '', // N/A
-            'ReasonCode4' => '', // N/A
-            'TimeZone' => $this->getBusinessTimezone($business),
-            'visitNote' => $shift->caregiver_comments ?? '',
-            'EndAddress1' => $address->address1,
-            'EndAddress2' => $address->address2,
-            'EndCity' => $address->city,
-            'EndState' => $address->state,
-            'EndZip' => $address->zip,
-            'VisitStatus' => 'COMP',
-            'MissedVisitReason' => '', // N/A
-            'MissedVisitActionTaken' => '', // N/A
-            'InvoiceUnits' => '', // TODO: find out how to fill this
-            'InvoiceAmount' => '', // TODO: find out how to fill this
-            'ScheduledEndLatitude' => '', // N/A
-            'ScheduledEndLongitude' => '', // N/A
-            'PaidAmount' => '', // N/A
-            'CareDirectionType' => '', // N/A
+            'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift),
+            'ScheduledLatitude'      => optional($geocode)->latitude ?? '',
+            'ScheduledLongitude'     => optional($geocode)->longitude ?? '',
+            'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat),
+            'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat),
+            'ActualStartLatitude'    => optional($geocode)->latitude ?? '', // these are not right, correct values TODO
+            'ActualStartLongitude'   => optional($geocode)->longitude ?? '', // these are not right, correct values TODO
+            'ActualEndLatitude'      => optional($geocode)->latitude ?? '', // these are not right, correct values TODO
+            'ActualEndLongitude'     => optional($geocode)->longitude ?? '', // these are not right, correct values TODO
+            'UserField1'             => '', // N/A
+            'UserField2'             => '', // N/A
+            'UserField3'             => '', // N/A
+            'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // N/A
+            // 'ReasonCode2' => '', // N/A
+            // 'ReasonCode3' => '', // N/A
+            // 'ReasonCode4' => '', // N/A
+            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
+            'VisitNote'              => $shift->caregiver_comments ?? '',
+            'EndAddress1'            => $address->address1,
+            'EndAddress2'            => $address->address2,
+            'EndCity'                => $address->city,
+            'EndState'               => $address->state,
+            'EndZip'                 => $address->zip,
+            'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ),
+            'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // N/A
+            'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // N/A
+            'InvoiceUnits'           => '', // TODO: find out how to fill this
+            'InvoiceAmount'          => '13.37', // TODO: find out how to fill this
+            'ScheduledEndLatitude'   => optional($geocode)->latitude ?? '', // these are not right, correct values TODO
+            'ScheduledEndLongitude'  => optional($geocode)->longitude ?? '', // these are not right, correct values TODO
+            'PaidAmount'             => '13.37', // N/A
+            'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // N/A
+
+            'Tasks'                  => '',
+            'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
         ];
     }
 

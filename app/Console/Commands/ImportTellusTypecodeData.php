@@ -12,7 +12,7 @@ class ImportTellusTypecodeData extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:tellus-typecode-data {file}';
+    protected $signature = 'import:tellus-typecode-data {enumeration?} {file?}';
 
     /**
      * The console command description.
@@ -26,9 +26,14 @@ class ImportTellusTypecodeData extends BaseImport
      */
     public function handle()
     {
+        \DB::table('tellus_typecodes')->truncate();
+        \DB::table('tellus_enumerations')->truncate();
+
         $this->info("Downloading latest xsd validation data...");
 
-        $xsd = file_get_contents('https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190710.xsd?api=v2');
+        // this populates the 'enumerations table'. The argument named 'file' populates the typecodes table
+        $file = $this->argument( 'enumeration' ) ?? "https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190829.xsd?api=v2";
+        $xsd = file_get_contents( $file );
 
         $this->info("Importing new list of Tellus enumerations...");
 
@@ -65,8 +70,6 @@ class ImportTellusTypecodeData extends BaseImport
 
         $this->info("Imported $count Tellus Validation rules.");
 
-        \DB::table('tellus_typecodes')->truncate();
-        \DB::table('tellus_enumerations')->truncate();
         parent::handle();
     }
 

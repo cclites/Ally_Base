@@ -44,24 +44,23 @@ class TestCommand extends Command
         if (config('app.env') == 'production') {
             return;
         }
-<<<<<<< HEAD
 
         \DB::beginTransaction();
-        $invoice = ClientInvoice::find(30269);
-        $claim = Claim::getOrCreate($invoice);
+        $invoice     = ClientInvoice::find(30269);
+        $claim       = Claim::getOrCreate($invoice);
         $transmitter = Claim::getTransmitter(ClaimService::TELLUS());
 
-        if ($transmitter->isTestMode($claim)) {
-            $testFile = $transmitter->test($claim);
+        if ( $transmitter->isTestMode( $claim ) ) {
+
+            $testFile = $transmitter->test( $claim );
         } else {
-            $transmitter->send($claim);
-            $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
+
+            $transmitter->send( $claim );
+            $claim->updateStatus( ClaimStatus::TRANSMITTED(), [
                 'service' => $service,
             ]);
         }
 
 //        \DB::commit();
-=======
->>>>>>> origin/master
     }
 }
