@@ -163,8 +163,10 @@ Vue.component('business-clients-missing-payment-methods-report', require('./comp
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 //Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
-Vue.component('business-notification', require('./components/BusinessNotification.vue'));
-Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
+
+Vue.component('system-notification', require('./components/SystemNotification.vue'));
+Vue.component('system-notifications-page', require('./components/SystemNotificationsPage.vue'));
+
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 
 Vue.component('third-party-payer', require('./components/business/reports/ThirdPartyPayerReport.vue'));
@@ -311,7 +313,7 @@ Vue.component('reset-password-modal', require('./components/ResetPasswordModal.v
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
-Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
+Vue.component('system-notifications-icon', require('./components/SystemNotificationsIcon.vue'));
 Vue.component('tasks-icon', require('./components/TasksIcon.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
