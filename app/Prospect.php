@@ -209,6 +209,13 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
                 $client->phoneNumbers()->save($phone);
             }
 
+            if($this->notes){
+                foreach ($this->notes as $note){
+                    $note->client_id = $client->id;
+                    $note->save();
+                }
+            }
+
             $this->update(['client_id' => $client->id]);
             $this->load('client');
 

@@ -8,6 +8,7 @@
                 :required="required"
                 :readonly="readonly"
                 v-model="localValue"
+                :id="id"
         />
         <input
                 v-else
@@ -17,6 +18,7 @@
                 :required="required"
                 :readonly="readonly"
                 v-model="localValue"
+                :id="id"
         />
     </div>
 </template>
@@ -43,7 +45,11 @@
             required: {
                 type: Boolean,
                 default: false
-            }
+            },
+            id: {
+                type: String,
+                default: '',
+            },
         },
 
         data() {

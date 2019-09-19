@@ -622,14 +622,6 @@
                             allowed: ['office_user'],
                             hidden: true,
                         },
-                        {
-                            name: 'Invoice Summary By County',
-                            url: 'reports/invoice-summary-by-county',
-                            description: 'Client Charges By County',
-                            category: 5,
-                            allowed: ['office_user'],
-                            hidden: true,
-                        },
                     )
                 }
 

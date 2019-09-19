@@ -441,3 +441,7 @@ label.required::after, legend.required::after {
   z-index: 500;
   opacity: 0.5;
 }
+
+.form-group.bold > label {
+    font-weight: 800;
+}

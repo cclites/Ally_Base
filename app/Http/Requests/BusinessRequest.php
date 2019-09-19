@@ -2,6 +2,7 @@
 namespace App\Http\Requests;
 
 use App\Business;
+use App\BusinessChain;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -85,7 +86,8 @@ abstract class BusinessRequest extends FormRequest
     }
 
     /**
-     * Returns the business ID from the request, defaulting to a single business if the user only has 1 attached
+     * Get the business ID from the request, defaulting to a
+     * single business if the user only has 1 attached.
      *
      * @param \App\User|null $user
      * @return array|string
@@ -101,6 +103,9 @@ abstract class BusinessRequest extends FormRequest
     }
 
     /**
+     * Get the business from the request, defaulting to a
+     * single business if the user only has 1 attached.
+     *
      * @param \App\User|null $user
      * @return \App\Business|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
@@ -108,6 +113,16 @@ abstract class BusinessRequest extends FormRequest
     public function getBusiness(User $user = null)
     {
         return Business::findOrFail($this->getBusinessId($user));
+    }
+
+    /**
+     * Get the business chain from the request.
+     *
+     * @return BusinessChain
+     */
+    public function getChain() : BusinessChain
+    {
+        return $this->getBusiness()->chain;
     }
 
     /**

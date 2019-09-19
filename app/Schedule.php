@@ -726,11 +726,13 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
         return [
             $client->schedules()
+                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
                 ->whereBetween('starts_at', $beforeWindow)
                 ->get()
                 ->unique('caregiver_id'),
             $client->schedules()
+                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
                 ->whereBetween('starts_at', $afterWindow)
                 ->get()

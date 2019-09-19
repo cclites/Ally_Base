@@ -6,10 +6,12 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
 use App\Billing\Contracts\ReconcilableInterface;
+use App\Contracts\HasTimezone;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
@@ -161,7 +163,7 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver onboarded()
  */
 class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
-    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
+    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface, HasTimezone
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
@@ -800,6 +802,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     }
 
     /**
+
      * Gets a formatted list of audits.
      *
      * @return array
@@ -807,11 +810,29 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function auditTrail()
     {
         $audits = Audit::where('new_values', 'like', '%"caregiver_id":' . $this->id . '%')
-            ->orWhere(function($q){
+            ->orWhere(function ($q) {
                 $q->whereIn('auditable_type', ['App\User', 'caregivers'])
                     ->where('auditable_id', $this->id);
             })
             ->get();
         return $audits;
+    }
+
+    /*
+     *
+     * Get the model's Timezone.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        // Attempt to get the timezone from the first business
+        // they belong to.
+        // TODO: this is faulty, Caregiver's should have a profile setting for timezone.
+        if ($business = $this->businesses()->first()) {
+            return Timezone::getTimezone($business->id);
+        }
+
+        return config('ally.local_timezone');
     }
 }

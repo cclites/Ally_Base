@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
-class ClaimController extends BaseController
+class ClaimsReportController extends BaseController
 {
     public function report()
     {
@@ -25,14 +25,15 @@ class ClaimController extends BaseController
 
         // TODO: Clean up temporary duplicate client find, Necessary to get the right timezone (from client business)
         $client = Client::findOrFail($request->client_id);
-        $start_date = Carbon::parse($request->start_date, $client->business->timezone);
-        $end_date = Carbon::parse($request->end_date, $client->business->timezone);
+        $start_date = Carbon::parse($request->start_date, $client->business->timezone)->format( 'Y-m-d ' . '00:00:00');
+        $end_date = Carbon::parse($request->end_date, $client->business->timezone)->format( 'Y-m-d ' . '23:59:59');
 
         $client = Client::with([
             'addresses',
             'shifts' => function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('checked_in_time', [$start_date, $end_date])
-                    ->whereNotNull('checked_out_time');
+                    ->whereNotNull('checked_out_time')
+                    ->ordered();
             }
         ])
             ->find($request->client_id);
@@ -40,7 +41,7 @@ class ClaimController extends BaseController
         $this->authorize('read', $client);
 
         $summary = [];
-        foreach ($client->shifts()->ordered()->get() as $shift) {
+        foreach ($client->shifts as $shift) {
             $summary[] = [
                 'date' => $shift->checked_in_time->format('Y-m-d'),
                 'total' => (float) $shift->shift_total = $shift->costs()->getTotalCost(),

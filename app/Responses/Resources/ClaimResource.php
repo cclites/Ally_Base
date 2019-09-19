@@ -2,6 +2,7 @@
 namespace App\Responses\Resources;
 
 use App\Billing\ClaimStatus;
+use Carbon\Carbon;
 
 class ClaimResource extends ClientInvoice
 {
@@ -11,10 +12,9 @@ class ClaimResource extends ClientInvoice
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray( $request )
     {
         return array_merge(parent::toArray($request), [
-
             'invoice_total' => $this->resource->amount,
             'balance'       => $this->resource->amount - $this->resource->getAmountPaid(),
             'client'        => $this->resource->client,

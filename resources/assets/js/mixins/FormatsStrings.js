@@ -27,6 +27,17 @@ export default {
         },
         fromSnakeCase(str){
            return str.replace(/_/g, ' ');
-        }
+        },
+        snakeToTitleCase(status) {
+            return this.uppercaseWords(status.replace('_', ' '));
+        },
+        resolveOption(value, options, defaultString = '-') {
+            let item = options.find(x => x.value == value);
+            if (item) {
+                return item.text;
+            }
+
+            return defaultString;
+        },
     }
 }

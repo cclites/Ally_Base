@@ -12,6 +12,6 @@ class Timezone
      */
     public static function getTimezone($business_id): string
     {
-        return (string) app('settings')->get($business_id, 'timezone') ?: 'America/New_York';
+        return (string) app('settings')->get($business_id, 'timezone') ?: config('ally.local_timezone');
     }
 }

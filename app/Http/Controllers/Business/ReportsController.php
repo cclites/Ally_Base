@@ -346,6 +346,7 @@ class ReportsController extends BaseController
         // Restrict businesses
         $report->forRequestedBusinesses();
 
+        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
         if ($request->has('start_date') || $request->has('end_date')) {
             $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
             $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);

@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Space out curly braces to prevent XSS attacks with Vue.js interpolation
@@ -306,5 +307,31 @@ if (! function_exists('alterStartOfWeekDay')) {
         Carbon::setWeekEndsAt($previousWeekEnd);
 
         return $result;
+    }
+}
+
+if (! function_exists('throw_validation_exception')) {
+    /**
+     * Throw a custom validation exception.
+     *
+     * @param array $messages
+     * @throws ValidationException
+     */
+    function throw_validation_exception(array $messages) : void
+    {
+        throw ValidationException::withMessages($messages);
+    }
+}
+
+if (! function_exists('snake_to_title_case')) {
+    /**
+     * Convert snake_case to Title Case.
+     *
+     * @param string $str
+     * @return string
+     */
+    function snake_to_title_case(string $str): string
+    {
+        return title_case(preg_replace('/_/', ' ', $str));
     }
 }

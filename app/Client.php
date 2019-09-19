@@ -16,6 +16,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Billing\Contracts\ReconcilableInterface;
+use App\Contracts\HasTimezone;
 use App\Contracts\UserRole;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToOneBusiness;
@@ -238,7 +239,8 @@ class Client extends AuditableModel implements
     ReconcilableInterface,
     HasPaymentHold,
     HasAllyFeeInterface,
-    BelongsToBusinessesInterface
+    BelongsToBusinessesInterface,
+    HasTimezone
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;

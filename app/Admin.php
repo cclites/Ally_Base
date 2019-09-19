@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Contracts\HasTimezone;
 use App\Contracts\UserRole;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\IsUserRole;
@@ -47,7 +48,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Admin extends AuditableModel implements UserRole
+class Admin extends AuditableModel implements UserRole, HasTimezone
 {
     use BelongsToBusinesses;
     use IsUserRole;
@@ -93,8 +94,8 @@ class Admin extends AuditableModel implements UserRole
      *
      * @return string
      */
-    public function getTimezone()
+    public function getTimezone() : string
     {
-        return 'America/New_York';
+        return config('ally.local_timezone');
     }
 }

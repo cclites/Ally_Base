@@ -19,11 +19,6 @@ use App\Shift;
  */
 trait CreatesClientInvoiceResources
 {
-    /**
-     * @var \App\Client
-     */
-    private $client;
-
     private function createAllowancePayer(float $allowance, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31',
         string $allocation_type = ClientPayer::ALLOCATION_MONTHLY): ClientPayer
     {
@@ -137,7 +132,7 @@ trait CreatesClientInvoiceResources
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
             'payer_id' => $payerId,
-            'service_id' => null,
+            'service_id' => \App\Billing\Service::inRandomOrder()->first() ?? factory(\App\Billing\Service::class)->create(),
             'caregiver_rate' => 0,
             'client_rate' => 0,
             'other_expenses' => $amount,
@@ -153,7 +148,7 @@ trait CreatesClientInvoiceResources
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
             'payer_id' => $payerId,
-            'service_id' => null,
+            'service_id' => \App\Billing\Service::inRandomOrder()->first() ?? factory(\App\Billing\Service::class)->create(),
             'caregiver_rate' => 0,
             'client_rate' => 0,
             'mileage' => $miles,
