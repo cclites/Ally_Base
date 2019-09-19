@@ -15,9 +15,13 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        $clients = Client::active()->orderByName()->get();
+        $clients = Client::active()->orderByName();
 
-        return response($clients);
+        if(filled($request->id)){
+            $clients->forRequestedBusinesses([$request->id]);
+        }
+
+        return response($clients->get());
     }
 
     /**
