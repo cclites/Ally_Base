@@ -14,4 +14,7 @@ class ClaimRemitType extends BaseEnum
 {
     private const TAKE_BACK = 'take-back';
     private const REMIT = 'remit';
+    private const ACH = 'ach';
+    private const CC = 'cc';
+    private const CHECK = 'check';
 }

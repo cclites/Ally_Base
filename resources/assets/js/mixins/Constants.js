@@ -60,10 +60,16 @@ export default {
             CLAIM_REMIT_TYPES: {
                 TAKE_BACK: 'take-back',
                 REMIT: 'remit',
+                ACH: 'ach',
+                CC: 'cc',
+                CHECK: 'check',
             },
             claimRemitTypeOptions: [
                 { value: 'remit', text: 'Remit' },
                 { value: 'take-back', text: 'Take Back' },
+                { value: 'ach', text: 'ACH' },
+                { value: 'cc', text: 'CC' },
+                { value: 'check', text: 'Check' },
             ],
             CLAIM_REMIT_STATUS: {
                 NOT_APPLIED: 'not_applied',                
