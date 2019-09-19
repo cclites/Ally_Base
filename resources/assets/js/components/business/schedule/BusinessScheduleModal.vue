@@ -6,6 +6,7 @@
                  size="xl"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
+                 scrollable
         >
             <loading-card text="Loading details" v-show="isLoading"></loading-card>
             <b-card no-body v-if="!isLoading">
@@ -428,17 +429,19 @@
                     <b-tab title="Audit Log" id="audit-log">
                         <b-row>
                             <b-col md-12>
-                                <b-table
-                                        class="log-table"
-                                        :items="auditLogItems"
-                                        :fields="audit.fields"
-                                        :sort-by="sortBy"
-                                        :empty-text="emptyText"
-                                >
-                                    <template slot="user" scope="row">
-                                        {{ row.item.user.nameLastFirst }}
-                                    </template>
-                                </b-table>
+                                <div class="table-wrapper">
+                                    <b-table
+                                            class="log-table"
+                                            :items="auditLogItems"
+                                            :fields="audit.fields"
+                                            :sort-by="sortBy"
+                                            :empty-text="emptyText"
+                                    >
+                                        <template slot="user" scope="row">
+                                            {{ row.item.user.nameLastFirst }}
+                                        </template>
+                                    </b-table>
+                                </div>
                             </b-col>
                         </b-row>
                     </b-tab>
@@ -1132,7 +1135,6 @@
                 if(this.selectedSchedule.id){
                     this.fetchAuditLog();
                 }
-
             },
 
             scheduleModal(val) {
@@ -1171,8 +1173,11 @@
 
     #audit-log .table{
         table-layout: fixed;
-        max-height: 300px;
-        overflow: auto;
+
+    }
+    .table-wrapper{
+        max-height: 800px;
+        overflow-y: auto;
     }
     .table th, .table td {
         padding: 0.35rem 0.5rem;

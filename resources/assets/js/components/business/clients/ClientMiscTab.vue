@@ -8,17 +8,19 @@
         <h4>Audit Log</h4>
         <b-row>
             <b-col md-12>
-                <b-table
-                        class="log-table"
-                        :items="auditLogItems"
-                        :fields="fields"
-                        :sort-by="sortBy"
-                        :empty-text="emptyText"
-                >
-                    <template slot="user" scope="row">
-                        {{ row.item.user.nameLastFirst }}
-                    </template>
-                </b-table>
+                <div class="table-wrapper">
+                    <b-table
+                            class="log-table"
+                            :items="auditLogItems"
+                            :fields="fields"
+                            :sort-by="sortBy"
+                            :empty-text="emptyText"
+                    >
+                        <template slot="user" scope="row">
+                            {{ row.item.user.nameLastFirst }}
+                        </template>
+                    </b-table>
+                </div>
             </b-col>
         </b-row>
     </b-card>
@@ -69,9 +71,12 @@
         overflow-wrap: break-all;
     }
 
+    .table-wrapper{
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
     table.table{
-        overflow: auto;
-        width: 100vw;
         table-layout: fixed;
     }
 </style>
