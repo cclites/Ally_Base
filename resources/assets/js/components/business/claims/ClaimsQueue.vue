@@ -32,7 +32,7 @@
                             </option>
                         </b-form-select>
 
-                        <payer-dropdown-filter v-model="payerFilter" class="mr-1 mt-1" />
+                        <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" />
 
                         <b-form-select
                             id="invoiceType"

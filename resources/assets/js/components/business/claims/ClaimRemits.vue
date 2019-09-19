@@ -44,7 +44,7 @@
                             <option value="">-- Any Status --</option>
                         </template>
                     </b-form-select>
-                    <payer-dropdown-filter v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --" />
+                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --" />
                     <b-input
                         v-model="filters.reference"
                         placeholder="Reference #"

@@ -60,7 +60,7 @@
                 :allow-all="true"
             />
 
-            <payer-dropdown-filter v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
+            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
 
             <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
                 <option value="">-- All Clients --</option>

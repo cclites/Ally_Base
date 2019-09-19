@@ -19,7 +19,7 @@
                         </option>
                     </b-form-select>
 
-                    <payer-dropdown-filter v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
+                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
 
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
