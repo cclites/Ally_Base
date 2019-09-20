@@ -56,13 +56,13 @@ class ProcessChainDeposits
         $caregivers = $this->invoiceAggregator->getEligibleCaregivers($chain);
         foreach($caregivers as $caregiver) {
             $invoices = $this->invoiceAggregator->dueForCaregiver($caregiver);
-            $results[] = $this->processSingleDeposit($batchId, $invoices);
+            $results[] = $this->processSingleDeposit($batchId, $invoices, $chain->id);
         }
 
         $businesses = $this->invoiceAggregator->getEligibleBusinesses($chain);
         foreach($businesses as $business) {
             $invoices = $this->invoiceAggregator->dueForBusiness($business);
-            $results[] = $this->processSingleDeposit($batchId, $invoices);
+            $results[] = $this->processSingleDeposit($batchId, $invoices, $chain->id);
         }
 
         DepositLog::releaseLock();
@@ -76,12 +76,12 @@ class ProcessChainDeposits
      * @param array $results
      * @return array
      */
-    private function processSingleDeposit(string $batchId, iterable $invoices): DepositLog
+    private function processSingleDeposit(string $batchId, iterable $invoices, $chainId): DepositLog
     {
         $log = new DepositLog();
         $log->batch_id = $batchId;
         try {
-            $deposit = $this->depositProcessor->payInvoices($invoices, $this->methodFactory);
+            $deposit = $this->depositProcessor->payInvoices($invoices, $this->methodFactory, $chainId);
             $log->setDeposit($deposit);
             if ($deposit->transaction && $deposit->transaction->method) {
                 $log->setPaymentMethod($deposit->transaction->method);

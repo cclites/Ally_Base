@@ -74,7 +74,7 @@ class ProcessInvoiceDeposit
      * @throws PaymentAmountError
      * @throws PaymentMethodError
      */
-    public function payInvoices(iterable $invoices, DepositMethodFactory $methodFactory): Deposit
+    public function payInvoices(iterable $invoices, DepositMethodFactory $methodFactory, $chainId): Deposit
     {
         $amount = 0.0;
         $allowZeroBalanceTransaction = false;
@@ -107,6 +107,7 @@ class ProcessInvoiceDeposit
 
         $deposit = null;
         if ($recipient instanceof Caregiver) {
+            $recipient->chain_id = $chainId;
             $deposit = $this->depositProcessor->depositToCaregiver($recipient, $methodFactory, $amount, 'USD', $allowZeroBalanceTransaction);
         }
         else if ($recipient instanceof Business) {

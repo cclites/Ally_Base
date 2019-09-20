@@ -112,6 +112,10 @@ class DepositsController extends Controller
         if ($request->caregiver_id) {
             $caregiver = Caregiver::findOrFail($request->caregiver_id);
 
+            //For manual deposits, the location id will be included, so trivial to get the chain.
+            $chainId =  Business::where('id', $request->business_id)->pluck('chain_id')->first();
+            $caregiver->chain_id = $chainId;
+
             if ($request->process) {
                 if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
                 $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
