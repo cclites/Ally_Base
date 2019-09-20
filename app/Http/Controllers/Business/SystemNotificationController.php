@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\PaginatedResourceRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
@@ -13,26 +14,55 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class SystemNotificationController extends BaseController
 {
     /**
+     * Get a preview of the user's notifications for
+     * the notifications icon in the page header.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function preview(Request $request)
+    {
+        $query = auth()->user()->systemNotifications()
+            ->latest()
+            ->whereNull('acknowledged_at');
+
+        $total = $query->count();
+
+        $notifications = $query->limit(20)->get();
+
+        return response()->json(compact('total', 'notifications'));
+    }
+
+    /**
      * Display a listing of the resource.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param PaginatedResourceRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(PaginatedResourceRequest $request)
     {
-        $query = auth()->user()->systemNotifications()->latest();
-        $notifications = (clone $query)->whereNull('acknowledged_at')
-            ->get();
-
         if ($request->expectsJson() && $request->input('json')) {
-            return collection_only_values($notifications, ['id', 'title', 'message', 'created_at', '']);
+            $query = auth()->user()->systemNotifications()
+                ->latest();
+
+            if ($request->acknowledged == '1') {
+                $query->whereNotNull('acknowledged_at');
+            } else {
+                $query->whereNull('acknowledged_at');
+            }
+
+            $total = $query->count();
+
+            $results = $query->offset($request->getOffset())
+                ->limit($request->getPerPage(25))
+                ->get();
+
+            return response()->json(compact('total', 'results'));
         }
 
-        $archived = (clone $query)->whereNotNull('acknowledged_at')
-            ->orderBy('acknowledged_at', 'DESC')
-            ->get();
-
-        return view('business.notifications.index', compact('notifications', 'archived'));
+        return view_component('system-notifications-page', 'System Notifications', [], [
+            'Home' => route('home'),
+        ]);
     }
 
     /**
@@ -46,7 +76,13 @@ class SystemNotificationController extends BaseController
     {
         $this->authorize('read', $notification);
         
-        return view('business.notifications.show', compact('notification'));
+        return view_component('system-notification', 'System Notification: '.$notification->title, [
+            'notification' => $notification,
+            'acknowledger' => $notification->acknowledger ?: null,
+        ], [
+            'Home' => route('home'),
+            'Notifications' => route('business.notifications.index'),
+        ]);
     }
 
     /**

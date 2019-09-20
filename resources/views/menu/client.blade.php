@@ -13,6 +13,11 @@
     </li>
 @endif
 <li>
+    <a href="/scheduled-shifts" aria-expanded="false">
+        <i class="mdi mdi-history"></i><span class="hide-menu">Scheduled Shifts</span>
+    </a>
+</li>
+<li>
     <a href="/client/invoices" aria-expanded="false">
         <i class="fa fa-file-text" style="margin-right: -2px; margin-left: 2px"></i><span class="hide-menu">Invoice History</span>
     </a>

@@ -57,7 +57,7 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
+            background-color: transparent;
             padding: 15px;
         }
 
@@ -76,7 +76,7 @@
     <div class="page" id="summary">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
                 <div class="h4">Invoice Summary By Salesperson</div>
             </div>
         </div>

@@ -50,7 +50,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="activity in shift.activities" :key="activity.id">
+                    <tr v-for="(activity, index) in shift.activities" :key="index">
                         <td>{{ activity.code }}</td>
                         <td>{{ activity.name }}</td>
                     </tr>
@@ -99,10 +99,15 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="business.co_signature && shift.signature != null" class="mb-2">
-            <b-col sm="12">
+        <b-row class="mb-2">
+            <b-col sm="6" v-if="business.co_signature && shift.client_signature != null">
                 <strong>Client Signature</strong>
-                <div v-html="shift.signature.content" class="signature"></div>
+                <div v-html="shift.client_signature.content" class="signature"></div>
+            </b-col>
+
+            <b-col sm="6" v-if="business.co_caregiver_signature && shift.caregiver_signature != null">
+                <strong>Caregiver Signature</strong>
+                <div v-html="shift.caregiver_signature.content" class="signature"></div>
             </b-col>
         </b-row>
 
@@ -179,7 +184,7 @@
                         let service = this.services.find(x => x.id === item.service_id);
                         let rate = this.authRole == 'caregiver' ? item.caregiver_rate : item.client_rate;
                         return {
-                            service: service ? service.name : 'General',
+                            service: item.service ? item.service.name : (service ? service.name : 'General'),
                             rate: rate,
                             hours_type: item.hours_type,
                             hours: item.duration,
@@ -192,7 +197,7 @@
                     let defaultServiceName = this.defaultService && this.defaultService.name ? this.defaultService.name : 'General';
                     let rate = this.authRole == 'caregiver' ? this.shift.caregiver_rate : this.shift.client_rate;
                     return [{
-                        service: service ? service.name : defaultServiceName,
+                        service: this.shift.service ? this.shift.service.name : (service ? service.name : defaultServiceName),
                         rate: rate,
                         hours_type: this.shift.hours_type,
                         hours: this.shift.hours,

@@ -74,7 +74,7 @@ class ShiftHistoryItemResource extends Resource
     private function mapServices(Shift $shift) : ?iterable
     {
         if ($shift->service) {
-            return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->duration . ')'];
+            return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->getRawDuration() . ')'];
         } else if ($shift->services->count()) {
             return $shift->services->map(function (ShiftService $shiftService) {
                 return $shiftService->service->code . '-' . Str::limit($shiftService->service->name, 8) . '(' . $shiftService->duration . ')';

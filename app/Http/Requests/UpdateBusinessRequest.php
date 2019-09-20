@@ -46,6 +46,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'co_expenses' => 'required|bool',
             'co_issues' => 'required|bool',
             'co_signature' => 'required|bool',
+            'co_caregiver_signature' => 'required|bool',
             'ein' => 'nullable',
             'medicaid_id' => 'nullable',
             'medicaid_npi_number' => 'nullable',

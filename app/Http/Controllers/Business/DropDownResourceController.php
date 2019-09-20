@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\Payer;
+use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Http\Resources\ClientDropdownResource;
@@ -20,7 +21,7 @@ class DropdownResourceController extends BaseController
      * A list of the resource types that may be called through the route.
      * @var array
      */
-    const AVAILABLE_RESOURCES = ['clients', 'caregivers', 'payers', 'sales-people','marketing-clients'];
+    const AVAILABLE_RESOURCES = ['clients', 'caregivers', 'payers', 'sales-people','marketing-clients', 'clients-for-chain'];
 
     /**
      * Determine the type of resource the request is looking
@@ -49,7 +50,17 @@ class DropdownResourceController extends BaseController
 
     protected function caregivers(Request $request)
     {
-        $caregivers = new CaregiverDropdownResource(Caregiver::forBusinesses([$request->business])->active()->get());
+        $query = Caregiver::forBusinesses([$request->business]);
+
+        if ($request->active == 'all') {
+            // no active scope
+        } else if ($request->active == '0') {
+            $query->inactive();
+        } else {
+            $query->active();
+        }
+
+        $caregivers = new CaregiverDropdownResource($query->get());
         return response()->json($caregivers);
     }
 
@@ -72,6 +83,12 @@ class DropdownResourceController extends BaseController
             ->whereNotNull('sales_person_id')
             ->get();
 
+        return response()->json(new ClientDropdownResource($clients));
+    }
+
+    protected function clientsForChain(Request $request)
+    {
+        $clients = Client::forChain($request->chain)->get();
         return response()->json(new ClientDropdownResource($clients));
     }
 }

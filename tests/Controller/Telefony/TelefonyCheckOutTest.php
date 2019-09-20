@@ -192,6 +192,20 @@ class TelefonyCheckOutTest extends TelefonyBase
         $response->assertSee(route('telefony.check-out.check-for-activities', [$shift]));
     }
 
+    /** @test */
+    function recording_the_same_activity_twice_should_not_add_duplicates()
+    {
+        $shift = $this->createShift();
+        $activity = factory(Activity::class)->create();
+
+        $this->telefonyPost('check-out/record-activity/' . $shift->id . '/' . $activity->id, ['Digits' => 1]);
+        $this->assertEquals($activity->id, $shift->activities()->first()->id);
+        $this->assertCount(1, $shift->fresh()->activities);
+
+        $this->telefonyPost('check-out/record-activity/' . $shift->id . '/' . $activity->id, ['Digits' => 1]);
+        $this->assertCount(1, $shift->fresh()->activities);
+    }
+
     public function test_no_digits_on_activities_redirects_to_finalize()
     {
         $shift = $this->createShift();

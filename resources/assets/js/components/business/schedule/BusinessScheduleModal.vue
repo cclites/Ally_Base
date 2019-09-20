@@ -402,6 +402,7 @@
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                                         <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
                                         <option value="OPEN_SHIFT">Open Shift</option>
+                                        <option value="HOSPITAL_HOLD">Hospital Hold</option>
                                     </b-form-select>
                                 </b-form-group>
                                 <b-form-group label="Add a note for the Caregiver to see" label-for="notes">

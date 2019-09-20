@@ -40,6 +40,5 @@ class TestCommand extends Command
         if (config('app.env') == 'production') {
             return;
         }
-
     }
 }

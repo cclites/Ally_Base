@@ -2,6 +2,7 @@ import * as Vue from "vue";
 
 const state = {
     notifications: [],
+    total: 0,
     running: false,
 };
 
@@ -9,6 +10,9 @@ const state = {
 const getters = {
     notifications(state) {
         return state.notifications;
+    },
+    total(state) {
+        return state.total;
     },
 };
 
@@ -18,7 +22,8 @@ const mutations = {
         Vue.set(state, 'running', true);
     },
 
-    update(state, notifications) {
+    update(state, {total, notifications}) {
+        Vue.set(state, 'total', total);
         Vue.set(state, 'notifications', notifications);
     },
 };
@@ -37,9 +42,10 @@ const actions = {
     },
 
     async fetch(context) {
-        await axios.get('/business/notifications?json=1')
+        await axios.get('/business/notifications/preview')
             .then( ({ data }) => {
-                context.commit('update', data ? data : []);
+                console.log('repsonse:', data);
+                context.commit('update', data ? data : {notifications: [], total: 0});
             })
             .catch(e => {
             });

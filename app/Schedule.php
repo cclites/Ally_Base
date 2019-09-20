@@ -137,6 +137,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
     const CAREGIVER_NOSHOW = 'CAREGIVER_NOSHOW';
     const OPEN_SHIFT = 'OPEN_SHIFT';
+    const HOSPITAL_HOLD = 'HOSPITAL_HOLD';
 
     ///////////////////////////////////////////
     /// Related Shift Statuses
@@ -724,11 +725,13 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
         return [
             $client->schedules()
+                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
                 ->whereBetween('starts_at', $beforeWindow)
                 ->get()
                 ->unique('caregiver_id'),
             $client->schedules()
+                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
                 ->whereBetween('starts_at', $afterWindow)
                 ->get()
@@ -790,4 +793,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         });
     }
 
+    /**
+     * Get only schedules that start between the two given dates.
+     * Adjusts to timezone.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $start
+     * @param string $end
+     * @return void
+     */
+    public function scopeStartsBetweenDates($query, $timezone, $start, $end)
+    {
+        $query->whereBetween('starts_at', [
+            Carbon::parse($start, $timezone),
+            Carbon::parse($end, $timezone)
+        ]);
+    }
 }

@@ -29,6 +29,10 @@ class ClientInvoiceController extends Controller
                 }
             }
 
+            if($clientId = $request->input('client_id')){
+                $invoiceQuery->where('client_id', $clientId);
+            }
+
             if ($businessId = $request->input('business_id')) {
                 $invoiceQuery->forBusiness($businessId);
             }
@@ -106,6 +110,10 @@ class ClientInvoiceController extends Controller
     {
         if ($invoice->payments()->exists()) {
             return new ErrorResponse(400, "This invoice cannot be removed because it has payments assigned.");
+        }
+
+        if (filled($invoice->claimInvoice)) {
+            return new ErrorResponse(400, "This invoice cannot be removed because it has a Claim attached.");
         }
 
         if ($invoice->delete()) {

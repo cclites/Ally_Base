@@ -8,7 +8,7 @@
             </b-row>
             <full-calendar ref="calendar" :events="events" defaultView="listDay" @event-selected="viewDetails" :header="header" />
         </b-card>
-        <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal">
+        <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal" size="xl" scrollable>
             <b-container fluid>
                 <b-row>
                     <b-col>
@@ -31,13 +31,13 @@
                             </tr>
                         </table>
                         <loading-card v-show="loadingClient"></loading-card>
-                        <caregiver-client-details v-if="selectedClient.id"
-                                                  :client="selectedClient"
-                                                  :care-plan="selectedEvent.care_plan || {}"
-                                                  :address="selectedClient.evv_address || {}"
-                                                  :phone="selectedClient.evv_phone ? selectedClient.evv_phone.number : ''"
-                                                  :care-details="selectedClient.care_details || {}"
-                        />
+                            <caregiver-client-details v-if="selectedClient.id"
+                                                      :client="selectedClient"
+                                                      :care-plan="selectedEvent.care_plan || {}"
+                                                      :address="selectedClient.evv_address || {}"
+                                                      :phone="selectedClient.evv_phone ? selectedClient.evv_phone.number : ''"
+                                                      :care-details="selectedClient.care_details || {}"
+                            />
                     </b-col>
                 </b-row>
             </b-container>
@@ -88,12 +88,6 @@
                 }
             }
         },
-
-        mounted() {
-
-
-        },
-
         methods: {
             refreshEvents(hideModals = true) {
                 this.$refs.calendar.fireMethod('refetchEvents');
@@ -167,3 +161,9 @@
         }
     }
 </script>
+
+<style scoped>
+    caregiver-client-details{
+        overflow-y: visible;
+    }
+</style>

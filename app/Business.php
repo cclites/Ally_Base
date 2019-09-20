@@ -13,6 +13,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\ContactableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Billing\Contracts\ReconcilableInterface;
+use App\Contracts\HasTimezone;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
@@ -196,7 +197,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @mixin \Eloquent
  */
 class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold,
-    BelongsToBusinessesInterface, BelongsToChainsInterface, ContactableInterface
+    BelongsToBusinessesInterface, BelongsToChainsInterface, ContactableInterface, HasTimezone
 {
     use BelongsToBusinesses, BelongsToOneChain;
     use \App\Traits\HasPaymentHold;
@@ -782,6 +783,27 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         ]);
     }
 
+    /**
+     * @return string|null
+     */
+    public function getStreetAddressAttribute()
+    {
+        $fullAddress = $this->address1;
+
+        if (!empty($this->address2)) {
+            $fullAddress .= ' ' . $this->address2;
+        }
+
+        return $fullAddress;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCityStateZipAttribute(){
+        return $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+    }
+
     function getPhoneNumber(): ?PhoneNumber
     {
         try {
@@ -924,5 +946,15 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     function getBirthdate(): ?string
     {
         return null;
+    }
+
+    /**
+     * Get the model's Timezone.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->timezone ? $this->timezone : config('ally.local_timezone');
     }
 }

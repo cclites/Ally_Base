@@ -6,6 +6,7 @@ use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ReferralSourceController extends BaseController
@@ -23,6 +24,8 @@ class ReferralSourceController extends BaseController
         if (request()->expectsJson()) {
             return response()->json($referralsources);
         }
+
+        $referralsources = ReferralSource::orderResources($referralsources);
 
         return view('business.referral.list', compact('referralsources', 'edit', 'create', 'type'));
     }
@@ -59,7 +62,7 @@ class ReferralSourceController extends BaseController
         $this->authorize('create', [ReferralSource::class, $data]);
 
         if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
-        return new CreatedResponse('The referral source has been created!', $referralSource);
+            return new CreatedResponse('The referral source has been created!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to create referral source.');
@@ -77,18 +80,30 @@ class ReferralSourceController extends BaseController
         return new ErrorResponse(500, 'Unable to save referral source.');
     }
 
+    /**
+     * Not used since we don't want to
+     *
+     * @param ReferralSource $referralSource
+     * @return SuccessResponse
+     */
     public function destroy(ReferralSource $referralSource) 
     {
-        $this->authorize('delete', $referralSource);
+        $referralSource->active = !$referralSource->active;
+        $referralSource->save();
 
-        try {
-            if ($referralSource->delete()) {
-                return new SuccessResponse('The referral source was successfully removed.', $referralSource);
-            }
-        } catch (\Illuminate\Database\QueryException $e) {
-            return new ErrorResponse(400, 'Cannot delete that referral source because it is currently in use.');
+        $slug = $referralSource->active ? 'activated' : 'deactivated';
+        $message = "The referral source was successfully $slug.";
+
+        return new SuccessResponse($message, $referralSource);
+    }
+
+    public function removeOrganization($organization){
+
+        $referralSources = ReferralSource::where('organization', $organization)->get();
+
+        foreach($referralSources as $referralSource){
+            $this->destroy($referralSource);
         }
-
-        return new ErrorResponse(500, 'An unexpected error occurred.');
+        return new SuccessResponse('The referral source was successfully deactivated.', $organization);
     }
 }

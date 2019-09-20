@@ -1,15 +1,9 @@
 <?php
-
-
 namespace App\Http\Controllers\Business\Report;
 
-
-use App\Caregiver;
 use App\CustomField;
 use App\Http\Controllers\Business\BaseController;
 use App\Reports\CaregiverDirectoryReport;
-use App\Responses\ErrorResponse;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CaregiverDirectoryReportController extends BaseController
@@ -17,40 +11,47 @@ class CaregiverDirectoryReportController extends BaseController
     /**
      * Shows the page to generate the caregiver directory
      *
+     * @param Request $request
      * @return Response
      */
-    public function index( Request $request )
+    public function index(Request $request)
     {
-        if( $request->filled( 'json' ) ){
+        $fields = CustomField::forAuthorizedChain()
+            ->where('user_type', 'caregiver')
+            ->with('options')
+            ->get();
+
+        if ($request->filled('json')) {
+            $page = $request->input('page', 1);
+            $sortBy = $request->input('sort', 'lastname');
+            $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
+
+            \DB::enableQueryLog();
 
             $report = new CaregiverDirectoryReport();
-            $report->query()->leftJoin( 'users', 'caregivers.id', '=', 'users.id' );
             $report->forRequestedBusinesses()
-                ->setActiveFilter( $request->active )
-                ->setStatusAliasFilter( $request->status_alias_id )
-                ->setCurrentPage( $request->current_page )
-                ->setPageCount( 100 );
-                // ->setDateFilter( $request->start_date, $request->end_date );
+                ->setCustomFields($fields)
+                ->setActiveFilter($request->active)
+                ->setStatusAliasFilter($request->status_alias_id)
+                ->setPageCount(50)
+                ->setCurrentPage($page)
+                ->setSort($sortBy, $sortOrder)
+                ->setForExport($request->export == '1');
 
-            if ( $request->export == '1' ) {
-                // the request object attributes are coming through as strings
-
-                return $report->setDateFormat( 'm/d/Y g:i A', 'America/New_York' )
+            if ($request->export == '1') {
+                return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
                     ->download();
             }
 
             // rows() has to be called for the private variable total_count to be set within the report
-            $rows  = $report->rows();
+            $rows = $report->rows();
             $total = $report->getTotalCount();
 
-            return response()->json( [ 'rows' => $rows, 'total' => $total ] );
+            \Log::info(\DB::getQueryLog());
+
+            return response()->json(['rows' => $rows, 'total' => $total]);
         }
 
-        $fields = CustomField::forAuthorizedChain()
-            ->where( 'user_type', 'caregiver' )
-            ->with( 'options' )
-            ->get();
-
-        return view( 'business.reports.caregiver_directory', compact( 'fields' ) );
+        return view('business.reports.caregiver_directory', compact('fields'));
     }
 }

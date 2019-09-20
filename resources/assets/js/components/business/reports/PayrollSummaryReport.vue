@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Payroll Summary"
+    <b-card header="This report shows total caregiver payments over a specified range for dates the caregiver was paid, NOT the dates of service."
             header-text-variant="white"
             header-bg-variant="info"
             class="mb-3"
@@ -36,7 +36,7 @@
                 <b-form-group label="&nbsp;">
                     <b-button-group>
                         <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                        <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                        <b-button @click="printTable()"><i class="fa fa-print mr-1"></i>Print</b-button>
                     </b-button-group>
                 </b-form-group>
             </b-col>
@@ -55,21 +55,46 @@
                      :footClone="footClone"
                      class="mt-2"
             >
-
-                <template slot="FOOT_date" scope="item">
-                    &nbsp;<strong>For Location:</strong> {{ totals.location }}
+                <template slot="details" scope="row">
+                    &nbsp;<b-btn @click="showPaymentSummary(row.item)">Details</b-btn>
                 </template>
-
                 <template slot="FOOT_caregiver" scope="item" class="primary">
                     &nbsp;<strong>For Client Types: </strong> {{totals.type}}
                 </template>
-
                 <template slot="FOOT_amount" scope="item" class="primary">
                     &nbsp;<strong>Total:  </strong> {{ moneyFormat(totals.amount ) }}
+                </template>
+                <template slot="FOOT_details" scope="item" class="primary">
+                    &nbsp;&nbsp;
                 </template>
 
             </b-table>
         </div>
+
+        <b-modal ref="paymentSummaryModal">
+            <h4>Caregiver: {{ selectedItem.caregiver }}</h4>
+            <table>
+                <thead>
+                  <tr>
+                      <th>Date</th>
+                      <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="deposit in selectedItem.deposits">
+                      <td class="pr-5">{{ formatDate(deposit.created_at) }}</td>
+                      <td>{{ moneyFormat(deposit.amount) }}</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="pt-3"><strong>Total</strong></th>
+                        <th class="pt-3">{{ depositTotal }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </b-modal>
+
     </b-card>
 
 </template>
@@ -112,13 +137,15 @@
                     default: () => { return []; },
                 },
                 fields: [
-                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x)},
                     { key: 'caregiver', label: 'Caregiver', sortable: true, },
                     { key: 'amount', label: 'Amount', sortable: true, formatter: x => this.moneyFormat(x) },
+                    { key: 'details', label: 'Details', sortable: true, },
                 ],
                 totals: [],
                 footClone: false,
-                emptyText: "No Results"
+                emptyText: "No Results",
+                selectedItem: '',
+                selectedDeposits: []
             }
         },
         methods: {
@@ -148,10 +175,27 @@
                         this.loading = false;
                     })
             },
-            print(){
-                $(".summary-table").print();
-            }
+            printTable(){
+                window.location = this.form.toQueryString(`/business/reports/payroll-summary-report?print=true`);
+            },
+            showPaymentSummary(selectedItem){
 
+                this.selectedItem = selectedItem;
+
+                this.$refs.paymentSummaryModal.show();
+
+            },
+
+        },
+
+        computed: {
+            depositTotal(){
+
+                if(this.selectedItem){
+                    return this.moneyFormat(this.selectedItem.deposits.reduce(function(a, c){return a + Number((c.amount) || 0)}, 0));
+                }
+
+            }
         },
 
         mounted(){

@@ -6,6 +6,7 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasPaymentHold;
+use App\Contracts\HasTimezone;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
@@ -87,7 +88,7 @@ use App\PhoneNumber;
  * @property-read mixed $masked_name
  * @property-read \App\PhoneNumber $smsNumber
  */
-class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface
+class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface, HasTimezone
 {
     use BelongsToBusinesses;
     use Notifiable;
@@ -371,6 +372,24 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return null;
     }
 
+    public function getFormattedGenderAttribute()
+    {
+        switch( strtolower( $this->gender ) ){
+
+            case 'm':
+
+                return 'Male';
+                break;
+            case 'f':
+
+                return 'Female';
+                break;
+            default:
+
+                return null;
+        }
+    }
+
     /**
      * Return the fully-qualified name of the role class
      *
@@ -569,5 +588,15 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
 
         return '';
 
+    }
+
+    /**
+     * Get the user's Timezone.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->role->getTimezone();
     }
 }

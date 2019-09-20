@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Caregiver;
 use App\Http\Controllers\Controller;
 
 class CaregiverController extends Controller
@@ -18,5 +19,19 @@ class CaregiverController extends Controller
             ->get();
 
         return view('clients.caregiver_list', compact('caregivers'));
+    }
+
+    /**
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Caregiver $caregiver){
+
+        return response()->json([
+            'caregiver'=>$caregiver,
+            'address'=>$caregiver->getAddress(),
+            'phone'=>$caregiver->getPhoneNumber()->number
+        ]);
+
     }
 }

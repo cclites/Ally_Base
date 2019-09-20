@@ -163,25 +163,29 @@ class ReportsController extends Controller
         return view('admin.reports.shared_shifts');
     }
 
-    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
+    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator, Request $request)
     {
-        // removed as per ALLY-1394, did not delete this, rather removed the front end link that will lead here,
-        // and then added this 'return back()' to rebuff manual attempts to access this report
-        return back();
+        if($request->business){
 
-        if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
-            $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
-            $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
-                $array = $caregiver->toArray();
-                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
-                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
-                return $array;
-            });
+            $caregivers = Caregiver::active()
+                            ->forRequestedBusinesses([$request->business])
+                            ->with('businessChains')
+                            ->doesntHave('bankAccount')
+                            ->get()->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
+                                $array = $caregiver->toArray();
+                                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
+                                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
+                                return $array;
+                            });
 
-            \Cache::put('caregivers_missing_accounts', $caregivers, 60);
+            return $caregivers;
         }
 
-        return view('admin.reports.caregivers.deposits_without_bank_account', compact('caregivers'));
+        return view_component('business-caregiver-deposits-missing-bank-account', 'Missing Deposits Report', [], [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+
     }
 
     public function finances()

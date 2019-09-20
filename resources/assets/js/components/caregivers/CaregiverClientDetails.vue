@@ -6,12 +6,12 @@
                     <strong>{{ client.name }}</strong>
                 </p>
                 <p v-if="address">
-                    {{ address.address1 }}<br />
-                    <span v-if="address.address2">{{ address.address2 }}<br /></span>
-                    {{ address.city }}, {{ address.state }} {{ address.zip }}
-
+                    <b-link :href=" mapsAddress " target="_blank">
+                        {{ address.address1 }}<br />
+                        <span v-if="address.address2">{{ address.address2 }}<br /></span>
+                        {{ address.city }}, {{ address.state }} {{ address.zip }}
+                    </b-link>
                     <span class="d-block mt-2">
-
                         Notes:<br/>
                         {{ address.notes }}
                     </span>
@@ -33,7 +33,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="careDetails.id" class="with-padding-top">
+        <b-row v-if="careDetails.id" class="with-padding-top care-details-scrollable">
             <b-col sm="12">
                 <b-card title="Detailed Client Care Needs">
                     <care-details-display :care-details="careDetails"></care-details-display>
@@ -78,10 +78,19 @@
                 type: Object,
                 default: () => ({}),
             }
-        }
+        },
+        computed: {
+            mapsAddress(){
+                return `https://maps.google.com/?q=${ this.address.address1 }, ${ this.address.state }, ${ this.address.city }, ${ this.address.zip }`;
+            }
+        },
+
     }
 </script>
 
 <style scoped>
-
+    .care-details-scrollable{
+        max-height:300px;
+        overflow:auto;
+    }
 </style>

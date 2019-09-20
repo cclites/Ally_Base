@@ -8,6 +8,7 @@ use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\ClientInvoice;
 use App\Business;
 use App\Client;
+use App\CareDetails;
 use App\ClientEthnicityPreference;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
@@ -22,6 +23,7 @@ use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Billing\Service;
 use App\Billing\Payer;
+use App\SkilledNursingPoc;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
@@ -176,6 +178,8 @@ class ClientController extends BaseController
             'carePlans',
             'caseManager',
             'deactivationReason',
+            'skilledNursingPoc',
+            'goals',
             'payers',
             'rates',
             'notes' => function ($query) {
@@ -184,6 +188,21 @@ class ClientController extends BaseController
             'contacts',
         ])
         ->append('last_service_date');
+
+        if (empty($client->careDetails)) {
+            $careDetails = new CareDetails();
+            $careDetails->client_id = $client->id;
+            $careDetails->save();
+            $client->load('careDetails');
+        }
+
+        if (empty($client->skilledNursingPoc)) {
+            $skilledNursingPoc = new SkilledNursingPoc();
+            $skilledNursingPoc->client_id = $client->id;
+            $skilledNursingPoc->save();
+            $client->load('skilledNursingPoc');
+        }
+
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 

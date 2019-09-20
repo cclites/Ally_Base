@@ -24,6 +24,20 @@ export default {
         {
             if (typeof(str) !== "string") return "";
             return (str.length > 70) ? str.substr(0, 70) + '..' : str;
-        }
+        },
+        fromSnakeCase(str){
+           return str.replace(/_/g, ' ');
+        },
+        snakeToTitleCase(status) {
+            return this.uppercaseWords(status.replace('_', ' '));
+        },
+        resolveOption(value, options, defaultString = '-') {
+            let item = options.find(x => x.value == value);
+            if (item) {
+                return item.text;
+            }
+
+            return defaultString;
+        },
     }
 }

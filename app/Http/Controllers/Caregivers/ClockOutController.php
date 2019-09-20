@@ -101,10 +101,15 @@ class ClockOutController extends BaseController
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
 
-
         if ($shift->business->require_signatures) {
             $request->validate([
-                'signature' => 'required'
+                'client_signature' => 'required'
+            ]);
+        }
+
+        if ($shift->business->co_caregiver_signature) {
+            $request->validate([
+                'caregiver_signature' => 'required'
             ]);
         }
 
@@ -134,12 +139,25 @@ class ClockOutController extends BaseController
 
         try {
             $clockOut = new ClockOut($this->caregiver());
-            if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
-            if ($data['mileage']) $clockOut->setMileage($data['mileage']);
-            if (array_key_exists('caregiver_comments', $data)) $clockOut->setComments($data['caregiver_comments']);
-            $clockOut->setGoals($data['goals']);
-            $clockOut->setQuestions($data['questions'], $allQuestions);
-            $clockOut->setGeocode($data['latitude'] ?? null, $data['longitude'] ?? null);
+            if (isset($data['other_expenses'])) {
+                $clockOut->setOtherExpenses($data['other_expenses'], isset($data['other_expenses_desc']) ? $data['other_expenses_desc'] : null);
+            }
+            if (isset($data['mileage'])) {
+                $clockOut->setMileage($data['mileage']);
+            }
+            if (isset($data['caregiver_comments'])) {
+                $clockOut->setComments($data['caregiver_comments']);
+            }
+            if (isset($data['goals'])) {
+                $clockOut->setGoals($data['goals']);
+            }
+            if (isset($data['questions'])) {
+                $clockOut->setQuestions($data['questions'], $allQuestions);
+            }
+            $clockOut->setGeocode(
+                isset($data['latitude']) ? $data['latitude'] : null,
+                isset($data['longitude']) ? $data['longitude'] : null
+            );
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues
                 $issueText = trim($request->input('issue_text'));
@@ -150,7 +168,11 @@ class ClockOutController extends BaseController
                     ]);
                     $shift->issues()->save($issue);
                 }
-                Signature::onModelInstance($shift, request('signature'));
+
+                Signature::attachToModel($shift, request('client_signature'), 'client' );
+
+                Signature::attachToModel($shift, request('caregiver_signature'), 'caregiver' );
+
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }
