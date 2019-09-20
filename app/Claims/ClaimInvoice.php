@@ -394,6 +394,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             case ClaimService::CLEARINGHOUSE():
                 throw new ClaimTransmissionException('Claim service not yet supported.');
                 break;
+            case ClaimService::DIRECT_MAIL():
             case ClaimService::FAX():
             case ClaimService::EMAIL():
                 return new ManualClaimTransmitter();

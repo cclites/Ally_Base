@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\ClientType;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimsQueueResource;
 use App\Billing\Queries\ClientInvoiceQuery;
@@ -83,6 +84,10 @@ class ClaimsQueueController extends BaseController
 
             if ($request->filled('payer_id')) {
                 $invoiceQuery->forPayer($request->payer_id);
+            }
+
+            if (in_array($request->client_type, ClientType::all())) {
+                $invoiceQuery->forClientType($request->client_type);
             }
 
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();

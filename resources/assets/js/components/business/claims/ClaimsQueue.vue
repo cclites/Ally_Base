@@ -32,6 +32,8 @@
                             </option>
                         </b-form-select>
 
+                        <b-form-select v-model="clientTypeFilter" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
                         <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" />
 
                         <b-form-select
@@ -127,20 +129,20 @@
                         </b-btn>
                         <b-dropdown right size="sm" text="..." class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
                             <b-dropdown-item :href="`/business/claims/${row.item.claim.id}/print?download=1`">
-                                <i class="fa fa-download" />&nbsp;Download PDF
+                                <i class="fa fa-download mr-1" />Download PDF
                             </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.claim.status == 'CREATED'" @click="transmit(row.item)">
-                                <i class="fa fa-send-o" />&nbsp;Transmit Claim
+                                <i class="fa fa-send-o mr-1" />Transmit Claim
                             </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.claim.status != 'CREATED'" @click="transmit(row.item)">
-                                <i class="fa fa-send-o" />&nbsp;Re-transmit Claim
+                                <i class="fa fa-send-o mr-1" />Re-transmit Claim
                             </b-dropdown-item>
                             <b-dropdown-item @click="adjust(row.item)">
-                                <i class="fa fa-usd" />&nbsp;Adjust Claim
+                                <i class="fa fa-usd mr-1" />Adjust Claim
                             </b-dropdown-item>
                             <b-dropdown-divider />
                             <b-dropdown-item @click="deleteClaim(row.item)" variant="danger">
-                                <i class="fa fa-times" />&nbsp;Delete Claim
+                                <i class="fa fa-times mr-1" />Delete Claim
                             </b-dropdown-item>
                         </b-dropdown>
                     </div>
@@ -163,7 +165,7 @@
         </confirm-modal>
 
         <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
-            <p>Based on the transmission type for this Claim, this will assume you have sent in via E-Mail/Fax.</p>
+            <p>Based on the transmission type for this Claim, this will assume you have sent in via E-Mail/Fax/Direct Mail.</p>
         </confirm-modal>
 
         <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete" yesVariant="danger">
@@ -277,6 +279,7 @@
                 clients: [],
                 clientFilter: '',
                 payerFilter: '',
+                clientTypeFilter: '',
                 businesses: '',
                 paymentModal: false,
                 form: new Form({
@@ -393,7 +396,13 @@
                         return;
                     }
 
-                    if ([this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.claim.transmission_method)) {
+                    let offlineMethods = [
+                        this.CLAIM_SERVICE.EMAIL,
+                        this.CLAIM_SERVICE.FAX,
+                        this.CLAIM_SERVICE.DIRECT_MAIL
+                    ];
+
+                    if (offlineMethods.includes(invoice.claim.transmission_method)) {
                         this.$refs.confirmManualTransmission.confirm(() => {
                             this.transmit(invoice, true);
                         });
@@ -438,7 +447,7 @@
              */
             async fetch() {
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
                 axios.get(url)
                     .then(({data}) => {
                         this.items = data.data;

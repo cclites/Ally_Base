@@ -19,4 +19,5 @@ class ClaimService extends BaseEnum
     private const CLEARINGHOUSE = 'CLEARINGHOUSE';
     private const EMAIL = 'EMAIL';
     private const FAX = 'FAX';
+    private const DIRECT_MAIL = 'DIRECT_MAIL';
 }

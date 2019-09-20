@@ -9,6 +9,7 @@
         <option value="-" disabled>Offline:</option>
         <option :value="CLAIM_SERVICE.EMAIL">{{ resolveOption(CLAIM_SERVICE.EMAIL, claimServiceOptions) }}</option>
         <option :value="CLAIM_SERVICE.FAX">{{ resolveOption(CLAIM_SERVICE.FAX, claimServiceOptions) }}</option>
+        <option :value="CLAIM_SERVICE.DIRECT_MAIL">{{ resolveOption(CLAIM_SERVICE.DIRECT_MAIL, claimServiceOptions) }}</option>
     </b-select>
 </template>
 
@@ -36,23 +37,17 @@
             updateValue() {
                 this.$emit('input', this.transmission_method);
             },
-
-            serviceLabel(serviceValue) {
-                switch (serviceValue) {
-                    case this.CLAIM_SERVICE.HHA: return 'HHAeXchange';
-                    case this.CLAIM_SERVICE.TELLUS: return 'Tellus';
-                    case this.CLAIM_SERVICE.CLEARINGHOUSE: return 'CareExchange LTC Clearinghouse';
-                    case this.CLAIM_SERVICE.EMAIL: return 'E-Mail';
-                    case this.CLAIM_SERVICE.FAX: return 'Fax';
-                    default:
-                        return '-';
-                }
-            },
         },
 
         created() {
             this.transmission_method = this.value;
-        }
+        },
+
+        watch: {
+            value(newValue, oldValue) {
+                this.transmission_method = newValue;
+            },
+        },
     }
 
 </script>
