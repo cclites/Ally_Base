@@ -4,7 +4,7 @@ namespace App\Billing;
 use MyCLabs\Enum\Enum;
 
 /**
- * ClaimService Enum
+ * InvoiceableType Enum
  *
  * @method static ClaimStatus SHIFT()
  * @method static ClaimStatus SHIFT_SERVICE()

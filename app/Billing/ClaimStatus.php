@@ -4,7 +4,7 @@ namespace App\Billing;
 use App\BaseEnum;
 
 /**
- * ClaimService Enum
+ * ClaimStatus Enum
  *
  * @method static ClaimStatus NOT_SENT()
  * @method static ClaimStatus CREATED()
