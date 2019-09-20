@@ -35,6 +35,13 @@ class BankAccountPayment implements PaymentMethodStrategy
             $this->gateway->setBillingPhone($phone);
         }
 
+        if($accountNumber = $this->account->attributes['last_four']){
+            $this->gateway->account_number = $accountNumber;
+        }
+
+        if($routingNumber = $this->account->attributes['last_four_routing_number']){
+            $this->gateway->routing_number = $routingNumber;
+        }
 
         return $this->gateway->chargeAccount($this->account, $amount, $currency);
     }

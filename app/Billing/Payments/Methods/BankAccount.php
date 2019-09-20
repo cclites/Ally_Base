@@ -102,6 +102,10 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
         return $this->getAccountNumber();
     }
 
+    public function getLastFourRoutingNumberAttribute(){
+        return substr($this->routing_number, -4);
+    }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
