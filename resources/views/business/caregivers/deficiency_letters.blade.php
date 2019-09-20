@@ -55,7 +55,7 @@
                          <tr>
 
                             <td>{{ $expiration[ 'name' ] }}</td>
-                            <td>{{ Carbon\Carbon::parse( $expiration[ 'expiration_date' ] )->format( 'm/d/Y' ) }}</td>
+                            <td>{{ $expiration[ 'expiration_date' ] ? Carbon\Carbon::parse( $expiration[ 'expiration_date' ] )->format( 'm/d/Y' ) : 'No Expiration on Record' }}</td>
                         </tr>
                     @endforeach
                 </table>
