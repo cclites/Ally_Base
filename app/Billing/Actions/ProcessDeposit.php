@@ -82,7 +82,7 @@ class ProcessDeposit
         $attributes = [
             'deposit_type' => 'business',
             'business_id'  => $business->id,
-            'chain_id' => $business->chain_id;
+            'chain_id' => $business->chain_id
         ];
 
         return $this->deposit($strategy, $attributes, $amount, $currency, $allowZero);
