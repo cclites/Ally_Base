@@ -127,20 +127,20 @@
                         </b-btn>
                         <b-dropdown right size="sm" text="..." class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
                             <b-dropdown-item :href="`/business/claims/${row.item.claim.id}/print?download=1`">
-                                <i class="fa fa-download" />&nbsp;Download PDF
+                                <i class="fa fa-download mr-1" />Download PDF
                             </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.claim.status == 'CREATED'" @click="transmit(row.item)">
-                                <i class="fa fa-send-o" />&nbsp;Transmit Claim
+                                <i class="fa fa-send-o mr-1" />Transmit Claim
                             </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.claim.status != 'CREATED'" @click="transmit(row.item)">
-                                <i class="fa fa-send-o" />&nbsp;Re-transmit Claim
+                                <i class="fa fa-send-o mr-1" />Re-transmit Claim
                             </b-dropdown-item>
                             <b-dropdown-item @click="adjust(row.item)">
-                                <i class="fa fa-usd" />&nbsp;Adjust Claim
+                                <i class="fa fa-usd mr-1" />Adjust Claim
                             </b-dropdown-item>
                             <b-dropdown-divider />
                             <b-dropdown-item @click="deleteClaim(row.item)" variant="danger">
-                                <i class="fa fa-times" />&nbsp;Delete Claim
+                                <i class="fa fa-times mr-1" />Delete Claim
                             </b-dropdown-item>
                         </b-dropdown>
                     </div>
