@@ -87,6 +87,15 @@ class ClientInvoiceQuery extends BaseQuery
         return $this;
     }
 
+    public function forClientType(string $clientType): self
+    {
+        $this->whereHas('client', function (Builder $q) use ($clientType) {
+            $q->where('client_type', $clientType);
+        });
+
+        return $this;
+    }
+
     function forPayer(int $payerId) : self
     {
         $this->whereHas('clientPayer', function ($q) use ($payerId) {

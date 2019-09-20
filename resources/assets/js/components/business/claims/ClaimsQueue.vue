@@ -32,6 +32,8 @@
                             </option>
                         </b-form-select>
 
+                        <b-form-select v-model="clientTypeFilter" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
                         <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" />
 
                         <b-form-select
@@ -277,6 +279,7 @@
                 clients: [],
                 clientFilter: '',
                 payerFilter: '',
+                clientTypeFilter: '',
                 businesses: '',
                 paymentModal: false,
                 form: new Form({
@@ -444,7 +447,7 @@
              */
             async fetch() {
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
                 axios.get(url)
                     .then(({data}) => {
                         this.items = data.data;
