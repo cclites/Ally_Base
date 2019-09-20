@@ -47,7 +47,7 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     protected $table = 'bank_accounts';
     protected $guarded = ['id'];
     protected $hidden = ['account_number', 'routing_number'];
-    protected $appends = ['last_four'];
+    protected $appends = ['last_four', 'last_four_routing_number'];
     protected static $accountTypes = [
         'checking',
         'savings'
