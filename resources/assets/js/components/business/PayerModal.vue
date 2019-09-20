@@ -63,6 +63,7 @@
                             <option value="-" disabled>Offline:</option>
                             <option :value="CLAIM_SERVICE.EMAIL">Email</option>
                             <option :value="CLAIM_SERVICE.FAX">Fax</option>
+                            <option :value="CLAIM_SERVICE.DIRECT_MAIL">Direct Mail</option>
                         </b-select>
                         <input-help :form="form" field="transmission_method"></input-help>
                     </b-form-group>

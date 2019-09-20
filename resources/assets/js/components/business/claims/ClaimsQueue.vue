@@ -163,7 +163,7 @@
         </confirm-modal>
 
         <confirm-modal title="Offline Transmission" ref="confirmManualTransmission" yesButton="Okay">
-            <p>Based on the transmission type for this Claim, this will assume you have sent in via E-Mail/Fax.</p>
+            <p>Based on the transmission type for this Claim, this will assume you have sent in via E-Mail/Fax/Direct Mail.</p>
         </confirm-modal>
 
         <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete" yesVariant="danger">
@@ -393,7 +393,13 @@
                         return;
                     }
 
-                    if ([this.CLAIM_SERVICE.EMAIL, this.CLAIM_SERVICE.FAX].includes(invoice.claim.transmission_method)) {
+                    let offlineMethods = [
+                        this.CLAIM_SERVICE.EMAIL,
+                        this.CLAIM_SERVICE.FAX,
+                        this.CLAIM_SERVICE.DIRECT_MAIL
+                    ];
+
+                    if (offlineMethods.includes(invoice.claim.transmission_method)) {
                         this.$refs.confirmManualTransmission.confirm(() => {
                             this.transmit(invoice, true);
                         });

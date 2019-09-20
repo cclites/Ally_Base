@@ -10,6 +10,7 @@ export default {
                 CLEARINGHOUSE: 'CLEARINGHOUSE',
                 EMAIL: 'EMAIL',
                 FAX: 'FAX',
+                DIRECT_MAIL: 'DIRECT_MAIL',
             },
             claimServiceOptions: [
                 { value: 'HHA', text: 'HHAeXchange' },
@@ -17,6 +18,7 @@ export default {
                 { value: 'CLEARINGHOUSE', text: 'CareExchange LTC Clearinghouse' },
                 { value: 'EMAIL', text: 'E-mail' },
                 { value: 'FAX', text: 'Fax' },
+                { value: 'DIRECT_MAIL', text: 'Direct Mail' },
             ],
 
             ethnicityOptions: [
