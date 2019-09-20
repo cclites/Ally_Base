@@ -141,18 +141,26 @@
 
     @if($shift->clientSignature)
         <div class="row with-padding-bottom">
-            <div @if( $shift->business->co_caregiver_signature ) class="col-sm-6" @endif>
+            <div @if( $shift->business->co_signature ) class="col-sm-6" @endif>
                 <strong>Client Signature</strong>
-                <div class="signature">
-                    {!! $shift->clientSignature->content !!}
-                </div>
+                @if(empty($shift->clientSignature))
+                    <div>Signature Missing</div>
+                @else
+                    <div class="signature">
+                        {!! $shift->clientSignature->content !!}
+                    </div>
+                @endif
             </div>
             @if( $shift->business->co_caregiver_signature )
                 <div class="col-sm-6">
                     <strong>Caregiver Signature</strong>
-                    <div class="signature">
-                        {!! $shift->caregiverSignature->content !!}
-                    </div>
+                    @if(empty($shift->caregiverSignature))
+                        <div>Signature Missing</div>
+                    @else
+                        <div class="signature">
+                            {!! $shift->caregiverSignature->content !!}
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
