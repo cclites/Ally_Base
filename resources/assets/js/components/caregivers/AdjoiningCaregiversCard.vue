@@ -59,15 +59,12 @@
                 if (this.shift) {
                     url += `?shift=${this.shift}`;
                 }
-                let response = await axios.get(url);
-                if (response.data.before) {
-                    // filter results to not show the current logged in caregiver 
-                    // for adjoining schedules.
-                    this.before = response.data.before.filter(x => { return x.caregiver_id !== this.authUser.id });
-                }
-                if (response.data.after) {
-                    this.after = response.data.after.filter(x => { return x.caregiver_id !== this.authUser.id });
-                }
+                axios.get(url)
+                    .then( ({ data }) => {
+                        this.before = data.before;
+                        this.after = data.after;
+                    })
+                    .catch(() => {});
             },
 
             formatShiftTime(schedule) {
