@@ -39,12 +39,8 @@ class DummySFTPReaderWriter extends SFTP implements SFTPReaderWriterInterface
         }
     }
 
-    function get(
-        $remote_file,
-        $local_file = false,
-        $offset = 0,
-        $length = -1
-    ) {
+    function get($remote_file, $local_file = false, $offset = 0, $length = -1, $progressCallback = null)
+    {
         $path = storage_path('sftp' . DIRECTORY_SEPARATOR . $remote_file);
 
         if (! file_exists($path)) {
