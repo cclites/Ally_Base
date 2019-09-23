@@ -3,6 +3,7 @@
 namespace App\Claims;
 
 use App\Claims\Exceptions\ClaimTransmissionException;
+use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Claims\Exceptions\ClaimBalanceException;
@@ -244,6 +245,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
+    /**
+     * Get the timezone for the Claim shift data.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->business->getTimezone();
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -384,9 +395,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     {
         switch ($service) {
             case ClaimService::HHA():
-                throw new ClaimTransmissionException('Claim service "HHAeXchange" not yet supported.');
-//                return new HhaClaimTransmitter();
-                break;
+                return new HhaClaimTransmitter();
             case ClaimService::TELLUS():
                 throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
 //                return new TellusClaimTransmitter();
