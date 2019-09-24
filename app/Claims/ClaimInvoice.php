@@ -244,6 +244,21 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
+    /**
+     * Check if the amount of the claim is different
+     * than the amount of the client invoice.
+     *
+     * @return bool
+     */
+    public function hasAmountMismatch(): bool
+    {
+        if (filled($this->modified_at)) {
+            return false;
+        }
+
+        return $this->amount != $this->clientInvoice->amount;
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************

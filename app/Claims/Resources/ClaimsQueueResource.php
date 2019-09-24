@@ -38,7 +38,8 @@ class ClaimsQueueResource extends Resource
             'claim_balance' => empty($claim) ? null : $claim->getAmountDue(),
             'claim_status' => empty($claim) ? null : $claim->status,
             'claim_date' => empty($claim) ? null : Carbon::parse($claim->created_at)->format('m/d/Y h:i A'),
-            'claim_service' => optional($claim)->service
+            'claim_service' => optional($claim)->service,
+            'amount_mismatch' => empty($claim) ? null : $claim->hasAmountMismatch(),
         ]);
     }
 }
