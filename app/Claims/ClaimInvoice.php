@@ -242,7 +242,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     /**
@@ -253,6 +253,21 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     public function getTimezone(): string
     {
         return $this->business->getTimezone();
+    }
+
+    /**
+     * Check if the amount of the claim is different
+     * than the amount of the client invoice.
+     *
+     * @return bool
+     */
+    public function hasAmountMismatch(): bool
+    {
+        if (filled($this->modified_at)) {
+            return false;
+        }
+
+        return $this->amount != $this->clientInvoice->amount;
     }
 
     // **********************************************************
@@ -431,7 +446,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (!$lastName) {
+        if (! $lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;

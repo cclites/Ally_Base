@@ -116,9 +116,11 @@ class ScheduleEvents implements Responsable
                 })->chunk(3)->map(function ($item) {
                     return $item->values();
                 });
-        } else {
+        } else if (filled($schedule->service)) {
             $duration = divide(floatval($schedule->duration), 60, 2);
             return collect([substr($schedule->service->name, 0, 3) . ':' . number_format($duration, 2)]);
+        } else {
+            return collect([]);
         }
     }
 

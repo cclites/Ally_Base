@@ -79,7 +79,7 @@ class ClaimsQueueController extends BaseController
             }
 
             if ($request->filled('client_id')) {
-                $invoiceQuery->forClient($request->client_id);
+                $invoiceQuery->forClient($request->client_id, false);
             }
 
             if ($request->filled('payer_id')) {
@@ -91,6 +91,7 @@ class ClaimsQueueController extends BaseController
             }
 
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();
+
             $coll = ClaimsQueueResource::collection($invoices);
 
             return $coll;
