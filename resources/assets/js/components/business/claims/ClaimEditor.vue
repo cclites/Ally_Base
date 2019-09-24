@@ -218,6 +218,7 @@
 
         async mounted() {
             await this.$store.dispatch('claims/fetchCaregiverList');
+            await this.$store.dispatch('claims/fetchServiceList');
         },
     }
 </script>

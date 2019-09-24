@@ -6,6 +6,7 @@ const state = {
     claims: [],
     item: {},
     caregivers: [],
+    services: [],
 
     remits: [],
     remit: {},
@@ -32,6 +33,9 @@ const getters = {
     caregiverList(state) {
         return state.caregivers ? state.caregivers : [];
     },
+    serviceList(state) {
+        return state.services ? state.services : [];
+    },
     remits(state) {
         return state.remits ? state.remits : [];
     },
@@ -57,6 +61,9 @@ const mutations = {
     setCaregiverList(state, data) {
         Vue.set(state, 'caregivers', data);
     },
+    setServiceList(state, data) {
+        Vue.set(state, 'services', data);
+    },
     setRemits(state, data) {
         Vue.set(state, 'remits', data);
     },
@@ -78,12 +85,21 @@ const mutations = {
 // actions
 const actions = {
     async fetchCaregiverList({commit, state}) {
-        await axios.get(`/business/claim-resources/${state.claim.id}/caregivers`)
+        await axios.get(`/business/dropdown/caregivers?business=${state.claim.business_id}&active=all`)
             .then( ({ data }) => {
                 commit('setCaregiverList', data);
             })
             .catch(() => {
                 commit('setCaregiverList', []);
+            });
+    },
+    async fetchServiceList({commit, state}) {
+        await axios.get(`/business/dropdown/services`)
+            .then( ({ data }) => {
+                commit('setServiceList', data);
+            })
+            .catch(() => {
+                commit('setServiceList', []);
             });
     },
 };

@@ -2,6 +2,8 @@
 
 namespace App\Claims\Requests;
 
+use App\Caregiver;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Services\GeocodeManager;
@@ -42,9 +44,14 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'rate' => 'required|numeric|min:0|max:999.99',
             'units' => 'required|numeric|min:0|max:999.99',
 
-            'caregiver_id' => ['required', 'exists:caregivers,id'],
-            'caregiver_first_name' => 'required',
-            'caregiver_last_name' => 'required',
+            'caregiver_reload' => 'nullable|boolean',
+            'caregiver_id' => ['required',
+                Rule::exists('caregivers', 'id')->where(function ($query) {
+                    $query->whereIn('id', Caregiver::forAuthorizedChain()->pluck('id'));
+                })
+            ],
+            'caregiver_first_name' => 'required_unless:caregiver_reload,true',
+            'caregiver_last_name' => 'required_unless:caregiver_reload,true',
             'caregiver_gender' => 'nullable|in:F,M',
             'caregiver_dob' => 'nullable|date',
             'caregiver_ssn' => ['nullable', new ValidSSN()],
@@ -56,6 +63,13 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'state' => 'nullable|string',
             'zip' => 'nullable|string',
 
+            'service_id' => [
+                'required_if:claimable_type,' . ClaimableService::class,
+                'nullable',
+                Rule::exists('services', 'id')->where(function ($query) {
+                    $query->where('chain_id', auth()->user()->officeUser->chain_id);
+                })
+            ],
             'service_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'service_code' => 'nullable|string',
             'activities' => 'nullable|string',
@@ -78,6 +92,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'service_id.required_if' => 'The :attribute field is required.',
             'name.required_if' => 'The :attribute field is required.',
             'date.required_if' => 'The :attribute field is required.',
             'caregiver_first_name.required_if' => 'The :attribute field is required.',
@@ -106,6 +121,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             case ClaimableService::class:
                 $data = $data->only([
                     'units',
+                    'caregiver_reload',
                     'caregiver_id',
                     'caregiver_first_name',
                     'caregiver_last_name',
@@ -118,6 +134,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'city',
                     'state',
                     'zip',
+                    'service_id',
                     'service_name',
                     'service_code',
                     'activities',
@@ -133,6 +150,18 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 if ($data['caregiver_dob']) {
                     $data['caregiver_dob'] = filter_date($data['caregiver_dob']);
+                }
+
+                if (isset($data['caregiver_reload']) && $data['caregiver_reload']) {
+                    // Update all caregiver data from the database.
+                    $caregiver = Caregiver::findOrFail($data['caregiver_id']);
+                    $data['caregiver_first_name'] = $caregiver->first_name;
+                    $data['caregiver_last_name'] = $caregiver->last_name;
+                    $data['caregiver_gender'] = $caregiver->gender;
+                    $data['caregiver_dob'] = $caregiver->date_of_birth;
+                    $data['caregiver_ssn'] = $caregiver->ssn;
+                    $data['caregiver_medicaid_id'] = $caregiver->medicaid_id;
+                    unset($data['caregiver_reload']);
                 }
 
                 // convert dates and times
@@ -164,8 +193,16 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 break;
             case ClaimableExpense::class:
-                $data = $data->only(['name', 'notes', 'date', 'caregiver_id', 'caregiver_first_name', 'caregiver_last_name'])
+                $data = $data->only(['name', 'notes', 'date', 'caregiver_reload', 'caregiver_id', 'caregiver_first_name', 'caregiver_last_name'])
                     ->toArray();
+
+                if ($data['caregiver_reload']) {
+                    $caregiver = Caregiver::findOrFail($data['caregiver_id']);
+                    $data['caregiver_first_name'] = $caregiver->first_name;
+                    $data['caregiver_last_name'] = $caregiver->last_name;
+                    unset($data['caregiver_reload']);
+                }
+
                 $data['date'] = filter_date($data['date']);
                 break;
             default:
