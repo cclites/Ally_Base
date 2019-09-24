@@ -6,6 +6,7 @@ use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ClientInvoiceItem;
+use Illuminate\Support\Collection;
 use App\Billing\InvoiceableType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableExpense;
@@ -21,14 +22,22 @@ use App\Shift;
 class ClaimInvoiceFactory
 {
     /**
-     * Create a ClaimInvoice from a ClientInvoice.
+     * @var Collection
+     */
+    protected $warnings;
+
+    /**
+     * Create a ClaimInvoice from a ClientInvoice.  Returns
+     * a tuple of [claim, warnings]
      *
      * @param ClientInvoice $invoice
-     * @return ClaimInvoice
+     * @return array
      * @throws \Exception
      */
-    public function createFromClientInvoice(ClientInvoice $invoice): ClaimInvoice
+    public function createFromClientInvoice(ClientInvoice $invoice): array
     {
+        $this->warnings = collect([]);
+
         $invoice->load('items', 'items.shift', 'items.shiftService', 'items.shiftService.shift');
 
         if (empty($invoice->clientPayer)) {
@@ -87,16 +96,16 @@ class ClaimInvoiceFactory
 
         \DB::commit();
 
-        return $claim;
+        return [$claim, $this->warnings];
     }
 
     /**
      * Create a ClaimInvoiceItem from a Shift-based ClientInvoiceItem.
      *
      * @param ClientInvoiceItem $item
-     * @return ClaimInvoiceItem
+     * @return null|ClaimInvoiceItem
      */
-    protected function convertShift(ClientInvoiceItem $item): ClaimInvoiceItem
+    protected function convertShift(ClientInvoiceItem $item): ?ClaimInvoiceItem
     {
         $shift = $item->getShift();
         $caregiver = $shift->caregiver;
@@ -107,7 +116,8 @@ class ClaimInvoiceFactory
         /** @var Service $service */
         $service = $shift->service;
         if (empty($service)) {
-            throw new \InvalidArgumentException('Shift has no related service.');
+            $this->warnings->push("Shift ({$shift->id}) has no related service.");
+            return null;
         }
 
         $claimableService = $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
@@ -129,11 +139,16 @@ class ClaimInvoiceFactory
      * Create a ClaimInvoiceItem from a ShiftService-based ClientInvoiceItem.
      *
      * @param ClientInvoiceItem $item
-     * @return ClaimInvoiceItem
+     * @return null|ClaimInvoiceItem
      */
-    protected function convertService(ClientInvoiceItem $item): ClaimInvoiceItem
+    protected function convertService(ClientInvoiceItem $item): ?ClaimInvoiceItem
     {
         /** @var \App\Shift $shift */
+        if (empty($item->shiftService)) {
+            // Original service DB entry no longer exists
+            $this->warnings->push("Shift Service ({$item->invoiceable_id}) no longer exists.");
+            return null;
+        }
         $shift = $item->shiftService->shift;
         $caregiver = $shift->caregiver;
         $evvAddress = $shift->address;

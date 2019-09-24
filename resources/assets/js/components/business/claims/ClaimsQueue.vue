@@ -83,7 +83,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive" v-if="loaded > 0">
+        <div class="table-responsive" v-if="loaded > 0" style="min-height: 250px">
             <b-table bordered striped hover show-empty
                 :items="items"
                 :fields="fields"
@@ -108,6 +108,15 @@
                     </span>
                     <span v-else>
                         {{ row.item.payer ? row.item.payer.name : 'N/A' }}
+                    </span>
+                </template>
+                <template slot="claim_total" scope="row" class="text-nowrap">
+                    <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
+                    <span v-if="row.item.amount_mismatch">
+                        <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
+                        <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
+                            Claim amount does not match invoice amount.
+                        </b-tooltip>
                     </span>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
