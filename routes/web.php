@@ -494,6 +494,8 @@ Route::group([
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');
     Route::get('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@create');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
+    Route::get('claim-resources/{claim}/caregivers', 'Business\Claims\ClaimResourceController@caregivers');
+    Route::get('claim-resources/{claim}/services', 'Business\Claims\ClaimResourceController@services');
 
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
     Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');

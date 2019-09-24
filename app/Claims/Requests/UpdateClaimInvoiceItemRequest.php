@@ -42,6 +42,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'rate' => 'required|numeric|min:0|max:999.99',
             'units' => 'required|numeric|min:0|max:999.99',
 
+            'caregiver_id' => ['required', 'exists:caregivers,id'],
             'caregiver_first_name' => 'required',
             'caregiver_last_name' => 'required',
             'caregiver_gender' => 'nullable|in:F,M',
@@ -105,6 +106,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             case ClaimableService::class:
                 $data = $data->only([
                     'units',
+                    'caregiver_id',
                     'caregiver_first_name',
                     'caregiver_last_name',
                     'caregiver_gender',
@@ -162,7 +164,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 break;
             case ClaimableExpense::class:
-                $data = $data->only(['name', 'notes', 'date', 'caregiver_first_name', 'caregiver_last_name'])
+                $data = $data->only(['name', 'notes', 'date', 'caregiver_id', 'caregiver_first_name', 'caregiver_last_name'])
                     ->toArray();
                 $data['date'] = filter_date($data['date']);
                 break;

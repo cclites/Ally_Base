@@ -78,7 +78,7 @@ const mutations = {
 // actions
 const actions = {
     async fetchCaregiverList({commit, state}) {
-        await axios.get(`/business/dropdown/caregivers?business=${state.claim.business_id}&active=all`)
+        await axios.get(`/business/claim-resources/${state.claim.id}/caregivers`)
             .then( ({ data }) => {
                 commit('setCaregiverList', data);
             })

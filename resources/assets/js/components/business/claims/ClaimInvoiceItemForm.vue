@@ -172,7 +172,7 @@
 
             <h5><strong>Service</strong></h5>
             <b-row>
-                <b-col lg="6">
+                <b-col lg="4">
                     <b-form-group label="Service Name" label-for="service_name" label-class="required">
                         <b-form-input
                             v-model="form.service_name"
@@ -184,7 +184,19 @@
                         <input-help :form="form" field="service_name" text=""></input-help>
                     </b-form-group>
                 </b-col>
-                <b-col lg="6">
+                <b-col lg="4">
+                    <b-form-group label="Service Name" label-for="service_name" label-class="required">
+                        <b-form-input
+                            v-model="form.service_name"
+                            id="service_name"
+                            name="service_name"
+                            type="text"
+                            :disabled="form.busy"
+                        />
+                        <input-help :form="form" field="service_name" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
                     <b-form-group label="Service Code" label-for="service_code">
                         <b-form-input
                             v-model="form.service_code"
@@ -292,19 +304,19 @@
             </b-row>
 
             <h5><strong>Caregiver Information</strong></h5>
-<!--            <b-row>-->
-<!--                <b-col lg="6">-->
-<!--                    <b-form-group label="Caregiver" label-for="caregiver_id">-->
-<!--                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id">-->
-<!--                            <option value="">&#45;&#45; Select a Caregiver &#45;&#45;</option>-->
-<!--                            <option v-for="item in caregivers" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>-->
-<!--                        </b-select>-->
-<!--                        <input-help :form="form" field="caregiver_id" text=""></input-help>-->
-<!--                    </b-form-group>-->
-<!--                </b-col>-->
-<!--                <b-col lg="6">-->
-<!--                </b-col>-->
-<!--            </b-row>-->
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Caregiver" label-for="caregiver_id">
+                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id" @change="updateCaregiverDataFromDropdown">
+                            <option value="">-- Select a Caregiver --</option>
+                            <option v-for="item in caregivers" :key="item.id" :value="item.id">{{ item.name_last_first }}</option>
+                        </b-select>
+                        <input-help :form="form" field="caregiver_id" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="First Name" label-for="caregiver_first_name" label-class="required">
@@ -629,7 +641,7 @@
 
                     // service data
                     shift_id: '',
-                    // caregiver_id: '',
+                    caregiver_id: '',
                     caregiver_first_name: '',
                     caregiver_last_name: '',
                     caregiver_gender: '',
@@ -727,6 +739,20 @@
 
                 this.form.rate = amount.dividedBy(units).toFixed(2);
             },
+
+            updateCaregiverDataFromDropdown(id) {
+                let cg = this.caregivers.find(x => x.id == id);
+                if (! cg) {
+                    return;
+                }
+
+                this.form.caregiver_first_name = cg.first_name;
+                this.form.caregiver_last_name = cg.last_name;
+                this.form.caregiver_medicaid_id = cg.medicaid_id;
+                this.form.caregiver_dob = cg.date_of_birth;
+                this.form.caregiver_gender = cg.gender ? cg.gender : '';
+                this.form.caregiver_ssn = '';
+            },
         },
 
         watch: {
@@ -742,7 +768,7 @@
                     this.form.id = null;
                     this.form.claimable_type = this.CLAIMABLE_TYPES.SERVICE;
                 }
-            }
+            },
         },
     }
 </script>
