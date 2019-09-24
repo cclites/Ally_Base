@@ -15,7 +15,8 @@ class GenerateClaimsCommand extends Command
      * @var string
      */
     protected $signature = 'claims:generate
-                            {client_invoice_ids : Comma separated list of client invoice ids.}';
+                            {client_invoice_ids : Comma separated list of client invoice ids.}
+                            {--dry-run : Do not commit anything}.';
 
     /**
      * The console command description.
@@ -101,7 +102,10 @@ class GenerateClaimsCommand extends Command
                 }
             }
 
-            \DB::commit();
+            if (! $this->option('dry-run')) {
+                \DB::commit();
+            }
+
         } catch (\Exception $ex) {
             $this->error("Unexpected error: {$ex->getMessage()}");
             \DB::rollBack();
@@ -125,6 +129,10 @@ class GenerateClaimsCommand extends Command
             foreach ($this->warnings as $item) {
                 $this->info($item);
             }
+        }
+
+        if ($this->option('dry-run')) {
+            $this->info("Note: this was a dry run, nothing was committed.");
         }
 
         return 0;
