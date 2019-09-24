@@ -2,6 +2,7 @@
 
 namespace App\Claims\Transmitters;
 
+use App\Claims\ClaimableService;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Claims\ClaimInvoiceItem;
@@ -19,21 +20,53 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
      */
     public function validateClaim(ClaimInvoice $claim): ?array
     {
-        $errors = ['business' => [], 'payer' => [], 'client' => [], 'credentials' => []];
-
-        if (empty($claim->business->ein)) {
-            array_push($errors['business'], 'ein');
-        }
-
-        if (empty($claim->client_medicaid_id)) {
-            array_push($errors['client'], 'medicaid_id');
-        }
+        $errors = collect([]);
+        $editClaimUrl = route('business.claims.edit', ['claim' => $claim]);
 
         if ($claim->items()->count() === 0) {
             throw new ClaimTransmissionException('You cannot transmit this Claim because there are no claimable items attached.');
         }
 
-        return $errors;
+        if (empty($claim->business->ein)) {
+            $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings').'#medicaid']);
+        }
+
+        if (empty($claim->client_medicaid_id)) {
+            $errors->push(['message' => 'Client Medicaid ID is required.', 'url' => $editClaimUrl]);
+        }
+
+        if (empty($claim->payer_code)) {
+            $errors->push(['message' => 'Payer Code is required.', 'url' => $editClaimUrl]);
+        }
+
+        foreach ($claim->items as $item) {
+            /** @var ClaimInvoiceItem $item */
+            if ($item->claimable_type == ClaimableService::class) {
+                /** @var ClaimableService $service */
+                $service = $item->claimable;
+                if (empty($service->service_code)) {
+                    $errors->push(['message' => "Service '{$service->service_name}' on {$item->date->toDateString()} as no Service Code.", 'url' => $editClaimUrl]);
+                }
+            }
+        }
+
+        return $errors->isEmpty() ? null : $errors->toArray();
+    }
+
+    /**
+     * Get all claim data to transmit, filtering out
+     * and skipped items.
+     *
+     * @param ClaimInvoice $claim
+     * @return array
+     */
+    public function getData(ClaimInvoice $claim): array
+    {
+        return $claim->items->map(function (ClaimInvoiceItem $item) {
+            return $this->mapClaimableRecord($item);
+        })
+            ->filter()
+            ->toArray();
     }
 
     /**
@@ -72,7 +105,7 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
      * Map a claim's shift into importable data for the service.
      *
      * @param ClaimInvoiceItem $item
-     * @return array
+     * @return null|array
      */
-    abstract public function mapClaimableRecord(ClaimInvoiceItem $item): array;
+    abstract public function mapClaimableRecord(ClaimInvoiceItem $item): ?array;
 }

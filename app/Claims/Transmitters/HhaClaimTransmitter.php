@@ -9,6 +9,7 @@ use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\HhaFile;
+use Illuminate\Support\Collection;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -51,26 +52,13 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         // VisitID  shift id ?
         // client evv address
 
-        $errors = parent::validateClaim($claim);
+        $errors = collect(parent::validateClaim($claim));
 
         if (empty($claim->business->hha_username) || empty($claim->business->getHhaPassword())) {
-            array_push($errors['credentials'], 'hha_username');
-            array_push($errors['credentials'], 'hha_password');
+            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings').'#claims']);
         }
 
-        if (empty($claim->payer_code)) {
-            if (optional($claim->payer)->isPrivatePay()) {
-                array_push($errors['client'], 'medicaid_payer_id');
-            } else {
-                array_push($errors['payer'], 'payer_code');
-            }
-        }
-
-        if (collect($errors)->flatten(1)->isEmpty()) {
-            return null;
-        }
-
-        return $errors;
+        return $errors->isEmpty() ? null : $errors->toArray();
     }
 
     /**
@@ -94,11 +82,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         }
 
         $filename = $hha->getFilename();
-        $data = $claim->items->map(function (ClaimInvoiceItem $item) {
-            return $this->mapClaimableRecord($item);
-        })->filter();
-
-        $hha->addItems($data);
+        $hha->addItems($this->getData($claim));
         if ($hha->uploadCsv($filename)) {
             // Success
 
@@ -119,9 +103,9 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * data for the service.
      *
      * @param ClaimInvoiceItem $item
-     * @return array
+     * @return null|array
      */
-    public function mapClaimableRecord(ClaimInvoiceItem $item): array
+    public function mapClaimableRecord(ClaimInvoiceItem $item): ?array
     {
         if ($item->claimable_type != ClaimableService::class) {
             // HHA DOES NOT SUPPORT EXPENSES

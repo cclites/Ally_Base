@@ -2,7 +2,6 @@
 
 namespace App\Claims\Contracts;
 
-use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
@@ -14,7 +13,6 @@ interface ClaimTransmitterInterface
      *
      * @param ClaimInvoice $claim
      * @return null|array
-     * @throws ClaimTransmissionException
      */
     public function validateClaim(ClaimInvoice $claim): ?array;
 
@@ -27,13 +25,22 @@ interface ClaimTransmitterInterface
     public function send(ClaimInvoice $claim): bool;
 
     /**
+     * Get all claim data to transmit, filtering out
+     * and skipped items.
+     *
+     * @param ClaimInvoice $claim
+     * @return array
+     */
+    public function getData(ClaimInvoice $claim): array;
+
+    /**
      * Map a ClaimInvoiceItem record to the importable
      * data for the service.
      *
      * @param ClaimInvoiceItem $item
-     * @return array
+     * @return null|array
      */
-    public function mapClaimableRecord(ClaimInvoiceItem $item): array;
+    public function mapClaimableRecord(ClaimInvoiceItem $item): ?array;
 
     /**
      * Check transmitter is in test mode.
