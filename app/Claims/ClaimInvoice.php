@@ -270,6 +270,19 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->amount != $this->clientInvoice->amount;
     }
 
+    /**
+     * Check if the Claim has any expense items.
+     *
+     * @return bool
+     */
+    public function getHasExpenses(): bool
+    {
+        return $this->items->filter(function ($item) {
+            /** @var ClaimInvoiceItem $item */
+            return $item->claimable_type == ClaimableExpense::class;
+        })->count() > 0;
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
