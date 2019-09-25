@@ -54,12 +54,12 @@ export default {
                 REJECTED: 'REJECTED',
             },
             claimStatusOptions: [
-                { value: 'NOT_SENT', text: 'Not Sent' },
-                { value: 'CREATED', text: 'Created' },
-                { value: 'TRANSMITTED', text: 'Transmitted' },
-                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
                 { value: 'ACCEPTED', text: 'Accepted' },
+                { value: 'CREATED', text: 'Created' },
+                { value: 'NOT_SENT', text: 'Not Sent' },
                 { value: 'REJECTED', text: 'Rejected' },
+                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
+                { value: 'TRANSMITTED', text: 'Transmitted' },
             ],
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',

@@ -1,10 +1,13 @@
 <template>
     <b-row>
         <b-col>
-            <b-card header="Claims AR Aging Report"
+            <b-card header="Claim Transmissions Report"
                 header-text-variant="white"
                 header-bg-variant="info"
             >
+                <b-alert show variant="info">
+                    This report shows total amounts grouped by payer for claims transmitted during the selected date range.
+                </b-alert>
                 <div class="form-inline mb-3">
                     <business-location-form-group
                         v-model="form.businesses"
@@ -13,20 +16,30 @@
                         :allow-all="true"
                     />
 
+                    <date-picker
+                        v-model="form.start_date"
+                        placeholder="Start Date"
+                        class="mt-1"
+                    />
+                        &nbsp;to&nbsp;
+                    <date-picker
+                        v-model="form.end_date"
+                        placeholder="End Date"
+                        class="mr-1 mt-1"
+                    />
+
                     <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loading">
                         <option value="">-- All Clients --</option>
                         <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                         </option>
                     </b-form-select>
 
-                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
-
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                         Generate Report
                     </b-button>
 
-                    <b-button @click="download()" v-if="totalRows" variant="success" class="mr-1 mt-1">
+                    <b-button @click="download()" v-if="!!items" variant="success" class="mr-1 mt-1">
                         <i class="fa fa-file-excel-o"></i> Export to Excel
                     </b-button>
                 </div>
@@ -40,8 +53,6 @@
                                 :busy="busy"
                                 :items="items"
                                 :fields="fields"
-                                :current-page="currentPage"
-                                :per-page="perPage"
                                 :sort-by.sync="sortBy"
                                 :sort-desc.sync="sortDesc"
                                 :empty-text="emptyText"
@@ -60,44 +71,17 @@
                                     <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
                                 </template>
 
-                                <template slot="FOOT_claim_name" scope="row">
-                                    &nbsp;
-                                </template>
-                                <template slot="FOOT_invoice_name" scope="row">
-                                    &nbsp;
-                                </template>
-                                <template slot="FOOT_client_name" scope="row">
-                                    &nbsp;
-                                </template>
                                 <template slot="FOOT_payer" scope="row">
                                     &nbsp;
                                 </template>
-                                <template slot="FOOT_current" scope="row">
-                                    <strong>Total:</strong>{{ moneyFormat(totals.current) }}
+                                <template slot="FOOT_amount" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(total_amount) }}
                                 </template>
-                                <template slot="FOOT_period_30_45" scope="row">
-                                    <strong>Total:</strong>{{ moneyFormat(totals.period_30_45) }}
+                                <template slot="FOOT_amount_due" scope="row">
+                                    <strong>Total:</strong>{{ moneyFormat(total_due) }}
                                 </template>
-                                <template slot="FOOT_period_46_60" scope="row">
-                                    <strong>Total:</strong>{{ moneyFormat(totals.period_46_60) }}
-                                </template>
-                                <template slot="FOOT_period_61_75" scope="row">
-                                    <strong>Total:</strong>{{ moneyFormat(totals.period_61_75) }}
-                                </template>
-                                <template slot="FOOT_period_75_plus" scope="row">
-                                    <strong>Total:</strong>{{ moneyFormat(totals.period_75_plus) }}
-                                </template>
-
                             </b-table>
                         </div>
-                        <b-row>
-                            <b-col lg="6">
-                                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
-                            </b-col>
-                            <b-col lg="6" class="text-right">
-                                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-                            </b-col>
-                        </b-row>
                     </b-col>
                 </b-row>
             </b-card>
@@ -128,44 +112,36 @@
                 loading: false,
                 clients: [],
                 form: new Form({
+                    start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
+                    end_date: moment().format('MM/DD/YYYY'),
                     businesses: '',
                     client_id: '',
-                    payer_id: '',
                     json: 1,
                 }),
                 busy: false,
-                totalRows: 0,
-                perPage: 30,
-                currentPage: 1,
-                sortBy: 'client_name',
+                sortBy: 'payer_name',
                 sortDesc: false,
                 fields: {
-                    claim_name: { sortable: true, label: "Claim", class: 'text-nowrap' },
-                    invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
-                    client_name: { sortable: true, label: "Client", class: 'text-nowrap' },
-                    payer: {sortable: true, label: "Payers"},
-                    current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
-                    period_30_45: { sortable: true, label: '30-45', formatter: x => this.moneyFormat(x) },
-                    period_46_60: { sortable: true, label: '46-60', formatter: x => this.moneyFormat(x) },
-                    period_61_75: { sortable: true, label: '61-75', formatter: x => this.moneyFormat(x) },
-                    period_75_plus: { sortable: true, label: '75+', formatter: x => this.moneyFormat(x) },
+                    payer_name: { sortable: true, label: 'Payer' },
+                    amount: { sortable: true, label: 'Total Amount Transmitted', formatter: x => this.moneyFormat(x) },
+                    amount_due: { sortable: true, label: 'Total Amount Due from Transmissions', formatter: x => this.moneyFormat(x) },
                 },
                 items: [],
+                total_amount: 0.00,
+                total_due: 0.00,
                 hasRun: false,
                 footClone: true,
-                totals: {},
-
             }
         },
 
         methods: {
             fetch() {
                 this.busy = true;
-                this.form.get('/business/reports/claims/ar-aging')
+                this.form.get('/business/reports/claims/transmissions')
                     .then( ({ data }) => {
                         this.items = data.results;
-                        this.totals = data.totals;
-                        this.totalRows = this.items.length;
+                        this.total_amount = data.total_amount;
+                        this.total_due = data.total_due;
                     })
                     .catch(e => {})
                     .finally(() => {
@@ -184,7 +160,7 @@
             },
 
             download() {
-                window.location = this.form.toQueryString('/business/reports/claims/ar-aging?export=1');
+                window.location = this.form.toQueryString('/business/reports/claims/transmissions?export=1');
             },
         },
 

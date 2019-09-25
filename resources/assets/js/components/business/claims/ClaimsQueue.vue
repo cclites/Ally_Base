@@ -51,6 +51,17 @@
                             <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
 
+                        <b-form-select
+                            id="claimStatus"
+                            name="claimStatus"
+                            v-model="claimStatus"
+                            class="mr-1 mt-1"
+                        >
+                            <option value="">-- Claim Status --</option>
+                            <option value="CREATED">Created</option>
+                            <option value="TRANSMITTED">Transmitted</option>
+                        </b-form-select>
+
                         <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
@@ -98,9 +109,16 @@
                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
                 <template slot="claim" scope="row">
-                    <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/print`" target="_blank">{{ row.item.claim.name }}</a>
-                    <span v-else> - </span>
-                    <i v-if="row.item.claim && row.item.claim.modified_at" class="fa fa-code-fork text-danger"></i>
+                    <div class="text-nowrap">
+                        <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/print`" target="_blank">{{ row.item.claim.name }}</a>
+                        <span v-else> - </span>
+                        <span v-if="row.item.claim && row.item.claim.modified_at">
+                            <i class="fa fa-code-fork text-danger" :id="`modified_icon_${row.item.id}`" />
+                            <b-tooltip :target="`modified_icon_${row.item.id}`" triggers="hover">
+                                Claim has been modified.
+                            </b-tooltip>
+                        </span>
+                    </div>
                 </template>
                 <template slot="payer" scope="row">
                     <span v-if="row.item.claim">
@@ -110,14 +128,16 @@
                         {{ row.item.payer ? row.item.payer.name : 'N/A' }}
                     </span>
                 </template>
-                <template slot="claim_total" scope="row" class="text-nowrap">
-                    <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
-                    <span v-if="row.item.amount_mismatch">
-                        <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
-                        <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
-                            Claim amount does not match invoice amount.
-                        </b-tooltip>
-                    </span>
+                <template slot="claim_total" scope="row">
+                    <div class="text-nowrap">
+                        <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
+                        <span v-if="row.item.amount_mismatch">
+                            <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
+                            <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
+                                Claim amount does not match invoice amount.
+                            </b-tooltip>
+                        </span>
+                    </div>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
                     <!-- CREATE BUTTON -->
@@ -148,6 +168,9 @@
                             </b-dropdown-item>
                             <b-dropdown-item @click="adjust(row.item)">
                                 <i class="fa fa-usd mr-1" />Adjust Claim
+                            </b-dropdown-item>
+                            <b-dropdown-item :href="`/business/claim-adjustments/${row.item.claim.id}`">
+                                <i class="fa fa-history mr-1" />Adjustment History
                             </b-dropdown-item>
                             <b-dropdown-divider />
                             <b-dropdown-item @click="deleteClaim(row.item)" variant="danger">
@@ -229,7 +252,8 @@
                 loaded: -1,
                 start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().format('MM/DD/YYYY'),
-                invoiceType: "",
+                invoiceType: '',
+                claimStatus: '',
                 items: [],
                 fields: [
                     {
@@ -481,7 +505,7 @@
              */
             async fetch() {
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
+                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&claimStatus=${this.claimStatus}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
                 axios.get(url)
                     .then(({data}) => {
                         this.items = data.data;
