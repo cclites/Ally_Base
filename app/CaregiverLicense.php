@@ -40,6 +40,11 @@ class CaregiverLicense extends AuditableModel
         return $this->belongsTo(Caregiver::class);
     }
 
+    public function defaultType()
+    {
+        return $this->hasOne( ExpirationType::class, 'id', 'chain_expiration_type_id' );
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
