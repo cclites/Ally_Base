@@ -22,6 +22,16 @@ class ImportTellusTypecodeData extends BaseImport
     protected $description = 'Import and update values from a Tellus Typecode Data Dictionary file.';
 
     /**
+     * 
+     * Known Errors with Dictionary:
+     *  Format is: Category :: Text_Code :: Description
+     * 
+     *  1. Payer :: SUNS :: Sunshine State Health Plan Inc. of Florida => change Description to "Sunshine/Centine"
+     *  2. Plan :: FMSP :: Florida State Medical Plan => change Description to "Florida Medicaid State Plan"
+     *  3. Payer :: UHTH :: UnitedHealthcare of Florida => change Description to United HealthCare
+     */
+
+    /**
      * @return mixed|void
      */
     public function handle()

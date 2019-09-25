@@ -59,11 +59,11 @@ class TellusService
 
         list($httpCode, $response) = $this->sendXml($xml);
 
-        dd($response);
+        // dd($response);
 
         $xml = new SimpleXMLElement($response);
 
-        dd( $xml );
+        // dd( $xml );
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
             throw new TellusApiException('Claim XML failed validation.');
