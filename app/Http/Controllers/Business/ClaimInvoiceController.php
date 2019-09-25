@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Http\Controllers\Business;
-
 
 use App\Billing\Claim;
 use App\Billing\View\InvoiceViewFactory;

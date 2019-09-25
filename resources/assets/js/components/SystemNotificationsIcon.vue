@@ -1,7 +1,7 @@
 <template>
     <li class="nav-item dropdown pr-2">
         <a class="nav-link dropdown-toggle text-muted text-muted" id="notificationsDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-bell notification-icon"></i>
-            <span class="badge badge-danger badge-notifications" v-if="notifications.length">{{ notifications.length }}</span>
+            <span class="badge badge-danger badge-notifications" v-if="total > 0">{{ total }}</span>
             <b-tooltip target="notificationsDropdown" placement="left" show title="You have notifications that require action" v-if="showTooltip"></b-tooltip>
         </a>
         <div class="dropdown-menu dropdown-menu-right mailbox scale-up">
@@ -49,10 +49,8 @@
         computed: {
             ...mapGetters({
                 notifications: 'notifications/notifications',
+                total: 'notifications/total',
             }),
-            count() {
-                return this.notifications.length;
-            },
             items() {
                 let maxTitle = 36;
                 let maxDescription = 72;

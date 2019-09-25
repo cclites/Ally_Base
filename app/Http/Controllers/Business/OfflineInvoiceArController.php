@@ -17,7 +17,6 @@ use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use App\Responses\Resources\ClaimResource;
 
 class OfflineInvoiceArController extends BaseController
 {

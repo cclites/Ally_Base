@@ -123,6 +123,9 @@
                     header-bg-variant="info"
                     header-text-variant="white"
             >
+                <div class="d-flex mb-2">
+                    <b-btn variant="info" :href="terms_url" target="_blank" class="ml-auto"><i class="fa fa-print" />Print</b-btn>
+                </div>
                 <div v-html="terms" style="overflow-y: scroll;max-height:220px;"></div>
             </b-card>
             <b-row>
@@ -157,6 +160,7 @@
                 busy: false,
                 loading: false,
                 terms: '',
+                terms_url: '',
                 form: new Form({
                     firstname: this.client.firstname,
                     lastname: this.client.lastname,
@@ -185,6 +189,7 @@
             async fetchTerms() {
                 let response = await axios.get(`/account-setup/clients/${this.token}/terms`);
                 this.terms = response.data.terms;
+                this.terms_url = response.data.terms_url;
             },
 
             submit() {

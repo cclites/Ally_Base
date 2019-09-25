@@ -7,7 +7,6 @@ use App\HhaFile;
 use App\HhaFileResult;
 use App\Services\HhaExchangeService;
 use Carbon\Carbon;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Console\Command;
 
 class CronHhaCheckStatus extends Command
@@ -131,7 +130,7 @@ class CronHhaCheckStatus extends Command
             }
 
             if (count($csv) != 45) {
-                throw new InvalidArgumentException("Invalid response file line: $line");
+                throw new \InvalidArgumentException("Invalid response file line: $line");
             }
 
             $result = HhaFileResult::create([

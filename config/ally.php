@@ -1,5 +1,11 @@
 <?php
 return [
+    /**
+     * The applications default local timezone for displaying
+     * dates on the front-end.
+     */
+    'local_timezone' => env('LOCAL_TIMEZONE', 'America/New_York'),
+
     'medicaid_fee' => '0.03',
     'bank_account_fee' => '0.03',
     'credit_card_fee' => '0.05',

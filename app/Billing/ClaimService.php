@@ -1,7 +1,7 @@
 <?php
 namespace App\Billing;
 
-use MyCLabs\Enum\Enum;
+use App\BaseEnum;
 
 /**
  * ClaimService Enum
@@ -12,11 +12,12 @@ use MyCLabs\Enum\Enum;
  * @method static ClaimService EMAIL()
  * @method static ClaimService FAX()
  */
-class ClaimService extends Enum
+class ClaimService extends BaseEnum
 {
     private const HHA = 'HHA';
     private const TELLUS = 'TELLUS';
     private const CLEARINGHOUSE = 'CLEARINGHOUSE';
     private const EMAIL = 'EMAIL';
     private const FAX = 'FAX';
+    private const DIRECT_MAIL = 'DIRECT_MAIL';
 }

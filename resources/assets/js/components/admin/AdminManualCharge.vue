@@ -124,7 +124,6 @@
         mounted() {
             this.makeForm();
             this.loadBusinesses();
-            this.loadClients();
         },
 
         methods: {
@@ -170,11 +169,10 @@
         },
 
         watch: {
-            business_id(newVal, oldVal) {
-                if (this.clients.find(obj => obj.id == this.form.client_id && obj.business_id == newVal)) {
-                    return;
+            "form.business_id"() {
+                if(this.form.business_id){
+                    axios.get('/admin/clients?json=1&id=' + this.form.business_id).then(response => this.clients = response.data);
                 }
-                this.form.client_id = '';
             },
         },
 

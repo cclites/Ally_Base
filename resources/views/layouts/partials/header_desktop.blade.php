@@ -23,7 +23,7 @@
                 <!-- Exceptions -->
                 <!-- ============================================================== -->
                 @if(is_office_user())
-                    <system-notifications></system-notifications>
+                    <system-notifications-icon></system-notifications-icon>
                 @endif
                 <!-- ============================================================== -->
                 <!-- Tasks -->

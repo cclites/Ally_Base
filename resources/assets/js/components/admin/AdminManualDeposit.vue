@@ -91,7 +91,6 @@
         mounted() {
             this.makeForm();
             this.loadBusinesses();
-            this.loadCaregivers();
         },
 
         methods: {
@@ -126,10 +125,14 @@
             loadBusinesses() {
                 axios.get('/admin/businesses?json=1').then(response => this.businesses = response.data);
             },
-
-            loadCaregivers() {
-                axios.get('/admin/caregivers?json=1').then(response => this.caregivers = response.data);
-            },
         },
+
+        watch: {
+            "form.business_id"() {
+                if(this.form.business_id){
+                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id).then(response => this.caregivers = response.data);
+                }
+            },
+        }
     }
 </script>

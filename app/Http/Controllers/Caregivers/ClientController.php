@@ -119,7 +119,7 @@ class ClientController extends BaseController
             }
         }
 
-        list($before, $after) = Schedule::getAdjoiningCaregiverSchedules($client, $start, $end);
+        list($before, $after) = Schedule::getAdjoiningCaregiverSchedules($client, $start, $end, auth()->user()->id, 4);
 
         return response()->json(compact(['before', 'after']));
     }

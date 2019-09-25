@@ -75,11 +75,15 @@ class ServiceAuthUsageReport extends BaseReport
      * @param array $period
      * @return array
      */
-    public function convertPeriodTimezone(array $period) : array
+    public function convertPeriodTimezone(array $period, bool $toUtc = false) : array
     {
         $period[0] = Carbon::parse($period[0]->toDateString(), $this->getTimezone())->setTime(0, 0, 0);
         $period[1] = Carbon::parse($period[1]->toDateString(), $this->getTimezone())->setTime(23, 59, 59);
 
+        if ($toUtc) {
+            $period[0] = $period[0]->setTimezone('UTC');
+            $period[1] = $period[1]->setTimezone('UTC');
+        }
         return $period;
     }
 
@@ -97,8 +101,8 @@ class ServiceAuthUsageReport extends BaseReport
             $calculator = $auth->getCalculator();
             $allowedUnits = $auth->getUnits($period[0]);
             $allowedHours = $auth->getHours($period[0]);
-            $confirmed = $calculator->getConfirmedUsage($period);
-            $unconfirmed = $calculator->getUnconfirmedUsage($period);
+            $confirmed = $calculator->getConfirmedUsage($this->convertPeriodTimezone($period, true));
+            $unconfirmed = $calculator->getUnconfirmedUsage($this->convertPeriodTimezone($period, true));
             $scheduled = $calculator->getScheduledUsage($this->convertPeriodTimezone($period));
             $remaining = subtract($allowedUnits, add(add($confirmed, $scheduled), $unconfirmed));
 

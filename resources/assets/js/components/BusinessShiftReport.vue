@@ -696,7 +696,7 @@
 
             hourlyFormat(item, amount, type) {
                 if(item.services && item.services.length > 1 && type == 'caregiver'){
-                    return 'M';
+                    return 'Multi';
                 }
 
                 return (item.fixed_rates) ? '---' : this.moneyFormat(amount);

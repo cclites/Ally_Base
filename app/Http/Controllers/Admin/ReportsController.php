@@ -163,21 +163,29 @@ class ReportsController extends Controller
         return view('admin.reports.shared_shifts');
     }
 
-    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator)
+    public function caregiversDepositsWithoutBankAccount(CaregiverInvoiceQuery $query, CaregiverInvoiceGenerator $invoiceGenerator, Request $request)
     {
-        if (!$caregivers = \Cache::get('caregivers_missing_accounts')) {
-            $caregivers = Caregiver::active()->with('businessChains')->doesntHave('bankAccount')->get();
-            $caregivers = $caregivers->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
-                $array = $caregiver->toArray();
-                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
-                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
-                return $array;
-            });
+        if($request->business){
 
-            \Cache::put('caregivers_missing_accounts', $caregivers, 60);
+            $caregivers = Caregiver::active()
+                            ->forRequestedBusinesses([$request->business])
+                            ->with('businessChains')
+                            ->doesntHave('bankAccount')
+                            ->get()->map(function(Caregiver $caregiver) use ($query, $invoiceGenerator) {
+                                $array = $caregiver->toArray();
+                                $array['has_amount_owed'] = $query->notPaidInFull()->forCaregiver($caregiver->id)->exists()
+                                    || count($invoiceGenerator->getInvoiceables($caregiver)) > 0;
+                                return $array;
+                            });
+
+            return $caregivers;
         }
 
-        return view('admin.reports.caregivers.deposits_without_bank_account', compact('caregivers'));
+        return view_component('business-caregiver-deposits-missing-bank-account', 'Missing Deposits Report', [], [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+
     }
 
     public function finances()

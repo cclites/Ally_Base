@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Payroll Summary"
+    <b-card header="This report shows total caregiver payments over a specified range for dates the caregiver was paid, NOT the dates of service."
             header-text-variant="white"
             header-bg-variant="info"
             class="mb-3"

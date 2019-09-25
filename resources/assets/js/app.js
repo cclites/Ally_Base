@@ -71,6 +71,7 @@ Vue.component('confirm-modal', require('./components/modals/ConfirmModal'));
 Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
+Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -163,8 +164,10 @@ Vue.component('business-clients-missing-payment-methods-report', require('./comp
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 //Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
-Vue.component('business-notification', require('./components/BusinessNotification.vue'));
-Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
+
+Vue.component('system-notification', require('./components/SystemNotification.vue'));
+Vue.component('system-notifications-page', require('./components/SystemNotificationsPage.vue'));
+
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 
 Vue.component('third-party-payer', require('./components/business/reports/ThirdPartyPayerReport.vue'));
@@ -311,7 +314,7 @@ Vue.component('reset-password-modal', require('./components/ResetPasswordModal.v
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
-Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
+Vue.component('system-notifications-icon', require('./components/SystemNotificationsIcon.vue'));
 Vue.component('tasks-icon', require('./components/TasksIcon.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
@@ -383,7 +386,15 @@ Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEdito
 Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
-
+/* Claims */
+Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
+Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
+Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
+Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
+Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
+Vue.component('business-claim-transmissions-report', require('./components/business/claims/ClaimTransmissionsReport'));
+Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
+Vue.component('claim-adjustment-history', require('./components/business/claims/ClaimAdjustmentHistory'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

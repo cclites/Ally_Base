@@ -146,7 +146,11 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
                     foreach( $by_caregivers as $caregiver_id => $caregiver ){
                         // make sure it is represented for every caregiver returned, blank or not..
 
-                        if( !$caregiver->where( 'chain_expiration_type_id', '=', $type->id )->first() ){
+                        // This step is a little messy, but necessary for the following reason:
+                        //  - I realized there is a bug where existing licenses OUTSIDE of the date range would be picked up as non-exsisting because of this mapping and displayed as such
+                        $allLicenses = CaregiverLicense::where( 'caregiver_id', $caregiver->first()->caregiver_id )->get();
+
+                        if( !$caregiver->where( 'chain_expiration_type_id', '=', $type->id )->first() && !$allLicenses->where( 'chain_expiration_type_id', '=', $type->id )->first() ){
                             // if the expiration type is not found for this caregiver, add a blank row
 
                             $caregiver->push( CaregiverLicense::make([
