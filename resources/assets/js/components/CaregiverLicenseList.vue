@@ -33,14 +33,11 @@
                 <template slot="name" scope="row">
 
                     <b-form-input
-                        v-if=" row.item.isNew "
+                        :disabled=" !!row.item.chain_expiration_type_id "
+                        :class=" row.item.applicable ? '' : 'text-muted' "
                         v-model=" row.item.name "
                         @change.native=" addToUpdateList( row.item ) "
                     ></b-form-input>
-                    <p class="mb-0" :class=" row.item.applicable ? '' : 'text-muted' " v-else>
-
-                        {{ row.item.name }}
-                    </p>
                 </template>
                 <template slot="description" scope="row">
 
@@ -195,7 +192,7 @@
                 let j = this.updateList.findIndex( tempId => tempId == item.tempId );
                 if( j >= 0 ) this.updateList.splice( j, 1 );
 
-                item.applicable  = !item.applicable;
+                item.applicable = !item.applicable;
 
                 if( item.applicable ){
                     // if applicable, delete the specific relationship so that the record could show up as a blank expiration ready to set
