@@ -12,13 +12,6 @@ use Carbon\Carbon;
 class FilteredResourceRequest extends FormRequest
 {
     /**
-     * Cache of the filtered data.
-     *
-     * @var null
-     */
-    protected $filtered = null;
-
-    /**
      * A default authorize() method to return true.  Authorization rules normally belong in a policy, called from the controller.
      *
      * @return bool
