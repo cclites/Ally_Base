@@ -5,6 +5,9 @@
                 header-text-variant="white"
                 header-bg-variant="info"
             >
+                <b-alert show variant="info">
+                    This report shows total amounts grouped by payer for claims transmitted during the selected date range.
+                </b-alert>
                 <div class="form-inline mb-3">
                     <business-location-form-group
                         v-model="form.businesses"
