@@ -29,6 +29,9 @@ class ImportTellusTypecodeData extends BaseImport
      *  1. Payer :: SUNS :: Sunshine State Health Plan Inc. of Florida => change Description to "Sunshine/Centine"
      *  2. Plan :: FMSP :: Florida State Medical Plan => change Description to "Florida Medicaid State Plan"
      *  3. Payer :: UHTH :: UnitedHealthcare of Florida => change Description to United HealthCare
+     * 
+     * 
+     * !!! ALSO, scan all ReasonCodes ( and other values ) for dashes ( - ). There are a few that are improperly encoded and should be just replaced with a regular "-"
      */
 
     /**
