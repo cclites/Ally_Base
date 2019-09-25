@@ -98,9 +98,16 @@
                     <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
                 </template>
                 <template slot="claim" scope="row">
-                    <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/print`" target="_blank">{{ row.item.claim.name }}</a>
-                    <span v-else> - </span>
-                    <i v-if="row.item.claim && row.item.claim.modified_at" class="fa fa-code-fork text-danger"></i>
+                    <div class="text-nowrap">
+                        <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/print`" target="_blank">{{ row.item.claim.name }}</a>
+                        <span v-else> - </span>
+                        <span v-if="row.item.claim && row.item.claim.modified_at">
+                            <i class="fa fa-code-fork text-danger" :id="`modified_icon_${row.item.id}`" />
+                            <b-tooltip :target="`modified_icon_${row.item.id}`" triggers="hover">
+                                Claim has been modified.
+                            </b-tooltip>
+                        </span>
+                    </div>
                 </template>
                 <template slot="payer" scope="row">
                     <span v-if="row.item.claim">
@@ -110,14 +117,16 @@
                         {{ row.item.payer ? row.item.payer.name : 'N/A' }}
                     </span>
                 </template>
-                <template slot="claim_total" scope="row" class="text-nowrap">
-                    <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
-                    <span v-if="row.item.amount_mismatch">
-                        <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
-                        <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
-                            Claim amount does not match invoice amount.
-                        </b-tooltip>
-                    </span>
+                <template slot="claim_total" scope="row">
+                    <div class="text-nowrap">
+                        <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
+                        <span v-if="row.item.amount_mismatch">
+                            <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
+                            <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
+                                Claim amount does not match invoice amount.
+                            </b-tooltip>
+                        </span>
+                    </div>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
                     <!-- CREATE BUTTON -->

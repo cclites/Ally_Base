@@ -263,10 +263,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasAmountMismatch(): bool
     {
-        if (filled($this->modified_at)) {
-            return false;
-        }
-
         return $this->amount != $this->clientInvoice->amount;
     }
 
