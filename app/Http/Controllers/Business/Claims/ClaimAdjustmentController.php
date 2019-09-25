@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Requests\CreateClaimAdjustmentRequest;
+use App\Claims\Resources\ClaimAdjustmentResource;
+use App\Claims\Resources\ClaimInvoiceResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Resources\ClaimsQueueResource;
@@ -13,6 +15,28 @@ use App\Claims\ClaimInvoice;
 
 class ClaimAdjustmentController extends BaseController
 {
+    /**
+     * Get the Claim Adjustment History page.
+     *
+     * @param ClaimInvoice $claim
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function index(ClaimInvoice $claim)
+    {
+        $this->authorize('view', $claim);
+
+        $init = [
+            'claim' => new ClaimInvoiceResource($claim),
+            'adjustments' => ClaimAdjustmentResource::collection($claim->adjustments),
+        ];
+
+        return view_component('claim-adjustment-history', 'Claim Adjustment History', compact('init'), [
+            'Home' => '/',
+            'Claims Queue' => route('business.claims-queue'),
+        ]);
+    }
+
     /**
      * Store new ClaimAdjustments.
      *

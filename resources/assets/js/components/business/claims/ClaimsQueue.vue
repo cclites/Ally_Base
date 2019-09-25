@@ -158,6 +158,9 @@
                             <b-dropdown-item @click="adjust(row.item)">
                                 <i class="fa fa-usd mr-1" />Adjust Claim
                             </b-dropdown-item>
+                            <b-dropdown-item :href="`/business/claim-adjustments/${row.item.claim.id}`">
+                                <i class="fa fa-history mr-1" />Adjustment History
+                            </b-dropdown-item>
                             <b-dropdown-divider />
                             <b-dropdown-item @click="deleteClaim(row.item)" variant="danger">
                                 <i class="fa fa-times mr-1" />Delete Claim
