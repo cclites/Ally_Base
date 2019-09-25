@@ -3,6 +3,7 @@
 namespace App\Claims;
 
 use App\Claims\Exceptions\ClaimTransmissionException;
+use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Claims\Exceptions\ClaimBalanceException;
@@ -241,7 +242,17 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
+    }
+
+    /**
+     * Get the timezone for the Claim shift data.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->business->getTimezone();
     }
 
     /**
@@ -257,6 +268,19 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return $this->amount != $this->clientInvoice->amount;
+    }
+
+    /**
+     * Check if the Claim has any expense items.
+     *
+     * @return bool
+     */
+    public function getHasExpenses(): bool
+    {
+        return $this->items->filter(function ($item) {
+            /** @var ClaimInvoiceItem $item */
+            return $item->claimable_type == ClaimableExpense::class;
+        })->count() > 0;
     }
 
     // **********************************************************
@@ -399,9 +423,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     {
         switch ($service) {
             case ClaimService::HHA():
-                throw new ClaimTransmissionException('Claim service "HHAeXchange" not yet supported.');
-//                return new HhaClaimTransmitter();
-                break;
+                return new HhaClaimTransmitter();
             case ClaimService::TELLUS():
                 throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
 //                return new TellusClaimTransmitter();
@@ -437,7 +459,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (!$lastName) {
+        if (! $lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;

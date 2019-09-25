@@ -37,8 +37,9 @@
             :no-close-on-backdrop="true"
             hide-footer
             class="modal-fit-more"
+            @hidden="onHideItemModal()"
         >
-            <claim-invoice-item-form ref="item-form" @close="hideModal()" :item="current" />
+            <claim-invoice-item-form ref="itemForm" @close="hideModal()" :item="current" />
         </b-modal>
 
         <confirm-modal title="Delete Item" ref="confirmDeleteItem" yesButton="Delete" yesVariant="danger">
@@ -124,6 +125,10 @@
                     id: null,
                     claimable_type: this.CLAIMABLE_TYPES.SERVICE,
                 });
+            },
+
+            onHideItemModal() {
+                this.$store.commit('claims/setItem', {});
             },
         },
     }

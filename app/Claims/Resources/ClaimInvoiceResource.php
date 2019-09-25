@@ -73,6 +73,7 @@ class ClaimInvoiceResource extends Resource
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
             'modified_at' => $this->resource->modified_at,
+            'has_expenses' => $this->resource->getHasExpenses(),
         ];
     }
 }

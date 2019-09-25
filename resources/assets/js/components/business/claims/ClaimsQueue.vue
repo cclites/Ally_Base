@@ -191,6 +191,19 @@
             <claim-adjustment-form @close="hideAdjustmentModal()" @update="updateRecord" />
         </b-modal>
 
+        <b-modal id="missingFieldsModal"
+            title="Missing Data Requirements"
+            v-model="missingFieldsModal"
+        >
+            <div v-for="(item, index) in missingFieldErrors" :key="index">
+                <span class="mr-1">{{ item.message }}</span>
+                <span>(<a :href="item.url">Fix</a>)</span>
+            </div>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="missingFieldsModal = false">Close</b-btn>
+            </div>
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -308,6 +321,8 @@
                 payFullBalance: false,
                 editingClaim: {},
                 showAdjustmentModal: false,
+                missingFieldErrors: [],
+                missingFieldsModal: false,
             }
         },
 
@@ -448,6 +463,16 @@
                         this.busy = false;
                         this.transmittingId = null;
                     });
+            },
+
+            /**
+             * Show the missing fields modal with the given errors
+             * @param {array} errors
+             * @param {Object} invoice
+             */
+            showMissingFieldsModal(errors, invoice) {
+                this.missingFieldErrors = errors;
+                this.missingFieldsModal = true;
             },
 
             /**
