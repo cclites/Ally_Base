@@ -29,7 +29,7 @@ class ClaimInvoiceAgingReport extends BaseReport
     public function __construct()
     {
         $this->query = ClaimInvoice::query()
-            ->with('client', 'payer', 'business', 'clientInvoice')
+            ->with('client', 'payer', 'business', 'clientInvoice', 'adjustments')
             ->where('amount_due', '<>', '0')
             ->whereIn('status', ClaimStatus::transmittedStatuses());
     }
