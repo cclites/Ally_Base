@@ -221,15 +221,19 @@
                 await axios.get( `/business/expiration-types` )
                     .then( ( { data } ) => {
 
+                        console.log( 'response: ', data );
+
                         this.licenses.forEach( license => {
 
                             let existingLicense = data.find( exp => exp.id == license.chain_expiration_type_id );
 
                             if( existingLicense ){
 
+                                console.log( 'if existing.. ', existingLicense );
+
                                 existingLicense.id                       = license.id;
                                 existingLicense.chain_expiration_type_id = license.chain_expiration_type_id;
-                                existingLicense.name                     = license.name;
+                                existingLicense.name                     = existingLicense.type;
                                 existingLicense.description              = license.description;
                                 existingLicense.expires_at               = license.expires_at;
                                 existingLicense.updated_at               = license.updated_at;
