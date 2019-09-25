@@ -51,6 +51,17 @@
                             <option value="no_balance">Does Not Have Claim Balance</option>
                         </b-form-select>
 
+                        <b-form-select
+                            id="claimStatus"
+                            name="claimStatus"
+                            v-model="claimStatus"
+                            class="mr-1 mt-1"
+                        >
+                            <option value="">-- Claim Status --</option>
+                            <option value="CREATED">Created</option>
+                            <option value="TRANSMITTED">Transmitted</option>
+                        </b-form-select>
+
                         <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
@@ -241,7 +252,8 @@
                 loaded: -1,
                 start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().format('MM/DD/YYYY'),
-                invoiceType: "",
+                invoiceType: '',
+                claimStatus: '',
                 items: [],
                 fields: [
                     {
@@ -493,7 +505,7 @@
              */
             async fetch() {
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
+                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&claimStatus=${this.claimStatus}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
                 axios.get(url)
                     .then(({data}) => {
                         this.items = data.data;

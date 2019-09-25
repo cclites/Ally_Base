@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Billing\ClaimStatus;
 use App\ClientType;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimsQueueResource;
@@ -65,6 +66,13 @@ class ClaimsQueueController extends BaseController
                         });
                         break;
                 }
+            }
+
+            if ($request->filled('claimStatus')) {
+                $status = ClaimStatus::fromValue($request->claimStatus);
+                $invoiceQuery->whereHas('claimInvoice', function ($q) use ($status) {
+                    $q->where('status', $status);
+                });
             }
 
             $invoiceQuery->forRequestedBusinesses();
