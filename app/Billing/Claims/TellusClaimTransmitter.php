@@ -9,6 +9,7 @@ use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
 use App\Business;
 use App\Client;
+use App\Services\DOMValidator;
 use App\Services\TellusApiException;
 use App\Services\TellusService;
 use App\Shift;
@@ -152,6 +153,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         $xml = $tellus->convertArrayToXML($this->getData($claim));
+
+        if ($errors = $tellus->getValidationErrors($xml)) {
+            throw new ClaimTransmissionException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
+        }
+
         $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
         \Storage::disk('public')->put($filename, $xml);
         return "/storage/$filename";
@@ -163,6 +169,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param \App\Billing\Claim $claim
      * @param \App\Shift $shift
      * @return array
+     * @throws ClaimTransmissionException
      */
     public function mapShiftRecord(Claim $claim, Shift $shift) : array
     {
@@ -186,7 +193,10 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        return [
+        $gps_in = $shift->checked_in_method == Shift::METHOD_GEOLOCATION;
+        $gps_out = $shift->checked_out_method == Shift::METHOD_GEOLOCATION;
+
+        $data = [
 
             'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
             'Jurisdiction'           => $this->tcLookup('Jurisdiction', $address->state ),
@@ -223,16 +233,34 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'DiagnosisCode4'         => $diagnosisCodes[ 3 ], // OPTIONAL && TODO
             'StartVerificationType'  => $this->tcLookup( 'StartVerificationType', $this->getVerificationType($shift->checked_in_method) ), // OPTIONAL
             'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($shift->checked_out_method) ), // OPTIONAL
-            // 'ScheduledStartDateTime' => $this->getScheduledStartTime($shift), // OPTIONAL
-            // 'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
-            // 'ScheduledLatitude'      => optional($geocode)->latitude ?? '', // OPTIONAL
-            // 'ScheduledLongitude'     => optional($geocode)->longitude ?? '', // OPTIONAL
-            // 'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
-            // 'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
-            // 'ActualStartLatitude'    => optional($geocode)->latitude ?? '', //OPTIONAL && this is not derived from correct value TODO
-            // 'ActualStartLongitude'   => optional($geocode)->longitude ?? '', //OPTIONAL && this is not derived from correct value TODO
-            // 'ActualEndLatitude'      => optional($geocode)->latitude ?? '', // OPTIONAL && this is not derived from correct value TODO
-            // 'ActualEndLongitude'     => optional($geocode)->longitude ?? '', //OPTIONAL && this is not derived from correct value TODO
+            'ScheduledStartDateTime' => $this->getScheduledStartTime($shift), // OPTIONAL
+            'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
+        ];
+
+        if ($gps_in) {
+            $data['ScheduledLatitude'] = optional($geocode)->latitude ?? ''; // OPTIONAL
+            $data['ScheduledLongitude'] = optional($geocode)->longitude ?? ''; // OPTIONAL
+        }
+
+        $data = array_merge($data, [
+            'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
+        ]);
+
+        if ($gps_in) {
+            $data = array_merge($data, [
+                'ActualStartLatitude'    => $gps_in ? $shift->checked_in_latitude ?? '' : '', //OPTIONAL
+                'ActualStartLongitude'   => $gps_in ? $shift->checked_in_longitude ?? '' : '', //OPTIONAL
+            ]);
+        }
+        if ($gps_out) {
+            $data = array_merge($data, [
+                'ActualEndLatitude'      => $gps_out ? $shift->checked_out_latitude ?? '' : '', // OPTIONAL
+                'ActualEndLongitude'     => $gps_out ? $shift->checked_out_longitude ?? '' : '', //OPTIONAL
+            ]);
+        }
+
+        $data = array_merge($data, [
             // 'UserField1'             => '', // OPTIONAL
             // 'UserField2'             => '', // OPTIONAL
             // 'UserField3'             => '', // OPTIONAL
@@ -252,14 +280,24 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
             // 'InvoiceUnits'           => '', // OPTIONAL && TODO
             // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
-            // 'ScheduledEndLatitude'   => optional($geocode)->latitude ?? '', // OPTIONAL && this is not derived from correct value TODO
-            // 'ScheduledEndLongitude'  => optional($geocode)->longitude ?? '', // OPTIONAL && this is not derived from correct value TODO
+        ]);
+
+        if ($gps_out) {
+            $data = array_merge($data, [
+                'ScheduledEndLatitude'   => $gps_in || $gps_out ? optional($geocode)->latitude ?? '' : '', // OPTIONAL && this is not derived from correct value TODO
+                'ScheduledEndLongitude'  => $gps_in || $gps_out ? optional($geocode)->longitude ?? '' : '', // OPTIONAL && this is not derived from correct value TODO
+            ]);
+        }
+
+        $data = array_merge($data, [
             // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
             // 'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL and most likely supposed to be Hardcoded as PROV
 
             'Tasks'                  => '', // a wrapper element for the tasks
             // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
-        ];
+        ]);
+
+        return $data;
     }
 
     /**
@@ -268,7 +306,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param string $category
      * @param string $textCode
      * @return array|string
-     * @throws TellusApiException
+     * @throws ClaimTransmissionException
      */
     public function tcLookup(string $category, string $textCode)
     {
@@ -277,7 +315,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             ->first();
 
         if (empty($typeCode)) {
-            throw new TellusApiException("Invalid text code value \"$textCode\" for $category.");
+            throw new ClaimTransmissionException("Invalid text code value \"$textCode\" for $category.");
         }
 
         return [$typeCode->description, $typeCode->code];

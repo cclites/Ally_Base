@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Billing\Exceptions\ClaimTransmissionException;
 use DOMDocument;
 use SimpleXMLElement;
 
@@ -55,15 +56,14 @@ class TellusService
     {
         $xml = $this->convertArrayToXML($records);
 
-        // dd( $xml );
+        if ($errors = $this->getValidationErrors($xml)) {
+            throw new TellusApiException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
+        }
 
         list($httpCode, $response) = $this->sendXml($xml);
 
-        // dd($response);
-
         $xml = new SimpleXMLElement($response);
 
-        // dd( $xml );
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
             throw new TellusApiException('Claim XML failed validation.');
@@ -108,6 +108,29 @@ class TellusService
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
             throw new TellusApiException('Error connecting to the Tellus API.');
+        }
+    }
+
+    /**
+     * Validate the XML schema and return the errors if any.
+     *
+     * @param string $xml
+     * @return array|null
+     * @throws TellusApiException
+     */
+    public function getValidationErrors(string $xml) : ?array
+    {
+        try {
+            $validator = new DomValidator;
+            $validated = $validator->validateXMLString($xml);
+            if (!$validated) {
+                return collect($validator->getErrors())->map(function (array $item) {
+                    return ($item['field'] ? $item['field'].': ' : '') . $item['error'];
+                })->toArray();
+            }
+            return null;
+        } catch (\Exception $ex) {
+            throw new TellusApiException("Could not validate XML Schema: " . $ex->getMessage());
         }
     }
 

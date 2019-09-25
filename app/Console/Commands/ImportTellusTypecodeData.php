@@ -32,6 +32,8 @@ class ImportTellusTypecodeData extends BaseImport
      * 
      * 
      * !!! ALSO, scan all ReasonCodes ( and other values ) for dashes ( - ). There are a few that are improperly encoded and should be just replaced with a regular "-"
+     *
+     * Files for parameters are located at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/182124545/Rendered+Services+File+Specifications
      */
 
     /**
@@ -45,7 +47,7 @@ class ImportTellusTypecodeData extends BaseImport
         $this->info("Downloading latest xsd validation data...");
 
         // this populates the 'enumerations table'. The argument named 'file' populates the typecodes table
-        $file = $this->argument( 'enumeration' ) ?? "https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190829.xsd?api=v2";
+        $file = $this->argument( 'enumeration' ) ?? "https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190920.xsd?api=v2";
         $xsd = file_get_contents( $file );
 
         $this->info("Importing new list of Tellus enumerations...");
