@@ -273,7 +273,7 @@
             <div v-for="(error, index) in tellusErrors" :key="index" class="mb-1">
                 <span class="mr-2"><strong>{{ error.field }}</strong></span>
                 <span>{{ error.error }}</span>
-                <span v-if="error.url" class="ml-2">(<a :href="`${error.url}`" target="_blank">Fix</a>)</span>
+                <span v-if="error.url" class="ml-2">(<a :href="`${error.url}`" target="_blank">Go Fix</a>)</span>
             </div>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="tellusErrorsModal = false">Dismiss</b-btn>

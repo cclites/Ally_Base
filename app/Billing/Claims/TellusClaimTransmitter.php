@@ -208,7 +208,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ProviderMedicaidId'     => $business->medicaid_id,
             'ProviderNPI'            => $business->medicaid_npi_number, // OPTIONAL
             'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy, // OPTIONAL
-            'ProviderNPIZipCode'     => $business->zip, // OPTIONAL
+            'ProviderNPIZipCode'     => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
             'ProviderEin'            => $business->ein, // REQUIRED
             'CaregiverFirstName'     => $caregiver->firstname,
             'CaregiverLastName'      => $caregiver->lastname,
@@ -219,7 +219,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'RecipientLastName'      => $client->lastname,
             'RecipientDob'           => Carbon::parse( $client->date_of_birth )->format('m/d/Y'),
             'ServiceAddress1'        => $address->address1,
-            // 'ServiceAddress2'        => $address->address2, // OPTIONAL
+            'ServiceAddress2'        => $address->address2, // OPTIONAL
             'ServiceCity'            => $address->city,
             'ServiceState'           => $address->state,
             'ServiceZip'             => $address->zip,
@@ -235,32 +235,14 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($shift->checked_out_method) ), // OPTIONAL
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift), // OPTIONAL
             'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
-        ];
-
-        if ($gps_in) {
-            $data['ScheduledLatitude'] = optional($geocode)->latitude ?? ''; // OPTIONAL
-            $data['ScheduledLongitude'] = optional($geocode)->longitude ?? ''; // OPTIONAL
-        }
-
-        $data = array_merge($data, [
+            'ScheduledLatitude' => '',
+            'ScheduledLongitude' => '',
             'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
             'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
-        ]);
-
-        if ($gps_in) {
-            $data = array_merge($data, [
-                'ActualStartLatitude'    => $gps_in ? $shift->checked_in_latitude ?? '' : '', //OPTIONAL
-                'ActualStartLongitude'   => $gps_in ? $shift->checked_in_longitude ?? '' : '', //OPTIONAL
-            ]);
-        }
-        if ($gps_out) {
-            $data = array_merge($data, [
-                'ActualEndLatitude'      => $shift->checked_out_latitude ?? '', // OPTIONAL
-                'ActualEndLongitude'     => $shift->checked_out_longitude ?? '', //OPTIONAL
-            ]);
-        }
-
-        $data = array_merge($data, [
+            'ActualStartLatitude' => '',
+            'ActualStartLongitude' => '',
+            'ActualEndLatitude' => '',
+            'ActualEndLongitude' => '',
             // 'UserField1'             => '', // OPTIONAL
             // 'UserField2'             => '', // OPTIONAL
             // 'UserField3'             => '', // OPTIONAL
@@ -269,34 +251,40 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
             'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
-            // 'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
-            // 'EndAddress1'            => $address->address1, // OPTIONAL
-            // 'EndAddress2'            => $address->address2, // OPTIONAL
-            // 'EndCity'                => $address->city, // OPTIONAL
-            // 'EndState'               => $address->state, // OPTIONAL
-            // 'EndZip'                 => $address->zip, // OPTIONAL
-            // 'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
+             'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
+             'EndAddress1'            => $address->address1, // OPTIONAL
+             'EndAddress2'            => $address->address2, // OPTIONAL
+             'EndCity'                => $address->city, // OPTIONAL
+             'EndState'               => $address->state, // OPTIONAL
+             'EndZip'                 => $address->zip, // OPTIONAL
+             'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
             // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
             // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
             // 'InvoiceUnits'           => '', // OPTIONAL && TODO
             // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
-        ]);
-
-        if ($gps_out) {
-            $data = array_merge($data, [
-                'ScheduledEndLatitude'   => optional($geocode)->latitude ?? '', // OPTIONAL && this is not derived from correct value TODO
-                'ScheduledEndLongitude'  => optional($geocode)->longitude ?? '', // OPTIONAL && this is not derived from correct value TODO
-            ]);
-        }
-
-        $data = array_merge($data, [
+            'ScheduledEndLatitude' => '',
+            'ScheduledEndLongitude' => '',
             // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
-            // 'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL and most likely supposed to be Hardcoded as PROV
-
+             'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL
             'Tasks'                  => '', // a wrapper element for the tasks
             // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
-        ]);
+        ];
 
+        if ($gps_in) {
+            $data['ScheduledLatitude'] = $address->latitude ?? ''; // OPTIONAL
+            $data['ScheduledLongitude'] = $address->longitude ?? ''; // OPTIONAL
+            $data['ActualStartLatitude'] = $shift->checked_in_latitude; //OPTIONAL
+            $data['ActualStartLongitude'] = $shift->checked_in_longitude; //OPTIONAL
+        }
+
+        if ($gps_out) {
+            $data['ActualEndLatitude']      = $shift->checked_out_latitude; // OPTIONAL
+            $data['ActualEndLongitude']     = $shift->checked_out_longitude; //OPTIONAL
+            $data['ScheduledEndLatitude']   = $address->latitude ?? ''; // OPTIONAL
+            $data['ScheduledEndLongitude']  = $address->longitude ?? ''; // OPTIONAL
+        }
+
+        // Remove empty values because Tellus is ridiculous.
         foreach (array_keys($data) as $key) {
             if (empty($data[$key])) {
                 unset($data[$key]);
