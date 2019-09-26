@@ -41,7 +41,8 @@ class TellusService
     {
         $this->username = $username;
         $this->password = $password;
-        $this->endpoint = $endpoint;
+        // Automatically handle replacing the username variable in the endpoint.
+        $this->endpoint = str_replace("{username}", strtoupper($username), $endpoint);
     }
 
     /**
