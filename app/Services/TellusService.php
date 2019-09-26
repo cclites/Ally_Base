@@ -55,22 +55,23 @@ class TellusService
      * @param array $records
      * @return bool
      * @throws TellusApiException
+     * @throws TellusValidationException
      */
     public function submitClaim(array $records) : bool
     {
         $xml = $this->convertArrayToXML($records);
 
         if ($errors = $this->getValidationErrors($xml)) {
-            throw new TellusApiException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
         }
 
         list($httpCode, $response) = $this->sendXml($xml);
 
         $xml = new SimpleXMLElement($response);
-
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
-            throw new TellusApiException('Claim XML failed validation.');
+            // TODO: add some sort of databased log so we can see other users errors
+            throw new TellusValidationException('Claim file did not pass remote XML validation.');
         }
 
         if ($httpCode === 401) {
@@ -120,7 +121,7 @@ class TellusService
      *
      * @param string $xml
      * @return array|null
-     * @throws TellusApiException
+     * @throws TellusValidationException
      */
     public function getValidationErrors(string $xml) : ?array
     {
@@ -128,13 +129,15 @@ class TellusService
             $validator = new DomValidator;
             $validated = $validator->validateXMLString($xml);
             if (!$validated) {
-                return collect($validator->getErrors())->map(function (array $item) {
-                    return ($item['field'] ? $item['field'].': ' : '') . $item['error'];
-                })->toArray();
+                return $validator->getErrors();
+//                return collect($validator->getErrors())->map(function (array $item) {
+//                    return ($item['field'] ? $item['field'].': ' : '') . $item['error'];
+//                })->toArray();
             }
             return null;
         } catch (\Exception $ex) {
-            throw new TellusApiException("Could not validate XML Schema: " . $ex->getMessage());
+            app('sentry')->captureException($ex);
+            throw new TellusValidationException("Unexpected error while validating XML Schema");
         }
     }
 
@@ -155,7 +158,7 @@ class TellusService
             return $dom->saveXML();
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
-            throw new TellusApiException('Error generating Tellus XML claim file..');
+            throw new TellusApiException('Error generating Tellus XML claim file.');
         }
     }
 

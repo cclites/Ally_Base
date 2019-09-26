@@ -14,6 +14,7 @@ use App\Http\Requests\TransmitClaimRequest;
 use App\Http\Requests\UpdateMissingClaimsFieldsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Services\TellusValidationException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -155,6 +156,9 @@ class ClaimsController extends BaseController
                 $data['test_result'] = $testFile;
             }
             return new SuccessResponse('Claim was transmitted successfully.', $data);
+        } catch (TellusValidationException $ex) {
+            // Handle returning list of validation errors
+            return new ErrorResponse(420, 'Could not submit, error with Claim data.', ['tellus_errors' => $ex->getErrors()]);
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {

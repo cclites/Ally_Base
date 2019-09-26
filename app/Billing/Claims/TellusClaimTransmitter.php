@@ -1,7 +1,6 @@
 <?php
 namespace App\Billing\Claims;
 
-use App\Address;
 use App\Billing\Claim;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
@@ -9,9 +8,9 @@ use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
 use App\Business;
 use App\Client;
-use App\Services\DOMValidator;
 use App\Services\TellusApiException;
 use App\Services\TellusService;
+use App\Services\TellusValidationException;
 use App\Shift;
 use App\TellusTypecode;
 use Carbon\Carbon;
@@ -47,17 +46,17 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             array_push($errors['business'], 'medicaid_id');
         }
 
-        if (empty($invoice->client->business->medicaid_npi_number)) {
-            array_push($errors['business'], 'medicaid_npi_number');
-        }
+//        if (empty($invoice->client->business->medicaid_npi_number)) {
+//            array_push($errors['business'], 'medicaid_npi_number');
+//        }
+//
+//        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
+//            array_push($errors['business'], 'medicaid_npi_taxonomy');
+//        }
 
-        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
-            array_push($errors['business'], 'medicaid_npi_taxonomy');
-        }
-
-        if (empty($invoice->client->business->zip)) {
-            array_push($errors['business'], 'zip');
-        }
+//        if (empty($invoice->client->business->zip)) {
+//            array_push($errors['business'], 'zip');
+//        }
 
         if (empty($invoice->client->date_of_birth)) {
             array_push($errors['client'], 'date_of_birth');
@@ -96,6 +95,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param Claim $claim
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
+     * @throws TellusValidationException
      */
     public function send(Claim $claim) : bool
     {
@@ -106,21 +106,21 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-
             if ($tellus->submitClaim($this->getData($claim))) {
                 // Success
-
                 return true;
             }
+        } catch (TellusValidationException $ex) {
+            if ($ex->hasErrors()) {
+                throw $ex;
+            }
+            throw new ClaimTransmissionException('Error submitting claim XML to Tellus: ' . $ex->getMessage());
         } catch (TellusApiException $ex) {
-
             throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
         } catch (\Exception $ex) {
-
             \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
-            throw new ClaimTransmissionException( $ex );
-            // throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
+            throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
@@ -155,7 +155,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $xml = $tellus->convertArrayToXML($this->getData($claim));
 
         if ($errors = $tellus->getValidationErrors($xml)) {
-            throw new ClaimTransmissionException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+//            throw new ClaimTransmissionException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
         }
 
         $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
@@ -193,11 +194,10 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        $gps_in = $shift->checked_in_method == Shift::METHOD_GEOLOCATION;
-        $gps_out = $shift->checked_out_method == Shift::METHOD_GEOLOCATION;
+        $gps_in = $shift->checked_in_method == Shift::METHOD_GEOLOCATION && filled($shift->checked_in_latitude) && filled($shift->checked_in_longitude);
+        $gps_out = $shift->checked_out_method == Shift::METHOD_GEOLOCATION && filled($shift->checked_out_latitude) && filled($shift->checked_out_longitude);
 
         $data = [
-
             'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
             'Jurisdiction'           => $this->tcLookup('Jurisdiction', $address->state ),
             'Payer'                  => $this->tcLookup('Payer', $clientInvoice->getPayerCode() ),
@@ -227,7 +227,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceCode'            => optional($shift->service)->code,
             'ServiceCodeMod1'        => '', // OPTIONAL
             'ServiceCodeMod2'        => '', // OPTIONAL
-            'DiagnosisCode1'         => $diagnosisCodes[ 0 ], // OPTIONAL && TODO
+            'DiagnosisCode1'         => $diagnosisCodes[ 0 ],
             'DiagnosisCode2'         => $diagnosisCodes[ 1 ], // OPTIONAL && TODO
             'DiagnosisCode3'         => $diagnosisCodes[ 2 ], // OPTIONAL && TODO
             'DiagnosisCode4'         => $diagnosisCodes[ 3 ], // OPTIONAL && TODO
@@ -255,8 +255,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
         if ($gps_out) {
             $data = array_merge($data, [
-                'ActualEndLatitude'      => $gps_out ? $shift->checked_out_latitude ?? '' : '', // OPTIONAL
-                'ActualEndLongitude'     => $gps_out ? $shift->checked_out_longitude ?? '' : '', //OPTIONAL
+                'ActualEndLatitude'      => $shift->checked_out_latitude ?? '', // OPTIONAL
+                'ActualEndLongitude'     => $shift->checked_out_longitude ?? '', //OPTIONAL
             ]);
         }
 
@@ -284,8 +284,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
         if ($gps_out) {
             $data = array_merge($data, [
-                'ScheduledEndLatitude'   => $gps_in || $gps_out ? optional($geocode)->latitude ?? '' : '', // OPTIONAL && this is not derived from correct value TODO
-                'ScheduledEndLongitude'  => $gps_in || $gps_out ? optional($geocode)->longitude ?? '' : '', // OPTIONAL && this is not derived from correct value TODO
+                'ScheduledEndLatitude'   => optional($geocode)->latitude ?? '', // OPTIONAL && this is not derived from correct value TODO
+                'ScheduledEndLongitude'  => optional($geocode)->longitude ?? '', // OPTIONAL && this is not derived from correct value TODO
             ]);
         }
 
@@ -296,6 +296,12 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'Tasks'                  => '', // a wrapper element for the tasks
             // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
         ]);
+
+        foreach (array_keys($data) as $key) {
+            if (empty($data[$key])) {
+                unset($data[$key]);
+            }
+        }
 
         return $data;
     }

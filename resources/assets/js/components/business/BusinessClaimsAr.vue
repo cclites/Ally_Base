@@ -264,6 +264,22 @@
             </div>
         </b-modal>
 
+        <b-modal id="tellusErrorsModal"
+             title="Tellus Validation Issues"
+             v-model="tellusErrorsModal"
+             size="lg"
+        >
+            <b-alert variant="danger" show>Tellus is very strict on what values they allow in their submissions.  Please address the following issues and try to transmit again.</b-alert>
+            <div v-for="(error, index) in tellusErrors" :key="index" class="mb-1">
+                <span class="mr-2"><strong>{{ error.field }}</strong></span>
+                <span>{{ error.error }}</span>
+                <span v-if="error.url" class="ml-2">(<a :href="`${error.url}`" target="_blank">Fix</a>)</span>
+            </div>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="tellusErrorsModal = false">Dismiss</b-btn>
+            </div>
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -380,7 +396,9 @@
                     service_code: { sortable: true, label: 'Service Code' },
                     status_code: { sortable: true, label: 'Status Code' },
                     import_status: { sortable: true, label: 'Import Status' },
-                }
+                },
+                tellusErrorsModal: false,
+                tellusErrors: [],
             }
         },
 
@@ -506,6 +524,10 @@
                         if (e.response.status == 412) {
                             // Required fields are missing.
                             this.showMissingFieldsModal(e.response.data.data, invoice);
+                        } else if (e.response.status == 420) {
+                            // Tellus Validation Errors
+                            this.tellusErrors = e.response.data.data.tellus_errors;
+                            this.tellusErrorsModal = true;
                         }
                     })
                     .finally(() => {
