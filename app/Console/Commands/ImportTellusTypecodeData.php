@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\TellusService;
 use App\TellusEnumeration;
 use App\TellusTypecode;
 
@@ -12,7 +13,7 @@ class ImportTellusTypecodeData extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:tellus-typecode-data {enumeration?} {file?}';
+    protected $signature = 'import:tellus-typecode-data {schema_file?} {dictionary_file?}';
 
     /**
      * The console command description.
@@ -21,37 +22,91 @@ class ImportTellusTypecodeData extends BaseImport
      */
     protected $description = 'Import and update values from a Tellus Typecode Data Dictionary file.';
 
-    /**
-     * 
-     * Known Errors with Dictionary:
-     *  Format is: Category :: Text_Code :: Description
-     * 
-     *  1. Payer :: SUNS :: Sunshine State Health Plan Inc. of Florida => change Description to "Sunshine/Centine"
-     *  2. Plan :: FMSP :: Florida State Medical Plan => change Description to "Florida Medicaid State Plan"
-     *  3. Payer :: UHTH :: UnitedHealthcare of Florida => change Description to United HealthCare
-     * 
-     * 
-     * !!! ALSO, scan all ReasonCodes ( and other values ) for dashes ( - ). There are a few that are improperly encoded and should be just replaced with a regular "-"
-     *
-     * Files for parameters are located at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/182124545/Rendered+Services+File+Specifications
-     */
+    /** @var string */
+    protected $dictionaryFile = '';
+
+    /** @var string */
+    protected $schemaFile = '';
 
     /**
+     * Files for parameters are located at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/182124545/Rendered+Services+File+Specifications
+     *
      * @return mixed|void
      */
     public function handle()
     {
-        \DB::table('tellus_typecodes')->truncate();
+        if ($file = $this->argument('dictionary_file')) {
+            $this->dictionaryFile = $file;
+        }
+
+        if ($file = $this->argument('schema_file')) {
+            $this->schemaFile = $file;
+        }
+
+        // Fetch latest files if none specified.
+        if (empty($this->schemaFile) || empty($this->dictionaryFile)) {
+            $this->info("Fetching Tellus resource files...");
+            if (!TellusService::downloadApiResources()) {
+                $this->error('Could not download Tellus resources, exiting');
+                return 1;
+            }
+            $this->info("Tellus resources updated.");
+
+            if (empty($this->schemaFile)) {
+                $this->schemaFile = \Storage::disk('public')->path(TellusService::XML_SCHEMA_FILENAME);
+            }
+
+            if (empty($this->dictionaryFile)) {
+                $this->dictionaryFile = \Storage::disk('public')->path(TellusService::TYPECODE_DICTIONARY_FILENAME);
+            }
+        }
+
+        $this->info("Importing new list of Tellus Enumerations...");
         \DB::table('tellus_enumerations')->truncate();
+        $enumerations = $this->importEnumerationsFromSchema($this->schemaFile);
+        $this->info("Imported {$enumerations->count()} Tellus Enumerations.");
 
-        $this->info("Downloading latest xsd validation data...");
+        // Handle importing typecodes from BaseImporter
+        \DB::table('tellus_typecodes')->truncate();
+        parent::handle();
 
-        // this populates the 'enumerations table'. The argument named 'file' populates the typecodes table
-        $file = $this->argument( 'enumeration' ) ?? "https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190920.xsd?api=v2";
-        $xsd = file_get_contents( $file );
+        $this->info('Cleaning known dictionary issues...');
+        $this->cleanKnownDictionaryIssues();
 
-        $this->info("Importing new list of Tellus enumerations...");
+        $this->info("Operation complete.");
+    }
 
+    /**
+     * At the time of of this code 9/26/2019 the tellus typecode dictionary
+     * has errors and mismatches from the XSD schema.  This will handle
+     * fixing those errors automatically.
+     *
+     */
+    public function cleanKnownDictionaryIssues()
+    {
+        TellusTypecode::where('category', 'Payer')
+                    ->where('text_code', 'SUNS')
+                    ->update(['description' => 'Sunshine/Centine']);
+
+        TellusTypecode::where('category', 'Plan')
+                    ->where('text_code', 'FMSP')
+                    ->update(['description' => 'Florida Medicaid State Plan']);
+
+        TellusTypecode::where('category', 'Payer')
+                    ->where('text_code', 'UHTH')
+                    ->update(['description' => 'United HealthCare']);
+    }
+
+    /**
+     * Handle parsing of XML Schema file, returns number of
+     * enumerations added.
+     *
+     * @param string $filename
+     * @return int
+     */
+    public function importEnumerationsFromSchema(string $filename) : int
+    {
+        $xsd = file_get_contents($filename);
         $doc = new \DOMDocument();
         $doc->loadXML(mb_convert_encoding($xsd, 'utf-8', mb_detect_encoding($xsd)));
         $xpath = new \DOMXPath($doc);
@@ -61,7 +116,6 @@ class ImportTellusTypecodeData extends BaseImport
         $count = 0;
         foreach ($elements as $el) {
             $category = $el->getAttribute('name');
-
             $enums = $xpath->evaluate("xs:complexType/xs:simpleContent/xs:extension/xs:attribute/xs:simpleType/xs:restriction/xs:enumeration", $el);
             $textCodes = $xpath->evaluate("/xs:schema/xs:simpleType[@name='ST_{$category}']/xs:restriction/xs:enumeration");
 
@@ -83,9 +137,21 @@ class ImportTellusTypecodeData extends BaseImport
             }
         }
 
-        $this->info("Imported $count Tellus Validation rules.");
+        return $count;
+    }
 
-        parent::handle();
+    /**
+     * Load the import spreadsheet into $sheet
+     *
+     * @return \PHPExcel
+     */
+    public function loadSheet()
+    {
+        if (!$objPHPExcel = PHPExcel_IOFactory::load($this->dictionaryFile)) {
+            $this->output->error('Could not load dictionary file at ' . $this->dictionaryFile);
+            exit;
+        }
+        return $this->sheet = $objPHPExcel;
     }
 
     /**
@@ -97,12 +163,16 @@ class ImportTellusTypecodeData extends BaseImport
      */
     protected function importRow(int $row)
     {
+        // Replace odd encodings
+        $description = trim($this->resolve('Description', $row));
+        $description = str_replace('–', '-', $description);
+
         return TellusTypecode::create([
             'category' => trim($this->resolve('Category', $row)),
             'code' => intval($this->resolve('Numeric Code (XML TC)', $row)),
             'subcategory' => trim($this->resolve('Subcategory', $row)),
             'text_code' => trim($this->resolve('Text Code', $row)),
-            'description' => trim($this->resolve('Description', $row)),
+            'description' => $description,
         ]);
     }
 
@@ -113,7 +183,7 @@ class ImportTellusTypecodeData extends BaseImport
      */
     protected function warningMessage()
     {
-        return 'Importing typecode data dictionary...';
+        return 'Importing Tellus typecode data dictionary...';
     }
 
     /**
