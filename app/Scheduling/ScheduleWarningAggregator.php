@@ -218,7 +218,8 @@ class ScheduleWarningAggregator
     {
         // check for expired/expiring caregiver licenses
         $expired = $this->schedule->caregiver->licenses()
-            ->whereBetween('expires_at', [Carbon::now(), Carbon::parse( '01/01/1800' )])
+            ->whereApplicable()
+            ->where('expires_at', '<', Carbon::now())
             ->get()
             ->map(function ($license) {
                 $date = $license->expires_at->format('m/d/Y');
