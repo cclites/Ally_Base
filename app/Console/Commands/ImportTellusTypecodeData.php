@@ -29,7 +29,8 @@ class ImportTellusTypecodeData extends BaseImport
     protected $schemaFile = '';
 
     /**
-     * Files for parameters are located at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/182124545/Rendered+Services+File+Specifications
+     * XSD Validation File can be found at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/182124545/Rendered+Services+File+Specifications
+     * Typecode Dictionary can be found at: https://tellusolutions.atlassian.net/wiki/spaces/EVV/pages/591527967/Type+Code+Listing+for+all+Files
      *
      * @return mixed|void
      */
@@ -64,7 +65,7 @@ class ImportTellusTypecodeData extends BaseImport
         $this->info("Importing new list of Tellus Enumerations...");
         \DB::table('tellus_enumerations')->truncate();
         $enumerations = $this->importEnumerationsFromSchema($this->schemaFile);
-        $this->info("Imported {$enumerations->count()} Tellus Enumerations.");
+        $this->info("Imported {$enumerations} Tellus Enumerations.");
 
         // Handle importing typecodes from BaseImporter
         \DB::table('tellus_typecodes')->truncate();
@@ -144,10 +145,11 @@ class ImportTellusTypecodeData extends BaseImport
      * Load the import spreadsheet into $sheet
      *
      * @return \PHPExcel
+     * @throws \PHPExcel_Reader_Exception
      */
     public function loadSheet()
     {
-        if (!$objPHPExcel = PHPExcel_IOFactory::load($this->dictionaryFile)) {
+        if (!$objPHPExcel = \PHPExcel_IOFactory::load($this->dictionaryFile)) {
             $this->output->error('Could not load dictionary file at ' . $this->dictionaryFile);
             exit;
         }

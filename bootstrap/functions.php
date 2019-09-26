@@ -354,6 +354,7 @@ if (! function_exists('download_file')) {
             curl_setopt($process, CURLOPT_HEADER, 1);
             curl_setopt($process, CURLOPT_TIMEOUT, 60);
             curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($process, CURLOPT_FOLLOWLOCATION, true);
 
             if (! ($result = curl_exec($process))) {
                 return false;
@@ -368,8 +369,8 @@ if (! function_exists('download_file')) {
             }
 
             $contents = substr($result, $header_size);
-
             $disk->put($filename, $contents);
+            return true;
 
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
