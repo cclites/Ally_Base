@@ -1,8 +1,11 @@
 <?php
 namespace App\Services;
 
+use App\Billing\Exceptions\ClaimTransmissionException;
 use DOMDocument;
 use SimpleXMLElement;
+
+class TellusApiException extends \Exception {}
 
 /**
  * Tellus XML API v2.0 implementation.
@@ -27,6 +30,9 @@ class TellusService
      */
     protected $endpoint;
 
+    public const TYPECODE_DICTIONARY_FILENAME = 'tellus/typecode-dictionary.xlsx';
+    public const XML_SCHEMA_FILENAME = 'tellus/xml-schema.xsd';
+
     /**
      * TellusService constructor.
      *
@@ -38,31 +44,101 @@ class TellusService
     {
         $this->username = $username;
         $this->password = $password;
-        $this->endpoint = $endpoint;
+        // Automatically handle replacing the username variable in the endpoint.
+        $this->endpoint = str_replace("{username}", strtoupper($username), $endpoint);
+    }
+
+    /**
+     * Submit an array of claim records through the
+     * Tellus API service using an XML file.
+     *
+     * @param array $records
+     * @return bool
+     * @throws TellusApiException
+     * @throws TellusValidationException
+     */
+    public function submitClaim(array $records) : bool
+    {
+        $xml = $this->convertArrayToXML($records);
+
+        if ($errors = $this->getValidationErrors($xml)) {
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        }
+
+        list($httpCode, $response) = $this->sendXml($xml);
+
+        $xml = new SimpleXMLElement($response);
+        if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
+            \Log::error("Tellus API XML Error:\r\n$response");
+            // TODO: add some sort of databased log so we can see other users errors
+            throw new TellusValidationException('Claim file did not pass remote XML validation.');
+        }
+
+        if ($httpCode === 401) {
+            throw new TellusApiException('Invalid credentials or otherwise not authorized.');
+        }
+
+        return true;
     }
 
     /**
      * Send XML to the Tellus Endpoint.
      *
      * @param string $xml
-     * @return string|bool
-     * @throws \Exception
+     * @return array
+     * @throws TellusApiException
      */
-    public function sendXml(string $xml)
+    protected function sendXml(string $xml) : array
     {
-        $process = curl_init($this->endpoint);
-        curl_setopt($process, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
-        curl_setopt($process, CURLOPT_HEADER, 1);
-        curl_setopt($process, CURLOPT_USERPWD, $this->username . ":" . $this->password);
-        curl_setopt($process, CURLOPT_TIMEOUT, 60);
-        curl_setopt($process, CURLOPT_POST, 1);
-        curl_setopt($process, CURLOPT_POSTFIELDS, $xml);
-        curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+        try {
+            $process = curl_init($this->endpoint);
+            curl_setopt($process, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
+            curl_setopt($process, CURLOPT_HEADER, 1);
+            curl_setopt($process, CURLOPT_USERPWD, $this->username . ":" . $this->password);
+            curl_setopt($process, CURLOPT_TIMEOUT, 60);
+            curl_setopt($process, CURLOPT_POST, 1);
+            curl_setopt($process, CURLOPT_POSTFIELDS, $xml);
+            curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
 
-        $result = curl_exec($process);
-        curl_close($process);
+            if (! ($result = curl_exec($process))) {
+                throw new TellusApiException('Invalid response from Tellus API.');
+            }
+            $responseCode = curl_getinfo($process, CURLINFO_HTTP_CODE);
+            $header_size = curl_getinfo($process, CURLINFO_HEADER_SIZE);
+            curl_close($process);
 
-        return $result;
+            $body = substr($result, $header_size);
+
+            return [$responseCode, $body];
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            throw new TellusApiException('Error connecting to the Tellus API.');
+        }
+    }
+
+    /**
+     * Validate the XML schema and return the errors if any.
+     *
+     * @param string $xml
+     * @return array|null
+     * @throws TellusValidationException
+     */
+    public function getValidationErrors(string $xml) : ?array
+    {
+        try {
+            $validator = new DomValidator;
+            $validated = $validator->validateXMLString($xml);
+            if (!$validated) {
+                return $validator->getErrors();
+//                return collect($validator->getErrors())->map(function (array $item) {
+//                    return ($item['field'] ? $item['field'].': ' : '') . $item['error'];
+//                })->toArray();
+            }
+            return null;
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            throw new TellusValidationException("Unexpected error while validating XML Schema");
+        }
     }
 
     /**
@@ -70,15 +146,20 @@ class TellusService
      *
      * @param array $records
      * @return string
-     * @throws \Exception
+     * @throws TellusApiException
      */
     public function convertArrayToXML(array $records)
     {
-        $dom = new DOMDocument("1.0", "UTF-8");
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($this->getSimpleXml($records)->asXML());
-        return $dom->saveXML();
+        try {
+            $dom = new DOMDocument("1.0", "UTF-8");
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            $dom->loadXML($this->getSimpleXml($records)->asXML());
+            return $dom->saveXML();
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            throw new TellusApiException('Error generating Tellus XML claim file.');
+        }
     }
 
     /**
@@ -114,10 +195,51 @@ class TellusService
             $service = $parent->addChild('RenderedService');
         }
 
-        foreach($record as $key => $value) {
-            $service->addChild($key, $value);
+        $tasks = null;
+
+        foreach( $record as $key => $value ) {
+
+            if( $key == 'Tasks' ){
+
+                $tasks = $service->addChild( $key );
+            }
+            else if( $key == 'Task' ){
+
+                $child = $tasks->addChild( $key, $value[0] );
+                $child->addAttribute('tc', $value[1]);
+            }
+            else if (is_array($value) && count($value) >= 2) {
+                // Handle adding tc="" attribute
+
+                $child = $service->addChild( $key, $value[0] );
+                $child->addAttribute('tc', $value[1]);
+            } else {
+                $service->addChild($key, $value);
+            }
         }
 
         return $service;
+    }
+
+    /**
+     * Download remote resource files and store on public disk.
+     *
+     * @return bool
+     */
+    public static function downloadApiResources() : bool
+    {
+        $dictionary = download_file(
+            config('services.tellus.dictionary_file'),
+            \Storage::disk('public'),
+            self::TYPECODE_DICTIONARY_FILENAME
+        );
+
+        $schema = download_file(
+            config('services.tellus.schema_file'),
+            \Storage::disk('public'),
+            self::XML_SCHEMA_FILENAME
+        );
+
+        return $dictionary && $schema;
     }
 }

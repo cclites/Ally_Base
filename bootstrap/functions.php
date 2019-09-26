@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -333,5 +334,47 @@ if (! function_exists('snake_to_title_case')) {
     function snake_to_title_case(string $str): string
     {
         return title_case(preg_replace('/_/', ' ', $str));
+    }
+}
+
+if (! function_exists('download_file')) {
+    /**
+     * Download file from the given URL and save it to the local storage disk.
+     * Usage: download_file('http://path', \Storage::disk('public'), 'path\file.txt')
+     *
+     * @param string $url
+     * @param FilesystemAdapter $disk
+     * @param string $filename
+     * @return bool
+     */
+    function download_file(string $url, FilesystemAdapter $disk, string $filename): bool
+    {
+        try {
+            $process = curl_init($url);
+            curl_setopt($process, CURLOPT_HEADER, 1);
+            curl_setopt($process, CURLOPT_TIMEOUT, 60);
+            curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($process, CURLOPT_FOLLOWLOCATION, true);
+
+            if (! ($result = curl_exec($process))) {
+                return false;
+            }
+
+            $responseCode = curl_getinfo($process, CURLINFO_HTTP_CODE);
+            $header_size = curl_getinfo($process, CURLINFO_HEADER_SIZE);
+            curl_close($process);
+
+            if ($responseCode != "200") {
+                return false;
+            }
+
+            $contents = substr($result, $header_size);
+            $disk->put($filename, $contents);
+            return true;
+
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            return false;
+        }
     }
 }

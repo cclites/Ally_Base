@@ -37,8 +37,5 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        if (config('app.env') == 'production') {
-            return;
-        }
     }
 }
