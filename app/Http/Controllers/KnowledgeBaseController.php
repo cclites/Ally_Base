@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Knowledge;
 use App\Attachment;
+use Illuminate\Support\Facades\DB;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class KnowledgeBaseController extends Controller
 {
@@ -54,5 +56,38 @@ class KnowledgeBaseController extends Controller
         $path = storage_path('app/knowledge/' . $attachment->filename);
 
         return response()->download($path, $attachment->filename);
+    }
+
+    /**
+     * View the Tellus Guide
+     *
+     * @param $attachment
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function tellusGuide()
+    {
+        // $xsd = TellusEnumeration::select( 'category', '' )
+        //  ->whereIn( 'category', [ 'Payer', 'Plan' ])
+        //  ->groupBy( 'category' )->get();
+
+        $xsd = DB::table( 'tellus_typecodes as dictionary' )
+            ->whereIn( 'dictionary.category', [ 'Payer', 'Plan' ])
+            ->leftJoin( 'tellus_enumerations as xsd', function( $join ){
+
+                $join->on( 'xsd.code', '=', 'dictionary.code' );
+                $join->on( 'xsd.category', '=', 'dictionary.category' );
+            })
+            ->select( 'xsd.id', 'dictionary.description', 'dictionary.category', 'dictionary.code', 'dictionary.text_code' )
+            ->whereNotNull( 'xsd.id' )
+            ->get();
+
+        // dd( $xsd->groupBy( 'category' ) );
+
+        if (empty($xsd)) {
+            return ErrorResponse(404, 'Error Generating Tellus Documentation');
+        }
+
+        $pdf = PDF::loadView( 'tellus-guide', [ 'categories' => $xsd->groupBy( 'category' ) ] );
+        return $pdf->download( 'tellus-guides.pdf' );
     }
 }
