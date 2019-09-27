@@ -15,12 +15,12 @@ class AddNotesToClientAndDepositInvoices extends Migration
     {
         Schema::table( 'client_invoices', function (Blueprint $table) {
 
-            $table->string( 'notes', 255 );
+            $table->string( 'notes', 255 )->nullable();
         });
 
         Schema::table( 'caregiver_invoices', function (Blueprint $table) {
 
-            $table->string( 'notes', 255 );
+            $table->string( 'notes', 255 )->nullable();
         });
     }
 
