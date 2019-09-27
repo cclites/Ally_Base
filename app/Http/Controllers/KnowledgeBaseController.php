@@ -66,10 +66,9 @@ class KnowledgeBaseController extends Controller
      */
     public function tellusGuide()
     {
-        // $xsd = TellusEnumeration::select( 'category', '' )
-        //  ->whereIn( 'category', [ 'Payer', 'Plan' ])
-        //  ->groupBy( 'category' )->get();
 
+        // this should probably be a relationship within the model itself..
+        // however defining a model based on a composite key is not simple, couldnt figure it out on google
         $xsd = DB::table( 'tellus_typecodes as dictionary' )
             ->whereIn( 'dictionary.category', [ 'Payer', 'Plan' ])
             ->leftJoin( 'tellus_enumerations as xsd', function( $join ){
@@ -88,6 +87,6 @@ class KnowledgeBaseController extends Controller
         }
 
         $pdf = PDF::loadView( 'tellus-guide', [ 'categories' => $xsd->groupBy( 'category' ) ] );
-        return $pdf->download( 'tellus-guides.pdf' );
+        return $pdf->stream( 'tellus-guides.pdf' );
     }
 }
