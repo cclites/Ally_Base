@@ -45,6 +45,9 @@ class DepositInvoice extends Resource
             'caregiver_on_hold' => $this->whenLoaded('caregiver', function() {
                 return $this->resource->caregiver->isOnHold();
             }),
+            'payment_hold_notes' => $this->whenLoaded('caregiver', function() {
+                return optional( $this->resource->caregiver->paymentHold )->notes;
+            }),
             'business' => $this->whenLoaded('business'),
             'business_on_hold' => $this->whenLoaded('business', function() {
                 return $this->resource->business->isOnHold();
