@@ -41,7 +41,7 @@
 
         <div class="table-responsive claims-table">
             <b-table bordered striped hover show-empty
-                :items="adjustments"
+                :items="claim_applications"
                 :fields="fields"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
@@ -86,7 +86,7 @@
             }),
 
             totalInterest() {
-                return this.adjustments.reduce((carry, item) => {
+                return this.claim_applications.reduce((carry, item) => {
                     if (! item.is_interest) {
                         return carry;
                     }
@@ -98,7 +98,7 @@
 
         data() {
             return {
-                adjustments: [],
+                claim_applications: [],
                 filter: '',
                 sortBy: 'created_at',
                 sortDesc: true,
@@ -117,7 +117,7 @@
 
         created() {
             this.$store.commit('claims/setRemit', this.init.remit);
-            this.adjustments = this.init.adjustments;
+            this.claim_applications = this.init.claim_applications;
         },
     }
 </script>

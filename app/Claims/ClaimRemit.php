@@ -92,7 +92,7 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function adjustments()
+    public function claimApplications()
     {
         return $this->hasMany(ClaimAdjustment::class);
     }
@@ -232,7 +232,7 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function updateBalance(): void
     {
-        $totalApplied = $this->adjustments->reduce(function ($carry, $application) {
+        $totalApplied = $this->claimApplications->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));
 

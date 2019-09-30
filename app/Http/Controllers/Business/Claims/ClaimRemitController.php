@@ -26,7 +26,7 @@ class ClaimRemitController extends BaseController
             $filters = $request->filtered();
 
             $query = ClaimRemit::with('business')
-                ->withCount('adjustments')
+                ->withCount('claimApplications')
                 ->forRequestedBusinesses();
 
             if ($filters['all']) {
@@ -96,7 +96,7 @@ class ClaimRemitController extends BaseController
 
         $init = [
             'remit' => new ClaimRemitResource($claimRemit),
-            'adjustments' => ClaimAdjustmentResource::collection($claimRemit->adjustments),
+            'claim_applications' => ClaimAdjustmentResource::collection($claimRemit->claimApplications),
         ];
 
         return view_component('remit-application-history', 'Remit Application History', compact('init'), [
@@ -126,7 +126,7 @@ class ClaimRemitController extends BaseController
         $updatedItems = collect([]);
         $updatedClaims = collect([]);
         // Soft-delete all related payments.
-        foreach ($claimRemit->adjustments as $item) {
+        foreach ($claimRemit->claimApplications as $item) {
             if (filled($item->claimInvoiceItem)) {
                 $updatedItems->push($item->claimInvoiceItem);
             }

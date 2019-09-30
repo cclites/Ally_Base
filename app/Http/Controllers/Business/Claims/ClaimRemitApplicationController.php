@@ -40,7 +40,7 @@ class ClaimRemitApplicationController extends BaseController
     {
         \DB::beginTransaction();
 
-        $adjustments = $claimRemit->adjustments()->createMany($request->filtered()['applications']);
+        $adjustments = $claimRemit->claimApplications()->createMany($request->filtered()['applications']);
 
         $adjustments->each(function (ClaimAdjustment $adjustment) {
             $adjustment->load(['claimInvoice', 'claimInvoiceItem']);
