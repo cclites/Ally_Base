@@ -25,7 +25,7 @@ class CreateClaimRemitRequest extends BusinessRequest
                 }),
             ],
             'reference' => 'nullable|string|max:255',
-            'amount' => 'required|numeric|min:0.01|max:999999.99',
+            'amount' => 'required|numeric|min:0|max:999999.99',
             'notes' => 'nullable|string|max:255',
         ];
 
