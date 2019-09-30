@@ -2,7 +2,6 @@
 
 namespace App\Claims;
 
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\BelongsToOneBusiness;
@@ -230,17 +229,12 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      * all of it's adjustments.
      *
      * @return void
-     * @throws ClaimBalanceException
      */
     public function updateBalance(): void
     {
         $totalApplied = $this->adjustments->reduce(function ($carry, $application) {
             return add($carry, floatval($application->amount_applied));
         }, floatval(0));
-
-        if ($totalApplied > floatval($this->amount) || $totalApplied < floatval(0)) {
-            throw new ClaimBalanceException('You cannot apply more than the total amount of the Remit.');
-        }
 
         $this->update(['amount_applied' => $totalApplied]);
     }

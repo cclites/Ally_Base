@@ -6,7 +6,6 @@ use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use App\Billing\ClientInvoice;
@@ -350,7 +349,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     /**
      * Update the amount and amount due from the ClaimInvoiceItem values
      *
-     * @throws ClaimBalanceException
      */
     public function updateBalance(): void
     {
@@ -363,10 +361,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         $amount_due = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
             return add($carry, (float)$item->amount_due);
         }, (float)0.00);
-
-        if ($amount_due < floatval(0)) {
-            throw new ClaimBalanceException('Claim invoices cannot have a negative balance.');
-        }
 
         $this->update(compact('amount', 'amount_due'));
     }

@@ -6,7 +6,6 @@ use App\Claims\Requests\CreateClaimAdjustmentRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Claims\Resources\ClaimsQueueResource;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
@@ -50,23 +49,18 @@ class ClaimAdjustmentController extends BaseController
         $this->authorize('update', $claim);
 
         \DB::beginTransaction();
-        try {
 
-            $adjustments = $claim->adjustments()->createMany(
-                $request->filtered()['adjustments']
-            );
+        $adjustments = $claim->adjustments()->createMany(
+            $request->filtered()['adjustments']
+        );
 
-            $adjustments->each(function (ClaimAdjustment $adjustment) {
-                $adjustment->load(['claimInvoice', 'claimInvoiceItem']);
-                $adjustment->claimInvoiceItem->updateBalance();
-                $adjustment->claimInvoice->updateBalance();
-            });
+        $adjustments->each(function (ClaimAdjustment $adjustment) {
+            $adjustment->load(['claimInvoice', 'claimInvoiceItem']);
+            $adjustment->claimInvoiceItem->updateBalance();
+            $adjustment->claimInvoice->updateBalance();
+        });
 
-            \DB::commit();
-
-        } catch (ClaimBalanceException $ex) {
-            return new ErrorResponse(412, $ex->getMessage());
-        }
+        \DB::commit();
 
         return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ClaimsQueueResource($claim->clientInvoice->fresh()));
     }
