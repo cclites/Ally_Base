@@ -21,6 +21,13 @@ class ClaimAdjustmentResource extends Resource
      */
     public function toArray($request)
     {
+        $item = '';
+        if ($this->resource->is_interest) {
+            $item = 'Interest';
+        } else if (empty($this->resource->claim_invoice_id)) {
+            $item = 'Claim Adjustment';
+        }
+
         $data = [
             'id' => $this->resource->id,
             'claim_remit_id' => $this->resource->claim_remit_id,
@@ -30,7 +37,7 @@ class ClaimAdjustmentResource extends Resource
             'claim_invoice_name' => null,
 
             'claim_invoice_item_id' => $this->resource->claim_invoice_item_id,
-            'item' => 'Interest',
+            'item' => $item,
             'item_total' => null,
 
             'client_id' => null,
@@ -43,7 +50,7 @@ class ClaimAdjustmentResource extends Resource
             'created_at' => $this->resource->created_at->toDateTimeString(),
         ];
 
-        if (!$this->resource->is_interest) {
+        if (! $this->resource->is_interest && filled($this->resource->claim_invoice_id)) {
             $data = array_merge($data, [
                 'claim_invoice_date' => $this->resource->claimInvoice->getDate()->toDateTimeString(),
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),
