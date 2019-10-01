@@ -148,10 +148,6 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
             throw new \Exception('This transaction has already been processed.  Create a new ECSPayment instance.');
         }
 
-        // dd( $query );
-        $query = str_replace( "ccnumber=", "ccnumber=999", $query );
-        $query = str_replace( "checkaccount=12312312", "", $query );
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://ecspayments.transactiongateway.com/api/transact.php");
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
