@@ -40,7 +40,7 @@ class ClaimRemitResource extends Resource
             'date' => $this->resource->date->toDateTimeString(),
             'created_at' => $this->resource->created_at->toDateTimeString(),
             'status' => $this->resource->getStatus(),
-            'claim_adjustments_count' => $this->resource->claim_adjustments_count,
+            'adjustments_count' => $this->resource->adjustments_count,
         ];
     }
 }

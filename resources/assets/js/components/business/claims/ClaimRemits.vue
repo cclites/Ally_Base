@@ -83,14 +83,13 @@
                 :empty-text="emptyText"
             >
                 <template slot="amount_applied" scope="row">
-                    <span v-if="row.item.claim_adjustments_count == 0">
+                    <span v-if="row.item.adjustments_count == 0">
                         {{ moneyFormat(row.item.amount_applied) }}
                     </span>
                     <a v-else :href="`/business/claim-remits/${row.item.id}`" target="_blank">{{ moneyFormat(row.item.amount_applied) }}</a>
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn variant="success" size="sm" class="mb-1 mr-1" :href="`/business/claim-remit-applications/${row.item.id}`">Apply</b-btn>
-                    <b-btn variant="primary" size="sm" class="mb-1 mr-1" @click="adjust(row.item)">Adjust</b-btn>
                     <b-btn variant="secondary" size="sm" class="mb-1 mr-1" @click="edit(row.item)"><i class="fa fa-edit" /></b-btn>
                     <b-btn variant="danger" size="sm" class="mb-1 mr-1" @click="destroy(row.item)" :disabled="!!deletingId">
                         <i v-if="deletingId == row.item.id" class="fa fa-spinner fa-spin" />
@@ -119,21 +118,6 @@
                 @updated="fetch()"
             />
         </b-modal>
-
-        <b-modal id="remitAdjustmentModal"
-            title="Adjust Remit"
-            v-model="showAdjustmentModal"
-            :no-close-on-backdrop="true"
-            hide-footer
-        >
-            <claim-remit-adjustment-form
-                ref="remit-adjustment-form"
-                @close="hideAdjustmentModal()"
-                :remit="remit"
-                @added="fetch()"
-                @updated="fetch()"
-            />
-        </b-modal>
     </b-card>
 </template>
 
@@ -144,11 +128,10 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from '../../../mixins/Constants';
     import ClaimRemitForm from "./ClaimRemitForm";
-    import ClaimRemitAdjustmentForm from "./ClaimRemitAdjustmentForm";
     import { mapGetters } from 'vuex';
 
     export default {
-        components: {BusinessLocationFormGroup, ClaimRemitForm, ClaimRemitAdjustmentForm},
+        components: {BusinessLocationFormGroup, ClaimRemitForm},
         mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
 
         data() {
@@ -182,7 +165,6 @@
                     json: 1,
                 }),
                 showEditModal: false,
-                showAdjustmentModal: false,
                 deletingId: null,
             }
         },
@@ -214,16 +196,6 @@
                         this.$store.commit('claims/setRemits', data.data);
                     })
                     .catch(() => {});
-            },
-
-            adjust(item) {
-                this.$store.commit('claims/setRemit', item);
-                this.showAdjustmentModal = true;
-            },
-
-            hideAdjustmentModal() {
-                this.showAdjustmentModal = false;
-                this.$store.commit('claims/setItem', {});
             },
 
             edit(item) {
