@@ -149,8 +149,8 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         }
 
         // dd( $query );
-        $query = str_replace( "344635036818464", "999635036818464", $query );
-        // $query = str_replace( "checkaccount=12312312", "", $query );
+        $query = str_replace( "ccnumber=", "ccnumber=999", $query );
+        $query = str_replace( "checkaccount=12312312", "", $query );
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://ecspayments.transactiongateway.com/api/transact.php");
@@ -202,8 +202,6 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         $data = $this->responses;
         $raw = http_build_query($data);
         $text = $data['responsetext'] ?? 'UNKNOWN';
-
-        // dd( $this->responses );
 
         if (!$response || empty($data['transactionid'])) {
             $statusCode = $this->lastResponseCode;

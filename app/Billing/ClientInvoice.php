@@ -8,7 +8,6 @@ use App\Billing\Events\InvoiceablePaymentRemoved;
 use App\Billing\Events\InvoiceableUninvoiced;
 use App\Claims\ClaimInvoice;
 use App\Client;
-use App\InvoiceError;
 use App\QuickbooksClientInvoice;
 use Illuminate\Support\Collection;
 
@@ -130,24 +129,9 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->hasMany(OfflineInvoicePayment::class);
     }
 
-    public function chargeErrors()
-    {
-        return $this->hasMany( InvoiceError::class );
-    }
-
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
-
-    function getCurrentErrorBatchAttribute(): int
-    {
-        return $this->chargeErrors->max( 'error_batch_id' ) ?? 0;
-    }
-
-    function getMostRecentErrors(): Collection
-    {
-        return $this->chargeErrors->where( 'error_batch_id', $this->current_error_batch );
-    }
 
     function getIsPaidAttribute(): bool
     {
