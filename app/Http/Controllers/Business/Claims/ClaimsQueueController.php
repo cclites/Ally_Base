@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Billing\ClaimStatus;
+use App\Claims\Requests\ClaimQueueRequest;
 use App\ClientType;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimsQueueResource;
@@ -16,13 +17,13 @@ class ClaimsQueueController extends BaseController
     /**
      * Get claims listing.
      *
-     * @param Request $request
+     * @param ClaimQueueRequest $request
      * @param ClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(ClaimQueueRequest $request, ClientInvoiceQuery $invoiceQuery)
     {
-        if ($request->filled('json') && $request->expectsJson()) {
+        if ($request->forJson()) {
             if ($request->filled('invoice_type')) {
                 switch ($request->invoice_type) {
                     case 'paid':
@@ -80,11 +81,7 @@ class ClaimsQueueController extends BaseController
             // Only return invoices that have a payer (adjustment invoices should not show)
             $invoiceQuery->whereNotNull('client_payer_id');
 
-            if ($request->has('start_date')) {
-                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
-                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
-                $invoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
-            }
+            $invoiceQuery->whereBetween('created_at', $request->filterDateRange());
 
             if ($request->filled('client_id')) {
                 $invoiceQuery->forClient($request->client_id, false);
