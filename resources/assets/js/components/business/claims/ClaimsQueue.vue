@@ -56,14 +56,14 @@
                             <option value="TRANSMITTED">Transmitted</option>
                         </b-form-select>
 
-                        <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
-                            <option v-if="loadingClients" selected value="">Loading...</option>
+                        <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                            <option v-if="loadingClients" selected value="">Loading Clients...</option>
                             <option v-else value="">-- Select a Client --</option>
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
 
-                        <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0">
+                        <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                             Show Inactive Clients
                         </b-form-checkbox>
 
@@ -110,8 +110,8 @@
                 <template slot="name" scope="row">
                     <a :href="`/business/client/invoices/${row.item.id}/`" target="_blank">{{ row.value }}</a>
                 </template>
-                <template slot="client" scope="row">
-                    <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ ( row.item.claim ? row.item.client_name : row.item.client.name ) }}</a>
+                <template slot="client_name" scope="row">
+                    <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ row.item.client_name }}</a>
                 </template>
                 <template slot="claim" scope="row">
                     <div class="text-nowrap">
@@ -281,7 +281,7 @@
                         sortable: true,
                     },
                     {
-                        key: 'client',
+                        key: 'client_name',
                         sortable: true,
                     },
                     {
@@ -502,16 +502,6 @@
              */
             async fetch() {
                 this.loaded = 0;
-                // let url = `/business/claims-queue?
-                // json=1&
-                // businesses=${this.businesses}&
-                // start_date=${this.start_date}&
-                // end_date=${this.end_date}&
-                // invoice_type=${this.invoice_type}&
-                // claimStatus=${this.claimStatus}&
-                // client_id=${this.client_id}&
-                // payer_id=${this.payer_id}&
-                // client_type=${this.client_type}`;
                 this.filters.get(`/business/claims-queue`)
                     .then(({data}) => {
                         this.items = data.data;

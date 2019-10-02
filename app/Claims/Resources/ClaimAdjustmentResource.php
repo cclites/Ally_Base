@@ -40,7 +40,7 @@ class ClaimAdjustmentResource extends Resource
             'item' => $item,
             'item_total' => null,
 
-            'client_id' => null,
+            'client_id' => null,©
             'client_name' => null,
 
             'amount_applied' => $this->resource->amount_applied,
@@ -57,7 +57,7 @@ class ClaimAdjustmentResource extends Resource
                 'item' => $this->resource->claimInvoiceItem->getItemSummary(),
                 'item_total' => $this->resource->claimInvoiceItem->amount,
                 'client_id' => $this->resource->claimInvoice->client->id,
-                'client_name' => $this->resource->claimInvoice->client->name,
+                'client_name' => $this->resource->claimInvoice->client->nameLastFirst,
             ]);
         }
 

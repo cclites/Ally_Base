@@ -53,6 +53,12 @@
                 placeholder="End Date"
                 class="mr-1 mt-1"
             />
+
+            <b-form-select v-model="filters.claim_status" class="mr-1 mt-1">
+                <option value="">-- All Claims --</option>
+                <option value="unpaid">Unpaid Claims</option>
+            </b-form-select>
+
             <business-location-form-group
                 v-model="filters.businesses"
                 :label="null"
@@ -62,15 +68,19 @@
 
             <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
 
-            <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
-                <option value="">-- All Clients --</option>
+            <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
+            <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                <option v-if="loadingClients" selected value="">Loading Clients...</option>
+                <option v-else value="">-- All Clients --</option>
                 <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                 </option>
             </b-form-select>
-            <b-form-select v-model="filters.claim_status" class="mr-1 mt-1">
-                <option value="">-- All Claims --</option>
-                <option value="unpaid">Unpaid Claims</option>
-            </b-form-select>
+
+            <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
+                Show Inactive Clients
+            </b-form-checkbox>
+
             <b-btn variant="info" class="mr-1 mt-1" @click.prevent="fetch()" :disabled="filters.busy">Generate</b-btn>
         </b-form>
 
@@ -312,9 +322,12 @@
                     payer_id: '',
                     client_id: '',
                     claim_status: 'unpaid',
+                    client_type: '',
+                    inactive: 0,
                     json: 1,
                 }),
                 clients: [],
+                loadingClients: false,
                 isScrolling: false,
                 interest: '',
                 interest_note: '',
@@ -567,15 +580,22 @@
             },
 
             /**
-             * Fetch data the Clients dropdown resource.
+             * Fetch client list for the dropdown filter.
+             * @returns {Promise<void>}
              */
             async fetchClients() {
-                await axios.get(`/business/dropdown/clients?businesses=${this.filters.businesses}`)
+                this.form.client_id = '';
+                this.loadingClients = true;
+                this.clients = [];
+                await axios.get(`/business/dropdown/clients?inactive=${this.filters.inactive}&client_type=${this.filters.client_type}&payer_id=${this.filters.payer_id}&businesses=${this.filters.businesses}`)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
                     .catch(() => {
                         this.clients = [];
+                    })
+                    .finally(() => {
+                        this.loadingClients = false;
                     });
             },
 
@@ -592,7 +612,7 @@
 
             // Set default filters
             this.filters.businesses = this.remit.business_id;
-            this.filters.payer_id = this.remit.payer_id ? this.remit.payer_id : '';
+            this.filters.payer_id = this.remit.payer_id ? ''+this.remit.payer_id : '';
 
             this.fetch();
         },
@@ -604,6 +624,21 @@
 
         destroyed() {
             window.removeEventListener('scroll', this.handleScroll);
+        },
+
+        watch: {
+            'filters.businesses'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.client_type'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.payer_id'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.inactive'(newValue, oldValue) {
+                this.fetchClients();
+            },
         },
     }
 </script>

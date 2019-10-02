@@ -295,7 +295,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function scopeForPayer($query, $payerId = null)
     {
-        if (empty($payerId)) {
+        if (is_null($payerId)) {
             return $query;
         }
 
@@ -341,6 +341,37 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     {
         return $query->where('amount_due', '<>', '0');
     }
+
+    /**
+     * Filter claims by client type.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClientType($query, $clientType)
+    {
+        if (empty($clientType)) {
+            return $query;
+        }
+
+        return $query->whereHas('client', function ($q) use ($clientType) {
+            $q->where('client_type', $clientType);
+        });
+    }
+
+    /**
+     * Filter claims by active users.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForActiveClientsOnly($query)
+    {
+        return $query->whereHas('client', function ($q) {
+            $q->active();
+        });
+    }
+
 
     // **********************************************************
     // OTHER FUNCTIONS

@@ -98,6 +98,12 @@ class ClaimsQueueController extends BaseController
                 $invoiceQuery->forClientType($request->client_type);
             }
 
+            if ($request->inactive != 1) {
+                $invoiceQuery->whereHas('client', function ($q) {
+                    $q->active();
+                });
+            }
+
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();
 
             $coll = ClaimsQueueResource::collection($invoices);

@@ -28,11 +28,18 @@
                         class="mr-1 mt-1"
                     />
 
-                    <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loading">
-                        <option value="">-- All Clients --</option>
+                    <b-form-select v-model="form.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
+                    <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                        <option v-if="loadingClients" selected value="">Loading Clients...</option>
+                        <option v-else value="">-- All Clients --</option>
                         <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                         </option>
                     </b-form-select>
+
+                    <b-form-checkbox v-model="form.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
+                        Show Inactive Clients
+                    </b-form-checkbox>
 
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
@@ -93,10 +100,11 @@
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import FormatsDates from '../../../mixins/FormatsDates';
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: { BusinessLocationFormGroup },
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, Constants],
 
         computed: {
             emptyText() {
@@ -111,11 +119,14 @@
             return {
                 loading: false,
                 clients: [],
+                loadingClients: false,
                 form: new Form({
                     start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
                     businesses: '',
                     client_id: '',
+                    client_type: '',
+                    inactive: 1,
                     json: 1,
                 }),
                 busy: false,
@@ -150,24 +161,50 @@
                     })
             },
 
-            async loadClients() {
+            download() {
+                window.location = this.form.toQueryString('/business/reports/claims/transmissions?export=1');
+            },
+
+            /**
+             * Fetch client list for the dropdown filter.
+             * @returns {Promise<void>}
+             */
+            async fetchClients() {
+                this.form.client_id = '';
+                this.loadingClients = true;
                 this.clients = [];
-                await axios.get('/business/clients?json=1')
+                await axios.get(`/business/dropdown/clients?inactive=${this.form.inactive}&client_type=${this.form.client_type}&businesses=${this.form.businesses}`)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
-                    .catch(() => {});
-            },
-
-            download() {
-                window.location = this.form.toQueryString('/business/reports/claims/transmissions?export=1');
+                    .catch(() => {
+                        this.clients = [];
+                    })
+                    .finally(() => {
+                        this.loadingClients = false;
+                    });
             },
         },
 
         async mounted() {
             this.loading = true;
-            await this.loadClients();
+            await this.fetchClients();
             this.loading = false;
+        },
+
+        watch: {
+            'form.businesses'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.client_type'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.payer_id'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.inactive'(newValue, oldValue) {
+                this.fetchClients();
+            },
         },
     }
 </script>
