@@ -303,11 +303,7 @@
              * @return {boolean}
              */
             canSubmit() {
-                // Check if we are exceeding the amount available to apply.
-                if (this.amountAvailable.lt(0) || this.amountApplied.equals(0)) {
-                    return false;
-                }
-
+                // We should always be able to submit now because there are no restrictions on amounts
                 return true;
             },
         },
