@@ -40,7 +40,7 @@ class ClaimAdjustmentResource extends Resource
             'item' => $item,
             'item_total' => null,
 
-            'client_id' => null,©
+            'client_id' => null,
             'client_name' => null,
 
             'amount_applied' => $this->resource->amount_applied,
