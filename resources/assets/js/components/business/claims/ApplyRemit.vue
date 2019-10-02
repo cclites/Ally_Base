@@ -146,6 +146,9 @@
                     <template slot="client_invoice_id" scope="row">
                         <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice.name }}</a>
                     </template>
+                    <template slot="amount_due" scope="row">
+                        ${{ getMasterAmountDue(row.item) }}
+                    </template>
                     <template slot="amount_applied" scope="row">
                         <div class="d-flex">
                         <b-form-input
@@ -603,6 +606,21 @@
                     .finally(() => {
                         this.loadingClients = false;
                     });
+            },
+
+            /**
+             * Calculate the amount due on a master (claim) item based on
+             * it's current balance and the amount being applied to it's sub items.
+             *
+             * @returns string
+             */
+            getMasterAmountDue(claim) {
+                return new Decimal(claim.amount_due).sub(claim.items.reduce((carry, item) => {
+                    if (item.amount_applied == '') {
+                        return carry;
+                    }
+                    return carry.add(new Decimal(item.amount_applied));
+                }, new Decimal(0.00))).toFixed(2);
             },
 
             /**
