@@ -42,6 +42,7 @@ class ClaimInvoiceItemResource extends Resource
             'summary' => $this->resource->claimable->getName(),
             'start_time' => optional($this->resource->claimable->getStartTime())->toDateTimeString(),
             'end_time' => optional($this->resource->claimable->getEndTime())->toDateTimeString(),
+            'caregiver_name' => optional($this->resource->claimable)->getCaregiverName(),
         ];
     }
 
