@@ -8,38 +8,32 @@
                 >
                     <b-form inline @submit.prevent="fetch()">
                         <business-location-form-group
-                            v-model="businesses"
+                            v-model="filters.businesses"
                             :label="null"
                             class="mr-1 mt-1"
                             :allow-all="true"
                         />
                         <date-picker
-                                v-model="start_date"
+                                v-model="filters.start_date"
                                 placeholder="Start Date"
                                 class="mt-1"
                         >
                         </date-picker> &nbsp;to&nbsp;
                         <date-picker
-                                v-model="end_date"
+                                v-model="filters.end_date"
                                 placeholder="End Date"
                                 class="mr-1 mt-1"
                         >
                         </date-picker>
-                        <b-form-select v-model="clientFilter" class="mr-1 mt-1">
-                            <option v-if="loadingClients" selected>Loading...</option>
-                            <option v-else value="">-- Select a Client --</option>
-                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
-                            </option>
-                        </b-form-select>
 
-                        <b-form-select v-model="clientTypeFilter" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" />
 
-                        <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" />
+                        <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
 
                         <b-form-select
-                            id="invoiceType"
-                            name="invoiceType"
-                            v-model="invoiceType"
+                            id="invoice_type"
+                            name="invoice_type"
+                            v-model="filters.invoice_type"
                             class="mr-1 mt-1"
                         >
                             <option value="">All Invoices</option>
@@ -52,15 +46,26 @@
                         </b-form-select>
 
                         <b-form-select
-                            id="claimStatus"
-                            name="claimStatus"
-                            v-model="claimStatus"
+                            id="claim_status"
+                            name="claim_status"
+                            v-model="filters.claim_status"
                             class="mr-1 mt-1"
                         >
                             <option value="">-- Claim Status --</option>
                             <option value="CREATED">Created</option>
                             <option value="TRANSMITTED">Transmitted</option>
                         </b-form-select>
+
+                        <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
+                            <option v-if="loadingClients" selected value="">Loading...</option>
+                            <option v-else value="">-- Select a Client --</option>
+                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
+                            </option>
+                        </b-form-select>
+
+                        <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0">
+                            Show Inactive Clients
+                        </b-form-checkbox>
 
                         <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -246,14 +251,22 @@
 
         data() {
             return {
+                filters: new Form({
+                    businesses: '',
+                    start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+                    end_date: moment().format('MM/DD/YYYY'),
+                    invoice_type: '',
+                    claim_status: '',
+                    client_id: '',
+                    payer_id: '',
+                    client_type: '',
+                    inactive: 0,
+                    json: 1,
+                }),
                 sortBy: 'shift_time',
                 sortDesc: false,
                 filter: null,
                 loaded: -1,
-                start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
-                end_date: moment().format('MM/DD/YYYY'),
-                invoiceType: '',
-                claimStatus: '',
                 items: [],
                 fields: [
                     {
@@ -323,27 +336,11 @@
                 ],
                 loadingClients: false,
                 clients: [],
-                clientFilter: '',
-                payerFilter: '',
-                clientTypeFilter: '',
-                businesses: '',
-                paymentModal: false,
-                form: new Form({
-                    type: '',
-                    payment_date: moment().format('MM/DD/YYYY'),
-                    amount: 0.00,
-                    reference: '',
-                    notes: '',
-                    description: 'payment_applied',
-                }),
-                selectedInvoice: {},
                 busy: false,
                 transmittingId: null,
                 creatingId: null,
                 deletingId: null,
                 selectedTransmissionMethod: '',
-                payFullBalance: false,
-                editingClaim: {},
                 showAdjustmentModal: false,
                 missingFieldErrors: [],
                 missingFieldsModal: false,
@@ -505,8 +502,17 @@
              */
             async fetch() {
                 this.loaded = 0;
-                let url = `/business/claims-queue?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&claimStatus=${this.claimStatus}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}&client_type=${this.clientTypeFilter}`;
-                axios.get(url)
+                // let url = `/business/claims-queue?
+                // json=1&
+                // businesses=${this.businesses}&
+                // start_date=${this.start_date}&
+                // end_date=${this.end_date}&
+                // invoice_type=${this.invoice_type}&
+                // claimStatus=${this.claimStatus}&
+                // client_id=${this.client_id}&
+                // payer_id=${this.payer_id}&
+                // client_type=${this.client_type}`;
+                this.filters.get(`/business/claims-queue`)
                     .then(({data}) => {
                         this.items = data.data;
                     })
@@ -523,8 +529,9 @@
              * @returns {Promise<void>}
              */
             async fetchClients() {
+                this.filters.client_id = '';
                 this.loadingClients = true;
-                await axios.get(`/business/dropdown/clients`)
+                await axios.get(`/business/dropdown/clients?inactive=${this.filters.inactive}&client_type=${this.filters.client_type}&payer_id=${this.filters.payer_id}&businesses=${this.filters.businesses}`)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
@@ -561,7 +568,22 @@
             if (autoLoad) {
                 this.fetch();
             }
-        }
+        },
+
+        watch: {
+            'filters.businesses'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.client_type'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.payer_id'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.inactive'(newValue, oldValue) {
+                this.fetchClients();
+            },
+        },
     }
 </script>
 
