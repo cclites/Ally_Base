@@ -271,18 +271,42 @@ class ShiftController extends BaseController
         // Duplicate an existing shift and advance one day
         /** @var Shift $shift */
         $shift = $shift->replicate();
+
+        //TODO: Figure out why this throws a DB error when using sanitizeDuplicatedShift
+        //      Would rather use that.
+        //$shift = $shift->sanitizeDuplicatedShift();
+
+        //TODO: Move all of this into the Shift model as a computed property.
+        //###################################################################
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
+
+        $shift->checked_in_method = "Office";
+        $shift->checked_out_method = "Office";
+
+        $shift->checked_in_latitude = null;
+        $shift->checked_in_longitude = null;
         $shift->checked_in_distance = null;
+        $shift->checked_in_agent = null;
+        $shift->checked_in_ip = null;
+        $shift->checked_in_number = null;
+        $shift->checked_out_latitude = null;
+        $shift->checked_out_longitude = null;
         $shift->checked_out_distance = null;
+        $shift->checked_out_agent = null;
+        $shift->checked_out_ip = null;
+        $shift->checked_out_number = null;
         $shift->status = null;
 
-        $activities = $shift->business->allActivities();
+        $shift->checked_in_verified = null;
+        $shift->checked_out_verified = null;
+        $shift->verified = null;
+        //###################################################################
 
+        $activities = $shift->business->allActivities();
         event(new ShiftFlagsCouldChange($shift));
 
         return view('business.shifts.show', compact('shift', 'activities'));
-
     }
 
     /**

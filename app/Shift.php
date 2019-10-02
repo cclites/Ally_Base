@@ -49,7 +49,7 @@ use App\Data\ScheduledRates;
  * @property float|null $checked_in_longitude
  * @property int|null $checked_in_distance The distance in meters from the client evv address.
  * @property string|null $checked_in_agent
- * @property string|null $checked_in_ip
+ * @property string|null d$checked_in_ip
  * @property int $checked_in_verified
  * @property string|null $checked_in_number evv phone number
  * @property string $checked_out_method
@@ -482,6 +482,43 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function getFlagsAttribute()
     {
         return $this->shiftFlags->pluck('flag')->unique()->values()->toArray();
+    }
+
+    /**
+     * TODO: Figure out why this causes a DB insert error 'missing shift_id'
+     */
+    public function sanitizeDuplicatedShift()
+    {
+        $this->checked_in_time = (new Carbon($this->checked_in_time))->addDay();
+        $this->checked_out_time = (new Carbon($this->checked_out_time))->addDay();
+
+        $this->checked_in_method = "Office";
+        $this->checked_out_method = "Office";
+
+        $nullColumns = [
+            'checked_in_latitude' => null,
+            'checked_in_longitude' => null,
+            'checked_in_distance' => null,
+            'checked_in_agent' => null,
+            'checked_in_ip' => null,
+            'checked_in_number' => null,
+            'checked_out_latitude' => null,
+            'checked_out_longitude' => null,
+            'checked_out_distance' => null,
+            'checked_out_agent' => null,
+            'checked_out_number' => null,
+            'status' => null,
+            'schedule_id' => null,
+        ];
+
+        $boolColumns = [
+            'checked_in_verified' => false,
+            'checked_out_verified' => false,
+            'verified' => false,
+        ];
+
+        $this->update($nullColumns);
+        $this->update($boolColumns);
     }
 
     //////////////////////////////////////
