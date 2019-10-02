@@ -117,35 +117,36 @@ class ClaimRemitController extends BaseController
     {
         $this->authorize('update', $claimRemit);
 
-        if (floatval($claimRemit->amount_applied) !== floatval(0)) {
-            return new ErrorResponse(412, 'This Remit has already been applied to one or more Claims and cannot be deleted.  Please zero out the balance of this Remit and try again..');
+        if ($claimRemit->adjustments()->exists()) {
+            return new ErrorResponse(412, 'This Remit has already been applied or adjusted and cannot be deleted.');
         }
 
         \DB::beginTransaction();
 
-        $updatedItems = collect([]);
-        $updatedClaims = collect([]);
-        // Soft-delete all related payments.
-        foreach ($claimRemit->adjustments as $item) {
-            if (filled($item->claimInvoiceItem)) {
-                $updatedItems->push($item->claimInvoiceItem);
-            }
-            if (filled($item->claimInvoice)) {
-                $updatedClaims->push($item->claimInvoice);
-            }
-            $item->delete();
-        }
-
-        // Technically the balance should always be the same because the
-        // amount applied for the remit must be 0, but we will
-        // re-calculate the balances anyway to ensure no errors.
-        foreach ($updatedItems->unique('id') as $item) {
-            $item->updateBalance();
-        }
-        foreach ($updatedClaims->unique('id') as $claim) {
-            $claim->updateBalance();
-        }
-
+        // Keeping this in case we bring this feature back
+//        $updatedItems = collect([]);
+//        $updatedClaims = collect([]);
+//        // Soft-delete all related payments.
+//        foreach ($claimRemit->adjustments as $item) {
+//            if (filled($item->claimInvoiceItem)) {
+//                $updatedItems->push($item->claimInvoiceItem);
+//            }
+//            if (filled($item->claimInvoice)) {
+//                $updatedClaims->push($item->claimInvoice);
+//            }
+//            $item->delete();
+//        }
+//
+//        // Technically the balance should always be the same because the
+//        // amount applied for the remit must be 0, but we will
+//        // re-calculate the balances anyway to ensure no errors.
+//        foreach ($updatedItems->unique('id') as $item) {
+//            $item->updateBalance();
+//        }
+//        foreach ($updatedClaims->unique('id') as $claim) {
+//            $claim->updateBalance();
+//        }
+//
         $claimRemit->delete();
 
         \DB::commit();
