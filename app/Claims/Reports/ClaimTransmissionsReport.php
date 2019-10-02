@@ -25,6 +25,18 @@ class ClaimTransmissionsReport extends BaseReport
     protected $totalDue = 0.00;
 
     /**
+     * ClientType filter
+     *
+     * @var string
+     */
+    protected $clientType;
+
+    /**
+     * @var bool
+     */
+    protected $showInactive = false;
+
+    /**
      * BusinessOfflineArAgingReport constructor.
      */
     public function __construct()
@@ -61,6 +73,32 @@ class ClaimTransmissionsReport extends BaseReport
     }
 
     /**
+     * Query by client type.
+     *
+     * @param string $clientType
+     * @return $this
+     */
+    public function forClientType(?string $clientType): self
+    {
+        $this->clientType = $clientType;
+
+        return $this;
+    }
+
+    /**
+     * Query inactive clients.
+     *
+     * @param bool $inactive
+     * @return $this
+     */
+    public function showInactive(bool $inactive): self
+    {
+        $this->showInactive = $inactive;
+
+        return $this;
+    }
+
+    /**
      * Return the instance of the query builder for additional manipulation
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
@@ -85,6 +123,18 @@ class ClaimTransmissionsReport extends BaseReport
 
         if (filled($this->range)) {
             $query->whereBetween('transmitted_at', $this->range);
+        }
+
+        if (filled($this->clientType) || ! $this->showInactive) {
+            $query->whereHas('client', function ($q) {
+                if (filled($this->clientType)) {
+                    $q->where('client_type', $this->clientType);
+                }
+
+                if (! $this->showInactive) {
+                    $q->active();
+                }
+            });
         }
 
         return $query->get()->groupBy('payer_id')

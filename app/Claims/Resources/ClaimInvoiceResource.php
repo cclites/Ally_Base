@@ -45,7 +45,7 @@ class ClaimInvoiceResource extends Resource
             'amount_paid' => $this->resource->getAmountPaid(),
             'business_id' => $this->resource->business_id,
             'client' => [
-                'name' => $this->resource->client->name,
+                'name' => $this->resource->client->nameLastFirst,
             ],
             'client_dob' => $this->resource->client_dob,
             'client_first_name' => $this->resource->client_first_name,

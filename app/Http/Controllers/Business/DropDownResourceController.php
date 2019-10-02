@@ -53,7 +53,23 @@ class DropdownResourceController extends BaseController
 
     protected function clients(Request $request)
     {
-        $clients = Client::forRequestedBusinesses()->active()->get();
+        $query = Client::forRequestedBusinesses();
+
+        if ($request->inactive != 1) {
+            $query->active();
+        }
+
+        if ($request->filled('client_type')) {
+            $query->whereClientType($request->client_type);
+        }
+
+        if ($request->filled('payer_id')) {
+            $query->whereHas('payers', function ($q) use ($request) {
+                $q->where('payer_id', $request->payer_id);
+            });
+        }
+
+        $clients = $query->get();
         return response()->json(new ClientDropdownResource($clients));
     }
 

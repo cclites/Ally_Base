@@ -195,7 +195,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
             return '';
         }
 
-        return $this->caregiver_first_name . ' ' . $this->caregiver_last_name;
+        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
     }
 
     /**

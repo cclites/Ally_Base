@@ -21,7 +21,9 @@ class ClaimTransmissionsReportController extends Controller
             $report->query()->forRequestedBusinesses();
 
             $report->forClient($request->client_id ?? null)
-                ->forDateRange($request->filterDateRange());
+                ->forDateRange($request->filterDateRange())
+                ->forClientType($request->client_type ?? null)
+                ->showInactive($request->inactive == 1);
 
             if ($request->forExport()) {
                 return $report->setDateFormat('m/d/Y g:i A', auth()->user()->getTimezone())
