@@ -36,10 +36,16 @@
             </table>
         </div>
 
-        <h2>
-            <strong>Available to Apply: </strong>
-            ${{ numberFormat(amountAvailable.toFixed(2)) }}
-        </h2>
+        <div class="d-flex">
+            <h2 class="f-1">
+                <strong>Amount Applied: </strong>
+                ${{ numberFormat(amountApplied.toFixed(2)) }}
+            </h2>
+            <h2 class="ml-auto">
+                <strong>Available to Apply: </strong>
+                ${{ numberFormat(amountAvailable.toFixed(2)) }}
+            </h2>
+        </div>
 
         <b-form inline class="mb-4">
             <date-picker
@@ -225,6 +231,10 @@
         <div v-if="isScrolling" id="floating-amount">
             <strong>Available to Apply: </strong>
             ${{ numberFormat(amountAvailable.toFixed(2)) }}
+        </div>
+        <div v-if="isScrolling" id="floating-amount-applied">
+            <strong>Amount Applied: </strong>
+            ${{ numberFormat(amountApplied.toFixed(2)) }}
         </div>
     </b-card>
 </template>
@@ -652,5 +662,17 @@
         font-size: 24px;
         border: 1px solid darkgrey;
         z-index: 2;
+    }
+    #floating-amount-applied {
+        position: fixed;
+        left: 25px;
+        bottom: 25px;
+        display: block;
+        background-color: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-size: 24px;
+        border: 1px solid darkgrey;
+        z-index: 25;
     }
 </style>
