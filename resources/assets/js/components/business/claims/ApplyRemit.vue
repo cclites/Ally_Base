@@ -465,10 +465,10 @@
                     // When the claim record is un-selected, we should clear
                     // all progress from it and it's sub items.
                     this.$set(claim, 'items', claim.items.map(item => {
-                        item.amount_applied = '';
-                        item.adjustment_type = '';
-                        item.note = '';
-                        item.selected = false;
+                        // item.amount_applied = '';
+                        // item.adjustment_type = '';
+                        // item.note = '';
+                        // item.selected = false;
                         item.disabled = false;
                         return item;
                     }));
