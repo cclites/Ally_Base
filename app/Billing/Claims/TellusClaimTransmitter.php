@@ -46,9 +46,9 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             array_push($errors['business'], 'medicaid_id');
         }
 
-//        if (empty($invoice->client->business->medicaid_npi_number)) {
-//            array_push($errors['business'], 'medicaid_npi_number');
-//        }
+        if (empty($invoice->client->business->medicaid_npi_number)) {
+            array_push($errors['business'], 'medicaid_npi_number');
+        }
 //
 //        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
 //            array_push($errors['business'], 'medicaid_npi_taxonomy');
@@ -117,6 +117,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw new ClaimTransmissionException('Error submitting claim XML to Tellus: ' . $ex->getMessage());
         } catch (TellusApiException $ex) {
             throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
+        } catch (ClaimTransmissionException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
             \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
@@ -124,6 +126,25 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
+    }
+
+    /**
+     * Convert claim into import row data.
+     *
+     * @param \App\Billing\Claim $claim
+     * @return array
+     */
+    protected function getData(Claim $claim) : array
+    {
+        // Remove empty values because Tellus is ridiculous.
+        return collect(parent::getData($claim))->map(function (array $item) {
+            foreach (array_keys($item) as $key) {
+                if (empty($item[$key])) {
+                    unset($item[$key]);
+                }
+            }
+            return $item;
+        })->toArray();
     }
 
     /**
@@ -156,7 +177,6 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
         if ($errors = $tellus->getValidationErrors($xml)) {
             throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
-//            throw new ClaimTransmissionException("Invalid XML Schema:\r\n" . join("\r\n", $errors));
         }
 
         $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
@@ -284,13 +304,6 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             $data['ScheduledEndLongitude']  = $address->longitude ?? ''; // OPTIONAL
         }
 
-        // Remove empty values because Tellus is ridiculous.
-        foreach (array_keys($data) as $key) {
-            if (empty($data[$key])) {
-                unset($data[$key]);
-            }
-        }
-
         return $data;
     }
 
@@ -309,7 +322,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             ->first();
 
         if (empty($typeCode)) {
-            throw new ClaimTransmissionException("Invalid text code value \"$textCode\" for $category.");
+            throw new ClaimTransmissionException("Error mapping values to Tellus dictionary: Invalid text code value \"$textCode\" for $category.");
         }
 
         return [$typeCode->description, $typeCode->code];
@@ -321,6 +334,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param \App\Billing\Claim $claim
      * @param ShiftService $shiftService
      * @return array
+     * @throws ClaimTransmissionException
      */
     public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
     {

@@ -22,9 +22,9 @@ class ClaimsQueueController extends BaseController
      */
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
-        if ($request->filled('json') || $request->expectsJson()) {
-            if ($request->filled('invoiceType')) {
-                switch ($request->invoiceType) {
+        if ($request->filled('json') && $request->expectsJson()) {
+            if ($request->filled('invoice_type')) {
+                switch ($request->invoice_type) {
                     case 'paid':
                         $invoiceQuery->where(function ($q) {
                             $q->where(function ($q) {
@@ -68,8 +68,8 @@ class ClaimsQueueController extends BaseController
                 }
             }
 
-            if ($request->filled('claimStatus')) {
-                $status = ClaimStatus::fromValue($request->claimStatus);
+            if ($request->filled('claim_status')) {
+                $status = ClaimStatus::fromValue($request->claim_status);
                 $invoiceQuery->whereHas('claimInvoice', function ($q) use ($status) {
                     $q->where('status', $status);
                 });
@@ -96,6 +96,12 @@ class ClaimsQueueController extends BaseController
 
             if (in_array($request->client_type, ClientType::all())) {
                 $invoiceQuery->forClientType($request->client_type);
+            }
+
+            if ($request->inactive != 1) {
+                $invoiceQuery->whereHas('client', function ($q) {
+                    $q->active();
+                });
             }
 
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();

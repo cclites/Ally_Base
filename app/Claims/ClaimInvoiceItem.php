@@ -2,7 +2,6 @@
 
 namespace App\Claims;
 
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\AuditableModel;
 
 /**
@@ -147,7 +146,6 @@ class ClaimInvoiceItem extends AuditableModel
      * from all the remit amounts applied to it.
      *
      * @return void
-     * @throws ClaimBalanceException
      */
     public function updateBalance(): void
     {
@@ -158,12 +156,6 @@ class ClaimInvoiceItem extends AuditableModel
         }, floatval(0));
 
         $amountDue = subtract(floatval($this->amount), $totalApplied);
-
-        if ($amountDue < floatval(0)) {
-            throw new ClaimBalanceException('Claim invoice items cannot have a negative balance.');
-        } elseif ($amountDue > floatval($this->amount)) {
-            throw new ClaimBalanceException('Claim invoice items cannot have a balance greater than their total amount.');
-        }
 
         $this->update(['amount_due' => $amountDue]);
     }

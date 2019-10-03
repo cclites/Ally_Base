@@ -18,7 +18,7 @@ class DOMValidator
 
     protected function getSchemaFilename(): string
     {
-        return storage_path('app/public/tellus-schema.xsd');
+        return \Storage::disk('public')->path(TellusService::XML_SCHEMA_FILENAME);;
     }
 
     /**

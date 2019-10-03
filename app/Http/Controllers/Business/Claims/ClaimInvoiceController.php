@@ -34,7 +34,12 @@ class ClaimInvoiceController extends BaseController
             ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id'])
+            ->forClientType($filters['client_type'])
             ->whereIn('status', ClaimStatus::transmittedStatuses());
+
+        if (! $filters['inactive']) {
+            $query->forActiveClientsOnly();
+        }
 
         if ($request->claim_status == 'unpaid') {
             $query = $query->hasBalance();

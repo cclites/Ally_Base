@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Exceptions\ClaimBalanceException;
 use Illuminate\Validation\ValidationException;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Responses\SuccessResponse;
@@ -71,10 +70,6 @@ class ClaimInvoiceItemController extends BaseController
      */
     public function update(ClaimInvoice $claim, ClaimInvoiceItem $item, UpdateClaimInvoiceItemRequest $request)
     {
-        // This method validates amounts based on remits/adjustments during
-        // the updateBalance() call.  This method throws a ClaimBalanceException
-        // if the amount is less than what was applied.
-
         $this->authorize('update', $claim);
 
         try {
@@ -88,8 +83,6 @@ class ClaimInvoiceItemController extends BaseController
             $claim->markAsModified();
 
             \DB::commit();
-        } catch (ClaimBalanceException $ex) {
-            return new ErrorResponse(500, 'Could not update Claim Item.  When changing the total cost of an item, it cannot be less than what has already been applied.');
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {

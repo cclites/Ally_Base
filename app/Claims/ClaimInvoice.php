@@ -6,7 +6,6 @@ use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use App\Billing\ClientInvoice;
@@ -296,7 +295,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function scopeForPayer($query, $payerId = null)
     {
-        if (empty($payerId)) {
+        if (is_null($payerId)) {
             return $query;
         }
 
@@ -343,6 +342,37 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $query->where('amount_due', '<>', '0');
     }
 
+    /**
+     * Filter claims by client type.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClientType($query, $clientType)
+    {
+        if (empty($clientType)) {
+            return $query;
+        }
+
+        return $query->whereHas('client', function ($q) use ($clientType) {
+            $q->where('client_type', $clientType);
+        });
+    }
+
+    /**
+     * Filter claims by active users.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForActiveClientsOnly($query)
+    {
+        return $query->whereHas('client', function ($q) {
+            $q->active();
+        });
+    }
+
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
@@ -350,7 +380,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     /**
      * Update the amount and amount due from the ClaimInvoiceItem values
      *
-     * @throws ClaimBalanceException
      */
     public function updateBalance(): void
     {
@@ -363,10 +392,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         $amount_due = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
             return add($carry, (float)$item->amount_due);
         }, (float)0.00);
-
-        if ($amount_due < floatval(0)) {
-            throw new ClaimBalanceException('Claim invoices cannot have a negative balance.');
-        }
 
         $this->update(compact('amount', 'amount_due'));
     }

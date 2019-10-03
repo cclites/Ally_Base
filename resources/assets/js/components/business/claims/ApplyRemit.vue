@@ -36,10 +36,16 @@
             </table>
         </div>
 
-        <h2>
-            <strong>Available to Apply: </strong>
-            ${{ numberFormat(amountAvailable.toFixed(2)) }}
-        </h2>
+        <div class="d-flex">
+            <h2 class="f-1">
+                <strong>Amount Applied: </strong>
+                ${{ numberFormat(amountApplied.toFixed(2)) }}
+            </h2>
+            <h2 class="ml-auto">
+                <strong>Available to Apply: </strong>
+                ${{ numberFormat(amountAvailable.toFixed(2)) }}
+            </h2>
+        </div>
 
         <b-form inline class="mb-4">
             <date-picker
@@ -53,6 +59,12 @@
                 placeholder="End Date"
                 class="mr-1 mt-1"
             />
+
+            <b-form-select v-model="filters.claim_status" class="mr-1 mt-1">
+                <option value="">-- All Claims --</option>
+                <option value="unpaid">Unpaid Claims</option>
+            </b-form-select>
+
             <business-location-form-group
                 v-model="filters.businesses"
                 :label="null"
@@ -62,15 +74,19 @@
 
             <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
 
-            <b-form-select v-model="filters.client_id" class="mr-1 mt-1">
-                <option value="">-- All Clients --</option>
+            <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
+            <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                <option v-if="loadingClients" selected value="">Loading Clients...</option>
+                <option v-else value="">-- All Clients --</option>
                 <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                 </option>
             </b-form-select>
-            <b-form-select v-model="filters.claim_status" class="mr-1 mt-1">
-                <option value="">-- All Claims --</option>
-                <option value="unpaid">Unpaid Claims</option>
-            </b-form-select>
+
+            <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
+                Show Inactive Clients
+            </b-form-checkbox>
+
             <b-btn variant="info" class="mr-1 mt-1" @click.prevent="fetch()" :disabled="filters.busy">Generate</b-btn>
         </b-form>
 
@@ -129,6 +145,9 @@
                     </template>
                     <template slot="client_invoice_id" scope="row">
                         <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice.name }}</a>
+                    </template>
+                    <template slot="amount_due" scope="row">
+                        ${{ getMasterAmountDue(row.item) }}
                     </template>
                     <template slot="amount_applied" scope="row">
                         <div class="d-flex">
@@ -216,6 +235,10 @@
             <strong>Available to Apply: </strong>
             ${{ numberFormat(amountAvailable.toFixed(2)) }}
         </div>
+        <div v-if="isScrolling" id="floating-amount-applied">
+            <strong>Amount Applied: </strong>
+            ${{ numberFormat(amountApplied.toFixed(2)) }}
+        </div>
     </b-card>
 </template>
 
@@ -293,11 +316,7 @@
              * @return {boolean}
              */
             canSubmit() {
-                // Check if we are exceeding the amount available to apply.
-                if (this.amountAvailable.lt(0) || this.amountApplied.equals(0)) {
-                    return false;
-                }
-
+                // We should always be able to submit now because there are no restrictions on amounts
                 return true;
             },
         },
@@ -312,9 +331,12 @@
                     payer_id: '',
                     client_id: '',
                     claim_status: 'unpaid',
+                    client_type: '',
+                    inactive: 0,
                     json: 1,
                 }),
                 clients: [],
+                loadingClients: false,
                 isScrolling: false,
                 interest: '',
                 interest_note: '',
@@ -456,10 +478,10 @@
                     // When the claim record is un-selected, we should clear
                     // all progress from it and it's sub items.
                     this.$set(claim, 'items', claim.items.map(item => {
-                        item.amount_applied = '';
-                        item.adjustment_type = '';
-                        item.note = '';
-                        item.selected = false;
+                        // item.amount_applied = '';
+                        // item.adjustment_type = '';
+                        // item.note = '';
+                        // item.selected = false;
                         item.disabled = false;
                         return item;
                     }));
@@ -567,16 +589,38 @@
             },
 
             /**
-             * Fetch data the Clients dropdown resource.
+             * Fetch client list for the dropdown filter.
+             * @returns {Promise<void>}
              */
             async fetchClients() {
-                await axios.get(`/business/dropdown/clients?businesses=${this.filters.businesses}`)
+                this.form.client_id = '';
+                this.loadingClients = true;
+                this.clients = [];
+                await axios.get(`/business/dropdown/clients?inactive=${this.filters.inactive}&client_type=${this.filters.client_type}&payer_id=${this.filters.payer_id}&businesses=${this.filters.businesses}`)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
                     .catch(() => {
                         this.clients = [];
+                    })
+                    .finally(() => {
+                        this.loadingClients = false;
                     });
+            },
+
+            /**
+             * Calculate the amount due on a master (claim) item based on
+             * it's current balance and the amount being applied to it's sub items.
+             *
+             * @returns string
+             */
+            getMasterAmountDue(claim) {
+                return new Decimal(claim.amount_due).sub(claim.items.reduce((carry, item) => {
+                    if (item.amount_applied == '') {
+                        return carry;
+                    }
+                    return carry.add(new Decimal(item.amount_applied));
+                }, new Decimal(0.00))).toFixed(2);
             },
 
             /**
@@ -592,7 +636,7 @@
 
             // Set default filters
             this.filters.businesses = this.remit.business_id;
-            this.filters.payer_id = this.remit.payer_id ? this.remit.payer_id : '';
+            this.filters.payer_id = this.remit.payer_id === 0 || this.remit.payer_id ? ''+this.remit.payer_id : '';
 
             this.fetch();
         },
@@ -604,6 +648,21 @@
 
         destroyed() {
             window.removeEventListener('scroll', this.handleScroll);
+        },
+
+        watch: {
+            'filters.businesses'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.client_type'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.payer_id'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'filters.inactive'(newValue, oldValue) {
+                this.fetchClients();
+            },
         },
     }
 </script>
@@ -621,5 +680,17 @@
         font-size: 24px;
         border: 1px solid darkgrey;
         z-index: 2;
+    }
+    #floating-amount-applied {
+        position: fixed;
+        left: 25px;
+        bottom: 25px;
+        display: block;
+        background-color: #fff;
+        padding: 1rem;
+        text-align: center;
+        font-size: 24px;
+        border: 1px solid darkgrey;
+        z-index: 25;
     }
 </style>

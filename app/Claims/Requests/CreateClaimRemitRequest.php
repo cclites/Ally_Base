@@ -21,11 +21,12 @@ class CreateClaimRemitRequest extends BusinessRequest
             'payment_type' => ['required', new ValidEnum(ClaimRemitType::class)],
             'payer_id' => ['nullable',
                 Rule::exists('payers', 'id')->where(function ($query) {
-                    $query->where('chain_id', $this->getChain()->id);
+                    $query->where('chain_id', $this->getChain()->id)
+                    ->orWhereIn('id', [0,1]);
                 }),
             ],
             'reference' => 'nullable|string|max:255',
-            'amount' => 'required|numeric|min:0.01|max:999999.99',
+            'amount' => 'required|numeric|min:0|max:999999.99',
             'notes' => 'nullable|string|max:255',
         ];
 
