@@ -64,6 +64,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
     Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
+
+    // I want to add this as an attachment, temporarily its own route for now.
+    Route::get( 'knowledge-base/tellus-guide', 'KnowledgeBaseController@tellusGuide' )->name( 'knowledge.tellus' );
 });
 
 Route::group([
