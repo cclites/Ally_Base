@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimAdjustment;
 use App\Claims\Requests\UpdateClaimRemitRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
+use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Resources\RemitApplicationHistoryResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\CreateClaimRemitRequest;
 use App\Claims\Requests\GetClaimRemitsRequest;
@@ -94,9 +97,32 @@ class ClaimRemitController extends BaseController
     {
         $this->authorize('view', $claimRemit);
 
+        $adjustments = $claimRemit->adjustments()
+            ->with('claimInvoice.clientInvoice')
+            ->orderBy('created_at')
+            ->get();
+
+        $applications = $adjustments->where('is_interest', false)
+            ->where('claim_invoice_id', '<>', null)
+            ->groupBy('claim_invoice_id');
+
+        $fixed = [];
+        foreach ($applications as $key => $items) {
+            $fixed[$key] = array_merge((new ClaimInvoiceResource($items->first()->claimInvoice))->toArray(request()), [
+                'items' => ClaimAdjustmentResource::collection($items)->toArray(request()),
+            ]);
+        }
+
+        $history = collect([
+            'interest' => $adjustments->where('is_interest', true)->values(),
+            'adjustments' => $adjustments->where('is_interest', false)
+                ->where('claim_invoice_id', '=', null)->values(),
+            'applications' => array_values($fixed)
+        ]);
+
         $init = [
             'remit' => new ClaimRemitResource($claimRemit),
-            'adjustments' => ClaimAdjustmentResource::collection($claimRemit->adjustments),
+            'adjustments' => $history,
         ];
 
         return view_component('remit-application-history', 'Remit Application History', compact('init'), [
