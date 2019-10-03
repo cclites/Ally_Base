@@ -214,11 +214,12 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
             'cvv_pass' => (!empty($data['cvvresponse']) && in_array($data['cvvresponse'], $this->cvvValidResponses)),
             'avs_pass' => (!empty($data['avsresponse']) && in_array($data['avsresponse'], $this->avsValidResponses)),
             'response_text' => $data['responsetext'] ?? null,
-            'response_data' => $raw
+            'response_data' => $raw,
+            'account_number' => $method['last_four'] ? $method['last_four'] : null,
+            'routing_number' => $method['last_four_routing_number'] ? $method['last_four_routing_number'] : null
         ]);
 
         $transaction->method()->associate($method);
-
         $transaction->save();
 
         if ($response == ECSPayment::ERROR) {
@@ -372,6 +373,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
     }
 
     protected function setParamsFromAccount(BankAccount $account, $secCode = 'PPD') {
+
         $this->params = array_merge($this->params, [
             'checkname' => $account->name_on_account,
             'checkaba' => $account->routing_number,
@@ -379,7 +381,9 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
             'account_holder_type' => $account->account_holder_type,
             'account_type' => $account->account_type,
             'sec_code' => $secCode,
-            'payment' => 'check'
+            'payment' => 'check',
+            'account_number' => $account->last_four ? $account->last_four : null,
+            'routing_number' => $account->last_four_routing_number ? $account->last_four_routing_number : null,
         ]);
     }
 
@@ -395,7 +399,9 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
             'ccnumber' => $card->number,
             'ccexp' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT) . substr($card->expiration_year, -2),
             'cvv' => $cvv ?? '',
-            'payment' => 'creditcard'
+            'payment' => 'creditcard',
+            'account_number' => null,
+            'routing_number' => null
         ]);
 
         $this->billing['firstname'] = $firstname;

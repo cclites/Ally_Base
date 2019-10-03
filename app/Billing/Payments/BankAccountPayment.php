@@ -34,8 +34,7 @@ class BankAccountPayment implements PaymentMethodStrategy
         if ($phone = $this->account->getBillingPhone()) {
             $this->gateway->setBillingPhone($phone);
         }
-
-
+        
         return $this->gateway->chargeAccount($this->account, $amount, $currency);
     }
 
