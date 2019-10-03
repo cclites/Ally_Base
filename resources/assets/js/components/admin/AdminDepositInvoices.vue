@@ -22,9 +22,9 @@
                                 name="paid"
                                 v-model="paid"
                         >
-                            <option value="">All Invoices</option>
-                            <option :value="0">Unpaid Invoices</option>
-                            <option :value="1">Paid Invoices</option>
+                            <option value="">All Stubs</option>
+                            <option :value="0">Unpaid Stubs</option>
+                            <option :value="1">Paid Stubs</option>
                         </b-form-select>
                         <b-form-select
                                 id="chain_id"
