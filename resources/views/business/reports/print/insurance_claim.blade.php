@@ -57,8 +57,7 @@
 
         .print-header {
             margin: 0;
-            background-color: #ccc;
-            padding: 15px;
+            background-color: transparent;
         }
 
         .logo img {
@@ -79,7 +78,7 @@
         <div class="page" id="summary">
             <div class="row print-header">
                 <div class="header-left">
-                    <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
+                    @include('layouts.partials.print_header')
                     <div class="h4">Associated Provider: {{ $business->name }}</div>
                     <br>
                     <div>{{ $business->address1 }}</div>
