@@ -532,14 +532,17 @@
                         <b-col lg="6">
                             <h4>Tellus Credentials</h4>
                             <hr/>
-                            <b-form-group label="Username" label-for="tellus_username">
-                                <b-form-input id="tellus_username" v-model="businessSettings.tellus_username"></b-form-input>
-                                <input-help :form="businessSettings" field="tellus_username" text="Enter your Tellus provided API username."></input-help>
-                            </b-form-group>
-                            <b-form-group label="Password" label-for="tellus_password">
-                                <b-form-input id="tellus_password" v-model="businessSettings.tellus_password"></b-form-input>
-                                <input-help :form="businessSettings" field="tellus_password" text="Enter your Tellus provided API password."></input-help>
-                            </b-form-group>
+                            <b-alert show variant="info">
+                                Ally has direct integration with Tellus. Please make sure your NPI Number and Business EIN are set. <a href="#" @click="tabIndex = 2">Edit Medicaid Settings</a>
+                            </b-alert>
+<!--                            <b-form-group label="Username" label-for="tellus_username">-->
+<!--                                <b-form-input id="tellus_username" v-model="businessSettings.tellus_username"></b-form-input>-->
+<!--                                <input-help :form="businessSettings" field="tellus_username" text="Enter your Tellus provided API username."></input-help>-->
+<!--                            </b-form-group>-->
+<!--                            <b-form-group label="Password" label-for="tellus_password">-->
+<!--                                <b-form-input id="tellus_password" v-model="businessSettings.tellus_password"></b-form-input>-->
+<!--                                <input-help :form="businessSettings" field="tellus_password" text="Enter your Tellus provided API password."></input-help>-->
+<!--                            </b-form-group>-->
                         </b-col>
                     </b-row>
                     <b-row>
