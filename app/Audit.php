@@ -67,4 +67,5 @@ class Audit extends BaseAudit
     {
         return $this->getModified();
     }
+
 }

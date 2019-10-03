@@ -426,24 +426,9 @@
                             </template>
                         </business-care-match>
                     </b-tab>
-                    <b-tab title="Audit Log" id="audit-log">
-                        <b-row>
-                            <b-col md-12>
-                                <div class="table-wrapper">
-                                    <b-table
-                                            class="log-table"
-                                            :items="auditLogItems"
-                                            :fields="audit.fields"
-                                            :sort-by="sortBy"
-                                            :empty-text="emptyText"
-                                    >
-                                        <template slot="user" scope="row">
-                                            {{ row.item.user.nameLastFirst }}
-                                        </template>
-                                    </b-table>
-                                </div>
-                            </b-col>
-                        </b-row>
+                    <b-tab title="Audit Log" id="audit-log" >
+                        <audits-table :trail="auditLogItems" v-if="auditLogItems.length > 0"></audits-table>
+                        <div v-else>{{ emptyText }}</div>
                     </b-tab>
                 </b-tabs>
             </b-card>
@@ -487,9 +472,10 @@
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
     import { mapGetters } from 'vuex';
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import AuditsTable from '../../../components/AuditsTable';
 
     export default {
-        components: {ScheduleGroupModal, ConfirmationModal},
+        components: {ScheduleGroupModal, ConfirmationModal, AuditsTable},
         mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings],
 
         props: {
@@ -542,17 +528,7 @@
                 warnings: [],
                 loadingQuickbooksConfig: false,
                 auditLogItems: [],
-                audit: {
-                    fields: [
-                    { label: 'Type', key: 'auditable_title', sortable: true, formatter: (val) => this.stringFormat(val) },
-                    { label: 'Event', key: 'event', sortable: true, formatter: (val) => this.stringFormat(val) },
-                    { label: 'By', key: 'user', sortable: true },
-                    { label: 'Date', key: 'updated_at', sortable: true, formatter: (val) => this.formatDateTimeFromUTC(val) },
-                    { label: 'Old Values', key: 'old_values', formatter: (val) => JSON.stringify(val) },
-                    { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
-                ]},
-                sortBy: '',
-                emptyText: '',
+                emptyText: 'No results',
             }
         },
 

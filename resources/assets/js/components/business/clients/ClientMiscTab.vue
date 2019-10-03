@@ -5,24 +5,7 @@
                 <custom-field-form :user-id="client.id" user-role="client" :meta="client.meta" />
             </b-col>
         </b-row>
-        <h4>Audit Log</h4>
-        <b-row>
-            <b-col md-12>
-                <div class="table-wrapper">
-                    <b-table
-                            class="log-table"
-                            :items="auditLogItems"
-                            :fields="fields"
-                            :sort-by="sortBy"
-                            :empty-text="emptyText"
-                    >
-                        <template slot="user" scope="row">
-                            {{ row.item.user.nameLastFirst }}
-                        </template>
-                    </b-table>
-                </div>
-            </b-col>
-        </b-row>
+        <audits-table :trail="auditLogItems"></audits-table>
     </b-card>
 </template>
 
@@ -30,9 +13,11 @@
 
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import AuditsTable from '../../../components/AuditsTable';
 
     export default {
         mixins: [ FormatsDates, FormatsStrings],
+        components: {AuditsTable},
         props: {
             client: {
                 type: Object,
