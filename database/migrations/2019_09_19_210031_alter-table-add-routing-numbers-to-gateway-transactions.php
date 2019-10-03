@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterTableAddRoutingNumbersToGatewayTransations extends Migration
+class AlterTableAddRoutingNumbersToGatewayTransactions extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class AlterTableAddRoutingNumbersToGatewayTransations extends Migration
     public function up()
     {
         Schema::table('gateway_transactions', function (Blueprint $table) {
-            $table->smallInteger('routing_number')->nullable();
-            $table->smallInteger('account_number')->nullable();
+            $table->string('routing_number', 4)->nullable()->after('response_data');
+            $table->string('account_number', 4)->nullable()->after('routing_number');
         });
     }
 
@@ -27,7 +27,7 @@ class AlterTableAddRoutingNumbersToGatewayTransations extends Migration
     public function down()
     {
         Schema::table('gateway_transactions', function (Blueprint $table) {
-            $table->dropColum(['routing_number', 'account_number']);
+            $table->dropColumn(['routing_number', 'account_number']);
         });
     }
 }
