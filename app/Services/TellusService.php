@@ -78,6 +78,14 @@ class TellusService
             throw new TellusApiException('Invalid credentials or otherwise not authorized.');
         }
 
+        if ($httpCode != 200) {
+            throw new TellusApiException("Unexpected response code from Tellus, code: $httpCode.  Please try again.");
+        }
+
+        if (! str_contains($response, 'Successfully submitted for processing')) {
+            throw new TellusApiException("Unexpected response from Tellus.  Please try again.");
+        }
+
         return true;
     }
 
