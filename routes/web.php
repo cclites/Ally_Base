@@ -502,6 +502,7 @@ Route::group([
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
     Route::post('expiration-types', 'Business\ExpirationTypesController@store');
+    Route::patch('expiration-types/{expiration}', 'Business\ExpirationTypesController@update');
     Route::delete('expiration-types/{expiration}', 'Business\ExpirationTypesController@destroy');
 
     /* Offline Invoice AR */
