@@ -709,10 +709,11 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      * @param \App\Client $client
      * @param \Carbon\Carbon $startTime
      * @param \Carbon\Carbon $endTime
-     * @param ?int $windowSize
+     * @param int $ignoreCaregiverId
+     * @param int|null $windowSize
      * @return array
      */
-    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, ?int $windowSize = 4) : array
+    public static function getAdjoiningCaregiverSchedules(Client $client, $startTime, $endTime, int $ignoreCaregiverId, ?int $windowSize = 4) : array
     {
         $beforeWindow = [
             $startTime->copy()->subHours($windowSize),
@@ -726,14 +727,16 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
         return [
             $client->schedules()
-                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
+                ->where('caregiver_id', '<>', $ignoreCaregiverId)
+                ->whereHas('caregiver')
                 ->whereBetween('starts_at', $beforeWindow)
                 ->get()
                 ->unique('caregiver_id'),
             $client->schedules()
-                ->whereHas('caregiver')
                 ->with('caregiver.phoneNumber')
+                ->where('caregiver_id', '<>', $ignoreCaregiverId)
+                ->whereHas('caregiver')
                 ->whereBetween('starts_at', $afterWindow)
                 ->get()
                 ->unique('caregiver_id')

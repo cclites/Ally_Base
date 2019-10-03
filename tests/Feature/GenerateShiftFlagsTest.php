@@ -119,21 +119,6 @@ class GenerateShiftFlagsTest extends TestCase
             ->assertStatus(200);
     }
 
-    /**
-     * @test
-     */
-    public function it_triggers_when_an_office_user_duplicates_a_shift()
-    {
-        $this->expectsEvents(ShiftFlagsCouldChange::class);
-
-        $this->actingAs($this->officeUser->user);
-
-        $shift = $this->createShift('12:00:00', '18:00:00');
-
-        $result = $this->get(route('business.shifts.duplicate', ['shift' => $shift]))
-            ->assertStatus(200);
-    }
-
     /** @test */
     public function it_triggers_when_the_schedule_convert_is_run()
     {

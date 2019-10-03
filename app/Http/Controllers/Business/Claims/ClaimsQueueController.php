@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Billing\ClaimStatus;
+use App\ClientType;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimsQueueResource;
 use App\Billing\Queries\ClientInvoiceQuery;
@@ -20,9 +22,9 @@ class ClaimsQueueController extends BaseController
      */
     public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
-        if ($request->filled('json') || $request->expectsJson()) {
-            if ($request->filled('invoiceType')) {
-                switch ($request->invoiceType) {
+        if ($request->filled('json') && $request->expectsJson()) {
+            if ($request->filled('invoice_type')) {
+                switch ($request->invoice_type) {
                     case 'paid':
                         $invoiceQuery->where(function ($q) {
                             $q->where(function ($q) {
@@ -66,6 +68,13 @@ class ClaimsQueueController extends BaseController
                 }
             }
 
+            if ($request->filled('claim_status')) {
+                $status = ClaimStatus::fromValue($request->claim_status);
+                $invoiceQuery->whereHas('claimInvoice', function ($q) use ($status) {
+                    $q->where('status', $status);
+                });
+            }
+
             $invoiceQuery->forRequestedBusinesses();
 
             // Only return invoices that have a payer (adjustment invoices should not show)
@@ -78,14 +87,25 @@ class ClaimsQueueController extends BaseController
             }
 
             if ($request->filled('client_id')) {
-                $invoiceQuery->forClient($request->client_id);
+                $invoiceQuery->forClient($request->client_id, false);
             }
 
             if ($request->filled('payer_id')) {
                 $invoiceQuery->forPayer($request->payer_id);
             }
 
+            if (in_array($request->client_type, ClientType::all())) {
+                $invoiceQuery->forClientType($request->client_type);
+            }
+
+            if ($request->inactive != 1) {
+                $invoiceQuery->whereHas('client', function ($q) {
+                    $q->active();
+                });
+            }
+
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();
+
             $coll = ClaimsQueueResource::collection($invoices);
 
             return $coll;

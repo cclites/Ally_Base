@@ -10,6 +10,7 @@ export default {
                 CLEARINGHOUSE: 'CLEARINGHOUSE',
                 EMAIL: 'EMAIL',
                 FAX: 'FAX',
+                DIRECT_MAIL: 'DIRECT_MAIL',
             },
             claimServiceOptions: [
                 { value: 'HHA', text: 'HHAeXchange' },
@@ -17,6 +18,7 @@ export default {
                 { value: 'CLEARINGHOUSE', text: 'CareExchange LTC Clearinghouse' },
                 { value: 'EMAIL', text: 'E-mail' },
                 { value: 'FAX', text: 'Fax' },
+                { value: 'DIRECT_MAIL', text: 'Direct Mail' },
             ],
 
             ethnicityOptions: [
@@ -37,6 +39,7 @@ export default {
                 {value:'lead_agency', text:'Lead Agency'},
             ],
 
+            TELLUS_CODE_GUIDE_URL: '/knowledge-base/tellus-guide',
             EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',
             SHIFT_MAX_FUTURE_END_DATE: 168, // hours
 
@@ -52,12 +55,12 @@ export default {
                 REJECTED: 'REJECTED',
             },
             claimStatusOptions: [
-                { value: 'NOT_SENT', text: 'Not Sent' },
-                { value: 'CREATED', text: 'Created' },
-                { value: 'TRANSMITTED', text: 'Transmitted' },
-                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
                 { value: 'ACCEPTED', text: 'Accepted' },
+                { value: 'CREATED', text: 'Created' },
+                { value: 'NOT_SENT', text: 'Not Sent' },
                 { value: 'REJECTED', text: 'Rejected' },
+                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
+                { value: 'TRANSMITTED', text: 'Transmitted' },
             ],
             CLAIMABLE_TYPES: {
                 EXPENSE: 'App\\Claims\\ClaimableExpense',

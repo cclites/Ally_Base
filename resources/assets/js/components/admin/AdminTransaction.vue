@@ -28,6 +28,15 @@
                             <th>Amount</th>
                             <td>{{ numberFormat(transaction.amount) }}</td>
                         </tr>
+                        <tr>
+                            <th>Account Number (last 4)</th>
+                            <td>{{ transaction.account_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Routing Number (last 4)</th>
+                            <td>{{ transaction.routing_number }}</td>
+                        </tr>
+
                     </table>
                 </b-card>
             </b-col>

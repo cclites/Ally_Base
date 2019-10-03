@@ -15,9 +15,14 @@ class ClientType
      *
      * @return array
      */
-    public static function all()
+    public static function all(): array
     {
-        $cls = new \ReflectionClass(__CLASS__);
-        return $cls->getConstants();
+        try {
+            $cls = new \ReflectionClass(__CLASS__);
+            return $cls->getConstants();
+        } catch (\ReflectionException $ex) {
+            app('sentry')->captureException($ex);
+            return [];
+        }
     }
 }

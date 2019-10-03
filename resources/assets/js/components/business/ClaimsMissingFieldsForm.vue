@@ -80,7 +80,7 @@
                     />
                     <input-help :form="form" field="client_medicaid_id" text="" />
                 </b-form-group>
-                <b-form-group v-if="hasField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-class="required">
+                <b-form-group v-if="hasField('client_medicaid_payer_id')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>) (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-class="required">
                     <b-form-input
                         name="client_medicaid_payer_id"
                         type="text"
@@ -90,7 +90,7 @@
                     />
                     <input-help :form="form" field="client_medicaid_payer_id" text="For use only if you are submitting a private pay claim for reimbursement (not common)" />
                 </b-form-group>
-                <b-form-group v-if="hasField('client_medicaid_plan_id')" label="Plan Identifier" label-class="required">
+                <b-form-group v-if="hasField('client_medicaid_plan_id')" :label="`Plan Identifier (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-class="required">
                     <b-form-input
                         name="client_medicaid_plan_id"
                         type="text"
@@ -114,7 +114,7 @@
 
             <b-col md="6" v-if="hasGroup(['payer'])" class="mb-4">
                 <h4>Payer Settings ({{ invoice.clientPayer.payer.name }})</h4>
-                <b-form-group v-if="hasField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-class="required">
+                <b-form-group v-if="hasField('payer_payer_code')" :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>) (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-class="required">
                     <b-form-input
                         name="payer_payer_code"
                         type="text"
@@ -124,7 +124,7 @@
                     />
                     <input-help :form="form" field="payer_payer_code" text="" />
                 </b-form-group>
-                <b-form-group v-if="hasField('payer_plan_code')" label="Plan Identifier" label-class="required">
+                <b-form-group v-if="hasField('payer_plan_code')" :label="`Plan Identifier (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-class="required">
                     <b-form-input
                         name="payer_plan_code"
                         type="text"

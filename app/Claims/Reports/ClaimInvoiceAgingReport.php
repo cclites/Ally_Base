@@ -24,12 +24,24 @@ class ClaimInvoiceAgingReport extends BaseReport
     protected $payerId;
 
     /**
+     * ClientType filter
+     *
+     * @var string
+     */
+    protected $clientType;
+
+    /**
+     * @var bool
+     */
+    protected $showInactive = false;
+
+    /**
      * BusinessOfflineArAgingReport constructor.
      */
     public function __construct()
     {
         $this->query = ClaimInvoice::query()
-            ->with('client', 'payer', 'business', 'clientInvoice')
+            ->with('client', 'payer', 'business', 'clientInvoice', 'adjustments')
             ->where('amount_due', '<>', '0')
             ->whereIn('status', ClaimStatus::transmittedStatuses());
     }
@@ -61,6 +73,32 @@ class ClaimInvoiceAgingReport extends BaseReport
     }
 
     /**
+     * Query by client type.
+     *
+     * @param string $clientType
+     * @return $this
+     */
+    public function forClientType(?string $clientType): self
+    {
+        $this->clientType = $clientType;
+
+        return $this;
+    }
+
+    /**
+     * Query inactive clients.
+     *
+     * @param bool $inactive
+     * @return $this
+     */
+    public function showInactive(bool $inactive): self
+    {
+        $this->showInactive = $inactive;
+
+        return $this;
+    }
+
+    /**
      * Return the instance of the query builder for additional manipulation
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
@@ -85,6 +123,18 @@ class ClaimInvoiceAgingReport extends BaseReport
 
         if (filled($this->payerId)) {
             $query->where('payer_id', $this->payerId);
+        }
+
+        if (filled($this->clientType) || ! $this->showInactive) {
+            $query->whereHas('client', function ($q) {
+                if (filled($this->clientType)) {
+                    $q->where('client_type', $this->clientType);
+                }
+
+                if (! $this->showInactive) {
+                    $q->active();
+                }
+            });
         }
 
         return $query->get()->map(function (ClaimInvoice $claim) {

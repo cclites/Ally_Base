@@ -31,6 +31,8 @@ class CaregiverLicense extends AuditableModel
     protected $guarded = ['id'];
     public $dates = ['expires_at'];
 
+    const INAPPLICABLE_DATE = '1337-01-01';
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -38,6 +40,11 @@ class CaregiverLicense extends AuditableModel
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class);
+    }
+
+    public function defaultType()
+    {
+        return $this->hasOne( ExpirationType::class, 'id', 'chain_expiration_type_id' );
     }
 
     ///////////////////////////////////////////
@@ -48,5 +55,17 @@ class CaregiverLicense extends AuditableModel
     {
         $expireDate = new Carbon($this->expires_at);
         return ($expireDate < Carbon::now());
+    }
+
+    /**
+     * Filter out Licenses that are artificially marked 'inapplicable'
+     *  this artificial attribute sets the expiration date to the year 1337
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereApplicable($query)
+    {
+        return $query->where( 'expires_at', '>', self::INAPPLICABLE_DATE );
     }
 }

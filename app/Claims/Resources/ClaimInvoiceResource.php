@@ -45,7 +45,7 @@ class ClaimInvoiceResource extends Resource
             'amount_paid' => $this->resource->getAmountPaid(),
             'business_id' => $this->resource->business_id,
             'client' => [
-                'name' => $this->resource->client->name,
+                'name' => $this->resource->client->nameLastFirst,
             ],
             'client_dob' => $this->resource->client_dob,
             'client_first_name' => $this->resource->client_first_name,
@@ -73,6 +73,7 @@ class ClaimInvoiceResource extends Resource
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
             'modified_at' => $this->resource->modified_at,
+            'has_expenses' => $this->resource->getHasExpenses(),
         ];
     }
 }

@@ -65,6 +65,7 @@ class ClaimAgingReportItemResource extends Resource
             'period_46_60' => $this->inDateRange($this->period_46_60) ? $this->resource->getAmountDue() : 0.00,
             'period_61_75' => $this->inDateRange($this->period_61_75) ? $this->resource->getAmountDue() : 0.00,
             'period_75_plus' => $this->inDateRange($this->period_75_plus) ? $this->resource->getAmountDue() : 0.00,
+            'has_notes' => $this->resource->adjustments->where('note', '!=', null)->count() > 0,
         ];
     }
 

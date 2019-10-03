@@ -7,6 +7,11 @@ use App\Audit;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Caregiver;
 use App\CaregiverApplication;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
+use App\Claims\ClaimAdjustment;
+use App\Claims\ClaimInvoice;
+use App\Claims\ClaimRemit;
 use App\Client;
 use App\Billing\Payments\Methods\CreditCard;
 use App\ClientMedication;
@@ -17,15 +22,17 @@ use App\PhoneNumber;
 use App\ScheduleNote;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
+use App\Traits\Console\HasProgressBars;
 use App\User;
 use Crypt;
 use Illuminate\Console\Command;
 use App\Business;
 use App\QuickbooksConnection;
-use Symfony\Component\Console\Helper\ProgressBar;
 
 class ClearSensitiveData extends Command
 {
+    use HasProgressBars;
+
     /**
      * The name and signature of the console command.
      *
@@ -44,16 +51,6 @@ class ClearSensitiveData extends Command
      * @var \Faker\Generator
      */
     protected $faker;
-
-    /**
-     * @var ProgressBar
-     */
-    protected $progressBar;
-
-    /**
-     * @var int
-     */
-    protected $progressTotal;
 
     /**
      * @var bool
@@ -93,6 +90,7 @@ class ClearSensitiveData extends Command
         $this->cleanClientMedication();
         $this->clean3rdPartyCredentials();
         $this->cleanFinancialAccounts();
+        $this->cleanEncryptedClaimsData();
 
         if (! $this->option('fix-only')) {
             // Only execute these options if fix-only if OFF
@@ -103,6 +101,7 @@ class ClearSensitiveData extends Command
             $this->cleanNotes();
             $this->cleanShifts();
             $this->cleanSmsData();
+            $this->cleanClaimData();
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -110,6 +109,253 @@ class ClearSensitiveData extends Command
         $this->info('Success.');
 
         return 0;
+    }
+
+    public function cleanEncryptedClaimsData()
+    {
+        $query = ClaimableService::whereNotNull('caregiver_ssn');
+
+        $this->startProgress(
+            'Cleaning encrypted claims data...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'caregiver_ssn' => Crypt::encrypt($this->generateSsn()),
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(ClaimableService $item) {
+                $item->caregiver_ssn = $this->generateSsn();
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimData()
+    {
+        $this->cleanClaimInvoices();
+        $this->cleanClaimableServices();
+        $this->cleanClaimableExpenses();
+        $this->cleanClaimRemits();
+        $this->cleanClaimAdjustments();
+    }
+
+    public function cleanClaimableServices()
+    {
+        $query = ClaimableService::query();
+        $this->startProgress(
+            'Cleaning claimable services...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'caregiver_last_name' => $this->faker->lastName,
+                'caregiver_dob' => $this->faker->date('Y-m-d', '-30 years'),
+                'caregiver_medicaid_id' => $this->faker->randomNumber(8),
+                'address1' => $this->faker->streetAddress,
+                'latitude' => $this->faker->latitude,
+                'longitude' => $this->faker->longitude,
+                'checked_in_number' => $this->generatePhoneNumber(),
+                'checked_out_number' => $this->generatePhoneNumber(),
+                'checked_in_latitude' => $this->faker->latitude,
+                'checked_in_longitude' => $this->faker->longitude,
+                'checked_out_latitude' => $this->faker->latitude,
+                'checked_out_longitude' => $this->faker->longitude,
+                'caregiver_comments' => $this->faker->sentence,
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $data = [
+                    'caregiver_last_name' => $this->faker->lastName,
+                    'caregiver_dob' => $this->faker->date('Y-m-d', '-30 years'),
+                    'caregiver_medicaid_id' => $this->faker->randomNumber(8),
+                    'address1' => $this->faker->streetAddress,
+                    'latitude' => $this->faker->latitude,
+                    'longitude' => $this->faker->longitude,
+                ];
+
+                if (filled($item->checked_in_number)) {
+                    $data['checked_in_number'] = $this->generatePhoneNumber();
+                }
+
+                if (filled($item->checked_out_number)) {
+                    $data['checked_out_number'] = $this->generatePhoneNumber();
+                }
+
+                if (filled($item->checked_in_latitude)) {
+                    $data['checked_in_latitude'] = $this->faker->latitude;
+                }
+
+                if (filled($item->checked_in_longitude)) {
+                    $data['checked_in_longitude'] = $this->faker->longitude;
+                }
+
+                if (filled($item->checked_out_latitude)) {
+                    $data['checked_out_latitude'] = $this->faker->latitude;
+                }
+
+                if (filled($item->checked_out_longitude)) {
+                    $data['checked_out_longitude'] = $this->faker->longitude;
+                }
+
+                if (filled($item->caregiver_comments)) {
+                    $data['caregiver_comments'] = $this->faker->sentence;
+                }
+
+                $item->update($data);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimInvoices()
+    {
+        $query = ClaimInvoice::query();
+        $this->startProgress(
+            'Cleaning claim invoices...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'client_last_name' => $this->faker->lastName,
+                'client_dob' => $this->faker->date('Y-m-d', '-30 years'),
+                'client_medicaid_id' => $this->faker->randomNumber(8),
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $item->update([
+                    'client_last_name' => $this->faker->lastName,
+                    'client_dob' => $this->faker->date('Y-m-d', '-30 years'),
+                    'client_medicaid_id' => $this->faker->randomNumber(8),
+                ]);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimableExpenses()
+    {
+        $query = ClaimableExpense::query();
+        $this->startProgress(
+            'Cleaning claimable expenses...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'caregiver_last_name' => $this->faker->lastName,
+                'notes' => $this->faker->sentence,
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $data = [
+                    'caregiver_last_name' => $this->faker->lastName,
+                ];
+                if (isset($item->notes)) {
+                    $data['notes'] = $this->faker->sentence;
+                }
+                $item->update($data);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimRemits()
+    {
+        $query = ClaimRemit::whereNotNull('notes');
+        $this->startProgress(
+            'Cleaning claim remits...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'notes' => $this->faker->sentence,
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $item->update(['notes' => $this->faker->sentence]);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimAdjustments()
+    {
+        $query = ClaimAdjustment::whereNotNull('note');
+        $this->startProgress(
+            'Cleaning claim adjustments...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'note' => $this->faker->sentence,
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $item->update(['note' => $this->faker->sentence]);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
     }
 
     public function cleanPhoneNumbers()
@@ -303,7 +549,7 @@ class ClearSensitiveData extends Command
 
         if ($this->fastMode) {
             Caregiver::whereRaw(1)->update([
-                'ssn' => Crypt::encrypt(mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999)),
+                'ssn' => Crypt::encrypt($this->generateSsn()),
             ]);
 
             $this->finish();
@@ -318,7 +564,7 @@ class ClearSensitiveData extends Command
                     return;
                 }
                 if ($caregiver->getOriginal('ssn')) {
-                    $caregiver->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $caregiver->ssn = $this->generateSsn();
                     $caregiver->save();
                 }
                 $this->advance();
@@ -338,7 +584,7 @@ class ClearSensitiveData extends Command
 
         if ($this->fastMode) {
             Client::whereRaw(1)->update([
-                'ssn' => Crypt::encrypt(mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999)),
+                'ssn' => Crypt::encrypt($this->generateSsn()),
             ]);
 
             $this->finish();
@@ -353,7 +599,7 @@ class ClearSensitiveData extends Command
                     return;
                 }
                 if ($client->getOriginal('ssn')) {
-                    $client->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $client->ssn = $this->generateSsn();
                     $client->save();
                 }
                 $this->advance();
@@ -376,7 +622,7 @@ class ClearSensitiveData extends Command
                 'date_of_birth' => $this->faker->date('Y-m-d', '-30 years'),
                 'last_name' => 'User',
                 'email' => \DB::raw("CONCAT('user', id, '@test.com')"),
-                'ssn' => Crypt::encrypt(mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999)),
+                'ssn' => Crypt::encrypt($this->generateSsn()),
                 'address' => $this->faker->streetAddress,
                 'cell_phone' => $this->generatePhoneNumber(),
                 'home_phone' => $this->generatePhoneNumber(),
@@ -416,7 +662,7 @@ class ClearSensitiveData extends Command
                 }
                 $application->email = $this->faker->email;
                 if ($application->getOriginal('ssn')) {
-                    $application->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
+                    $application->ssn = $this->generateSsn();
                 }
                 if ($application->address) {
                     $application->address = $this->faker->streetAddress;
@@ -731,34 +977,12 @@ class ClearSensitiveData extends Command
     }
 
     /**
-     * Helper to create a progress bar.
+     * Generate a SSN.
      *
-     * @param string $status
-     * @param int $total
+     * @return string
      */
-    protected function startProgress(string $status, int $total) : void
+    protected function generateSsn() : string
     {
-        $this->info($status);
-        $this->progressTotal = $total;
-        $this->progressBar = $this->output->createProgressBar($this->progressTotal);
-    }
-
-    /**
-     * Advance the current progress bar.
-     *
-     * @param int $size
-     */
-    protected function advance(int $size = 1) : void
-    {
-        $this->progressBar->advance($size);
-    }
-
-    /**
-     * Complete the current progress bar.
-     */
-    protected function finish() : void
-    {
-        $this->progressBar->setProgress($this->progressTotal);
-        $this->line('');
+        return mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
     }
 }

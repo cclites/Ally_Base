@@ -78,6 +78,8 @@
 </head>
 
 <body>
+
+@include('layouts.partials.print_header')
 <!-- ============================================================== -->
 <!-- Preloader - style you can find in spinners.css -->
 <!-- ============================================================== -->

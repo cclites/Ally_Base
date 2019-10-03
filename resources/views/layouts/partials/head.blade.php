@@ -20,8 +20,16 @@
 <script>
     try {
         window.gmapsKey = '{{ config('services.gmaps.key') }}';
-        window.AuthUser = JSON.parse('@json(optional(auth()->user())->withImpersonationDetails())');
-        window.OfficeUserSettings = JSON.parse('@json((new \App\Users\SettingsRepository)->getOfficeUserSettings(auth()->user()))');
+        @if (empty(auth()->user()))
+            window.AuthUser = {};
+        @else
+            window.AuthUser = JSON.parse('{!! str_replace('"', '\"', json_encode(
+                auth()->user()->withImpersonationDetails(), JSON_UNESCAPED_UNICODE)
+            ) !!}');
+        @endif
+        window.OfficeUserSettings = JSON.parse('{!! str_replace('"', '\"', json_encode(
+            (new \App\Users\SettingsRepository)->getOfficeUserSettings(auth()->user()), JSON_UNESCAPED_UNICODE)
+        ) !!}');
     }
     catch(e) { console.log(e); }
 </script>

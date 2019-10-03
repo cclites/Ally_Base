@@ -28,7 +28,7 @@
                 @foreach($items as $item)
                     <?php /** @var \App\Billing\CaregiverInvoiceItem $item */ ?>
                     <tr>
-                        <td class="text-nowrap">{{ local_date($item->date) }}</td>
+                        <td class="text-nowrap">{{ filter_date($item->date, 'm/d/Y') }}</td>
                         <td>
                             {{ $item->name }}
                             @if(trim($item->notes))

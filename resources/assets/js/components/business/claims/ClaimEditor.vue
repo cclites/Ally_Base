@@ -150,6 +150,9 @@
 
         <hr />
         <h2>Claimable Items</h2>
+        <b-alert :show="claim.has_expenses" variant="info">
+            This claim has expense items attached.  Note: HHA and Tellus do not accept expenses.
+        </b-alert>
         <claim-invoice-items-table />
     </b-card>
 </template>
@@ -218,6 +221,7 @@
 
         async mounted() {
             await this.$store.dispatch('claims/fetchCaregiverList');
+            await this.$store.dispatch('claims/fetchServiceList');
         },
     }
 </script>

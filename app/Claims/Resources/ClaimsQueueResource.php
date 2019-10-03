@@ -30,7 +30,7 @@ class ClaimsQueueResource extends Resource
             'clientPayer' => $this->resource->clientPayer,
             'payer' => optional($this->resource->clientPayer)->payer,
             'payments' => $this->resource->payments,
-            'client_name' => empty($claim) ? $this->resource->client->name : ucwords(implode(' ', [$claim->client_first_name, $claim->client_last_name])),
+            'client_name' => empty($claim) ? $this->resource->client->name_last_first : ucwords(implode(', ', [$claim->client_last_name, $claim->client_first_name])),
             'balance' => $this->resource->amount - $this->resource->getAmountPaid(),
             'claim' => new ClaimInvoiceResource($claim),
             'claim_total' => empty($claim) ? null : $claim->getAmount(),
@@ -38,7 +38,8 @@ class ClaimsQueueResource extends Resource
             'claim_balance' => empty($claim) ? null : $claim->getAmountDue(),
             'claim_status' => empty($claim) ? null : $claim->status,
             'claim_date' => empty($claim) ? null : Carbon::parse($claim->created_at)->format('m/d/Y h:i A'),
-            'claim_service' => optional($claim)->service
+            'claim_service' => optional($claim)->service,
+            'amount_mismatch' => empty($claim) ? null : $claim->hasAmountMismatch(),
         ]);
     }
 }

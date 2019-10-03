@@ -13,13 +13,20 @@
                         :allow-all="true"
                     />
 
-                    <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loading">
-                        <option value="">-- All Clients --</option>
+                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
+
+                    <b-form-select v-model="form.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+
+                    <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                        <option v-if="loadingClients" selected value="">Loading Clients...</option>
+                        <option v-else value="">-- All Clients --</option>
                         <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                         </option>
                     </b-form-select>
 
-                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
+                    <b-form-checkbox v-model="form.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
+                        Show Inactive Clients
+                    </b-form-checkbox>
 
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
@@ -48,7 +55,10 @@
                                 :footClone="footClone"
                             >
                                 <template slot="claim_name" scope="row">
-                                    <a :href="`/business/claims/${row.item.claim_id}/print`" target="_blank">{{ row.item.claim_name }}</a>
+                                    <a :href="`/business/claims/${row.item.claim_id}/print`" target="_blank">#{{ row.item.claim_name }}</a>
+                                    <span v-if="row.item.has_notes">
+                                        <a :href="`/business/claim-adjustments/${row.item.claim_id}`" target="_blank"><i class="fa fa-comment text-warning ml-1" /></a>
+                                    </span>
                                 </template>
                                 <template slot="invoice_name" scope="row">
                                     <a :href="`/business/client/invoices/${row.item.invoice_id}`" target="_blank">{{ row.item.invoice_name }}</a>
@@ -106,10 +116,11 @@
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
     import FormatsDates from '../../../mixins/FormatsDates';
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: { BusinessLocationFormGroup },
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, Constants],
 
         computed: {
             emptyText() {
@@ -128,6 +139,8 @@
                     businesses: '',
                     client_id: '',
                     payer_id: '',
+                    client_type: '',
+                    inactive: 0,
                     json: 1,
                 }),
                 busy: false,
@@ -137,9 +150,9 @@
                 sortBy: 'client_name',
                 sortDesc: false,
                 fields: {
-                    claim_name: { sortable: true, label: "Claim" },
-                    invoice_name: { sortable: true, label: "Invoice" },
-                    client_name: { sortable: true, label: "Client" },
+                    claim_name: { sortable: true, label: "Claim", class: 'text-nowrap' },
+                    invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
+                    client_name: { sortable: true, label: "Client", class: 'text-nowrap' },
                     payer: {sortable: true, label: "Payers"},
                     current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
                     period_30_45: { sortable: true, label: '30-45', formatter: x => this.moneyFormat(x) },
@@ -151,7 +164,7 @@
                 hasRun: false,
                 footClone: true,
                 totals: {},
-
+                loadingClients: false,
             }
         },
 
@@ -171,24 +184,50 @@
                     })
             },
 
-            async loadClients() {
+            download() {
+                window.location = this.form.toQueryString('/business/reports/claims/ar-aging?export=1');
+            },
+
+            /**
+             * Fetch client list for the dropdown filter.
+             * @returns {Promise<void>}
+             */
+            async fetchClients() {
+                this.form.client_id = '';
+                this.loadingClients = true;
                 this.clients = [];
-                await axios.get('/business/clients?json=1')
+                await axios.get(`/business/dropdown/clients?inactive=${this.form.inactive}&client_type=${this.form.client_type}&payer_id=${this.form.payer_id}&businesses=${this.form.businesses}`)
                     .then( ({ data }) => {
                         this.clients = data;
                     })
-                    .catch(() => {});
-            },
-
-            download() {
-                window.location = this.form.toQueryString('/business/reports/claims/ar-aging?export=1');
+                    .catch(() => {
+                        this.clients = [];
+                    })
+                    .finally(() => {
+                        this.loadingClients = false;
+                    });
             },
         },
 
         async mounted() {
             this.loading = true;
-            await this.loadClients();
+            await this.fetchClients();
             this.loading = false;
+        },
+
+        watch: {
+            'form.businesses'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.client_type'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.payer_id'(newValue, oldValue) {
+                this.fetchClients();
+            },
+            'form.inactive'(newValue, oldValue) {
+                this.fetchClients();
+            },
         },
     }
 </script>

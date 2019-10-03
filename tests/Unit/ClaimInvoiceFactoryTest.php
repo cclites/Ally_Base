@@ -75,7 +75,7 @@ class ClaimInvoiceFactoryTest extends TestCase
         // Expects 3 items a shift_service, a shift and a shift_expense
         $this->assertCount(3, $invoice->items);
 
-        $claim = $this->claimGenerator->createFromClientInvoice($invoice);
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
 
         $this->assertInstanceOf(ClaimInvoice::class, $claim);
 
@@ -88,7 +88,7 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
         $invoice = $this->createClientInvoice();
-        $claim = $this->claimGenerator->createFromClientInvoice($invoice);
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
         $this->assertInstanceOf(ClaimInvoice::class, $claim);
 
         $this->assertCount(3, ClaimInvoiceItem::all());
@@ -108,7 +108,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
-        $claim = $this->claimGenerator->createFromClientInvoice($invoice);
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
         $claim->update(['status' => ClaimStatus::TRANSMITTED()]);
 
         $this->expectException(CannotDeleteClaimInvoiceException::class);
