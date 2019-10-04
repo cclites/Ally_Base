@@ -13,6 +13,10 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::group(['prefix' => 'qb', 'as' => 'qb.'], function() {
+    Route::get('/ping', 'Api\Quickbooks\QuickbooksDesktopController@ping')->name('ping');
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
