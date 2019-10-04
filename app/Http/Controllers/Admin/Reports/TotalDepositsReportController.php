@@ -4,7 +4,9 @@
 namespace App\Http\Controllers\Admin\Reports;
 
 
+use App\BusinessChain;
 use App\Reports\TotalDepositsReport;
+use Http\Message\Authentication\Chain;
 use Illuminate\Http\Request;
 
 class TotalDepositsReportController
@@ -48,13 +50,20 @@ class TotalDepositsReportController
 
         foreach($data as $item){
 
-            $key = $item["name"];
+            if($item['chain_id']){
+                $chain = BusinessChain::find($item['chain_id'])->pluck('name')->first();
+                $key = $chain;
+            }else{
+                $chain = null;
+                $key = $item["name"];
+            }
 
             if(!isset($set[$key])){
                 $set[$key] = [
                     'name'=>$item['name'],
                     'amount' => $item['amount'],
                     'type' => $item['type'],
+                    'chain' => $chain,
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];

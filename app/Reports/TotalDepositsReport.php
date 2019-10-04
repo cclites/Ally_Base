@@ -84,7 +84,8 @@ class TotalDepositsReport extends BaseReport
             return [
                 'name'=> $name,
                 'type' => ucfirst($deposit->deposit_type),
-                'amount'=>$deposit->amount
+                'amount'=>$deposit->amount,
+                'chain_id'=>$deposit->chain_id
             ];
 
         })->values();
