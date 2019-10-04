@@ -1,15 +1,28 @@
 <template>
         <b-modal id="EditReferralModal" v-model="showModal" class="edit-modal" size="lg">
             <b-row>
-                <b-col>
+                <b-col class="align-items-center">
+
+                    <small class="text-muted">{{ source.is_company ? 'This Referral Source is a Company' : 'This Referral Source is not a Company' }}</small>
                     <b-btn variant="info" @click="add" class="float-right">Add New Source</b-btn>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Organization Name" label-for="organization">
+                    <b-form-group :label=" 'Organization Name <small>' + ( source.source_type || '' ) + '</small>'" label-for="organization">
                         <b-form-input v-model="source.organization" type="text" required disabled/>
                     </b-form-group>
+                </b-col>
+                <b-col v-if=" source.is_company " class="d-flex align-items-center mb-2 justify-content-between">
+
+                    <div class="d-flex">
+
+                        <p class="mr-2 mb-0"><b>Owner Name:</b> {{ source.source_owner || 'n/a' }} </p>|
+                        <p class="ml-2 mr-2 mb-0"><b>Web Address:</b> {{ source.web_address || 'n/a' }} </p>|
+                        <p class="ml-2 mb-0"><b>Work Phone:</b> {{ source.work_phone || 'n/a' }}</p>
+                    </div>
+
+                    <b-btn variant="success" @click=" editSource() " class="float-right">Edit Source</b-btn>
                 </b-col>
             </b-row>
 
@@ -60,7 +73,8 @@
             sourceType: {
                 type: String,
                 default: 'client',
-            }
+            },
+            editSource: Function
         },
 
         data() {
@@ -102,11 +116,16 @@
                 let form = new Form({
                     contact_name: resourceData.contact_name,
                     phone: resourceData.phone,
-                    id: resourceData.id,
+                    id: resourceData.source_id,
                     active: resourceData.active,
                     organization: this.source.organization,
                     chain_id: this.source.id,
                     type: this.sourceType,
+                    source_owner : this.source.source_owner,
+                    source_type : this.source.source_type,
+                    work_phone : this.source.work_phone,
+                    web_address : this.source.web_address,
+                    is_company : this.source.is_company,
                     deactivate: resourceData.deactivate ? resourceData.deactivate : null,
                 });
 
@@ -115,6 +134,9 @@
                 let url = resourceData.id ? `/business/referral-sources/${resourceData.id}` : '/business/referral-sources';
                 form.submit(method, url)
                     .then(response => {
+
+                        console.log( 'response: ', response );
+                        console.log( 'method: ', method );
 
                         if(method === 'post'){
                             resourceData.id = response.data.data.id;

@@ -19,11 +19,17 @@ class UpdateReferralSourceRequest extends FormRequest
     public function rules()
     {
         return [
-            'organization' => 'required',
-            'contact_name' => 'required',
+            'organization' => 'nullable',
+            'contact_name' => 'nullable',
             'phone' => 'nullable|max:32',
             'active' => 'boolean',
             'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
+
+            'is_company' => 'boolean',
+            'source_owner' => 'nullable|max:150',
+            'source_type' => 'nullable|max:150',
+            'web_address' => 'nullable|max:150',
+            'work_phone' => 'nullable|max:15'
         ];
     }
 }

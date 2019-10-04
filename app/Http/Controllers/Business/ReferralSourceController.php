@@ -59,6 +59,10 @@ class ReferralSourceController extends BaseController
     public function store(UpdateReferralSourceRequest $request)
     {
         $data = $request->validated();
+
+        if( empty( $data[ 'contact_name' ] ) ) $data[ 'contact_name' ] = 'Default';
+        if( empty( $data[ 'organization' ] ) ) $data[ 'organization' ] = $data[ 'contact_name' ];
+
         $this->authorize('create', [ReferralSource::class, $data]);
 
         if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
@@ -73,7 +77,20 @@ class ReferralSourceController extends BaseController
         $this->authorize('update', $referralSource);
         $data = $request->validated();
 
-        if ($referralSource->update($data)) {
+        if( empty( $data[ 'contact_name' ] ) ){
+
+            unset( $data[ 'contact_name' ] );
+            unset( $data[ 'phone' ] );
+
+            $res = ReferralSource::where( 'type', $referralSource->type )
+                ->where( 'organization', $referralSource->organization )
+                ->update( $data );
+        } else {
+
+            $res = $referralSource->update( $data );
+        }
+
+        if ( $res ) {
             return new SuccessResponse('The referral source has been saved!', $referralSource);
         }
 

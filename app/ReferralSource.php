@@ -41,6 +41,11 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         'contact_name',
         'phone',
         'type',
+        'is_company',
+        'source_owner',
+        'source_type',
+        'web_address',
+        'work_phone',
         'active'
     ];
     
@@ -134,7 +139,13 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
                 $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
                 $set[$key]['phone'] = $item['phone'];
                 $set[$key]['id'] = $cnt++;
+                $set[$key]['source_id'] = $item[ 'id' ];
                 $set[$key]['created_at'] = $item['created_at']->format('m/d/Y');
+                $set[$key]['source_type'] = $item[ 'source_type' ];
+                $set[$key]['source_owner'] = $item[ 'source_owner' ];
+                $set[$key]['web_address'] = $item[ 'web_address' ];
+                $set[$key]['is_company'] = $item[ 'is_company' ];
+                $set[$key]['work_phone'] = $item[ 'work_phone' ];
             }else{
                 if($item['active']){
                     $set[$key]['contact_name'] .= $item['contact_name'] . ", ";

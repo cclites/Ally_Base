@@ -4,18 +4,55 @@
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
-                        <b-form-group label="Organization Name" label-for="organization" label-class="required">
-                            <b-form-input v-model="form.organization" type="text" required />
-                            <input-help :form="form" field="organization"></input-help>
+
+                        <b-form-group>
+
+                            <b-form-checkbox v-model=" form.is_company " class="align-items-center">
+
+                                This is a Company: <b>{{ form.is_company }}</b>
+                            </b-form-checkbox>
                         </b-form-group>
-                        <b-form-group label="Contact Name" label-for="name" label-class="required">
-                            <b-form-input v-model="form.contact_name" type="text" required />
-                            <input-help :form="form" field="contact_name"></input-help>
-                        </b-form-group>
-                        <b-form-group label="Phone Number" label-for="phone">
-                            <b-form-input v-model="form.phone" type="text" />
-                            <input-help :form="form" field="phone"></input-help>
-                        </b-form-group>
+
+                        <transition-group mode="out-in" name="slide-fade">
+
+                            <b-form-group v-if=" form.is_company " label="Organization Name" label-for="organization" label-class="required" :key=" 'seven' ">
+
+                                <b-form-input v-model="form.organization" type="text" />
+                                <input-help :form="form" field="organization"></input-help>
+                            </b-form-group>
+
+                            <b-form-group v-if=" !form.id " label="Contact Name" label-for="name" label-class="required" :key=" 'six' ">
+
+                                <b-form-input v-model="form.contact_name" type="text" />
+                                <input-help :form="form" field="contact_name"></input-help>
+                            </b-form-group>
+                            <b-form-group v-if=" !form.id " label="Phone Number" label-for="phone" :key=" 'five' ">
+
+                                <b-form-input v-model="form.phone" type="text" />
+                                <input-help :form="form" field="phone"></input-help>
+                            </b-form-group>
+
+                            <b-form-group v-if=" form.is_company " label="Referral Owner" label-for="referral_owner" :key=" 'one' ">
+
+                                <b-form-input v-model="form.source_owner" type="text" />
+                                <input-help :form="form" field="referral_owner"></input-help>
+                            </b-form-group>
+                            <b-form-group v-if=" form.is_company " label="Referral Source Type" label-for="referral_source_type" :key=" 'two' ">
+
+                                <b-form-input v-model="form.source_type" type="text" />
+                                <input-help :form="form" field="referral_source_type"></input-help>
+                            </b-form-group>
+                            <b-form-group v-if=" form.is_company " label="Web Address" label-for="web_address" :key=" 'three' ">
+
+                                <b-form-input v-model="form.web_address" type="text" />
+                                <input-help :form="form" field="web_address"></input-help>
+                            </b-form-group>
+                            <b-form-group v-if=" form.is_company " label="Work Phone" label-for="work_phone" :key=" 'four' ">
+
+                                <b-form-input v-model="form.work_phone" type="text" />
+                                <input-help :form="form" field="work_phone"></input-help>
+                            </b-form-group>
+                        </transition-group>
                     </b-col>
                 </b-row>
             </b-container>
@@ -63,16 +100,27 @@
         methods: {
             makeForm(defaults = {}) {
                 return new Form({
+
+                    is_company: defaults.is_company,
+
                     organization: defaults.organization,
-                    contact_name: defaults.contact_name,
-                    phone: defaults.phone,
+                    contact_name: defaults.id ? null : defaults.contact_name,
+                    phone: defaults.id ? null : defaults.phone,
                     type: this.sourceType,
+
+                    source_owner: defaults.source_owner,
+                    source_type : defaults.source_type,
+                    web_address : defaults.web_address,
+                    work_phone: defaults.work_phone,
+
+                    id: defaults.source_id || null
                 });
             },
 
             submitForm() {
-                let url = '/business/referral-sources';
-                this.form.submit('post', url)
+                let url = '/business/referral-sources' + ( this.form.id ? '/' + this.form.id : '' );
+                let method = this.form.id ? 'patch' : 'post';
+                this.form.submit( method, url )
                     .then(response => {
                         this.$emit('saved', response.data.data);
                     })
