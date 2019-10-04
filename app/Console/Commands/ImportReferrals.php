@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Business;
+use App\BusinessChain;
 use App\ReferralSource;
 
 class ImportReferrals extends BaseImport
@@ -12,7 +13,7 @@ class ImportReferrals extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:referrals {business_id} {file}';
+    protected $signature = 'import:referrals {chain_id} {file}';
 
     /**
      * The console command description.
@@ -22,9 +23,9 @@ class ImportReferrals extends BaseImport
     protected $description = 'Import an excel sheet of referrals.';
 
     /**
-     * @var \App\Business
+     * @var \App\BusinessChain
      */
-    protected $business;
+    protected $chain;
 
     /**
      * A store for duplicate row checks
@@ -42,16 +43,15 @@ class ImportReferrals extends BaseImport
         parent::__construct();
     }
 
-
     /**
-     * Return the current business model for who the data should be imported in to
+     * Return the current business chain model for who the data should be imported in to
      *
-     * @return \App\Business
+     * @return \App\BusinessChain
      */
-    protected function business()
+    protected function chain()
     {
-        if ($this->business) return $this->business;
-        return $this->business = Business::findOrFail($this->argument('business_id'));
+        if ($this->chain) return $this->chain;
+        return $this->chain = BusinessChain::findOrFail($this->argument('chain_id'));
     }
 
     /**
@@ -76,7 +76,7 @@ class ImportReferrals extends BaseImport
 
         $data = [
             'type'         => 'client', // or caregiver?
-            'chain_id'     => $this->business->id,
+            'chain_id'     => $this->chain()->id,
             'organization' => $organization_name,
             'contact_name' => $full_name,
             'phone'        => $this->resolve('Home Phone', $row),
@@ -129,7 +129,7 @@ class ImportReferrals extends BaseImport
      */
     protected function warningMessage()
     {
-        return 'Importing referrals into ' . $this->business()->name . '..';
+        return 'Importing referrals into ' . $this->chain()->name . '..';
     }
 
     /**
@@ -137,9 +137,21 @@ class ImportReferrals extends BaseImport
      *
      * @param int $row
      * @return bool
+     * @throws \PHPExcel_Exception
      */
     protected function emptyRow(int $row)
     {
         return !$this->resolve('Full Name', $row);
+    }
+
+    /**
+     * Return the current business model for who the data should be imported in to
+     *
+     * @return \App\Business
+     */
+    protected function business()
+    {
+        // ReferralSource belong to the BusinessChain, not the Business.
+        return null;
     }
 }
