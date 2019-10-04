@@ -82,7 +82,8 @@ class ReferralSourceController extends BaseController
             unset( $data[ 'contact_name' ] );
             unset( $data[ 'phone' ] );
 
-            $res = ReferralSource::where( 'type', $referralSource->type )
+            $res = $this->businessChain()->referralSources()
+                ->where( 'type', $referralSource->type )
                 ->where( 'organization', $referralSource->organization )
                 ->update( $data );
         } else {

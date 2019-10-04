@@ -158,6 +158,7 @@
                         }
 
                     })
+                    .catch(() => {})
                     .finally(() => this.loading = false)
             },
 

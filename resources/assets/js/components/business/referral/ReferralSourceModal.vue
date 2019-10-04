@@ -7,7 +7,7 @@
 
                         <b-form-group>
 
-                            <b-form-checkbox v-model=" form.is_company " class="align-items-center">
+                            <b-form-checkbox v-if="!form.id" v-model=" form.is_company " class="align-items-center">
 
                                 This is a Company: <b>{{ form.is_company }}</b>
                             </b-form-checkbox>
@@ -123,8 +123,10 @@
                 this.form.submit( method, url )
                     .then(response => {
                         this.$emit('saved', response.data.data);
+                        this.showModal=false;
                     })
-                    .finally(() => this.showModal=false)
+                    .catch(() => {
+                    })
             },
         },
 
