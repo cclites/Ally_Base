@@ -209,4 +209,13 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 
         return $this->recipients()->where('user_id', $user_id)->exists();
     }
+
+    public function sentBy()
+    {
+        if($this->sent_by_user_id){
+            return User::find($this->sent_by_user_id)->nameLastFirst();
+        }
+
+        return "Unknown";
+    }
 }

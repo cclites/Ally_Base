@@ -35,6 +35,11 @@
                 </div>
             </b-col>
         </b-row>
+        <b-row class="mb-4">
+            <b-col>
+                <h4>Sent By: {{ sentBy }}</h4>
+            </b-col>
+        </b-row>
         <b-row>
             <b-col>
                 <h4>Replies</h4>
@@ -62,7 +67,6 @@ export default {
     data: () => ({
         busy: true,
         showRecipients: false,
-
         perPage: 25,
         currentPage: 1,
         sortBy: 'created_at',
@@ -105,7 +109,14 @@ export default {
             });
 
             return unique.sort( (a, b) => a.name > b.name ? 1 : -1);
-        }
+        },
+
+        sentBy(){
+
+            if(this.thread.sent_by){
+                return this.thread.sent_by;
+            }
+        },
     },
 
     methods: {
