@@ -133,6 +133,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     //// Instance Methods
     ////////////////////////////////////
 
+    function getIsPaidAttribute(): bool
+    {
+        return $this->getAmountPaid() == $this->getAmount();
+    }
+
     function isOffline(): bool
     {
         return (bool) $this->offline;

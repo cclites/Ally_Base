@@ -30,6 +30,7 @@ use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
+use App\Billing\PaymentLog;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
@@ -332,6 +333,14 @@ class Client extends AuditableModel implements
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    // made this a relationship method so it can be eager loaded
+    public function paymentLogs()
+    {
+        return $this->hasMany( PaymentLog::class, 'payment_method_id', 'default_payment_id' )
+            ->where( 'payment_method_type', $this->default_payment_type )
+            ->orderBy( 'created_at', 'desc' );
+    }
+
     public function creator()
     {
         return $this->belongsTo('App\User', 'created_by');
@@ -594,6 +603,15 @@ class Client extends AuditableModel implements
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getPaymentErrorsAttribute()
+    {
+        $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
+
+        if( $most_recent ) return 'Outstanding Client Payer Issue - ' . $most_recent->error_message;
+
+        return null;
+    }
 
     public function getAddress(): ?Address
     {
