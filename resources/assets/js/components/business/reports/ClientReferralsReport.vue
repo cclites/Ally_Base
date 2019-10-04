@@ -1,58 +1,54 @@
 <template>
     <b-card
-      header="This report shows data that has been invoiced & billed. No data for the current service week will be included."
+      header="Client Referrals Report"
       header-text-variant="white"
       header-bg-variant="info"
     >
-        <b-row class="filter-row">
-            <b-form-group label="Location" class="mr-2">
+        <b-alert show variant="info">This report shows data that has been invoiced &amp; billed. No data for the current service week will be included.</b-alert>
+        <div class="form-inline">
+            <b-form-group label="Location" class="mb-2 mr-2">
                 <business-location-form-group
                         v-model="form.business"
                         :allow-all="false"
                         :label="null"
                 />
             </b-form-group>
-            <b-form-group label="Start Date" class="mr-2">
+            <b-form-group label="Start Date" class="mb-2 mr-2">
                 <date-picker v-model="form.start"
                              weekStart="1"
                              :label="null"
                 >
                 </date-picker>
             </b-form-group>
-            <b-form-group label="End Date" class="mr-2">
+            <b-form-group label="End Date" class="mb-2 mr-2">
                 <date-picker v-model="form.end"
-                             class="mr-2"
                 ></date-picker>
             </b-form-group>
-            <b-form-group label="Clients" class="mr-2">
+            <b-form-group label="Clients" class="mb-2 mr-2">
                     <b-form-select
                             name="client_id"
                             v-model="form.client"
                     >
                         <option value="">All Clients</option>
-                        <option v-for="row in clients" :value="row.id" :key="row.id">{{ row.nameLastFirst }}</option>
+                        <option v-for="row in clients" :value="row.id" :key="row.id" :text="row.name">{{ row.name }}</option>
                     </b-form-select>
             </b-form-group>
-            <b-form-group label="Salesperson" class=" mr-2" v-if="salespersons">
-                <b-form-select v-model="form.salesperson" class="mr-2" name="salesperson">
+            <b-form-group label="Salesperson" class="mb-2 mr-2" v-if="salespersons">
+                <b-form-select v-model="form.salesperson" name="salesperson">
                     <option value="">All Salespeople</option>
                     <option v-for="s in salespersons" :key="s.id" :value="s.id">{{ s.name }}</option>
                 </b-form-select>
             </b-form-group>
-            <b-form-group label="County" class="mr-2">
+            <b-form-group label="County" class="mb-2 mr-2">
                 <b-form-input type="text" v-model="form.county" placeholder="County"/>
             </b-form-group>
-        </b-row>
-        <b-row class="button-row">
-            <b-col>
-                <b-form-group label="&nbsp;" class="mr-2 float-right">
-                    <b-button-group>
-                        <b-btn variant="info" @click="fetch()" :disabled="loading">Generate Report</b-btn>
-                        <b-btn @click="print()">Print</b-btn>
-                    </b-button-group>
-                </b-form-group>
-            </b-col>
-        </b-row>
+            <b-form-group label="&nbsp;" class="mb-2 mr-2">
+                <b-button-group>
+                    <b-btn variant="info" @click="fetch()" :disabled="loading">Generate Report</b-btn>
+                    <b-btn @click="print()">Print</b-btn>
+                </b-button-group>
+            </b-form-group>
+        </div>
 
         <loading-card v-show="loading"></loading-card>
 
@@ -65,7 +61,7 @@
                          :per-page="perPage"
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
-                         class="report-table"
+                         class="report-table mt-4"
                          :footClone="footclone"
                          :noFooterSorting="true"
                 >
@@ -139,9 +135,9 @@
                 ),
                 loading: false,
                 totalRows: 0,
-                perPage: 30,
+                perPage: 100,
                 currentPage: 1,
-                sortBy: '',
+                sortBy: 'salesperson',
                 sortDesc: '',
                 fields: [
                     {
@@ -251,13 +247,3 @@
         }
     }
 </script>
-
-<style scoped>
-    .button-row .form-group{
-        margin-top: unset;
-    }
-
-    .filter-row .form-group{
-        margin-bottom: unset;
-    }
-</style>

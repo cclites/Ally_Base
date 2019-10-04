@@ -34,7 +34,12 @@ class ClaimInvoiceController extends BaseController
             ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id'])
+            ->forClientType($filters['client_type'])
             ->whereIn('status', ClaimStatus::transmittedStatuses());
+
+        if (! $filters['inactive']) {
+            $query->forActiveClientsOnly();
+        }
 
         if ($request->claim_status == 'unpaid') {
             $query = $query->hasBalance();
@@ -59,9 +64,16 @@ class ClaimInvoiceController extends BaseController
 
         $this->authorize('read', $clientInvoice);
 
-        $claim = $factory->createFromClientInvoice($clientInvoice);
+        list($claim, $warnings) = $factory->createFromClientInvoice($clientInvoice);
 
-        return new SuccessResponse('Claim has been created.', new ClaimsQueueResource($claim->clientInvoice->fresh()));
+        $message = 'Claim has been created.';
+        if ($warnings->count() > 0) {
+            $message = "Claim was created but produced the following warnings:\r\n";
+            foreach ($warnings as $item) {
+                $message .= "$item\r\n";
+            }
+        }
+        return new SuccessResponse($message, new ClaimsQueueResource($claim->clientInvoice->fresh()));
     }
 
     /**

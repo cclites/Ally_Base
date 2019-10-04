@@ -37,8 +37,9 @@
             :no-close-on-backdrop="true"
             hide-footer
             class="modal-fit-more"
+            @hidden="onHideItemModal()"
         >
-            <claim-invoice-item-form ref="item-form" @close="hideModal()" :item="current" />
+            <claim-invoice-item-form ref="itemForm" @close="hideModal()" :item="current" />
         </b-modal>
 
         <confirm-modal title="Delete Item" ref="confirmDeleteItem" yesButton="Delete" yesVariant="danger">
@@ -82,6 +83,7 @@
                     summary: { sortable: true },
                     date: { sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     start_time: { label: 'Time', sortable: true },
+                    caregiver_name: { label: 'Caregiver', sortable: true },
                     related_shift_id: { sortable: true, label: 'Related Shift' },
                     rate: { sortable: true, formatter: x => this.moneyFormat(x) },
                     units: { sortable: true },
@@ -124,6 +126,10 @@
                     id: null,
                     claimable_type: this.CLAIMABLE_TYPES.SERVICE,
                 });
+            },
+
+            onHideItemModal() {
+                this.$store.commit('claims/setItem', {});
             },
         },
     }

@@ -250,7 +250,7 @@ Vue.component('business-service-auth-ending-report', require('./components/busin
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
 
-Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
+Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummary'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
 Vue.component('invoice-summary-by-salesperson-report', require('./components/business/reports/InvoiceSummaryBySalesperson'));
 
@@ -394,7 +394,9 @@ Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'
 Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
 Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
+Vue.component('business-claim-transmissions-report', require('./components/business/claims/ClaimTransmissionsReport'));
 Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
+Vue.component('claim-adjustment-history', require('./components/business/claims/ClaimAdjustmentHistory'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

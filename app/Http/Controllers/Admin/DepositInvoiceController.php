@@ -58,7 +58,7 @@ class DepositInvoiceController extends Controller
         }
 
         $chains = BusinessChain::ordered()->get();
-        return view_component('admin-deposit-invoices', 'Deposit Invoices', compact('chains'));
+        return view_component('admin-deposit-invoices', 'Deposit Stubs', compact('chains'));
     }
 
     public function generate(Request $request, BusinessInvoiceGenerator $businessInvoiceGenerator, CaregiverInvoiceGenerator $caregiverInvoiceGenerator)

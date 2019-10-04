@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\Payer;
-use App\Business;
+use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\CaregiverDropdownResource;
 use App\Http\Resources\PayersDropdownResource;
 use App\Http\Resources\SalespersonDropdownResource;
+use App\Http\Resources\ServicesDropdownResource;
 use App\Responses\ErrorResponse;
 use App\SalesPerson;
 use Illuminate\Http\Request;
@@ -21,7 +22,15 @@ class DropdownResourceController extends BaseController
      * A list of the resource types that may be called through the route.
      * @var array
      */
-    const AVAILABLE_RESOURCES = ['clients', 'caregivers', 'payers', 'sales-people','marketing-clients', 'clients-for-chain'];
+    const AVAILABLE_RESOURCES = [
+        'clients',
+        'caregivers',
+        'payers',
+        'sales-people',
+        'marketing-clients',
+        'clients-for-chain',
+        'services'
+    ];
 
     /**
      * Determine the type of resource the request is looking
@@ -35,7 +44,7 @@ class DropdownResourceController extends BaseController
     {
         $method = Str::camel($resource);
 
-        if (! in_array($resource, self::AVAILABLE_RESOURCES) || ! method_exists($this, $method)) {
+        if (!in_array($resource, self::AVAILABLE_RESOURCES) || !method_exists($this, $method)) {
             return new ErrorResponse(500, 'That resource does not exist.');
         }
 
@@ -44,7 +53,23 @@ class DropdownResourceController extends BaseController
 
     protected function clients(Request $request)
     {
-        $clients = Client::forRequestedBusinesses()->active()->get();
+        $query = Client::forRequestedBusinesses();
+
+        if ($request->inactive != 1) {
+            $query->active();
+        }
+
+        if ($request->filled('client_type')) {
+            $query->whereClientType($request->client_type);
+        }
+
+        if ($request->filled('payer_id')) {
+            $query->whereHas('payers', function ($q) use ($request) {
+                $q->where('payer_id', $request->payer_id);
+            });
+        }
+
+        $clients = $query->get();
         return response()->json(new ClientDropdownResource($clients));
     }
 
@@ -90,5 +115,11 @@ class DropdownResourceController extends BaseController
     {
         $clients = Client::forChain($request->chain)->get();
         return response()->json(new ClientDropdownResource($clients));
+    }
+
+    public function services(Request $request)
+    {
+        $services = new ServicesDropdownResource(Service::forAuthorizedChain()->get());
+        return response()->json($services);
     }
 }

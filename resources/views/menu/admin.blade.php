@@ -36,10 +36,11 @@
         <li><a href="{{ route('admin.deposits.adjustment') }}">Manual Adjustment</a></li>
     </ul>
 </li>
-<li> <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-file-pdf-o"></i><span class="hide-menu">Invoices</span></a>
+<li> <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-file-pdf-o"></i><span
+                class="hide-menu">Invoices/Stubs</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.invoices.clients') }}">Client Invoices</a></li>
-        <li><a href="{{ route('admin.invoices.deposits') }}">Deposit Invoices</a></li>
+        <li><a href="{{ route('admin.invoices.deposits') }}">Deposit Stubs</a></li>
     </ul>
 </li>
 <li>

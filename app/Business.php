@@ -850,6 +850,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getDisplayValue(): string
     {
+        if (empty($this->paymentAccount)) {
+            return 'ACH-P Missing';
+        }
+
         return 'ACH-P *' . $this->paymentAccount->last_four;
     }
 

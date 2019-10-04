@@ -3,7 +3,7 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="3">
-                <b-btn variant="info" @click="showAddReferralModal=true">Add Referral Source</b-btn>
+                <b-btn variant="info" @click=" addModal() ">Add Referral Source</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -50,6 +50,7 @@
                 @saved="updateAfterAddEdit"
                 :source-type="sourceType"
                 @deactivated="deactivated"
+                :editSource=" editSourceInfo "
         ></business-referral-source>
     </b-card>
 </template>
@@ -100,6 +101,19 @@
         },
 
         methods: {
+
+            addModal(){
+
+                this.addSource = {};
+                this.showAddReferralModal = true;
+            },
+            editSourceInfo(){
+
+                this.editSource.is_company = !!this.editSource.is_company;
+                this.addSource = this.editSource;
+                this.showEditReferralModal = false;
+                this.showAddReferralModal = true;
+            },
             edit(id) {
                 this.editSource = this.referralSources[id];
                 this.showEditReferralModal = true;

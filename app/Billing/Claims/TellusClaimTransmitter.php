@@ -8,8 +8,11 @@ use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
 use App\Business;
 use App\Client;
+use App\Services\TellusApiException;
 use App\Services\TellusService;
+use App\Services\TellusValidationException;
 use App\Shift;
+use App\TellusTypecode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -46,14 +49,14 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         if (empty($invoice->client->business->medicaid_npi_number)) {
             array_push($errors['business'], 'medicaid_npi_number');
         }
+//
+//        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
+//            array_push($errors['business'], 'medicaid_npi_taxonomy');
+//        }
 
-        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
-            array_push($errors['business'], 'medicaid_npi_taxonomy');
-        }
-
-        if (empty($invoice->client->business->zip)) {
-            array_push($errors['business'], 'zip');
-        }
+//        if (empty($invoice->client->business->zip)) {
+//            array_push($errors['business'], 'zip');
+//        }
 
         if (empty($invoice->client->date_of_birth)) {
             array_push($errors['client'], 'date_of_birth');
@@ -92,6 +95,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param Claim $claim
      * @return bool
      * @throws \App\Billing\Exceptions\ClaimTransmissionException
+     * @throws TellusValidationException
      */
     public function send(Claim $claim) : bool
     {
@@ -102,17 +106,45 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-            $xml = $tellus->convertArrayToXML($this->getData($claim));
-            if ($tellus->sendXml($xml)) {
+            if ($tellus->submitClaim($this->getData($claim))) {
                 // Success
                 return true;
             }
+        } catch (TellusValidationException $ex) {
+            if ($ex->hasErrors()) {
+                throw $ex;
+            }
+            throw new ClaimTransmissionException('Error submitting claim XML to Tellus: ' . $ex->getMessage());
+        } catch (TellusApiException $ex) {
+            throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
+        } catch (ClaimTransmissionException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
+            \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
+    }
+
+    /**
+     * Convert claim into import row data.
+     *
+     * @param \App\Billing\Claim $claim
+     * @return array
+     */
+    protected function getData(Claim $claim) : array
+    {
+        // Remove empty values because Tellus is ridiculous.
+        return collect(parent::getData($claim))->map(function (array $item) {
+            foreach (array_keys($item) as $key) {
+                if (empty($item[$key])) {
+                    unset($item[$key]);
+                }
+            }
+            return $item;
+        })->toArray();
     }
 
     /**
@@ -142,6 +174,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         $xml = $tellus->convertArrayToXML($this->getData($claim));
+
+        if ($errors = $tellus->getValidationErrors($xml)) {
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        }
+
         $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
         \Storage::disk('public')->put($filename, $xml);
         return "/storage/$filename";
@@ -153,6 +190,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param \App\Billing\Claim $claim
      * @param \App\Shift $shift
      * @return array
+     * @throws ClaimTransmissionException
      */
     public function mapShiftRecord(Claim $claim, Shift $shift) : array
     {
@@ -176,76 +214,118 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         /** @var ClientInvoice $clientInvoice */
         $clientInvoice = $claim->invoice;
 
-        return [
-            'SourceSystem' => 'ALLY',
-            'Jurisdiction' => $address->state ?? 'NN',
-            'Payer' => $clientInvoice->getPayerCode(),
-            'Plan' => $clientInvoice->getPlanCode(),
-            'Program' => '', // N/A
-            'DeliverySystem' => 'ALLY',
-            'ProviderName' => $business->name,
-            'ProviderMedicaidId' => $business->medicaid_id,
-            'ProviderNpi' => $business->medicaid_npi_number,
-            'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy,
-            'ProviderNPIZipCode' => $business->zip,
-            'ProviderEin' => $business->ein,
-            'CaregiverFirstName' => $caregiver->firstname,
-            'CaregiverLastName' => $caregiver->lastname,
-            'CaregiverLicenseNumber' => $caregiver->medicaid_id,
-            'RecipientMedicaidId' => $client->medicaid_id,
-            'RecipientMemberId' => '', // N/A
-            'RecipientFirstName' => $client->firstname,
-            'RecipientLastName' => $client->lastname,
-            'RecipientDob' => Carbon::parse($client->date_of_birth)->format('m/d/Y'),
-            'ServiceAddress1' => $address->address1,
-            'ServiceAddress2' => $address->address2,
-            'ServiceCity' => $address->city,
-            'ServiceState' => $address->state,
-            'ServiceZip' => $address->zip,
-            'VisitId' => $shift->id,
-            'ServiceCode' => optional($shift->service)->code,
-            'ServiceCodeMod1' => '', // N/A
-            'ServiceCodeMod2' => '', // N/A
-            'DiagnosisCode1' => $diagnosisCodes[0],
-            'DiagnosisCode2' => $diagnosisCodes[1],
-            'DiagnosisCode3' => $diagnosisCodes[2],
-            'DiagnosisCode4' => $diagnosisCodes[3],
-            'StartVerificationType' => $this->getVerificationType($shift->checked_in_method),
-            'EndVerificationType' => $this->getVerificationType($shift->checked_out_method),
-            'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
-            'ScheduledEndDateTime' => $this->getScheduledEndTime($shift),
-            'ScheduledLatitude' => optional($geocode)->latitude ?? '',
-            'ScheduledLongitude' => optional($geocode)->longitude ?? '',
-            'ActualStartDatetime' => $shift->checked_in_time->format($this->timeFormat),
-            'ActualEndDatetime' => $shift->checked_out_time->format($this->timeFormat),
-            'ActualStartLatitude' => $shift->checked_in_latitude ?? '',
-            'ActualStartLongitude' => $shift->checked_in_longitude ?? '',
-            'ActualEndLatitude' => $shift->checked_out_latitude ?? '',
-            'ActualEndLongitude' => $shift->checked_out_longitude ?? '',
-            'UserField1' => '', // N/A
-            'UserField2' => '', // N/A
-            'UserField3' => '', // N/A
-            'ReasonCode1' => '', // N/A
-            'ReasonCode2' => '', // N/A
-            'ReasonCode3' => '', // N/A
-            'ReasonCode4' => '', // N/A
-            'TimeZone' => $this->getBusinessTimezone($business),
-            'visitNote' => $shift->caregiver_comments ?? '',
-            'EndAddress1' => $address->address1,
-            'EndAddress2' => $address->address2,
-            'EndCity' => $address->city,
-            'EndState' => $address->state,
-            'EndZip' => $address->zip,
-            'VisitStatus' => 'COMP',
-            'MissedVisitReason' => '', // N/A
-            'MissedVisitActionTaken' => '', // N/A
-            'InvoiceUnits' => '', // TODO: find out how to fill this
-            'InvoiceAmount' => '', // TODO: find out how to fill this
-            'ScheduledEndLatitude' => '', // N/A
-            'ScheduledEndLongitude' => '', // N/A
-            'PaidAmount' => '', // N/A
-            'CareDirectionType' => '', // N/A
+        $gps_in = $shift->checked_in_method == Shift::METHOD_GEOLOCATION && filled($shift->checked_in_latitude) && filled($shift->checked_in_longitude);
+        $gps_out = $shift->checked_out_method == Shift::METHOD_GEOLOCATION && filled($shift->checked_out_latitude) && filled($shift->checked_out_longitude);
+
+        $data = [
+            'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
+            'Jurisdiction'           => $this->tcLookup('Jurisdiction', $address->state ),
+            'Payer'                  => $this->tcLookup('Payer', $clientInvoice->getPayerCode() ),
+            'Plan'                   => $this->tcLookup('Plan', $clientInvoice->getPlanCode() ), // FMSP is only Acceptable Value
+            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL, PACE is only Acceptable Value
+            'DeliverySystem'         => $this->tcLookup( 'DeliverySystem', 'MCOR' ), // FFFS or MCOR.. no way to derive this from our system yet.
+            'ProviderName'           => $business->name,
+            'ProviderMedicaidId'     => $business->medicaid_id,
+            'ProviderNPI'            => $business->medicaid_npi_number, // OPTIONAL
+            'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy, // OPTIONAL
+            'ProviderNPIZipCode'     => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
+            'ProviderEin'            => $business->ein, // REQUIRED
+            'CaregiverFirstName'     => $caregiver->firstname,
+            'CaregiverLastName'      => $caregiver->lastname,
+            'CaregiverLicenseNumber' => $caregiver->medicaid_id, // OPTIONAL
+            'RecipientMedicaidId'    => $client->medicaid_id,
+            'RecipientMemberId'      => '', // OPTIONAL
+            'RecipientFirstName'     => $client->firstname,
+            'RecipientLastName'      => $client->lastname,
+            'RecipientDob'           => Carbon::parse( $client->date_of_birth )->format('m/d/Y'),
+            'ServiceAddress1'        => $address->address1,
+            'ServiceAddress2'        => $address->address2, // OPTIONAL
+            'ServiceCity'            => $address->city,
+            'ServiceState'           => $address->state,
+            'ServiceZip'             => $address->zip,
+            'VisitId'                => $shift->id,
+            'ServiceCode'            => optional($shift->service)->code,
+            'ServiceCodeMod1'        => '', // OPTIONAL
+            'ServiceCodeMod2'        => '', // OPTIONAL
+            'DiagnosisCode1'         => $diagnosisCodes[ 0 ],
+            'DiagnosisCode2'         => $diagnosisCodes[ 1 ], // OPTIONAL && TODO
+            'DiagnosisCode3'         => $diagnosisCodes[ 2 ], // OPTIONAL && TODO
+            'DiagnosisCode4'         => $diagnosisCodes[ 3 ], // OPTIONAL && TODO
+            'StartVerificationType'  => $this->tcLookup( 'StartVerificationType', $this->getVerificationType($shift->checked_in_method) ), // OPTIONAL
+            'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($shift->checked_out_method) ), // OPTIONAL
+            'ScheduledStartDateTime' => $this->getScheduledStartTime($shift), // OPTIONAL
+            'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
+            'ScheduledLatitude' => '',
+            'ScheduledLongitude' => '',
+            'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartLatitude' => '',
+            'ActualStartLongitude' => '',
+            'ActualEndLatitude' => '',
+            'ActualEndLongitude' => '',
+            // 'UserField1'             => '', // OPTIONAL
+            // 'UserField2'             => '', // OPTIONAL
+            // 'UserField3'             => '', // OPTIONAL
+            // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO
+            // 'ReasonCode2' => '', // OPTIONAL && TODO
+            // 'ReasonCode3' => '', // OPTIONAL && TODO
+            // 'ReasonCode4' => '', // OPTIONAL && TODO
+            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
+             'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
+             'EndAddress1'            => $address->address1, // OPTIONAL
+             'EndAddress2'            => $address->address2, // OPTIONAL
+             'EndCity'                => $address->city, // OPTIONAL
+             'EndState'               => $address->state, // OPTIONAL
+             'EndZip'                 => $address->zip, // OPTIONAL
+             'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
+            // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
+            // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
+            // 'InvoiceUnits'           => '', // OPTIONAL && TODO
+            // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
+            'ScheduledEndLatitude' => '',
+            'ScheduledEndLongitude' => '',
+            // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
+             'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL
+            'Tasks'                  => '', // a wrapper element for the tasks
+            // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
         ];
+
+        if ($gps_in) {
+            $data['ScheduledLatitude'] = $address->latitude ?? ''; // OPTIONAL
+            $data['ScheduledLongitude'] = $address->longitude ?? ''; // OPTIONAL
+            $data['ActualStartLatitude'] = $shift->checked_in_latitude; //OPTIONAL
+            $data['ActualStartLongitude'] = $shift->checked_in_longitude; //OPTIONAL
+        }
+
+        if ($gps_out) {
+            $data['ActualEndLatitude']      = $shift->checked_out_latitude; // OPTIONAL
+            $data['ActualEndLongitude']     = $shift->checked_out_longitude; //OPTIONAL
+            $data['ScheduledEndLatitude']   = $address->latitude ?? ''; // OPTIONAL
+            $data['ScheduledEndLongitude']  = $address->longitude ?? ''; // OPTIONAL
+        }
+
+        return $data;
+    }
+
+    /**
+     * Lookup typecode data from the database.
+     *
+     * @param string $category
+     * @param string $textCode
+     * @return array|string
+     * @throws ClaimTransmissionException
+     */
+    public function tcLookup(string $category, string $textCode)
+    {
+        $typeCode = TellusTypecode::where('category', $category)
+            ->where('text_code', 'LIKE', $textCode)
+            ->first();
+
+        if (empty($typeCode)) {
+            throw new ClaimTransmissionException("Error mapping values to Tellus dictionary: Invalid text code value \"$textCode\" for $category.");
+        }
+
+        return [$typeCode->description, $typeCode->code];
     }
 
     /**
@@ -254,6 +334,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param \App\Billing\Claim $claim
      * @param ShiftService $shiftService
      * @return array
+     * @throws ClaimTransmissionException
      */
     public function mapServiceRecord(Claim $claim, ShiftService $shiftService) : array
     {

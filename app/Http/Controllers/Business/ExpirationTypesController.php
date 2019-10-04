@@ -43,6 +43,24 @@ class ExpirationTypesController extends BaseController
     }
 
     /**
+     * Update an existing expiration type and return an updated list in the response.
+     *
+     * @param Request $request
+     * @return SuccessResponse
+     */
+    public function update( Request $request, ExpirationType $expiration )
+    {
+        $data = $request->validate([
+            'type' => 'required'
+        ]);
+
+        $expiration->update( $data );
+
+        $types = ExpirationType::where('chain_id', $this->businessChain()->id)->get();
+        return new SuccessResponse('Edited default expiration type', $types);
+    }
+
+    /**
      * Destroy a default type and return an updated list in the response
      *
      * @param ExpirationType $expiration

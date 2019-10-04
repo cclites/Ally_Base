@@ -532,14 +532,20 @@
                         <b-col lg="6">
                             <h4>Tellus Credentials</h4>
                             <hr/>
-                            <b-form-group label="Username" label-for="tellus_username">
-                                <b-form-input id="tellus_username" v-model="businessSettings.tellus_username"></b-form-input>
-                                <input-help :form="businessSettings" field="tellus_username" text="Enter your Tellus provided API username."></input-help>
-                            </b-form-group>
-                            <b-form-group label="Password" label-for="tellus_password">
-                                <b-form-input id="tellus_password" v-model="businessSettings.tellus_password"></b-form-input>
-                                <input-help :form="businessSettings" field="tellus_password" text="Enter your Tellus provided API password."></input-help>
-                            </b-form-group>
+                            <b-alert show variant="info">
+                                Ally has direct integration with Tellus. Please make sure your NPI Number and Business EIN are set. <a href="#" @click="tabIndex = 2">Edit Medicaid Settings</a>
+                            </b-alert>
+                            <div v-if="isAdmin">
+                                <b-alert show variant="info">This is only shown because you are an admin</b-alert>
+                                <b-form-group label="Username" label-for="tellus_username">
+                                    <b-form-input id="tellus_username" v-model="businessSettings.tellus_username"></b-form-input>
+                                    <input-help :form="businessSettings" field="tellus_username" text="Enter your Tellus provided API username."></input-help>
+                                </b-form-group>
+                                <b-form-group label="Password" label-for="tellus_password">
+                                    <b-form-input id="tellus_password" v-model="businessSettings.tellus_password"></b-form-input>
+                                    <input-help :form="businessSettings" field="tellus_password" text="Enter your Tellus provided API password."></input-help>
+                                </b-form-group>
+                            </div>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -561,12 +567,13 @@
 
 <script>
     import BusinessLocationSelect from "./BusinessLocationSelect";
-
+    import AuthUser from '../../mixins/AuthUser';
     import {mapGetters, mapState, mapMutations} from 'vuex';
 
     export default {
         components: {BusinessLocationSelect},
         props: {},
+        mixins: [AuthUser],
 
         data() {
             return {

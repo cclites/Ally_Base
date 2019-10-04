@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ClaimTransmissionController extends BaseController
@@ -50,6 +51,9 @@ class ClaimTransmissionController extends BaseController
                 $testFile = $transmitter->test($claim);
             } else {
                 $transmitter->send($claim);
+                if (empty($claim->transmitted_at)) {
+                    $claim->update(['transmitted_at' => Carbon::now()]);
+                }
                 $claim->updateStatus(ClaimStatus::TRANSMITTED());
             }
 

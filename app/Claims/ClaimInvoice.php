@@ -3,9 +3,9 @@
 namespace App\Claims;
 
 use App\Claims\Exceptions\ClaimTransmissionException;
+use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
-use App\Claims\Exceptions\ClaimBalanceException;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use App\Billing\ClientInvoice;
@@ -241,7 +241,41 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
+    }
+
+    /**
+     * Get the timezone for the Claim shift data.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->business->getTimezone();
+    }
+
+    /**
+     * Check if the amount of the claim is different
+     * than the amount of the client invoice.
+     *
+     * @return bool
+     */
+    public function hasAmountMismatch(): bool
+    {
+        return $this->amount != $this->clientInvoice->amount;
+    }
+
+    /**
+     * Check if the Claim has any expense items.
+     *
+     * @return bool
+     */
+    public function getHasExpenses(): bool
+    {
+        return $this->items->filter(function ($item) {
+            /** @var ClaimInvoiceItem $item */
+            return $item->claimable_type == ClaimableExpense::class;
+        })->count() > 0;
     }
 
     // **********************************************************
@@ -261,7 +295,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function scopeForPayer($query, $payerId = null)
     {
-        if (empty($payerId)) {
+        if (is_null($payerId)) {
             return $query;
         }
 
@@ -308,6 +342,37 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $query->where('amount_due', '<>', '0');
     }
 
+    /**
+     * Filter claims by client type.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClientType($query, $clientType)
+    {
+        if (empty($clientType)) {
+            return $query;
+        }
+
+        return $query->whereHas('client', function ($q) use ($clientType) {
+            $q->where('client_type', $clientType);
+        });
+    }
+
+    /**
+     * Filter claims by active users.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForActiveClientsOnly($query)
+    {
+        return $query->whereHas('client', function ($q) {
+            $q->active();
+        });
+    }
+
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
@@ -315,7 +380,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     /**
      * Update the amount and amount due from the ClaimInvoiceItem values
      *
-     * @throws ClaimBalanceException
      */
     public function updateBalance(): void
     {
@@ -328,10 +392,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         $amount_due = $items->reduce(function (float $carry, ClaimInvoiceItem $item) {
             return add($carry, (float)$item->amount_due);
         }, (float)0.00);
-
-        if ($amount_due < floatval(0)) {
-            throw new ClaimBalanceException('Claim invoices cannot have a negative balance.');
-        }
 
         $this->update(compact('amount', 'amount_due'));
     }
@@ -384,9 +444,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     {
         switch ($service) {
             case ClaimService::HHA():
-                throw new ClaimTransmissionException('Claim service "HHAeXchange" not yet supported.');
-//                return new HhaClaimTransmitter();
-                break;
+                return new HhaClaimTransmitter();
             case ClaimService::TELLUS():
                 throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
 //                return new TellusClaimTransmitter();
@@ -422,7 +480,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (!$lastName) {
+        if (! $lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;

@@ -83,6 +83,11 @@
                 loading: false,
                 fields: [
                     {
+                        key: 'shift_id',
+                        label: 'Shift Id',
+                        sortable: true,
+                    },
+                    {
                         key: 'shift_time',
                         label: 'Date',
                         sortable: true,

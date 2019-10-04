@@ -87,7 +87,7 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
      */
     public function __construct()
     {
-        $this->query = CaregiverLicense::with('caregiver', 'caregiver.address', 'caregiver.schedules' );
+        $this->query = CaregiverLicense::with('caregiver', 'caregiver.address', 'caregiver.schedules', 'defaultType' );
     }
 
     /**
@@ -180,12 +180,14 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
             }
         }
 
+        // dd( $by_caregivers );
+
         return $by_caregivers->flatten()->map(function (CaregiverLicense $license) {
 
             return [
 
                 'id'                 => $license->id,
-                'name'               => $license->name,
+                'name'               => optional( $license->defaultType )->type ?? $license->name,
                 'expiration_date'    => $license->expires_at ? ( new Carbon( $license->expires_at ) )->format( 'Y-m-d' ) : null,
                 'caregiver_id'       => $license->caregiver->id,
                 'caregiver_name'     => $license->caregiver->nameLastFirst(),

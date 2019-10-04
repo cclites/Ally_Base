@@ -195,7 +195,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
             return '';
         }
 
-        return $this->caregiver_first_name . ' ' . $this->caregiver_last_name;
+        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
     }
 
     /**
@@ -216,5 +216,30 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function getEndTime(): ?Carbon
     {
         return $this->visit_end_time;
+    }
+
+    /**
+     * Get the full text address.
+     *
+     * @return string
+     */
+    public function getAddress(): string
+    {
+        $address = $this->address1;
+        if (filled($this->address2)) {
+            $address .= " " . $this->address2;
+        }
+        $address .= " {$this->city}, {$this->state} {$this->zip}";
+        return $address;
+    }
+
+    /**
+     * Check if service has full EVV.
+     *
+     * @return bool
+     */
+    public function getHasEvv(): bool
+    {
+        return $this->has_evv == 1 ? true : false;
     }
 }

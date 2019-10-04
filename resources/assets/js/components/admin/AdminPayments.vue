@@ -111,6 +111,10 @@
                         <b-button v-if="! row.item.client.user.payment_hold" @click="addHold(row.item)" variant="danger">Add Hold</b-button>
                         <b-button v-if="row.item.client.user.payment_hold" @click="removeHold(row.item)" variant="primary">Remove Hold</b-button>
                     </template>
+                    <template slot="flags" scope="row">
+
+                        <p v-if=" row.item.payment_errors "><b-btn size="sm" variant="danger" v-b-tooltip.hover :title=" row.item.payment_errors "><i class="fa fa-exclamation-triangle"></i></b-btn></p>
+                    </template>
                 </b-table>
             </div>
         </div>
@@ -178,6 +182,9 @@
                     },
                     {
                         key: 'actions',
+                    },
+                    {
+                        key: 'flags'
                     }
                 ],
                 sortBy: null,

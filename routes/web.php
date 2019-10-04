@@ -64,6 +64,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
     Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
+
+    // I want to add this as an attachment, temporarily its own route for now.
+    Route::get( 'knowledge-base/tellus-guide', 'KnowledgeBaseController@tellusGuide' )->name( 'knowledge.tellus' );
 });
 
 Route::group([
@@ -369,7 +372,7 @@ Route::group([
     Route::get('reports/batch-invoice', 'Business\Report\BatchInvoiceReportController@index')->name('reports.batch-invoice-report');
 
     Route::get('reports/invoice-summary-by-county', 'Business\Report\InvoiceSummaryByCountyReportController@index')->name('reports.invoice-summary-by-county');
-    Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryByPayerReportController@index')->name('reports.payment-summary-by-payer');
+    Route::get('reports/payment-summary-by-payer', 'Business\Report\PaymentSummaryReportController@index')->name('reports.payment-summary-by-payer');
     Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
@@ -491,16 +494,19 @@ Route::group([
     Route::get('claims/{claim}/print', 'Business\Claims\ClaimInvoiceController@print');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
     Route::resource('claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
+    Route::post('claim-remits/{claimRemit}/adjust', 'Business\Claims\ClaimRemitAdjustmentController@store');
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');
     Route::get('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@create');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
-
+    Route::get('reports/claims/transmissions', 'Business\Claims\ClaimTransmissionsReportController@index')->name('reports.claims.transmissions');
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
+    Route::get('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@index');
     Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');
     Route::post('expiration-types', 'Business\ExpirationTypesController@store');
+    Route::patch('expiration-types/{expiration}', 'Business\ExpirationTypesController@update');
     Route::delete('expiration-types/{expiration}', 'Business\ExpirationTypesController@destroy');
 
     /* Offline Invoice AR */
