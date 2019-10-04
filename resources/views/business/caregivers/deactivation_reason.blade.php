@@ -16,6 +16,7 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
 
     <div class="h4">Caregiver deactivation</div>
 

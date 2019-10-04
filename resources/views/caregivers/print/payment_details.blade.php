@@ -47,7 +47,7 @@
         <div class="row print-header">
             <div class="header-left">
                 <div><a href="{{ is_office_user() ? route('business.caregivers.show', [$deposit->caregiver]) . '#payment_statement' : route('caregiver.deposits') }}" class="btn btn-info">Return to Payment History</a></div>
-                @include('layouts.partials.print_header')
+                @include('layouts.partials.print_logo')
                 <div class="h4">Associated Provider: {{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>
                 @if($business->address2)

@@ -78,7 +78,7 @@
         <div class="page" id="summary">
             <div class="row print-header">
                 <div class="header-left">
-                    @include('layouts.partials.print_header')
+                    @include('layouts.partials.print_logo')
                     <div class="h4">Associated Provider: {{ $business->name }}</div>
                     <br>
                     <div>{{ $business->address1 }}</div>
