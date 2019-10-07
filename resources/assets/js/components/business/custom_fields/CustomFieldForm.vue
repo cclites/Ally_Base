@@ -112,6 +112,7 @@ export default {
 
                     this.customFields = data;
                     this.form = new Form(options);
+                    this.$emit('customFields', data);
                 })
                 .catch(() => {})
         },

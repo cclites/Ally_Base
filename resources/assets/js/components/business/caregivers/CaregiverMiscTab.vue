@@ -16,10 +16,32 @@
         </b-row>
         <b-row>
             <b-col>
-                <custom-field-form :user-id="caregiver.id" user-role="caregiver" :meta="caregiver.meta" />
+                <custom-field-form @customFields="filterMeta" :user-id="caregiver.id" user-role="caregiver" :meta="caregiver.meta" />
             </b-col>
         </b-row>
-        <audits-table :trail="auditLogItems"></audits-table>
+        <b-row>
+            <b-col>
+                <b-card header="Audit Log"
+                        header-bg-variant="info"
+                        header-text-variant="white">
+                    <audits-table :trail="auditLogItems"></audits-table>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row if="isAdmin">
+            <b-col>
+                <b-card header="Meta Data-Visible to admins only"
+                        header-bg-variant="warning"
+                        header-text-variant="white">
+
+                    <b-table bordered striped hover show-empty
+                             :items="meta"
+                             :fields="metaFields">
+                    </b-table>
+                </b-card>
+            </b-col>
+        </b-row>
+
     </b-card>
 </template>
 
@@ -38,6 +60,7 @@
                 form: new Form({
                     misc: this.misc,
                 }),
+                role: window.AuthUser,
                 auditLogItems: [],
                 fields: [
                     { label: 'Type', key: 'auditable_title', sortable: true },
@@ -48,7 +71,13 @@
                     { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
                 ],
                 sortBy: '',
-                emptyText: 'No records to display'
+                emptyText: 'No records to display',
+                meta: [],
+                item: [],
+                metaFields: [
+                    { key: 'key', label: 'Key', sortable: true, },
+                    { key: 'value', label: 'Value', sortable: true, },
+                ],
             };
         },
         async mounted() {
@@ -65,7 +94,11 @@
             async fetchAuditLog(){
                 let response = await axios.get(`/business/reports/audit-log?caregiver_id=${this.caregiver.id}`);
                 this.auditLogItems = response.data;
-            }
+            },
+            filterMeta(data){
+                this.meta = this.caregiver.meta.filter(item1 =>
+                    !data.some(item2 => (item2.key === item1.key && item2.key === item1.key)));
+            },
         },
 
     }
