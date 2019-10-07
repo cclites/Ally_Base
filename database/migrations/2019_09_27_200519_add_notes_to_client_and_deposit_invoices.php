@@ -22,6 +22,11 @@ class AddNotesToClientAndDepositInvoices extends Migration
 
             $table->string( 'notes', 255 )->nullable();
         });
+
+        Schema::table( 'business_invoices', function (Blueprint $table) {
+
+            $table->string( 'notes', 255 )->nullable();
+        });
     }
 
     /**
@@ -37,6 +42,11 @@ class AddNotesToClientAndDepositInvoices extends Migration
         });
 
         Schema::table( 'caregiver_invoices', function (Blueprint $table) {
+
+            $table->dropColumn(['notes']);
+        });
+
+        Schema::table( 'business_invoices', function (Blueprint $table) {
 
             $table->dropColumn(['notes']);
         });

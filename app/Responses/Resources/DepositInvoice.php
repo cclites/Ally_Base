@@ -33,6 +33,7 @@ class DepositInvoice extends Resource
     {
         return [
             'invoice_type' => $this->resource instanceof Model ? maps_from_model($this->resource) : null,
+            'notes' => $this->resource->notes ?? '',
             'invoice_id' => $this->resource->id,
             'name' => $this->resource->getName(),
             'date' => $this->resource->getDate(),

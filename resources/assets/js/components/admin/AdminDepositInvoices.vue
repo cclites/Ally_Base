@@ -218,7 +218,7 @@
 
             async updateSelectedInvoice() {
 
-                await this.form.patch(`/admin/invoices/deposits/${this.selectedInvoice.invoice_id}`);
+                await this.form.patch(`/admin/invoices/deposits/${this.selectedInvoice.invoice_id}/${this.selectedInvoice.invoice_type}`);
                 this.selectedInvoice.notes = this.form.notes;
                 this.selectedInvoice = null;
             }
@@ -230,7 +230,7 @@
 
                 this.form = new Form({
 
-                    notes: val.notes || ""
+                    notes: val ? val.notes : ""
                 });
             }
         },

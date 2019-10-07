@@ -635,7 +635,7 @@ Route::group([
     Route::delete('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@destroy');
     Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
-    Route::patch('invoices/deposits/{invoice}', 'Admin\DepositInvoiceController@update');
+    Route::patch('invoices/deposits/{invoice}/{type?}', 'Admin\DepositInvoiceController@update');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
