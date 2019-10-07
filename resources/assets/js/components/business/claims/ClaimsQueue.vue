@@ -14,19 +14,19 @@
                             :allow-all="true"
                         />
                         <date-picker
-                                v-model="filters.start_date"
-                                placeholder="Start Date"
-                                class="mt-1"
+                            v-model="filters.start_date"
+                            placeholder="Start Date"
+                            class="mt-1"
                         >
                         </date-picker> &nbsp;to&nbsp;
                         <date-picker
-                                v-model="filters.end_date"
-                                placeholder="End Date"
-                                class="mr-1 mt-1"
+                            v-model="filters.end_date"
+                            placeholder="End Date"
+                            class="mr-1 mt-1"
                         >
                         </date-picker>
 
-                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" />
+                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
 
                         <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
@@ -66,6 +66,12 @@
                         <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                             Show Inactive Clients
                         </b-form-checkbox>
+
+                        <b-input
+                            v-model="filters.invoice_id"
+                            placeholder="Invoice #"
+                            class="mr-1 mt-1"
+                        />
 
                         <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -260,6 +266,7 @@
                     client_id: '',
                     payer_id: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),

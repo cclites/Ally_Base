@@ -28,6 +28,12 @@
                         Show Inactive Clients
                     </b-form-checkbox>
 
+                    <b-input
+                        v-model="form.invoice_id"
+                        placeholder="Invoice #"
+                        class="mr-1 mt-1"
+                    />
+
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                         Generate Report
@@ -140,6 +146,7 @@
                     client_id: '',
                     payer_id: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),

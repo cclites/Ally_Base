@@ -35,6 +35,7 @@ class ClaimInvoiceController extends BaseController
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id'])
             ->forClientType($filters['client_type'])
+            ->searchForInvoiceId($filters['invoice_id'])
             ->whereIn('status', ClaimStatus::transmittedStatuses());
 
         if (! $filters['inactive']) {

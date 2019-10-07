@@ -27,6 +27,7 @@ class ClaimQueueRequest extends FilteredResourceRequest
             'payer_id' => 'nullable',
             'client_type' => 'nullable',
             'inactive' => 'nullable|bool',
+            'invoice_id' => 'nullable',
         ];
     }
 }

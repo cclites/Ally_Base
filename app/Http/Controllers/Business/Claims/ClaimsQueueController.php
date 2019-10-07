@@ -101,6 +101,10 @@ class ClaimsQueueController extends BaseController
                 });
             }
 
+            if (filled($request->invoice_id)) {
+                $invoiceQuery->searchForId($request->invoice_id);
+            }
+
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();
 
             $coll = ClaimsQueueResource::collection($invoices);

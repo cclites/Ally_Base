@@ -72,7 +72,7 @@
                 :allow-all="true"
             />
 
-            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
+            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --"/>
 
             <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
@@ -86,6 +86,12 @@
             <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                 Show Inactive Clients
             </b-form-checkbox>
+
+            <b-input
+                v-model="filters.invoice_id"
+                placeholder="Invoice #"
+                class="mr-1 mt-1"
+            />
 
             <b-btn variant="info" class="mr-1 mt-1" @click.prevent="fetch()" :disabled="filters.busy">Generate</b-btn>
         </b-form>
@@ -332,6 +338,7 @@
                     client_id: '',
                     claim_status: 'unpaid',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),

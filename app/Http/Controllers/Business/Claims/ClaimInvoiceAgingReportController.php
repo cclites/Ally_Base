@@ -23,7 +23,8 @@ class ClaimInvoiceAgingReportController extends Controller
             $report->forClient($request->client_id ?? null)
                 ->forPayer($request->payer_id ?? null)
                 ->forClientType($request->client_type ?? null)
-                ->showInactive($request->inactive == 1);
+                ->showInactive($request->inactive == 1)
+                ->forClientInvoiceId($request->invoice_id);
 
             if ($request->filled('export')) {
                 return $report->setDateFormat('m/d/Y g:i A', auth()->user()->getTimezone())
