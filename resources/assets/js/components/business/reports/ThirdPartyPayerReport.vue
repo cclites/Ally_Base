@@ -28,9 +28,7 @@
                                      class="mb-2 mr-2 col-md-2">
                         </date-picker>
 
-                        <b-form-select v-model="form.type" class="mb-2 mr-2" name="client_id">
-                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                        </b-form-select>
+                        <client-type-dropdown v-model="form.type" class="mb-2 mr-2" name="client_id" />
 
                         <b-select v-model="form.client" class="mb-2 mr-2">
                             <option value="">All Clients</option>

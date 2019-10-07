@@ -4,14 +4,7 @@
             <b-col lg="12">
                 <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
                     <b-form-group label="Client Type" label-for="client_type">
-                        <b-form-select
-                                id="client_type"
-                                name="client_type"
-                                v-model="form.client_type"
-                                :disabled="busy"
-                        >
-                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                        </b-form-select>
+                        <client-type-dropdown id="client_type" name="client_type" v-model="form.client_type" :disabled="busy" empty-text="-- Select Client Type --" />
                         <input-help :form="form" field="client_type" text=""></input-help>
                     </b-form-group>
 
@@ -97,7 +90,7 @@
                 this.form = new Form({
                     question: data.question,
                     required: data.required == 1 ? 1 : 0,
-                    client_type: data.client_type,
+                    client_type: data.client_type ? data.client_type : '',
                 });
             },
         },

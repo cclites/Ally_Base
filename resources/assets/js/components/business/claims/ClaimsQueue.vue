@@ -28,7 +28,7 @@
 
                         <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" />
 
-                        <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+                        <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
                         <b-form-select
                             id="invoice_type"
@@ -36,7 +36,7 @@
                             v-model="filters.invoice_type"
                             class="mr-1 mt-1"
                         >
-                            <option value="">All Invoices</option>
+                            <option value="">-- Invoice Status --</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
                             <option value="has_claim">Has Claim</option>
@@ -58,7 +58,7 @@
 
                         <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                             <option v-if="loadingClients" selected value="">Loading Clients...</option>
-                            <option v-else value="">-- Select a Client --</option>
+                            <option v-else value="">-- All Clients --</option>
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>

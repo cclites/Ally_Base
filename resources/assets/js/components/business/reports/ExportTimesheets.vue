@@ -58,9 +58,7 @@
                             </b-col>
                             <b-col lg="2">
                                 <b-form-group label="Client Type">
-                                    <b-form-select v-model="form.client_type" class="mb-1" name="client_type">
-                                        <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                                    </b-form-select>
+                                    <client-type-dropdown v-model="form.client_type" class="mb-1" name="client_type" />
                                 </b-form-group>
                             </b-col>
                         </b-row>

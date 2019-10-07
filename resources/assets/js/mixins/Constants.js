@@ -31,12 +31,11 @@ export default {
             ],
             smsLength: 160,
             clientTypes: [
-                {value:'', text: "All Client Types"},
-                {value:'private_pay', text:'Private Pay'},
-                {value:'medicaid', text:'Medicaid'},
-                {value:'LTCI', text:'LTCI'},
-                {value:'VA', text:'VA'},
                 {value:'lead_agency', text:'Lead Agency'},
+                {value:'LTCI', text:'LTCI'},
+                {value:'medicaid', text:'Medicaid'},
+                {value:'private_pay', text:'Private Pay'},
+                {value:'VA', text:'VA'},
             ],
 
             EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',

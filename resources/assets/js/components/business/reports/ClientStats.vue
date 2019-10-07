@@ -25,12 +25,7 @@
                 </b-form-group>
 
                 <b-form-group label="Client Type" class="mb-2 mr-2">
-                    <b-form-select v-model="form.client_type" name="client_type" :disabled="state === 'loading'">
-                        <option value="">All</option>
-                        <option v-for="item in clientTypes" :key="item.id" :value="item.id">
-                            {{ item.name }}
-                        </option>
-                    </b-form-select>
+                    <client-type-dropdown v-model="form.client_type" name="client_type" :disabled="state === 'loading'" />
                 </b-form-group>
 
                 <b-form-group label="Client Status" class="mb-2 mr-2">

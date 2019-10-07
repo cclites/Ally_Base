@@ -74,7 +74,7 @@
 
             <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
 
-            <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+            <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
             <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                 <option v-if="loadingClients" selected value="">Loading Clients...</option>

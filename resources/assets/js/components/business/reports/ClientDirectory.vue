@@ -20,9 +20,7 @@
                             </b-form-select>
                         </b-col>
                         <b-col sm="3">
-                            <b-form-select v-model="filters.client_type" class="mb-2 mr-2" name="client_id">
-                                <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                            </b-form-select>
+                            <client-type-dropdown v-model="filters.client_type" class="mb-2 mr-2" name="client_id" />
                         </b-col>
                         <b-col sm="3">
                             <b-form-select name="status_alias_id" v-model=" filters.status_alias_id ">
