@@ -97,6 +97,7 @@
         <li><a href="{{ route('business.communication.text-caregivers') }}">Text Caregivers</a></li>
         <li><a href="{{ route('business.communication.sms-threads') }}">Sent Texts</a></li>
         <li><a href="{{ route('business.communication.sms-other-replies') }}">View Unsorted replies</a></li>
+        <li><a href="{{ route('business.communication.templates') }}">Templates</a></li>
     </ul>
 </li>
 <li>
