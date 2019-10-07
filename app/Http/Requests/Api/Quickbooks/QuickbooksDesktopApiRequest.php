@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Api\Quickbooks;
 
+use App\Http\Controllers\Api\Quickbooks\QuickbooksApiResponse;
+use App\Http\Controllers\Api\Quickbooks\QuickbooksResponseException;
 use App\QuickbooksConnection;
 use App\Business;
 use App\Responses\ErrorResponse;
@@ -42,10 +44,13 @@ class QuickbooksDesktopApiRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json([
-            'message' => 'Invalid Request.',
-            'errors' => $validator->errors(),
-        ], 422));
+        $response = (new QuickbooksApiResponse(
+            'Invalid Request.',
+            $validator->errors()->toArray(),
+            422
+        ))->toResponse(request());
+
+        throw new HttpResponseException($response);
     }
 
     /**

@@ -13,7 +13,7 @@ class QuickbooksDesktopController extends Controller
      * Pulse the API and make sure connection is working.
      *
      * @param QuickbooksDesktopApiRequest $request
-     * @return SuccessResponse
+     * @return QuickbooksApiResponse
      */
     public function ping(QuickbooksDesktopApiRequest $request)
     {
@@ -21,6 +21,6 @@ class QuickbooksDesktopController extends Controller
             'last_connected_at' => Carbon::now(),
         ]);
 
-        return new SuccessResponse('pong');
+        return new QuickbooksApiResponse('pong');
     }
 }
