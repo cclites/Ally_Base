@@ -379,6 +379,8 @@ Route::group([
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
     Route::get('reports/client-referrals/{businessId}', 'Business\Report\ClientReferralsReportController@populateDropdown');
 
+    Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
+
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
     Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');

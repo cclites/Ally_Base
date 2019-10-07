@@ -80,7 +80,6 @@ use App\Data\ScheduledRates;
  * @property int|null $address_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \App\Address|null $address
- * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
