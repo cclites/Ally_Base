@@ -3,7 +3,8 @@
         <b-list-group>
             <b-list-group-item v-for="type in types" :key="type.id" class="d-flex">
                 <div class="f-1">{{ type.type }}</div>
-                <div class="ml-auto">
+                <div class="d-flex justify-content-end align-items-center">
+                    <a href="#" style="margin-right:10px"><i class="fa fa-edit" @click="showNew(type)"></i></a>
                     <a href="#"><i class="fa fa-trash" @click="showDestroy(type)"></i></a>
                 </div>
             </b-list-group-item>
@@ -39,6 +40,7 @@
                 form: new Form({
                     type: '',
                 }),
+                editing: false,
                 busy: false,
             }
         },
@@ -53,7 +55,14 @@
                     });
             },
 
-            showNew() {
+            showNew( type = null ) {
+                this.editing = null;
+
+                if( type ){
+
+                    this.editing = type;
+                    this.form.type = type.type;
+                }
                 this.$refs.addExpirationTypeModal.show();
             },
 
@@ -62,6 +71,7 @@
             },
 
             hideNew() {
+                this.editing = null;
                 this.$refs.addExpirationTypeModal.hide();
             },
 
@@ -75,8 +85,13 @@
             },
 
             addExpiration() {
+
                 this.busy = true;
-                this.form.post(`/business/expiration-types`)
+
+                let method = this.editing ? 'patch' : 'post';
+                let url = '/business/expiration-types' + ( this.editing ? '/' + this.editing.id : '' );
+
+                this.form.submit( method, url )
                     .then(({data}) => {
                         this.form.type = '';
                         this.setItems(data.data);
@@ -84,6 +99,7 @@
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
+                        this.editing = null;
                     });
             },
 

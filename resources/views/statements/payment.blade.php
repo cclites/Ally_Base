@@ -84,7 +84,7 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
+                @include('layouts.partials.print_logo')
                 <br>
                 <table>
                     <tr>

@@ -187,6 +187,7 @@
                     let flags = [];
                     if (item.client_on_hold) flags.push("On Hold");
                     if (!item.payer_payment_type) flags.push("No Payment Method");
+                    if (item.payment_errors) flags.push( item.payment_errors );
 
                     item.flags = flags.join(' | ');
                     return item;

@@ -28,7 +28,7 @@ class UpdateMissingClaimsFieldsRequest extends FormRequest
             'business_ein' => 'sometimes|required|max:255',
             'business_zip' => 'sometimes|required|max:45',
             'business_medicaid_id' => 'sometimes|required|max:255',
-            'business_medicaid_npi_number' => 'sometimes|required|max:45',
+            'business_medicaid_npi_number' => 'sometimes|required|digits:10',
             'business_medicaid_npi_taxonomy' => 'sometimes|required|max:45',
 
             'client_medicaid_id' => 'sometimes|required|max:255',

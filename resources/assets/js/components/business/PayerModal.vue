@@ -35,11 +35,11 @@
                         </b-select>
                         <input-help :form="form" field="payment_method_type"></input-help>
                     </b-form-group>
-                    <b-form-group :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>)`" label-for="payer_code">
+                    <b-form-group :label="`MCO / Payer Identifier (<a href='${EDI_CODE_GUIDE_URL}' target='_blank'>Code Guides: HHA</a>) (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-for="payer_code">
                         <b-form-input type="text" v-model="form.payer_code" />
                         <input-help :form="form" field="payer_code" text=""></input-help>
                     </b-form-group>
-                    <b-form-group label="Plan Identifier" label-for="plan_code">
+                    <b-form-group :label="`Plan Identifier (<a href='${TELLUS_CODE_GUIDE_URL}' target='_blank'>Code Guides: Tellus</a>)`" label-for="plan_code">
                         <b-form-input type="text" v-model="form.plan_code" />
                         <input-help :form="form" field="plan_code" text=""></input-help>
                     </b-form-group>

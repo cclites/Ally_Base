@@ -22,15 +22,17 @@ use App\PhoneNumber;
 use App\ScheduleNote;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
+use App\Traits\Console\HasProgressBars;
 use App\User;
 use Crypt;
 use Illuminate\Console\Command;
 use App\Business;
 use App\QuickbooksConnection;
-use Symfony\Component\Console\Helper\ProgressBar;
 
 class ClearSensitiveData extends Command
 {
+    use HasProgressBars;
+
     /**
      * The name and signature of the console command.
      *
@@ -49,16 +51,6 @@ class ClearSensitiveData extends Command
      * @var \Faker\Generator
      */
     protected $faker;
-
-    /**
-     * @var ProgressBar
-     */
-    protected $progressBar;
-
-    /**
-     * @var int
-     */
-    protected $progressTotal;
 
     /**
      * @var bool
@@ -992,37 +984,5 @@ class ClearSensitiveData extends Command
     protected function generateSsn() : string
     {
         return mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
-    }
-
-    /**
-     * Helper to create a progress bar.
-     *
-     * @param string $status
-     * @param int $total
-     */
-    protected function startProgress(string $status, int $total) : void
-    {
-        $this->info($status);
-        $this->progressTotal = $total;
-        $this->progressBar = $this->output->createProgressBar($this->progressTotal);
-    }
-
-    /**
-     * Advance the current progress bar.
-     *
-     * @param int $size
-     */
-    protected function advance(int $size = 1) : void
-    {
-        $this->progressBar->advance($size);
-    }
-
-    /**
-     * Complete the current progress bar.
-     */
-    protected function finish() : void
-    {
-        $this->progressBar->setProgress($this->progressTotal);
-        $this->line('');
     }
 }

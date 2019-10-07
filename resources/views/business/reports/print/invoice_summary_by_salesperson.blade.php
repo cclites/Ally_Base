@@ -1,71 +1,20 @@
 @extends('layouts.print')
 
-@section('title', "Invoice SUmmary By Salesperson")
+@section('title', "Invoice Summary By Salesperson")
 
 @push('head')
     <style>
-        .col-sm-6 {
-            float: left;
-            width: 50%;
-        }
-
-        body {
-            color: #000;
-        }
-
-        .header-left,
-        .footer-left {
-            float: left;
-            width: 65%;
-            padding-left: 0;
-        }
-
-        .header-right,
-        .footer-right {
-            float: left;
-            width: 35%;
-            padding-right: 0;
-        }
-
-        .footer-left {
-            padding-left: 2rem;
-            padding-right: 4rem;
-        }
-
-        .header-right table tr td {
-            padding-left: .5rem;
-        }
-
-        .report-table {
-            margin-top: 2rem;
-            font-size: 1.4rem;
-        }
-
-        .bg-info {
-            color: white;
-        }
-
-        .header-right-table {
-            float: right;
-        }
-
-        .header-right-table td,
-        .header-right-table th {
-            text-align: left;
-            padding: .5rem .75rem;
-        }
-
-        .print-header {
-            margin: 0;
-            background-color: transparent;
-            padding: 15px;
-        }
 
         .logo img {
             max-height: 80px;
         }
 
-        table.b-table tfoot tr th{
+        table tr th{
+            padding: 0 6px;
+            width: 200px;
+        }
+
+        table tfoot tr td {
             padding-top: 40px;
         }
 
@@ -73,14 +22,10 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
 
     <div class="page" id="summary">
-        <div class="row print-header">
-            <div class="header-left">
-                <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
-                <div class="h4">Invoice Summary By Salesperson</div>
-            </div>
-        </div>
+        <div class="h4">Invoice Summary By Salesperson</div>
         <div>
             <table>
                 <thead>

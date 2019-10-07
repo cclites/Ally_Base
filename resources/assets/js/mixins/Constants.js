@@ -38,6 +38,7 @@ export default {
                 {value:'VA', text:'VA'},
             ],
 
+            TELLUS_CODE_GUIDE_URL: '/knowledge-base/tellus-guide',
             EDI_CODE_GUIDE_URL: 'https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_Florida.pdf',
             SHIFT_MAX_FUTURE_END_DATE: 168, // hours
 

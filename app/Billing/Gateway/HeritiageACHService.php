@@ -53,6 +53,8 @@ class HeritiageACHService implements ACHDepositInterface
             'declined' => 0,
             'cvv_pass' => 0,
             'avs_pass' => 0,
+            'account_number' => $account->last_four ? $account->last_four : null,
+            'routing_number' => $account->last_four_routing_number ? $account->last_four_routing_number : null,
         ]);
 
         $transaction->method()->associate($account);

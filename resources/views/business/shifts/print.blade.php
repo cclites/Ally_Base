@@ -14,5 +14,6 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
     @include('business.shifts.print_details', ['report_type' => 'full'])
 @endsection

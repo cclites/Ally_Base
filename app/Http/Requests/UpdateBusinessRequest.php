@@ -49,7 +49,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'co_caregiver_signature' => 'required|bool',
             'ein' => 'nullable',
             'medicaid_id' => 'nullable',
-            'medicaid_npi_number' => 'nullable',
+            'medicaid_npi_number' => 'nullable|digits:10',
             'medicaid_npi_taxonomy' => 'nullable',
             'allow_client_confirmations' => 'required|bool',
             'auto_confirm_modified' => 'required|bool',

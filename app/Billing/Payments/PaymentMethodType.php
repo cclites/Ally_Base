@@ -23,4 +23,20 @@ class PaymentMethodType extends Enum
     static function ACH() { return new self(self::ACH); }
     static function ACH_P() { return new self(self::ACH_P); }
     static function TRUST() { return new self(self::TRUST); }
+
+    /**
+     * Get all of the payment types in array form.
+     *
+     * @return array
+     */
+    public static function all(): array
+    {
+        try {
+            $cls = new \ReflectionClass(__CLASS__);
+            return $cls->getConstants();
+        } catch (\ReflectionException $ex) {
+            app('sentry')->captureException($ex);
+            return [];
+        }
+    }
 }

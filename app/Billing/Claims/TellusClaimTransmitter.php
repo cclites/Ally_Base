@@ -46,9 +46,9 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             array_push($errors['business'], 'medicaid_id');
         }
 
-//        if (empty($invoice->client->business->medicaid_npi_number)) {
-//            array_push($errors['business'], 'medicaid_npi_number');
-//        }
+        if (empty($invoice->client->business->medicaid_npi_number)) {
+            array_push($errors['business'], 'medicaid_npi_number');
+        }
 //
 //        if (empty($invoice->client->business->medicaid_npi_taxonomy)) {
 //            array_push($errors['business'], 'medicaid_npi_taxonomy');
