@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\Payment;
-use App\Billing\Queries\ClientInvoiceQuery;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\ChargedRate;
 use App\QuickbooksClientInvoice;
@@ -16,7 +14,6 @@ use App\Responses\Resources\QuickbooksQueueResource;
 use App\Responses\SuccessResponse;
 use App\Services\Quickbooks\QuickbooksInvoice;
 use App\Services\Quickbooks\QuickbooksInvoiceItem;
-use App\Services\QuickbooksOnlineService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -47,7 +44,7 @@ class QuickbooksQueueController extends Controller
             }
 
             if ($request->filled('payer_id')) {
-                $invoiceQuery->whereHas('clientPayer', function ($query) use($request) {
+                $invoiceQuery->whereHas('clientPayer', function ($query) use ($request) {
                     $query->where('payer_id', $request->payer_id);
                 });
             }
@@ -82,7 +79,7 @@ class QuickbooksQueueController extends Controller
 
         /** @var QuickbooksConnection $connection */
         $connection = $business->quickbooksConnection;
-        if (empty($connection) || ! $connection->isConfigured()) {
+        if (empty($connection) || !$connection->isConfigured()) {
             return new ErrorResponse(401, 'You must be connected to the Quickbooks API and have all your settings configured in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.');
         }
 
@@ -208,7 +205,7 @@ class QuickbooksQueueController extends Controller
         }
 
         $qbInvoice->amount = collect($qbInvoice->lineItems)->reduce(function (float $carry, $item) {
-           return add($carry, $item->amount);
+            return add($carry, $item->amount);
         }, floatval(0));
 
         $result = $api->createInvoice($qbInvoice->toArray());
@@ -234,7 +231,7 @@ class QuickbooksQueueController extends Controller
      * @param int|null $overrideServiceId
      * @return array
      */
-    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection, ?int $overrideServiceId = null) : array
+    public function mapInvoiceItemToService(ClientInvoiceItem $item, QuickbooksConnection $connection, ?int $overrideServiceId = null): array
     {
         $service = null;
         if ($item->name == 'Manual Adjustment') {
