@@ -14,21 +14,21 @@
                             :allow-all="true"
                         />
                         <date-picker
-                                v-model="filters.start_date"
-                                placeholder="Start Date"
-                                class="mt-1"
+                            v-model="filters.start_date"
+                            placeholder="Start Date"
+                            class="mt-1"
                         >
                         </date-picker> &nbsp;to&nbsp;
                         <date-picker
-                                v-model="filters.end_date"
-                                placeholder="End Date"
-                                class="mr-1 mt-1"
+                            v-model="filters.end_date"
+                            placeholder="End Date"
+                            class="mr-1 mt-1"
                         >
                         </date-picker>
 
-                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" />
+                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
 
-                        <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+                        <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
                         <b-form-select
                             id="invoice_type"
@@ -36,7 +36,7 @@
                             v-model="filters.invoice_type"
                             class="mr-1 mt-1"
                         >
-                            <option value="">All Invoices</option>
+                            <option value="">-- Invoice Status --</option>
                             <option value="unpaid">Unpaid Invoices</option>
                             <option value="paid">Paid Invoices</option>
                             <option value="has_claim">Has Claim</option>
@@ -58,7 +58,7 @@
 
                         <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                             <option v-if="loadingClients" selected value="">Loading Clients...</option>
-                            <option v-else value="">-- Select a Client --</option>
+                            <option v-else value="">-- All Clients --</option>
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
@@ -66,6 +66,12 @@
                         <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                             Show Inactive Clients
                         </b-form-checkbox>
+
+                        <b-input
+                            v-model="filters.invoice_id"
+                            placeholder="Invoice #"
+                            class="mr-1 mt-1"
+                        />
 
                         <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -260,6 +266,7 @@
                     client_id: '',
                     payer_id: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),

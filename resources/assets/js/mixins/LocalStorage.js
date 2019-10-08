@@ -16,7 +16,7 @@ export default {
             try {
                 let val = JSON.parse(localStorage.getItem(this.computedPrefix + item));
                 if (typeof(val) === 'string') {
-                    if (val.toLowerCase() === 'null' || val.toLowerCase() === '') return null;
+                    if (val.toLowerCase() === 'null') return null;
                     if (val.toLowerCase() === 'false') return false;
                     if (val.toLowerCase() === 'true') return true;
                 }

@@ -15,7 +15,7 @@
 
                     <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
 
-                    <b-form-select v-model="form.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+                    <client-type-dropdown v-model="form.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
                     <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                         <option v-if="loadingClients" selected value="">Loading Clients...</option>
@@ -27,6 +27,12 @@
                     <b-form-checkbox v-model="form.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                         Show Inactive Clients
                     </b-form-checkbox>
+
+                    <b-input
+                        v-model="form.invoice_id"
+                        placeholder="Invoice #"
+                        class="mr-1 mt-1"
+                    />
 
                     <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-1 mt-1">
                         <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
@@ -140,6 +146,7 @@
                     client_id: '',
                     payer_id: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),
