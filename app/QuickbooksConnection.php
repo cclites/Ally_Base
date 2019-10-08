@@ -29,6 +29,14 @@ class QuickbooksConnection extends BaseModel
      */
     protected $appends = [];
 
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['last_connected_at'];
+
+
     const FEE_TYPE_REGISTRY = 'registry';
     const FEE_TYPE_CLIENT = 'client';
 
@@ -159,7 +167,8 @@ class QuickbooksConnection extends BaseModel
      */
     public function isAuthenticated() : bool
     {
-        return !empty($this->attributes['access_token']);
+        return (!$this->attributes['is_desktop'] && !empty($this->attributes['access_token']))
+            || ($this->attributes['is_desktop'] && !empty($this->attributes['desktop_api_key']));
     }
 
     /**

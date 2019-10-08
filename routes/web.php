@@ -470,6 +470,7 @@ Route::group([
     Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
     Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
     Route::get('quickbooks/{business}/config', 'Business\QuickbooksSettingsController@config')->name('quickbooks.config');
+    Route::get('quickbooks/{business}/enable-desktop', 'Business\QuickbooksSettingsController@enableDesktop')->name('quickbooks.enable-desktop');
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');

@@ -1,8 +1,13 @@
 <?php
 namespace App\Responses\Resources;
 
+use App\QuickbooksConnection;
+
 class QuickbooksConnectionResource extends ClientInvoice
 {
+    /** @var QuickbooksConnection */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -22,6 +27,9 @@ class QuickbooksConnectionResource extends ClientInvoice
             'is_authenticated' => $this->resource->isAuthenticated(),
             'allow_shift_overrides' => $this->resource->allow_shift_overrides,
             'created_at' => $this->resource->created_at->toDateTimeString(),
+            'is_desktop' => $this->resource->is_desktop,
+            'desktop_api_key' => $this->resource->desktop_api_key,
+            'last_connected_at' => optional($this->resource->last_connected_at)->toDateTimeString(),
         ]);
     }
 }
