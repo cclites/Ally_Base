@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 use App\Traits\HasSSNAttribute;
+use App\Signature;
 use Carbon\Carbon;
 
 /**
@@ -99,6 +100,7 @@ use Carbon\Carbon;
  * @property int $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BusinessChain $businessChain
+ * @property-read \App\Signature $signature
  * @property-read string $masked_ssn
  * @property-read mixed $name
  * @property null|string $w9_ssn
@@ -290,5 +292,10 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
 
             return $caregiver;
         });
+    }
+
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
     }
 }
