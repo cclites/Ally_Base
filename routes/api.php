@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => 'qb', 'as' => 'qb.'], function() {
     Route::get('/ping', 'Api\Quickbooks\QuickbooksDesktopController@ping')->name('ping');
+    Route::post('/sync', 'Api\Quickbooks\QuickbooksDesktopController@sync')->name('sync');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

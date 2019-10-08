@@ -2,15 +2,14 @@
 
 namespace App\Http\Requests\Api\Quickbooks;
 
-use App\Http\Controllers\Api\Quickbooks\QuickbooksApiResponse;
 use App\Http\Controllers\Api\Quickbooks\QuickbooksResponseException;
+use App\Http\Controllers\Api\Quickbooks\QuickbooksApiResponse;
+use App\Exceptions\QuickbooksApiResponseException;
+use Illuminate\Contracts\Validation\Validator;
+use App\Exceptions\HttpResponsableException;
+use Illuminate\Foundation\Http\FormRequest;
 use App\QuickbooksConnection;
 use App\Business;
-use App\Responses\ErrorResponse;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\ValidationException;
 
 class QuickbooksDesktopApiRequest extends FormRequest
 {
@@ -37,20 +36,16 @@ class QuickbooksDesktopApiRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @param \Illuminate\Contracts\Validation\Validator $validator
      * @return void
      *
      * @throws \Illuminate\Validation\HttpResponseException
      */
     protected function failedValidation(Validator $validator)
     {
-        $response = (new QuickbooksApiResponse(
-            'Invalid Request.',
-            $validator->errors()->toArray(),
-            422
-        ))->toResponse(request());
-
-        throw new HttpResponseException($response);
+        throw new HttpResponsableException(
+            new QuickbooksApiResponse('Invalid API Key.', null, 422)
+        );
     }
 
     /**
@@ -82,7 +77,9 @@ class QuickbooksDesktopApiRequest extends FormRequest
             ->first();
 
         if (empty($this->connection)) {
-            abort(404);
+            throw new HttpResponsableException(
+                new QuickbooksApiResponse('Invalid API Key: Could not find connection.', null, 404)
+            );
         }
 
         return $this->connection;
@@ -102,7 +99,9 @@ class QuickbooksDesktopApiRequest extends FormRequest
         $this->business = $this->connection()->business;
 
         if (empty($this->business)) {
-            abort(404);
+            throw new HttpResponsableException(
+                new QuickbooksApiResponse('Invalid API Key: Could not find account.', null, 404)
+            );
         }
 
         return $this->business;
