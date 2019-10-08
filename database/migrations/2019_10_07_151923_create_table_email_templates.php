@@ -17,7 +17,9 @@ class CreateTableEmailTemplates extends Migration
             $table->increments('id');
             $table->unsignedInteger('business_id');
             $table->string('type');
-            $table->text('message');
+            $table->string('greeting');
+            $table->text('body');
+            $table->timestamps();
         });
     }
 

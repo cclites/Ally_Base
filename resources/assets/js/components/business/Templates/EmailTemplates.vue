@@ -7,40 +7,39 @@
             <option v-for="type in types" :key="type.id">{{ type.name }}</option>
         </b-select>
 
-        <b-row class="pane caregiver_expirations">
-            <div>
-                <b-input v-model="cg_expire.greeting"></b-input>
-            </div>
+        <b-row class="pane caregiver_expirations mt-3">
+            <b-col>
+                <caregiver-expiration-notice :template="caregiver_expiration"></caregiver-expiration-notice>
+            </b-col>
         </b-row>
 
     </b-card>
 </template>
 
 <script>
+
     export default {
         name: "EmailTemplates",
         props: {
-            templates: [],
-            types: [],
+            types: '',
+            templates: '',
         },
         data() {
             return {
                 selectedType: "",
-                cg_expire: {
-                    greeting: "",
-                }
+                caregiver_expiration: {},
             };
         },
+        mounted(){
+            this.caregiver_expiration = this.templates.filter( x => x.type === 'caregiver_expiration');
+        },
         watch: {
-            selectedType(){
-
-            },
         }
     }
 </script>
 
 <style scoped>
     .pane{
-        display: none;
+       /*display: none;*/
     }
 </style>
