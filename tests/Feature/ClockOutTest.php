@@ -5,6 +5,7 @@ use App\Activity;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\ClientType;
 use App\Events\UnverifiedShiftLocation;
 use App\Events\UnverifiedClockOut;
 use App\PhoneNumber;
@@ -263,6 +264,14 @@ class ClockOutTest extends TestCase
         $this->actingAs($this->caregiver->user);
 
         $activity = factory(Activity::class)->create();
+        $activities = [$activity->id];
+
+        if( in_array( $shift->client->client_type, [ ClientType::LTCI, ClientType::MEDICAID ] ) ){
+            // technically just testing for the 2nd activity requirement if the factory builds with this client_type
+
+            $activity2 = factory(Activity::class)->create();
+            $activities = [$activity->id, $activity2->id];
+        }
 
         $question = factory(\App\Question::class)->create(['business_id' => $this->business->id, 'client_type' => $this->client->client_type]);
 
@@ -271,7 +280,7 @@ class ClockOutTest extends TestCase
         $data = [
             'clientSignature' => 'test',
             'caregiver_comments' => 'test',
-            'activities' => [$activity->id],
+            'activities' => $activities,
             'questions' => [$question->id => 'answer'],
             'goals' => [],
         ];
