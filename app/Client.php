@@ -624,6 +624,26 @@ class Client extends AuditableModel implements
     }
 
     /**
+     * Get the Client's Policy # (insurance and service auth tab)
+     *
+     * @return null|string
+     */
+    public function getPolicyNumber(): ?string
+    {
+        return $this->ltci_policy;
+    }
+
+    /**
+     * Get the Client's Claim # (insurance and service auth tab)
+     *
+     * @return null|string
+     */
+    public function getClaimNumber(): ?string
+    {
+        return $this->ltci_claim;
+    }
+
+    /**
      * Get the client timezone (currently retrieved from the business record)
      *
      * @return string

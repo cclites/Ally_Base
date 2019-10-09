@@ -2,11 +2,14 @@
 /**
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
+ * @var \App\Billing\ClientPayer|null $clientPayer The related Client Payer
  */
 ?>
 <div class="row">
-    <div class="footer-left">
-        &nbsp;
+    <div class="footer-left" style="margin-top: 2rem">
+        @if($clientPayer && $clientPayer->notes)
+            <div>{{ $clientPayer->notes }}</div>
+        @endif
     </div>
     <div class="footer-right" style="padding-right: 15px;">
         <table class="table">
@@ -38,11 +41,8 @@
 <div class="row mt-5">
     <div class="col">
         @if (! empty($sender->getPhoneNumber()))
-        <p class="text-center"><em>For questions regarding hours and rates: {{ $sender->getPhoneNumber()->number() }}</em></p>
+        <p class="text-center"><em>For questions call {{ $sender->getPhoneNumber()->number() }}</em></p>
         @endif
-        <p class="text-center">
-            For questions regarding payments: support@allyms.com - (800) 930-0587
-        </p>
         <p class="text-center"><em>Thank you for your business!</em></p>
     </div>
 </div>

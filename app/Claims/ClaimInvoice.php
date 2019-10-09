@@ -2,6 +2,7 @@
 
 namespace App\Claims;
 
+use App\Billing\ClientPayer;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
@@ -276,6 +277,22 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             /** @var ClaimInvoiceItem $item */
             return $item->claimable_type == ClaimableExpense::class;
         })->count() > 0;
+    }
+
+    /**
+     * Get the ClientPayer record from the current
+     * client/payer combo.
+     *
+     * WARNING: This has the potential to return null if the
+     * Client's payer list has been modified to remove this payer.
+     *
+     * @return ClientPayer
+     */
+    public function getClientPayer() : ?ClientPayer
+    {
+        return $this->client->payers()
+            ->where('payer_id', $this->payer_id)
+            ->first();
     }
 
     // **********************************************************
