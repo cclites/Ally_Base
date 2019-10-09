@@ -35,11 +35,7 @@
 
                     <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
 
-                    <b-btn variant="info" class="mr-1 mt-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
-
-                    <b-button @click="download()" v-if="!!items" variant="success" class="mt-1">
-                        <i class="fa fa-file-excel-o"></i> Export to Excel
-                    </b-button>
+                    <b-btn variant="info" class="t-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
                 </b-form>
             </b-col>
         </b-row>
@@ -48,7 +44,10 @@
             <b-col lg="6">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
-            <b-col lg="6">
+            <b-col lg="6" class="d-flex">
+                <b-button @click="download()" v-if="!filters.busy && !!items" variant="success" class="ml-auto">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel
+                </b-button>
             </b-col>
         </b-row>
 
