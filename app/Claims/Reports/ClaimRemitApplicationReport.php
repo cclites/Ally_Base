@@ -94,14 +94,15 @@ class ClaimRemitApplicationReport extends BaseReport
 
                 return [
                     'payer_id' => optional($payer)->id,
-                    'payer_name' => empty($payer) ? '' : $payer->name,
-                    'amount' => $amount,
-                    'available' => $available,
-                    'applied' => $applied,
-                    'remit_count' => $payerGroup->count(),
+                    'payer' => empty($payer) ? '(No Payer)' : $payer->name,
+                    'total_payments' => $payerGroup->count(),
+                    'total_amount' => $amount,
+                    'total_amount_available' => $available,
                     'remits' => ClaimRemitResource::collection($payerGroup),
                 ];
-            })->values();
+            })
+            ->sortBy('payer')
+            ->values();
     }
 
     /**

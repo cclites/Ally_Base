@@ -35,7 +35,11 @@
 
                     <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
 
-                    <b-btn variant="info" class="mt-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
+                    <b-btn variant="info" class="mr-1 mt-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
+
+                    <b-button @click="download()" v-if="!!items" variant="success" class="mt-1">
+                        <i class="fa fa-file-excel-o"></i> Export to Excel
+                    </b-button>
                 </b-form>
             </b-col>
         </b-row>
@@ -69,6 +73,7 @@
                         <b-table bordered striped show-empty
                             :items="row.item.remits"
                             :fields="subFields"
+                            sort-by="date"
                         >
                         </b-table>
                       <!---------- /END SUB TABLE --------------->
@@ -94,16 +99,15 @@
         data() {
             return {
                 items: [],
-                sortBy: 'payer_name',
+                sortBy: 'payer',
                 sortDesc: false,
                 filter: '',
                 fields: {
                     expand: { label: ' ', sortable: false, },
-                    payer_name: { label: 'Payer', sortable: true, formatter: x => x ? x : '(No Payer)' },
-                    remit_count: { label: 'Total Payments', sortable: true, },
-                    // applied: { sortable: true },
-                    amount: { label: 'Total Amount', sortable: true, formatter: x => this.moneyFormat(x) },
-                    available: { label: 'Total Amount Available', sortable: true, formatter: x => this.moneyFormat(x) },
+                    payer: { sortable: true, formatter: x => x ? x : '(No Payer)' },
+                    total_payments: { sortable: true, },
+                    total_amount: { sortable: true, formatter: x => this.moneyFormat(x) },
+                    total_amount_available: { sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 subFields: {
                     id: { sortable: true, label: 'ID' },
@@ -149,6 +153,10 @@
                     .catch(() => {
                         this.items = [];
                     });
+            },
+
+            download() {
+                window.location = this.filters.toQueryString('/business/reports/claims/remit-application?export=1');
             },
         },
 
