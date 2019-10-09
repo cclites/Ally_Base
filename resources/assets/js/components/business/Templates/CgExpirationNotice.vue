@@ -94,7 +94,7 @@
                 }else{
                     this.form = new Form({
                         greeting: "Hello #caregiver-name#\n",
-                        body: "This is a friendly reminder that, according to our records, your #expiring-item-name# certification expires on #expiring-item-date#. Please contact #registry-name#, with your updated certification information as soon as possible.\n" +
+                        body: "This is a friendly reminder that, according to our records, your #expiring-item-name# certification expires on #expiring-item-date#. Please contact #registry-name#, with your updated certification information as soon as possible.\n\n" +
                             "Thank you!\n" +
                             "Sincerely,\n" +
                             "xxxxxxxxxxxx",
