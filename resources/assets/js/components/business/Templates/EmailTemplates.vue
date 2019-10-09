@@ -3,11 +3,12 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-select v-model="selectedType">
-            <option v-for="type in types" :key="type.id">{{ type.name }}</option>
-        </b-select>
-
-        <b-row class="pane caregiver_expirations mt-3">
+        <b-form-group label="Select a template to customize">
+            <b-select v-model="selectedType">
+                <option v-for="type in types" :key="type.id">{{ type.name }}</option>
+            </b-select>
+        </b-form-group>
+        <b-row v-if="selectedType === 'Caregiver Expiration'" class="pane mt-3">
             <b-col>
                 <caregiver-expiration-notice :template="caregiver_expiration"></caregiver-expiration-notice>
             </b-col>
@@ -39,7 +40,4 @@
 </script>
 
 <style scoped>
-    .pane{
-       /*display: none;*/
-    }
 </style>

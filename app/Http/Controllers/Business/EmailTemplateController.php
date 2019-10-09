@@ -42,6 +42,9 @@ class EmailTemplateController extends Controller
         $template->business_id = activeBusiness()->id;
 
         if($template->save()){
+
+            \Log::info($template);
+
             return new SuccessResponse( 'Template has been saved.', $template );
         }
 
@@ -85,6 +88,7 @@ class EmailTemplateController extends Controller
      */
     public function destroy($id)
     {
-        //
+        EmailTemplate::destroy($id);
+        return new SuccessResponse('Template has been deleted.');
     }
 }

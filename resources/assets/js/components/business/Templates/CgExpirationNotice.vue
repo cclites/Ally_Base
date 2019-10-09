@@ -5,7 +5,10 @@
     >
         <b-row>
             <b-col>
-                <b-btn @click="save" variant="info" class="float-right">
+                <b-btn v-if="form.id" @click="destroy" variant="warning" class="float-right">
+                    Delete Template
+                </b-btn>
+                <b-btn @click="save" variant="info" class="float-right mr-2">
                     Save Template
                 </b-btn>
             </b-col>
@@ -56,56 +59,74 @@
     export default {
         name: "CgExpirationNotice",
         props: {
-            template: '',
+            template: null,
         },
         data() {
             return {
                 selectedType: "",
-                form: {},
+                form: new Form({}),
             };
         },
         mounted(){
-
             this.$nextTick(() => {
                 this.createForm();
             });
-
-
         },
         methods: {
-
-            save(){
+            save()
+            {
                 let method = (typeof this.form.id === 'undefined') ? 'put' : "patch";
 
                 this.form.submit( method, '/business/communication/templates')
-                    .then( ({ response }) => {
-                        this.form = new Form(response.data);
+                    .then( ({ data }) => {
+                        this.form = new Form(data.data);
                     })
-                    .catch(e => {})
+                    .catch(e => {
+                        console.log(e);
+                    })
                     .finally(() => {
                     })
-
             },
 
-            createForm(){
-
-                if(this.template !== null){
+            createForm()
+            {
+                if(this.template.length !== 0){
                     this.form = new Form(this.template[0]);
                 }else{
-                    this.form = new Form({
-                        greeting: "Hello #caregiver-name#\n",
-                        body: "This is a friendly reminder that, according to our records, your #expiring-item-name# certification expires on #expiring-item-date#. Please contact #registry-name#, with your updated certification information as soon as possible.\n\n" +
-                            "Thank you!\n" +
-                            "Sincerely,\n" +
-                            "xxxxxxxxxxxx",
-                        type: 'caregiver_expiration',
-                    })
+                    this.createDefault();
                 }
             },
+            createDefault()
+            {
+                this.form = new Form({
+                    greeting: "Hello #caregiver-name#\n",
+                    body: "This is a friendly reminder that, according to our records, your #expiring-item-name# certification expires on #expiring-item-date#. Please contact #registry-name#, with your updated certification information as soon as possible.\n\n" +
+                        "Thank you!\n" +
+                        "Sincerely,\n" +
+                        "xxxxxxxxxxxx",
+                    type: 'caregiver_expiration',
+                })
+            },
+            destroy()
+            {
+                if (!confirm('Are you sure you wish to delete this template?')) {
+                    return;
+                }
+
+                axios.delete('/business/communication/templates/' + this.form.id)
+                    .then(response => {
+                        this.createDefault();
+                    })
+                    .catch(error => {
+                        console.error(error.response);
+                    });
+            }
         },
     }
 </script>
 
 <style scoped>
-
+    table tr td{
+        padding: 0 12px 0 0;
+    }
 </style>
