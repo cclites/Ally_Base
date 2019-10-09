@@ -42,9 +42,6 @@ class EmailTemplateController extends Controller
         $template->business_id = activeBusiness()->id;
 
         if($template->save()){
-
-            \Log::info($template);
-
             return new SuccessResponse( 'Template has been saved.', $template );
         }
 
