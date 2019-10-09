@@ -3,6 +3,7 @@
 @section('title', 'Projected Billing')
 
 @section('content')
+    @include('layouts.partials.print_logo')
     <table class="w-100">
         <tr>
             <td class="w-50">

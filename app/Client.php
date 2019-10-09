@@ -610,7 +610,7 @@ class Client extends AuditableModel implements
     {
         $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
 
-        if( $most_recent ) return 'Outstanding Client Payer Issue - ' . $most_recent->error_message;
+        if( $most_recent && $most_recent->error_message ) return 'Outstanding Client Payer Issue - ' . $most_recent->error_message;
 
         return null;
     }

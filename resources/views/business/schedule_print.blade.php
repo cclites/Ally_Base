@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+    @include('layouts.partials.print_logo')
     <script>
         function onPrint() {
             window.print();
