@@ -120,7 +120,7 @@ class CommunicationController extends Controller
             'message' => $request->message,
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
-            'sent_by_user_id' => auth()->user()->id,
+            'user_id' => auth()->user()->id,
         ];
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);
@@ -194,11 +194,8 @@ class CommunicationController extends Controller
     public function threadShow(SmsThread $thread)
     {
         $this->authorize('read', $thread);
-        $thread->load(['recipients', 'replies', 'audits', 'audits.user']);
-
+        $thread->load(['recipients', 'replies', 'sender']);
         $thread->unreadReplies()->update(['read_at' => Carbon::now()]);
-
-        $thread->sent_by = $thread->sentBy();
 
         if (request()->wantsJson()) {
             return response()->json($thread);

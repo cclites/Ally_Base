@@ -102,7 +102,6 @@ export default {
 
             let unique = [];
             this.thread.recipients.forEach(item => {
-                console.log(item);
                 if (unique.findIndex(x => x.user_id == item.user_id) < 0) {
                     unique.push(item);
                 }
@@ -112,9 +111,8 @@ export default {
         },
 
         sentBy(){
-
-            if(this.thread.sent_by){
-                return this.thread.sent_by;
+            if(this.thread.sender){
+                return this.thread.sender.nameLastFirst;
             }
         },
     },

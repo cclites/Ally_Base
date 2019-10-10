@@ -85,7 +85,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     /**
      * Get the thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function replies()
     {
@@ -95,12 +95,22 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     /**
      * Get the unread thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function unreadReplies()
     {
         return $this->hasMany(SmsThreadReply::class)
             ->whereNull('read_at');
+    }
+
+    /**
+     *  Get the sender
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     */
+    public function sender()
+    {
+        return $this->belongsTo(User::Class, 'user_id', 'id');
     }
     
     // **********************************************************
@@ -208,14 +218,5 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
         }
 
         return $this->recipients()->where('user_id', $user_id)->exists();
-    }
-
-    public function sentBy()
-    {
-        if($this->sent_by_user_id){
-            return User::find($this->sent_by_user_id)->nameLastFirst();
-        }
-
-        return "Unknown";
     }
 }

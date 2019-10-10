@@ -14,7 +14,8 @@ class AlterTableAddByUserIdToSmsThreads extends Migration
     public function up()
     {
         Schema::table('sms_threads', function (Blueprint $table) {
-            $table->integer('sent_by_user_id')->nullable();
+            $table->unsignedInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -26,7 +27,8 @@ class AlterTableAddByUserIdToSmsThreads extends Migration
     public function down()
     {
         Schema::table('sms_threads', function (Blueprint $table) {
-            $table->dropColumn(['sent_by_user_id']);
+            $table->dropForeign('sms_threads_user_id_foreign');
+            $table->dropColumn(['user_id']);
         });
     }
 }
