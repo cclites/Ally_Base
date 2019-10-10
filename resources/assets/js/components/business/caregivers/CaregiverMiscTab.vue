@@ -24,7 +24,6 @@
 </template>
 
 <script>
-
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import AuditsTable from '../../../components/AuditsTable';
@@ -38,6 +37,7 @@
                 form: new Form({
                     misc: this.misc,
                 }),
+                role: window.AuthUser,
                 auditLogItems: [],
                 fields: [
                     { label: 'Type', key: 'auditable_title', sortable: true },
@@ -48,7 +48,9 @@
                     { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
                 ],
                 sortBy: '',
-                emptyText: 'No records to display'
+                emptyText: 'No records to display',
+                meta: [],
+                item: [],
             };
         },
         async mounted() {
@@ -63,11 +65,13 @@
                     .catch(() => {});
             },
             async fetchAuditLog(){
-                let response = await axios.get(`/business/reports/audit-log?caregiver_id=${this.caregiver.id}`);
-                this.auditLogItems = response.data;
-            }
+                axios.get(`/business/reports/audit-log?caregiver_id=${this.caregiver.id}`)
+                    .then( ({ data }) => {
+                        this.auditLogItems = data;
+                    })
+                    .catch(() => {});
+            },
         },
-
     }
 </script>
 

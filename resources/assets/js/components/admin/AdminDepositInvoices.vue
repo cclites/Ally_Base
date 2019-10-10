@@ -1,62 +1,40 @@
 <template>
     <b-card>
         <b-row>
-
             <b-col lg="12">
-
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-
-                    <b-form @submit.prevent=" loadItems() ">
-                        <b-row>
-
-                            <b-col sm="12" lg="6" class="my-1 d-flex align-items-center flex-row flex-wrap">
-
-                                <date-picker
-                                    v-model=" start_date "
-                                    placeholder="Start Date"
-                                >
-                                </date-picker>
-
-                                &nbsp;to&nbsp;
-
-                                <date-picker
-                                    v-model=" end_date "
-                                    placeholder="End Date"
-                                >
-                                </date-picker>
-                            </b-col>
-                            <b-col sm="6" lg="3" class="my-1">
-
-                                <b-form-select
-                                    id="paid"
-                                    name="paid"
-                                    v-model="paid"
-                                >
-                                    <option value="">All Invoices</option>
-                                    <option :value="0">Unpaid Invoices</option>
-                                    <option :value="1">Paid Invoices</option>
-                                </b-form-select>
-                            </b-col>
-                            <b-col sm="6" lg="3" class="my-1">
-
-                                <b-form-select
-                                    id="chain_id"
-                                    name="chain_id"
-                                    v-model="chain_id"
-                                >
-                                    <option value="">All Business Chains</option>
-                                    <option v-for=" ( chain, index ) in chains " :value=" chain.id " :key=" index ">{{ chain.name }}</option>
-                                </b-form-select>
-                            </b-col>
-                        </b-row>
-
-                        <b-row class="ml-1 mt-4">
-
-                            <b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
-                        </b-row>
+                    <b-form inline @submit.prevent="loadItems()">
+                        <date-picker
+                                v-model="start_date"
+                                placeholder="Start Date"
+                        >
+                        </date-picker> &nbsp;to&nbsp;
+                        <date-picker
+                                v-model="end_date"
+                                placeholder="End Date"
+                        >
+                        </date-picker>
+                        <b-form-select
+                                id="paid"
+                                name="paid"
+                                v-model="paid"
+                        >
+                            <option value="">All Stubs</option>
+                            <option :value="0">Unpaid Stubs</option>
+                            <option :value="1">Paid Stubs</option>
+                        </b-form-select>
+                        <b-form-select
+                                id="chain_id"
+                                name="chain_id"
+                                v-model="chain_id"
+                        >
+                            <option value="">All Business Chains</option>
+                            <option v-for="chain in chains" :value="chain.id" :key="chain.id">{{ chain.name }}</option>
+                        </b-form-select>
+                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -76,11 +54,11 @@
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
             <b-table bordered striped hover show-empty
-                :items="items"
-                :fields="fields"
-                :sort-by.sync="sortBy"
-                :sort-desc.sync="sortDesc"
-                :filter="filter"
+                     :items="items"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     :filter="filter"
             >
                 <template slot="name" scope="row">
                     <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
@@ -89,8 +67,32 @@
                     <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
                     <span v-else>Unpaid</span>
                 </template>
+                <template slot="actions" scope="row">
+                    <b-btn size="sm" @click="selectedInvoice = row.item">Edit Notes</b-btn>
+                </template>
             </b-table>
         </div>
+
+        <b-modal title="Edit Invoice Notes" v-model="showModal" size="lg">
+            <b-container fluid>
+
+                    <b-form-group label="Notes" label-for="notes">
+                        <b-form-textarea :rows="4" v-model="form.notes"></b-form-textarea>
+                        <input-help :form="form" field="notes" text=""></input-help>
+                    </b-form-group>
+
+                    <div v-if=" selectedInvoice && selectedInvoice.caregiver_on_hold ">
+
+                        <p>On Hold Notes:</p>
+                        <p>{{ selectedInvoice.payment_hold_notes }}</p>
+                    </div>
+            </b-container>
+
+            <div slot="modal-footer">
+                <b-button variant="info" @click="updateSelectedInvoice()">Save</b-button>
+                <b-btn variant="default" @click="selectedInvoice = null">Cancel</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
@@ -153,9 +155,15 @@
                         key: 'status',
                     },
                     {
+                        key: 'notes',
+                    },
+                    {
                         key: 'flags',
-                    }
+                    },
+                    'actions'
                 ],
+                form : new Form({}),
+                selectedInvoice : null
             }
         },
 
@@ -164,7 +172,15 @@
         },
 
         computed: {
+            showModal: {
+                get() {
+                    return !!this.selectedInvoice;
+                },
+                set(val) {
 
+                    if (!val) this.selectedInvoice = null;
+                }
+            },
         },
 
         methods: {
@@ -199,7 +215,25 @@
                 const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
                 return `/admin/invoices/${type}/${invoice.invoice_id}/${view}`;
             },
-        }
+
+            async updateSelectedInvoice() {
+
+                await this.form.patch(`/admin/invoices/deposits/${this.selectedInvoice.invoice_id}/${this.selectedInvoice.invoice_type}`);
+                this.selectedInvoice.notes = this.form.notes;
+                this.selectedInvoice = null;
+            }
+        },
+
+        watch: {
+
+            selectedInvoice( val ) {
+
+                this.form = new Form({
+
+                    notes: val ? val.notes : ""
+                });
+            }
+        },
     }
 </script>
 

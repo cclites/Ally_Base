@@ -37,7 +37,7 @@ class CustomFieldController extends BaseController
             $query->where('user_type', $request->type);
         }
 
-        return response()->json($query->get()->values());
+        return response()->json($query->ordered()->get()->values());
     }
 
     /**
