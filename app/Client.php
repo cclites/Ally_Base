@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Audit;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\GatewayTransaction;
@@ -30,6 +31,7 @@ use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Billing\ClientAuthorization;
+use App\Billing\PaymentLog;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
@@ -87,6 +89,7 @@ use App\SalesPerson;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Audit $auditTrail
  * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
@@ -331,6 +334,14 @@ class Client extends AuditableModel implements
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
+
+    // made this a relationship method so it can be eager loaded
+    public function paymentLogs()
+    {
+        return $this->hasMany( PaymentLog::class, 'payment_method_id', 'default_payment_id' )
+            ->where( 'payment_method_type', $this->default_payment_type )
+            ->orderBy( 'created_at', 'desc' );
+    }
 
     public function creator()
     {
@@ -594,6 +605,15 @@ class Client extends AuditableModel implements
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getPaymentErrorsAttribute()
+    {
+        $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
+
+        if( $most_recent && $most_recent->error_message ) return 'Outstanding Client Payer Issue - ' . $most_recent->error_message;
+
+        return null;
+    }
 
     public function getAddress(): ?Address
     {
@@ -927,5 +947,21 @@ class Client extends AuditableModel implements
         }
 
         return $this->addresses->first();
+    }
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
+                 ->orWhere(function($q){
+                     $q->whereIn('auditable_type', ['App\User', 'clients'])
+                         ->where('auditable_id', $this->id);
+                 })
+                ->get();
+        return $audits;
     }
 }

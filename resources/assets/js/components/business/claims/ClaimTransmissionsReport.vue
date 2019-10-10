@@ -28,7 +28,7 @@
                         class="mr-1 mt-1"
                     />
 
-                    <b-form-select v-model="form.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+                    <client-type-dropdown v-model="form.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
                     <b-form-select v-model="form.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                         <option v-if="loadingClients" selected value="">Loading Clients...</option>

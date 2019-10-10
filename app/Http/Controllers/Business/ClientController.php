@@ -190,17 +190,11 @@ class ClientController extends BaseController
         ->append('last_service_date');
 
         if (empty($client->careDetails)) {
-            $careDetails = new CareDetails();
-            $careDetails->client_id = $client->id;
-            $careDetails->save();
-            $client->load('careDetails');
+            $client['careDetails'] = CareDetails::make(['client_id' => $client->id]);
         }
 
         if (empty($client->skilledNursingPoc)) {
-            $skilledNursingPoc = new SkilledNursingPoc();
-            $skilledNursingPoc->client_id = $client->id;
-            $skilledNursingPoc->save();
-            $client->load('skilledNursingPoc');
+            $client['skilledNursingPoc'] = SkilledNursingPoc::make(['client_id' => $client->id]);
         }
 
         $client->allyFee = AllyFeeCalculator::getPercentage($client);

@@ -31,12 +31,11 @@ export default {
             ],
             smsLength: 160,
             clientTypes: [
-                {value:'', text: "All Client Types"},
-                {value:'private_pay', text:'Private Pay'},
-                {value:'medicaid', text:'Medicaid'},
-                {value:'LTCI', text:'LTCI'},
-                {value:'VA', text:'VA'},
                 {value:'lead_agency', text:'Lead Agency'},
+                {value:'LTCI', text:'LTCI'},
+                {value:'medicaid', text:'Medicaid'},
+                {value:'private_pay', text:'Private Pay'},
+                {value:'VA', text:'VA'},
             ],
 
             TELLUS_CODE_GUIDE_URL: '/knowledge-base/tellus-guide',

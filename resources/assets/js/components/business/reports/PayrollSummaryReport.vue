@@ -27,9 +27,7 @@
 
 
             <b-form-group label="Client Type" class="mr-2">
-                <b-select v-model="form.client_type" >
-                    <option v-for="type in clientTypes" :key="type.value" :value="type.value">{{ type.text }}</option>
-                </b-select>
+                <client-type-dropdown v-model="form.client_type" />
             </b-form-group>
 
             <b-col>

@@ -72,9 +72,9 @@
                 :allow-all="true"
             />
 
-            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
+            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --"/>
 
-            <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+            <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
             <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                 <option v-if="loadingClients" selected value="">Loading Clients...</option>
@@ -86,6 +86,12 @@
             <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
                 Show Inactive Clients
             </b-form-checkbox>
+
+            <b-input
+                v-model="filters.invoice_id"
+                placeholder="Invoice #"
+                class="mr-1 mt-1"
+            />
 
             <b-btn variant="info" class="mr-1 mt-1" @click.prevent="fetch()" :disabled="filters.busy">Generate</b-btn>
         </b-form>
@@ -247,12 +253,13 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import LocalStorage from "../../../mixins/LocalStorage";
     import Constants from "../../../mixins/Constants";
     import { Decimal } from 'decimal.js';
     import { mapGetters } from 'vuex';
 
     export default {
-        mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers ],
+        mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers, LocalStorage ],
         components: { BusinessLocationFormGroup },
         props: {
             init: {
@@ -319,6 +326,16 @@
                 // We should always be able to submit now because there are no restrictions on amounts
                 return true;
             },
+
+            /**
+             * Get the prefix for saving filters to local storage.  This is
+             * based on the current remit ID.
+             *
+             * @return {string}
+             */
+            localStoragePrefix() {
+                return this.remit ? 'apply_remit_' + this.remit.id : 'apply_remit_default';
+            },
         },
 
         data() {
@@ -330,8 +347,9 @@
                     businesses: '',
                     payer_id: '',
                     client_id: '',
-                    claim_status: 'unpaid',
+                    claim_status: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),
@@ -400,6 +418,7 @@
                         this.claims = [];
                     })
                     .finally(() => {
+                        this.saveFilters();
                     });
             },
 
@@ -626,8 +645,47 @@
             /**
              * Handle tracking of window scroll event
              */
-            handleScroll () {
+            handleScroll() {
               this.isScrolling = window.scrollY > 0;
+            },
+
+            /**
+             * Save filters to local storage.
+             */
+            saveFilters() {
+                for (let filter of Object.keys(this.filters.data())) {
+                    if (['invoice_id', 'json'].includes(filter)) {
+                        continue;
+                    }
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+                this.setLocalStorage('sortBy', this.sortBy);
+                this.setLocalStorage('sortDesc', this.sortDesc);
+            },
+
+            /**
+             * Load filters from local storage.
+             */
+            loadFilters() {
+                if (typeof(Storage) !== "undefined") {
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value !== null) {
+                            this.filters[filter] = value;
+                        }
+                    }
+
+                    // Sorting/show UI
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) {
+                        this.sortBy = sortBy;
+                    }
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) {
+                        this.sortDesc = sortDesc;
+                    }
+                }
             },
         },
 
@@ -635,8 +693,10 @@
             await this.fetchClients();
 
             // Set default filters
+            this.filters.claim_status = 'unpaid';
             this.filters.businesses = this.remit.business_id;
             this.filters.payer_id = this.remit.payer_id === 0 || this.remit.payer_id ? ''+this.remit.payer_id : '';
+            this.loadFilters();
 
             this.fetch();
         },

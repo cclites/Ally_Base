@@ -10,7 +10,7 @@ use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
 use Carbon\Carbon;
 
-class PaymentSummaryByPayerReport extends BaseReport
+class PaymentSummary extends BaseReport
 {
 
     protected $query;
@@ -38,6 +38,8 @@ class PaymentSummaryByPayerReport extends BaseReport
             'client',
             'client.user',
             'clientPayer',
+
+            'payments',
         ])->whereHas('payments');
     }
 
@@ -60,7 +62,7 @@ class PaymentSummaryByPayerReport extends BaseReport
         return $this;
     }
 
-    public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $client, ?int $payer): self
+    public function applyFilters(string $start, string $end, int $business, ?string $client_type, ?int $client, ?string $payment_method): self
     {
         $startDate = (new Carbon($start . ' 00:00:00', $this->timezone))->timezone('UTC');
         $endDate = (new Carbon($end . ' 23:59:59', $this->timezone))->timezone('UTC');
@@ -82,8 +84,10 @@ class PaymentSummaryByPayerReport extends BaseReport
             });
         }
 
-        if(filled($payer)){
-            $this->query->forPayer($payer);
+        if(filled($payment_method)){
+            $this->query->whereHas('payments', function($q) use($payment_method){
+                $q->where('payment_type', $payment_method);
+            });
         }
 
         return $this;
@@ -96,6 +100,7 @@ class PaymentSummaryByPayerReport extends BaseReport
     {
         return $this->query->get()
             ->map(function(ClientInvoice $invoice){
+
                 return $invoice->items
                 ->whereIn('invoiceable_type', ['shifts', 'shift_services'])
                     ->map(function (ClientInvoiceItem $item) use ($invoice) {
@@ -137,7 +142,11 @@ class PaymentSummaryByPayerReport extends BaseReport
             'client_name'=>$invoice->client->nameLastFirst,
             'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
             'invoice'=> $invoice->id,
-            'amount'=>$shift->getAmountCharged()
+            'amount'=>$shift->getAmountCharged(),
+            'payment_type' => $invoice->payments[0]->payment_type,
+            'caregiver_amount' => $invoice->payments->sum('caregiver_allotment'),
+            'registry_amount' => $invoice->payments->sum('system_allotment'),
+            'client_type'=> $invoice->client->client_type,
         ];
     }
 
@@ -154,7 +163,11 @@ class PaymentSummaryByPayerReport extends BaseReport
             'client_name'=>$invoice->client->nameLastFirst,
             'date'=>Carbon::parse($invoice->created_at, $this->timezone)->toDateString(),
             'invoice'=> $invoice->id,
-            'amount'=>$shiftService->getAmountCharged()
+            'amount'=>$shiftService->getAmountCharged(),
+            'payment_type' => $invoice->payments[0]->payment_type,
+            'caregiver_amount' => $invoice->payments->sum('caregiver_allotment'),
+            'registry_amount' => $invoice->payments->sum('system_allotment'),
+            'client_type'=> $invoice->client->client_type,
         ];
     }
 

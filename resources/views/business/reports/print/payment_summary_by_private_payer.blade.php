@@ -21,6 +21,7 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
 
     <div class="page" id="summary">
         <div class="h4">Payment Summary By Private Payer</div>

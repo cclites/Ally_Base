@@ -36,6 +36,9 @@ class ClientInvoice extends Resource
             'client_on_hold' => $this->whenLoaded('client', function() {
                 return $this->resource->client->isOnHold();
             }),
+            'payment_hold_notes' => $this->whenLoaded('client', function() {
+                return optional( $this->resource->client->paymentHold )->notes;
+            }),
             'payer' => $this->whenLoaded('clientPayer', function() {
                 return $this->resource->getClientPayer()->getPayer();
             }),
@@ -65,7 +68,10 @@ class ClientInvoice extends Resource
             'location' => $this->whenLoaded('client', function () {
                 return $this->resource->client->business->name;
             }),
-                'has_claim' => !empty($this->resource->claim)
+                'has_claim' => !empty($this->resource->claim),
+                'payment_errors' => $this->whenLoaded('client', function() {
+                    return $this->resource->client->payment_errors;
+                }),
         ];
     }
 }

@@ -50,6 +50,7 @@ class ClaimInvoiceResource extends Resource
             'client_dob' => $this->resource->client_dob,
             'client_first_name' => $this->resource->client_first_name,
             'client_id' => $this->resource->client_id,
+            'client_invoice_name' => $this->resource->clientInvoice->name,
             'client_invoice' => [
                 'name' => $this->resource->clientInvoice->name,
                 'date' => $this->resource->clientInvoice->created_at->toDateTimeString(),
@@ -57,6 +58,7 @@ class ClaimInvoiceResource extends Resource
             'client_invoice_date' => $this->resource->clientInvoice->created_at->toDateTimeString(),
             'client_invoice_id' => $this->resource->client_invoice_id,
             'client_last_name' => $this->resource->client_last_name,
+            'client_name' => $this->resource->client_last_name . ', ' . $this->resource->client_first_name,
             'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,
             'client_medicaid_id' => $this->resource->client_medicaid_id,
             'created_at' => $this->resource->created_at,

@@ -31,6 +31,13 @@ class ClaimInvoiceAgingReport extends BaseReport
     protected $clientType;
 
     /**
+     * Client Invoice ID/name filter.
+     *
+     * @var string
+     */
+    protected $clientInvoiceId;
+
+    /**
      * @var bool
      */
     protected $showInactive = false;
@@ -99,6 +106,19 @@ class ClaimInvoiceAgingReport extends BaseReport
     }
 
     /**
+     * Query a given Client Invoice.
+     *
+     * @param null|string $invoiceIdOrName
+     * @return $this
+     */
+    public function forClientInvoiceId(?string $invoiceIdOrName): self
+    {
+        $this->clientInvoiceId = $invoiceIdOrName;
+
+        return $this;
+    }
+
+    /**
      * Return the instance of the query builder for additional manipulation
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
@@ -135,6 +155,10 @@ class ClaimInvoiceAgingReport extends BaseReport
                     $q->active();
                 }
             });
+        }
+
+        if (filled($this->clientInvoiceId)) {
+            $query->searchForInvoiceId($this->clientInvoiceId);
         }
 
         return $query->get()->map(function (ClaimInvoice $claim) {

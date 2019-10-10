@@ -118,4 +118,20 @@ class ClientInvoiceQuery extends BaseQuery
 
         return $this;
     }
+
+    /**
+     * Search invoices for the ID or Name matching the given parameter.
+     *
+     * @param string $invoiceIdOrName
+     * @return $this
+     */
+    public function searchForId(string $invoiceIdOrName): self
+    {
+        $this->where(function ($q) use ($invoiceIdOrName) {
+            $q->where('id', $invoiceIdOrName)->
+                orWhere('name', $invoiceIdOrName);
+        });
+
+        return $this;
+    }
 }
