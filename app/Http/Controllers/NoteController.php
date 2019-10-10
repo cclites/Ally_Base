@@ -97,7 +97,7 @@ class NoteController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function search(Request $request): \Illuminate\Http\Response
+    public function search(Request $request)
     {
         $notes = Note::forRequestedBusinesses()
             ->with('caregiver', 'client', 'prospect', 'referral_source')
