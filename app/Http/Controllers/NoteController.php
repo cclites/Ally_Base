@@ -97,7 +97,7 @@ class NoteController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function search(Request $request)
+    public function search(Request $request): \Illuminate\Http\Response
     {
         $notes = Note::forRequestedBusinesses()
             ->with('caregiver', 'client', 'prospect', 'referral_source')
@@ -131,8 +131,7 @@ class NoteController extends Controller
             ->get();
 
         if($request->print){
-            $pdf =  $this->printReport($notes);
-            return $pdf;
+            return $this->printReport($notes);
         }
 
         return response()->json($notes);
@@ -145,9 +144,6 @@ class NoteController extends Controller
      */
     public function printReport($data) : \Illuminate\Http\Response
     {
-
-        \Log::info($data);
-
         $html = response(view('business.reports.communication_notes',['data'=>$data]))->getContent();
         $snappy = \App::make('snappy.pdf');
 

@@ -20,6 +20,7 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
 
     <div class="page" id="summary">
         <div class="h4">Notes</div>
@@ -41,11 +42,11 @@
                     <tr>
                         <td>{{ $item['created_at'] }}</td>
                         <td>{{ $item['type'] }}</td>
-                        <td>{{ $item['caregiver'] }}</td>
-                        <td>{{ $item['client'] }}</td>
-                        <td>{{ $item['prospect'] }}</td>
-                        <td>{{ $item['referral_source'] }}</td>
-                        <td>{{ $item->body }}</td>
+                        <td>{{ $item->caregiver ? $item->caregiver->nameLastFirst() : '' }}</td>
+                        <td>{{ $item->client ? $item->client->name : '' }}</td>
+                        <td>{{ $item->prospect ? $item->prospect->name() : '' }}</td>
+                        <td>{{ $item->referral_source ? $item->referral_source->organization : '' }}</td>
+                        <td>{{ $item['body'] }}</td>
                     </tr>
                 @endforeach
                 </tbody>
