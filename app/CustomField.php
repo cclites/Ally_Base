@@ -11,6 +11,11 @@ class CustomField extends BaseModel implements BelongsToChainsInterface
     use BelongsToOneChain;
 
     /**
+     * @var string  The column to sort by default when using ordered()
+     */
+    protected $orderedColumn = 'key';
+
+    /**
      * The database table associated with this model
      * 
      * @var string
