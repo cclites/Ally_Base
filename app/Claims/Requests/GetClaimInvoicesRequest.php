@@ -22,6 +22,7 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
             'claim_status' => 'nullable',
             'client_type' => 'nullable',
             'inactive' => 'nullable|bool',
+            'invoice_id' => 'nullable',
         ];
     }
 

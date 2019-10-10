@@ -8,6 +8,7 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
     <table class="table">
         <thead>
         <tr>

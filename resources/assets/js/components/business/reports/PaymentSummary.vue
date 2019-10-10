@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="This report shows all payments made by private pay clients"
+                        header="This report shows a summary of all payments made."
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -14,19 +14,30 @@
                                 :allow-all="false"
                                 class="mr-2"
                         />
-                        <b-form-group label="Start Date" class="mb-2 mr-2 col-md-2">
+                        <b-form-group label="Start Date" class="mb-2 mr-2">
                             <date-picker v-model="form.start" name="start_date"></date-picker>
                         </b-form-group>
-                        <b-form-group label="End Date" class="mb-2 mr-2 col-md-2">
+                        <b-form-group label="End Date" class="mb-2 mr-2">
                             <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
+                        <b-form-group label="Client Type" class="mb-2 mr-2">
+                            <b-form-select v-model="form.client_type">
+                                <option value="">All</option>
+                                <option v-for="item in clientTypes" :value="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-form-group>
                         <b-form-group label="Clients" class="mb-2 mr-2">
-                            <b-select v-model="form.client" class="mb-2 mr-2">
+                            <b-select v-model="form.client">
                                 <option value="">All Clients</option>
                                 <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
                             </b-select>
                         </b-form-group>
-
+                        <b-form-group label="Payment Type" class="mb-2 mr-2">
+                            <b-form-select v-model="form.payment_method">
+                                <option value="">All</option>
+                                <option v-for="item in paymentTypes" :value="item.name">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-form-group>
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
@@ -57,6 +68,12 @@
                                         <a :href="invoiceUrl(row.item.invoice)" target="_blank">{{ row.item.invoice }}</a>
                                     </template>
 
+                                    <template slot="FOOT_client_type" scope="item" class="primary">&nbsp;
+                                    </template>
+
+                                    <template slot="FOOT_payment_type" scope="item" class="primary">&nbsp;
+                                    </template>
+
                                     <template slot="FOOT_client_name" scope="item" class="primary">
                                         <strong>For Client: </strong>{{totals.client_name}}
                                     </template>
@@ -65,13 +82,21 @@
                                         <strong>For Location: </strong> {{ totals.location }}
                                     </template>
 
-                                    <template slot="FOOT_invoice" scope="item" class="primary">
-                                        &nbsp;
+                                    <template slot="FOOT_invoice" scope="item" class="primary">&nbsp;
                                     </template>
 
                                     <template slot="FOOT_amount" scope="item" class="primary">
                                         &nbsp;<strong>Total Invoiced Amount: </strong> {{ moneyFormat(totals.total ) }}
                                     </template>
+
+                                    <template slot="FOOT_caregiver_amount" scope="item" class="primary">
+                                        &nbsp;<strong>Total Caregivers Amount: </strong> {{ moneyFormat(caregiversTotal) }}
+                                    </template>
+
+                                    <template slot="FOOT_registry_amount" scope="item" class="primary">
+                                        &nbsp;<strong>Total Registry Amount: </strong> {{ moneyFormat(registryTotal ) }}
+                                    </template>
+
                                 </b-table>
                         </div>
                     </div>
@@ -96,13 +121,15 @@
     import BusinessLocationSelect from "../../business/BusinessLocationSelect";
     import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from "../../../mixins/Constants";
 
     export default {
         name: "PaymentSummaryByPayer",
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
-        mixins: [FormatsDates, FormatsNumbers, Constants],
+        mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
+
         data() {
             return {
                 form: new Form({
@@ -111,7 +138,7 @@
                     end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     client_type: '',
                     client: '',
-                    payer: '',
+                    payment_method: '',
                     json: 1
                 }),
                 busy: false,
@@ -120,13 +147,18 @@
                 currentPage: 1,
                 sortBy: 'client_name',
                 sortDesc: false,
+                clientTypes: [],
+                paymentTypes: [],
                 fields: [
                     {key: 'client_name', label: 'Client', sortable: true,},
+                    {key: 'client_type', label: 'Client Type', sortable: true, formatter: x => { return this.snakeToTitleCase(x) }},
+                    {key: 'payment_type', label: 'Payment Method', sortable: true,},
                     {key: 'date', label: 'Invoice Date', sortable: true, formatter: x => { return this.formatDate(x) }},
                     {key: 'invoice', label: 'Invoice', sortable: true,},
-                    //{key: 'client_type', label: 'Client Type', sortable: true,},
                     {key: 'amount', label: 'Total Invoiced Amount', sortable: true, formatter: x => { return this.moneyFormat(x)}},
-                    //{key: 'registry_amount', label: 'Total Registry Amount', sortable: true,},
+                    {key: 'caregiver_amount', label: 'Caregiver Amount', sortable: true, formatter: x => { return this.moneyFormat(x)}},
+                    {key: 'registry_amount', label: 'Registry Amount', sortable: true, formatter: x => { return this.moneyFormat(x)}},
+
                 ],
                 items: [],
                 item: '',
@@ -154,7 +186,11 @@
             },
 
             printReport(){
-                window.location = this.form.toQueryString(`/business/reports/payment-summary-by-payer?print=true`);
+                $(".payers-summary-table").print();
+
+                //Original request was for a PDF
+                //window.location = this.form.toQueryString(`/business/reports/payment-summary-by-payer?print=true`);
+
             },
 
             getClients(){
@@ -184,12 +220,27 @@
                 if(newVal !== oldVal){
                     this.getClients();
                 }
-            }
+            },
+
         },
 
         mounted() {
             this.getClients();
+            this.clientTypes = this.$attrs.clienttypes;
+            this.paymentTypes = this.$attrs.paymenttypes;
         },
+        computed: {
+            caregiversTotal(){
+                return this.items.reduce(function(sum, item){
+                   return sum + item.caregivers_amount;
+                }, 0);
+            },
+            registryTotal(){
+                return this.items.reduce(function(sum, item){
+                    return sum + item.registry_amount;
+                }, 0);
+            },
+        }
         
     }
 </script>

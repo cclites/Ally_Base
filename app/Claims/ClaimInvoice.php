@@ -372,6 +372,24 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         });
     }
 
+    /**
+     * Search claims for the matching client invoice ID or Name.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param $invoiceIdOrName
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeSearchForInvoiceId($query, $invoiceIdOrName)
+    {
+        if (empty($invoiceIdOrName)) {
+            return $query;
+        }
+
+        return $query->whereHas('clientInvoice', function ($q) use ($invoiceIdOrName) {
+            $q->where('id', $invoiceIdOrName)
+                ->orWhere('name', $invoiceIdOrName);
+        });
+    }
 
     // **********************************************************
     // OTHER FUNCTIONS

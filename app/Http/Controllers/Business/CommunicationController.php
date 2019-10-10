@@ -194,7 +194,7 @@ class CommunicationController extends Controller
     public function threadShow(SmsThread $thread)
     {
         $this->authorize('read', $thread);
-        $thread->load(['recipients', 'replies']);
+        $thread->load(['recipients', 'replies', 'audits', 'audits.user']);
 
         $thread->unreadReplies()->update(['read_at' => Carbon::now()]);
 

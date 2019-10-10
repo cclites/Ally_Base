@@ -66,7 +66,7 @@
     <div class="">
         <div class="row print-header">
             <div class="header-left">
-                @include('layouts.partials.print_header')
+                @include('layouts.partials.print_logo')
                 <div class="h4">Associated Provider: {{ $payment->business->name }}</div>
                 <br>
                 <div>{{ $payment->business->address1 }}</div>

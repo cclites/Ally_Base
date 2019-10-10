@@ -69,6 +69,7 @@
 @endpush
 
 @section('content')
+        @include('layouts.partials.print_logo')
 
         @foreach( $categories as $key => $category )
 

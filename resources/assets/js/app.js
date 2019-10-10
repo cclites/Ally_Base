@@ -72,6 +72,7 @@ Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
+Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -248,7 +249,7 @@ Vue.component('business-service-auth-ending-report', require('./components/busin
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
 
-Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummaryByPayer'));
+Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummary'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
 Vue.component('invoice-summary-by-salesperson-report', require('./components/business/reports/InvoiceSummaryBySalesperson'));
 

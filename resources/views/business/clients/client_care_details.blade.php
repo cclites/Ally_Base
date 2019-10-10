@@ -44,6 +44,7 @@
 @endpush
 
 @section('content')
+    @include('layouts.partials.print_logo')
 
     <h2>Client Care Details for {{ $client->nameLastFirst }}</h2>
 

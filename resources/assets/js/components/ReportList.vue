@@ -446,13 +446,13 @@
                         category: 7,
                         allowed: ['office_user'],
                     },
-                    {
-                        name: 'Payment History',
-                        url: 'reports/payments',
-                        description: 'See client charges and caregiver payments over time',
-                        category: 5,
-                        allowed: ['office_user'],
-                    },
+                    // { Removed as per ALLY-1459
+                    //     name: 'Payment History',
+                    //     url: 'reports/payments',
+                    //     description: 'See client charges and caregiver payments over time',
+                    //     category: 5,
+                    //     allowed: ['office_user'],
+                    // },
                     {
                         name: 'Client Statistics',
                         url: 'reports/client-stats',
@@ -615,9 +615,9 @@
                             hidden: true,
                         },
                         {
-                            name: 'Payment Summary By Private Pay Clients',
+                            name: 'Payment Summary by Payment Method”',
                             url: 'reports/payment-summary-by-payer',
-                            description: 'See all payments made by private pay clients',
+                            description: 'This report shows a summary of all payments made',
                             category: 5,
                             allowed: ['office_user'],
                             hidden: true,
