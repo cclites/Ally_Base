@@ -182,23 +182,34 @@ class ClientAuthorization extends AuditableModel
      */
     public function getPeriodDates(Carbon $date, string $timezone = 'UTC') : ?array
     {
+        $range = [];
+
         switch ($this->period) {
             case self::PERIOD_DAILY:
-                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
+            case self::PERIOD_SPECIFIC_DAYS:
+                $range = [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
                 break;
             case self::PERIOD_WEEKLY:
-                return alterStartOfWeekDay((int) $this->week_start, function() use ($date, $timezone) {
+                $range = alterStartOfWeekDay((int) $this->week_start, function() use ($date, $timezone) {
                     return [$date->copy()->startOfWeek()->setTimezone($timezone), $date->copy()->endOfWeek()->setTimezone($timezone)];
                 });
+                break;
             case self::PERIOD_MONTHLY:
-                return [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
+                $range = [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
+                break;
             case self::PERIOD_TERM:
-                return [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
-            case self::PERIOD_SPECIFIC_DAYS:
-                return [$date->copy()->startOfDay()->setTimezone($timezone), $date->copy()->endOfDay()->setTimezone($timezone)];
+                $range = [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
+                break;
             default:
-                return [null, null];
+                break;
         }
+
+        $effectiveEnd = Carbon::parse($this->effective_end)->setTime(23, 59, 59);
+        if (filled($range[1]) && $effectiveEnd->isBefore($range[1])) {
+            $range[1] = $effectiveEnd;
+        }
+
+        return $range;
     }
 
     public function getPeriodsForRange(Carbon $start, Carbon $end) : array
