@@ -68,7 +68,7 @@ abstract class BaseImport extends Command
     public function handle()
     {
         $this->output->writeln($this->warningMessage() . ' (Hit CTRL+C to cancel)..');
-        sleep(3);
+        // sleep(3);
 
         $this->loadSheet();
         $lastRow = (int) $this->getRowCount($this->sheet);
@@ -80,7 +80,8 @@ abstract class BaseImport extends Command
         DB::beginTransaction();
 
         $count = 0;
-        for($row=2; $row<$lastRow; $row++) {
+        for($row=2; $row <= $lastRow; $row++) {
+
             if (!$this->emptyRow($row)) {
                 if ($imported = $this->importRow($row)) {
                     $count++;
