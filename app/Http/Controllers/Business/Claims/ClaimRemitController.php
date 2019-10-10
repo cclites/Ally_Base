@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimAdjustment;
 use App\Claims\Requests\UpdateClaimRemitRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
+use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Resources\RemitApplicationHistoryResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\CreateClaimRemitRequest;
 use App\Claims\Requests\GetClaimRemitsRequest;
@@ -94,9 +97,32 @@ class ClaimRemitController extends BaseController
     {
         $this->authorize('view', $claimRemit);
 
+        $adjustments = $claimRemit->adjustments()
+            ->with('claimInvoice.clientInvoice')
+            ->orderBy('created_at')
+            ->get();
+
+        $applications = $adjustments->where('is_interest', false)
+            ->where('claim_invoice_id', '<>', null)
+            ->groupBy('claim_invoice_id');
+
+        $fixed = [];
+        foreach ($applications as $key => $items) {
+            $fixed[$key] = array_merge((new ClaimInvoiceResource($items->first()->claimInvoice))->toArray(request()), [
+                'items' => ClaimAdjustmentResource::collection($items)->toArray(request()),
+            ]);
+        }
+
+        $history = collect([
+            'interest' => $adjustments->where('is_interest', true)->values(),
+            'adjustments' => $adjustments->where('is_interest', false)
+                ->where('claim_invoice_id', '=', null)->values(),
+            'applications' => array_values($fixed)
+        ]);
+
         $init = [
             'remit' => new ClaimRemitResource($claimRemit),
-            'adjustments' => ClaimAdjustmentResource::collection($claimRemit->adjustments),
+            'adjustments' => $history,
         ];
 
         return view_component('remit-application-history', 'Remit Application History', compact('init'), [
@@ -117,35 +143,36 @@ class ClaimRemitController extends BaseController
     {
         $this->authorize('update', $claimRemit);
 
-        if (floatval($claimRemit->amount_applied) !== floatval(0)) {
-            return new ErrorResponse(412, 'This Remit has already been applied to one or more Claims and cannot be deleted.  Please zero out the balance of this Remit and try again..');
+        if ($claimRemit->adjustments()->exists()) {
+            return new ErrorResponse(412, 'This Remit has already been applied or adjusted and cannot be deleted.');
         }
 
         \DB::beginTransaction();
 
-        $updatedItems = collect([]);
-        $updatedClaims = collect([]);
-        // Soft-delete all related payments.
-        foreach ($claimRemit->adjustments as $item) {
-            if (filled($item->claimInvoiceItem)) {
-                $updatedItems->push($item->claimInvoiceItem);
-            }
-            if (filled($item->claimInvoice)) {
-                $updatedClaims->push($item->claimInvoice);
-            }
-            $item->delete();
-        }
-
-        // Technically the balance should always be the same because the
-        // amount applied for the remit must be 0, but we will
-        // re-calculate the balances anyway to ensure no errors.
-        foreach ($updatedItems->unique('id') as $item) {
-            $item->updateBalance();
-        }
-        foreach ($updatedClaims->unique('id') as $claim) {
-            $claim->updateBalance();
-        }
-
+        // Keeping this in case we bring this feature back
+//        $updatedItems = collect([]);
+//        $updatedClaims = collect([]);
+//        // Soft-delete all related payments.
+//        foreach ($claimRemit->adjustments as $item) {
+//            if (filled($item->claimInvoiceItem)) {
+//                $updatedItems->push($item->claimInvoiceItem);
+//            }
+//            if (filled($item->claimInvoice)) {
+//                $updatedClaims->push($item->claimInvoice);
+//            }
+//            $item->delete();
+//        }
+//
+//        // Technically the balance should always be the same because the
+//        // amount applied for the remit must be 0, but we will
+//        // re-calculate the balances anyway to ensure no errors.
+//        foreach ($updatedItems->unique('id') as $item) {
+//            $item->updateBalance();
+//        }
+//        foreach ($updatedClaims->unique('id') as $claim) {
+//            $claim->updateBalance();
+//        }
+//
         $claimRemit->delete();
 
         \DB::commit();

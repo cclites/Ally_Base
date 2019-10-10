@@ -16,9 +16,7 @@
                         &nbsp;to&nbsp;
                         <date-picker v-model="form.end" placeholder="End Date" class="mb-2 mr-2"></date-picker>
 
-                        <b-form-select v-model="form.client_type" class="mb-2 mr-2" name="client_id">
-                            <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                        </b-form-select>
+                        <client-type-dropdown v-model="form.client_type" class="mb-2 mr-2" name="client_id" />
 
                         <b-select v-model="form.client" class="mb-2 mr-2">
                             <option value="">All Clients</option>

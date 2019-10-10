@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+    @include('layouts.partials.print_logo')
     <div class="">
         <div class="row" style="margin-top: 1rem;">
             <div class="col-sm-4">

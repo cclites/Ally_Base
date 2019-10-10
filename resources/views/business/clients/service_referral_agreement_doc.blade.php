@@ -1,6 +1,7 @@
 @extends('layouts.print')
 
 @section('content')
+    @include('layouts.partials.print_logo')
     <style>
         .mt {
             margin-top: 1.2rem;

@@ -27,10 +27,11 @@
                         </option>
                     </b-form-select>
 
-                    <b-form-select v-model="filters.client_type" class="f-1 mr-2">
-                        <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                    </b-form-select>
-
+                    <client-type-dropdown
+                        v-model="filters.client_type"
+                        class="f-1 mr-2"
+                    />
+'
                     <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
                 </div>
             </b-col>

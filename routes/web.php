@@ -379,6 +379,8 @@ Route::group([
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
     Route::get('reports/client-referrals/{businessId}', 'Business\Report\ClientReferralsReportController@populateDropdown');
 
+    Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
+
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
     Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');
@@ -470,6 +472,7 @@ Route::group([
     Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
     Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
     Route::get('quickbooks/{business}/config', 'Business\QuickbooksSettingsController@config')->name('quickbooks.config');
+    Route::get('quickbooks/{business}/enable-desktop', 'Business\QuickbooksSettingsController@enableDesktop')->name('quickbooks.enable-desktop');
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');

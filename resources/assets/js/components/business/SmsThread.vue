@@ -105,7 +105,7 @@ export default {
             });
 
             return unique.sort( (a, b) => a.name > b.name ? 1 : -1);
-        }
+        },
     },
 
     methods: {

@@ -72,6 +72,7 @@ Vue.component('client-contacts-tab', require('./components/ClientContactsTab'));
 Vue.component('client-contacts-modal', require('./components/ClientContactsModal'));
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
+Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
