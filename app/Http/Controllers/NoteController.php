@@ -132,7 +132,7 @@ class NoteController extends Controller
         if($request->print){
             \Log::info("PRINT");
             \Log::info($notes);
-            return $notes;
+            return response()->json($notes);
         }
 
         return response()->json($notes);

@@ -309,21 +309,10 @@
                     })
             },
             print(){
-
                 var link = document.createElement('a');
                 document.body.appendChild(link);
                 link.href = this.searchForm.toQueryString('/notes/print?print=1');
                 link.click();
-
-                //let report = this.searchForm.toQueryString('/notes/print?print=1');
-                //window.location = this.searchForm.toQueryString('/notes/print?print=1');
-
-                //window.location = this.form.toQueryString('/notes/search?print=1');
-
-                //let queryString = Object.keys(this.searchForm).map(key => key + '=' + this.searchForm[key]).join('&');
-                //queryString += "&print=true";
-                //window.location = axios.post(`/notes/search?` + queryString);
-
             }
         }
     }
