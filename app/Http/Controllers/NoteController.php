@@ -124,11 +124,18 @@ class NoteController extends Controller
             ->when($request->filled('type'), function ($query) use ($request) {
                 return $query->where('type', $request->type);
             })
-            // ->when($request->filled('tags'), function ($query) use ($request) {
-            //     return $query->where('tags', 'like', '%'.$request->tags.'%');
-            // })
+            ->when($request->filled('free_form'), function ($query) use ($request) {
+                return $query->where('body', 'like', '%' . $request->free_form . '%');
+            })
             ->get();
+
+        if($request->print){
+            \Log::info("PRINT");
+            \Log::info($notes);
+            return $notes;
+        }
 
         return response()->json($notes);
     }
+
 }
