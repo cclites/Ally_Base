@@ -10,6 +10,7 @@ use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateNoteRequest;
+use Illuminate\Http\Response;
 
 class NoteController extends Controller
 {
@@ -130,12 +131,35 @@ class NoteController extends Controller
             ->get();
 
         if($request->print){
-            \Log::info("PRINT");
-            \Log::info($notes);
-            return response()->json($notes);
+            $pdf =  $this->printReport($notes);
+            return $pdf;
         }
 
         return response()->json($notes);
+    }
+
+    /**
+     * Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function printReport($data) : \Illuminate\Http\Response
+    {
+        $html = response(view('business.reports.communication_notes',['data'=>$data]))->getContent();
+
+        \Log::info($html);
+
+        $snappy = \App::make('snappy.pdf');
+
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200
+            /*
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="payment_summary_by_private_payer.pdf"'
+            )*/
+        );
     }
 
 }

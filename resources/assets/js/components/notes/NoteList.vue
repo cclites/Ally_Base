@@ -309,10 +309,7 @@
                     })
             },
             print(){
-                var link = document.createElement('a');
-                document.body.appendChild(link);
-                link.href = this.searchForm.toQueryString('/notes/print?print=1');
-                link.click();
+
             }
         }
     }
