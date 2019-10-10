@@ -198,14 +198,14 @@ class ClientAuthorization extends AuditableModel
                 $range = [$date->copy()->startOfMonth()->setTimezone($timezone), $date->copy()->endOfMonth()->setTimezone($timezone)];
                 break;
             case self::PERIOD_TERM:
-                $range = [Carbon::parse($this->effective_start)->setTimezone($timezone), Carbon::parse($this->effective_end)->setTimezone($timezone)];
+                $range = [Carbon::parse($this->effective_start, $timezone), Carbon::parse($this->effective_end, $timezone)->endOfDay()];
                 break;
             default:
                 break;
         }
 
-        $effectiveEnd = Carbon::parse($this->effective_end)->setTime(23, 59, 59);
-        if (filled($range[1]) && $effectiveEnd->isBefore($range[1])) {
+        $effectiveEnd = Carbon::parse($this->effective_end, $timezone)->endOfDay();
+        if (filled($range[1]) && $effectiveEnd->lt($range[1])) {
             $range[1] = $effectiveEnd;
         }
 
