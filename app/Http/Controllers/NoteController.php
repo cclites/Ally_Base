@@ -145,20 +145,20 @@ class NoteController extends Controller
      */
     public function printReport($data) : \Illuminate\Http\Response
     {
+
+        \Log::info($data);
+
         $html = response(view('business.reports.communication_notes',['data'=>$data]))->getContent();
-
-        \Log::info($html);
-
         $snappy = \App::make('snappy.pdf');
 
-        return new Response(
+        return Response(
             $snappy->getOutputFromHtml($html),
-            200
-            /*
+            200,
+
             array(
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="payment_summary_by_private_payer.pdf"'
-            )*/
+                'Content-Disposition' => 'attachment; filename="Notes.pdf"'
+            )
         );
     }
 

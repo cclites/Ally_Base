@@ -45,7 +45,7 @@
                         <td>{{ $item['client'] }}</td>
                         <td>{{ $item['prospect'] }}</td>
                         <td>{{ $item['referral_source'] }}</td>
-                        <td>{{ $item['body'] }}</td>
+                        <td>{{ $item->body }}</td>
                     </tr>
                 @endforeach
                 </tbody>
