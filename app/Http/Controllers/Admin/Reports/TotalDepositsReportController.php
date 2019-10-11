@@ -48,22 +48,16 @@ class TotalDepositsReportController
     {
         $set = [];
 
+        //This was done using for-each because there is no chain_id for deposits created
+        //before this report was updated.
         foreach($data as $item){
 
-            if($item['business_chain']){
-                $chain = $item['business_chain']['name'];
-                $key = $chain;
-            }else{
-                $chain = null;
-                $key = $item["name"];
-            }
+            $key = $item['name'];
 
             if(!isset($set[$key])){
                 $set[$key] = [
                     'name'=>$item['name'],
                     'amount' => $item['amount'],
-                    'type' => $item['type'],
-                    'chain' => $chain,
                 ];
             }else{
                 $set[$key]['amount'] += $item['amount'];

@@ -35,9 +35,9 @@ class TotalDepositsReport extends BaseReport
     public function __construct(DepositQuery $query)
     {
         $this->query = $query->with([
-            'business',
-            'business.business_chain',
             'caregiver',
+            'business',
+            'chain',
         ]);
     }
 
@@ -76,17 +76,23 @@ class TotalDepositsReport extends BaseReport
     {
         return $this->query->get()->map(function(Deposit $deposit){
 
-            $name = $deposit->deposit_type === "caregiver" ? $deposit->caregiver->nameLastFirst : null;
-
-            if(!$name){
-                $name = $deposit->deposit_type === "business" ? $deposit->business->name : '';
+            //This is to account for older deposits that do not have a chain_id
+            try{
+                if($deposit->chain){
+                    $name = $deposit->chain->name;
+                } else if($deposit->deposit_type === "caregiver"){
+                    $name = $deposit->caregiver->nameLastFirst . " (Caregiver)";
+                } else if($deposit->deposit_type === "business"){
+                    $name = $deposit->business->name . " (Business)";
+                }
+            }catch(\Exception $e){
+                $name = 'Uncategorized - Deposit ID: ' . $deposit->id;
             }
 
             return [
                 'name'=> $name,
-                'type' => ucfirst($deposit->deposit_type),
                 'amount'=>$deposit->amount,
-                'chain_id'=>$deposit->chain_id
+                'business'=>$deposit->business,
             ];
 
         })->values();

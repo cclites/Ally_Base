@@ -57,13 +57,10 @@
                                         :busy="busy"
                                         :footClone="footClone"
                                 >
-                                    <template slot="FOOT_name" scope="item">
-                                        &nbsp;
+                                    <template slot="FOOT_chain" scope="item">&nbsp;
                                     </template>
                                     <template slot="FOOT_type" scope="item">
-                                        &nbsp;
                                     </template>
-
                                     <template slot="FOOT_amount" scope="item">
                                         <strong>Total: </strong> {{ moneyFormat(totals.amount) }}
                                     </template>
@@ -92,9 +89,7 @@
         name: "TotalDepositsReport",
         mixins: [ FormatsNumbers ],
         data() {
-
             return {
-
                 form: new Form({
                     startdate: moment().startOf( 'isoweek' ).subtract( 1, 'days' ).format( 'MM/DD/YYYY' ),
                     enddate  : moment().endOf( 'isoday' ).format( 'MM/DD/YYYY' ),
@@ -105,8 +100,7 @@
                 sortBy: 'name',
                 sortDesc: false,
                 fields: [
-                    {key: 'name', label: 'Name', sortable: true,},
-                    {key: 'type', label: 'Type', sortable: true,},
+                    {key: 'name', label: 'Location', sortable: true,},
                     {key: 'amount', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
