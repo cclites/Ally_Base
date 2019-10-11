@@ -96,7 +96,7 @@ class DepositsController extends Controller
     {
         $request->validate([
             'business_id' => 'required',
-            'caregiver_id' => 'integer',
+            'caregiver_id' => 'nullable|integer',
             'type' => 'required|in:withdrawal,deposit',
             'amount' => 'required|numeric|min:0.1',
             'adjustment' => 'nullable|boolean',
