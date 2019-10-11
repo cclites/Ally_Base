@@ -112,7 +112,7 @@ class DepositsController extends Controller
         if ($request->caregiver_id) {
             $caregiver = Caregiver::findOrFail($request->caregiver_id);
 
-            //For manual deposits, the location id will be included, so trivial to get the chain.
+            //For manual deposits, the location id will be included, and trivial to get the chain.
             $chainId =  Business::where('id', $request->business_id)->pluck('chain_id')->first();
 
             if ($request->process) {
