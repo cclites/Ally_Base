@@ -36,6 +36,7 @@ class TotalDepositsReport extends BaseReport
     {
         $this->query = $query->with([
             'business',
+            'business.business_chain',
             'caregiver',
         ]);
     }

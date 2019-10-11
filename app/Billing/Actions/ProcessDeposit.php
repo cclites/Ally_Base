@@ -100,7 +100,7 @@ class ProcessDeposit
      * @throws PaymentAmountError
      * @throws PaymentMethodError
      */
-    public function depositToCaregiver(Caregiver $caregiver, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD', bool $allowZero = false): Deposit
+    public function depositToCaregiver(Caregiver $caregiver, DepositMethodFactory $methodFactory, float $amount, string $currency = 'USD', bool $allowZero = false, int $chainId): Deposit
     {
         $account = $caregiver->bankAccount;
         if (!$account) {
@@ -112,7 +112,7 @@ class ProcessDeposit
         $attributes = [
             'deposit_type' => 'caregiver',
             'caregiver_id'  => $caregiver->id,
-            'chain_id' => $caregiver->chain_id
+            'chain_id' => $chainId
         ];
 
         return $this->deposit($strategy, $attributes, $amount, $currency, $allowZero);

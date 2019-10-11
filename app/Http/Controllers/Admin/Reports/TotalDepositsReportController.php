@@ -50,8 +50,8 @@ class TotalDepositsReportController
 
         foreach($data as $item){
 
-            if($item['chain_id']){
-                $chain = BusinessChain::find($item['chain_id'])->pluck('name')->first();
+            if($item['business_chain']){
+                $chain = $item['business_chain']['name'];
                 $key = $chain;
             }else{
                 $chain = null;

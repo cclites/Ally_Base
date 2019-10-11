@@ -76,7 +76,7 @@ class ProcessChainDeposits
      * @param array $results
      * @return array
      */
-    private function processSingleDeposit(string $batchId, iterable $invoices, $chainId): DepositLog
+    private function processSingleDeposit(string $batchId, iterable $invoices, int $chainId): DepositLog
     {
         $log = new DepositLog();
         $log->batch_id = $batchId;
