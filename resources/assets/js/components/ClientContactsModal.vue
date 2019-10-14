@@ -8,9 +8,20 @@
         >
             <b-row>
                 <b-col>
-                    <div class="d-flex">
-                        <b-form-checkbox class="ml-auto" v-model="form.is_emergency" :disabled="busy">
+                    <div class="d-flex ">
+                        <b-form-checkbox class="f-1" v-model="form.is_emergency" :disabled="busy">
                             Emergency Contact
+                        </b-form-checkbox>
+                        <b-form-checkbox class="f-1" v-model="form.has_poa" :disabled="busy">
+                            Has Power of Attorney
+                        </b-form-checkbox>
+                    </div>
+                    <div class="d-flex ">
+                        <b-form-checkbox class="f-1" v-model="form.is_payer" :disabled="busy">
+                            Is Payer
+                        </b-form-checkbox>
+                        <b-form-checkbox class="f-1" v-model="form.has_login_access" :disabled="busy">
+                            Has Login Access
                         </b-form-checkbox>
                     </div>
                     <b-form-group label="Contact Name" label-for="name" label-class="required">
@@ -25,7 +36,7 @@
                             <option value="other">Other</option>
                             <option value="custom">Custom</option>
                         </b-select>
-                        <b-form-input v-if="form.relationship === 'custom'" v-model="form.relationship_custom" type="text" required class="mt-2" :disabled="busy"/>
+                        <b-form-input v-if=" [ 'custom', 'family' ].includes( form.relationship )" v-model="form.relationship_custom" type="text" required class="mt-2" :disabled="busy"/>
                         <input-help :form="form" field="relationship"></input-help>
                     </b-form-group>
                     <b-form-group label="Email" label-for="email">
@@ -34,15 +45,29 @@
                     </b-form-group>
                     <b-row>
                         <b-col sm="6">
-                            <b-form-group label="Phone Number 1" label-for="phone1">
+                            <b-form-group label="Mobile Phone" label-for="phone1">
                                 <b-form-input v-model="form.phone1" type="text" max="45" :disabled="busy" />
                                 <input-help :form="form" field="phone1"></input-help>
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
-                            <b-form-group label="Phone Number 2" label-for="phone2">
+                            <b-form-group label="Home Phone" label-for="phone2">
                                 <b-form-input v-model="form.phone2" type="text" max="45" :disabled="busy" />
                                 <input-help :form="form" field="phone2"></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col sm="6">
+                            <b-form-group label="Work Phone" label-for="work_phone">
+                                <b-form-input v-model="form.work_phone" type="text" max="45" :disabled="busy" />
+                                <input-help :form="form" field="work_phone"></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="6">
+                            <b-form-group label="Fax Number" label-for="fax_number">
+                                <b-form-input v-model="form.fax_number" type="text" max="45" :disabled="busy" />
+                                <input-help :form="form" field="fax_number"></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -123,11 +148,16 @@
                     email: defaults.email,
                     phone1: defaults.phone1,
                     phone2: defaults.phone2,
+                    work_phone: defaults.work_phone,
+                    fax_number: defaults.fax_number,
                     address: defaults.address,
                     city: defaults.city,
                     state: defaults.state,
                     zip: defaults.zip,
+                    is_payer: defaults.is_payer ? true : false,
                     is_emergency: defaults.is_emergency ? true : false,
+                    has_poa: defaults.has_poa ? true : false,
+                    has_login_access: defaults.has_login_access ? true : false,
                 });
             },
 

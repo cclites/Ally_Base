@@ -31,11 +31,16 @@ class CreateClientContactRequest extends FormRequest
             'email' => 'nullable|email|max:255',
             'phone1' => 'nullable|max:45',
             'phone2' => 'nullable|max:45',
+            'work_phone' => 'nullable|max:45',
+            'fax_number' => 'nullable|max:45',
             'address' => 'nullable|max:255',
             'city' => 'nullable|max:45',
             'state' => 'nullable|max:45',
             'zip' => 'nullable|max:45',
             'is_emergency' => 'nullable|boolean',
+            'is_payer' => 'nullable|boolean',
+            'has_poa' => 'nullable|boolean',
+            'has_login_access' => 'nullable|boolean',
         ];
     }
 
@@ -49,9 +54,15 @@ class CreateClientContactRequest extends FormRequest
         $data = $this->validated();
         
         $data['is_emergency'] = $data['is_emergency'] ? 1 : 0;
+        $data['has_poa'] = $data['has_poa'] ? 1 : 0;
+        $data['is_payer'] = $data['is_payer'] ? 1 : 0;
+        $data['has_login_access'] = $data['has_login_access'] ? 1 : 0;
         
-        if ($data['relationship'] != 'custom') {
+        if ( !in_array( $data['relationship'], [ 'custom', 'family' ] )) {
             $data['relationship_custom'] = null;
+        }
+        if ( $data['relationship'] == 'poa' ) {
+            $data['has_poa'] = 1;
         }
 
         if (! $data['is_emergency']) {
