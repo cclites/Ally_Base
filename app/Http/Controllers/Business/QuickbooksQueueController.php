@@ -95,7 +95,13 @@ class QuickbooksQueueController extends Controller
 
         if (empty($client->quickbooksCustomer)) {
             // Create new customer relationship.
-            [$customerId, $customerName] = $api->createCustomer($client);
+            try {
+                [$customerId, $customerName] = $api->createCustomer($client);
+            } catch (\Exception $ex) {
+                // Handle duplicate customer name errors
+                return new ErrorResponse(500, "Could not create customer record for this invoice, customer name already exists.  Please select a client mapping for client {$client->name} in the Quickbooks Settings area.");
+            }
+
             $customer = $client->quickbooksCustomer()->create([
                 'business_id' => $business->id,
                 'name' => $customerName,
