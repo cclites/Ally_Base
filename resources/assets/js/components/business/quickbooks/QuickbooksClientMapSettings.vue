@@ -8,7 +8,7 @@
                     <b-btn variant="info" @click="save()" :disabled="busy">Save Changes</b-btn>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn variant="success" @click="refreshCustomers()" :disabled="busy">Sync Quickbooks Customer Data</b-btn>
+                    <b-btn v-show="!connection.is_desktop" variant="success" @click="refreshCustomers()" :disabled="busy">Sync Quickbooks Customer Data</b-btn>
                 </b-col>
             </b-row>
             <b-row class="mb-2" align-h="end">
@@ -58,6 +58,10 @@
 <script>
     export default {
         props: {
+            connection: {
+                type: [Array, Object],
+                default: () => { return {}; },
+            },
             clients: {
                 type: Array,
                 default: [],
