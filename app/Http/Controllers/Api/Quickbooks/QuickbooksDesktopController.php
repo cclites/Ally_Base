@@ -55,7 +55,7 @@ class QuickbooksDesktopController extends Controller
     {
         // Find service records that no longer appear in Quickbooks.
         $deleteIds = $business->quickbooksServices()
-            ->whereNotIn('name', $services->pluck('name'))
+            ->whereNotIn('service_id', $services->pluck('id'))
             ->get()
             ->pluck('id');
 
@@ -73,14 +73,13 @@ class QuickbooksDesktopController extends Controller
             ->delete();
 
         foreach ($services as $service) {
-            if ($match = $business->quickbooksServices()->where('name', $service['name'])->first()) {
-                // No need to update because at this time we are only storing
-                // the name, which is essentially the primary key here.
-//                $match->update([
-//                    'name' => $service->Name,
-//                ]);
+            if ($match = $business->quickbooksServices()->where('service_id', $service['id'])->first()) {
+                $match->update([
+                    'name' => $service['name'],
+                ]);
             } else {
                 $business->quickbooksServices()->create([
+                    'service_id' => $service['id'],
                     'name' => $service['name'],
                 ]);
             }
@@ -90,9 +89,9 @@ class QuickbooksDesktopController extends Controller
     public function syncCustomers(Collection $customers, Business $business)
     {
         // Find customer records that no longer appear in Quickbooks.
-        $customerNames = $customers->pluck('name');
+        $customerIds = $customers->pluck('id');
         $deleteIds = $business->quickbooksCustomers()
-            ->whereNotIn('name', $customerNames)
+            ->whereNotIn('customer_id', $customerIds)
             ->get()
             ->pluck('id');
 
@@ -109,15 +108,13 @@ class QuickbooksDesktopController extends Controller
 
         // Create OR update each customer record.
         foreach ($customers as $customer) {
-            if ($match = $business->quickbooksCustomers()->where('name', $customer['name'])->first()) {
-                // No need to update because at this time we are only storing
-                // the name, which is essentially the primary key here.
-//                $match->update([
-//                    'name' => $customer->name,
-//                ]);
+            if ($match = $business->quickbooksCustomers()->where('customer_id', $customer['id'])->first()) {
+                $match->update([
+                    'name' => $customer['name'],
+                ]);
             } else {
                 $business->quickbooksCustomers()->create([
-                    'customer_id' => null, // Quickbooks Desktop Customers have no ID
+                    'customer_id' => $customer['id'],
                     'name' => $customer['name'],
                 ]);
             }
