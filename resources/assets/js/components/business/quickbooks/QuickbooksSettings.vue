@@ -28,6 +28,7 @@
                     <business-quickbooks-client-map-settings
                         :clients="clients"
                         :businessId="business_id"
+                        :connection="connection"
                     />
                 </b-tab>
             </b-tabs>

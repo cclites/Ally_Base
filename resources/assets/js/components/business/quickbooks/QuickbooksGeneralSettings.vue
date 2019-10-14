@@ -35,7 +35,7 @@
                     <h3>Service Mapping</h3>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn variant="success" @click="refreshServices()" :disabled="busy">Sync Quickbooks Services</b-btn>
+                    <b-btn v-show="!connection.is_desktop" variant="success" @click="refreshServices()" :disabled="busy">Sync Quickbooks Services</b-btn>
                 </b-col>
             </b-row>
             <b-row>
