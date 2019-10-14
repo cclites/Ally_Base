@@ -58,7 +58,7 @@ class AchExportFile
 
         $this->transactions[] = [
             'SSN-ID' => $id,
-            'Name' => $account->getBillingName(),
+            'Name' => $this->stripUnwantedChars($account->getBillingName()),
             'ABA Routing' => $account->getRoutingNumber(),
             'Account' => $account->getAccountNumber(),
             'Transaction Type' => $type,
@@ -112,5 +112,20 @@ class AchExportFile
     public function getBankName() : string
     {
         return $this->bank;
+    }
+
+    /**
+     * Remove unwanted chars from a string.  Use this to
+     * ensure no unwanted chars appear in the output Heritage file.
+     *
+     * @param string $str
+     * @return string
+     */
+    protected function stripUnwantedChars(string $str) : string
+    {
+        $str = str_replace('\'', '', $str);
+        $str = str_replace('-', '', $str);
+
+        return $str;
     }
 }
