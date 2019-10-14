@@ -474,6 +474,8 @@ Route::group([
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
+    Route::post('quickbooks-queue/{invoice}/enqueue', 'Business\QuickbooksQueueController@enqueue')->name('quickbooks-queue.enqueue');
+    Route::post('quickbooks-queue/{invoice}/dequeue', 'Business\QuickbooksQueueController@dequeue')->name('quickbooks-queue.dequeue');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::delete('referral-sources/organization/{organization}', 'Business\ReferralSourceController@removeOrganization');

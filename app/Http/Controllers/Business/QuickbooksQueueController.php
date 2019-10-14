@@ -8,12 +8,13 @@ use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\ChargedRate;
 use App\QuickbooksClientInvoice;
 use App\QuickbooksConnection;
+use App\QuickbooksInvoiceStatus;
 use App\QuickbooksService;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksQueueResource;
 use App\Responses\SuccessResponse;
-use App\Services\Quickbooks\QuickbooksInvoice;
-use App\Services\Quickbooks\QuickbooksInvoiceItem;
+use App\Services\Quickbooks\QuickbooksOnlineInvoice;
+use App\Services\Quickbooks\QuickbooksOnlineInvoiceItem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -49,7 +50,7 @@ class QuickbooksQueueController extends Controller
                 });
             }
 
-            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claim', 'quickbooksInvoice'])->get();
+            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'quickbooksInvoice.statuses'])->get();
 
             return QuickbooksQueueResource::collection($invoices);
         }
@@ -58,7 +59,7 @@ class QuickbooksQueueController extends Controller
     }
 
     /**
-     * Transfer ClientInvoice to Quickbooks.
+     * Transfer ClientInvoice to Quickbooks Online.
      *
      * @param ClientInvoice $invoice
      * @return ErrorResponse
@@ -79,8 +80,8 @@ class QuickbooksQueueController extends Controller
 
         /** @var QuickbooksConnection $connection */
         $connection = $business->quickbooksConnection;
-        if (empty($connection) || !$connection->isConfigured()) {
-            return new ErrorResponse(401, 'You must be connected to the Quickbooks API and have all your settings configured in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.');
+        if (empty($connection) || !$connection->isConfigured() || $connection->is_desktop) {
+            return new ErrorResponse(401, 'You must be connected to the Quickbooks Online API and have all your settings configured in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.  Note: this includes setting up all service mappings.');
         }
 
         /** @var \App\Services\QuickbooksOnlineService $api */
@@ -111,7 +112,7 @@ class QuickbooksQueueController extends Controller
             $client = $client->fresh();
         }
 
-        $qbInvoice = new QuickbooksInvoice();
+        $qbInvoice = new QuickbooksOnlineInvoice();
         $qbInvoice->date = Carbon::parse($invoice->getDate());
         $qbInvoice->invoiceId = $invoice->getName();
 
@@ -124,7 +125,7 @@ class QuickbooksQueueController extends Controller
 
         /** @var ClientInvoiceItem $invoiceItem */
         foreach ($invoice->getItems() as $invoiceItem) {
-            $lineItem = new QuickbooksInvoiceItem();
+            $lineItem = new QuickbooksOnlineInvoiceItem();
             $lineItem->quantity = $invoiceItem->units;
 
             if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY) {
@@ -219,12 +220,14 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(500, 'An error occurred while trying to submit the invoice.  Please try again.');
         }
 
-        $invoice->quickbooksInvoice()->create([
+        $record = $invoice->quickbooksInvoice()->create([
             'client_invoice_id' => $invoice->id,
             'quickbooks_invoice_id' => $result->Id,
         ]);
 
-        $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'payments', 'claim', 'quickbooksInvoice']);
+        $record->updateStatus(QuickbooksInvoiceStatus::TRANSFERRED());
+
+        $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'quickbooksInvoice.statuses']);
         return new SuccessResponse('Invoice transmitted successfully.', new QuickbooksQueueResource($invoice));
     }
 
@@ -261,5 +264,68 @@ class QuickbooksQueueController extends Controller
         }
 
         return [$service->service_id, $service->name];
+    }
+
+    /**
+     * Add invoice to quickbooks desktop invoice queue.
+     *
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function enqueue(ClientInvoice $invoice)
+    {
+        /** @var \App\Client $client */
+        $client = $invoice->client;
+
+        /** @var \App\Business $client */
+        $business = $client->business;
+        $this->authorize('update', $business);
+
+        /** @var QuickbooksConnection $connection */
+        $connection = $business->quickbooksConnection;
+        if (empty($connection) || !$connection->isConfigured() || !$connection->is_desktop) {
+            return new ErrorResponse(401, 'You must configure your Quickbooks Desktop connection in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.  Note: this includes setting up all service mappings.');
+        }
+
+        // Ensure there is a qb invoice entry
+        if (empty($invoice->quickbooksInvoice)) {
+            $invoice->quickbooksInvoice()->create([
+                'client_invoice_id' => $invoice->id,
+            ]);
+        }
+
+        $invoice->fresh()->quickbooksInvoice->updateStatus(QuickbooksInvoiceStatus::QUEUED(), ['errors' => null]);
+
+        $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'quickbooksInvoice.statuses']);
+        return new SuccessResponse('Invoice added to queue successfully.', new QuickbooksQueueResource($invoice));
+    }
+
+    /**
+     * Remove a client invoice from the quickbooks queue.
+     *
+     * @param ClientInvoice $invoice
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function dequeue(ClientInvoice $invoice)
+    {
+        /** @var \App\Client $client */
+        $client = $invoice->client;
+
+        /** @var \App\Business $client */
+        $business = $client->business;
+        $this->authorize('update', $business);
+
+        /** @var QuickbooksConnection $connection */
+        $connection = $business->quickbooksConnection;
+        if (empty($connection) || !$connection->isConfigured() || !$connection->is_desktop) {
+            return new ErrorResponse(401, 'You must configure your Quickbooks Desktop connection in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.  Note: this includes setting up all service mappings.');
+        }
+
+        $invoice->quickbooksInvoice->updateStatus(QuickbooksInvoiceStatus::READY());
+
+        $invoice = $invoice->fresh()->load(['client', 'clientPayer.payer', 'quickbooksInvoice.statuses']);
+        return new SuccessResponse('Invoice removed from queue successfully.', new QuickbooksQueueResource($invoice));
     }
 }
