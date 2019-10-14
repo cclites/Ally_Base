@@ -140,6 +140,9 @@ class ClientSetupController extends Controller
         \DB::commit();
 
         $client = $client->fresh()->load(['address', 'phoneNumber']);
+
+        $this->renderClientAgreementDocument($client);
+
         return new SuccessResponse('Your account has been set up!', $client);
     }
 
@@ -198,5 +201,20 @@ class ClientSetupController extends Controller
         $client->save();
 
         return response()->json($client);
+    }
+
+    public function renderClientAgreementDocument(Client $client){
+
+        $termsFile = 'terms-inc.html';
+        $termsUrl = url($termsFile);
+
+        if (file_exists(public_path('terms-inc-' . $client->business_id . '.html'))) {
+            $termsFile = 'terms-inc-' . $client->business_id . '.html';
+            $termsUrl = url('terms-inc-' . $client->business_id . '.html');
+        }
+
+        $terms = file_get_contents($termsUrl);
+
+
     }
 }
