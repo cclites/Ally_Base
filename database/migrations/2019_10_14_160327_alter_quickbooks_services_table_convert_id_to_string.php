@@ -30,8 +30,6 @@ class AlterQuickbooksServicesTableConvertIdToString extends Migration
      */
     public function down()
     {
-        Schema::table('quickbooks_services', function (Blueprint $table) {
-            $table->unsignedInteger('service_id')->nullable()->change();
-        });
+        // No turning back
     }
 }

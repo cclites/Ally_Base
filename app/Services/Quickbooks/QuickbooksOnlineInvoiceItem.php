@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Services\Quickbooks;
 
 use App\Shift;
 
-class QuickbooksInvoiceItem
+class QuickbooksOnlineInvoiceItem
 {
     /**
      * @var string
@@ -45,7 +46,7 @@ class QuickbooksInvoiceItem
      *
      * @return array
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         return [
             'Description' => $this->description,

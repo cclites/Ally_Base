@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Quickbooks;
 
-class QuickbooksInvoice
+class QuickbooksOnlineInvoice
 {
     /**
      * @var string
@@ -14,7 +14,7 @@ class QuickbooksInvoice
     public $customerName;
 
     /**
-     * @var \Illuminate\Support\Collection|QuickbooksInvoiceItem[]
+     * @var \Illuminate\Support\Collection|QuickbooksOnlineInvoiceItem[]
      */
     public $lineItems = [];
 
@@ -31,9 +31,9 @@ class QuickbooksInvoice
     /**
      * Add a line item.
      *
-     * @param QuickbooksInvoiceItem $item
+     * @param QuickbooksOnlineInvoiceItem $item
      */
-    public function addItem(QuickbooksInvoiceItem $item) : void
+    public function addItem(QuickbooksOnlineInvoiceItem $item) : void
     {
         $this->lineItems[] = $item;
     }

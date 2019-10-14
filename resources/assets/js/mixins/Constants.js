@@ -122,6 +122,21 @@ export default {
                 { value: 'supplier-contribution', text: 'Supplier Contribution' },
                 { value: 'take-back', text: 'Take Back' },
             ],
+            QUICKBOOKS_INVOICE_STATUS: {
+                READY: 'ready',
+                QUEUED: 'queued',
+                PROCESSING: 'processing',
+                TRANSFERRED: 'transferred',
+                ERRORED: 'errored',
+                NONE: '-',
+            },
+            quickbooksInvoiceStatusOptions: [
+                { value: 'ready', text: 'Ready' },
+                { value: 'queued', text: 'Queued' },
+                { value: 'processing', text: 'Processing' },
+                { value: 'transferred', text: 'Transferred' },
+                { value: 'errored', text: 'Errored' },
+            ],
         }
     },
 }

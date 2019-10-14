@@ -79,19 +79,54 @@
                                 :busy="loadingTable"
                             >
                                 <template slot="name" scope="row">
-                                    <a :href="invoiceUrl(row.item)" target="_blank">{{ row.value }}</a>
+                                    <a :href="`/business/client/invoices/${row.item.id}`" target="_blank">{{ row.item.name }}</a>
                                 </template>
-                                <template slot="client" scope="row">
-                                    <a :href="`/business/clients/${row.item.client.id}`">{{ row.item.client.name }}</a>
+                                <template slot="client_name" scope="row">
+                                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
                                 </template>
                                 <template slot="actions" scope="row">
-                                    <div v-if="row.item.quickbooksInvoice && row.item.quickbooksInvoice.length">
-                                        Transferred on {{ formatDateFromUTC(row.item.quickbooksInvoice[0].created_at) }}
+                                    <div v-if="connection.is_desktop">
+                                        <!-- DESKTOP ACTIONS -->
+                                        <div v-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.READY">
+                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                <span>Add to Queue</span>
+                                            </b-btn>
+                                        </div>
+                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.QUEUED">
+                                            <b-btn variant="warning" class="mr-2" @click="dequeue(row.item)" :disabled="busy">
+                                                <i v-if="row.item.id === dequeueingId" class="fa fa-spin fa-spinner"></i>
+                                                <span>Remove from Queue</span>
+                                            </b-btn>
+                                        </div>
+                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.ERRORED">
+                                            <b-btn variant="primary" class="mr-2" @click="viewErrors(row.item)" :disabled="busy">
+                                                <span>View Errors</span>
+                                            </b-btn>
+                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                <span>Re-Queue</span>
+                                            </b-btn>
+                                        </div>
+                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.PROCESSING">
+                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                <span>Re-Queue</span>
+                                            </b-btn>
+                                        </div>
                                     </div>
-                                    <b-btn v-else variant="primary" class="mr-2" @click="transfer(row.item)" :disabled="busy">
-                                        <i v-if="row.item.id === transferringId" class="fa fa-spin fa-spinner"></i>
-                                        <span>Transfer to Quickbooks</span>
-                                    </b-btn>
+                                    <div v-else>
+                                        <!-- ONLINE ACTIONS -->
+                                        <div v-if="row.item.status != QUICKBOOKS_INVOICE_STATUS.TRANSFERRED">
+                                            <b-btn variant="primary" class="mr-2" @click="transferOnline(row.item)" :disabled="busy">
+                                                <i v-if="row.item.id === transferringId" class="fa fa-spin fa-spinner"></i>
+                                                <span>Transfer to Quickbooks</span>
+                                            </b-btn>
+                                        </div>
+                                        <div v-ekse>
+                                            -
+                                        </div>
+                                    </div>
                                 </template>
                             </b-table>
                         </div>
@@ -107,9 +142,11 @@
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import Constants from "../../../mixins/Constants";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, Constants, FormatsStrings],
         components: { BusinessLocationFormGroup },
 
         data() {
@@ -117,6 +154,17 @@
                 loadingConnection: true,
                 loadingTable: false,
                 waitingToGenerate: true,
+                loadingClients: false,
+                clients: [],
+                clientFilter: '',
+                payers: [],
+                payerFilter: '',
+                loadingPayers: false,
+                selectedInvoice: {},
+                busy: false,
+                transferringId: null,
+                queueingId: null,
+                dequeueingId: null,
 
                 connection: {},
                 business_id: null,
@@ -129,7 +177,7 @@
                 items: [],
                 fields: [
                     {
-                        key: 'created_at',
+                        key: 'date',
                         label: 'Date',
                         formatter: (val) => this.formatDateFromUTC(val),
                         sortable: true,
@@ -140,16 +188,16 @@
                         sortable: true,
                     },
                     {
-                        key: 'client',
+                        key: 'client_name',
                         sortable: true,
                     },
                     {
-                        key: 'payer',
-                        formatter: (val) => val ? val.name : 'None',
+                        key: 'payer_name',
                         sortable: true,
+                        formatter: x => x ? x : '(None)',
                     },
                     {
-                        key: 'amount',
+                        key: 'total',
                         label: 'Inv Total',
                         formatter: (val) => this.moneyFormat(val),
                         sortable: true,
@@ -161,20 +209,22 @@
                         sortable: true,
                     },
                     {
+                        key: 'status',
+                        sortable: true,
+                        formatter: (x) => x ? this.resolveOption(x, this.quickbooksInvoiceStatusOptions) : '-',
+                    },
+                    {
+                        key: 'last_status_update',
+                        label: 'Last Update',
+                        formatter: x => x ? this.formatDateTimeFromUTC(x) : '-',
+                        sortable: true,
+                    },
+                    {
                         key: 'actions',
-                        label: 'Transfer',
+                        label: 'Actions',
                         sortable: false,
                     },
                 ],
-                loadingClients: false,
-                clients: [],
-                clientFilter: '',
-                payers: [],
-                payerFilter: '',
-                loadingPayers: false,
-                selectedInvoice: {},
-                busy: false,
-                transferringId: null,
             }
         },
 
@@ -198,7 +248,49 @@
         },
 
         methods: {
-            transfer(invoice) {
+            enqueue(invoice) {
+                this.busy = true;
+                this.queueingId = invoice.id;
+                let form = new Form({});
+                form.post(`/business/quickbooks-queue/${invoice.id}/enqueue`)
+                    .then( ({ data }) => {
+                        // success
+                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data);
+                        }
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.busy = false;
+                        this.queueingId = null;
+                    });
+            },
+
+            dequeue(invoice) {
+                this.busy = true;
+                this.dequeueingId = invoice.id;
+                let form = new Form({});
+                form.post(`/business/quickbooks-queue/${invoice.id}/dequeue`)
+                    .then( ({ data }) => {
+                        // success
+                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1, data.data);
+                        }
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.busy = false;
+                        this.dequeueingId = null;
+                    });
+            },
+
+            viewErrors(invoice) {
+
+            },
+
+            transferOnline(invoice) {
                 this.busy = true;
                 this.transferringId = invoice.id;
                 let form = new Form({});
@@ -255,10 +347,6 @@
                     .finally(() => {
                         this.loadingConnection = false;
                     })
-            },
-
-            invoiceUrl(invoice, view="") {
-                return `/business/client/invoices/${invoice.id}/${view}`;
             },
         },
 
