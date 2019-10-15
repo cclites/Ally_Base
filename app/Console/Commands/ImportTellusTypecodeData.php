@@ -85,17 +85,47 @@ class ImportTellusTypecodeData extends BaseImport
      */
     public function cleanKnownDictionaryIssues()
     {
-        TellusTypecode::where('category', 'Payer')
-                    ->where('text_code', 'SUNS')
-                    ->update(['description' => 'Sunshine/Centine']);
+        // tellus seems to have fixed this..
+        // TellusTypecode::where('category', 'Payer')
+        //             ->where('text_code', 'SUNS')
+        //             ->update(['description' => 'Sunshine/Centine']);
 
-        TellusTypecode::where('category', 'Plan')
-                    ->where('text_code', 'FMSP')
-                    ->update(['description' => 'Florida Medicaid State Plan']);
+        // tellus seems to have fixed this..
+        // TellusTypecode::where('category', 'Plan')
+        //             ->where('text_code', 'FMSP')
+        //             ->update(['description' => 'Florida Medicaid State Plan']);
 
-        TellusTypecode::where('category', 'Payer')
-                    ->where('text_code', 'UHTH')
-                    ->update(['description' => 'United HealthCare']);
+        // tellus seems to have fixed this..
+        // TellusTypecode::where('category', 'Payer')
+        //             ->where('text_code', 'UHTH')
+        //             ->update(['description' => 'United HealthCare']);
+
+        // tellus introduced these new errors of course
+        TellusTypecode::where('category', 'EndVerificationType')
+                    ->where('text_code', 'GPS')
+                    ->update(['description' => 'GPS Verification Method']);
+        TellusTypecode::where('category', 'EndVerificationType')
+                    ->where('text_code', 'IVR')
+                    ->update(['description' => 'IVR Verification Method']);
+        TellusTypecode::where('category', 'EndVerificationType')
+                    ->where('text_code', 'QCD')
+                    ->update(['description' => 'Q-Code Verification Method']);
+        TellusTypecode::where('category', 'EndVerificationType')
+                    ->where('text_code', 'TOK')
+                    ->update(['description' => 'Digital Token Verification Method']);
+
+        TellusTypecode::where('category', 'StartVerificationType')
+                    ->where('text_code', 'GPS')
+                    ->update(['description' => 'GPS Verification Method']);
+        TellusTypecode::where('category', 'StartVerificationType')
+                    ->where('text_code', 'IVR')
+                    ->update(['description' => 'IVR Verification Method']);
+        TellusTypecode::where('category', 'StartVerificationType')
+                    ->where('text_code', 'QCD')
+                    ->update(['description' => 'Q-Code Verification Method']);
+        TellusTypecode::where('category', 'StartVerificationType')
+                    ->where('text_code', 'TOK')
+                    ->update(['description' => 'Digital Token Verification Method']);
     }
 
     /**
