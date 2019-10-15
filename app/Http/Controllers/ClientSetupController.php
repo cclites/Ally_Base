@@ -9,7 +9,9 @@ use App\Traits\Request\PaymentMethodRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
+use File;
 use App\PhoneNumber;
+use function Composer\Autoload\includeFile;
 
 class ClientSetupController extends Controller
 {
@@ -205,16 +207,46 @@ class ClientSetupController extends Controller
 
     public function renderClientAgreementDocument(Client $client){
 
+        $client->load(['addresses', 'defaultPayment', 'backupPayment', 'phoneNumbers']);
+
+        \Log::info($client);
+
+
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
 
         if (file_exists(public_path('terms-inc-' . $client->business_id . '.html'))) {
             $termsFile = 'terms-inc-' . $client->business_id . '.html';
-            $termsUrl = url('terms-inc-' . $client->business_id . '.html');
+            $termsUrl = url($termsFile);
         }
 
         $terms = file_get_contents($termsUrl);
+        $paymentInfo = (string)view('business.clients.payment_details', compact('client'))->render();
 
+        $pdf = \PDF::loadView('business.clients.client_agreement_document', ['terms'=>$terms, 'paymentInfo'=>$paymentInfo]);
 
+        $dir = storage_path('app/documents/');
+        if (!File::exists($dir)) {
+            File::makeDirectory($dir, 493, true);
+        }
+        $filename = str_slug($client->id . ' ' . $client->name.' Client Agreement').'.pdf';
+        $filePath = $dir . '/' . $filename;
+        if (config('app.env') == 'local') {
+            if (File::exists($filePath)) {
+                File::delete($filePath);
+            }
+        }
+        $response = $pdf->save($filePath);
+
+        if ($response) {
+            \DB::transaction(function() use ($response, $filePath, $client) {
+                $client->documents()->create([
+                    'filename' => File::basename($filePath),
+                    'original_filename' => File::basename($filePath),
+                    'description' => 'Client Agreement',
+                    'user_id' => $client->id
+                ]);
+            });
+        }
     }
 }

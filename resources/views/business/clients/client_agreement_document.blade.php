@@ -12,6 +12,8 @@
         }
     </style>
 
-    {{ $terms }}
+    {!!  $terms !!}
+
+    {!!  $paymentInfo !!}
 
 @endsection

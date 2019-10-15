@@ -1,7 +1,31 @@
-@section('content')
+<style>
+    h5{
+        margin-top: 20px;
+    }
+
+    table{
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    table, th, td {
+        border: 1px solid #93a1a1;
+        border-collapse: collapse;
+    }
+
+    th, td{
+        padding: 6px;
+    }
+
+    th{
+        font-size: 18px;
+        color: #ffffff;
+        background-color: #0b67cd;
+    }
+</style>
 
 <div>
-    <b-table class="client_information">
+    <table class="client_information">
         <thead>
             <tr>
                 <th colspan="12">Client Information:</th>
@@ -18,18 +42,18 @@
             </tr>
             <tr>
                 <td colspan="12">
-                    Address: {{ $client->getBillingAddress() }}
+                    Address: {{ $client->getBillingAddress()->address1 }}
                 </td>
             </tr>
             <tr>
                 <td colspan="4">
-                    City: {{ $client->user->addresses->where('type', 'home')->city }}
+                    City: {{ $client->getBillingAddress()->city }}
                 </td>
                 <td colspan="4">
-                    State: {{ $client->user->addresses->where('type', 'home')->state }}
+                    State: {{ $client->getBillingAddress()->state }}
                 </td>
                 <td colspan="4">
-                    Zip: {{ $client->user->addresses->where('type', 'home')->zip }}
+                    Zip: {{ $client->getBillingAddress()->zip }}
                 </td>
             </tr>
             <tr>
@@ -40,16 +64,19 @@
                     SSN: {{ $client->masked_ssn }}
                 </td>
             </tr>
-        </tbody>
-    </b-table>
 
-    <h2>Primary Payment Method</h2>
+        </tbody>
+    </table>
+
+    <h5>Primary Payment Method</h5>
+
+    {{ $client->default_payment_type }}
 
     {{--
       ACH PRIMARY
     --}}
     @if($client->default_payment_type === 'bank_accounts')
-        <b-table class="primary_payment_ach">
+        <table class="primary_payment_ach">
             <thead>
                 <th colspan="12">ACH</th>
             </thead>
@@ -69,7 +96,7 @@
                 </tr>
                 <tr>
                     <td colspan="4">
-                        Payment Start Date: {{  }}
+                        Payment Start Date: {{ new Carbon('next tuesday') }}
                     </td>
                     <td colspan="4">
                         Routing/ABA #: {{ $client->defaultPayment->last_four_routing_number }}
@@ -79,7 +106,7 @@
                     </td>
                 </tr>
             </tbody>
-        </b-table>
+        </table>
     @endif
 
     {{--
@@ -87,7 +114,7 @@
     --}}
 
     @if($client->default_payment_type === 'credit_card')
-        <b-table class="primary_payment_cc">
+        <table class="primary_payment_cc">
             <thead>
             <th colspan="12">Credit Card/Debit Card</th>
             </thead>
@@ -111,7 +138,7 @@
                     Address: {{ $client->getBillingAddress() }}
                 </td>
                 <td colspan="4">
-                    Payment Start Date: {{  }}
+                    Payment Start Date: {{ new Carbon('next tuesday')  }}
                 </td>
             </tr>
 
@@ -120,7 +147,7 @@
                     Billing Email: {{ $client->user->email }}
                 </td>
                 <td colspan="4">
-                    Billing Phone: {{  }}
+                    Billing Phone: {{ $client->phoneNumbers()->where('type', 'service')->first() }}
                 </td>
             </tr>
             <tr>
@@ -130,16 +157,16 @@
             </tr>
 
             </tbody>
-        </b-table>
+        </table>
     @endif
 
-    <h2>Backup Payment Method</h2>
+    <h5>Backup Payment Method</h5>
 
     {{--
         ACH BACKUP PAYMENT
     --}}
     @if($client->backup_payment_type === 'bank_accounts')
-        <b-table class="primary_payment_ach">
+        <table class="primary_payment_ach">
             <thead>
             <th colspan="12">ACH</th>
             </thead>
@@ -159,7 +186,7 @@
             </tr>
             <tr>
                 <td colspan="4">
-                    Payment Start Date: {{  }}
+                    Payment Start Date: {{ new Carbon('next tuesday') }}
                 </td>
                 <td colspan="4">
                     Routing/ABA #: {{ $client->backupPayment->last_four_routing_number }}
@@ -169,7 +196,7 @@
                 </td>
             </tr>
             </tbody>
-        </b-table>
+        </table>
     @endif
 
     {{--
@@ -200,7 +227,7 @@
                             Address: {{ $client->backupPayment->getBillingAddress() }}
                         </td>
                         <td colspan="4">
-                            Payment Start Date: {{  }}
+                            Payment Start Date: {{ new Carbon('next tuesday') }}
                         </td>
                     </tr>
                     <tr>
@@ -208,7 +235,7 @@
                             Billing Email: {{ $client->user->email }}
                         </td>
                         <td colspan="4">
-                            Billing Phone: {{  }}
+                            Billing Phone: {{ $client->phoneNumbers()->where('type', 'service')->first() }}
                         </td>
                     </tr>
                     <tr>
@@ -221,5 +248,3 @@
         @endif
     @endif
 </div>
-
-@endsection
