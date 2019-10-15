@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddIndexesToUsersTable extends Migration
+class AlterTablePhoneNumbersAddIndex extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,9 @@ class AddIndexesToUsersTable extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('phone_numbers', function (Blueprint $table) {
+            $table->index('national_number');
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AddIndexesToUsersTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('phone_numbers', function (Blueprint $table) {
+            $table->dropIndex(['national_number']);
+        });
     }
 }
