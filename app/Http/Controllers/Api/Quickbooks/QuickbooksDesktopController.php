@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Api\Quickbooks;
 
+use App\Billing\ClientInvoice;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Business;
 use App\Client;
 use App\Http\Requests\Api\Quickbooks\QuickbooksDesktopApiRequest;
 use App\Http\Controllers\Controller;
+use App\QuickbooksClientInvoice;
 use App\QuickbooksCustomer;
+use App\QuickbooksInvoiceStatus;
+use App\Responses\SuccessResponse;
+use App\Services\Quickbooks\QuickbooksOnlineInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -51,7 +57,105 @@ class QuickbooksDesktopController extends Controller
         return new QuickbooksApiResponse($message, $data);
     }
 
-    public function syncServices(Collection $services, Business $business)
+    /**
+     * Fetch invoices from processing queue.
+     *
+     * @param QuickbooksDesktopApiRequest $request
+     * @param OnlineClientInvoiceQuery $invoiceQuery
+     * @return QuickbooksApiResponse
+     */
+    public function fetchInvoices(QuickbooksDesktopApiRequest $request, OnlineClientInvoiceQuery $invoiceQuery)
+    {
+        $query = $invoiceQuery->with('items', 'quickbooksInvoice')
+            ->forBusiness($request->business()->id)
+            ->whereHas('quickbooksInvoice', function ($q) {
+                return $q->where('status', QuickbooksInvoiceStatus::QUEUED());
+            })
+            ->latest();
+
+        $invoices = $query->take(50)
+            ->get()
+            ->map(function (ClientInvoice $invoice) use ($request) {
+                try {
+                    return QuickbooksOnlineInvoice::fromClientInvoice($request->connection(), $invoice, false)
+                        ->toDesktopArray();
+                } catch (\Exception $ex) {
+                    // Most likely a problem with determining the ally fee.
+                    // This should not happen often.
+                    app('sentry')->captureException($ex);
+                    $invoice->quickbooksInvoice->updateStatus(
+                        QuickbooksInvoiceStatus::ERRORED(), [
+                            'errors' => 'Error determining the provider rate for one or more line items.  Please contact Ally.'
+                        ]
+                    );
+                    return null;
+                }
+            })
+            ->filter()
+            ->toArray();
+
+        return new QuickbooksApiResponse('', $invoices);
+    }
+
+    /**
+     * Mark the given quickbooks invoices as processed.
+     *
+     * @param QuickbooksDesktopApiRequest $request
+     * @return QuickbooksApiResponse
+     */
+    public function processInvoices(QuickbooksDesktopApiRequest $request)
+    {
+        $ids = $request->filled('ids') ? explode(',', $request->ids) : [];
+
+        $invoices = QuickbooksClientInvoice::whereIn('id', $ids)
+            ->where('business_id', $request->business()->id)
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            $invoice->updateStatus(QuickbooksInvoiceStatus::PROCESSING());
+        }
+
+        return new QuickbooksApiResponse($invoices->count() . ' Invoices were marked as processed.');
+    }
+
+    public function invoiceResults(QuickbooksDesktopApiRequest $request)
+    {
+        $success = 0;
+        $error = 0;
+        foreach ($request->results as $result) {
+            if (! isset($result['QuickbooksInvoiceId'])) {
+                continue;
+            }
+
+            $qbInvoice = QuickbooksClientInvoice::where('id', $result['QuickbooksInvoiceId'])
+                ->where('business_id', $request->business()->id)
+                ->first();
+
+            if (empty($qbInvoice)) {
+                continue;
+            }
+
+            if (isset($result['Error'])) {
+                $error++;
+                $qbInvoice->updateStatus(QuickbooksInvoiceStatus::ERRORED(), ['errors' => $result['Error']]);
+            }
+            else if (isset($result['DesktopID'])) {
+                $success++;
+                $qbInvoice->updateStatus(QuickbooksInvoiceStatus::TRANSFERRED(), ['qb_desktop_id' => $result['DesktopID'], 'errors' => null]);
+            }
+        }
+
+        return new QuickbooksApiResponse("$success invoices marked transferred, and $error invoices marked errored.");
+    }
+
+    /**
+     * Sync the given collection of QB services with the
+     * current data set.
+     *
+     * @param Collection $services
+     * @param Business $business
+     */
+    protected function syncServices(Collection $services, Business $business)
     {
         // Find service records that no longer appear in Quickbooks.
         $deleteIds = $business->quickbooksServices()
@@ -86,7 +190,14 @@ class QuickbooksDesktopController extends Controller
         }
     }
 
-    public function syncCustomers(Collection $customers, Business $business)
+    /**
+     * Sync the given collection of QB customers with the
+     * current data set.
+     *
+     * @param Collection $customers
+     * @param Business $business
+     */
+    protected function syncCustomers(Collection $customers, Business $business)
     {
         // Find customer records that no longer appear in Quickbooks.
         $customerIds = $customers->pluck('id');

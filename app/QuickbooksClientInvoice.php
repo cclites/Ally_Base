@@ -26,7 +26,7 @@ class QuickbooksClientInvoice extends Model
      */
     public function clientInvoice()
     {
-        return $this->belongsTo(ClientInvoice::class, 'id', 'client_invoice_id');
+        return $this->belongsTo(ClientInvoice::class);
     }
 
     /**
@@ -47,6 +47,30 @@ class QuickbooksClientInvoice extends Model
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
+
+    /**
+     * Filter by Business.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $businessId
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
+    /**
+     * Filter by status.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param QuickbooksInvoiceStatus $status
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWithStatus($query, QuickbooksInvoiceStatus $status)
+    {
+        return $query->where('status', $status);
+    }
 
     // **********************************************************
     // ACCESSORS

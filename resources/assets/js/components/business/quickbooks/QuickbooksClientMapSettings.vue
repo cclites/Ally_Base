@@ -37,7 +37,7 @@
                                 <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
                             </b-form-select>
 
-                            <b-btn v-if="! row.item.quickbooks_customer_id" variant="primary" @click="createCustomer(row.item)" :disabled="busy">Create Customer</b-btn>
+                            <b-btn v-if="!connection.is_desktop && !row.item.quickbooks_customer_id" variant="primary" @click="createCustomer(row.item)" :disabled="busy">Create Customer</b-btn>
                         </div>
                     </template>
                 </b-table>
