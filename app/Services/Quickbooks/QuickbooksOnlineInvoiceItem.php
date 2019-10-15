@@ -63,4 +63,21 @@ class QuickbooksOnlineInvoiceItem
             ],
         ];
     }
+
+    /**
+     * Convert object to a Quickbooks Desktop Invoice.
+     *
+     * @return array
+     */
+    public function toDesktopArray(): array
+    {
+        return [
+            'ServiceID' => $this->itemId,
+            'ServiceName' => $this->itemName,
+            'Description' => $this->description,
+            'Quantity' => number_format($this->quantity, 2),
+            'Rate' => number_format($this->unitPrice, 2),
+            'Amount' => number_format($this->amount, 2),
+        ];
+    }
 }

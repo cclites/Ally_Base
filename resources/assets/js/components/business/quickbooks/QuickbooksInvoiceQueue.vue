@@ -9,132 +9,141 @@
             </b-col>
         </b-row>
         <b-card header="Quickbooks Invoice Queue"
-        header-text-variant="white"
-        header-bg-variant="info"
-    >
-        <b-row v-if="loadingConnection">
-            <b-col>
-                <loading-card />
-            </b-col>
-        </b-row>
-        <div v-else> <!-- Not initializing -->
-            <b-row v-if="! hasConnectionConfigured">
+            header-text-variant="white"
+            header-bg-variant="info"
+        >
+            <b-row v-if="loadingConnection">
                 <b-col>
-                    <b-alert show variant="danger">
-                        You must configure your <a href="/business/quickbooks">Quickbooks Connection</a> for this office location before you can transfer invoices.
-                    </b-alert>
+                    <loading-card />
                 </b-col>
             </b-row>
-            <div v-else> <!-- Connection is configured -->
-                <b-row>
+            <div v-else> <!-- Not initializing -->
+                <b-row v-if="! hasConnectionConfigured">
                     <b-col>
-                        <b-alert show variant="info">This search does not include Offline Client invoices.</b-alert>
+                        <b-alert show variant="danger">
+                            You must configure your <a href="/business/quickbooks">Quickbooks Connection</a> for this office location before you can transfer invoices.
+                        </b-alert>
                     </b-col>
                 </b-row>
-                <b-row>
-                    <b-col class="mb-4">
-                        <b-form inline @submit.prevent="fetch()">
-                            <date-picker
-                                v-model="start_date"
-                                placeholder="Start Date"
-                                class="mt-1"
-                            >
-                            </date-picker> &nbsp;to&nbsp;
-                            <date-picker
-                                v-model="end_date"
-                                placeholder="End Date"
-                                class="mr-1 mt-1"
-                            >
-                            </date-picker>
-                            <b-form-select v-model="clientFilter" class="mr-1 mt-1">
-                                <option v-if="loadingClients" selected>Loading...</option>
-                                <option v-else value="">-- Select a Client --</option>
-                                <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
-                            </b-form-select>
+                <div v-else> <!-- Connection is configured -->
+                    <b-row>
+                        <b-col>
+                            <b-alert show variant="info">This search does not include Offline Client invoices.</b-alert>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col class="mb-4">
+                            <b-form inline @submit.prevent="fetch()">
+                                <date-picker
+                                    v-model="start_date"
+                                    placeholder="Start Date"
+                                    class="mt-1"
+                                >
+                                </date-picker> &nbsp;to&nbsp;
+                                <date-picker
+                                    v-model="end_date"
+                                    placeholder="End Date"
+                                    class="mr-1 mt-1"
+                                >
+                                </date-picker>
+                                <b-form-select v-model="clientFilter" class="mr-1 mt-1">
+                                    <option v-if="loadingClients" selected>Loading...</option>
+                                    <option v-else value="">-- Select a Client --</option>
+                                    <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
 
-                            <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" empty-text="-- Select a Payer --" />
+                                <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" empty-text="-- Select a Payer --" />
 
-                            &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loadingTable">Generate</b-button>
-                        </b-form>
-                    </b-col>
-                </b-row>
-                <b-row v-if="waitingToGenerate">
-                    <b-col>
-                        <b-card class="text-center text-muted">
-                            Select filters and press Generate
-                        </b-card>
-                    </b-col>
-                </b-row>
-                <b-row v-else>
-                    <b-col>
-                        <b-form-input v-model="filter" placeholder="Type to Search" class="mb-2" />
+                                &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loadingTable">Generate</b-button>
+                            </b-form>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="waitingToGenerate">
+                        <b-col>
+                            <b-card class="text-center text-muted">
+                                Select filters and press Generate
+                            </b-card>
+                        </b-col>
+                    </b-row>
+                    <b-row v-else>
+                        <b-col>
+                            <b-form-input v-model="filter" placeholder="Type to Search" class="mb-2" />
 
-                        <div class="table-responsive">
-                            <b-table bordered striped hover show-empty
-                                :items="items"
-                                :fields="fields"
-                                :sort-by.sync="sortBy"
-                                :sort-desc.sync="sortDesc"
-                                :filter="filter"
-                                :busy="loadingTable"
-                            >
-                                <template slot="name" scope="row">
-                                    <a :href="`/business/client/invoices/${row.item.id}`" target="_blank">{{ row.item.name }}</a>
-                                </template>
-                                <template slot="client_name" scope="row">
-                                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
-                                </template>
-                                <template slot="actions" scope="row">
-                                    <div v-if="connection.is_desktop">
-                                        <!-- DESKTOP ACTIONS -->
-                                        <div v-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.READY">
-                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
-                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
-                                                <span>Add to Queue</span>
-                                            </b-btn>
+                            <div class="table-responsive">
+                                <b-table bordered striped hover show-empty
+                                    :items="items"
+                                    :fields="fields"
+                                    :sort-by.sync="sortBy"
+                                    :sort-desc.sync="sortDesc"
+                                    :filter="filter"
+                                    :busy="loadingTable"
+                                >
+                                    <template slot="name" scope="row">
+                                        <a :href="`/business/client/invoices/${row.item.id}`" target="_blank">{{ row.item.name }}</a>
+                                    </template>
+                                    <template slot="client_name" scope="row">
+                                        <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                                    </template>
+                                    <template slot="actions" scope="row">
+                                        <div v-if="connection.is_desktop">
+                                            <!-- DESKTOP ACTIONS -->
+                                            <div v-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.READY">
+                                                <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                    <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                    <span>Add to Queue</span>
+                                                </b-btn>
+                                            </div>
+                                            <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.QUEUED">
+                                                <b-btn variant="warning" class="mr-2" @click="dequeue(row.item)" :disabled="busy">
+                                                    <i v-if="row.item.id === dequeueingId" class="fa fa-spin fa-spinner"></i>
+                                                    <span>Remove from Queue</span>
+                                                </b-btn>
+                                            </div>
+                                            <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.ERRORED">
+                                                <b-btn variant="secondary" class="mr-2" @click="viewErrors(row.item)" :disabled="busy">
+                                                    <span>View Errors</span>
+                                                </b-btn>
+                                                <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                    <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                    <span>Re-Queue</span>
+                                                </b-btn>
+                                            </div>
+                                            <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.PROCESSING">
+                                                <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
+                                                    <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
+                                                    <span>Re-Queue</span>
+                                                </b-btn>
+                                            </div>
                                         </div>
-                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.QUEUED">
-                                            <b-btn variant="warning" class="mr-2" @click="dequeue(row.item)" :disabled="busy">
-                                                <i v-if="row.item.id === dequeueingId" class="fa fa-spin fa-spinner"></i>
-                                                <span>Remove from Queue</span>
-                                            </b-btn>
+                                        <div v-else>
+                                            <!-- ONLINE ACTIONS -->
+                                            <div v-if="row.item.status != QUICKBOOKS_INVOICE_STATUS.TRANSFERRED">
+                                                <b-btn variant="primary" class="mr-2" @click="transferOnline(row.item)" :disabled="busy">
+                                                    <i v-if="row.item.id === transferringId" class="fa fa-spin fa-spinner"></i>
+                                                    <span>Transfer to Quickbooks</span>
+                                                </b-btn>
+                                            </div>
+                                            <div v-ekse>
+                                                -
+                                            </div>
                                         </div>
-                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.ERRORED">
-                                            <b-btn variant="primary" class="mr-2" @click="viewErrors(row.item)" :disabled="busy">
-                                                <span>View Errors</span>
-                                            </b-btn>
-                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
-                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
-                                                <span>Re-Queue</span>
-                                            </b-btn>
-                                        </div>
-                                        <div v-else-if="row.item.status == QUICKBOOKS_INVOICE_STATUS.PROCESSING">
-                                            <b-btn variant="primary" class="mr-2" @click="enqueue(row.item)" :disabled="busy">
-                                                <i v-if="row.item.id === queueingId" class="fa fa-spin fa-spinner"></i>
-                                                <span>Re-Queue</span>
-                                            </b-btn>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <!-- ONLINE ACTIONS -->
-                                        <div v-if="row.item.status != QUICKBOOKS_INVOICE_STATUS.TRANSFERRED">
-                                            <b-btn variant="primary" class="mr-2" @click="transferOnline(row.item)" :disabled="busy">
-                                                <i v-if="row.item.id === transferringId" class="fa fa-spin fa-spinner"></i>
-                                                <span>Transfer to Quickbooks</span>
-                                            </b-btn>
-                                        </div>
-                                        <div v-ekse>
-                                            -
-                                        </div>
-                                    </div>
-                                </template>
-                            </b-table>
-                        </div>
-                    </b-col>
-                </b-row>
+                                    </template>
+                                </b-table>
+                            </div>
+                        </b-col>
+                    </b-row>
+                </div>
             </div>
-        </div>
-    </b-card>
+        </b-card>
+        <b-modal :title="`Processing Invoice #${currentInvoice.name} Failed`" v-model="showErrorsModal" size="xl">
+            <b-container fluid>
+                <div><strong>Errors:</strong></div>
+                <div>{{ currentInvoice.errors }}</div>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="showErrorsModal = false">Close</b-btn>
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -165,6 +174,8 @@
                 transferringId: null,
                 queueingId: null,
                 dequeueingId: null,
+                currentInvoice: {},
+                showErrorsModal: false,
 
                 connection: {},
                 business_id: null,
@@ -287,7 +298,8 @@
             },
 
             viewErrors(invoice) {
-
+                this.currentInvoice = invoice;
+                this.showErrorsModal = true;
             },
 
             transferOnline(invoice) {
