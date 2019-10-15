@@ -192,36 +192,10 @@
                                 </b-tabs>
                             </b-col>
                         </b-row>
-                        <!-- <h4>Hourly Rate Assignment</h4>
-
-                        <b-form-group label="What should the client be charged per hour?">
-                            <b-form-input type="number" step="0.01" v-model="client_hourly"></b-form-input>
-                            <small>If the client doesn't receive hourly services, you can set this to 0.</small>
-                        </b-form-group>
-
-                        <b-form-group label="What should the caregiver be paid per hour?">
-                            <b-form-input type="number" step="0.01" v-model="caregiver_hourly"></b-form-input>
-                            <small>If the client doesn't receive hourly services, you can set this to 0.  Otherwise, this should be less than what the client is charged.</small>
-                        </b-form-group> -->
                     </template>
-
-                    <!-- <template v-if="step === 5">
-                        <h4>Fixed Rate Assignment</h4>
-
-                        <b-form-group label="What should the client be charged per fixed shift?">
-                            <b-form-input type="number" step="0.01" v-model="client_fixed"></b-form-input>
-                            <small>If the client doesn't receive fixed or daily services, you can set this to 0.</small>
-                        </b-form-group>
-
-                        <b-form-group label="What should the caregiver be paid per fixed shift?">
-                            <b-form-input type="number" step="0.01" v-model="caregiver_fixed"></b-form-input>
-                            <small>If the client doesn't receive fixed or daily services, you can set this to 0.  Otherwise, this should be less than what the client is charged.</small>
-                        </b-form-group>
-                    </template> -->
 
                     <template v-if="step === 5">
                         <h4>Effective Date Range</h4>
-
                         <b-form-group label="When will this rate to go into effect?">
                             <mask-input v-model="start_date" type="date" class="date-input"></mask-input>
                             <small>Enter the start of the date range (ex. {{ today }})</small>
@@ -231,8 +205,6 @@
                             <mask-input v-model="end_date" type="date" class="date-input"></mask-input>
                             <small>Enter the end of the date range.  If you are unsure, leave it at 12/31/9999 to remain in effect forever.</small>
                         </b-form-group>
-
-                        <!--<small>Note: Once you press "Finish", you'll still have to save your changes in the Client Rates Table.  This makes sure you don't have any overlapping rates defined.</small>-->
                     </template>
                 </b-col>
             </b-row>
@@ -273,12 +245,10 @@
         service_select: "",
         payer_type: "all",
         payer_select: "",
-        // client_hourly: "",
-        caregiver_hourly: "",
-        provider_hourly: "",
-        ally_hourly: "",
-        total_hourly: "",
-        // client_fixed: "",
+        caregiver_hourly: "0.00",
+        provider_hourly: "0.00",
+        ally_hourly: "0.00",
+        total_hourly: "0.00",
         caregiver_fixed: "0.00",
         provider_fixed: "0.00",
         ally_fixed: "0.00",
