@@ -23,3 +23,4 @@ yarn-error.log
 /*.sql
 /*.sql.gz
 .project
+.DS_Store
