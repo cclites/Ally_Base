@@ -129,6 +129,7 @@ class QuickbooksQueueController extends Controller
         $record = $invoice->quickbooksInvoice()->create([
             'client_invoice_id' => $invoice->id,
             'qb_online_id' => $result->Id,
+            'business_id' => $business->id,
         ]);
 
         $record->updateStatus(QuickbooksInvoiceStatus::TRANSFERRED());
@@ -167,6 +168,7 @@ class QuickbooksQueueController extends Controller
         if (empty($invoice->quickbooksInvoice)) {
             $invoice->quickbooksInvoice()->create([
                 'client_invoice_id' => $invoice->id,
+                'business_id' => $business->id,
             ]);
         }
 
