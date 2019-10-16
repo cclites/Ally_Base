@@ -336,16 +336,33 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Filter by date range.
+     * Filter by client invoiced at between the given date range.
      *
      * @param \Illuminate\Database\Query\Builder $query
      * @param \Carbon\Carbon $start
      * @param \Carbon\Carbon $end
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeForDateRange($query, $start, $end)
+    public function scopeWhereInvoicedBetween($query, $start, $end)
     {
-        return $query->whereBetween('created_at', [$start, $end]);
+        return $query->whereHas('clientInvoice', function ($q) use ($start, $end) {
+            return $q->whereBetween('created_at', [$start, $end]);
+        });
+    }
+
+    /**
+     * Filter by dates of service between the given date range.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param \Carbon\Carbon $start
+     * @param \Carbon\Carbon $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereDatesOfServiceBetween($query, $start, $end)
+    {
+        return $query->whereHas('items', function ($q) use ($start, $end) {
+            return $q->whereBetween('date', [$start, $end]);
+        });
     }
 
     /**
