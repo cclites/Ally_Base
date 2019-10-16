@@ -123,7 +123,7 @@
                                                     <span>Transfer to Quickbooks</span>
                                                 </b-btn>
                                             </div>
-                                            <div v-ekse>
+                                            <div v-else>
                                                 -
                                             </div>
                                         </div>
