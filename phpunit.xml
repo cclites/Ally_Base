@@ -38,6 +38,9 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="SMS_DRIVER" value="log" />
+        <env name="TWILIO_SANDBOX_SID" value="AC8eb9500b9eb0e6cdabf577fd12bbbb6d" />
+        <env name="TWILIO_SANDBOX_APP_TOKEN" value="f1270612bdae498f9c99b526a6b661fe" />
+        <env name="TWILIO_SANDBOX_DEFAULT_NUMBER" value="(952) 800-3055" />
         <env name="PREVENT_DUPE_POSTS" value="false" />
     </php>
 </phpunit>

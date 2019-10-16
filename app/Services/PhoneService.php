@@ -81,13 +81,20 @@ class PhoneService
             if (empty($this->client)) {
                 return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
             }
-
             $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);
 
             return $message->sid;
-        } catch( \Exception $e ){
+        } catch( TwilioException $ex ){
 
-            dd( $e->getMessage() );
+            if( strpos( $ex->getMessage(), 'blacklist') !== false ){
+                // if this is a blacklist error..
+
+                $this->log->update([ 'error' => $ex->getMessage() ]);
+            } else {
+                // else pass along to log to sentry..
+
+                app( 'sentry' )->captureException( $ex );
+            }
         }
     }
 
