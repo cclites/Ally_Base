@@ -36,6 +36,7 @@
 
     .bg-info {
         color: white;
+        background-color: #1e88e5!important;
     }
 
     .bg-danger {
