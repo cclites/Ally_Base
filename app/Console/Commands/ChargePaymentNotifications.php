@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Notifications\ChargePaymentNotification;
 use App\User;
+use App\Billing\Payment;
+use App\Billing\Deposit;
 
 class ChargePaymentNotifications extends Command{
 
@@ -46,38 +48,37 @@ class ChargePaymentNotifications extends Command{
 
         $date = Carbon::now('America/New_York');
         $start = $date->setTimezone('UTC')->toDateTimeString();
-        $end = $date->subHours(24)->toDateTimeString();
+        $end = $date->subHours(24)->setTimezone('UTC')->toDateTimeString();
 
-        /* Handle Client recipients */
-        $clientRecipients = with(clone $query)->join('payments', 'payments.client_id', '=', 'users.id')
-            ->whereBetween('payments.created_at', [$start, $end])
-            ->pluck('email')->implode(',');
+        $clients = with(clone $query)->join('payments', 'payments.client_id', '=', 'users.id')
+                    ->whereBetween('payments.created_at', [$start, $end])
+                    ->get();
 
-        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $clientRecipients->pluck('id'));
+        $triggered = TriggeredReminder::getTriggered('charge_notification', $clients->pluck('id'));
 
-        foreach ($clientRecipients as $client) {
+        foreach ($clients as $client) {
             if ($triggered->contains($client->id)) {
                 continue;
             }
 
             \Notification::send($client->business->notifiableUsers(), new ChargePaymentNotification($client, 'client'));
-            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id, 1);
+            TriggeredReminder::markTriggered('charge_notification', $client->id, 1);
         }
 
         /* Handle Caregiver recipients*/
-        $caregiverRecipients = with(clone $query)->join('deposits', 'deposits.caregiver_id', '=', 'users.id')
+        $caregivers = with(clone $query)->join('deposits', 'deposits.caregiver_id', '=', 'users.id')
             ->whereBetween('deposits.created_at',  [$start, $end])
-            ->pluck('email')->implode(',');
+            ->get();
 
-        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $caregiverRecipients->pluck('id'));
+        $triggered = TriggeredReminder::getTriggered('payment_notification', $caregivers->pluck('id'));
 
-        foreach ($caregiverRecipients as $caregiver) {
+        foreach ($caregivers as $caregiver) {
             if ($triggered->contains($caregiver->id)) {
                 continue;
             }
 
             \Notification::send($caregiver->business->notifiableUsers(), new ChargePaymentNotification($caregiver, 'caregiver'));
-            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id, 1);
+            TriggeredReminder::markTriggered('payment_notification', $caregiver->id, 1);
         }
 
     }
