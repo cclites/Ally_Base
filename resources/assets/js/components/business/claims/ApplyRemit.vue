@@ -450,7 +450,12 @@
             populateFormFromTable() {
                 this.form.applications = this.claims.map(claim => {
                     return claim.items.map(item => {
-                        if (! item.selected || parseFloat(item.amount_applied) === parseFloat('0')) {
+                        if (! item.selected || item.amount_applied == '') {
+                            return null;
+                        }
+
+                        // Do not allow 0 if no note is present
+                        if (! item.note && parseFloat(item.amount_applied) === parseFloat('0')) {
                             return null;
                         }
 
