@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
+use App\Console\Commands\ChargePaymentNotifications;
 use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
@@ -35,6 +36,7 @@ class Kernel extends ConsoleKernel
         CronFlushTriggeredReminders::class,
         AchOfflineChargeCommand::class,
         CronHhaCheckStatus::class,
+        ChargePaymentNotifications::class,
     ];
 
     /**
@@ -72,6 +74,9 @@ class Kernel extends ConsoleKernel
         $schedule->command(CronHhaCheckStatus::class)
             ->everyThirtyMinutes()
             ->withoutOverlapping();
+
+        $schedule->command('cron:charge_payment_notifications')
+            ->dailyAt('23:30'); // 6:30 PM EST / 7:30 EDT
     }
 
     /**
