@@ -37,9 +37,5 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        $cController = new \App\Http\Controllers\ClientSetupController();
-        $client = \App\Client::find(32252);
-
-        $cController->renderClientAgreementDocument($client);
     }
 }
