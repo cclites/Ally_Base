@@ -61,7 +61,7 @@ class ChargePaymentNotifications extends Command{
             }
 
             \Notification::send($client->business->notifiableUsers(), new ChargePaymentNotification($client, 'client'));
-            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id);
+            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id, 1);
         }
 
         /* Handle Caregiver recipients*/
@@ -77,7 +77,7 @@ class ChargePaymentNotifications extends Command{
             }
 
             \Notification::send($caregiver->business->notifiableUsers(), new ChargePaymentNotification($caregiver, 'caregiver'));
-            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id);
+            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id, 1);
         }
 
     }
