@@ -23,7 +23,7 @@ class ClientCareDetailsController extends BaseController
         $this->authorize('update', $client);
 
         $data = CareDetails::convertFormData($request->validated());
-        if ($client->careDetails()->updateOrCreate($data)) {
+        if ($client->careDetails()->updateOrCreate(['client_id' => $client->id], $data)) {
             return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->careDetails);
         }
 
