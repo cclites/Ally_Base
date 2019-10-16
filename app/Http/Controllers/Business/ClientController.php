@@ -171,6 +171,7 @@ class ClientController extends BaseController
             'payments',
             'payments.invoices',
             'user.documents',
+            'user.notificationPreferences',
             'medications',
             'meta',
             'notes.creator',
@@ -239,7 +240,16 @@ class ClientController extends BaseController
             ->orWhere('id', $client->sales_person_id)
             ->get();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices'));
+        $notifications = $client->user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+                'disabled' => $cls::DISABLED,
+            ];
+        });
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices', 'notifications'));
     }
 
     public function edit(Client $client)
