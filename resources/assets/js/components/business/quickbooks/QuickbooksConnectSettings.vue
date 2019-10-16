@@ -4,7 +4,7 @@
             <div v-if="connection.is_authenticated" class="text-center">
                 <div v-if="connection.is_desktop">
                     <!-- QB DESKTOP MODE -->
-                    <b-alert show variant="info" class="mb-4">You can connect to your Quickbooks Desktop installation using our <a href="#">Ally Quickbooks Desktop Receiver Tool</a>.<br/>You can follow <a href="#">the help guide</a> if you need assistance getting set up.</b-alert>
+                    <b-alert show variant="info" class="mb-4">You can connect to your Quickbooks Desktop installation using our <a href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank">Ally Quickbooks Desktop Receiver Tool</a>.<br/>You can follow <a href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank">the help guide</a> if you need assistance getting set up.</b-alert>
                     <div class="mt-4 mb-4">
                         <div><strong>Company Name:</strong> {{ connection.company_name }}</div>
                         <div><strong>Your API Key:</strong> {{ connection.desktop_api_key }}</div>

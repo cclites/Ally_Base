@@ -35,7 +35,12 @@
                     <h3>Service Mapping</h3>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn v-show="!connection.is_desktop" variant="success" @click="refreshServices()" :disabled="busy">Sync Quickbooks Services</b-btn>
+                    <b-btn v-if="connection.is_desktop" variant="success" href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank" :disabled="busy">
+                        How to Sync Quickbooks Services
+                    </b-btn>
+                    <b-btn v-else variant="success" @click="refreshServices()" :disabled="busy">
+                        Sync Quickbooks Services
+                    </b-btn>
                 </b-col>
             </b-row>
             <b-row>
