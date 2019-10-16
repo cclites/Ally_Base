@@ -108,12 +108,9 @@
             <b-row>
                 <b-col md="3">
                     <b-form-group label="Interest" label-for="interest">
-                        <b-form-input
+                        <number-input id="interest"
                             v-model="interest"
-                            id="interest"
                             name="interest"
-                            type="number"
-                            step="0.01"
                             :disabled="form.busy"
                         />
                         <input-help :form="form" field="interest" text="The amount to apply towards interest."></input-help>
@@ -164,24 +161,22 @@
                     </template>
                     <template slot="amount_applied" scope="row">
                         <div class="d-flex">
-                        <b-form-input
-                            class="mr-1"
-                            v-model="row.item.amount_applied"
-                            name="amount_applied"
-                            type="number"
-                            step="0.01"
-                            :disabled="true"
-                        />
-                        <b-select name="adjustment_type"
-                            v-model="row.item.adjustment_type"
-                            :options="claimRemitAdjustmentTypeOptions"
-                            :disabled="form.busy || !row.item.selected"
-                            @change="(val) => changeMasterType(row.item, val)"
-                        >
-                            <template slot="first">
-                                <option value="">-- Select Type --</option>
-                            </template>
-                        </b-select>
+                            <number-input
+                                class="mr-1"
+                                v-model="row.item.amount_applied"
+                                name="amount_applied"
+                                :disabled="true"
+                            />
+                            <b-select name="adjustment_type"
+                                v-model="row.item.adjustment_type"
+                                :options="claimRemitAdjustmentTypeOptions"
+                                :disabled="form.busy || !row.item.selected"
+                                @change="(val) => changeMasterType(row.item, val)"
+                            >
+                                <template slot="first">
+                                    <option value="">-- Select Type --</option>
+                                </template>
+                            </b-select>
                         </div>
                     </template>
                     <template slot="row-details" scope="row">
@@ -204,12 +199,10 @@
                         </template>
                         <template slot="amount_applied" scope="row">
                             <div class="d-flex">
-                                <b-form-input
+                                <number-input
                                     class="mr-1"
                                     v-model="row.item.amount_applied"
                                     name="amount_applied"
-                                    type="number"
-                                    step="0.01"
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subAmountChanged(row.item, x)"
                                 />
@@ -296,7 +289,7 @@
              * @return {Decimal}
              */
             amountAvailable() {
-                return new Decimal(this.remit.amount_available).sub(this.amountApplied);
+                return this.decimalOrZero(this.remit.amount_available).sub(this.amountApplied);
             },
 
             /**
@@ -311,17 +304,12 @@
                             if (item.amount_applied == '' || isNaN(item.amount_applied)) {
                                 return itemTotal;
                             }
-                            return itemTotal.add(new Decimal(item.amount_applied));
-                        }, new Decimal(0.00))
+                            return itemTotal.add(this.decimalOrZero(item.amount_applied));
+                        }, this.decimalOrZero(0.00))
                     );
-                }, new Decimal(0.00));
+                }, this.decimalOrZero(0.00));
 
-                let interest = new Decimal(0.00);
-                if (this.interest != '' && !isNaN(this.interest)) {
-                    interest = new Decimal(this.interest);
-                }
-
-                return total.add(interest);
+                return total.add(this.decimalOrZero(this.interest));
             },
 
             /**
@@ -450,7 +438,12 @@
             populateFormFromTable() {
                 this.form.applications = this.claims.map(claim => {
                     return claim.items.map(item => {
-                        if (! item.selected || parseFloat(item.amount_applied) === parseFloat('0')) {
+                        if (! item.selected || item.amount_applied == '') {
+                            return null;
+                        }
+
+                        // Do not allow 0 if no note is present
+                        if (! item.note && parseFloat(item.amount_applied) === parseFloat('0')) {
                             return null;
                         }
 
@@ -642,12 +635,12 @@
              * @returns string
              */
             getMasterAmountDue(claim) {
-                return new Decimal(claim.amount_due).sub(claim.items.reduce((carry, item) => {
+                return this.decimalOrZero(claim.amount_due).sub(claim.items.reduce((carry, item) => {
                     if (item.amount_applied == '') {
                         return carry;
                     }
-                    return carry.add(new Decimal(item.amount_applied));
-                }, new Decimal(0.00))).toFixed(2);
+                    return carry.add(this.decimalOrZero(item.amount_applied));
+                }, this.decimalOrZero(0.00))).toFixed(2);
             },
 
             /**
@@ -693,6 +686,14 @@
                     if (sortDesc === false || sortDesc === true) {
                         this.sortDesc = sortDesc;
                     }
+                }
+            },
+
+            decimalOrZero(number) {
+                try {
+                    return new Decimal(number);
+                } catch (e) {
+                    return new Decimal(0.00);
                 }
             },
         },
