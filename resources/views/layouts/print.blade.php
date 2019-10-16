@@ -15,14 +15,14 @@
     @if(isset($render) && $render == 'html')
         <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
-        <link rel="stylesheet" href="{{ mix('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
-        <ling href="{{ mix('print/Homemade+Apple.css') }}" rel="stylesheet" />
-        <link rel="stylesheet" href="{{ mix('print/font-awesome-4.7.0/css/font-awesome.css') }}">
-        <link rel="stylesheet" href="{{ mix('print/full-calendar.3.5.1.min.css') }}" />
-        <link href="{{ mix('css/style.css') }}" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
+        <ling href="{{ asset('print/Homemade+Apple.css') }}" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('print/font-awesome-4.7.0/css/font-awesome.css') }}">
+        <link rel="stylesheet" href="{{ asset('print/full-calendar.3.5.1.min.css') }}" />
+        <link href="{{ asset('css/style.css') }}" rel="stylesheet" />
         <!--[if lt IE 9]>
-        <script src="{{ mix('print/html5shiv.3.7.0.js') }}"></script>
-        <script src="{{ mix('print/respond.js.1.4.2.js') }}"></script>
+        <script src="{{ asset('print/html5shiv.3.7.0.js') }}"></script>
+        <script src="{{ asset('print/respond.js.1.4.2.js') }}"></script>
         <![endif]-->
     @else
         <link rel="stylesheet" href="{{ public_path('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
