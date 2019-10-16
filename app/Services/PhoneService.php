@@ -89,7 +89,7 @@ class PhoneService
             if( strpos( $ex->getMessage(), 'blacklist') !== false ){
                 // if this is a blacklist error..
 
-                $this->log->update([ 'error' => $ex->getMessage() ]);
+                $this->log->update([ 'error' => 'Blacklisted Phone Number' ]);
             } else {
                 // else pass along to log to sentry..
 
