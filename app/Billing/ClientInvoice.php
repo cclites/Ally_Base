@@ -112,11 +112,11 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     /**
      * Get the QuickbooksClientInvoice relation.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function quickbooksInvoice()
     {
-        return $this->hasMany(QuickbooksClientInvoice::class, 'client_invoice_id', 'id');
+        return $this->hasOne(QuickbooksClientInvoice::class, 'client_invoice_id', 'id');
     }
 
     /**
