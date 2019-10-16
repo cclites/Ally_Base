@@ -12,7 +12,8 @@ let mix = require('laravel-mix');
  */
 
 mix.js('resources/assets/js/app.js', 'public/js')
-   .sass('resources/assets/sass/style.scss', 'public/css');
+    .sass('resources/assets/sass/style.scss', 'public/css')
+    .copyDirectory('resources/assets/print', 'public/print');
 
 if (mix.inProduction()) {
     mix.sourceMaps();
