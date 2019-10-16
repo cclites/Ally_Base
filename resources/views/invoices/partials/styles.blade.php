@@ -46,11 +46,18 @@
     .header-right-table {
         float: right;
     }
-
     .header-right-table td,
     .header-right-table th {
         text-align: left;
         padding: .5rem .75rem;
+    }
+
+    .header-left-table {
+    }
+    .header-left-table td,
+    .header-left-table th {
+        text-align: left;
+        padding: .5rem .75rem 0 0;
     }
 
     .print-header {

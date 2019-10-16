@@ -185,6 +185,7 @@ class ClaimInvoiceController extends BaseController
             'recipient' => $claim->payer,
             'client' => $claim->client,
             'itemGroups' => $groups,
+            'clientPayer' => $claim->getClientPayer(),
         ]);
 
         if ($request->filled('download')) {

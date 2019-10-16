@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Services\Quickbooks;
 
 use App\Shift;
 
-class QuickbooksInvoiceItem
+class QuickbooksOnlineInvoiceItem
 {
     /**
      * @var string
@@ -45,7 +46,7 @@ class QuickbooksInvoiceItem
      *
      * @return array
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         return [
             'Description' => $this->description,
@@ -60,6 +61,23 @@ class QuickbooksInvoiceItem
                 'Qty' => $this->quantity,
                 'UnitPrice' => $this->unitPrice,
             ],
+        ];
+    }
+
+    /**
+     * Convert object to a Quickbooks Desktop Invoice.
+     *
+     * @return array
+     */
+    public function toDesktopArray(): array
+    {
+        return [
+            'ServiceID' => $this->itemId,
+            'ServiceName' => $this->itemName,
+            'Description' => $this->description,
+            'Quantity' => number_format($this->quantity, 2),
+            'Rate' => number_format($this->unitPrice, 2),
+            'Amount' => number_format($this->amount, 2),
         ];
     }
 }
