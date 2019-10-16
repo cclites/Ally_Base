@@ -7,7 +7,6 @@
 /public/fonts
 /public/images/error-bg.jpg
 /public/mix-manifest.json
-/public/print
 /storage/*.key
 /vendor
 /.idea
