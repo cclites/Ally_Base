@@ -63,6 +63,7 @@ class TellusValidationException extends \Exception
 
     public function hasErrors() : bool
     {
+        // this was throwing a 'cant get count() of null'..
         return $this->errors ? count($this->errors) > 0 : false;
     }
 

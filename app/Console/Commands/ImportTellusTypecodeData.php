@@ -85,21 +85,6 @@ class ImportTellusTypecodeData extends BaseImport
      */
     public function cleanKnownDictionaryIssues()
     {
-        // tellus seems to have fixed this..
-        // TellusTypecode::where('category', 'Payer')
-        //             ->where('text_code', 'SUNS')
-        //             ->update(['description' => 'Sunshine/Centine']);
-
-        // tellus seems to have fixed this..
-        // TellusTypecode::where('category', 'Plan')
-        //             ->where('text_code', 'FMSP')
-        //             ->update(['description' => 'Florida Medicaid State Plan']);
-
-        // tellus seems to have fixed this..
-        // TellusTypecode::where('category', 'Payer')
-        //             ->where('text_code', 'UHTH')
-        //             ->update(['description' => 'United HealthCare']);
-
         // tellus introduced these new errors of course
         TellusTypecode::where('category', 'EndVerificationType')
                     ->where('text_code', 'GPS')
