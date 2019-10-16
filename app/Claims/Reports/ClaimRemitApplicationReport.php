@@ -2,7 +2,6 @@
 
 namespace App\Claims\Reports;
 
-use App\Claims\ClaimInvoice;
 use App\Claims\ClaimRemit;
 use App\Claims\Resources\ClaimRemitResource;
 use App\Reports\BaseReport;
@@ -25,14 +24,14 @@ class ClaimRemitApplicationReport extends BaseReport
 
     /**
      * Payer ID filter.
-     * 
+     *
      * @var string
      */
     protected $payerId;
 
     /**
      * Payment Type filter.
-     * 
+     *
      * @var string
      */
     protected $paymentType;
@@ -81,16 +80,16 @@ class ClaimRemitApplicationReport extends BaseReport
                 $payer = $payerGroup->first()->payer;
 
                 $amount = $payerGroup->reduce(function (float $carry, ClaimRemit $remit) {
-                        return add($carry, floatval($remit->amount));
-                    }, floatval(0.00));
+                    return add($carry, floatval($remit->amount));
+                }, floatval(0.00));
 
                 $available = $payerGroup->reduce(function (float $carry, ClaimRemit $remit) {
-                        return add($carry, floatval($remit->getAmountAvailable()));
-                    }, floatval(0.00));
+                    return add($carry, floatval($remit->getAmountAvailable()));
+                }, floatval(0.00));
 
                 $applied = $payerGroup->reduce(function (float $carry, ClaimRemit $remit) {
-                        return add($carry, floatval($remit->amount_applied));
-                    }, floatval(0.00));
+                    return add($carry, floatval($remit->amount_applied));
+                }, floatval(0.00));
 
                 return [
                     'payer_id' => optional($payer)->id,
@@ -117,5 +116,32 @@ class ClaimRemitApplicationReport extends BaseReport
         $this->payerId = $payerId;
         $this->range = $dateRange;
         $this->paymentType = $paymentType;
+    }
+
+    /**
+     * Download the report to an xlsx file.
+     */
+    public function download()
+    {
+        $this->rows = $this->results()->map(function ($row) {
+            return collect($row['remits']->toArray(request()))->map(function ($item) {
+                return [
+                    'id' => $item['id'],
+                    'office_location' => $item['office_location'],
+                    'payment_date' => $item['date'],
+                    'payment_type' => $item['payment_type'],
+                    'payer' => $item['payer_name'],
+                    'reference' => $item['reference'],
+                    'amount' => $item['amount'],
+                    'amount_applied' => $item['amount_applied'],
+                    'amount_available' => $item['amount_available'],
+                    'status' => $item['status'],
+                    'date_added' => $item['created_at'],
+                    'notes' => $item['notes'],
+                ];
+            });
+        })->flatten(1);
+
+        parent::download();
     }
 }
