@@ -25,6 +25,8 @@ class UpdateNotificationOptionsRequest extends FormRequest
      */
     public function rules()
     {
+        \Log::info($this);
+
         return [
             'allow_sms_notifications' => 'required|boolean',
             'allow_email_notifications' => 'required|boolean',

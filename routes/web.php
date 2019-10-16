@@ -235,6 +235,7 @@ Route::group([
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
+    Route::patch('clients/{client}/notification-options', 'Business\ClientController@updateNotificationOptions');
     Route::patch('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
     Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
     Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');

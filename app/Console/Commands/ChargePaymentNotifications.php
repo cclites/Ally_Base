@@ -47,8 +47,9 @@ class ChargePaymentNotifications extends Command{
                  ->where('email', 'NOT LIKE', '%noemail%');
 
         $date = Carbon::now('America/New_York');
-        $start = $date->setTimezone('UTC')->toDateTimeString();
-        $end = $date->subHours(24)->setTimezone('UTC')->toDateTimeString();
+        $end = $date->setTimezone('UTC')->toDateTimeString();
+        $start = $date->subHours(24)->setTimezone('UTC')->toDateTimeString();
+        $expiration = $date->addHours(24)->setTimezone('UTC')->toDateTimeString();
 
         $clients = with(clone $query)->join('payments', 'payments.client_id', '=', 'users.id')
                     ->whereBetween('payments.created_at', [$start, $end])
@@ -61,8 +62,8 @@ class ChargePaymentNotifications extends Command{
                 continue;
             }
 
-            \Notification::send($client->business->notifiableUsers(), new ChargePaymentNotification($client, 'client'));
-            TriggeredReminder::markTriggered('charge_notification', $client->id, 1);
+            \Notification::send($client, new ChargePaymentNotification($client, 'client'));
+            TriggeredReminder::markTriggered('charge_notification', $client->id, $expiration);
         }
 
         /* Handle Caregiver recipients*/
@@ -77,8 +78,8 @@ class ChargePaymentNotifications extends Command{
                 continue;
             }
 
-            \Notification::send($caregiver->business->notifiableUsers(), new ChargePaymentNotification($caregiver, 'caregiver'));
-            TriggeredReminder::markTriggered('payment_notification', $caregiver->id, 1);
+            \Notification::send($caregiver, new ChargePaymentNotification($caregiver, 'caregiver'));
+            TriggeredReminder::markTriggered('payment_notification', $caregiver->id, $expiration);
         }
 
     }

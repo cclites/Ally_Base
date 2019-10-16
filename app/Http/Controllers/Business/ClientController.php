@@ -15,6 +15,7 @@ use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -417,6 +418,27 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    /**
+     * Update caregiver's user notification settings.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $data = $request->validated();
+
+        if ($client->user()->update($data)) {
+            return new SuccessResponse('Client\'s notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating the Client\'s notification options.  Please try again.');
     }
 
     /**
