@@ -77,8 +77,6 @@ class PaginatedClientController extends BaseController
 
             $clients = $query->get();
 
-            // dd( $clients->first()->id );
-
             $data = [
 
                 'total'   => $total,
