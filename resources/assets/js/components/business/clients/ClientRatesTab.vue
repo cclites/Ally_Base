@@ -381,6 +381,7 @@
                     'unhappy_client': 'Client not happy and refuses service from this caregiver',
                     'no_shows': 'Continual no shows',
                     'retired': 'Retired',
+                    'other': 'Other'
                 },
             }
         },
