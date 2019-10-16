@@ -455,6 +455,7 @@ class ReportsController extends BaseController
                 $pdf = PDF::loadView('business.reports.print.timesheets', $viewData);
                 return $pdf->download('timesheet_export.pdf');
             default:
+                $viewData['render'] = 'html';
                 return view('business.reports.print.timesheets', $viewData);
         }
     }
@@ -503,7 +504,8 @@ class ReportsController extends BaseController
             return $pdf->download('deposit_details.pdf');
         }
 
-        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'));
+        $render = 'html';
+        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit', 'render'));
     }
 
     /**
