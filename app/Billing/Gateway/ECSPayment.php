@@ -160,7 +160,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         curl_setopt($ch, CURLOPT_POST, 1);
 
         if (!($data = curl_exec($ch))) {
-            \Log::error('ECSPayments::post error.  Invalid Response. ' . print_r(curl_getinfo($ch)));
+            \Log::error('ECSPayments::post error.  Invalid Response. ' . print_r(curl_getinfo($ch), true));
             return false;
         }
         $this->processed = true;
