@@ -47,6 +47,13 @@
             </h2>
         </div>
 
+        <div>
+            <b-form-radio-group v-model="filters.date_type">
+                <b-radio value="service">Search by Date of Service</b-radio>
+                <b-radio value="invoice">Search by Invoiced Date</b-radio>
+            </b-form-radio-group>
+        </div>
+
         <b-form inline class="mb-4">
             <date-picker
                 v-model="filters.start_date"
@@ -342,6 +349,7 @@
             return {
                 // Filter data
                 filters: new Form({
+                    date_type: 'service',
                     start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
                     businesses: '',

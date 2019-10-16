@@ -23,6 +23,7 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
             'client_type' => 'nullable',
             'inactive' => 'nullable|bool',
             'invoice_id' => 'nullable',
+            'date_type' => 'nullable',
         ];
     }
 
@@ -38,5 +39,21 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
         list($data['start_date'], $data['end_date']) = $this->filterDateRange();
 
         return $data;
+    }
+
+    /**
+     * Get the type of date search that should performed.
+     * service = dates of service
+     * invoice = date of invoice
+     *
+     * @return string
+     */
+    public function getDateSearchType() : string
+    {
+        if ($this->date_type == 'invoice') {
+            return $this->date_type;
+        }
+
+        return 'service';
     }
 }
