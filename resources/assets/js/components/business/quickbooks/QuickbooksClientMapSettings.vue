@@ -8,7 +8,12 @@
                     <b-btn variant="info" @click="save()" :disabled="busy">Save Changes</b-btn>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn v-show="!connection.is_desktop" variant="success" @click="refreshCustomers()" :disabled="busy">Sync Quickbooks Customer Data</b-btn>
+                    <b-btn v-if="connection.is_desktop" variant="success" href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank" :disabled="busy">
+                        How to Sync Quickbooks Customers
+                    </b-btn>
+                    <b-btn v-else variant="success" @click="refreshCustomers()" :disabled="busy">
+                        Sync Quickbooks Customers
+                    </b-btn>
                 </b-col>
             </b-row>
             <b-row class="mb-2" align-h="end">
