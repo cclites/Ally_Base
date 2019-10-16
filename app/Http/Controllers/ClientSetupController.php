@@ -129,6 +129,9 @@ class ClientSetupController extends Controller
         \DB::beginTransaction();
 
         $method = $this->validatePaymentMethod($request, $client->defaultPayment);
+
+        \Log::info($client->defaultPayment);
+
         if (! $client->setPaymentMethod($method)) {
             \DB::rollBack();
             return new ErrorResponse(500, 'There was an error saving your payment details.  Please try again.');
@@ -143,7 +146,9 @@ class ClientSetupController extends Controller
 
         $client = $client->fresh()->load(['address', 'phoneNumber']);
 
-        $this->renderClientAgreementDocument($client);
+        if($client->default_payment_type === 'credit_card' || $client->default_payment_type === 'bank_accounts'){
+            $this->renderClientAgreementDocument($client);
+        }
 
         return new SuccessResponse('Your account has been set up!', $client);
     }

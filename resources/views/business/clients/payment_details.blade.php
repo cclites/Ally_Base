@@ -24,7 +24,14 @@
     }
 </style>
 
-<div>
+@php
+    $expiration = new Carbon('next tuesday');
+    $expiration = $expiration->format('m/d/Y');
+
+    $mask = "******";
+@endphp
+
+<div style="margin-top: 20px;">
     <table class="client_information">
         <thead>
             <tr>
@@ -70,8 +77,6 @@
 
     <h5>Primary Payment Method</h5>
 
-    {{ $client->default_payment_type }}
-
     {{--
       ACH PRIMARY
     --}}
@@ -88,7 +93,7 @@
                 </tr>
                 <tr>
                     <td colspan="6">
-                        Name on Account: {{ $client->getBillingName() }}
+                        Name on Account: {{ $client->defaultPayment->name_on_account }}
                     </td>
                     <td colspan="6">
                         Payment Frequency: Weekly
@@ -96,13 +101,13 @@
                 </tr>
                 <tr>
                     <td colspan="4">
-                        Payment Start Date: {{ new Carbon('next tuesday') }}
+                        Payment Start Date: {{ $expiration }}
                     </td>
                     <td colspan="4">
-                        Routing/ABA #: {{ $client->defaultPayment->last_four_routing_number }}
+                        Routing/ABA #: {{ $mask . $client->defaultPayment->last_four_routing_number }}
                     </td>
                     <td colspan="4">
-                        Account # {{ $client->defaultPayment->last_four }}
+                        Account #: {{ $mask . $client->defaultPayment->last_four }}
                     </td>
                 </tr>
             </tbody>
@@ -113,7 +118,7 @@
         CC PRIMARY
     --}}
 
-    @if($client->default_payment_type === 'credit_card')
+    @if($client->default_payment_type !== 'bank_accounts')
         <table class="primary_payment_cc">
             <thead>
             <th colspan="12">Credit Card/Debit Card</th>
@@ -126,7 +131,7 @@
             </tr>
             <tr>
                 <td colspan="6">
-                    Name on Account: {{ $client->getBillingName() }}
+                    Name on Account: {{ $client->defaultPayment->name_on_card }}
                 </td>
                 <td colspan="6">
                     Payment Frequency: Weekly
@@ -138,7 +143,7 @@
                     Address: {{ $client->getBillingAddress() }}
                 </td>
                 <td colspan="4">
-                    Payment Start Date: {{ new Carbon('next tuesday')  }}
+                    Payment Start Date: {{ $expiration }}
                 </td>
             </tr>
 
@@ -152,7 +157,7 @@
             </tr>
             <tr>
                 <td colspan="12">
-                    Card Number: {{ $client->defaultPayment->last_four }}
+                    Card Number: {{ $mask . $client->defaultPayment->last_four }}
                 </td>
             </tr>
 
@@ -178,7 +183,7 @@
             </tr>
             <tr>
                 <td colspan="6">
-                    Name on Account: {{ $client->backupPayment->getBillingName() }}
+                    Name on Account: {{ $client->backupPayment->name_on_account }}
                 </td>
                 <td colspan="6">
                     Payment Frequency: Weekly
@@ -186,13 +191,13 @@
             </tr>
             <tr>
                 <td colspan="4">
-                    Payment Start Date: {{ new Carbon('next tuesday') }}
+                    Payment Start Date: {{ $expiration }}
                 </td>
                 <td colspan="4">
-                    Routing/ABA #: {{ $client->backupPayment->last_four_routing_number }}
+                    Routing/ABA #: {{ $mask . $client->backupPayment->last_four_routing_number }}
                 </td>
                 <td colspan="4">
-                    Account # {{ $client->backupPayment->last_four }}
+                    Account #: {{ $mask . $client->backupPayment->last_four }}
                 </td>
             </tr>
             </tbody>
@@ -203,8 +208,8 @@
         CC Backup Payment
     --}}
     @if($client->backup_payment_type)
-        @if($client->backup_payment_type === 'credit_card')
-            <b-table class="primary_payment_cc">
+        @if($client->backup_payment_type !== 'bank_accounts')
+            <table class="primary_payment_cc">
                 <thead>
                 <th colspan="12">Credit Card/Debit Card</th>
                 </thead>
@@ -216,7 +221,7 @@
                     </tr>
                     <tr>
                         <td colspan="6">
-                            Name on Account: {{ $client->backupPayment->getBillingName() }}
+                            Name on Account: {{ $client->backupPayment->name_on_card }}
                         </td>
                         <td colspan="6">
                             Payment Frequency: Weekly
@@ -224,10 +229,10 @@
                     </tr>
                     <tr>
                         <td colspan="8">
-                            Address: {{ $client->backupPayment->getBillingAddress() }}
+                            Address: {{ $client->backupPayment->getBillingAddress()->full_address }}
                         </td>
                         <td colspan="4">
-                            Payment Start Date: {{ new Carbon('next tuesday') }}
+                            Payment Start Date: {{ $expiration }}
                         </td>
                     </tr>
                     <tr>
@@ -235,16 +240,16 @@
                             Billing Email: {{ $client->user->email }}
                         </td>
                         <td colspan="4">
-                            Billing Phone: {{ $client->phoneNumbers()->where('type', 'service')->first() }}
+                            Billing Phone: {{ $client->backupPayment->getBillingPhone() }}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="12">
-                            Card Number: {{ $client->backupPayment->last_four }}
+                            Card Number: {{ $mask . $client->backupPayment->last_four }}
                         </td>
                     </tr>
                 </tbody>
-            </b-table>
+            </table>
         @endif
     @endif
 </div>
