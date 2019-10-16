@@ -16,7 +16,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
         <link rel="stylesheet" href="{{ asset(mix('print/bootstrap-3.3.7-dist/css/bootstrap.min.css')) }}">
-        <ling href="{{ asset(mix('print/Homemade+Apple.css')) }}" rel="stylesheet" />
+        <link href="{{ asset(mix('print/Homemade+Apple.css')) }}" rel="stylesheet" />
         <link rel="stylesheet" href="{{ asset(mix('print/font-awesome-4.7.0/css/font-awesome.css')) }}">
         <link rel="stylesheet" href="{{ asset(mix('print/full-calendar.3.5.1.min.css')) }}" />
         <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
@@ -26,7 +26,7 @@
         <![endif]-->
     @else
         <link rel="stylesheet" href="{{ public_path('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
-        <ling href="{{ public_path('print/Homemade+Apple.css') }}" rel="stylesheet" />
+        <link href="{{ public_path('print/Homemade+Apple.css') }}" rel="stylesheet" />
         <link rel="stylesheet" href="{{ public_path('print/font-awesome-4.7.0/css/font-awesome.css') }}">
         <link rel="stylesheet" href="{{ public_path('print/full-calendar.3.5.1.min.css') }}" />
         <link href="{{ public_path('print/css/style.css') }}" rel="stylesheet" />
