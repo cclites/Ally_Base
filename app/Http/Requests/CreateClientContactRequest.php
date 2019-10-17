@@ -52,17 +52,14 @@ class CreateClientContactRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
-        
+
         $data['is_emergency'] = $data['is_emergency'] ? 1 : 0;
         $data['has_poa'] = $data['has_poa'] ? 1 : 0;
         $data['is_payer'] = $data['is_payer'] ? 1 : 0;
         $data['has_login_access'] = $data['has_login_access'] ? 1 : 0;
-        
-        if ( !in_array( $data['relationship'], [ 'custom', 'family' ] )) {
+
+        if ( !in_array( $data['relationship'], ClientContact::customRelationships() )) {
             $data['relationship_custom'] = null;
-        }
-        if ( $data['relationship'] == 'poa' ) {
-            $data['has_poa'] = 1;
         }
 
         if (! $data['is_emergency']) {

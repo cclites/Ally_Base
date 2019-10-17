@@ -27,6 +27,7 @@ use App\User;
 use Crypt;
 use Illuminate\Console\Command;
 use App\Business;
+use App\ClientContact;
 use App\QuickbooksConnection;
 
 class ClearSensitiveData extends Command
@@ -98,6 +99,7 @@ class ClearSensitiveData extends Command
             $this->cleanAddresses();
             $this->cleanPhoneNumbers();
             $this->cleanEmergencyContacts();
+            $this->cleanClientContacts();
             $this->cleanNotes();
             $this->cleanShifts();
             $this->cleanSmsData();
@@ -735,6 +737,43 @@ class ClearSensitiveData extends Command
                 }
                 $application->save();
 
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientContacts()
+    {
+        $this->startProgress(
+            'Cleaning Client Contact records...',
+            ClientContact::count()
+        );
+
+        if ($this->fastMode) {
+            ClientContact::whereRaw(1)->update([
+                'name' => $this->faker->name,
+                'phone_number' => $this->generatePhoneNumber(),
+                'email' => $this->faker->email,
+                'address' => $this->faker->streetAddress
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        ClientContact::chunk(400, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(ClientContact $contact) {
+                $contact->update([
+
+                    'name' => $this->faker->name,
+                    'phone_number' => $this->generatePhoneNumber(),
+                    'email' => $this->faker->email,
+                    'address' => $this->faker->streetAddress
+                ]);
                 $this->advance();
             });
             \DB::commit();

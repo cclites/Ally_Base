@@ -109,6 +109,16 @@ class ImportClientContacts extends BaseImport
             }
         }
 
+        $relationship = strtolower( $this->resolve( 'Contact Type', $row ) );
+        $relationship_type = $this->resolve( 'Relation Type', $row );
+
+        if( !in_array( $relationship, ClientContact::validRelationships() ) ){
+
+            $relationship_type = $relationship;
+            $relationship = 'custom';
+        }
+
+
         $address = $this->resolve('Address', $row) . ' ' . $this->resolve('Address Line 2', $row);
 
         $data = [
@@ -116,8 +126,8 @@ class ImportClientContacts extends BaseImport
             'client_id'           => $client_id,
             'name'                => $this->resolve('Contact Full Name', $row),
             'is_payer'            => $is_payer,
-            'relationship'        => $this->resolve('Contact Type', $row),
-            'relationship_custom' => $this->resolve('Relation Type', $row),
+            'relationship'        => $relationship,
+            'relationship_custom' => $relationship_type,
             'has_poa'             => $this->resolve('Power of Attorney', $row) == 'true' ? 1 : 0,
             'email'               => $contact_email,
             'phone1'              => $this->resolve('Mobile Phone', $row),

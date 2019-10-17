@@ -31,12 +31,12 @@
                     <b-form-group label="Relationship" label-for="relationship" label-class="required">
                         <b-select v-model="form.relationship" name="relationship" id="relationship" :disabled="busy">
                             <option value="family">Family</option>
-                            <option value="poa">Power of Attorney</option>
                             <option value="physician">Physician</option>
+                            <option value="medical professional">Medical Professional</option>
                             <option value="other">Other</option>
                             <option value="custom">Custom</option>
                         </b-select>
-                        <b-form-input v-if=" [ 'custom', 'family' ].includes( form.relationship )" v-model="form.relationship_custom" type="text" required class="mt-2" :disabled="busy"/>
+                        <b-form-input v-if=" [ 'custom', 'family', 'medical professional' ].includes( form.relationship )" v-model="form.relationship_custom" type="text" required class="mt-2" :disabled="busy" placeholder="Enter Specific Relationship Type"/>
                         <input-help :form="form" field="relationship"></input-help>
                     </b-form-group>
                     <b-form-group label="Email" label-for="email">
