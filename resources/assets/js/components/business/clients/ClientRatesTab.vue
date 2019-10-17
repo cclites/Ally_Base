@@ -228,21 +228,19 @@
         </div>
 
         <!-- MODALS -->
-        <b-modal id="clientExcludeCargiver"
-                 :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
+        <b-modal :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
                  v-model="clientExcludeCaregiverModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
                         <div class="toggleInactiveCaregivers">
-                            <span>
-                                Show Inactive Caregivers
-                            </span>
                             <b-form-checkbox type="checkbox"
                                              v-model="displayAllCaregivers"
                                              value="1"
                                              unchecked-value="0"
-                            />
+                            >
+                                Show Inactive Caregivers
+                            </b-form-checkbox>
                         </div>
                         <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
                             <div v-if="excludeForm.id">
@@ -291,7 +289,7 @@
                             :services="services"
                             :payers="payers"
                             :default-rate="defaultRateOnWizard"
-                            :potential-caregivers="otherCaregivers"
+                            :potential-caregivers="otherActiveCaregivers"
                             :add-mode="addNewCaregiver"
                             :ally-pct-original="allyRateOriginal"
                             @new-rate="addRate">
@@ -375,6 +373,10 @@
         },
 
         computed: {
+            otherActiveCaregivers() {
+                return this.otherCaregivers.filter(x => x.active);
+            },
+
             paymentText() {
                 return this.paymentMethodDetail.payment_text || this.paymentTypeMessage;
             },
