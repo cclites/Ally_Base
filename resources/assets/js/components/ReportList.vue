@@ -525,7 +525,6 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
-
                     {
                         name: 'Salesperson Commission',
                         url: 'reports/sales-people-commission',
@@ -568,6 +567,13 @@
                         url: 'reports/service-auth-usage',
                         description: 'Shows a usage report for client\'s service authorizations.',
                         category: 2,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Payment Summary by Payment Method',
+                        url: 'reports/payment-summary-by-payer',
+                        description: 'This report shows a summary of all payments made',
+                        category: 5,
                         allowed: ['office_user'],
                     },
                     // {
@@ -617,14 +623,6 @@
                             name: 'Invoice Summary By County',
                             url: 'reports/invoice-summary-by-county',
                             description: 'Invoice Summary Report By County',
-                            category: 5,
-                            allowed: ['office_user'],
-                            hidden: true,
-                        },
-                        {
-                            name: 'Payment Summary by Payment Method”',
-                            url: 'reports/payment-summary-by-payer',
-                            description: 'This report shows a summary of all payments made',
                             category: 5,
                             allowed: ['office_user'],
                             hidden: true,

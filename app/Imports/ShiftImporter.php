@@ -60,7 +60,6 @@ class ShiftImporter
         $businessId = $this->sheet->getValue('business_id', $row);
         $data = $this->getDataFromRow($row);
         if (Carbon::now()->diffInSeconds($data['checked_in_time']) < 10) {
-            dd($data['checked_in_time'], $data['checked_out_time']);
             throw new \Exception('The checked_in_time is invalid on row ' . $row . '. Too close to current timestamp.');
         }
 

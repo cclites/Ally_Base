@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
@@ -17,11 +18,9 @@ use Carbon\Carbon;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\Business $business
- * @property-read \App\Audit $auditTrail
  * @property-read \Illuminate\Database\Eloquent\Relations\HasMany $unique_recipient_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadRecipient[] $recipients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $replies
- * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -35,7 +34,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
+class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 
@@ -63,7 +62,7 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
-    
+
     /**
      * Get the business relation.
      *
@@ -87,7 +86,7 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Get the thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function replies()
     {
@@ -97,18 +96,29 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Get the unread thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function unreadReplies()
     {
         return $this->hasMany(SmsThreadReply::class)
             ->whereNull('read_at');
     }
-    
+
+    /**
+     *  Get the sender
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     */
+    public function sender()
+    {
+        return $this->belongsTo(User::Class, 'user_id', 'id');
+    }
+
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
-    
+
     /**
      * Get the thread recipients.
      *
@@ -135,7 +145,7 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
-    
+
     /**
      * Gets shifts that are checked in between given given start and end dates.
      * Automatically applies timezone transformation.
@@ -172,6 +182,7 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
 
         return $query;
     }
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
@@ -184,7 +195,7 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function isAcceptingReplies()
     {
-        if (! $this->can_reply) {
+        if (!$this->can_reply) {
             return false;
         }
 
@@ -196,14 +207,14 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
 
         return true;
     }
-    
+
     /**
      * Check if the thread was created with the given user as a recipient.
      *
      * @param string|null $user_id
      * @return boolean
      */
-    public function hasRecipient(?string $user_id = null) : bool 
+    public function hasRecipient(?string $user_id = null): bool
     {
         if (empty($user_id)) {
             return false;
@@ -211,5 +222,4 @@ class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
 
         return $this->recipients()->where('user_id', $user_id)->exists();
     }
-
 }

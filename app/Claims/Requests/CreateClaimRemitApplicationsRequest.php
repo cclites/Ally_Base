@@ -30,7 +30,7 @@ class CreateClaimRemitApplicationsRequest extends FormRequest
         $rules = [
             'applications' => 'required|array',
             'applications.*.is_interest' => 'required|boolean',
-            'applications.*.amount_applied' => 'required|numeric|not_in:0|min:-9999999.99|max:9999999.99',
+            'applications.*.amount_applied' => 'required|numeric|min:-9999999.99|max:9999999.99',
             'applications.*.adjustment_type' => ['required', new ValidEnum(ClaimAdjustmentType::class)],
             'applications.*.claim_invoice_item_id' => 'required_unless:applications.*.is_interest,true|exists:claim_invoice_items,id',
         ];

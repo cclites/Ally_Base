@@ -10,6 +10,7 @@ use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateNoteRequest;
+use Illuminate\Http\Response;
 
 class NoteController extends Controller
 {
@@ -124,11 +125,37 @@ class NoteController extends Controller
             ->when($request->filled('type'), function ($query) use ($request) {
                 return $query->where('type', $request->type);
             })
-            // ->when($request->filled('tags'), function ($query) use ($request) {
-            //     return $query->where('tags', 'like', '%'.$request->tags.'%');
-            // })
+            ->when($request->filled('free_form'), function ($query) use ($request) {
+                return $query->where('body', 'like', '%' . $request->free_form . '%');
+            })
             ->get();
+
+        if($request->print){
+            return $this->printReport($notes);
+        }
 
         return response()->json($notes);
     }
+
+    /**
+     * Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function printReport($data) : \Illuminate\Http\Response
+    {
+        $html = response(view('business.reports.communication_notes',['data'=>$data]))->getContent();
+        $snappy = \App::make('snappy.pdf');
+
+        return Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="Notes.pdf"'
+            )
+        );
+    }
+
 }

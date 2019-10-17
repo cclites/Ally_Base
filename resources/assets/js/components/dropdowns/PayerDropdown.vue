@@ -60,7 +60,6 @@
              * The starting selected value.
              */
             value: {
-                type: String,
                 default: '',
             },
         },
