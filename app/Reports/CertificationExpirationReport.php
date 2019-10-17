@@ -180,8 +180,6 @@ class CertificationExpirationReport extends BaseReport implements BusinessReport
             }
         }
 
-        // dd( $by_caregivers );
-
         return $by_caregivers->flatten()->map(function (CaregiverLicense $license) {
 
             return [

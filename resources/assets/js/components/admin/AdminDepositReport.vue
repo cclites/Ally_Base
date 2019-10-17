@@ -1,51 +1,66 @@
 <template>
     <b-card>
         <b-row>
-            <b-col lg="9">
+            <b-col sm="12" md="6" lg="8">
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
                     <b-form inline @submit.prevent="loadItemsWithoutShift()">
-                        <date-picker
-                                v-model="start_date"
-                                placeholder="Start Date"
-                        >
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                                v-model="end_date"
-                                placeholder="End Date"
-                        >
-                        </date-picker>
+
+                        <div class="d-flex align-items-center mb-2 w-100 text-center" style="flex-wrap: wrap">
+
+                            <date-picker
+                                    v-model="start_date"
+                                    placeholder="Start Date"
+                                    class="f-1 my-1"
+                                    style="min-width: 150px"
+                            >
+                            </date-picker>
+                            &nbsp;to&nbsp;
+                            <date-picker
+                                    v-model="end_date"
+                                    placeholder="End Date"
+                                    class="f-1 my-1"
+                                    style="min-width: 150px"
+                            >
+                            </date-picker>
+                        </div>
+
                         <b-form-select
                             id="business_id"
                             name="business_id"
                             v-model="business_id"
+                            class="mb-2 w-100"
                             >
                             <option value="">--All Providers--</option>
                             <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+
+                        <b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
-            <b-col lg="3">
+            <b-col sm="12" md="6" lg="4">
                 <b-card header="Shift Search"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
+                    <b-form @submit.prevent="loadItems()">
                         <b-form-group label="Shift ID: " label-for="shiftId">
                             <b-form-input type="text"
                                           id="shiftId"
                                           v-model="shiftId"
                             />
-                            <b-btn type="submit" variant="info">Get Related Deposits</b-btn>
+                            <b-btn type="submit" variant="info" class="mt-2">Get Related Deposits</b-btn>
                         </b-form-group>
                     </b-form>
                 </b-card>
             </b-col>
+            <b-col class="my-2 text-right">
 
+                A limit of 2500 deposits can be returned
+            </b-col>
         </b-row>
         <b-row v-if="shiftMsg">
             <b-col>
@@ -173,7 +188,11 @@
             loadItems() {
                 this.loading = true;
                 let shiftId = this.shiftId;
-                axios.get('/admin/deposits?json=1&shift_id=' + shiftId + '&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
+
+                let form = new Form();
+
+
+                form.get('/admin/deposits?json=1&shift_id=' + shiftId + '&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.items = response.data.map(item => {
                             item.name = (item.deposit_type == 'business') ? item.business.name : item.caregiver.nameLastFirst;

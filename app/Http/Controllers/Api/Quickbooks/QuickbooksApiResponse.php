@@ -57,6 +57,6 @@ class QuickbooksApiResponse implements Responsable
             'data' => $this->data,
         ];
 
-        return new JsonResponse(array_filter($response), 200);
+        return new JsonResponse($response, 200);
     }
 }

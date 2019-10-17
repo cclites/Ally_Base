@@ -156,25 +156,25 @@
                             </div>
                         </b-form-group>
 
-                        <b-form-group label="Caregiver Ethnicity">
-                            <b-form-select v-model="ethnicity">
-                                <option value="">No Preference</option>
-                                <option value="client">Match Client Preference</option>
-                                <option value="select">Select Specific Ethnicities</option>
-                            </b-form-select>
-                            <input-help :form="form" field="ethnicity" />
-                            <div v-if="ethnicity == 'select'">
-                                <b-form-checkbox v-for="item in ethnicityOptions"
-                                    :key="item.value"
-                                    v-model="ethnicities"
-                                    :value="item.value"
-                                    unchecked-value="null"
-                                >
-                                    {{ item.text }}
-                                </b-form-checkbox>
-                                <input-help :form="form" field="ethnicities" />
-                            </div>
-                        </b-form-group>
+<!--                        <b-form-group label="Caregiver Ethnicity">-->
+<!--                            <b-form-select v-model="ethnicity">-->
+<!--                                <option value="">No Preference</option>-->
+<!--                                <option value="client">Match Client Preference</option>-->
+<!--                                <option value="select">Select Specific Ethnicities</option>-->
+<!--                            </b-form-select>-->
+<!--                            <input-help :form="form" field="ethnicity" />-->
+<!--                            <div v-if="ethnicity == 'select'">-->
+<!--                                <b-form-checkbox v-for="item in ethnicityOptions"-->
+<!--                                    :key="item.value"-->
+<!--                                    v-model="ethnicities"-->
+<!--                                    :value="item.value"-->
+<!--                                    unchecked-value="null"-->
+<!--                                >-->
+<!--                                    {{ item.text }}-->
+<!--                                </b-form-checkbox>-->
+<!--                                <input-help :form="form" field="ethnicities" />-->
+<!--                            </div>-->
+<!--                        </b-form-group>-->
                     </div>
 
                     <!--<div class="form-check">-->
@@ -384,7 +384,7 @@
                     pets_cats: this.pets_cats,
                     pets_birds: this.pets_birds,
                     pets: this.pets,
-                    ethnicity: this.ethnicity,
+                    ethnicity: '',
                     ethnicities: this.ethnicities,
                 })
             },

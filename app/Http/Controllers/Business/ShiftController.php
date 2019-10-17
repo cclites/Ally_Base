@@ -258,7 +258,8 @@ class ShiftController extends BaseController
             return $pdf->download('payment_details.pdf');
         }
 
-        return view('business.shifts.print', compact('shift', 'timezone'));
+        $render = 'html';
+        return view('business.shifts.print', compact('shift', 'timezone', 'render'));
     }
 
     public function duplicate(Shift $shift)
