@@ -36,22 +36,23 @@ class QuickSearchController extends BaseController
             });
 
         $q = request('q');
+        // 'type' here is for the display/return type.  This quick search is used in multiple places.
         $type = request('type');
-
-        //If we are searching for a phone number, change the type and remove
-        //any non-digit separators from the string.
         if(1 === preg_match('~[0-9]~', $q)){
+            // If we are searching for a phone number, remove
+            // any non-digit separators from the string.
             $type = 'phone';
             $q = preg_replace("/[^0-9]/", "", $q);
 
-            //Load phone numbers relation
-            $query->with('phoneNumbers');
-        }
-
-        if($type === 'role'){
+            // search by phone number
+            $query->whereHas('phoneNumbers', function($query) use($q){
+                $query->where('national_number', 'LIKE', "%$q%");
+            });
+        } else {
+            // search by user name
             $query->where(function($query) use($q){
                 if (\App::runningUnitTests()) {
-                    // check if testing enviornment because sqlite doesn't have CONCAT function
+                    // check if testing environment because sqlite doesn't have CONCAT function
                     $query->whereRaw("printf('%s %s', firstname, lastname) like ?", ["%$q%"]);
                 }
                 else {
@@ -59,15 +60,13 @@ class QuickSearchController extends BaseController
                 }
                 $query->orWhere('email', 'LIKE', "%$q%");
             });
-        }elseif($type === 'phone'){
-            $query->whereHas('phoneNumbers', function($query) use($q){
-                $query->where('national_number', 'LIKE', "%$q%");
-            });
         }
 
         switch($type) {
             case 'sms':
             case 'phone':
+                // Load phone number relationship
+                $query->with('phoneNumbers');
                 $keys = ['id', 'name', 'role_type', 'phone'];
                 break;
             default:
@@ -75,6 +74,13 @@ class QuickSearchController extends BaseController
         }
 
         $users = $query->get()->map(function($user) use ($keys) {
+            if ($user->relationLoaded('phoneNumbers')) {
+                if (request('type') == 'sms') {
+                    $user->phone = $user->smsNumber ? $user->smsNumber->number : $user->default_phone;
+                } else {
+                    $user->phone = $user->default_phone;
+                }
+            }
             return $user->only($keys);
         });
 
