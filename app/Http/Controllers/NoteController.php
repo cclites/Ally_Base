@@ -185,7 +185,7 @@ class NoteController extends Controller
         })->download('xls');
     }
 
-     * Get the PDF printed output of the report.
+     /** Get the PDF printed output of the report.
      *
      * @return \Illuminate\Http\Response
      */
