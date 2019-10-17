@@ -3,6 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\ContactableInterface;
@@ -17,6 +18,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property string $deposit_type
  * @property int|null $caregiver_id
  * @property int|null $business_id
+ * @property int $chain_id
  * @property float|null $amount
  * @property string|null $transaction_id
  * @property string|null $transaction_code
@@ -91,6 +93,10 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
     {
         return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits')
             ->withPivot(['amount_applied']);
+    }
+
+    public function chain(){
+        return $this->belongsTo(BusinessChain::class, 'chain_id', 'id');
     }
 
     ///////////////////////////////////////////

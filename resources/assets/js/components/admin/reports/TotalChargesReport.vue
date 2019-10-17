@@ -8,18 +8,28 @@
                         header-bg-variant="info"
                 >
                     <b-row>
+                        <b-col sm="12" md="4">
 
-                        <b-form-group label="Start" class="mr-2">
-                            <date-picker v-model="form.start" name="date"></date-picker>
-                        </b-form-group>
-                        <b-form-group label="End" class="mr-2">
-                            <date-picker v-model="form.end" name="date"></date-picker>
-                        </b-form-group>
-                        <b-col md="2">
+                            <b-form-group label="Date" class="mr-2">
+
+                                <date-picker v-model=" form.startdate " name="startdate"></date-picker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="12" md="4">
+
+                            <b-form-group label="Date" class="mr-2">
+
+                                <date-picker v-model=" form.enddate " name="enddate"></date-picker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="12" md="4">
+
                             <b-form-group label="&nbsp;">
-                                <b-button-group>
-                                    <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                                    <b-button @click="print()"><i class="fa fa-print mr-1"></i>Print</b-button>
+
+                                <b-button-group class="justify-content-end w-100">
+
+                                    <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mx-1"></i>Generate Report</b-button>
+                                    <b-button @click="print()"><i class="fa fa-print mx-1"></i>Print</b-button>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
@@ -45,8 +55,6 @@
                                         :sort-by="sortBy"
                                         :empty-text="emptyText"
                                         :busy="busy"
-                                        :current-page="currentPage"
-                                        :per-page="perPage"
                                         :footClone="footClone"
                                 >
                                     <template slot="FOOT_location" scope="item">
@@ -69,12 +77,11 @@
                         </b-row>
                     </div>
 
-                    <b-row v-if="this.items.length > 0">
-                        <b-col lg="6" >
-                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-                        </b-col>
-                        <b-col lg="6" class="text-right">
-                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                    <b-row v-if=" this.items.length > 0 ">
+
+                        <b-col sm="12" class="text-right">
+
+                            Showing {{ totalRows }} results
                         </b-col>
                     </b-row>
 
@@ -89,19 +96,20 @@
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
 
     export default {
+
         name: "TotalChargesReport",
-        mixins: [FormatsNumbers],
+        mixins: [ FormatsNumbers ],
         data() {
+
             return {
+
                 form: new Form({
-                    start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
-                    end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                    startdate: moment().startOf( 'isoweek' ).subtract( 1, 'days' ).format( 'MM/DD/YYYY' ),
+                    enddate  : moment().endOf( 'isoday' ).format( 'MM/DD/YYYY' ),
                     json: 1
                 }),
                 busy: false,
                 totalRows: 0,
-                perPage: 25,
-                currentPage: 1,
                 sortBy: 'location',
                 sortDesc: false,
                 fields: [
@@ -123,13 +131,15 @@
                 this.busy = true;
                 this.form.get('/admin/reports/total_charges_report')
                     .then( ({ data }) => {
-                        this.items = data.data;
-                        this.totals = data.totals;
+
+                        this.items     = data.data;
+                        this.totals    = data.totals;
                         this.totalRows = this.items.length;
                     })
-                    .catch(e => {})
+                    .catch( e => {} )
                     .finally(() => {
-                        this.busy = false;
+
+                        this.busy      = false;
                         this.footClone = true;
                     })
             },

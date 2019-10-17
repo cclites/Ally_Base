@@ -104,8 +104,8 @@ class DepositsController extends Controller
     public function manualDeposit(Request $request)
     {
         $request->validate([
-            'business_id' => 'required_without:caregiver_id',
-            'caregiver_id' => 'required_without:business_id',
+            'business_id' => 'required',
+            'caregiver_id' => 'nullable|integer',
             'type' => 'required|in:withdrawal,deposit',
             'amount' => 'required|numeric|min:0.1',
             'adjustment' => 'nullable|boolean',
@@ -121,9 +121,12 @@ class DepositsController extends Controller
         if ($request->caregiver_id) {
             $caregiver = Caregiver::findOrFail($request->caregiver_id);
 
+            //For manual deposits, the location id will be included, and trivial to get the chain.
+            $chainId =  Business::where('id', $request->business_id)->pluck('chain_id')->first();
+
             if ($request->process) {
                 if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
-                $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
+                $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes, $chainId);
             } else {
                 $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice($caregiver, $amount, $request->notes);
             }
