@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Audit;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\GatewayTransaction;
@@ -88,6 +89,7 @@ use App\SalesPerson;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Audit $auditTrail
  * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
@@ -608,7 +610,14 @@ class Client extends AuditableModel implements
     {
         $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
 
-        if( $most_recent ) return 'Outstanding Client Payer Issue - ' . $most_recent->error_message;
+        if( $most_recent && $most_recent->exception ){
+            // error_message is the most descriptive, but the last string in the exception is still a viable fallback in case the error_message is null
+
+            $exception = explode( '\\', $most_recent->exception );
+            $specific_infraction = empty( $most_recent->error_message ) ? $exception[ count( $exception ) - 1 ] : $most_recent->error_message;
+
+            return 'Outstanding Client Payer Issue - ' . $specific_infraction;
+        }
 
         return null;
     }
@@ -621,6 +630,26 @@ class Client extends AuditableModel implements
     public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->evvPhone;
+    }
+
+    /**
+     * Get the Client's Policy # (insurance and service auth tab)
+     *
+     * @return null|string
+     */
+    public function getPolicyNumber(): ?string
+    {
+        return $this->ltci_policy;
+    }
+
+    /**
+     * Get the Client's Claim # (insurance and service auth tab)
+     *
+     * @return null|string
+     */
+    public function getClaimNumber(): ?string
+    {
+        return $this->ltci_claim;
     }
 
     /**
@@ -945,5 +974,21 @@ class Client extends AuditableModel implements
         }
 
         return $this->addresses->first();
+    }
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
+                 ->orWhere(function($q){
+                     $q->whereIn('auditable_type', ['App\User', 'clients'])
+                         ->where('auditable_id', $this->id);
+                 })
+                ->get();
+        return $audits;
     }
 }

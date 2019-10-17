@@ -455,6 +455,7 @@ class ReportsController extends BaseController
                 $pdf = PDF::loadView('business.reports.print.timesheets', $viewData);
                 return $pdf->download('timesheet_export.pdf');
             default:
+                $viewData['render'] = 'html';
                 return view('business.reports.print.timesheets', $viewData);
         }
     }
@@ -503,7 +504,8 @@ class ReportsController extends BaseController
             return $pdf->download('deposit_details.pdf');
         }
 
-        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'));
+        $render = 'html';
+        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit', 'render'));
     }
 
     /**
@@ -557,13 +559,13 @@ class ReportsController extends BaseController
         return $business->shifts()
             ->with('activities', 'client', 'caregiver')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
-            ->when($data['client_id'], function ($query) use ($data) {
+            ->when(isset($data['client_id']) && $data['client_id'], function ($query) use ($data) {
                 return $query->where('client_id', $data['client_id']);
             })
-            ->when($data['caregiver_id'], function ($query) use ($data) {
+            ->when(isset($data['caregiver_id']) && $data['caregiver_id'], function ($query) use ($data) {
                 return $query->where('caregiver_id', $data['caregiver_id']);
             })
-            ->when($data['client_type'], function ($query) use ($data) {
+            ->when(isset($data['client_type']) && $data['client_type'], function ($query) use ($data) {
                 return $query->whereHas('client', function ($query) use ($data) {
                     $query->where('client_type', $data['client_type']);
                 });

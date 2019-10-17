@@ -78,9 +78,7 @@
                         </b-col>
                         <b-col xl="4" lg="6">
                             <b-form-group label="Client Type" class="form-inline">
-                                <b-form-select v-model="filters.client_type" ref="clientTypeFilter">
-                                    <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                                </b-form-select>
+                                <client-type-dropdown ref="clientTypeFilter" v-model="filters.client_type" />
                             </b-form-group>
                         </b-col>
                     </b-row>

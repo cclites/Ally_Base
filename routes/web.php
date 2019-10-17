@@ -379,6 +379,8 @@ Route::group([
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
     Route::get('reports/client-referrals/{businessId}', 'Business\Report\ClientReferralsReportController@populateDropdown');
 
+    Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
+
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
     Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');
@@ -474,9 +476,12 @@ Route::group([
     Route::post('quickbooks/{business}/services/sync', 'Business\QuickbooksSettingsController@servicesSync');
     Route::patch('quickbooks/{business}/settings', 'Business\QuickbooksSettingsController@updateSettings');
     Route::get('quickbooks/{business}/config', 'Business\QuickbooksSettingsController@config')->name('quickbooks.config');
+    Route::get('quickbooks/{business}/enable-desktop', 'Business\QuickbooksSettingsController@enableDesktop')->name('quickbooks.enable-desktop');
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
+    Route::post('quickbooks-queue/{invoice}/enqueue', 'Business\QuickbooksQueueController@enqueue')->name('quickbooks-queue.enqueue');
+    Route::post('quickbooks-queue/{invoice}/dequeue', 'Business\QuickbooksQueueController@dequeue')->name('quickbooks-queue.dequeue');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::delete('referral-sources/organization/{organization}', 'Business\ReferralSourceController@removeOrganization');
@@ -503,6 +508,7 @@ Route::group([
     Route::get('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@create');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
     Route::get('reports/claims/transmissions', 'Business\Claims\ClaimTransmissionsReportController@index')->name('reports.claims.transmissions');
+    Route::get('reports/claims/remit-application', 'Business\Claims\ClaimRemitApplicationReportController@index')->name('reports.claims.remit-application');
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
     Route::get('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@index');
     Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');
@@ -640,9 +646,11 @@ Route::group([
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
     Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::patch('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@update');
     Route::delete('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@destroy');
     Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index')->name('invoices.deposits');
     Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
+    Route::patch('invoices/deposits/{invoice}/{type?}', 'Admin\DepositInvoiceController@update');
     Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');

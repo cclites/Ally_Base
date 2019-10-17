@@ -32,7 +32,7 @@
                         class="mr-1 mt-1"
                     >
                         <template slot="first">
-                            <option value="">-- Any Payment Type --</option>
+                            <option value="">-- All Payment Types --</option>
                         </template>
                     </b-form-select>
                     <b-form-select
@@ -41,10 +41,12 @@
                         class="mr-1 mt-1"
                     >
                         <template slot="first">
-                            <option value="">-- Any Status --</option>
+                            <option value="">-- Remit Status --</option>
                         </template>
                     </b-form-select>
-                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --" />
+
+                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
+
                     <b-input
                         v-model="filters.reference"
                         placeholder="Reference #"

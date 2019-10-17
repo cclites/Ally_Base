@@ -26,6 +26,7 @@ class HtmlInvoiceView implements InvoiceViewStrategy
         Collection $payments
     ) {
         $itemGroups = $invoice->getItemGroups();
-        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups')));
+        $render = 'html';
+        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups', 'render')));
     }
 }

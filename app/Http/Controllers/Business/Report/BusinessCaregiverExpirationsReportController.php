@@ -55,8 +55,6 @@ class BusinessCaregiverExpirationsReportController extends BaseController
                     $deficiencyLetter->caregiver = Caregiver::with( 'address' )->find( $caregiverId );
                 }
 
-                // dd( $pages );
-
                 return PDF::loadView( 'business.caregivers.deficiency_letters', [
 
                     'pages'       => $pages,

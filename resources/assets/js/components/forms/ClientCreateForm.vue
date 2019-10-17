@@ -24,13 +24,11 @@
                 <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
             </b-form-group>
             <b-form-group label="Client Type" label-for="client_type" label-class="required">
-                <b-form-select
+                <client-type-dropdown
                         id="client_type"
                         name="client_type"
                         v-model="form.client_type"
-                >
-                    <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                </b-form-select>
+                />
                 <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
             </b-form-group>
             <b-form-group>

@@ -8,7 +8,7 @@
 ?>
 <div class="row print-header">
     <div class="header-left">
-        <div class="logo"><img src="{{ asset('/images/AllyLogo-new-light.png') }}" /></div>
+        @include('layouts.partials.print_logo')
         @if($sender->name())
             <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
             <br>
@@ -16,13 +16,28 @@
                 @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
             </div>
         @endif
+
+        <table class="header-left-table">
+            @if($sender->getEinNumber())
+            <tr>
+                <td><strong>Business EIN:</strong></td>
+                <td>{{ $sender->getEinNumber() }}</td>
+            </tr>
+            @endif
+                @if($sender->getNpiNumber())
+                <tr>
+                    <td><strong>NPI Number:</strong></td>
+                    <td>{{ $sender->getNpiNumber() }}</td>
+                </tr>
+                @endif
+        </table>
     </div>
     <div class="text-right header-right">
-        <div class="h1">Claim #{{ $claim->getName() }}</div>
+        <div class="h1">C-Invoice #{{ $claim->getName() }}</div>
         <br>
         <table class="header-right-table">
             <tr>
-                <td>Claim Date: </td>
+                <td><strong>Claim Date: </strong></td>
                 <td>{{ $claim->getDate()->format('m/d/Y') }}</td>
             </tr>
             <tr>
@@ -31,6 +46,22 @@
                     {{ snake_to_title_case($claim->getStatus()) }}
                 </td>
             </tr>
+            @if($client->getPolicyNumber())
+            <tr>
+                <td><strong>Policy #: </strong></td>
+                <td>
+                    {{ $client->getPolicyNumber() }}
+                </td>
+            </tr>
+            @endif
+            @if($client->getPolicyNumber())
+            <tr>
+                <td><strong>Claim #: </strong></td>
+                <td>
+                    {{ $client->getClaimNumber() }}
+                </td>
+            </tr>
+            @endif
         </table>
     </div>
 </div>

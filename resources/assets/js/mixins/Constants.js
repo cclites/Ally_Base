@@ -31,12 +31,11 @@ export default {
             ],
             smsLength: 160,
             clientTypes: [
-                {value:'', text: "All Client Types"},
-                {value:'private_pay', text:'Private Pay'},
-                {value:'medicaid', text:'Medicaid'},
-                {value:'LTCI', text:'LTCI'},
-                {value:'VA', text:'VA'},
                 {value:'lead_agency', text:'Lead Agency'},
+                {value:'LTCI', text:'LTCI'},
+                {value:'medicaid', text:'Medicaid'},
+                {value:'private_pay', text:'Private Pay'},
+                {value:'VA', text:'VA'},
             ],
 
             TELLUS_CODE_GUIDE_URL: '/knowledge-base/tellus-guide',
@@ -121,6 +120,21 @@ export default {
                 { value: 'payment', text: 'Payment Applied' },
                 { value: 'supplier-contribution', text: 'Supplier Contribution' },
                 { value: 'take-back', text: 'Take Back' },
+            ],
+            QUICKBOOKS_INVOICE_STATUS: {
+                READY: 'ready',
+                QUEUED: 'queued',
+                PROCESSING: 'processing',
+                TRANSFERRED: 'transferred',
+                ERRORED: 'errored',
+                NONE: '-',
+            },
+            quickbooksInvoiceStatusOptions: [
+                { value: 'ready', text: 'Ready' },
+                { value: 'queued', text: 'Queued' },
+                { value: 'processing', text: 'Processing' },
+                { value: 'transferred', text: 'Transferred' },
+                { value: 'errored', text: 'Errored' },
             ],
         }
     },

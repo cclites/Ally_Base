@@ -12,25 +12,42 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
+    @if(isset($render) && $render == 'html')
+        <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
+        <link rel="stylesheet" href="{{ asset('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
+        <ling href="{{ asset('print/Homemade+Apple.css') }}" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('print/font-awesome-4.7.0/css/font-awesome.css') }}">
+        <link rel="stylesheet" href="{{ asset('print/full-calendar.3.5.1.min.css') }}" />
+        <link href="{{ asset('css/style.css') }}" rel="stylesheet" />
+        <!--[if lt IE 9]>
+        <script src="{{ asset('print/html5shiv.3.7.0.js') }}"></script>
+        <script src="{{ asset('print/respond.js.1.4.2.js') }}"></script>
+        <![endif]-->
+    @else
+        <link rel="stylesheet" href="{{ public_path('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">
+        <ling href="{{ public_path('print/Homemade+Apple.css') }}" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ public_path('print/font-awesome-4.7.0/css/font-awesome.css') }}">
+        <link rel="stylesheet" href="{{ public_path('print/full-calendar.3.5.1.min.css') }}" />
+        <link href="{{ public_path('print/css/style.css') }}" rel="stylesheet" />
+    @endif
     <!-- Bootstrap  -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    
+{{--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">--}}
+
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Homemade+Apple" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+{{--    <link href="https://fonts.googleapis.com/css?family=Homemade+Apple" rel="stylesheet">--}}
+{{--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">--}}
 
     <!-- Full Calendar -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.css" />
+{{--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.css" />--}}
 
     <!-- App CSS -->
-    <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
+{{--    <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />--}}
 
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+{{--    <!--[if lt IE 9]>--}}
+{{--    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>--}}
+{{--    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>--}}
+{{--    <![endif]-->--}}
     <style>
         body {
             margin: 10px;
@@ -79,7 +96,6 @@
 
 <body>
 
-@include('layouts.partials.print_header')
 <!-- ============================================================== -->
 <!-- Preloader - style you can find in spinners.css -->
 <!-- ============================================================== -->

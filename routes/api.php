@@ -13,6 +13,14 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::group(['prefix' => 'qb', 'as' => 'qb.'], function() {
+    Route::get('/ping', 'Api\Quickbooks\QuickbooksDesktopController@ping')->name('ping');
+    Route::post('/sync', 'Api\Quickbooks\QuickbooksDesktopController@sync')->name('sync');
+    Route::get('/invoices/fetch', 'Api\Quickbooks\QuickbooksDesktopController@fetchInvoices')->name('invoices.fetch');
+    Route::post('/invoices/process', 'Api\Quickbooks\QuickbooksDesktopController@processInvoices')->name('invoices.process');
+    Route::post('/invoices/results', 'Api\Quickbooks\QuickbooksDesktopController@invoiceResults')->name('invoices.results');
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

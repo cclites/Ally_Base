@@ -47,6 +47,13 @@
             </h2>
         </div>
 
+        <div>
+            <b-form-radio-group v-model="filters.date_type">
+                <b-radio value="service">Search by Date of Service</b-radio>
+                <b-radio value="invoice">Search by Invoiced Date</b-radio>
+            </b-form-radio-group>
+        </div>
+
         <b-form inline class="mb-4">
             <date-picker
                 v-model="filters.start_date"
@@ -72,9 +79,9 @@
                 :allow-all="true"
             />
 
-            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- Any Payer --"/>
+            <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --"/>
 
-            <b-form-select v-model="filters.client_type" :options="clientTypes" class="mr-1 mt-1"></b-form-select>
+            <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
             <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
                 <option v-if="loadingClients" selected value="">Loading Clients...</option>
@@ -87,6 +94,12 @@
                 Show Inactive Clients
             </b-form-checkbox>
 
+            <b-input
+                v-model="filters.invoice_id"
+                placeholder="Invoice #"
+                class="mr-1 mt-1"
+            />
+
             <b-btn variant="info" class="mr-1 mt-1" @click.prevent="fetch()" :disabled="filters.busy">Generate</b-btn>
         </b-form>
 
@@ -95,12 +108,9 @@
             <b-row>
                 <b-col md="3">
                     <b-form-group label="Interest" label-for="interest">
-                        <b-form-input
+                        <number-input id="interest"
                             v-model="interest"
-                            id="interest"
                             name="interest"
-                            type="number"
-                            step="0.01"
                             :disabled="form.busy"
                         />
                         <input-help :form="form" field="interest" text="The amount to apply towards interest."></input-help>
@@ -151,24 +161,22 @@
                     </template>
                     <template slot="amount_applied" scope="row">
                         <div class="d-flex">
-                        <b-form-input
-                            class="mr-1"
-                            v-model="row.item.amount_applied"
-                            name="amount_applied"
-                            type="number"
-                            step="0.01"
-                            :disabled="true"
-                        />
-                        <b-select name="adjustment_type"
-                            v-model="row.item.adjustment_type"
-                            :options="claimRemitAdjustmentTypeOptions"
-                            :disabled="form.busy || !row.item.selected"
-                            @change="(val) => changeMasterType(row.item, val)"
-                        >
-                            <template slot="first">
-                                <option value="">-- Select Type --</option>
-                            </template>
-                        </b-select>
+                            <number-input
+                                class="mr-1"
+                                v-model="row.item.amount_applied"
+                                name="amount_applied"
+                                :disabled="true"
+                            />
+                            <b-select name="adjustment_type"
+                                v-model="row.item.adjustment_type"
+                                :options="claimRemitAdjustmentTypeOptions"
+                                :disabled="form.busy || !row.item.selected"
+                                @change="(val) => changeMasterType(row.item, val)"
+                            >
+                                <template slot="first">
+                                    <option value="">-- Select Type --</option>
+                                </template>
+                            </b-select>
                         </div>
                     </template>
                     <template slot="row-details" scope="row">
@@ -191,12 +199,10 @@
                         </template>
                         <template slot="amount_applied" scope="row">
                             <div class="d-flex">
-                                <b-form-input
+                                <number-input
                                     class="mr-1"
                                     v-model="row.item.amount_applied"
                                     name="amount_applied"
-                                    type="number"
-                                    step="0.01"
                                     :disabled="form.busy || row.item.disabled"
                                     @change="x => subAmountChanged(row.item, x)"
                                 />
@@ -247,12 +253,13 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import LocalStorage from "../../../mixins/LocalStorage";
     import Constants from "../../../mixins/Constants";
     import { Decimal } from 'decimal.js';
     import { mapGetters } from 'vuex';
 
     export default {
-        mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers ],
+        mixins: [ FormatsDates, FormatsStrings, Constants, FormatsNumbers, LocalStorage ],
         components: { BusinessLocationFormGroup },
         props: {
             init: {
@@ -282,7 +289,7 @@
              * @return {Decimal}
              */
             amountAvailable() {
-                return new Decimal(this.remit.amount_available).sub(this.amountApplied);
+                return this.decimalOrZero(this.remit.amount_available).sub(this.amountApplied);
             },
 
             /**
@@ -297,17 +304,12 @@
                             if (item.amount_applied == '' || isNaN(item.amount_applied)) {
                                 return itemTotal;
                             }
-                            return itemTotal.add(new Decimal(item.amount_applied));
-                        }, new Decimal(0.00))
+                            return itemTotal.add(this.decimalOrZero(item.amount_applied));
+                        }, this.decimalOrZero(0.00))
                     );
-                }, new Decimal(0.00));
+                }, this.decimalOrZero(0.00));
 
-                let interest = new Decimal(0.00);
-                if (this.interest != '' && !isNaN(this.interest)) {
-                    interest = new Decimal(this.interest);
-                }
-
-                return total.add(interest);
+                return total.add(this.decimalOrZero(this.interest));
             },
 
             /**
@@ -319,19 +321,31 @@
                 // We should always be able to submit now because there are no restrictions on amounts
                 return true;
             },
+
+            /**
+             * Get the prefix for saving filters to local storage.  This is
+             * based on the current remit ID.
+             *
+             * @return {string}
+             */
+            localStoragePrefix() {
+                return this.remit ? 'apply_remit_' + this.remit.id : 'apply_remit_default';
+            },
         },
 
         data() {
             return {
                 // Filter data
                 filters: new Form({
+                    date_type: 'service',
                     start_date: moment().subtract(30, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
                     businesses: '',
                     payer_id: '',
                     client_id: '',
-                    claim_status: 'unpaid',
+                    claim_status: '',
                     client_type: '',
+                    invoice_id: '',
                     inactive: 0,
                     json: 1,
                 }),
@@ -400,6 +414,7 @@
                         this.claims = [];
                     })
                     .finally(() => {
+                        this.saveFilters();
                     });
             },
 
@@ -423,7 +438,12 @@
             populateFormFromTable() {
                 this.form.applications = this.claims.map(claim => {
                     return claim.items.map(item => {
-                        if (! item.selected || parseFloat(item.amount_applied) === parseFloat('0')) {
+                        if (! item.selected || item.amount_applied == '') {
+                            return null;
+                        }
+
+                        // Do not allow 0 if no note is present
+                        if (! item.note && parseFloat(item.amount_applied) === parseFloat('0')) {
                             return null;
                         }
 
@@ -615,19 +635,66 @@
              * @returns string
              */
             getMasterAmountDue(claim) {
-                return new Decimal(claim.amount_due).sub(claim.items.reduce((carry, item) => {
+                return this.decimalOrZero(claim.amount_due).sub(claim.items.reduce((carry, item) => {
                     if (item.amount_applied == '') {
                         return carry;
                     }
-                    return carry.add(new Decimal(item.amount_applied));
-                }, new Decimal(0.00))).toFixed(2);
+                    return carry.add(this.decimalOrZero(item.amount_applied));
+                }, this.decimalOrZero(0.00))).toFixed(2);
             },
 
             /**
              * Handle tracking of window scroll event
              */
-            handleScroll () {
+            handleScroll() {
               this.isScrolling = window.scrollY > 0;
+            },
+
+            /**
+             * Save filters to local storage.
+             */
+            saveFilters() {
+                for (let filter of Object.keys(this.filters.data())) {
+                    if (['invoice_id', 'json'].includes(filter)) {
+                        continue;
+                    }
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+                this.setLocalStorage('sortBy', this.sortBy);
+                this.setLocalStorage('sortDesc', this.sortDesc);
+            },
+
+            /**
+             * Load filters from local storage.
+             */
+            loadFilters() {
+                if (typeof(Storage) !== "undefined") {
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value !== null) {
+                            this.filters[filter] = value;
+                        }
+                    }
+
+                    // Sorting/show UI
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) {
+                        this.sortBy = sortBy;
+                    }
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) {
+                        this.sortDesc = sortDesc;
+                    }
+                }
+            },
+
+            decimalOrZero(number) {
+                try {
+                    return new Decimal(number);
+                } catch (e) {
+                    return new Decimal(0.00);
+                }
             },
         },
 
@@ -635,8 +702,10 @@
             await this.fetchClients();
 
             // Set default filters
+            this.filters.claim_status = 'unpaid';
             this.filters.businesses = this.remit.business_id;
             this.filters.payer_id = this.remit.payer_id === 0 || this.remit.payer_id ? ''+this.remit.payer_id : '';
+            this.loadFilters();
 
             this.fetch();
         },

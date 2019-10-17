@@ -784,6 +784,26 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     }
 
     /**
+     * Get the business's EIN number.
+     *
+     * @return null|string
+     */
+    public function getEinNumber() : ?string
+    {
+        return $this->ein;
+    }
+
+    /**
+     * Get the business's NPI Number.
+     *
+     * @return null|string
+     */
+    public function getNpiNumber(): ?string
+    {
+        return $this->medicaid_npi_number;
+    }
+
+    /**
      * @return string|null
      */
     public function getStreetAddressAttribute()

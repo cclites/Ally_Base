@@ -97,6 +97,7 @@ class ClaimsReportController extends BaseController
                 $pdf = PDF::loadView('business.reports.print.insurance_claim', $viewData);
                 return $pdf->download(str_slug($client->name.' Claim').'.pdf');
             default:
+                $viewData['render'] = 'html';
                 return view('business.reports.print.insurance_claim', $viewData);
         }
     }

@@ -17,9 +17,11 @@ use Carbon\Carbon;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\Business $business
+ * @property-read \App\Audit $auditTrail
  * @property-read \Illuminate\Database\Eloquent\Relations\HasMany $unique_recipient_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadRecipient[] $recipients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $replies
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -33,7 +35,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class SmsThread extends BaseModel implements BelongsToBusinessesInterface
+class SmsThread extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 
@@ -209,4 +211,5 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 
         return $this->recipients()->where('user_id', $user_id)->exists();
     }
+
 }

@@ -31,9 +31,7 @@
                         <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.nameLastFirst }}</option>
                     </b-select>
 
-                    <b-form-select v-model="form.type" class="mb-1 mr-2">
-                        <option v-for="item in clientTypes" :key="item.value" :value="item.value">{{ item.text }}</option>
-                    </b-form-select>
+                    <client-type-dropdown v-model="form.type" class="mb-1 mr-2" />
 
                     <b-form-select v-model="form.active" class="mr-2 mb-1" name="client_status">
                         <option value="">All Active/Inactive Clients</option>

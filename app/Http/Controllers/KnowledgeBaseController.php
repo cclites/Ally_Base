@@ -80,8 +80,6 @@ class KnowledgeBaseController extends Controller
             ->whereNotNull( 'xsd.id' )
             ->get();
 
-        // dd( $xsd->groupBy( 'category' ) );
-
         if (empty($xsd)) {
             return ErrorResponse(404, 'Error Generating Tellus Documentation');
         }

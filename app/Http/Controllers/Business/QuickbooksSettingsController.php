@@ -60,8 +60,8 @@ class QuickbooksSettingsController extends BaseController
     public function connect(Business $business)
     {
         try {
-
             $this->authorize('update', $business);
+
             Session::put('quickbooks_business_id', $business->id);
 
             return redirect(app(QuickbooksOnlineService::class)
@@ -74,6 +74,29 @@ class QuickbooksSettingsController extends BaseController
             return new ErrorResponse(500, 'Quickbooks API not configured.');
 
         }
+    }
+
+    /**
+     * Create a Desktop Connection API key.
+     *
+     * @param Business $business
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function enableDesktop(Business $business)
+    {
+        $data = [
+            'company_name' => $business->name,
+            'desktop_api_key' => strtoupper(md5($business->id.uniqid().microtime())),
+            'is_desktop' => true,
+            'access_token' => null,
+        ];
+        if ($business->quickbooksConnection()->exists()) {
+            $business->quickbooksConnection()->update($data);
+        } else {
+            $business->quickbooksConnection()->create($data);
+        }
+
+        return redirect(route('business.quickbooks.index'));
     }
 
     /**
@@ -135,7 +158,11 @@ class QuickbooksSettingsController extends BaseController
         $this->authorize('update', $business);
 
         if ($connection = $business->quickbooksConnection) {
-            $connection->update(['access_token' => null]);
+            $connection->update([
+                'access_token' => null,
+                'is_desktop' => false,
+                'desktop_api_key' => null
+            ]);
         }
 
         return new SuccessResponse('Your account has been disconnected from the Quickbooks API.', [], '.');
