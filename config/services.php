@@ -72,8 +72,8 @@ return [
 
     'tellus' => [
         'endpoint' => env('TELLUS_ENDPOINT', 'https://edi.stg.4tellus.net/v2.0/{username}/SRVC'),
-        'dictionary_file' => env('TELLUS_DICTIONARY_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/591527967/Typecode%20Data%20Dictionary%2020190925.xlsx?api=v2'),
-        'schema_file' => env('TELLUS_SCHEMA_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020190920.xsd?api=v2'),
+        'dictionary_file' => env('TELLUS_DICTIONARY_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/591527967/Typecode%20Data%20Dictionary%2020191011.xlsx?api=v2'),
+        'schema_file' => env('TELLUS_SCHEMA_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020191011.xsd?api=v2'),
     ],
 
     'fullcalendar' => [

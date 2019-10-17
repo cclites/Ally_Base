@@ -143,6 +143,7 @@ class CaregiverSetupController extends Controller
         \DB::commit();
 
         $caregiver = $caregiver->fresh()->load(['address', 'phoneNumber']);
+
         return new SuccessResponse('Your account has been set up!', $caregiver);
     }
 
