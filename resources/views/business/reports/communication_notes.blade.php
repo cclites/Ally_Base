@@ -16,6 +16,10 @@
         table tfoot tr td{
             padding-top: 40px;
         }
+
+        table td {
+            vertical-align: top;
+        }
     </style>
 @endpush
 
@@ -25,7 +29,7 @@
     <div class="page" id="summary">
         <div class="h4">Notes</div>
         <div>
-            <table>
+            <table class="table table-bordered items-table">
                 <thead>
                     <tr>
                         <th>Note Date</th>
@@ -40,7 +44,7 @@
                 <tbody>
                 @foreach($data as $item)
                     <tr>
-                        <td>{{ $item->created_at }}</td>
+                        <td>{{ local_date($item->created_at, 'm/d/Y', auth()->user()->getTimezone()) }}</td>
                         <td>{{ $item->type }}</td>
                         <td>{{ $item->caregiver ? $item->caregiver->nameLastFirst() : '' }}</td>
                         <td>{{ $item->client ? $item->client->name : '' }}</td>
