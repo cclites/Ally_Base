@@ -9,7 +9,9 @@ use App\Traits\Request\PaymentMethodRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
+use File;
 use App\PhoneNumber;
+use function Composer\Autoload\includeFile;
 
 class ClientSetupController extends Controller
 {
@@ -127,6 +129,9 @@ class ClientSetupController extends Controller
         \DB::beginTransaction();
 
         $method = $this->validatePaymentMethod($request, $client->defaultPayment);
+
+        \Log::info($client->defaultPayment);
+
         if (! $client->setPaymentMethod($method)) {
             \DB::rollBack();
             return new ErrorResponse(500, 'There was an error saving your payment details.  Please try again.');
@@ -140,6 +145,11 @@ class ClientSetupController extends Controller
         \DB::commit();
 
         $client = $client->fresh()->load(['address', 'phoneNumber']);
+
+        if($client->default_payment_type === 'credit_card' || $client->default_payment_type === 'bank_accounts'){
+            $this->renderClientAgreementDocument($client);
+        }
+
         return new SuccessResponse('Your account has been set up!', $client);
     }
 
@@ -198,5 +208,46 @@ class ClientSetupController extends Controller
         $client->save();
 
         return response()->json($client);
+    }
+
+    public function renderClientAgreementDocument(Client $client){
+
+        $client->load(['addresses', 'defaultPayment', 'backupPayment', 'phoneNumbers']);
+
+        \Log::info($client);
+        $termsFile = 'terms-inc.html';
+        $termsUrl = url($termsFile);
+
+        if (file_exists(public_path('terms-inc-' . $client->business_id . '.html'))) {
+            $termsFile = 'terms-inc-' . $client->business_id . '.html';
+            $termsUrl = url($termsFile);
+        }
+
+        $terms = file_get_contents($termsUrl);
+
+        $pdf = \PDF::loadView('business.clients.client_agreement_document', compact('terms', 'client'));
+
+        $dir = storage_path('app/documents/');
+        if (!File::exists($dir)) {
+            File::makeDirectory($dir, 493, true);
+        }
+        $filename = str_slug($client->id . ' ' . $client->name.' Client Agreement').'.pdf';
+        $filePath = $dir . '/' . $filename;
+        if (File::exists($filePath)) {
+            if (config('app.env') != 'production') {
+                File::delete($filePath);
+            }
+            // Do not overwrite agreement files
+            return;
+        }
+
+        if ($pdf->save($filePath)) {
+            $client->documents()->create([
+                'filename' => File::basename($filePath),
+                'original_filename' => File::basename($filePath),
+                'description' => 'Client Agreement',
+                'user_id' => $client->id
+            ]);
+        }
     }
 }
