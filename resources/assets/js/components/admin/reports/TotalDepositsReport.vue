@@ -3,23 +3,24 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Total Deposits Report"
-                        header-text-variant="white"
-                        header-bg-variant="info"
+                    header="Total Deposits Report"
+                    header-text-variant="white"
+                    header-bg-variant="info"
                 >
+                    <b-alert show variant="info">This report should group all deposits by Chain, but does not account for older deposits where we did not store the Chain on the deposit record.  Those entries will show a location of the Business or Caregiver name.</b-alert>
                     <b-row>
                         <b-col sm="12" md="4">
 
                             <b-form-group label="Date" class="mr-2">
 
-                                <date-picker v-model=" form.startdate " name="startdate"></date-picker>
+                                <date-picker v-model=" form.start_date " name="start_date"></date-picker>
                             </b-form-group>
                         </b-col>
                         <b-col sm="12" md="4">
 
                             <b-form-group label="Date" class="mr-2">
 
-                                <date-picker v-model=" form.enddate " name="enddate"></date-picker>
+                                <date-picker v-model=" form.end_date " name="end_date"></date-picker>
                             </b-form-group>
                         </b-col>
                         <b-col sm="12" md="4">
@@ -40,41 +41,38 @@
                             <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                         </div>
                     </div>
-
-                    <div v-else-if="items.length == 0">
-                        {{ emptyText }}
-                    </div>
-
                     <div v-else>
-                        <b-row>
-                            <b-col>
-                                <b-table
-                                        class="deposits-summary-table"
-                                        :items="items"
-                                        :fields="fields"
-                                        :sort-by="sortBy"
-                                        :empty-text="emptyText"
-                                        :busy="busy"
-                                        :footClone="footClone"
-                                >
-                                    <template slot="FOOT_chain" scope="item">&nbsp;
-                                    </template>
-                                    <template slot="FOOT_type" scope="item">
-                                    </template>
-                                    <template slot="FOOT_amount" scope="item">
-                                        <strong>Total: </strong> {{ moneyFormat(totals.amount) }}
-                                    </template>
-                                </b-table>
+                        <div v-if="items.length == 0">
+                            {{ emptyText }}
+                        </div>
+                        <div v-else>
+                            <b-row>
+                                <b-col>
+                                    <b-table
+                                            class="deposits-summary-table"
+                                            :items="items"
+                                            :fields="fields"
+                                            :sort-by="sortBy"
+                                            :empty-text="emptyText"
+                                            :busy="busy"
+                                            :footClone="footClone"
+                                    >
+                                        <template slot="HEAD_amount" scope="item">
+                                            <strong>Total: </strong> {{ moneyFormat(totals.amount) }}
+                                        </template>
+                                        <template slot="FOOT_amount" scope="item">
+                                            <strong>Total: </strong> {{ moneyFormat(totals.amount) }}
+                                        </template>
+                                    </b-table>
+                                </b-col>
+                            </b-row>
+                        </div>
+                        <b-row v-if="this.items.length > 0">
+                            <b-col sm="12" class="text-right">
+                                Showing {{ totalRows }} results
                             </b-col>
                         </b-row>
                     </div>
-
-                    <b-row v-if=" this.items.length > 0 ">
-                        <b-col sm="12" class="text-right">
-                            Showing {{ totalRows }} results
-                        </b-col>
-                    </b-row>
-
                 </b-card>
             </b-col>
         </b-row>
@@ -91,8 +89,8 @@
         data() {
             return {
                 form: new Form({
-                    startdate: moment().startOf( 'isoweek' ).subtract( 1, 'days' ).format( 'MM/DD/YYYY' ),
-                    enddate  : moment().endOf( 'isoday' ).format( 'MM/DD/YYYY' ),
+                    start_date: moment().startOf( 'isoweek' ).subtract( 1, 'days' ).format( 'MM/DD/YYYY' ),
+                    end_date  : moment().endOf( 'isoday' ).format( 'MM/DD/YYYY' ),
                     json: 1
                 }),
                 busy: false,
@@ -100,7 +98,7 @@
                 sortBy: 'name',
                 sortDesc: false,
                 fields: [
-                    {key: 'name', label: 'Location', sortable: true,},
+                    {key: 'name', label: 'Business Chain', sortable: true,},
                     {key: 'amount', label: 'Total', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],
                 items: [],
@@ -112,6 +110,7 @@
         },
         methods: {
             fetch() {
+                this.items = [];
                 this.busy = true;
                 this.form.get('/admin/reports/total_deposits_report')
                     .then( ({ data }) => {
