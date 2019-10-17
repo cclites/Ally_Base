@@ -31,7 +31,7 @@ class SkilledNursingPocController extends BaseController
         $this->authorize('update', $client);
         $data = SkilledNursingPoc::convertFormData($request->validated());
 
-        if ($client->skilledNursingPoc()->updateOrCreate($data)) {
+        if ($client->skilledNursingPoc()->updateOrCreate(['client_id' => $client->id], $data)) {
             return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc);
         }
 

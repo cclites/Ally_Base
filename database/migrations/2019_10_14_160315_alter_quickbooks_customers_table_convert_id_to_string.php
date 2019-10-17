@@ -14,6 +14,11 @@ class AlterQuickbooksCustomersTableConvertIdToString extends Migration
      */
     public function up()
     {
+        if (config('app.env') != 'production') {
+            // If in a dev environment just clear out the old rare blank customer IDs
+            \App\QuickbooksCustomer::whereNull('customer_id')->delete();
+        }
+
         if (\App\QuickbooksCustomer::whereNull('customer_id')->exists()) {
             throw new Exception('Cannot migrate quickbooks customer id because there are null values in the database.');
         }

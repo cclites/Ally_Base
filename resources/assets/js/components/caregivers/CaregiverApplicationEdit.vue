@@ -513,6 +513,19 @@
             </b-row>
             <hr>
             <b-row>
+                <b-col sm="6" v-if="form.caregiver_signature">
+                    <strong>Caregiver Signature</strong>
+                    <div v-html="form.caregiver_signature.content" class="signature"></div>
+                </b-col>
+                <b-col v-else class="d-flex mb-2 flex-wrap align-content-stretch">
+                    <signature-pad
+                            class="mr-2 my-1"
+                            v-model="form.caregiver_signature"
+                            :buttonTitle=" 'Add Caregiver Signature' ">
+                    </signature-pad>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col>
                     <div class="btn btn-success" @click="saveApp">Update</div>
                 </b-col>
@@ -538,7 +551,7 @@
                 travelRadius: [5, 10, 15, 20],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
                 states: new States(),
-                form: new Form({})
+                form: new Form({}),
             }
         },
 
@@ -568,6 +581,7 @@
                 }
 
                 this.form = new Form(data);
+
             },
 
             saveApp() {

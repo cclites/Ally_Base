@@ -29,7 +29,7 @@ class SingleDepositProcessor
         return new ECSPayment();
     }
 
-    public static function depositCaregiver(Caregiver $caregiver, $amount, $adjustment = false, $notes = null)
+    public static function depositCaregiver(Caregiver $caregiver, $amount, $adjustment = false, $notes = null, int $chainId)
     {
         $account = $caregiver->bankAccount;
         if ($transaction = self::handleTransaction($account, $amount)) {
@@ -41,6 +41,7 @@ class SingleDepositProcessor
                 'adjustment' => $adjustment,
                 'notes' => $notes,
                 'success' => $transaction->success,
+                'chain_id' => $chainId,
             ]);
 
             $invoice = self::generateCaregiverAdjustmentInvoice($caregiver, $amount, $notes);
@@ -73,6 +74,7 @@ class SingleDepositProcessor
     public static function depositBusiness(Business $business, $amount, $adjustment = false, $notes = null)
     {
         $account = $business->bankAccount;
+
         if ($transaction = self::handleTransaction($account, $amount)) {
             $deposit = Deposit::create([
                 'deposit_type' => 'business',
@@ -82,6 +84,7 @@ class SingleDepositProcessor
                 'adjustment' => $adjustment,
                 'notes' => $notes,
                 'success' => $transaction->success,
+                'chain_id' => $business->chain_id,
             ]);
 
             $invoice = self::generateBusinessAdjustmentInvoice($business, $amount, $notes);

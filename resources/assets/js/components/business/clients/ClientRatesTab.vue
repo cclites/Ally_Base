@@ -228,20 +228,31 @@
         </div>
 
         <!-- MODALS -->
-        <b-modal id="clientExcludeCargiver"
-                 :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
+        <b-modal :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
                  v-model="clientExcludeCaregiverModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
+                        <div class="toggleInactiveCaregivers">
+                            <b-form-checkbox type="checkbox"
+                                             v-model="displayAllCaregivers"
+                                             value="1"
+                                             unchecked-value="0"
+                            >
+                                Show Inactive Caregivers
+                            </b-form-checkbox>
+                        </div>
                         <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
                             <div v-if="excludeForm.id">
                                 {{ excludeForm.caregiver_name }}
                             </div>
                             <b-form-select v-else name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
                                 <option value="">--Select a Caregiver--</option>
-                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name
-                                    }}
+                                <option v-for="item in otherCaregivers"
+                                        :value="item.id"
+                                        :key="item.id"
+                                        v-if="item.active || displayAllCaregivers == 1"
+                                >{{ item.name }}
                                 </option>
                             </b-form-select>
                         </b-form-group>
@@ -272,38 +283,13 @@
             </div>
         </b-modal>
 
-        <!-- <b-modal title="Add Caregiver Assignment"
-                 v-model="clientCaregiverModal"
-                 ref="clientCaregiverModal">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12">
-                        <b-form-group label="Caregiver" label-for="caregiver_id">
-                            <select2
-                                    v-model="caregiverForm.caregiver_id"
-                                    class="form-control"
-                            >
-                                <option value="">-- Select Caregiver --</option>
-                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
-                            </select2>
-                            <input-help :form="caregiverForm" field="caregiver_id" text=""></input-help>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
-                <b-btn variant="info" @click="saveCaregiver()" :disabled="!caregiverForm.caregiver_id">Add Caregiver</b-btn>
-            </div>
-        </b-modal> -->
-
         <client-rate-wizard v-model="rateWizardModal"
                             :client="client"
                             :caregivers="caregivers"
                             :services="services"
                             :payers="payers"
                             :default-rate="defaultRateOnWizard"
-                            :potential-caregivers="otherCaregivers"
+                            :potential-caregivers="otherActiveCaregivers"
                             :add-mode="addNewCaregiver"
                             :ally-pct-original="allyRateOriginal"
                             @new-rate="addRate">
@@ -357,6 +343,7 @@
                 }),
                 caregiverForm: new Form({caregiver_id: ""}),
                 busyRemoving: null,
+                displayAllCaregivers: 0,
 
                 items: [],
                 excludedFields: [
@@ -381,11 +368,16 @@
                     'unhappy_client': 'Client not happy and refuses service from this caregiver',
                     'no_shows': 'Continual no shows',
                     'retired': 'Retired',
+                    'other': 'Other'
                 },
             }
         },
 
         computed: {
+            otherActiveCaregivers() {
+                return this.otherCaregivers.filter(x => x.active);
+            },
+
             paymentText() {
                 return this.paymentMethodDetail.payment_text || this.paymentTypeMessage;
             },
@@ -727,6 +719,12 @@
 
                 return '(All)';
             },
+
+            displayCaregivers(val){
+                console.log("CHECKED");
+                console.log(JSON.stringify(val));
+            }
+
         },
 
         async mounted() {
@@ -749,4 +747,16 @@
     .bl { border-left: 1px solid #A9A9A9!important; }
     .br { border-right: 1px solid #A9A9A9!important; }
     .bb { border-bottom: 1px solid #A9A9A9!important; }
+
+    .toggleInactiveCaregivers{
+        text-align: right;
+        position: relative;
+        top: 32px;
+        left: 22px;
+    }
+
+    .toggleInactiveCaregivers span{
+        position: relative;
+        bottom: 5px;
+    }
 </style>
