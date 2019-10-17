@@ -15,7 +15,7 @@ class QuickSearchController extends BaseController
         }
 
         $roles = ['client', 'caregiver'];
-        
+
         if (request()->role == 'caregiver') {
             $roles = ['caregiver'];
         } else if (request()->role == 'client') {
@@ -35,23 +35,37 @@ class QuickSearchController extends BaseController
                 });
             });
 
+        $q = request('q');
+        // 'type' here is for the display/return type.  This quick search is used in multiple places.
+        $type = request('type');
+        if(1 === preg_match('~[0-9]~', $q)){
+            // If we are searching for a phone number, remove
+            // any non-digit separators from the string.
+            $type = 'phone';
+            $q = preg_replace("/[^0-9]/", "", $q);
 
-        $query->where(function($query) {
-            $q = request('q');
-            if (\App::runningUnitTests()) {
-                // check if testing enviornment because sqlite doesn't have CONCAT function
-                $query->whereRaw("printf('%s %s', firstname, lastname) like ?", ["%$q%"]);
-            }
-            else {
-                $query->whereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%$q%"]);
-            }
-            $query->orWhere('email', 'LIKE', "%$q%");
-        });
+            // search by phone number
+            $query->whereHas('phoneNumbers', function($query) use($q){
+                $query->where('national_number', 'LIKE', "%$q%");
+            });
+        } else {
+            // search by user name
+            $query->where(function($query) use($q){
+                if (\App::runningUnitTests()) {
+                    // check if testing environment because sqlite doesn't have CONCAT function
+                    $query->whereRaw("printf('%s %s', firstname, lastname) like ?", ["%$q%"]);
+                }
+                else {
+                    $query->whereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%$q%"]);
+                }
+                $query->orWhere('email', 'LIKE', "%$q%");
+            });
+        }
 
-        switch(request('type')) {
+        switch($type) {
             case 'sms':
             case 'phone':
-                $query->whereHas('phoneNumbers');
+                // Load phone number relationship
                 $query->with('phoneNumbers');
                 $keys = ['id', 'name', 'role_type', 'phone'];
                 break;
