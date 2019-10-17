@@ -52,6 +52,15 @@ class DepositsController extends Controller
                 });
             }
 
+            $count = $query->count();
+            $limit = 2500;
+
+            if ( $count > $limit ) {
+
+                // Limit deposit return for performance reasons
+                return new ErrorResponse( 400, "The number of deposits to display is $count which exceeds the limit of $limit. Please adjust your filters and re-run." );
+            }
+
             return $query->get();
         }
         return view('admin.deposits.index');

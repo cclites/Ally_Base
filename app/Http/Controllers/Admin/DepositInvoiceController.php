@@ -49,9 +49,18 @@ class DepositInvoiceController extends Controller
                 $businessInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
             }
 
-            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains'])->get();
-            $businessInvoices = $businessInvoiceQuery->with(['business', 'business.chain'])->get();
+            $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains']);
+            $businessInvoiceQuery->with(['business', 'business.chain']);
 
+            $count = (clone $caregiverInvoiceQuery)->count() + (clone $businessInvoiceQuery)->count();
+            $limit = 5000;
+            if ( $count > $limit ) {
+                // Limit deposit return for performance reasons
+                return new ErrorResponse(400, "The number of deposits to display is $count which exceeds the limit of $limit. Please adjust your filters and re-run.");
+            }
+
+            $caregiverInvoices = $caregiverInvoiceQuery->get();
+            $businessInvoices = $businessInvoiceQuery->get();
             $invoices = $caregiverInvoices->merge($businessInvoices);
 
             return DepositInvoiceResponse::collection($invoices);
