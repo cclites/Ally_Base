@@ -311,9 +311,9 @@ class CareMatch
             $this->queryCaregiverUser($builder, 'pets_birds_okay', $pets_birds);
         }
 
-        if ($ethnicities = array_get($this->preferences, 'ethnicities')) {
-            $builder->whereIn('ethnicity', $ethnicities);
-        }
+//        if ($ethnicities = array_get($this->preferences, 'ethnicities')) {
+//            $builder->whereIn('ethnicity', $ethnicities);
+//        }
     }
 
     protected function queryOvertime($builder)

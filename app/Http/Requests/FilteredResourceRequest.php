@@ -56,6 +56,16 @@ class FilteredResourceRequest extends FormRequest
     }
 
     /**
+     * Determine if the request is asking for data or export.
+     *
+     * @return bool
+     */
+    public function wantsReportData(): bool
+    {
+        return $this->forExport() || $this->forJson();
+    }
+
+    /**
      * Filter the start and end dates from one timezone into another
      * and return a tuple of Carbon instances.
      *

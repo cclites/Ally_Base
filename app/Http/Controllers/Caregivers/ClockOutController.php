@@ -98,6 +98,7 @@ class ClockOutController extends BaseController
             'narrative_notes' => 'nullable',
         ]);
 
+
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
 
@@ -114,7 +115,17 @@ class ClockOutController extends BaseController
         }
 
         // If not private pay, ADL and comments are required
-        if ($shift->client->client_type != ClientType::PRIVATE_PAY) {
+        if( in_array( $shift->client->client_type, [ ClientType::LTCI, ClientType::MEDICAID ] ) ){
+            $request->validate(
+                [
+                    'activities' => 'min:2',
+                ],
+                [
+                    'activities.min' => 'A minimum of two activities is required for this client.',
+                ]
+            );
+        } else if ($shift->client->client_type != ClientType::PRIVATE_PAY) {
+            // this still includes VA and lead_agency.. wont just overwrite this with the minimum = 2 rule
             $request->validate(
                 [
                     'activities' => 'min:1',

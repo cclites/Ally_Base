@@ -776,4 +776,25 @@ class ServiceAuthValidatorTest extends TestCase
         $this->assertEquals(Carbon::MONDAY, Carbon::getWeekStartsAt());
         $this->assertEquals(Carbon::SUNDAY, Carbon::getWeekEndsAt());
     }
+
+    /** @test */
+    public function if_a_weekly_auth_ends_in_the_middle_of_the_week_it_should_not_calculate_the_whole_week()
+    {
+        $auth = $this->createClientAuth([
+            'units' => 6,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'week_start' => 1, // Monday
+            'effective_start' => Carbon::parse('2019-09-01'),
+        ]);
+
+        $shift = $this->createShift(Carbon::parse('2019-09-30'), '11:00:00', 5);
+        $this->assertDoesNotExceedServiceAuth($shift);
+
+        $shift2 = $this->createShift(Carbon::parse('2019-10-01'), '11:00:00', 5);
+        $this->assertExceedsServiceAuth($shift->fresh());
+
+        $auth->update(['effective_end' => Carbon::parse('2019-09-30')]);
+
+        $this->assertDoesNotExceedServiceAuth($shift->fresh());
+    }
 }

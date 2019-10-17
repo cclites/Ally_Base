@@ -136,6 +136,34 @@ class DepositInvoiceController extends Controller
         return new ErrorResponse(500, "The invoice could not be removed.");
     }
 
+    public function update( Request $request, $id, $type )
+    {
+        switch( $type ){
+
+            case 'caregiver_invoices':
+
+                $invoice = CaregiverInvoice::find( $id );
+                break;
+            case 'business_invoices':
+
+                $invoice = BusinessInvoice::find( $id );
+                break;
+            default:
+
+                return new ErrorResponse( 500, 'Invalid invoice type.' );
+                break;
+        }
+        $data = $request->validate([
+
+            'notes' => 'required|max:255'
+        ]);
+
+        if( $invoice->update( $request->toArray() ) ) return new SuccessResponse( 'invoice has been updatd.');
+
+        return new ErrorResponse( 500, 'invoice could not be updated.');
+
+    }
+
     public function destroyCaregiverInvoice(CaregiverInvoice $invoice)
     {
         if ($invoice->deposits()->exists()) {

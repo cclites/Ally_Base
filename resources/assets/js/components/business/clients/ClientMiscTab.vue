@@ -10,7 +10,6 @@
 </template>
 
 <script>
-
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import AuditsTable from '../../../components/AuditsTable';
@@ -36,17 +35,22 @@
                     { label: 'New Values', key: 'new_values', formatter: (val) => JSON.stringify(val) },
                 ],
                 sortBy: '',
-                emptyText: 'No records to display'
+                emptyText: 'No records to display',
+                item: [],
             }
         },
         async mounted() {
             this.fetchAuditLog();
         },
+
         methods: {
             async fetchAuditLog(){
-                let response = await axios.get(`/business/reports/audit-log?client_id=${this.client.id}`);
-                this.auditLogItems = response.data;
-            }
+                axios.get(`/business/reports/audit-log?client_id=${this.client.id}`)
+                    .then( ({ data }) => {
+                        this.auditLogItems = data;
+                    })
+                    .catch(() => {});
+            },
         }
     }
 </script>
