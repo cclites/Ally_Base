@@ -38,9 +38,9 @@ class EmailTemplateController extends BaseController
      * @return ErrorResponse
      * @return ErrorResponse
      */
-    public function store(Request $request)
+    public function store(UpdateEmailTemplateRequest $request)
     {
-        $template = new EmailTemplate($request->all());
+        $template = new EmailTemplate($request->filtered());
 
         if($template->save()){
             return new SuccessResponse( 'Template has been saved.', $template );
