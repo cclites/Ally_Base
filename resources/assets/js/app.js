@@ -73,6 +73,7 @@ Vue.component('client-contacts-modal', require('./components/ClientContactsModal
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
+Vue.component('number-input', require('./components/NumberInput'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -394,6 +395,7 @@ Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
 Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
 Vue.component('business-claim-transmissions-report', require('./components/business/claims/ClaimTransmissionsReport'));
+Vue.component('business-remit-application-report', require('./components/business/claims/reports/RemitApplicationReport'));
 Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
 Vue.component('claim-adjustment-history', require('./components/business/claims/ClaimAdjustmentHistory'));
 

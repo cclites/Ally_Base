@@ -31,7 +31,7 @@
                         v-model="filters.client_type"
                         class="f-1 mr-2"
                     />
-'
+                    
                     <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
                 </div>
             </b-col>

@@ -8,7 +8,12 @@
                     <b-btn variant="info" @click="save()" :disabled="busy">Save Changes</b-btn>
                 </b-col>
                 <b-col md="6" class="text-right">
-                    <b-btn variant="success" @click="refreshCustomers()" :disabled="busy">Sync Quickbooks Customer Data</b-btn>
+                    <b-btn v-if="connection.is_desktop" variant="success" href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank" :disabled="busy">
+                        How to Sync Quickbooks Customers
+                    </b-btn>
+                    <b-btn v-else variant="success" @click="refreshCustomers()" :disabled="busy">
+                        Sync Quickbooks Customers
+                    </b-btn>
                 </b-col>
             </b-row>
             <b-row class="mb-2" align-h="end">
@@ -37,7 +42,7 @@
                                 <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }} ({{ customer.customer_id }})</option>
                             </b-form-select>
 
-                            <b-btn v-if="! row.item.quickbooks_customer_id" variant="primary" @click="createCustomer(row.item)" :disabled="busy">Create Customer</b-btn>
+                            <b-btn v-if="!connection.is_desktop && !row.item.quickbooks_customer_id" variant="primary" @click="createCustomer(row.item)" :disabled="busy">Create Customer</b-btn>
                         </div>
                     </template>
                 </b-table>
@@ -58,6 +63,10 @@
 <script>
     export default {
         props: {
+            connection: {
+                type: [Array, Object],
+                default: () => { return {}; },
+            },
             clients: {
                 type: Array,
                 default: [],

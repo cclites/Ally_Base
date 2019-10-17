@@ -2,6 +2,7 @@
 
 namespace App\Claims;
 
+use App\Billing\ClientPayer;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
@@ -278,6 +279,22 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         })->count() > 0;
     }
 
+    /**
+     * Get the ClientPayer record from the current
+     * client/payer combo.
+     *
+     * WARNING: This has the potential to return null if the
+     * Client's payer list has been modified to remove this payer.
+     *
+     * @return ClientPayer
+     */
+    public function getClientPayer() : ?ClientPayer
+    {
+        return $this->client->payers()
+            ->where('payer_id', $this->payer_id)
+            ->first();
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -319,16 +336,33 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Filter by date range.
+     * Filter by client invoiced at between the given date range.
      *
      * @param \Illuminate\Database\Query\Builder $query
      * @param \Carbon\Carbon $start
      * @param \Carbon\Carbon $end
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeForDateRange($query, $start, $end)
+    public function scopeWhereInvoicedBetween($query, $start, $end)
     {
-        return $query->whereBetween('created_at', [$start, $end]);
+        return $query->whereHas('clientInvoice', function ($q) use ($start, $end) {
+            return $q->whereBetween('created_at', [$start, $end]);
+        });
+    }
+
+    /**
+     * Filter by dates of service between the given date range.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param \Carbon\Carbon $start
+     * @param \Carbon\Carbon $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereDatesOfServiceBetween($query, $start, $end)
+    {
+        return $query->whereHas('items', function ($q) use ($start, $end) {
+            return $q->whereBetween('date', [$start, $end]);
+        });
     }
 
     /**

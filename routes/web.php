@@ -476,6 +476,8 @@ Route::group([
 
     Route::get('quickbooks-queue', 'Business\QuickbooksQueueController@index')->name('quickbooks-queue');
     Route::post('quickbooks-queue/{invoice}/transfer', 'Business\QuickbooksQueueController@transfer')->name('quickbooks-queue.transfer');
+    Route::post('quickbooks-queue/{invoice}/enqueue', 'Business\QuickbooksQueueController@enqueue')->name('quickbooks-queue.enqueue');
+    Route::post('quickbooks-queue/{invoice}/dequeue', 'Business\QuickbooksQueueController@dequeue')->name('quickbooks-queue.dequeue');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::delete('referral-sources/organization/{organization}', 'Business\ReferralSourceController@removeOrganization');
@@ -502,6 +504,7 @@ Route::group([
     Route::get('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@create');
     Route::post('claim-remit-applications/{claimRemit}', 'Business\Claims\ClaimRemitApplicationController@store');
     Route::get('reports/claims/transmissions', 'Business\Claims\ClaimTransmissionsReportController@index')->name('reports.claims.transmissions');
+    Route::get('reports/claims/remit-application', 'Business\Claims\ClaimRemitApplicationReportController@index')->name('reports.claims.remit-application');
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
     Route::get('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@index');
     Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');
