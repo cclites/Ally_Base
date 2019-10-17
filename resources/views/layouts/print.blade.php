@@ -21,8 +21,8 @@
         <link rel="stylesheet" href="{{ asset(mix('print/full-calendar.3.5.1.min.css')) }}" />
         <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
         <!--[if lt IE 9]>
-        <script src="{{ asset(mix('print/html5shiv.3.7.0.js')) }}"></script>
-        <script src="{{ asset(mix('print/respond.js.1.4.2.js')) }}"></script>
+        <script src="{{ asset('print/html5shiv.3.7.0.js') }}"></script>
+        <script src="{{ asset('print/respond.js.1.4.2.js') }}"></script>
         <![endif]-->
     @else
         <link rel="stylesheet" href="{{ public_path('print/bootstrap-3.3.7-dist/css/bootstrap.min.css') }}">

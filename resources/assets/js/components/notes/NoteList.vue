@@ -51,11 +51,19 @@
                     </b-form-select>
                 </b-col>
                 <b-col lg="3">
-                    <b-button variant="info" type="submit" class="mb-2">
-                        Generate List
-                    </b-button>
+                    <b-form-input v-model="searchForm.free_form"
+                                  class="mb-2"
+                                  placeholder="Enter search term"
+                    >
+                    </b-form-input>
                 </b-col>
             </b-row>
+            <div>
+                <b-btn @click="print" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+                <b-button variant="info" type="submit" class="mb-2 mr-2 float-right">
+                    Generate List
+                </b-button>
+            </div>
         </b-form>
 
         <loading-card v-show="loading"></loading-card>
@@ -135,7 +143,7 @@
                 prospects: [],
                 referral_sources: [],
                 items: [],
-                searchForm: {
+                searchForm: new Form({
                     businesses: '',
                     start_date: moment().utc().subtract(1, 'days').format('MM/DD/YYYY'), // todo, make this local, but backend needs to know what the local timezone is
                     end_date: moment.utc().format('MM/DD/YYYY'),
@@ -145,8 +153,9 @@
                     referral_source: null,
                     user: null,
                     type: null,
-                    tags: ''
-                },
+                    tags: '',
+                    free_form: '',
+                }),
                 types: [
                     { text: 'Phone', value: 'phone' },
                     { text: 'Other', value: 'other' },
@@ -190,11 +199,6 @@
                         label: 'Referral Source',
                         sortable: true,
                     },
-                    // {
-                    //     key: 'tags',
-                    //     label: 'Tags',
-                    //     sortable: true,
-                    // },
                     {
                         key: 'body',
                         label: 'Preview',
@@ -226,25 +230,21 @@
 
         methods: {
             async loadClients() {
-                console.log('loadClients called');
                 const response = await axios.get('/business/clients?json=1');
                 this.clients = response.data;
             },
 
             async loadCaregivers() {
-                console.log('loadCaregivers called');
                 const response = await axios.get('/business/caregivers?json=1');
                 this.caregivers = response.data;
             },
 
             async loadProspects() {
-                console.log('loadProspects called');
                 const response = await axios.get('/business/prospects?json=1');
                 this.prospects = response.data;
             },
 
             async loadReferralSources() {
-                console.log('loadReferralSources called');
                 const response = await axios.get('/business/referral-sources?json=1');
                 this.referral_sources = response.data;
             },
@@ -308,6 +308,32 @@
                         this.noteModal = false;
                     })
             },
+            print(){
+
+                axios.post('/notes/search?print=1',
+                            this.searchForm,
+                            {
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/pdf'
+                                },
+                                responseType: 'blob'
+                            },
+                    )
+                    .then(response => {
+                        var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                        var fileLink = document.createElement('a');
+                        fileLink.href = fileURL;
+                        fileLink.setAttribute('download', 'Notes.pdf');
+                        document.body.appendChild(fileLink);
+                        fileLink.click();
+                        fileLink.remove();
+
+                    })
+                    .catch(error => {
+                        console.error(error.response);
+                    });
+            }
         }
     }
 </script>

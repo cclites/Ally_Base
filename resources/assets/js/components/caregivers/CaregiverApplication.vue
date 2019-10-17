@@ -354,6 +354,12 @@
                     <td>{{ application.heard_about }}</td>
                 </tr>
             </table>
+            <b-row>
+                <b-col sm="6" v-if="application.caregiver_signature">
+                    <strong>Caregiver Signature</strong>
+                    <div v-html="application.caregiver_signature.content" class="signature"></div>
+                </b-col>
+            </b-row>
         </b-card>
     </b-container>
 </template>
