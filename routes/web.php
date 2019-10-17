@@ -602,6 +602,11 @@ Route::group([
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
+    // notes import
+    Route::get('notes-import', 'Admin\NotesImportController@view')->name('notes-import');
+
+
+    // shift import
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');

@@ -59,6 +59,13 @@
     </ul>
 </li>
 <li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Note Imports</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.notes-import') }}">Note Importer</a></li>
+        {{-- <li><a href="{{ route('admin.imports.index') }}">Import History</a></li> --}}
+    </ul>
+</li>
+<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-diamond"></i><span class="hide-menu">Testing</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.microbilt') }}">Microbilt</a></li>
