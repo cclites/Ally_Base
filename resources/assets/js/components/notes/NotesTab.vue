@@ -8,8 +8,8 @@
         <b-form-group label="&nbsp;">
             <b-btn variant="info" class="mb-3 mr-auto" @click="create()">Add Note</b-btn>
             <b-button-group class="float-right">
-                <b-button @click="print()" variant="info" :disabled="loading"><i class="fa fa-file-pdf-o mr-1"></i>Print</b-button>
-                <b-button @click="exportExcel()"><i class="fa fa-print mr-1"></i>Export To Excel</b-button>
+                <b-button @click="print()" variant="info" :disabled="loading"><i class="fa fa-print mr-1"></i>Print</b-button>
+                <b-button @click="exportExcel()"><i class="fa fa-file-pdf-o mr-1"></i>Export To Excel</b-button>
             </b-button-group>
         </b-form-group>
 
