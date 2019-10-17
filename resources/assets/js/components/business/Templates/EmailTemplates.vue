@@ -5,6 +5,7 @@
     >
         <b-form-group label="Select a template to customize">
             <b-select v-model="selectedType">
+                <option value="">Select a Template</option>
                 <option v-for="type in types" :key="type.id">{{ type.name }}</option>
             </b-select>
         </b-form-group>

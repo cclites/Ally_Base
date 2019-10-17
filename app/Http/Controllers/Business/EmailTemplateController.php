@@ -36,7 +36,7 @@ class EmailTemplateController extends Controller
      * @return ErrorResponse
      * @return ErrorResponse
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $template = new EmailTemplate($request->toArray());
         $template->business_id = activeBusiness()->id;
