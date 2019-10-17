@@ -60,6 +60,7 @@
         name: "CgExpirationNotice",
         props: {
             template: null,
+            business_id: null
         },
         data() {
             return {
@@ -75,7 +76,7 @@
         methods: {
             save()
             {
-                let method = (typeof this.form.id === 'undefined') ? 'put' : "patch";
+                let method = (typeof this.form.id === 'undefined') ? 'post' : "patch";
 
                 this.form.submit( method, '/business/communication/templates')
                     .then( ({ data }) => {
@@ -105,6 +106,7 @@
                         "Sincerely,\n" +
                         "xxxxxxxxxxxx",
                     type: 'caregiver_expiration',
+                    business_id: this.business_id,
                 })
             },
             destroy()

@@ -20,6 +20,8 @@ class CreateTableEmailTemplates extends Migration
             $table->string('greeting');
             $table->text('body');
             $table->timestamps();
+
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('RESTRICT')->onUpdate('CASCADE');
         });
     }
 

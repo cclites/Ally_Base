@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use Illuminate\Http\Request;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Http\Controllers\Controller;
-use App\Traits\ActiveBusiness;
 use App\EmailTemplate;
+use App\Http\Requests\UpdateEmailTemplateRequest;
 
-class EmailTemplateController extends Controller
+class EmailTemplateController extends BaseController
 {
-    use ActiveBusiness;
     /**
      * Display a listing of the resource.
      *
@@ -19,14 +19,16 @@ class EmailTemplateController extends Controller
      */
     public function index(Request $request)
     {
-        $templates = EmailTemplate::where('business_id', activeBusiness()->id)->get()->toArray();
+        if($request->json){
+            return EmailTemplate::where('business_id', $request->business_id)->get()->toArray();
+        }
 
         $types = [];
         foreach(EmailTemplate::TEMPLATE as $type=>$value){
             $types[] = ['id'=>$value, 'name'=> ucwords(str_replace("_", " ", $value))];
         }
 
-        return view_component('email-templates', 'Custom Email Templates', compact('templates', 'types'));
+        return view_component('email-templates', 'Custom Email Templates', compact('types'));
     }
 
     /**
@@ -38,8 +40,7 @@ class EmailTemplateController extends Controller
      */
     public function store(Request $request)
     {
-        $template = new EmailTemplate($request->toArray());
-        $template->business_id = activeBusiness()->id;
+        $template = new EmailTemplate($request->all());
 
         if($template->save()){
             return new SuccessResponse( 'Template has been saved.', $template );
@@ -66,11 +67,13 @@ class EmailTemplateController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(UpdateEmailTemplateRequest $request)
     {
+        $business = $request->getBusiness();
+        $request->authorize('update', $business);
         $template = EmailTemplate::find($request->id);
 
-        if( $template->update( $request->toArray() ) ){
+        if( $template->update( $request->filtered() ) ){
             return new SuccessResponse( 'Template has been updated.', $template );
         }
 
