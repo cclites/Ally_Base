@@ -153,14 +153,6 @@ class CaregiverApplicationController extends BusinessBaseController
      */
     public function update(CaregiverApplicationStoreRequest $request, CaregiverApplication $application)
     {
-
-        \Log::info("REQUEST");
-        \Log::info(json_encode($request));
-
-        \Log::info("APPLICATION");
-        \Log::info(json_encode($application));
-
-
         $this->authorize('update', $application);
 
         Signature::attachToModel($application, request('caregiver_signature'), 'caregiver' );
