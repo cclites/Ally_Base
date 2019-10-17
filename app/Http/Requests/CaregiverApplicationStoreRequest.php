@@ -108,6 +108,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'reference_3_phone' => ['nullable', new PhonePossible()],
             'reference_3_relationship' => 'nullable|string|max:100',
             'heard_about' => 'nullable|array',
+            'caregiver_signature' => 'required'
         ];
     }
 

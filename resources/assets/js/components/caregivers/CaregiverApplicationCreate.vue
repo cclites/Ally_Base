@@ -531,7 +531,19 @@
             <hr>
             <b-row>
                 <b-col>
-                    <div class="btn btn-success" @click="saveApp">Submit</div>
+                    <strong>Applicant Signature</strong>
+                </b-col>
+                <b-col cols="12" class="d-flex mb-2 flex-wrap align-content-stretch">
+                    <signature-pad
+                            class="mr-2 caregiver-application-signature-button"
+                            v-model="form.caregiver_signature"
+                            :buttonTitle=" 'Please sign electronically - REQUIRED' ">
+                    </signature-pad>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <div class="btn btn-success float-right mr-2" @click="saveApp">Submit</div>
                 </b-col>
             </b-row>
         </b-card>
@@ -643,6 +655,7 @@
                     reference_3_phone: '',
                     reference_3_relationship: '',
                     heard_about: '',
+                    caregiver_signature: null,
                     acknowledged_terms: true // todo decide how to acknowledge terms
                 })
             }
@@ -665,7 +678,15 @@
 </script>
 
 <style scoped>
-.space-above {
-    margin-top: 25px;
-}
+    .space-above {
+        margin-top: 25px;
+    }
+</style>
+
+<style>
+    /*The signature pad is a separate component and cannot be scoped*/
+    .caregiver-application-signature-button,
+    .caregiver-application-signature-button .btn{
+        width: 100%;
+    }
 </style>
