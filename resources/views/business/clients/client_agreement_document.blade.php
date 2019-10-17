@@ -14,6 +14,6 @@
 
     {!!  $terms !!}
 
-    {!!  $paymentInfo !!}
+    @include('business.clients.payment_details')
 
 @endsection

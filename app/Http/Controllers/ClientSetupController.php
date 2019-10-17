@@ -215,8 +215,6 @@ class ClientSetupController extends Controller
         $client->load(['addresses', 'defaultPayment', 'backupPayment', 'phoneNumbers']);
 
         \Log::info($client);
-
-
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
 
@@ -226,9 +224,8 @@ class ClientSetupController extends Controller
         }
 
         $terms = file_get_contents($termsUrl);
-        $paymentInfo = (string)view('business.clients.payment_details', compact('client'))->render();
 
-        $pdf = \PDF::loadView('business.clients.client_agreement_document', ['terms'=>$terms, 'paymentInfo'=>$paymentInfo]);
+        $pdf = \PDF::loadView('business.clients.client_agreement_document', compact('terms', 'client'));
 
         $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {
@@ -236,22 +233,21 @@ class ClientSetupController extends Controller
         }
         $filename = str_slug($client->id . ' ' . $client->name.' Client Agreement').'.pdf';
         $filePath = $dir . '/' . $filename;
-        if (config('app.env') == 'local') {
-            if (File::exists($filePath)) {
+        if (File::exists($filePath)) {
+            if (config('app.env') != 'production') {
                 File::delete($filePath);
             }
+            // Do not overwrite agreement files
+            return;
         }
-        $response = $pdf->save($filePath);
 
-        if ($response) {
-            \DB::transaction(function() use ($response, $filePath, $client) {
-                $client->documents()->create([
-                    'filename' => File::basename($filePath),
-                    'original_filename' => File::basename($filePath),
-                    'description' => 'Client Agreement',
-                    'user_id' => $client->id
-                ]);
-            });
+        if ($pdf->save($filePath)) {
+            $client->documents()->create([
+                'filename' => File::basename($filePath),
+                'original_filename' => File::basename($filePath),
+                'description' => 'Client Agreement',
+                'user_id' => $client->id
+            ]);
         }
     }
 }
