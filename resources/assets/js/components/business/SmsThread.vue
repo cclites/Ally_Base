@@ -113,6 +113,8 @@ export default {
         sentBy(){
             if(this.thread.sender){
                 return this.thread.sender.nameLastFirst;
+            } else {
+                return 'Unknown';
             }
         },
     },
