@@ -68,7 +68,7 @@ abstract class BaseImport extends Command
     public function handle()
     {
         $this->output->writeln($this->warningMessage() . ' (Hit CTRL+C to cancel)..');
-        // sleep(3);
+        sleep(3);
 
         $this->loadSheet();
         $lastRow = (int) $this->getRowCount($this->sheet);
