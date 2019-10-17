@@ -77,7 +77,14 @@ class ImportClientContacts extends BaseImport
 
         if( array_key_exists( $client_id, $this->client_blacklist ) ) return false;
 
-        if( empty( $this->client ) || ( $this->client && $this->client->id !== $client_id ) ) $this->client = Client::find( $client_id );
+        if( empty( $this->client ) || ( $this->client && $this->client->id !== $client_id ) ) {
+            $this->client = Client::where('id', $client_id)
+                ->where('business_id', $this->business->id)
+                ->first();
+            if (empty($this->client)) {
+                return false;
+            }
+        }
 
         if( count( $this->client->contacts ) > 0 ){
             // if the client already has contacts, dont process..
