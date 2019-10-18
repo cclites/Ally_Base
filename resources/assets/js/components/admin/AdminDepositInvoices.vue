@@ -184,31 +184,38 @@
         },
 
         methods: {
-
             async loadItems() {
                 this.loaded = 0;
                 let url = '/admin/invoices/deposits?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
-                const response = await axios.get(url);
-                this.items = response.data.data.map(item => {
-                    let chain;
-                    if (item.caregiver) {
-                        chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
-                    }
-                    if (item.business) {
-                        chain = item.business.chain;
-                    }
-                    item.chain_name = chain ? chain.name : "";
 
-                    let flags = [];
-                    if (item.caregiver_on_hold) flags.push("On Hold");
-                    if (item.business_on_hold) flags.push("On Hold");
-                    if (item.no_bank_account) flags.push("No Bank Account");
+                let form = new Form({});
+                form.get(url)
+                    .then(response => {
+                        this.items = response.data.data.map(item => {
+                            let chain;
+                            if (item.caregiver) {
+                                chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
+                            }
+                            if (item.business) {
+                                chain = item.business.chain;
+                            }
+                            item.chain_name = chain ? chain.name : "";
 
-                    item.flags = flags.join(' | ');
-                    return item;
-                });
-                this.loaded = 1;
+                            let flags = [];
+                            if (item.caregiver_on_hold) flags.push("On Hold");
+                            if (item.business_on_hold) flags.push("On Hold");
+                            if (item.no_bank_account) flags.push("No Bank Account");
+
+                            item.flags = flags.join(' | ');
+                            return item;
+                        });
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                        this.loaded = 1;
+                    });
             },
 
             invoiceUrl(invoice, view="") {

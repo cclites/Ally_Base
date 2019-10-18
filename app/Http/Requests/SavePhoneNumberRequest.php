@@ -30,7 +30,7 @@ class SavePhoneNumberRequest extends FormRequest
             'extension' => 'nullable|numeric',
             'type' => 'required',
             'user_id' => 'sometimes|exists:users,id', // Only for office users or admins
-            'notes' =>'nullable|string'
+            'notes' =>'nullable|string|max:255'
         ];
     }
 }

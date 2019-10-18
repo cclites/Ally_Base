@@ -1,6 +1,6 @@
 <template>
     <div class="quick-search">
-        <user-search-dropdown placeholder="Quick Search Clients and Caregivers" @selectUser="openProfile" />
+        <user-search-dropdown placeholder="Quick Search Active Clients and Caregivers" @selectUser="openProfile" />
     </div>
 </template>
 

@@ -89,7 +89,6 @@ class ClientReferralServiceAgreement extends BaseModel
 
         if ($response) {
             DB::transaction(function() use ($response, $filePath) {
-                $this->update(['agreement_file' => str_after($filePath, 'storage/')]);
                 $this->client->documents()->create([
                     'filename' => File::basename($filePath),
                     'original_filename' => File::basename($filePath),

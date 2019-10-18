@@ -244,6 +244,13 @@
                         category: 5,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Total Deposits Report',
+                        url: 'reports/total_deposits_report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 

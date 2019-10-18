@@ -4,27 +4,36 @@
             header-text-variant="white"
     >
     <div class="d-flex flex-column">
-        <b-btn variant="info" class="mb-3 mr-auto" @click="create()">Add Note</b-btn>
 
-        <b-card v-for="note in localNotes"
-                class="mb-3 f-1"
-                header-tag="header"
-                :key="note.id">
-                <div slot="header">
-                    <b-row align-h="between">
-                        <b-col>
-                            <strong>{{ note.title }}</strong> Created By: {{ note.creator.name }}
-                        </b-col>
-                        <!--<b-col>
-                            <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>
-                        </b-col>-->
-                        <b-col>
-                            <div class="pull-right">{{ formatDateFromUTC(note.created_at) + ' ' + formatTimeFromUTC(note.created_at) }}</div>
-                        </b-col>
-                    </b-row>
-                </div>
-            <div class="note-body">{{ note.body }}</div>
-        </b-card>
+        <b-form-group label="&nbsp;">
+            <b-btn variant="info" class="mb-3 mr-auto" @click="create()">Add Note</b-btn>
+            <b-button-group class="float-right">
+                <b-button @click="print()" variant="info" :disabled="loading"><i class="fa fa-print mr-1"></i>Print</b-button>
+                <b-button @click="exportExcel()"><i class="fa fa-file-pdf-o mr-1"></i>Export To Excel</b-button>
+            </b-button-group>
+        </b-form-group>
+
+        <div id="notes-list">
+            <b-card v-for="note in localNotes"
+                    class="mb-3 f-1"
+                    header-tag="header"
+                    :key="note.id">
+                    <div slot="header">
+                        <b-row align-h="between">
+                            <b-col>
+                                <strong>{{ note.title }}</strong> Created By: {{ note.creator.name }}
+                            </b-col>
+                            <!--<b-col>
+                                <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>
+                            </b-col>-->
+                            <b-col>
+                                <div class="pull-right">{{ formatDateFromUTC(note.created_at) + ' ' + formatTimeFromUTC(note.created_at) }}</div>
+                            </b-col>
+                        </b-row>
+                    </div>
+                <div class="note-body">{{ note.body }}</div>
+            </b-card>
+        </div>
 
         <b-card v-if="! localNotes.length" class="f-1">
             No notes.
@@ -69,6 +78,7 @@
                 noteModal: false,
                 note: {},
                 localNotes: [],
+                loading: false,
             };
         },
 
@@ -106,10 +116,28 @@
                     return this.source.id == note.referral_source_id;
                 }
             },
+
+            print(){
+                window.location = this.url + '/pdf';
+            },
+
+            exportExcel(){
+                window.location = this.url + '/excel';
+            },
         },
 
         created() {
             this.localNotes = this.notes;
+        },
+
+        computed: {
+            url(){
+                if( ! _.isEmpty(this.caregiver) ){
+                    return '/notes/caregiver/' + this.caregiver.id;
+                }else if( ! _.isEmpty(this.client) ){
+                    return '/notes/client/' + this.client.id ;
+                }
+            }
         },
     }
 </script>

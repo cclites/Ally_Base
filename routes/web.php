@@ -522,6 +522,7 @@ Route::group([
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
+    Route::get('/notes/{role}/{id}/{type}', 'NoteController@download');
     Route::resource('notes', 'NoteController');
     Route::resource('note-templates', 'NoteTemplateController');
     Route::resource('note-templates', 'NoteTemplateController');
@@ -594,6 +595,7 @@ Route::group([
     Route::get('reports/shared_shifts', 'Admin\ReportsController@sharedShifts')->name('reports.shared_shifts');
     Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
     Route::get('reports/total_charges_report', 'Admin\Reports\TotalChargesReportController@index')->name('reports.total_charges_report');
+    Route::get('reports/total_deposits_report', 'Admin\Reports\TotalDepositsReportController@index')->name('reports.total_deposits_report');
 
     Route::get('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');

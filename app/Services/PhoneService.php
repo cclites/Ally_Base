@@ -4,6 +4,7 @@ namespace App\Services;
 use App\CommunicationLog;
 use Carbon\Carbon;
 use Log;
+use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
 class PhoneService
@@ -12,6 +13,11 @@ class PhoneService
      * @var \Twilio\Rest\Client
      */
     protected $client;
+
+    /**
+     * @var App\CommunicationLog
+     */
+    protected $log;
 
     /**
      * @var string
@@ -68,15 +74,28 @@ class PhoneService
      */
     public function sendTextMessage($to, $message)
     {
-        $this->logCommunication($this->from, $to, $message);
+        try {
 
-        if (empty($this->client)) {
-            return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
+            $this->logCommunication($this->from, $to, $message);
+
+            if (empty($this->client)) {
+                return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
+            }
+            $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);
+
+            return $message->sid;
+        } catch( TwilioException $ex ){
+
+            if( strpos( $ex->getMessage(), 'blacklist') !== false ){
+                // if this is a blacklist error..
+
+                $this->log->update([ 'error' => 'Blacklisted Phone Number' ]);
+            } else {
+                // else pass along to log to sentry..
+
+                app( 'sentry' )->captureException( $ex );
+            }
         }
-
-        $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);
-
-        return $message->sid;
     }
 
     /**
@@ -89,7 +108,7 @@ class PhoneService
     public function logCommunication(string $from, string $to, string $message) : void
     {
         if (config('ally.communication_log')) {
-            CommunicationLog::create([
+            $this->log = CommunicationLog::create([
                 'body' => $message,
                 'subject' => null,
                 'to' => $to,
@@ -97,6 +116,7 @@ class PhoneService
                 'sent_at' => Carbon::now(),
                 'channel' => 'sms',
                 'preview' => substr($message, 0, 100),
+                'error' => null,
             ]);
         }
     }

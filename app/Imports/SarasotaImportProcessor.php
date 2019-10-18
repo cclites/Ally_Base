@@ -73,10 +73,16 @@ END;
      */
     function getStartTime($rowNo, int $offset = 0)
     {
-        $carbon = new Carbon($this->worksheet->getValue('Date', $rowNo), $this->business->timezone);
-        $time = $this->worksheet->getValue('StartTime', $rowNo);
-        $offset = $offset + (strtotime($time) - strtotime('00:00:00'));
-        return $carbon->addSeconds($offset);
+        try {
+
+            $carbon = new Carbon($this->worksheet->getValue('Date', $rowNo), $this->business->timezone);
+            $time = $this->worksheet->getValue('StartTime', $rowNo);
+            $offset = $offset + (strtotime($time) - strtotime('00:00:00'));
+            return $carbon->addSeconds($offset);
+        } catch( \Exception $e ){
+
+            throw new ErrorException( "Improper Date format detected on Row #" . $rowNo );
+        }
     }
 
     /**
@@ -135,6 +141,9 @@ END;
         $billTotal = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('TotalBillable', $rowNo));
         $hours = (float) $this->worksheet->getValue('Hours', $rowNo);
         // Divide bill total by total hours to get provider hourly rate
+
+        if( $hours == 0 ) throw new ErrorException( "Row #" . $rowNo . " has zero hours issue" );
+
         return round($billTotal / $hours, 2);
     }
 
