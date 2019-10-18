@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Imports\Worksheet;
 use App\Business;
+use App\User;
 use App\Note;
 
 use Illuminate\Http\Request;
@@ -67,38 +68,36 @@ class NoteImportController extends Controller
             }
 
             $related_to = $this->worksheet->getValue( 'Related To', $rowNo );
-            [ $caregiver, $client ] = $this->mapRelatedTo( $related_to );
+            [ $caregiver, $client, $errors ] = $this->mapRelatedTo( $related_to );
 
-            if( $caregiver == null || $client == null ){
-                // if no client/caregiver match could be made, push the row reference and exit
+            if( empty( $caregiver ) || empty( $client ) || !empty( $errors ) ){
+                // if no client/caregiver match could be made, or if errors existed with the matching process, dont create a note
 
-                $collection->push([
+                $note = null;
+            } else {
 
-                    'note' => null,
-                    'row'  => $rowNo
+                $note = new Note([
+                    // create a note using the details of the row
+
+                    'business_id'        => $this->business->id,
+                    'caregiver_id'       => $caregiver->id,
+                    'client_id'          => $client->id,
+                    'title'              => $this->worksheet->getValue( 'Subject', $rowNo ),
+                    'body'               => $this->worksheet->getValue( 'Description', $rowNo ),
+                    'tags'               => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
+                    'created_by'         => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
+                    'type'               => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
                 ]);
-
-                continue;
             }
-
-            $note = new Note([
-                // create a note using the details of the row
-
-                'business_id'        => $this->business->id,
-                'caregiver_id'       => $caregiver->id,
-                'client_id'          => $client->id,
-                'title'              => $this->worksheet->getValue( 'Subject', $rowNo ),
-                'body'               => $this->worksheet->getValue( 'Description', $rowNo ),
-                'tags'               => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
-                'created_by'         => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
-                'type'               => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
-            ]);
 
             // and push the newly created object into the collection to return for the front-end response
             $collection->push([
 
-                'note' => $note,
-                'row'  => $rowNo
+                'note'      => $note,
+                'caregiver' => $caregiver,
+                'client'    => $client,
+                'errors'    => $errors,
+                'row'       => $rowNo
             ]);
         }
 
@@ -116,11 +115,33 @@ class NoteImportController extends Controller
     {
         $names = explode( ',', $related_to );
 
-        foreach( $names as $name ){
-      
-          echo trim( $name );
+        if( count( $names ) != 2 ){
+            // there should only be two names
+
+            return [ null, null, 'invalid name format, "Related To" column didn\'t break cleanly into two names' ];
         }
-        return [ 'erik', 'emily' ];
+
+        foreach( $names as $name ){
+
+            // search user table for it
+            $matches = User::whereRaw( 'CONCAT( firstname, " ", lastname ) = ?', [ trim( $name ) ]);
+
+            switch( count( $matches ) ){
+
+                case 0:
+
+
+                    break;
+                case 1:
+
+                    break;
+                default:
+
+                    break;
+            }
+        }
+
+        // caregiver or client may be present, but not the other
     }
 
     /**
