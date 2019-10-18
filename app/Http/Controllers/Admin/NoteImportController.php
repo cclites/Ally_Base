@@ -57,22 +57,19 @@ class NoteImportController extends Controller
                 continue;
             }
 
-            $note = null;
-            // create the notes object
+            $note = new Note([
+                // create a note using the details of the row
 
-            $shift = new Note([
-
-                'business_id' => $this->business->id,
-                'caregiver_id' => ($caregiver = $this->findCaregiver($caregiverName)) ? $caregiver->id : null,
-                'client_id' => ($client = $this->findClient($clientName)) ? $client->id : null,
-                'checked_in_time' => $checkIn->toDateTimeString(),
-                'checked_out_time' => $checkOut->toDateTimeString(),
-                'caregiver_rate' => $this->getCaregiverRate($rowNo, $overtime),
-                'provider_fee' => $this->getProviderFee($rowNo, $overtime),
-                'mileage' => $expenses ? $this->getMileage($rowNo) : 0,
-                'other_expenses' => $expenses ? $this->getOtherExpenses($rowNo) : 0,
-                'hours_type' => ($overtime) ? 'overtime' : 'default',
-                'caregiver_comments' => $this->getComments($rowNo),
+                'business_id'        => $this->business->id,
+                'caregiver_id'       => ( $caregiver = $this->findCaregiver( $caregiverName ) ) ? $caregiver->id : null,
+                'client_id'          => ( $client = $this->findClient( $clientName ) ) ? $client->id : null,
+                'title'              => $checkIn->toDateTimeString(),
+                'body'               => $checkOut->toDateTimeString(),
+                'tags'               => $this->getCaregiverRate($rowNo, $overtime),
+                'created_by'         => $this->getProviderFee($rowNo, $overtime),
+                'referral_source_id' => $expenses ? $this->getMileage($rowNo) : 0,
+                'type'               => $expenses ? $this->getOtherExpenses($rowNo) : 0,
+                'call_direction'     => ($overtime) ? 'overtime' : 'default',
             ]);
 
 
@@ -81,7 +78,8 @@ class NoteImportController extends Controller
                 'note' => $note
             ];
 
-            $collection->push( $array ); // push the newly created object into the collection to return for the front-end response
+            // and push the newly created object into the collection to return for the front-end response
+            $collection->push( $array );
         }
 
         return $collection;
