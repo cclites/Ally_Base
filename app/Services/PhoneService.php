@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Log;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
+use App\Responses\ErrorResponse;
 
 class PhoneService
 {
@@ -74,6 +75,12 @@ class PhoneService
      */
     public function sendTextMessage($to, $message)
     {
+        $valid = $this->validate($message);
+
+        if( ! $valid->valid){
+            return new ErrorResponse(500, $valid->message);
+        }
+
         try {
 
             $this->logCommunication($this->from, $to, $message);
@@ -119,5 +126,16 @@ class PhoneService
                 'error' => null,
             ]);
         }
+    }
+
+    public function validate($message){
+
+        if(strlen($message) > 1600){
+            return [
+                'valid' => false,
+                'message' => 'Text message must be less than 1600 characters'
+            ];
+        }
+
     }
 }
