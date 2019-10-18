@@ -603,7 +603,8 @@ Route::group([
     Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
     // notes import
-    Route::get('notes-import', 'Admin\NotesImportController@view')->name('notes-import');
+    Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');
+    Route::post('note-import', 'Admin\NoteImportController@process');
 
 
     // shift import

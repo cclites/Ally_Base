@@ -61,7 +61,7 @@
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Note Imports</span></a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('admin.notes-import') }}">Note Importer</a></li>
+        <li><a href="{{ route('admin.note-import') }}">Note Importer</a></li>
         {{-- <li><a href="{{ route('admin.imports.index') }}">Import History</a></li> --}}
     </ul>
 </li>
