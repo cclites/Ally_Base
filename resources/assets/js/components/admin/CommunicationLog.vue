@@ -72,6 +72,12 @@
                         <div v-html="current.body"></div>
                     </b-col>
                 </b-row>
+                <b-row class="mt-4">
+                    <b-col lg="12">
+                        <h3 class="mb-0">Error</h3>
+                        <div v-html="current.error || 'none' " :class=" ( current.error ? 'text-danger' : '' ) "></div>
+                    </b-col>
+                </b-row>
             </b-container>
             <div slot="modal-footer" scope="row">
                 <b-btn variant="secondary" @click="showModal = false">Close</b-btn>
@@ -133,6 +139,11 @@
                         label: 'Date',
                         sortable: true,
                         formatter: (val) => this.formatDateTimeFromUTC(val),
+                    },
+                    {
+                        key: 'error',
+                        label: 'Errors',
+                        sortable: true,
                     },
                     {
                         key: 'actions',
