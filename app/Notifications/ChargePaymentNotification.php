@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ChargePaymentNotification extends Notification
+class ChargePaymentNotification extends BaseNotification
 {
     use Queueable;
 
@@ -20,6 +20,13 @@ class ChargePaymentNotification extends Notification
      * @var String
      */
     public $type;
+
+    /**
+     * @var string
+     */
+    public const KEY = "charge_payment_notification";
+
+    public const TITLE = "Charge/Payment notifications";
 
     /**
      * Create a new notification instance.

@@ -81,7 +81,6 @@
         <b-card header="System Notifications"
             header-bg-variant="info"
             header-text-variant="white"
-            v-if="user.role_type === 'caregiver'"
         >
             <form v-if="! loading" @submit.prevent="savePreferences()">
                 <b-row v-for="item in notifications" :key="item.key">

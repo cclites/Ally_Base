@@ -16,6 +16,7 @@ use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -507,5 +508,22 @@ class ClientController extends BaseController
 
         // Use the reload page redirect to update the timestamp
         return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
+    }
+
+    /**
+     * Update caregiver's user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $client->user->syncNotificationPreferences($request->validated());
+
+        return new SuccessResponse('Client\'s notification preferences have been saved.');
     }
 }

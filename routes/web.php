@@ -279,6 +279,7 @@ Route::group([
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
+    Route::post('clients/{client}/notification-preferences', 'Business\ClientController@updateNotificationPreferences');
 
     Route::get('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@show');
     Route::post('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@store');

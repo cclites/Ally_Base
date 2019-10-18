@@ -55,7 +55,7 @@ class ChargePaymentNotifications extends Command{
                     ->whereBetween('payments.created_at', [$start, $end])
                     ->get();
 
-        $triggered = TriggeredReminder::getTriggered('charge_notification', $clients->pluck('id'));
+        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $clients->pluck('id'));
 
         foreach ($clients as $client) {
             if ($triggered->contains($client->id)) {
@@ -63,7 +63,7 @@ class ChargePaymentNotifications extends Command{
             }
 
             \Notification::send($client, new ChargePaymentNotification($client, 'client'));
-            TriggeredReminder::markTriggered('charge_notification', $client->id, $expiration);
+            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id, $expiration);
         }
 
         /* Handle Caregiver recipients*/
@@ -71,7 +71,7 @@ class ChargePaymentNotifications extends Command{
             ->whereBetween('deposits.created_at',  [$start, $end])
             ->get();
 
-        $triggered = TriggeredReminder::getTriggered('payment_notification', $caregivers->pluck('id'));
+        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $caregivers->pluck('id'));
 
         foreach ($caregivers as $caregiver) {
             if ($triggered->contains($caregiver->id)) {
@@ -79,7 +79,7 @@ class ChargePaymentNotifications extends Command{
             }
 
             \Notification::send($caregiver, new ChargePaymentNotification($caregiver, 'caregiver'));
-            TriggeredReminder::markTriggered('payment_notification', $caregiver->id, $expiration);
+            TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id, $expiration);
         }
 
     }

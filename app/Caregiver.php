@@ -222,6 +222,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         \App\Notifications\Caregiver\VisitAccuracyCheck::class,
         \App\Notifications\Caregiver\CertificationExpiring::class,
         \App\Notifications\Caregiver\CertificationExpired::class,
+        \App\Notifications\ChargePaymentNotification::class,
     ];
 
     ///////////////////////////////////////////
