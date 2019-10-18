@@ -277,7 +277,7 @@ class TelefonyCheckOutController extends BaseVoiceController
             $mileage = 0;
         }
 
-        if($mileage >= 1000){
+        if($mileage > 1000){
             $this->telefony->say(self::MileageEntryFailure);
             return $this->askForMileageEntry($shift);
         }
