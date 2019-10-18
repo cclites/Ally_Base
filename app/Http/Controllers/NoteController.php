@@ -129,7 +129,8 @@ class NoteController extends Controller
                 return $query->where('type', $request->type);
             })
             ->when($request->filled('free_form'), function ($query) use ($request) {
-                return $query->where('body', 'like', '%' . $request->free_form . '%');
+                return $query->where('body', 'like', '%' . $request->free_form . '%')
+                       ->orWhere('tags', 'like', '%' . $request->free_form . '%');
             })
             ->get();
 
@@ -173,6 +174,7 @@ class NoteController extends Controller
             return [
                 'Title' => $note->title,
                 'Created By' => $note->creator->name,
+                'Tags' => $note->tags,
                 'Date' => \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $note->created_at)->format('m/d/Y  h:i:s A'),
                 'Note' => $note->body
             ];

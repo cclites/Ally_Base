@@ -200,6 +200,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'tags',
+                        label: 'Tags',
+                        sortable: true,
+                    },
+                    {
                         key: 'body',
                         label: 'Preview',
                         sortable: false,
