@@ -49,6 +49,12 @@ class PaginatedCaregiverController extends BaseController
                     ->orWhere('users.firstname', 'LIKE', "%$search%")
                     ->orWhere('users.lastname', 'LIKE', "%$search%");
             });
+
+            \Log::info($search);
+
+            $query->whereHas('caregiver.businesses', function($q) use($search){
+                $q->where('name', $search);
+            });
         }
 
         // Default to active only, unless active is provided in the query string
