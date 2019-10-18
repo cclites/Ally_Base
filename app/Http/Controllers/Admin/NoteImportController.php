@@ -43,16 +43,40 @@ class NoteImportController extends Controller
         return $this->handleImport();
     }
 
-    protected function handleImport()
+    /**
+     * 
+     * The general algorithm of this import will be as follows:
+     * - attempt to save the records
+     * - return a collection of the items saved with their rowNumber as reference
+     * - if a caregiver/client match could not be made, the front-end will allow for manual matching
+     * - there will also be the ability to edit/change the imported row
+     * - there will also 
+     */
+    public function handleImport()
     {
         $collection = collect();
 
-        for( $i = 2, $n = $this->worksheet->getRowCount(); $i <= $n; $i++ ) {
+        for( $rowNo = 2, $totalRows = $this->worksheet->getRowCount(); $rowNo <= $totalRows; $rowNo++ ) {
             // for every row..
 
 
-            if ( empty( trim( $this->worksheet->getValue( 'Related To', $i ) ) ) ) {
+            if ( empty( trim( $this->worksheet->getValue( 'Related To', $rowNo ) ) ) ) {
                 // that isnt empty..
+
+                continue;
+            }
+
+            $related_to = $this->worksheet->getValue( 'Related To', $rowNo );
+            [ $caregiver, $client ] = $this->mapRelatedTo( $related_to );
+
+            if( $caregiver == null || $client == null ){
+                // if no client/caregiver match could be made, push the row reference and exit
+
+                $collection->push([
+
+                    'note' => null,
+                    'row'  => $rowNo
+                ]);
 
                 continue;
             }
@@ -61,71 +85,89 @@ class NoteImportController extends Controller
                 // create a note using the details of the row
 
                 'business_id'        => $this->business->id,
-                'caregiver_id'       => ( $caregiver = $this->findCaregiver( $caregiverName ) ) ? $caregiver->id : null,
-                'client_id'          => ( $client = $this->findClient( $clientName ) ) ? $client->id : null,
-                'title'              => $checkIn->toDateTimeString(),
-                'body'               => $checkOut->toDateTimeString(),
-                'tags'               => $this->getCaregiverRate($rowNo, $overtime),
-                'created_by'         => $this->getProviderFee($rowNo, $overtime),
-                'referral_source_id' => $expenses ? $this->getMileage($rowNo) : 0,
-                'type'               => $expenses ? $this->getOtherExpenses($rowNo) : 0,
-                'call_direction'     => ($overtime) ? 'overtime' : 'default',
+                'caregiver_id'       => $caregiver->id,
+                'client_id'          => $client->id,
+                'title'              => $this->worksheet->getValue( 'Subject', $rowNo ),
+                'body'               => $this->worksheet->getValue( 'Description', $rowNo ),
+                'tags'               => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
+                'created_by'         => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
+                'type'               => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
             ]);
 
-
-            $array = [
-
-                'note' => $note
-            ];
-
             // and push the newly created object into the collection to return for the front-end response
-            $collection->push( $array );
+            $collection->push([
+
+                'note' => $note,
+                'row'  => $rowNo
+            ]);
         }
 
         return $collection;
     }
 
+    /**
+     * 1. break apart the provided string ( comes in a format of "name1, name2" )
+     * 2. map the first name to a user in our system
+     * 3. then determine if that is a client or caregiver
+     * 4. repeat for second name
+     * 5. return both
+     */
+    public function mapRelatedTo( $related_to )
+    {
+        $names = explode( ',', $related_to );
+
+        foreach( $names as $name ){
+      
+          echo trim( $name );
+        }
+        return [ 'erik', 'emily' ];
+    }
 
     /**
-     * Add a shift (used by addRegularShift and addOvertimeShift)
+     * Find a caregiver record based on the name
      *
-     * @param \Illuminate\Support\Collection $collection
-     * @param $rowNo
-     * @param \Carbon\Carbon $checkIn
-     * @param $hours
-     * @param bool $overtime
-     * @param bool $expenses
-     * @return \App\Shift
+     * @param string $name
+     * @return \App\Caregiver|null
      */
-    function _addShift(Collection $collection, $rowNo, Carbon $checkIn, $hours, $overtime = false, $expenses = true)
+    function findCaregiver($name)
     {
-        $caregiverName = $this->getCaregiverName($rowNo);
-        $clientName = $this->getClientName($rowNo);
-        $checkOut = $checkIn->copy()->addSeconds(round($hours * 3600));
+        // Search by import_identifier
+        if ($caregiver = $this->business->caregivers()->where('import_identifier', $name)->first()) {
+            return $caregiver;
+        }
 
-        $shift = new Shift([
-            'business_id' => $this->business->id,
-            'caregiver_id' => ($caregiver = $this->findCaregiver($caregiverName)) ? $caregiver->id : null,
-            'client_id' => ($client = $this->findClient($clientName)) ? $client->id : null,
-            'checked_in_time' => $checkIn->toDateTimeString(),
-            'checked_out_time' => $checkOut->toDateTimeString(),
-            'caregiver_rate' => $this->getCaregiverRate($rowNo, $overtime),
-            'provider_fee' => $this->getProviderFee($rowNo, $overtime),
-            'mileage' => $expenses ? $this->getMileage($rowNo) : 0,
-            'other_expenses' => $expenses ? $this->getOtherExpenses($rowNo) : 0,
-            'hours_type' => ($overtime) ? 'overtime' : 'default',
-            'caregiver_comments' => $this->getComments($rowNo),
-        ]);
+        // Search by exact name, if one match
+        $caregivers = $this->business->caregivers()->whereHas('user', function($q) use ($name) {
+            $q->whereRaw('CONCAT(lastname, ", ", firstname) = ?', [trim($name)]);
+        })->get();
+        if ($caregivers->count() === 1) {
+            return $caregivers->first();
+        }
 
-        $array = [
-            'shift' => $shift,
-            'identifiers' => [
-                'caregiver_name' => $caregiverName,
-                'client_name' => $clientName,
-            ]
-        ];
+        return null;
+    }
 
-        $collection->push($array);
-        return $shift;
+    /**
+     * Find a client record based on the name
+     *
+     * @param string $name
+     * @return \App\Client|null
+     */
+    function findClient($name)
+    {
+        // Search by import_identifier
+        if ($client = $this->business->clients()->where('import_identifier', $name)->first()) {
+            return $client;
+        }
+
+        // Search by exact name, if one match
+        $clients = $this->business->clients()->whereHas('user', function($q) use ($name) {
+            $q->whereRaw('CONCAT(lastname, ", ", firstname) = ?', [trim($name)]);
+        })->get();
+        if ($clients->count() === 1) {
+            return $clients->first();
+        }
+
+        return null;
     }
 }
