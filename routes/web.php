@@ -520,7 +520,7 @@ Route::group([
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 });
 
-Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::get('/notes/{role}/{id}/{type}', 'NoteController@download');
     Route::resource('notes', 'NoteController');
