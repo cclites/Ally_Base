@@ -627,7 +627,7 @@
             },
 
             async fetchPayers() {
-                let response = await axios.get('/business/payers?json=1');
+                let response = await axios.get(`/business/payers?json=1&business_id=${this.client.business_id}`);
                 if (Array.isArray(response.data)) {
                     this.payers = response.data;
                 } else {
