@@ -192,7 +192,7 @@
 
             async loadReferralSources() {
                 console.log('loadReferralSources called');
-                const response = await axios.get('/business/referral-sources?json=1');
+                const response = await axios.get(`/business/referral-sources?json=1&business_id=${this.client.business_id}`);
                 this.referral_sources = response.data;
             },
 
