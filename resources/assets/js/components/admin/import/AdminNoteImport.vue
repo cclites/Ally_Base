@@ -18,8 +18,8 @@
 
                         <select v-model="filters.ByType" class="form-control">
                             <option value="">--Show All (Type)--</option>
-                            <option value="default">Show Only Regular</option>
-                            <option value="overtime">Show Only Overtime</option>
+                            <option value="phone">Show By Phone</option>
+                            <option value="other">Show By Other</option>
                         </select>
 
                         <input v-model="filters.ByName" class="form-control" placeholder="Filter by Name" />
@@ -98,7 +98,7 @@
                     <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
                     <b-btn @click="savenotes()" variant="info" :disabled="submitting">
                         <i class="fa fa-spin fa-spinner" v-if="submitting"></i>
-                        <i class="fa fa-upload" v-else></i> Save notes
+                        <i class="fa fa-upload" v-else></i> Save Notes
                     </b-btn>
                     <b-btn @click="deleteDraft()" variant="danger"><i class="fa fa-times"></i> Delete &amp; Cancel</b-btn>
                 </div>
@@ -213,7 +213,7 @@
 
                 if (this.filters.ByType) {
                     filtered = filtered.filter(item => {
-                        return item.note.type === this.filters.type;
+                        return item.note.type === this.filters.ByType;
                     })
                 }
 
@@ -296,7 +296,7 @@
                     notes: this.imported.map(item => item.note)
                 });
                 try {
-                    const response = await form.post('/admin/import/save');
+                    const response = await form.post('/admin/note-import/save');
                     this.deleteDraft(false);
                     this.submitting = false;
                 }
@@ -369,7 +369,7 @@
                     const name = this.createClientName;
                     if (id) {
                         // Save the mapping
-                        axios.post('/admin/import/map/client', {id, name});
+                        axios.post('/admin/note-import/map/client', {id, name});
                         this.mapIdentifier('client', name, id);
 
                         // Close the modal
@@ -402,7 +402,7 @@
                     const name = this.createCaregiverName;
                     if (id) {
                         // Save the mapping
-                        axios.post('/admin/import/map/caregiver', {id, name});
+                        axios.post('/admin/note-import/map/caregiver', {id, name});
                         this.mapIdentifier('caregiver', name, id);
 
                         // Close the modal

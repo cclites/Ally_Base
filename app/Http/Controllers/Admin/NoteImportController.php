@@ -71,29 +71,33 @@ class NoteImportController extends Controller
             $related_to = $this->worksheet->getValue( 'Related To', $rowNo );
             $names = explode( ',', $related_to );
 
-            $caregiver     = null;
-            $caregiverName = null;
-            $client        = null;
-            $clientName    = null;
+            $caregiver_id  = null;
+            $caregiverName = '';
+            $client_id     = null;
+            $clientName    = '';
             foreach( $names as $name ){
 
                 $user = User::whereRaw( 'CONCAT( firstname, " ", lastname ) = ?', [ trim( $name ) ])
                     ->forBusinesses([ $this->business->id ])
                     ->first();
 
+                \Log::info( 'Found User!: ' . $user );
+
                 if( !empty( $user ) ){
 
-                    switch( $user->user_type ){
+                    \Log::info( 'With Type: ' . $user->role_type );
+
+                    switch( $user->role_type ){
 
                         case 'client':
 
                             $client_id  = $user->id;
-                            $clientName = $name;
+                            $clientName = trim( $name );
                             break;
                         case 'caregiver':
 
                             $caregiver_id  = $user->id;
-                            $caregiverName = $name;
+                            $caregiverName = trim( $name );
                             break;
                         default:
                             // no default, leave the information null
@@ -124,8 +128,8 @@ class NoteImportController extends Controller
                 'rowNo'       => $rowNo,
                 'identifiers' => [
 
-                    'caregiver_name' => empty( $caregiver_id ) ? null : $caregiverName,
-                    'client_name'    => empty( $client_id ) ? null : $clientName
+                    'caregiver_name' => $caregiverName,
+                    'client_name'    => $clientName
                 ]
             ]);
         }
