@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\Http\Requests\StoreCustomFieldRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -25,6 +26,13 @@ class CustomFieldController extends BaseController
      */
     public function index(Request $request)
     {
+
+        if( request()->input( 'business_id', null ) ){
+
+            $chain = Business::find( request()->input( 'business_id' ) )->chain;
+            $this->setBusinessChainAs( $chain );
+        }
+
         $this->authorize('read', $this->businessChain());
 
         $request->validate([

@@ -97,6 +97,10 @@ export default {
             type: Array,
             default: () => { return []; },
         },
+        businessId: {
+
+            type: Number
+        }
     },
 
     async mounted() {
@@ -111,6 +115,7 @@ export default {
             busy: false,
             form: new Form({}),
             customFields: [],
+            business_id : this.businessId || null,
             dropdownDefault: {
                 value: '',
                 text: '--- Select ---',
@@ -137,7 +142,7 @@ export default {
 
     methods: {
         async fetchCustomFields() {
-            return await axios.get(`/business/custom-fields?type=${this.userRole}`)
+            return await axios.get(`/business/custom-fields?type=${this.userRole}&business_id=${this.business_id}`)
                 .then( ({ data }) => {
                     // Populate custom fields
                     let options = {};
