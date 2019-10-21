@@ -564,12 +564,23 @@
             },
 
             async loadFiltersData() {
-                await axios.get('/business/clients').then(response => this.clients = response.data);
-                this.clientsLoaded = true;
-                await axios.get('/business/caregivers').then(response => this.caregivers = response.data);
-                this.caregiversLoaded = true;
-                await axios.get('/business/services?json=1').then(response => this.services = response.data);
-                this.servicesLoaded = true;
+                await axios.get('/business/clients').
+                        then(response => {
+                            this.clients = response.data;
+                            this.clientsLoaded = true;
+                        });
+
+                await axios.get('/business/caregivers').
+                        then(response => {
+                            this.caregivers = response.data;
+                            this.caregiversLoaded = true;
+                        });
+
+                await axios.get('/business/services?json=1').
+                        then(response => {
+                            this.services = response.data;
+                            this.servicesLoaded = true;
+                        });
             },
 
             details(item) {
