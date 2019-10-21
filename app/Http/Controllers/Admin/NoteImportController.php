@@ -23,6 +23,7 @@ class NoteImportController extends Controller
      */
     public $business;
 
+
     public function view()
     {
         return view( 'admin.import.notes' );
@@ -68,127 +69,67 @@ class NoteImportController extends Controller
             }
 
             $related_to = $this->worksheet->getValue( 'Related To', $rowNo );
-            [ $caregiver, $client, $errors ] = $this->mapRelatedTo( $related_to );
+            $names = explode( ',', $related_to );
 
-            if( empty( $caregiver ) || empty( $client ) || !empty( $errors ) ){
-                // if no client/caregiver match could be made, or if errors existed with the matching process, dont create a note
+            $caregiver     = null;
+            $caregiverName = null;
+            $client        = null;
+            $clientName    = null;
+            foreach( $names as $name ){
 
-                $note = null;
-            } else {
+                $user = User::whereRaw( 'CONCAT( firstname, " ", lastname ) = ?', [ trim( $name ) ])
+                    ->forBusinesses([ $this->business->id ])
+                    ->first();
 
-                $note = new Note([
-                    // create a note using the details of the row
+                if( !empty( $user ) ){
 
-                    'business_id'        => $this->business->id,
-                    'caregiver_id'       => $caregiver->id,
-                    'client_id'          => $client->id,
-                    'title'              => $this->worksheet->getValue( 'Subject', $rowNo ),
-                    'body'               => $this->worksheet->getValue( 'Description', $rowNo ),
-                    'tags'               => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
-                    'created_by'         => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
-                    'type'               => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
-                ]);
+                    switch( $user->user_type ){
+
+                        case 'client':
+
+                            $client_id  = $user->id;
+                            $clientName = $name;
+                            break;
+                        case 'caregiver':
+
+                            $caregiver_id  = $user->id;
+                            $caregiverName = $name;
+                            break;
+                        default:
+                            // no default, leave the information null
+
+                            break;
+                    }
+                }
             }
+
+
+            $note = new Note([
+                // create a note using the details of the row
+
+                'business_id'  => $this->business->id,
+                'caregiver_id' => empty( $caregiver_id ) ? null : $caregiver_id,
+                'client_id'    => empty( $client_id    ) ? null : $client_id,
+                'title'        => $this->worksheet->getValue( 'Subject', $rowNo ),
+                'body'         => $this->worksheet->getValue( 'Description', $rowNo ),
+                'tags'         => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
+                'created_by'   => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
+                'type'         => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
+            ]);
 
             // and push the newly created object into the collection to return for the front-end response
             $collection->push([
 
-                'note'      => $note,
-                'caregiver' => $caregiver,
-                'client'    => $client,
-                'errors'    => $errors,
-                'row'       => $rowNo
+                'note'        => $note,
+                'rowNo'       => $rowNo,
+                'identifiers' => [
+
+                    'caregiver_name' => empty( $caregiver_id ) ? null : $caregiverName,
+                    'client_name'    => empty( $client_id ) ? null : $clientName
+                ]
             ]);
         }
 
         return $collection;
-    }
-
-    /**
-     * 1. break apart the provided string ( comes in a format of "name1, name2" )
-     * 2. map the first name to a user in our system
-     * 3. then determine if that is a client or caregiver
-     * 4. repeat for second name
-     * 5. return both
-     */
-    public function mapRelatedTo( $related_to )
-    {
-        $names = explode( ',', $related_to );
-
-        if( count( $names ) != 2 ){
-            // there should only be two names
-
-            return [ null, null, 'invalid name format, "Related To" column didn\'t break cleanly into two names' ];
-        }
-
-        foreach( $names as $name ){
-
-            // search user table for it
-            $matches = User::whereRaw( 'CONCAT( firstname, " ", lastname ) = ?', [ trim( $name ) ]);
-
-            switch( count( $matches ) ){
-
-                case 0:
-
-                    
-                    break;
-                case 1:
-
-                    break;
-                default:
-
-                    break;
-            }
-        }
-
-        // caregiver or client may be present, but not the other
-    }
-
-    /**
-     * Find a caregiver record based on the name
-     *
-     * @param string $name
-     * @return \App\Caregiver|null
-     */
-    function findCaregiver($name)
-    {
-        // Search by import_identifier
-        if ($caregiver = $this->business->caregivers()->where('import_identifier', $name)->first()) {
-            return $caregiver;
-        }
-
-        // Search by exact name, if one match
-        $caregivers = $this->business->caregivers()->whereHas('user', function($q) use ($name) {
-            $q->whereRaw('CONCAT(lastname, ", ", firstname) = ?', [trim($name)]);
-        })->get();
-        if ($caregivers->count() === 1) {
-            return $caregivers->first();
-        }
-
-        return null;
-    }
-
-    /**
-     * Find a client record based on the name
-     *
-     * @param string $name
-     * @return \App\Client|null
-     */
-    function findClient($name)
-    {
-        // Search by import_identifier
-        if ($client = $this->business->clients()->where('import_identifier', $name)->first()) {
-            return $client;
-        }
-
-        // Search by exact name, if one match
-        $clients = $this->business->clients()->whereHas('user', function($q) use ($name) {
-            $q->whereRaw('CONCAT(lastname, ", ", firstname) = ?', [trim($name)]);
-        })->get();
-        if ($clients->count() === 1) {
-            return $clients->first();
-        }
-
-        return null;
     }
 }
