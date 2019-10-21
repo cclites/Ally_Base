@@ -115,7 +115,7 @@ export default {
             busy: false,
             form: new Form({}),
             customFields: [],
-            business_id : this.businessId || null,
+            business_id : this.businessId || '',
             dropdownDefault: {
                 value: '',
                 text: '--- Select ---',

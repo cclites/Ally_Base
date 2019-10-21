@@ -37,7 +37,7 @@
 
                 showReferralModal : false,
                 referralSources   : null,
-                business_id       : this.businessId || null
+                business_id       : this.businessId || ''
             }
         },
 
