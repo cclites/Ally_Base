@@ -4,6 +4,7 @@ namespace App\Http\Requests\AccountSetup\Clients;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\PhonePossible;
+use App\Rules\ValidSSN;
 use App\Client;
 
 class ClientStep1Request extends FormRequest
@@ -30,9 +31,8 @@ class ClientStep1Request extends FormRequest
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required|email',
-            'date_of_birth' => 'nullable|date',
-            // 'password' => 'required|confirmed|min:8',
-
+            'date_of_birth' => 'required|date',
+            'ssn' => ['required', new ValidSSN()],
             'phone_number' => ['required', new PhonePossible()],
         ];
     }

@@ -45,9 +45,13 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
-                        <b-form-group label="Date of Birth" label-for="date_of_birth">
+                        <b-form-group label="Date of Birth" label-for="date_of_birth" label-class="required">
                             <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date" :disabled="busy"></mask-input>
                             <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
+                        </b-form-group>
+                        <b-form-group label="Social Security Number" label-for="ssn" label-class="required">
+                            <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
+                            <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                         </b-form-group>
                         <b-form-group label="Phone Number" label-for="phone_number" label-class="required">
                             <mask-input v-model="form.phone_number" id="phone_number" type="phone" :disabled="busy"></mask-input>
@@ -157,6 +161,7 @@
                     zip: this.caregiver.address ? this.caregiver.address.zip : '',
                     country: 'US', // This form assumes US addresses ONLY!
                     accepted_terms: 0,
+                    ssn: this.caregiver.ssn ? this.caregiver.masked_ssn : ''
                 })
             }
         },
