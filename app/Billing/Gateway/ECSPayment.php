@@ -203,7 +203,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         if (!$response || empty($data['transactionid'])) {
             $statusCode = $this->lastResponseCode;
             \Log::error("ECSPayments::post error.  Error processing transaction. HTTP code: $statusCode.  Message: $text");
-            return new ErrorResponse(500, 'ECSPayments::Error processing transaction.');
+            return new ErrorResponse(500, 'ECSPayments::Error processing transaction.' . $text);
         }
 
         $transaction = new GatewayTransaction([
