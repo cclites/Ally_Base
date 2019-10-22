@@ -74,9 +74,9 @@
                     <td>Position applied for:</td>
                     <td>{{ application.position.name }}</td>
                 </tr>
-                <tr v-if="application.classification">
+                <tr v-if="application.certification">
                     <td>Level of Credentialing:</td>
-                    <td>{{ application.classification }}</td>
+                    <td>{{ application.certification }}</td>
                 </tr>
                 <tr v-if="application.license_number">
                     <td>License Number:</td>

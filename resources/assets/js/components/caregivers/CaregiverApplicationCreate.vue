@@ -163,14 +163,16 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-form-radio-group v-model="form.classification" label="Level of Credentialing:">
-                        <b-radio value="companion">Companion</b-radio><br />
-                        <b-radio value="HHA">HHA</b-radio><br />
-                        <b-radio value="CNA">CNA</b-radio><br />
-                        <b-radio value="LPN">LPN</b-radio><br />
-                        <b-radio value="RN">RN</b-radio><br />
-                        <input-help :form="form" field="classification" text=""></input-help>
-                    </b-form-radio-group>
+                    <b-form-group  label="Level of Credentialing:">
+                        <b-form-radio-group v-model="form.certification">
+                            <b-radio value="Companion">Companion</b-radio>
+                            <b-radio value="HHA">HHA</b-radio>
+                            <b-radio value="CNA">CNA</b-radio>
+                            <b-radio value="LPN">LPN</b-radio>
+                            <b-radio value="RN">RN</b-radio>
+                            <input-help :form="form" field="certification" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -624,7 +626,7 @@
                     worked_here_before: false,
                     worked_before_location: '',
                     position: '',
-                    classification: '',
+                    certification: '',
                     license_number: '',
                     training_school: '',
                     preferred_start_date: '',

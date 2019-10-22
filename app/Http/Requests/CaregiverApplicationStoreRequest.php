@@ -46,7 +46,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'worked_here_before' => 'boolean',
             'worked_before_location' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:200',
-            'classification' => 'nullable|string',
+            'certification' => 'nullable|string',
             'license_number' => 'nullable|string',
             'training_school' => 'nullable|string',
             'preferred_start_date' => 'nullable|date',

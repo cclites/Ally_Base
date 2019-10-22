@@ -265,6 +265,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
                 'date_of_birth' => $this->date_of_birth,
                 'password' => bcrypt(random_bytes(32)),
                 'application_date' => Carbon::now(),
+                'certification' => $this->certification
             ]);
 
             $this->businessChain->assignCaregiver($caregiver);
