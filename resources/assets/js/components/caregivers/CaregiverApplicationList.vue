@@ -70,7 +70,7 @@
                     <template slot="action" scope="data">
                         <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-eye"></i></a>
                         <a :href="'/business/caregivers/applications/' + data.item.id + '/edit'" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
-                        <button @click="deleteApplication(data.item.id)" class="btn btn-outline-secondary"><i class="fa fa-trash mr-1"></i></button>
+                        <button variant="danger" @click="deleteApplication(data.item.id)" class="btn btn-danger"><i class="fa fa-times mr-1 pl-1"></i></button>
                         <button @click="convertApplication(data.item.id)" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</button>
                         <button @click="archiveApplication(data.item.id)" class="btn btn-info" v-if="!data.item.archived"><i class="fa fa-archive mr-1"></i>Archive</button>
                     </template>
