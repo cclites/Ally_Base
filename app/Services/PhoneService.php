@@ -74,7 +74,6 @@ class PhoneService
      */
     public function sendTextMessage($to, $message)
     {
-        $valid = $this->validate($message);
 
         if(strlen($message) > 1600){
             $message = substr($message, 0, 1600);
