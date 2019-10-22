@@ -58,12 +58,12 @@ class AchExportFile
 
         $this->transactions[] = [
             'SSN-ID' => $id,
-            'Name' => $this->stripUnwantedChars($account->getBillingName()),
+            'Name' => $this->sanitizeString($account->getBillingName()),
             'ABA Routing' => $account->getRoutingNumber(),
             'Account' => $account->getAccountNumber(),
-            'Transaction Type' => $type,
+            'Transaction Type' => $this->sanitizeString($type),
             'Amount' => $amount,
-            'Checking or Savings' => ucwords($account->getAccountType()),
+            'Checking or Savings' => $this->sanitizeString(ucwords($account->getAccountType())),
         ];
     }
 
@@ -121,11 +121,8 @@ class AchExportFile
      * @param string $str
      * @return string
      */
-    protected function stripUnwantedChars(string $str) : string
+    public function sanitizeString(string $str) : string
     {
-        $str = str_replace('\'', '', $str);
-        $str = str_replace('-', '', $str);
-
-        return $str;
+        return preg_replace("/[^A-Za-z ]+/", '', $str);
     }
 }
