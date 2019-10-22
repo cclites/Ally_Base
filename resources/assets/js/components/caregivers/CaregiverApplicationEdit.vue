@@ -154,6 +154,36 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group  label="Level of Credentialing:">
+                        <b-form-radio-group v-model="form.certification">
+                            <b-radio value="Companion">Companion</b-radio>
+                            <b-radio value="HHA">HHA</b-radio>
+                            <b-radio value="CNA">CNA</b-radio>
+                            <b-radio value="LPN">LPN</b-radio>
+                            <b-radio value="RN">RN</b-radio>
+                            <input-help :form="form" field="certification" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group label="License Number (if applicable):">
+                        <b-form-input v-model="form.license_number"></b-form-input>
+                        <input-help :form="form" field="license_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group label="Healthcare Training School Name:">
+                        <b-form-input v-model="form.training_school"></b-form-input>
+                        <input-help :form="form" field="training_school" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <!-- Availability -->
             <b-row>
                 <b-col>
