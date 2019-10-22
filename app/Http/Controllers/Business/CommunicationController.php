@@ -38,6 +38,10 @@ class CommunicationController extends Controller
         $recipients = null;
         $message = '';
 
+        $request->validate([
+            'message' => 'required|min:1|max:1600',
+        ]);
+
         $request->session()->reflash();
 
         // handle loading and setting recipient list (coming from care match results)

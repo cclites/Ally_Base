@@ -56,7 +56,7 @@ class BusinessCommunicationSettingsController extends Controller
             'week_end' => 'required|string|max:8',
             'weekend_start' => 'required|string|max:8',
             'weekend_end' => 'required|string|max:8',
-            'message'=>'required_unless:reply_option,off|max:160',
+            'message'=>'required_unless:reply_option,off|max:1600',
         ], $messages);
 
         if($settings){
