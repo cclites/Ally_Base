@@ -56,7 +56,7 @@ class ShiftHistoryReportController extends BaseController
 
         return view_component('business-shift-report', 'Shift History', [
             'admin' => (int) is_admin(),
-            'imports' => is_admin() ? \App\Import::orderBy('id', 'DESC')->get()->toArray() : [],
+            'imports' => is_admin() ? \App\Import::orderBy( 'id', 'DESC')->where( 'type', 'shift' )->get()->toArray() : [],
             'autoload' => $request->autoload ? 1 : 0,
             'activities' => $this->business()->allActivities(), // TODO: replace this
         ], [

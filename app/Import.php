@@ -24,11 +24,17 @@ class Import extends AuditableModel
     protected $table = 'imports';
     protected $fillable = [
         'name',
+        'type',
         'user_id',
     ];
 
     public function shifts()
     {
         return $this->hasMany(Shift::class, 'import_id', 'id');
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'import_id', 'id');
     }
 }

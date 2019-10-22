@@ -37,7 +37,7 @@
                             <th colspan="2">Caregiver</th>
                             <th>Body</th>
                             <th>Tags</th>
-                            <th>Created By</th>
+                            <th>User ID Created By</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -45,10 +45,10 @@
                             :clients="clients"
                             :caregivers="caregivers"
                             :note.sync="row.note"
-                            :rowNo=" row.rowNo "
                             :identifiers="row.identifiers"
                             :key="row.index"
                             :index="row.index"
+                            @swapIdentifiers=" swapIdentifiers "
                             @mappedIdentifier="mapIdentifier"
                             @createClient="loadCreateClient"
                             @createCaregiver="loadCreateCaregiver"
@@ -202,6 +202,14 @@
         },
 
         methods: {
+
+            swapIdentifiers( rowNo ){
+
+                let found = this.imported.find( data => data.note.rowNo == rowNo );
+                const tmp = found.identifiers.caregiver_name;
+                found.identifiers.caregiver_name = found.identifiers.client_name;
+                found.identifiers.client_name = tmp;
+            },
             loadFiltered()
             {
                 let filtered = this.imported.slice(0);

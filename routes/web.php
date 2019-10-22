@@ -607,6 +607,9 @@ Route::group([
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');
     Route::post('note-import', 'Admin\NoteImportController@process');
+    Route::post('note-import/save', 'Admin\NoteImportController@store')->name('note-import.save');
+    Route::post('note-import/map/client', 'Admin\NoteImportController@storeClientMapping')->name('note-import.map.client');
+    Route::post('note-import/map/caregiver', 'Admin\NoteImportController@storeCaregiverMapping')->name('note-import.map.caregiver');
 
 
     // shift import

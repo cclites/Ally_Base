@@ -156,6 +156,7 @@ class ShiftImportController extends Controller
         \DB::beginTransaction();
         $import = Import::create([
             'name' => $request->name,
+            'type' => 'shift',
             'user_id' => \Auth::id()
         ]);
         foreach($shifts as $shift) {

@@ -1,6 +1,6 @@
 <template>
     <tr>
-        <td>{{ rowNo }}</td>
+        <td>{{ model.rowNo }}</td>
         <td><input type="text" class="form-control" v-model=" model.title " /></td>
         <td><input type="text" class="form-control" v-model=" model.type " /></td>
         <td :id="`clientIdentifier${index}`">{{ identifiers.client_name }}</td>
@@ -25,6 +25,7 @@
             <span class="red bold" v-if="!model.client_id">Unmapped</span>
             <span v-else>{{ mappedClientName }}</span>
             <b-btn @click="clientPopover = !clientPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
+            <b-btn @click=" swapNames( model ) " variant="info" size="sm"><i class="fa fa-exchange"></i></b-btn>
         </td>
         <td :id="`cgIdentifier${index}`">{{ identifiers.caregiver_name }}</td>
         <td>
@@ -65,7 +66,6 @@
         props: {
             index: Number,
             note: Object,
-            rowNo: Number,
             identifiers: Object,
             clients: Array,
             caregivers: Array,
@@ -87,7 +87,10 @@
 
         methods: {
 
+            swapNames( model ){
 
+                this.$emit( 'swapIdentifiers', model.rowNo );
+            },
             getNameById(array, id) {
                 let index = array.findIndex(item => item.id == id);
                 if (index < 0) return "";
