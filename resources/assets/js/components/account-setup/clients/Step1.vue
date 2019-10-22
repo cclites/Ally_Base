@@ -50,7 +50,7 @@
                             <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
                         </b-form-group>
                         <b-form-group label="Social Security Number" label-for="ssn" label-class="required">
-                            <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
+                            <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn" :disabled="busy"></mask-input>
                             <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                         </b-form-group>
                         <b-form-group label="Phone Number" label-for="phone_number" label-class="required">
