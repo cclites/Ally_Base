@@ -70,7 +70,7 @@
                     </b-form-select>
                     <input-help :form="form" field="referral_source_id" text="Select a Referral Source."></input-help>
                 </b-form-group>
-                <!--<b-form-group label="Tags" label-for="tags">
+                <b-form-group label="Tags" label-for="tags">
                     <b-form-input
                             id="tags"
                             name="tags"
@@ -80,7 +80,7 @@
                     >
                     </b-form-input>
                     <input-help :form="form" field="tags" text="Tag the note for searching."></input-help>
-                </b-form-group>-->
+                </b-form-group>
             </b-col>
             <b-col lg="8">
                 <b-form-group label="Template" label-for="note_template_id">

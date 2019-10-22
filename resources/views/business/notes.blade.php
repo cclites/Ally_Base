@@ -22,6 +22,7 @@
                 </tr>
                 <tr>
                     <td>Created By: {{ $note->creator->name }}</td>
+                    <td>Tags: {{ $note->tags }}</td>
                     <td class="align-right">{{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $note->created_at)->format('m/d/Y  h:i:s A') }}</td>
                 </tr>
                 <tr>
