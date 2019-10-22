@@ -29,7 +29,8 @@ class CaregiverStep1Request extends FormRequest
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required|email',
-            'date_of_birth' => 'nullable|date',
+            'date_of_birth' => 'required|date',
+            'ssn' => ['required', new ValidSSN()],
             'phone_number' => ['required', new PhonePossible()],
         ];
     }
