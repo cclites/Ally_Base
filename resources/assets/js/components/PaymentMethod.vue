@@ -11,7 +11,7 @@
         </b-row>
         <b-row>
             <b-col class="text-right hidden-xs-down">
-                <b-btn @click="deleteMethod()" :disabled="authInactive">Delete <i class="fa fa-times"></i></b-btn>
+                <b-btn @click="deleteMethod()" :disabled="authInactive" v-if="method.type">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
         </b-row>
         <b-row v-if="!restricted">
