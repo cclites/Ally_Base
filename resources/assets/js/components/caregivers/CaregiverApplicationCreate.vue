@@ -2,11 +2,11 @@
     <b-container>
         <b-row>
             <b-col class="mt-5">
-                <h2>{{ businessChain.name }}</h2>
+                <h2>{{ businessChain.name }} Contractor Application</h2>
             </b-col>
         </b-row>
 
-        <b-card title="Caregiver Availability">
+        <b-card>
 
             <b-row class="mt-3">
 
@@ -142,7 +142,7 @@
                                      v-model="form.worked_here_before"
                                      :value="true"
                                      :unchecked-value="false">
-                        Have you worked for {{ businessChain.name }} before?
+                        Have you worked with {{ businessChain.name }} before?
                     </b-form-checkbox>
                 </b-col>
                 <b-col lg="6">
@@ -158,6 +158,34 @@
                     <b-form-group label="Which position are you applying for?">
                         <b-form-input v-model="form.position"></b-form-input>
                         <input-help :form="form" field="position" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-radio-group v-model="form.classification" label="Level of Credentialing:">
+                        <b-radio value="companion">Companion</b-radio><br />
+                        <b-radio value="HHA">HHA</b-radio><br />
+                        <b-radio value="CNA">CNA</b-radio><br />
+                        <b-radio value="LPN">LPN</b-radio><br />
+                        <b-radio value="RN">RN</b-radio><br />
+                        <input-help :form="form" field="classification" text=""></input-help>
+                    </b-form-radio-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group label="License Number (if applicable):">
+                        <b-form-input v-model="form.license_number"></b-form-input>
+                        <input-help :form="form" field="license_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-form-group label="Healthcare Training School Name:">
+                        <b-form-input v-model="form.training_school"></b-form-input>
+                        <input-help :form="form" field="training_school" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -179,7 +207,7 @@
                             <b-form-checkbox v-for="day in days" :value="day" :key="day">{{ day }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
-                    <b-form-group label="Preferred Shift Length">
+                    <b-form-group label="Preferred Shift Length (Hours)">
                         <b-form-checkbox-group id="preferred_shift_length" v-model="form.preferred_shift_length">
                             <b-form-checkbox v-for="preferred_shift in shifts" :value="preferred_shift" :key="preferred_shift.id">{{ preferred_shift }}</b-form-checkbox>
                         </b-form-checkbox-group>
@@ -190,12 +218,6 @@
                         <b-form-checkbox-group id="preferred_times" v-model="form.preferred_times">
                             <b-form-checkbox v-for="time in times" :value="time" :key="time">{{ time }}</b-form-checkbox>
                         </b-form-checkbox-group>
-                    </b-form-group>
-                    <b-form-group label="Work Weekends">
-                        <b-form-checkbox v-model="form.work_weekends"
-                                         :value="true"
-                                         :unchecked-value="false">
-                        </b-form-checkbox>
                     </b-form-group>
                     <b-form-group label="How many miles will you travel for an assignment?">
                         <b-form-checkbox-group id="travel_radius" v-model="form.travel_radius">
@@ -521,6 +543,15 @@
             <hr>
             <b-row class="space-above">
                 <b-col>
+                    <p>
+                        We're an <b>equal opportunity employer</b>. All applicants will be considered for employment
+                        without attention to race, color, religion, sex, sexual orientation, gender identity, national origin,
+                        veteran or disability status
+                    </p>
+                </b-col>
+            </b-row>
+            <b-row class="space-above">
+                <b-col>
                     <h3><b>APPLICANT’S CERTIFICATION</b> – Please read carefully before signing/submitting</h3>
                     <p>I authorize any of the persons or organizations referenced in the application to give you any and all information concerning my previous employment, education or any other information they might have, personal or otherwise, with regard to any of the subjects covered by this application and release all such parties from all liability for any damage that may result from furnishing such information to you. I authorize you to request and receive such information.</p>
                     <p>I understand that my contract is contingent upon verification of past employment; school transcripts; licensures and certifications; satisfactory criminal background check. I hereby consent to such examinations and verifications.</p>
@@ -567,7 +598,7 @@
 
         data() {
             return{
-                days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 times: ['Mornings', 'Afternoons', 'Evenings', 'Nights'],
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
@@ -593,11 +624,13 @@
                     worked_here_before: false,
                     worked_before_location: '',
                     position: '',
+                    classification: '',
+                    license_number: '',
+                    training_school: '',
                     preferred_start_date: '',
                     preferred_days: '',
                     preferred_times: '',
                     preferred_shift_length: '',
-                    work_weekends: false,
                     travel_radius: 5,
                     vehicle: '',
                     dui: false,

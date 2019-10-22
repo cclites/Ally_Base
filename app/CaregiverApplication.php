@@ -96,6 +96,9 @@ use Carbon\Carbon;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $position
+ * @property string| $classification
+ * @property string|null $license_number
+ * @property string|null $training_school
  * @property string $status
  * @property int $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
