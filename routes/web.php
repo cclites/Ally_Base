@@ -182,6 +182,8 @@ Route::group([
     Route::get('caregivers/applications/{application}/edit', 'CaregiverApplicationController@edit')->name('caregivers.applications.edit');
     Route::put('caregivers/applications/{application}', 'CaregiverApplicationController@update')->name('caregivers.applications.update');
     Route::post('caregivers/applications/{application}/convert', 'CaregiverApplicationController@convert')->name('caregivers.applications.convert');
+    Route::post('caregivers/applications/{application}/delete', 'CaregiverApplicationController@destroy')->name('caregivers.applications.convert');
+    Route::post('caregivers/applications/{application}/archive', 'CaregiverApplicationController@archive')->name('caregivers.applications.convert');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::get('caregivers/paginate', 'Business\PaginatedCaregiverController@index')->name('caregivers.paginate');
