@@ -43,10 +43,10 @@ class CaregiverApplicationController extends BusinessBaseController
                 $query->where('created_at', '<', Carbon::parse($endDate, $timezone)->addDay());
             }
 
-            return $query->get();
+            return $query->whereArchived($request->archived)->get();
         }
 
-        $applications = $query->get();
+        $applications = $query->whereStatus('Open')->whereArchived(0)->get();
         $applicationUrl = $this->businessChain()->getCaregiverApplicationUrl();
         return view('caregivers.applications.index', compact('applicationUrl', 'applications'));
     }
@@ -172,9 +172,25 @@ class CaregiverApplicationController extends BusinessBaseController
      */
     public function destroy(CaregiverApplication $application)
     {
-        abort(404); // not implemented
         $this->authorize('delete', $application);
 
+        if( $application->delete() ){
+            return new SuccessResponse('Application Deleted');
+        }
+
+        return new ErrorResponse('Unable to delete application');
+
+    }
+
+    public function archive(CaregiverApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        if( $application->update(['archived'=>true]) ){
+            return new SuccessResponse('Application has been archived');
+        }
+
+        return new ErrorResponse('Unable to archive application');
     }
 
     /**

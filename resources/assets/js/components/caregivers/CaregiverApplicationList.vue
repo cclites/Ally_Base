@@ -6,15 +6,15 @@
             </b-col>
         </b-row>
         <b-row class="mb-3">
-            <b-col lg="3">
+            <b-col lg="2">
                 From: <date-picker v-model="start_date" placeholder="From" />
             </b-col>
 
-            <b-col lg="3">
+            <b-col lg="2">
                 To: <date-picker v-model="end_date" placeholder="To" />
             </b-col>
 
-            <b-col lg="3">
+            <b-col lg="2">
                 Status: <b-form-select v-model="status" class="mb-3">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
@@ -22,6 +22,19 @@
                     </template>
                     <option v-for="status in statuses" :key="status">{{ status }}</option>
                 </b-form-select>
+            </b-col>
+
+            <b-col lg="1">
+                <b-form-group>
+                    <b-form-checkbox id="archived"
+                                     v-model="archived"
+                                     :value="1"
+                                     :unchecked-value="0"
+                                     class="mt-4"
+                    >
+                        Archived
+                    </b-form-checkbox>
+                </b-form-group>
             </b-col>
 
             <b-col lg="2">
@@ -43,6 +56,7 @@
                         :per-page="perPage"
                         :sort-by.sync="sortBy"
                         @filtered="onFiltered"
+                         ref="table"
                 >
                     <template slot="created_at" scope="data">
                         {{ dateFormat(data.item.created_at) }}
@@ -56,7 +70,9 @@
                     <template slot="action" scope="data">
                         <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-eye"></i></a>
                         <a :href="'/business/caregivers/applications/' + data.item.id + '/edit'" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
+                        <button @click="deleteApplication(data.item.id)" class="btn btn-outline-secondary"><i class="fa fa-trash mr-1"></i></button>
                         <button @click="convertApplication(data.item.id)" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</button>
+                        <button @click="archiveApplication(data.item.id)" class="btn btn-info" v-if="!data.item.archived"><i class="fa fa-archive mr-1"></i>Archive</button>
                     </template>
                 </b-table>
             </div>
@@ -89,7 +105,8 @@
                 statuses: ['New', 'Open', 'Converted'],
                 start_date: "",
                 end_date: "",
-                status: "",
+                status: 'Open',
+                archived: 0,
                 totalRows: this.applications.length,
                 perPage: 15,
                 currentPage: 1,
@@ -138,7 +155,7 @@
             },
             reloadData() {
                 this.loading = true;
-                let url = `/business/caregivers/applications?json=1&start_date=${this.start_date}&end_date=${this.end_date}&status=${this.status}`;
+                let url = `/business/caregivers/applications?json=1&start_date=${this.start_date}&end_date=${this.end_date}&status=${this.status}&archived=${this.archived}`;
                 axios.get(url)
                     .then(response => {
                         this.items = response.data;
@@ -155,7 +172,30 @@
                     let form = new Form({});
                     form.post(url);
                 }
-            }
+            },
+            deleteApplication(id){
+                if (confirm('Are you sure you wish to delete this application?')) {
+                    let url = `/business/caregivers/applications/${id}/delete`;
+                    let form = new Form({});
+                    form.post(url)
+                        .then(response => {
+                            this.items.splice(this.items.id, 1);
+                            this.$refs.table.refresh();
+                        });
+                }
+            },
+            archiveApplication(id){
+                if (confirm('Are you sure you wish to archive this application?')) {
+                    let url = `/business/caregivers/applications/${id}/archive`;
+                    let form = new Form({});
+                    form.post(url)
+                        .then(response => {
+                            this.items.splice(this.items.id, 1);
+                            this.$refs.table.refresh();
+                        });
+                }
+            },
+
         }
     }
 </script>
