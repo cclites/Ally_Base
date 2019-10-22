@@ -62,6 +62,7 @@ class TelephonySMSController extends BaseTelefonyController
             'from_number' => $from,
             'to_number' => $to,
             'message' => $request->Body,
+            'media_url' => $request->MediaUrl,
             'twilio_message_id' => $request->MessageSid,
         ]);
 
