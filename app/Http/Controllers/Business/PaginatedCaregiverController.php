@@ -49,7 +49,7 @@ class PaginatedCaregiverController extends BaseController
                     ->orWhere('users.firstname', 'LIKE', "%$search%")
                     ->orWhere('users.lastname', 'LIKE', "%$search%");
             });
-            
+
         }
 
         // Default to active only, unless active is provided in the query string
