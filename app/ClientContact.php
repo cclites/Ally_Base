@@ -26,7 +26,7 @@ class ClientContact extends Model
      * @var array
      */
     protected $appends = [];
-    
+
     /**
      * The "booting" method of the model.
      *
@@ -64,9 +64,9 @@ class ClientContact extends Model
     // **********************************************************
     // Contact Relationship Options
     // **********************************************************
-    
+
     const RELATION_FAMILY = 'family';
-    const RELATION_POA = 'poa';
+    const RELATION_MEDICAL_PROFESSIONAL = 'medical professional';
     const RELATION_PHYSICIAN = 'physician';
     const RELATION_OTHER = 'other';
     const RELATION_CUSTOM = 'custom';
@@ -119,8 +119,6 @@ class ClientContact extends Model
 
 
 
-
-
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
@@ -140,8 +138,22 @@ class ClientContact extends Model
             self::RELATION_CUSTOM,
             self::RELATION_FAMILY,
             self::RELATION_PHYSICIAN,
-            self::RELATION_POA,
-            self::RELATION_OTHER,
+            self::RELATION_MEDICAL_PROFESSIONAL,
+            self::RELATION_OTHER
+        ];
+    }
+
+    /**
+     * Get the relationships that allow a 'custom' field
+     *
+     * @return array
+     */
+    public static function customRelationships() : array
+    {
+        return [
+            self::RELATION_CUSTOM,
+            self::RELATION_FAMILY,
+            self::RELATION_MEDICAL_PROFESSIONAL
         ];
     }
 
