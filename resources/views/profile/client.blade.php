@@ -34,6 +34,9 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -46,6 +49,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
                 <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
             </div>
         </li>
     </ul>
@@ -103,6 +107,13 @@
         </div>
         <div class="tab-pane" id="contacts" role="tabpanel">
             <client-contacts-tab :contacts="{{ $user->role->contacts }}" :client="{{ $user->role }}"></client-contacts-tab>
+        </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

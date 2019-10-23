@@ -36,6 +36,7 @@ use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
 
+
 /**
  * App\Client
  *
@@ -330,6 +331,15 @@ class Client extends AuditableModel implements
     const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
     const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
     const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        \App\Notifications\ChargePaymentNotification::class,
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods

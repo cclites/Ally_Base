@@ -237,6 +237,7 @@ Route::group([
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/deactivate', 'Business\ClientController@destroy')->name('clients.deactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
+    Route::patch('clients/{client}/notification-options', 'Business\ClientController@updateNotificationOptions');
     Route::patch('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
     Route::get('clients/{client}/contacts', 'Business\ClientContactController@index');
     Route::post('clients/{client}/contacts', 'Business\ClientContactController@store');
@@ -280,6 +281,7 @@ Route::group([
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
+    Route::post('clients/{client}/notification-preferences', 'Business\ClientController@updateNotificationPreferences');
 
     Route::get('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@show');
     Route::post('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@store');

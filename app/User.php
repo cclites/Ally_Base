@@ -556,6 +556,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 return collect(OfficeUser::$availableNotifications);
             case 'caregiver':
                 return collect(Caregiver::$availableNotifications);
+            case 'client':
+                return collect(Client::$availableNotifications);
             default:
                 return collect([]);
         }
