@@ -427,4 +427,31 @@ class SmsRepliesTest extends TestCase
         $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);
     }
+
+    /** @test */
+    public function reply_is_saved_if_message_is_null(){
+
+        $this->withoutExceptionHandling();
+
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
+        $data["MediaUrl"] = str_random(10);
+        $data["Body"] = null;
+
+        $this->post(route('telefony.sms.incoming'), $data)
+            ->assertStatus(200);
+    }
+
+    /** @test */
+    public function reply_is_not_saved_if_message_is_null_and_media_url_is_null(){
+
+        $this->withoutExceptionHandling();
+
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
+        $data["MediaUrl"] = null;
+        $data["Body"] = null;
+
+        $response = $this->post(route('telefony.sms.incoming'), $data);
+
+        $this->assertTrue($response->exception === null);
+    }
 }
