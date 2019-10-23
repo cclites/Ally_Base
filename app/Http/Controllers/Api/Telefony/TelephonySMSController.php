@@ -26,8 +26,8 @@ class TelephonySMSController extends BaseTelefonyController
             'MessageSid' => 'required|string',
             'To' => 'required|string',
             'From' => 'required|string',
-            'Body' => 'required_without:MediaUrl',
-            'MediaUrl' => 'required_without|Body'
+            'Body' => 'required_without:MediaUrl|string',
+            'MediaUrl' => 'required_without:Body|string'
         ]);
 
         if ($validator->fails()) {
