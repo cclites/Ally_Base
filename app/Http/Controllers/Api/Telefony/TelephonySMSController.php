@@ -26,7 +26,10 @@ class TelephonySMSController extends BaseTelefonyController
             'MessageSid' => 'required|string',
             'To' => 'required|string',
             'From' => 'required|string',
+            'Body' => 'required_without:MediaUrl',
+            'MediaUrl' => 'required_without:Body'
         ]);
+
         if ($validator->fails()) {
             return $this->xmlResponse('<error>' . $validator->errors()->first() . '</error>');
         }
@@ -59,6 +62,7 @@ class TelephonySMSController extends BaseTelefonyController
             'from_number' => $from,
             'to_number' => $to,
             'message' => $request->Body,
+            'media_url' => $request->MediaUrl,
             'twilio_message_id' => $request->MessageSid,
         ]);
 
