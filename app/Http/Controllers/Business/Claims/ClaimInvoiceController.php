@@ -126,9 +126,12 @@ class ClaimInvoiceController extends BaseController
      *
      * @param ClaimInvoice $claim
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function show(ClaimInvoice $claim)
     {
+        $this->authorize('read', $claim);
+
         return response()->json(new ClaimInvoiceResource($claim));
     }
 
