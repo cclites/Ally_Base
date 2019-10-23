@@ -95,6 +95,7 @@ Vue.component('caregiver-task-list', require('./components/caregivers/TaskList')
 Vue.component('admin-control-file', require('./components/admin/ControlFile'));
 Vue.component('admin-communication-log', require('./components/admin/CommunicationLog'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
+Vue.component('admin-note-import', require('./components/admin/import/AdminNoteImport'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
 Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
 Vue.component('admin-bucket-report', require('./components/admin/AdminBucketReport'));
