@@ -497,7 +497,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function getServices() : Collection
     {
         if ($this->services->count() > 0) {
-            return $this->services;
+            return $this->services->map(function (ShiftService $shiftService) {
+                return $shiftService->service;
+            })->toBase();
         }
 
         return collect([$this->service]);

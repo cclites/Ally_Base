@@ -707,7 +707,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     public function getServices() : Collection
     {
         if ($this->services->count() > 0) {
-            return $this->services;
+            return $this->services->map(function (ScheduleService $scheduleService) {
+                return $scheduleService->service;
+            })->toBase();
         }
 
         return collect([$this->service]);
