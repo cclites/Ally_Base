@@ -406,14 +406,17 @@ class SmsRepliesTest extends TestCase
     }
 
     /** @test */
-    public function reply_is_saved_if_message_is_blank(){
+    public function no_reply_is_saved_if_a_message_and_media_url_are_not_supplied(){
 
         $this->withoutExceptionHandling();
 
         $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
 
         $this->post(route('telefony.sms.incoming'), $data)
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertSeeText('The body field is required');
+
+        $this->assertEquals(0, SmsThreadReply::count());
     }
 
     /** @test */
@@ -423,35 +426,29 @@ class SmsRepliesTest extends TestCase
 
         $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
         $data["MediaUrl"] = str_random(10);
+        $this->assertEmpty($data['Body']);
 
         $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);
+
+        $reply = SmsThreadReply::first();
+        $this->assertEquals($data['MediaUrl'], $reply->media_url);
+        $this->assertNull($reply->message);
     }
 
     /** @test */
-    public function reply_is_saved_if_message_is_null(){
+    public function a_reply_can_have_a_media_url(){
 
         $this->withoutExceptionHandling();
 
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', 'test');
         $data["MediaUrl"] = str_random(10);
-        $data["Body"] = null;
 
         $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);
-    }
 
-    /** @test */
-    public function reply_is_not_saved_if_message_is_null_and_media_url_is_null(){
-
-        $this->withoutExceptionHandling();
-
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
-        $data["MediaUrl"] = null;
-        $data["Body"] = null;
-
-        $response = $this->post(route('telefony.sms.incoming'), $data);
-
-        $this->assertTrue($response->exception === null);
+        $reply = SmsThreadReply::first();
+        $this->assertEquals($data['MediaUrl'], $reply->media_url);
+        $this->assertEquals('test', $reply->message);
     }
 }
