@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Services\PhoneService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
@@ -56,7 +57,7 @@ class BusinessCommunicationSettingsController extends Controller
             'week_end' => 'required|string|max:8',
             'weekend_start' => 'required|string|max:8',
             'weekend_end' => 'required|string|max:8',
-            'message'=>'required_unless:reply_option,off|max:160',
+            'message'=>'required_unless:reply_option,off|max:' . PhoneService::MAX_MESSAGE_LENGTH,
         ], $messages);
 
         if($settings){

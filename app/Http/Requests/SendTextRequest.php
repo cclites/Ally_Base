@@ -3,6 +3,7 @@ namespace App\Http\Requests;
 
 use App\Caregiver;
 use App\PhoneNumber;
+use App\Services\PhoneService;
 use Illuminate\Support\Collection;
 
 class SendTextRequest extends BusinessRequest
@@ -15,7 +16,7 @@ class SendTextRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'message' => 'required|string|min:5',
+            'message' => 'required|string|min:5|max:' . PhoneService::MAX_MESSAGE_LENGTH,
             'recipients' => 'array',
             'recipients.*' => 'integer',
             'can_reply' => 'boolean',
