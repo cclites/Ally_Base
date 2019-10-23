@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
-use App\Console\Commands\ChargePaymentNotifications;
+use App\Console\Commands\CronChargePaymentNotifications;
 use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
@@ -36,7 +36,7 @@ class Kernel extends ConsoleKernel
         CronFlushTriggeredReminders::class,
         AchOfflineChargeCommand::class,
         CronHhaCheckStatus::class,
-        ChargePaymentNotifications::class,
+        CronChargePaymentNotifications::class,
     ];
 
     /**

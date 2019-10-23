@@ -10,7 +10,7 @@ use App\User;
 use App\Billing\Payment;
 use App\Billing\Deposit;
 
-class ChargePaymentNotifications extends Command{
+class CronChargePaymentNotifications extends Command{
 
     /**
      * The name and signature of the console command.

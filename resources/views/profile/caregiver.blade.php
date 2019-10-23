@@ -44,6 +44,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
                 <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
+                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
             </div>
         </li>
     </ul>
