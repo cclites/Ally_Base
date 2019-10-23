@@ -30,6 +30,11 @@ class PhoneService
     protected $sandbox = false;
 
     /**
+     * Maximum message length allowed.
+     */
+    const MAX_MESSAGE_LENGTH = 1600;
+
+    /**
      * PhoneService constructor.
      * @param Client|null $client
      * @param bool $sandbox
@@ -74,9 +79,8 @@ class PhoneService
      */
     public function sendTextMessage($to, $message)
     {
-
-        if(strlen($message) > 1600){
-            $message = substr($message, 0, 1600);
+        if(strlen($message) > self::MAX_MESSAGE_LENGTH) {
+            $message = substr($message, 0, self::MAX_MESSAGE_LENGTH);
         }
 
         try {
