@@ -182,7 +182,7 @@
                     </b-form-group>
 
                     <b-form-group class="mb-2">
-                        <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
+                        <business-referral-source-select :businessId=" client.business_id " v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                         <div class="d-flex justify-content-end">
                             <input-help :form="form" field="referral_source_id" text="Enter how the prospect was referred."/>
                         </div>

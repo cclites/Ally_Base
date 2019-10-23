@@ -29,12 +29,15 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'sourceType'],
+        props: ['value', 'sourceType', 'businessId'],
 
         data() {
+
             return {
-                showReferralModal: false,
-                referralSources: null,
+
+                showReferralModal : false,
+                referralSources   : null,
+                business_id       : this.businessId || ''
             }
         },
 
@@ -61,7 +64,7 @@
                 }
             },
             async loadReferralSources() {
-                const response = await axios(`/business/referral-sources?type=${this.sourceType}`);
+                const response = await axios(`/business/referral-sources?type=${this.sourceType}&business_id=${this.business_id}`);
                 this.referralSources = response.data || null;
             }
         },

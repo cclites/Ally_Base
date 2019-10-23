@@ -36,6 +36,12 @@ class StatusAliasController extends BaseController
      */
     public function index(Request $request)
     {
+        if( request()->input( 'business_id', null ) ){
+
+            $chain = Business::find( request()->input( 'business_id' ) )->chain;
+            $this->setBusinessChainAs( $chain );
+        }
+
         return response()->json(
             $this->getStatusAliases()
         );

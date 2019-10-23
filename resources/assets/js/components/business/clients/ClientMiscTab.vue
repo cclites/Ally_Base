@@ -2,7 +2,7 @@
     <b-card>
         <b-row>
             <b-col>
-                <custom-field-form :user-id="client.id" user-role="client" :meta="client.meta" />
+                <custom-field-form :businessId=" client.business_id " :user-id="client.id" user-role="client" :meta="client.meta" />
             </b-col>
         </b-row>
         <audits-table :trail="auditLogItems"></audits-table>

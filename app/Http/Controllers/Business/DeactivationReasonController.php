@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\DeactivationReason;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -19,6 +20,12 @@ class DeactivationReasonController extends BaseController
      */
     public function index()
     {
+        if( request()->input( 'business_id', null ) ){
+
+            $chain = Business::find( request()->input( 'business_id' ) )->chain;
+            $this->setBusinessChainAs( $chain );
+        }
+
         $chain = $this->businessChain();
 
         return response()->json([

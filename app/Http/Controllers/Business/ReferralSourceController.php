@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\Http\Requests\UpdateReferralSourceRequest;
 use App\ReferralSource;
 use App\Responses\CreatedResponse;
@@ -15,6 +16,11 @@ class ReferralSourceController extends BaseController
     {
         $type = $request->type;
 
+        if( request()->input( 'business_id', null ) ){
+
+            $chain = Business::find( request()->input( 'business_id' ) )->chain;
+            $this->setBusinessChainAs( $chain );
+        }
         $referralsources = $this->businessChain()
             ->referralSources()
             ->forType($type)
