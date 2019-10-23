@@ -20,10 +20,14 @@ class EmailTemplateController extends BaseController
     public function index(Request $request)
     {
         if($request->json){
+            $business = Business::find($request->business_id);
+            $this->authorize('read', $business);
+
             return EmailTemplate::where('business_id', $request->business_id)->get()->toArray();
         }
 
         $types = [];
+
         foreach(EmailTemplate::AVAILABLE_CUSTOM_TEMPLATES as $type=>$value){
             $types[] = ['id'=>$value, 'name'=> ucwords(str_replace("_", " ", $value))];
         }
