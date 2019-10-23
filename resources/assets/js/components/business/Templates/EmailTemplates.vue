@@ -7,7 +7,8 @@
             <b-col lg="2">
                 <business-location-form-group v-model="business_id"
                                               field="business_id"
-                                              help-text="Select the office location for this client" />
+                                              help-text="Select the office location for this client"
+                />
             </b-col>
             <b-col lg="4">
                 <b-form-group label="Select a template to customize">
@@ -49,17 +50,31 @@
                 caregiver_expiration: {},
                 business_id: '',
                 templates: [],
+                refresh: false,
             };
         },
+        methods: {
+            loadTemplates(){
+                axios.get('/business/email/templates?json=1&business_id=' + this.business_id).then(response => {
+                    this.templates = response.data;
+                    this.caregiver_expiration = this.templates.filter( x => x.type === 'caregiver_expiration');
+
+                    if(this.refresh === true){
+                        this.selectedType = "";
+                    }
+                }).finally();
+            }
+        },
         mounted(){
-            axios.get('/business/communication/templates?json=1&business_id=' + this.business_id).then(response => {
-                this.templates = response.data;
-                this.caregiver_expiration = this.templates.filter( x => x.type === 'caregiver_expiration');
-            }).finally();
-
-
+            this.loadTemplates();
+            this.refresh = true;
         },
         watch: {
+            business_id(oldVal, newVal){
+                if(oldVal !== newVal){
+                    this.loadTemplates();
+                }
+            }
         }
     }
 </script>

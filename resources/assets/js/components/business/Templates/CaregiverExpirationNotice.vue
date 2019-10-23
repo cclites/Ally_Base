@@ -57,7 +57,7 @@
 
 <script>
     export default {
-        name: "CgExpirationNotice",
+        name: "CaregiverExpirationNotice",
         props: {
             template: null,
             business_id: null
@@ -65,7 +65,10 @@
         data() {
             return {
                 selectedType: "",
-                form: new Form({}),
+                form: new Form({
+                    id: 0,
+                }),
+                url: '/business/email/templates/'
             };
         },
         mounted(){
@@ -77,8 +80,9 @@
             save()
             {
                 let method = (typeof this.form.id === 'undefined') ? 'post' : "patch";
+                let path = (method === 'post') ? this.url : this.url + `${this.form.id}`;
 
-                this.form.submit( method, '/business/communication/templates')
+                this.form.submit( method, path)
                     .then( ({ data }) => {
                         this.form = new Form(data.data);
                     })
@@ -115,7 +119,7 @@
                     return;
                 }
 
-                axios.delete('/business/communication/templates/' + this.form.id)
+                this.form.delete(this.url + this.form.id)
                     .then(response => {
                         this.createDefault();
                     })

@@ -24,7 +24,7 @@ class EmailTemplateController extends BaseController
         }
 
         $types = [];
-        foreach(EmailTemplate::TEMPLATE as $type=>$value){
+        foreach(EmailTemplate::AVAILABLE_CUSTOM_TEMPLATES as $type=>$value){
             $types[] = ['id'=>$value, 'name'=> ucwords(str_replace("_", " ", $value))];
         }
 
@@ -35,18 +35,16 @@ class EmailTemplateController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return ErrorResponse
-     * @return ErrorResponse
+     * @return mixed
      */
     public function store(UpdateEmailTemplateRequest $request)
     {
-        $template = new EmailTemplate($request->filtered());
-
-        if($template->save()){
-            return new SuccessResponse( 'Template has been saved.', $template );
+        if ($template = EmailTemplate::create($request->filtered())) {
+            return new SuccessResponse('Template has been created.', $template);
         }
 
-        return new ErrorResponse(500, 'Unable to save template.');
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to create a Template.  Please try again.');
+
     }
 
 
@@ -67,17 +65,16 @@ class EmailTemplateController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateEmailTemplateRequest $request)
+    public function update(UpdateEmailTemplateRequest $request, EmailTemplate $template)
     {
-        $business = $request->getBusiness();
-        $request->authorize('update', $business);
-        $template = EmailTemplate::find($request->id);
+        $request->authorize('update', $template);
 
-        if( $template->update( $request->filtered() ) ){
-            return new SuccessResponse( 'Template has been updated.', $template );
+        if( $template->update($request->filtered() ) ){
+            return new SuccessResponse('Templates has been updated.', $template->fresh() );
         }
 
-        return new ErrorResponse(500, 'Unable to update template.');
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to update a Template.  Please try again.');
+
     }
 
     /**
@@ -86,9 +83,14 @@ class EmailTemplateController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(EmailTemplate $template)
     {
-        EmailTemplate::destroy($id);
-        return new SuccessResponse('Template has been deleted.');
+        $this->authorize('delete', $template);
+
+        if($template->delete()){
+            return new SuccessResponse('Template has been deleted.');
+        }
+
+        return new ErrorResponse(500, 'Unable to update template.');
     }
 }
