@@ -489,6 +489,21 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     //////////////////////////////////////
 
     /**
+     * Get a collection of all the shift services, whether
+     * it is a breakout or regular shift.
+     *
+     * @return Collection
+     */
+    public function getServices() : Collection
+    {
+        if ($this->services->count() > 0) {
+            return $this->services;
+        }
+
+        return collect([$this->service]);
+    }
+
+    /**
      * Get the abbreviation code for the hours type of the current shift.
      *
      * @return string

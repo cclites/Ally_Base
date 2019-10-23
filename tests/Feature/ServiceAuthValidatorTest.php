@@ -797,4 +797,72 @@ class ServiceAuthValidatorTest extends TestCase
 
         $this->assertDoesNotExceedServiceAuth($shift->fresh());
     }
+
+    /** @test */
+    public function it_should_only_fail_for_auths_of_the_same_service_as_the_shift()
+    {
+        // This represents an issue where we were looking at all active service auths instead of
+        // the ones matching the shift's services.  This resulted in false positives if any of
+        // the auths failed, even if it was not for the service on the shift.
+        $otherService = factory(Service::class)->create([
+            'chain_id' => $this->client->business->businessChain->id,
+            'default' => false
+        ]);
+
+        $this->createClientAuth([
+            'service_id' => $otherService,
+            'units' => 5,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'effective_start' => Carbon::today()->subDays(1)->toDateString(),
+            'effective_end' => Carbon::today()->addDays(1)->toDateString(),
+        ]);
+
+        $this->createClientAuth([
+            'service_id' => $this->service->id,
+            'units' => 5,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'effective_start' => Carbon::today()->subDays(1)->toDateString(),
+            'effective_end' => Carbon::today()->addDays(1)->toDateString(),
+        ]);
+
+        $shift = $this->createShift(Carbon::now(), '11:00:00', 7, ['service_id' => $otherService->id]);
+        $this->assertCount(1, $this->client->getActiveServiceAuths($shift->checked_in_time, $shift->getServices()->pluck('id')));
+        $this->assertExceedsServiceAuth($shift);
+
+        $shift2 = $this->createShift(Carbon::now(), '11:00:00', 3, ['service_id' => $this->service->id]);
+        $this->assertCount(1, $this->client->getActiveServiceAuths($shift2->checked_in_time, $shift2->getServices()->pluck('id')));
+        $this->assertCount(2, $this->client->getActiveServiceAuths($shift2->checked_in_time));
+        $this->assertDoesNotExceedServiceAuth($shift2);
+    }
+
+    /** @test */
+    public function it_should_only_fail_for_auths_of_the_same_service_as_the_schedule()
+    {
+        $otherService = factory(Service::class)->create([
+            'chain_id' => $this->client->business->businessChain->id,
+            'default' => false
+        ]);
+
+        $this->createClientAuth([
+            'service_id' => $otherService,
+            'units' => 5,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'effective_start' => Carbon::today()->subDays(1)->toDateString(),
+            'effective_end' => Carbon::today()->addDays(1)->toDateString(),
+        ]);
+
+        $this->createClientAuth([
+            'service_id' => $this->service->id,
+            'units' => 5,
+            'period' => ClientAuthorization::PERIOD_WEEKLY,
+            'effective_start' => Carbon::today()->subDays(1)->toDateString(),
+            'effective_end' => Carbon::today()->addDays(1)->toDateString(),
+        ]);
+
+        $schedule = $this->createSchedule(Carbon::now(), '11:00:00', 7, ['service_id' => $otherService->id]);
+        $this->assertExceedsServiceAuth($schedule);
+
+        $schedule2 = $this->createSchedule(Carbon::now(), '11:00:00', 3, ['service_id' => $this->service->id]);
+        $this->assertDoesNotExceedServiceAuth($schedule2);
+    }
 }
