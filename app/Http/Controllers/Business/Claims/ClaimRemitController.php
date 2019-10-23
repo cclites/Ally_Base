@@ -59,9 +59,12 @@ class ClaimRemitController extends BaseController
      *
      * @param CreateClaimRemitRequest $request
      * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(CreateClaimRemitRequest $request)
     {
+        $this->authorize('create', [ClaimRemit::class, $request->filtered()]);
+
         if ($remit = ClaimRemit::create($request->filtered())) {
             return new SuccessResponse('Remit has been created.', new ClaimRemitResource($remit));
         }

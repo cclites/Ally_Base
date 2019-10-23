@@ -2,6 +2,7 @@
 
 namespace App\Claims\Policies;
 
+use App\Business;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Policies\BasePolicy;
 use App\Claims\ClaimRemit;
@@ -22,7 +23,7 @@ class ClaimRemitPolicy extends BasePolicy
 
     public function create(User $user, $data)
     {
-        return false;
+        return $this->businessCheck($user, Business::findOrFail($data['business_id']));
     }
 
     public function read(User $user, ClaimRemit $claimRemit)
