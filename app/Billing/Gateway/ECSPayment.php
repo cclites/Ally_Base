@@ -260,8 +260,6 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
      */
     public function depositFunds(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
-        throw new PaymentMethodError('Test Error');
-
         $this->setParamsFromAccount($account, $secCode);
         $this->params += [
             'currency' => $currency,
