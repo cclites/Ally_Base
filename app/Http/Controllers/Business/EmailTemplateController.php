@@ -43,7 +43,10 @@ class EmailTemplateController extends BaseController
      */
     public function store(UpdateEmailTemplateRequest $request)
     {
-        if ($template = EmailTemplate::create($request->filtered())) {
+        $data = $request->filtered();
+        $this->authorize('create', [EmailTemplate::class, $data]);
+
+        if ($template = EmailTemplate::create($data)) {
             return new SuccessResponse('Template has been created.', $template);
         }
 
@@ -71,7 +74,7 @@ class EmailTemplateController extends BaseController
      */
     public function update(UpdateEmailTemplateRequest $request, EmailTemplate $template)
     {
-        $request->authorize('update', $template);
+        $this->authorize('update', $template);
 
         if( $template->update($request->filtered() ) ){
             return new SuccessResponse('Templates has been updated.', $template->fresh() );
