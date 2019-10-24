@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\EmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -53,13 +54,24 @@ class LicenseExpirationReminder extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)->markdown(
-            'emails.caregiver.license_expiration_reminder', [
+        if($template = EmailTemplate::where('business_id', $this->business->id)->where('type', 'caregiver_expiration')->first()){
+            return (new MailMessage)->markdown(
+                'emails.caregiver.custom_expiration_reminder', [
                 'business' => $this->business,
                 'caregiver' => $this->license->caregiver,
-                //'expiration_date' => $this->license->expires_at->format('m/d/Y'),
+                'license' => $this->license,
+                'template' => $template
+            ]);
+        }else{
+            return (new MailMessage)->markdown(
+                'emails.caregiver.license_expiration_reminder', [
+                'business' => $this->business,
+                'caregiver' => $this->license->caregiver,
                 'license' => $this->license
             ]);
+        }
+
+
     }
 
     /**

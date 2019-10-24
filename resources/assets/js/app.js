@@ -359,6 +359,8 @@ Vue.component('business-task-details', require('./components/business/tasks/Task
 Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
 Vue.component('report-list', require('./components/ReportList'));
+Vue.component('email-templates', require('./components/business/Templates/EmailTemplates'));
+Vue.component('caregiver-expiration-notice', require('./components/business/Templates/CaregiverExpirationNotice'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
