@@ -118,6 +118,12 @@ class QuickbooksDesktopController extends Controller
         return new QuickbooksApiResponse($invoices->count() . ' Invoices were marked as processed.');
     }
 
+    /**
+     * Log results from importing invoice attempts.
+     *
+     * @param QuickbooksDesktopApiRequest $request
+     * @return QuickbooksApiResponse
+     */
     public function invoiceResults(QuickbooksDesktopApiRequest $request)
     {
         $success = 0;
