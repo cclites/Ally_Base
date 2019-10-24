@@ -8,7 +8,6 @@ use App\Billing\Exceptions\PaymentMethodDeclined;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\PhoneNumber;
-use App\Responses\ErrorResponse;
 
 /**
  * Class ECSPayment
@@ -203,7 +202,7 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
         if (!$response || empty($data['transactionid'])) {
             $statusCode = $this->lastResponseCode;
             \Log::error("ECSPayments::post error.  Error processing transaction. HTTP code: $statusCode.  Message: $text");
-            return new ErrorResponse(500, 'ECSPayments::Error processing transaction.' . $text);
+            throw new PaymentMethodError('Error processing transaction: ' . $text);
         }
 
         $transaction = new GatewayTransaction([
@@ -261,6 +260,8 @@ class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
      */
     public function depositFunds(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
+        throw new PaymentMethodError('Test Error');
+
         $this->setParamsFromAccount($account, $secCode);
         $this->params += [
             'currency' => $currency,
