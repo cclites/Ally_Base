@@ -26,9 +26,18 @@
                     <system-notifications-icon></system-notifications-icon>
                 @endif
                 <!-- ============================================================== -->
+                <!-- Open Shifts Feature -->
+                <!-- ============================================================== -->
+                {{-- @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']) && !in_array( $active_business->open_shifts_setting, [ App\Business::OPEN_SHIFTS_DISABLED ] ))
+                    <a class="nav-link dropdown-toggle text-muted" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="mdi mdi-account-circle"></i></a>
+                @endif --}}
+                @if( is_office_user() || is_caregiver() )
+                    {{ 'hey lol' }}
+                @endif
+                <!-- ============================================================== -->
                 <!-- Tasks -->
                 <!-- ============================================================== -->
-                @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']))
+                @if( is_office_user() || is_caregiver() )
                     <tasks-icon role="{{ Auth::user()->role_type }}"></tasks-icon>
                 @endif
                 <!-- ============================================================== -->

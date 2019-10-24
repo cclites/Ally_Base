@@ -240,6 +240,15 @@ function is_office_user() {
 }
 
 /**
+ * Check if the logged in user is an office user
+ *
+ * @return bool
+ */
+function is_caregiver() {
+    return Auth::check() && Auth::user()->role_type === 'caregiver';
+}
+
+/**
  * Check if the logged in user is a client
  *
  * @return bool
@@ -265,11 +274,15 @@ if (! function_exists('activeBusiness')) {
      * @deprecated
      */
     function activeBusiness() {
-        if (Auth::check() && Auth::user()->role_type === 'caregiver') {
-            return Auth::user()->role->businesses->first();
-        }
 
         $activeBusiness = app()->make(\App\ActiveBusiness::class);
+
+        // caregivers should have an active business as well
+        // if ( is_caregiver() ) {
+
+        //     return Auth::user()->role->businesses->first();
+        // }
+
         if (!$business = $activeBusiness->get()) {
             return null;
         }
