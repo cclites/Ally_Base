@@ -25,7 +25,7 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
     protected $range = [];
 
     /**
-     * BusinessOfflineArAgingReport constructor.
+     * InvoiceSummaryByClientTypeReport constructor.
      * @param OnlineClientInvoiceQuery $query
      */
     public function __construct(OnlineClientInvoiceQuery $query)

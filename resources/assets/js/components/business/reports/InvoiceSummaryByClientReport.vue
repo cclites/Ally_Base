@@ -70,8 +70,28 @@
                 :fields="fields"
                 :sort-by.sync="sortBy"
                 :sort-desc.sync="sortDesc"
+                :filter="filter"
                 :empty-text="emptyText"
             >
+                <template slot="expand" scope="row">
+                    <b-btn variant="secondary" size="sm" @click.stop="row.toggleDetails">
+                        <i v-if="row.detailsShowing" class="fa fa-caret-down" />
+                        <i v-else class="fa fa-caret-right" />
+                    </b-btn>
+                </template>
+                <template slot="row-details" scope="row">
+                        <!---------- SUB TABLE --------------->
+                        <b-table bordered striped show-empty
+                            :items="row.item.invoices"
+                            :fields="subFields"
+                            sort-by="date"
+                        >
+                            <template slot="invoice_name" scope="row">
+                                <a :href="`/business/client/invoices/${row.item.invoice_id}`" target="_blank">#{{ row.item.invoice_name }}</a>
+                            </template>
+                        </b-table>
+                      <!---------- /END SUB TABLE --------------->
+                </template>
             </b-table>
         </div>
     </b-card>
@@ -91,14 +111,26 @@
         data() {
             return {
                 items: [],
-                sortBy: 'client',
+                sortBy: 'client_name',
                 sortDesc: false,
+                filter: '',
+                clients: [],
                 fields: {
-                    client: { sortable: true },
+                    expand: { label: ' ', sortable: false, },
+                    client_name: { label: 'Client', sortable: true },
+                    invoice_count: { label: 'No of Invoices', sortable: true },
                     hours: { sortable: true, formatter: x => this.numberFormat(x) },
                     hourly_charges: { sortable: true, formatter: x => this.moneyFormat(x) },
                     total_charges: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    average_charge: { sortable: true, formatter: x => this.moneyFormat(x) },
+                },
+                subFields: {
+                    invoice_name: { sortable: true, label: 'Invoice' },
+                    invoice_date: { sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    payer_name: { sortable: true, label: 'Payer' },
+                    date_range: { sortable: true, label: 'Dates of Service' },
+                    hours: { sortable: true, formatter: x => this.numberFormat(x) },
+                    hourly_charges: { sortable: true, formatter: x => this.moneyFormat(x) },
+                    total_charges: { sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 filters: new Form({
                     mode: 'invoice',
@@ -111,9 +143,6 @@
                     inactive: 0,
                     json: 1,
                 }),
-                showEditModal: false,
-                showAdjustmentModal: false,
-                deletingId: null,
                 loadingClients: false,
             }
         },

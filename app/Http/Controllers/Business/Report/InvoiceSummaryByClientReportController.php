@@ -22,7 +22,10 @@ class InvoiceSummaryByClientReportController extends Controller
 
             $report->applyFilters(
                 $request->mode,
-                $request->filterDateRange()
+                $request->filterDateRange(),
+                $request->client_type,
+                $request->payer_id,
+                $request->client_id
             );
 
             if ($request->forExport()) {
