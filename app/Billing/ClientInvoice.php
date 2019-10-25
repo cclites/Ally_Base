@@ -367,4 +367,23 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
         }, floatval(0.00));
     }
+
+    /**
+     * Get the date range of the attached items.  Example:
+     * If invoice contains shifts for 10/01/2019, 10/15/2019, 10/31/2019
+     * This method should return [10/01/2019, 10/31/2019]
+     *
+     * @return string
+     */
+    public function getDateSpan() : string
+    {
+        if (empty($this->items)) {
+            return [null, null];
+        }
+
+        $ordered = $this->items->sortBy('date');
+        return optional(optional($ordered->first())->getDate())->format('m/d/Y')
+            . ' - ' .
+            optional(optional($ordered->last())->getDate())->format('m/d/Y');
+    }
 }

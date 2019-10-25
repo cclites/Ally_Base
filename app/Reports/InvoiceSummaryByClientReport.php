@@ -124,7 +124,7 @@ class InvoiceSummaryByClientReport extends BaseReport
                     'hours' => $totalsObj->getTotalHours(),
                     'hourly_charges' => $totalsObj->getTotalHourlyCharges(),
                     'total_charges' => $totalsObj->getAmount(),
-                    'date_range' => '-', // TODO
+                    'date_range' => $totalsObj->getDateSpan(),
                 ];
             })
             ->groupBy('client_id')
