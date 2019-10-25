@@ -32,7 +32,7 @@
                     <a class="nav-link dropdown-toggle text-muted" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="mdi mdi-account-circle"></i></a>
                 @endif --}}
                 @if( Auth::user()->can( 'view-open-shifts' ) )
-                    {{ 'hey lol' }}
+                    <open-shifts-icon />
                 @endif
                 <!-- ============================================================== -->
                 <!-- Tasks -->

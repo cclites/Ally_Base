@@ -339,6 +339,7 @@ Vue.component('reset-password-modal', require('./components/ResetPasswordModal.v
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('system-notifications-icon', require('./components/SystemNotificationsIcon.vue'));
+Vue.component('open-shifts-icon', require('./components/OpenShiftsIcon.vue'));
 Vue.component('tasks-icon', require('./components/TasksIcon.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));

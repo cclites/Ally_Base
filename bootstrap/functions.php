@@ -275,14 +275,11 @@ if (! function_exists('activeBusiness')) {
      */
     function activeBusiness() {
 
+        if ( is_caregiver() ) {
+            return Auth::user()->role->businesses->first();
+        }
+
         $activeBusiness = app()->make(\App\ActiveBusiness::class);
-
-        // caregivers should have an active business as well
-        // if ( is_caregiver() ) {
-
-        //     return Auth::user()->role->businesses->first();
-        // }
-
         if (!$business = $activeBusiness->get()) {
             return null;
         }
