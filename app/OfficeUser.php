@@ -152,6 +152,11 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->phoneNumbers()->first();
     }
 
+    public function getHasAccessToOpenShiftsAttribute()
+    {
+        return $this->defaultBusiness && $this->defaultBusiness->has_open_shifts;
+    }
+
     /**
      * Return an array of business IDs the entity is attached to
      *
