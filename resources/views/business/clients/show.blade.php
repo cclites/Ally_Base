@@ -95,6 +95,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
+                <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc</a>
+                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>    
             </div>
         </li>
     </ul>
