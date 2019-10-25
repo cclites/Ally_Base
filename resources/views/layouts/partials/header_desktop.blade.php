@@ -28,11 +28,8 @@
                 <!-- ============================================================== -->
                 <!-- Open Shifts Feature -->
                 <!-- ============================================================== -->
-                {{-- @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']) && !in_array( $active_business->open_shifts_setting, [ App\Business::OPEN_SHIFTS_DISABLED ] ))
-                    <a class="nav-link dropdown-toggle text-muted" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="mdi mdi-account-circle"></i></a>
-                @endif --}}
                 @if( Auth::user()->can( 'view-open-shifts' ) )
-                    <open-shifts-icon />
+                    <open-shifts-icon></open-shifts-icon>
                 @endif
                 <!-- ============================================================== -->
                 <!-- Tasks -->
