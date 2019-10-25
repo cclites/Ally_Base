@@ -572,7 +572,21 @@
                     {
                         name: 'Payment Summary by Payment Method',
                         url: 'reports/payment-summary-by-payer',
-                        description: 'This report shows a summary of all payments made',
+                        description: 'This report shows a summary of all payments made.',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Invoice Summary by Client',
+                        url: 'reports/invoice-summary-by-client',
+                        description: 'This report shows invoice or claim totals summarized by client for a specified period.',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Invoice Summary by Client Type',
+                        url: 'reports/invoice-summary-by-client-type',
+                        description: 'This report shows invoice or claim totals summarized by client type in a specified period.',
                         category: 5,
                         allowed: ['office_user'],
                     },

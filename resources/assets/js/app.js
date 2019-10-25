@@ -404,6 +404,9 @@ Vue.component('business-remit-application-report', require('./components/busines
 Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
 Vue.component('claim-adjustment-history', require('./components/business/claims/ClaimAdjustmentHistory'));
 
+Vue.component('invoice-summary-by-client-type-report', require('./components/business/reports/InvoiceSummaryByClientTypeReport'));
+Vue.component('invoice-summary-by-client-report', require('./components/business/reports/InvoiceSummaryByClientReport'));
+
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
 });

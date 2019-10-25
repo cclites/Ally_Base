@@ -2,6 +2,7 @@
 
 namespace App\Claims;
 
+use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
@@ -17,6 +18,7 @@ use App\Billing\Payer;
 use Carbon\Carbon;
 use App\Business;
 use App\Client;
+use Illuminate\Support\Collection;
 
 /**
  * App\Claims\ClaimInvoice
@@ -176,6 +178,14 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     // **********************************************************
 
     /**
+     * @return \Illuminate\Support\Collection|\App\Claims\ClaimInvoiceItem[]
+     */
+    function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    /**
      * Get the claim name.
      *
      * @return string
@@ -293,6 +303,62 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->client->payers()
             ->where('payer_id', $this->payer_id)
             ->first();
+    }
+
+
+    /**
+     * Get the total number of hours on the client invoice by
+     * adding all the 'units' for shift related items.
+     *
+     * @return float
+     */
+    public function getTotalHours() : float
+    {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
+            if ($item->claimable_type == ClaimableService::class) {
+                return add($carry, floatval($item->units));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the total number of 'hourly' charges on the invoice by
+     * adding the amounts for shift related items.
+     *
+     * @return float
+     */
+    public function getTotalHourlyCharges() : float
+    {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
+            if ($item->claimable_type == ClaimableService::class) {
+                return add($carry, floatval($item->amount));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the date range of the attached items.  Example:
+     * If invoice contains shifts for 10/01/2019, 10/15/2019, 10/31/2019
+     * This method should return [10/01/2019, 10/31/2019]
+     *
+     * @return string
+     */
+    public function getDateSpan() : string
+    {
+        if (empty($this->items)) {
+            return [null, null];
+        }
+
+        $ordered = $this->items->sortBy('date');
+        return optional(optional($ordered->first())->date)->format('m/d/Y')
+            . ' - ' .
+            optional(optional($ordered->last())->date)->format('m/d/Y');
     }
 
     // **********************************************************
