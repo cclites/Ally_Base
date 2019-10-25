@@ -434,6 +434,9 @@ Route::group([
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');
 
+    /** Open Shifts */
+    Route::resource('open-shifts', 'OpenShiftController');
+
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');
     Route::get('shifts/{shift}/print', 'Business\ShiftController@printPage')->name('shifts.print');

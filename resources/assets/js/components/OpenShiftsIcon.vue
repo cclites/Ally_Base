@@ -2,7 +2,7 @@
 
     <li class="nav-item pr-2">
 
-        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 55px" id="openShiftsDropdown" href="" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 55px" id="openShiftsDropdown" href="/business/open-shifts" aria-haspopup="true" aria-expanded="false">
 
             <i class="notification-icon open-shifts-icon"></i>
 
