@@ -656,7 +656,7 @@ class Caregiver extends AuditableModel implements
 
         foreach( $this->businesses as $business ){
 
-            if( $business->open_shifts_setting != Business::OPEN_SHIFTS_DISABLED ) $businesses->push( $business );
+            if( $business->has_open_shifts ) $businesses->push( $business );
         }
 
         return $businesses;

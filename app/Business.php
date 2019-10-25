@@ -555,6 +555,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return false;
     }
 
+
+
     /**
      * Save a new Chargeable instance to the database
      */
@@ -809,6 +811,11 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getNpiNumber(): ?string
     {
         return $this->medicaid_npi_number;
+    }
+
+    public function getHasOpenShiftsAttribute()
+    {
+        return $this->open_shifts_setting != self::OPEN_SHIFTS_DISABLED;
     }
 
     /**
