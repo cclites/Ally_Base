@@ -64,12 +64,10 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
     {
         $query = clone $this->query;
 
-        $query->whereBetween('created_at', [$this->range[0], $this->range[1]]);
+        $query->forDateRange($this->range);
 
         if ($this->mode == 'claim') {
-            $query->whereHas('claimInvoice', function ($q) {
-                $q->whereIn('status', ClaimStatus::transmittedStatuses());
-            });
+            $query->hasClaim(true);
         }
 
         return $query->get()
