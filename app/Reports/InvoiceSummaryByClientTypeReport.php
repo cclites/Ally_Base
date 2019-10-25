@@ -2,11 +2,11 @@
 
 namespace App\Reports;
 
-use App\Billing\ClaimStatus;
-use App\Billing\ClientInvoice;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
-use App\Claims\ClaimInvoice;
 use Illuminate\Support\Collection;
+use App\Billing\ClientInvoice;
+use App\Billing\ClaimStatus;
+use App\Claims\ClaimInvoice;
 
 class InvoiceSummaryByClientTypeReport extends BaseReport
 {
