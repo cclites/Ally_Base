@@ -3,7 +3,7 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <b-alert show variant="info">This report shows invoice or claim totals summarized by client type by invoice date. The date range on this report is for invoice date (not date of service).</b-alert>
+        <b-alert show variant="info">This report shows invoice or claim totals summarized by client type.  The date range on this report is for the invoice date (not date of service).  If you select Claim Amounts, this will only include invoices that have transmitted claims.</b-alert>
         <b-row>
             <b-col lg="12">
                 <b-form inline class="mb-4">

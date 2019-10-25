@@ -2,13 +2,10 @@
 
 namespace App\Reports;
 
+use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
-use App\Billing\Queries\ClientInvoiceQuery;
+use App\Billing\Queries\OnlineClientInvoiceQuery;
 use App\Claims\ClaimInvoice;
-use App\Claims\ClaimRemit;
-use App\Claims\Resources\ClaimRemitResource;
-use App\ClientType;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class InvoiceSummaryByClientTypeReport extends BaseReport
@@ -29,9 +26,9 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
 
     /**
      * BusinessOfflineArAgingReport constructor.
-     * @param ClientInvoiceQuery $query
+     * @param OnlineClientInvoiceQuery $query
      */
-    public function __construct(ClientInvoiceQuery $query)
+    public function __construct(OnlineClientInvoiceQuery $query)
     {
         $this->query = $query->with('client', 'items', 'claimInvoice.items');
     }
@@ -70,7 +67,9 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
         $query->whereBetween('created_at', [$this->range[0], $this->range[1]]);
 
         if ($this->mode == 'claim') {
-            $query->whereHas('claimInvoice');
+            $query->whereHas('claimInvoice', function ($q) {
+                $q->whereIn('status', ClaimStatus::transmittedStatuses());
+            });
         }
 
         return $query->get()
