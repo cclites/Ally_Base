@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 class InvoiceSummaryByClientTypeReportController extends Controller
 {
     /**
-     * Get the Claim Remit Application Report.
+     * Get the Invoice Summary by Client Type Report.
      *
      * @param InvoiceSummaryByClientTypeReportRequest $request
      * @param InvoiceSummaryByClientTypeReport $report

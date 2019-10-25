@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 /**
- * Class ClaimRemitApplicationReportRequest
- * @package App\Claims\Requests
+ * Class InvoiceSummaryByClientTypeReportRequest
+ * @package App\Http\Requests
  */
 class InvoiceSummaryByClientTypeReportRequest extends FilteredResourceRequest
 {
