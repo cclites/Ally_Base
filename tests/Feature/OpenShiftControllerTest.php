@@ -55,7 +55,5 @@ class OpenShiftControllerTest extends TestCase
         $this->actingAs( $this->officeUser->user );
 
         $data = $this->get( route( 'business.open-shifts.index' ) . '?json=1' );
-
-        dd( $data );
     }
 }
