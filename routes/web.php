@@ -447,11 +447,6 @@ Route::group([
     Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
     Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');
     Route::get('communication/sms-other-replies', 'Business\CommunicationController@otherReplies')->name('communication.sms-other-replies');
-
-    Route::get('email/templates', 'Business\EmailTemplateController@index')->name('email.templates');
-    Route::post('email/templates', 'Business\EmailTemplateController@store')->name('email.templates.store');
-    Route::patch('email/templates/{template}', 'Business\EmailTemplateController@update')->name('email.templates.update');
-    Route::delete('email/templates/{template}', 'Business\EmailTemplateController@destroy')->name('email.templates.destroy');
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');

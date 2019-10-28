@@ -14,7 +14,6 @@ use App\Claims\ClaimInvoice;
 use App\Claims\ClaimRemit;
 use App\Client;
 use App\Billing\Deposit;
-use App\EmailTemplate;
 use App\EmergencyContact;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
@@ -49,7 +48,6 @@ use App\Policies\TimesheetPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\CustomFieldPolicy;
 use App\Policies\CustomFieldOptionPolicy;
-use App\Policies\EmailTemplatePolicy;
 use App\CustomField;
 use App\CustomFieldOption;
 use App\Prospect;
@@ -93,7 +91,6 @@ class AuthServiceProvider extends ServiceProvider
         CustomFieldOption::class => CustomFieldOptionPolicy::class,
         DeactivationReason::class => DeactivationReasonPolicy::class,
         Deposit::class => DepositPolicy::class,
-        EmailTemplate::class => EmailTemplatePolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
         OtherContact::class => OtherContactPolicy::class,

@@ -120,7 +120,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Timesheet[] $timesheets
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $users
- * @property-read \App\Business\EmailTemolates $emailTemplates
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forAuthorizedChain(\App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forChains($chains)
@@ -440,10 +439,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function quickbooksServices()
     {
         return $this->hasMany(QuickbooksService::class);
-    }
-
-    public function emailTemplates(){
-        return $this->hasMany(EmailTemplate::class);
     }
 
     ///////////////////////////////////////////
