@@ -17,6 +17,7 @@ class AuditLogController extends Controller
     public function index()
     {
         if (request()->expectsJson()) {
+            return response()->json([]);
             $dates = [
                 Carbon::parse(request()->start)->startOfDay(),
                 Carbon::parse(request()->end)->endOfDay()

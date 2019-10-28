@@ -14,6 +14,7 @@ class AuditLogController extends Controller
 {
     public function show(Request $request){
 
+        return response()->json([]);
         // Note: when adding new models to this controller make sure to
         // identify and clear any sensitive and/or encrypted data
         // at the AuditLogResource level before returning to the front-end.
