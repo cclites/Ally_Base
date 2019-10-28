@@ -7,7 +7,7 @@ use App\Billing\Payment;
 use App\Business;
 use App\BusinessChain;
 
-class PaymentsVsDepositsReport extends BaseReport
+class ChargesVsDepositsReport extends BaseReport
 {
     /**
      * Date range filter.
@@ -17,7 +17,7 @@ class PaymentsVsDepositsReport extends BaseReport
     protected $range = [];
 
     /**
-     * PaymentsVsDepositsReport constructor.
+     * ChargesVsDepositsReport constructor.
      */
     public function __construct()
     {
@@ -58,7 +58,7 @@ class PaymentsVsDepositsReport extends BaseReport
                 return $business->clients()->pluck('id');
             })->flatten(1);
 
-            $payments = Payment::whereBetween('created_at', $this->range)
+            $charges = Payment::whereBetween('created_at', $this->range)
                 ->where(function ($q) use ($businesses, $clients) {
                     return $q->whereIn('business_id', $businesses)
                         ->orWhereIn('client_id', $clients);
@@ -81,33 +81,33 @@ class PaymentsVsDepositsReport extends BaseReport
             return [
                 'chain' => $chain->name,
                 'chain_id' => $chain->id,
-                'payments' => $payments,
+                'charges' => $charges,
                 'deposits' => $deposits,
-                'diff' => abs(subtract($payments, $deposits)),
-                'diff_percent' => $this->getDiff($payments, $deposits),
+                'diff' => abs(subtract($charges, $deposits)),
+                'diff_percent' => $this->getDiff($charges, $deposits),
             ];
         });
     }
 
     /**
-     * Get percentage difference between payments and deposits.
+     * Get percentage difference between charges and deposits.
      *
-     * @param float $payments
+     * @param float $charges
      * @param float $deposits
      * @return float
      */
-    public function getDiff(float $payments, float $deposits) : float
+    public function getDiff(float $charges, float $deposits) : float
     {
-        if ($payments == 0 || $deposits == 0) {
-            return add($payments, $deposits);
+        if ($charges == 0 || $deposits == 0) {
+            return add($charges, $deposits);
         }
 
-        if ($payments > $deposits) {
-            $more = $payments;
+        if ($charges > $deposits) {
+            $more = $charges;
             $less = $deposits;
         } else {
             $more = $deposits;
-            $less = $payments;
+            $less = $charges;
         }
 
         return (($more - $less) / ($more)) * 100;

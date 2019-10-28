@@ -252,9 +252,9 @@
                         allowed: ['admin'],
                     },
                     {
-                        name: 'Payments vs Deposits Report',
-                        url: 'reports/payments-vs-deposits',
-                        description: 'This report shows all incoming payments and outgoing deposits for each chain for a given period.',
+                        name: 'Charges vs Deposits Report',
+                        url: 'reports/charges-vs-deposits',
+                        description: 'This report shows all incoming charges and outgoing deposits for each chain for a given period.',
                         category: 5,
                         allowed: ['admin'],
                     },

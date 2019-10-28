@@ -5,10 +5,10 @@ namespace App\Http\Requests\Admin;
 use App\Http\Requests\FilteredResourceRequest;
 
 /**
- * Class ClaimTransmissionsReportRequest
- * @package App\Claims\Requests\Admin
+ * Class ChargesVsDepositsReportRequest
+ * @package App\Http\Requests\Admin
  */
-class PaymentsVsDepositsReportRequest extends FilteredResourceRequest
+class ChargesVsDepositsReportRequest extends FilteredResourceRequest
 {
     /**
      * Get the validation rules that apply to the request.

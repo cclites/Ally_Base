@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\PaymentsVsDepositsReportRequest;
-use App\Reports\PaymentsVsDepositsReport;
+use App\Http\Requests\Admin\ChargesVsDepositsReportRequest;
+use App\Reports\ChargesVsDepositsReport;
 
-class PaymentsVsDepositsReportController extends Controller
+class ChargesVsDepositsReportController extends Controller
 {
-    public function index(PaymentsVsDepositsReportRequest $request, PaymentsVsDepositsReport $report)
+    public function index(ChargesVsDepositsReportRequest $request, ChargesVsDepositsReport $report)
     {
         if ($request->forJson() || $request->forExport()) {
 
@@ -22,9 +22,9 @@ class PaymentsVsDepositsReportController extends Controller
             return response()->json($report->rows());
         }
 
-        return view_component('payments-vs-deposits-report', 'Payments vs Deposits Report', [], [
+        return view_component('charges-vs-deposits-report', 'Charges vs Deposits Report', [], [
             'Home' => route('home'),
-            'Reports' => route('admin.reports.payments-vs-deposits')
+            'Reports' => route('admin.reports.charges-vs-deposits')
         ]);
     }
 }

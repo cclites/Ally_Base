@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Payments vs Deposits Report"
+    <b-card header="Charges vs Deposits Report"
         header-text-variant="white"
         header-bg-variant="info"
     >
@@ -69,7 +69,7 @@
                 filter: '',
                 fields: {
                     chain: { label: 'Business Chain', sortable: true, },
-                    payments: { sortable: true, formatter: x => this.moneyFormat(x) },
+                    charges: { sortable: true, formatter: x => this.moneyFormat(x) },
                     deposits: { sortable: true, formatter: x => this.moneyFormat(x) },
                     diff: { sortable: true },
                 },
@@ -89,7 +89,7 @@
 
         methods: {
             async fetch() {
-                this.filters.get(`/admin/reports/payments-vs-deposits`)
+                this.filters.get(`/admin/reports/charges-vs-deposits`)
                     .then( ({ data }) => {
                         this.items = data;
                     })
@@ -99,12 +99,11 @@
             },
 
             download() {
-                window.location = this.filters.toQueryString('/admin/reports/payments-vs-deposits?export=1');
+                window.location = this.filters.toQueryString('/admin/reports/charges-vs-deposits?export=1');
             },
         },
 
         async mounted() {
-            this.fetch();
         }
     }
 </script>
