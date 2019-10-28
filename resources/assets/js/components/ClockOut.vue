@@ -271,7 +271,14 @@
             },
 
             async submitForm() {
-                this.showLoading('Clocking out..');
+
+                if ( this.needsTwoAdls && this.form.activities.length < 2 ) {
+
+                    alert( 'You must have at least 2 activities to clock out' );
+                    return;
+                }
+
+                this.showLoading( 'Clocking out..' );
                 try {
                     await this.form.post(`/clock-out/${this.shift.id}`);
                     window.location = '/schedule?clocked_out=1'
@@ -332,6 +339,11 @@
                 }
 
                 return this.nl2br(this.shift.schedule.care_plan.notes);
+            },
+            needsTwoAdls(){
+
+                if( !this.shift ) return null;
+                return [ 'medicaid', 'ltci' ].includes( this.shift.client.client_type.toLowerCase() );
             }
         },
     }

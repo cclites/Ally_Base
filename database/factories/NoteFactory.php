@@ -19,6 +19,7 @@ $factory->define(Note::class, function (Faker $faker) {
             return factory(Client::class)->create()->id;
         },
         'body' => $faker->paragraph,
+        'title' => $faker->word,
         'tags' => $faker->word,
         'created_by' => function() {
             return factory(OfficeUser::class)->create()->id;

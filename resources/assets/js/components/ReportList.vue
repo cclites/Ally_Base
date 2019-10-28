@@ -244,6 +244,20 @@
                         category: 5,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Total Deposits Report',
+                        url: 'reports/total_deposits_report',
+                        description: '',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
+                        name: 'Charges vs Deposits Report',
+                        url: 'reports/charges-vs-deposits',
+                        description: 'This report shows all incoming charges and outgoing deposits for each chain for a given period.',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 
@@ -565,7 +579,21 @@
                     {
                         name: 'Payment Summary by Payment Method',
                         url: 'reports/payment-summary-by-payer',
-                        description: 'This report shows a summary of all payments made',
+                        description: 'This report shows a summary of all payments made.',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Invoice Summary by Client',
+                        url: 'reports/invoice-summary-by-client',
+                        description: 'This report shows invoice or claim totals summarized by client for a specified period.',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Invoice Summary by Client Type',
+                        url: 'reports/invoice-summary-by-client-type',
+                        description: 'This report shows invoice or claim totals summarized by client type in a specified period.',
                         category: 5,
                         allowed: ['office_user'],
                     },

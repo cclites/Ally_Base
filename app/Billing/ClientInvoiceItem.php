@@ -6,6 +6,7 @@ use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Shift;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -67,6 +68,16 @@ class ClientInvoiceItem extends BaseInvoiceItem
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    /**
+     * Get the Carbon parsed object for the item date.
+     *
+     * @return Carbon
+     */
+    public function getDate() : Carbon
+    {
+        return Carbon::parse($this->date);
+    }
 
     /**
      * Get the related invoiceable Shift.

@@ -297,6 +297,10 @@
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
                 services: [],
+                clientsLoaded: false,
+                caregiversLoaded: false,
+                servicesLoaded: false,
+
             }
         },
 
@@ -444,10 +448,15 @@
                         + '&client_type=' + filters.client_type + '&service_id=' + filters.service_id
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             },
+
             generateReportDisabled(){
-                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))){
+
+                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))
+                    && this.clientsLoaded && this.caregiversLoaded && this.servicesLoaded)
+                {
                     return false;
                 }
+
                 return true;
             },
         },
@@ -555,9 +564,23 @@
             },
 
             async loadFiltersData() {
-                await axios.get('/business/clients').then(response => this.clients = response.data);
-                await axios.get('/business/caregivers').then(response => this.caregivers = response.data);
-                await axios.get('/business/services?json=1').then(response => this.services = response.data);
+                await axios.get('/business/clients').
+                        then(response => {
+                            this.clients = response.data;
+                            this.clientsLoaded = true;
+                        });
+
+                await axios.get('/business/caregivers').
+                        then(response => {
+                            this.caregivers = response.data;
+                            this.caregiversLoaded = true;
+                        });
+
+                await axios.get('/business/services?json=1').
+                        then(response => {
+                            this.services = response.data;
+                            this.servicesLoaded = true;
+                        });
             },
 
             details(item) {

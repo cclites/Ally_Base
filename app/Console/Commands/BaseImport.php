@@ -80,7 +80,8 @@ abstract class BaseImport extends Command
         DB::beginTransaction();
 
         $count = 0;
-        for($row=2; $row<$lastRow; $row++) {
+        for($row=2; $row <= $lastRow; $row++) {
+
             if (!$this->emptyRow($row)) {
                 if ($imported = $this->importRow($row)) {
                     $count++;

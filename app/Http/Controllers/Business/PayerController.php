@@ -12,6 +12,7 @@ use App\Http\Requests\CreatePayerRequest;
 use App\Http\Requests\UpdatePayerRequest;
 use App\Responses\ErrorResponse;
 use App\Billing\Validators\PayerRateValidator;
+use App\Business;
 
 class PayerController extends BaseController
 {
@@ -23,6 +24,12 @@ class PayerController extends BaseController
      */
     public function index(Request $request)
     {
+        if( request()->input( 'business_id', null ) ){
+
+            $chain = Business::find( request()->input( 'business_id' ) )->chain;
+            $this->setBusinessChainAs( $chain );
+        }
+
         $payers = $this->businessChain()->payers()
             ->with(['rates', 'rates.service'])
             ->ordered()

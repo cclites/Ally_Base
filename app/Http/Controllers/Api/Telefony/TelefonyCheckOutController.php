@@ -13,6 +13,7 @@ class TelefonyCheckOutController extends BaseVoiceController
     const AskForMileageEntry = 'Enter the number of miles followed by the pound sign.';
     const ConfirmMileageEntry = 'You have entered, %s miles.  If this is correct, Press 1. To re-enter, Press 2.';
     const MileageEntrySuccess = 'Your mileage has been recorded.';
+    const MileageEntryFailure = 'Mileage must be less than 1000 miles';
     const PromptForCaregiverPhone = 'Please enter your own ten digit phone number for identification';
 
     /**
@@ -274,6 +275,11 @@ class TelefonyCheckOutController extends BaseVoiceController
     {
         if (! is_numeric($mileage)) {
             $mileage = 0;
+        }
+
+        if($mileage > 1000){
+            $this->telefony->say(self::MileageEntryFailure);
+            return $this->askForMileageEntry($shift);
         }
 
         if ($this->request->input('Digits') == 1) {

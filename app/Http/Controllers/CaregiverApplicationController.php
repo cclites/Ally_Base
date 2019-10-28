@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Business;
 use App\BusinessChain;
 use App\CaregiverApplication;
+use App\Signature;
 use App\Http\Controllers\Business\BaseController as BusinessBaseController;
 use App\Http\Requests\CaregiverApplicationStoreRequest;
 use App\Responses\CreatedResponse;
@@ -42,10 +43,10 @@ class CaregiverApplicationController extends BusinessBaseController
                 $query->where('created_at', '<', Carbon::parse($endDate, $timezone)->addDay());
             }
 
-            return $query->get();
+            return $query->whereArchived($request->archived)->get();
         }
 
-        $applications = $query->get();
+        $applications = $query->whereStatus('Open')->whereArchived(0)->get();
         $applicationUrl = $this->businessChain()->getCaregiverApplicationUrl();
         return view('caregivers.applications.index', compact('applicationUrl', 'applications'));
     }
@@ -85,9 +86,18 @@ class CaregiverApplicationController extends BusinessBaseController
     {
         $businessChain = BusinessChain::whereSlug($slug)->firstOrFail();
         $data = $request->filtered();
+
+        //Throw signature into another variable and unset it from $data so
+        //application saves correctly.
+        $signature = $data['caregiver_signature'];
+        unset($data['caregiver_signature']);
+
         $application = $businessChain->caregiverApplications()->create($data);
 
-        if ($application) {
+        if ($application)
+        {
+            Signature::attachToModel($application, $signature, 'caregiver' );
+
             \Notification::send($businessChain->notifiableUsers(), new ApplicationSubmitted($application));
 
             return new CreatedResponse('Application submitted successfully.', [], route('business_chain_routes.applications.done', ['slug' => $slug, 'application' => $application]));
@@ -106,6 +116,7 @@ class CaregiverApplicationController extends BusinessBaseController
     {
         $this->authorize('read', $application);
         $application->updateStatus();
+        $application->caregiver_signature = $application->signature;
 
         return view('caregivers.applications.show', compact('application'));
     }
@@ -127,6 +138,8 @@ class CaregiverApplicationController extends BusinessBaseController
         $application->preferred_times = explode(',', $application->preferred_times);
         $application->preferred_shift_length = explode(',', $application->preferred_shift_length);
         $application->heard_about = explode(',', $application->heard_about);
+        $application->caregiver_signature = $application->signature;
+
         return view('caregivers.applications.edit', compact('application', 'business'));
     }
 
@@ -141,6 +154,8 @@ class CaregiverApplicationController extends BusinessBaseController
     public function update(CaregiverApplicationStoreRequest $request, CaregiverApplication $application)
     {
         $this->authorize('update', $application);
+
+        Signature::attachToModel($application, request('caregiver_signature'), 'caregiver' );
 
         $data = $request->filtered();
         $application->update($data);
@@ -157,9 +172,25 @@ class CaregiverApplicationController extends BusinessBaseController
      */
     public function destroy(CaregiverApplication $application)
     {
-        abort(404); // not implemented
         $this->authorize('delete', $application);
 
+        if( $application->delete() ){
+            return new SuccessResponse('Application Deleted');
+        }
+
+        return new ErrorResponse('Unable to delete application');
+
+    }
+
+    public function archive(CaregiverApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        if( $application->update(['archived'=>true]) ){
+            return new SuccessResponse('Application has been archived');
+        }
+
+        return new ErrorResponse('Unable to archive application');
     }
 
     /**

@@ -74,6 +74,18 @@
                     <td>Position applied for:</td>
                     <td>{{ application.position.name }}</td>
                 </tr>
+                <tr v-if="application.certification">
+                    <td>Level of Credentialing:</td>
+                    <td>{{ application.certification }}</td>
+                </tr>
+                <tr v-if="application.license_number">
+                    <td>License Number:</td>
+                    <td>{{ application.license_number }}</td>
+                </tr>
+                <tr v-if="application.training_school">
+                    <td>Healthcare Training School Name:</td>
+                    <td>{{ application.training_school }}</td>
+                </tr>
                 <tr>
                     <td colspan="2">
                         <h5>Availability</h5>
@@ -94,10 +106,6 @@
                 <tr v-if="application.preferred_shift_length">
                     <td>Preferred Shift Length</td>
                     <td>{{ application.preferred_shift_length }}hrs</td>
-                </tr>
-                <tr>
-                    <td>Willing to work weekends:</td>
-                    <td>{{ application.work_weekends ? 'Yes' : 'No' }}</td>
                 </tr>
                 <tr v-if="application.travel_radius">
                     <td>Travel Radius:</td>
@@ -354,6 +362,12 @@
                     <td>{{ application.heard_about }}</td>
                 </tr>
             </table>
+            <b-row>
+                <b-col sm="6" v-if="application.caregiver_signature">
+                    <strong>Caregiver Signature</strong>
+                    <div v-html="application.caregiver_signature.content" class="signature"></div>
+                </b-col>
+            </b-row>
         </b-card>
     </b-container>
 </template>

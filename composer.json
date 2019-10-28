@@ -25,7 +25,7 @@
         "maatwebsite/excel": "^2.1",
         "myclabs/php-enum": "^1.6",
         "nacha/file-generator": "1.9.*",
-        "owen-it/laravel-auditing": "^6.1",
+        "owen-it/laravel-auditing": "^8.0",
         "php-http/curl-client": "^1.7",
         "phpseclib/phpseclib": "^2.0",
         "quickbooks/v3-php-sdk": "^5.0.4",

@@ -32,7 +32,7 @@
                                 v-model="chain_id"
                         >
                             <option value="">All Business Chains</option>
-                            <option v-for="chain in chains" :value="chain.id">{{ chain.name }}</option>
+                            <option v-for="chain in chains" :value="chain.id" :key="chain.id">{{ chain.name }}</option>
                         </b-form-select>
                         &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
@@ -67,8 +67,32 @@
                     <span v-if="row.item.amount == row.item.amount_paid">Paid</span>
                     <span v-else>Unpaid</span>
                 </template>
+                <template slot="actions" scope="row">
+                    <b-btn size="sm" @click="selectedInvoice = row.item">Edit Notes</b-btn>
+                </template>
             </b-table>
         </div>
+
+        <b-modal title="Edit Invoice Notes" v-model="showModal" size="lg">
+            <b-container fluid>
+
+                    <b-form-group label="Notes" label-for="notes">
+                        <b-form-textarea :rows="4" v-model="form.notes"></b-form-textarea>
+                        <input-help :form="form" field="notes" text=""></input-help>
+                    </b-form-group>
+
+                    <div v-if=" selectedInvoice && selectedInvoice.caregiver_on_hold ">
+
+                        <p>On Hold Notes:</p>
+                        <p>{{ selectedInvoice.payment_hold_notes }}</p>
+                    </div>
+            </b-container>
+
+            <div slot="modal-footer">
+                <b-button variant="info" @click="updateSelectedInvoice()">Save</b-button>
+                <b-btn variant="default" @click="selectedInvoice = null">Cancel</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
@@ -131,9 +155,15 @@
                         key: 'status',
                     },
                     {
+                        key: 'notes',
+                    },
+                    {
                         key: 'flags',
-                    }
+                    },
+                    'actions'
                 ],
+                form : new Form({}),
+                selectedInvoice : null
             }
         },
 
@@ -142,42 +172,75 @@
         },
 
         computed: {
+            showModal: {
+                get() {
+                    return !!this.selectedInvoice;
+                },
+                set(val) {
 
+                    if (!val) this.selectedInvoice = null;
+                }
+            },
         },
 
         methods: {
-
             async loadItems() {
                 this.loaded = 0;
                 let url = '/admin/invoices/deposits?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&chain_id=' + this.chain_id + '&paid=' + this.paid;
-                const response = await axios.get(url);
-                this.items = response.data.data.map(item => {
-                    let chain;
-                    if (item.caregiver) {
-                        chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
-                    }
-                    if (item.business) {
-                        chain = item.business.chain;
-                    }
-                    item.chain_name = chain ? chain.name : "";
 
-                    let flags = [];
-                    if (item.caregiver_on_hold) flags.push("On Hold");
-                    if (item.business_on_hold) flags.push("On Hold");
-                    if (item.no_bank_account) flags.push("No Bank Account");
+                let form = new Form({});
+                form.get(url)
+                    .then(response => {
+                        this.items = response.data.data.map(item => {
+                            let chain;
+                            if (item.caregiver) {
+                                chain = item.caregiver.business_chains.length ? item.caregiver.business_chains[0] : null;
+                            }
+                            if (item.business) {
+                                chain = item.business.chain;
+                            }
+                            item.chain_name = chain ? chain.name : "";
 
-                    item.flags = flags.join(' | ');
-                    return item;
-                });
-                this.loaded = 1;
+                            let flags = [];
+                            if (item.caregiver_on_hold) flags.push("On Hold");
+                            if (item.business_on_hold) flags.push("On Hold");
+                            if (item.no_bank_account) flags.push("No Bank Account");
+
+                            item.flags = flags.join(' | ');
+                            return item;
+                        });
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                        this.loaded = 1;
+                    });
             },
 
             invoiceUrl(invoice, view="") {
                 const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
                 return `/admin/invoices/${type}/${invoice.invoice_id}/${view}`;
             },
-        }
+
+            async updateSelectedInvoice() {
+
+                await this.form.patch(`/admin/invoices/deposits/${this.selectedInvoice.invoice_id}/${this.selectedInvoice.invoice_type}`);
+                this.selectedInvoice.notes = this.form.notes;
+                this.selectedInvoice = null;
+            }
+        },
+
+        watch: {
+
+            selectedInvoice( val ) {
+
+                this.form = new Form({
+
+                    notes: val ? val.notes : ""
+                });
+            }
+        },
     }
 </script>
 

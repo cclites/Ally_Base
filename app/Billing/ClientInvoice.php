@@ -331,4 +331,59 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
 
         return $this->clientPayer->payer->getPayerCode();
     }
+
+    /**
+     * Get the total number of hours on the client invoice by
+     * adding all the 'units' for shift related items.
+     *
+     * @return float
+     */
+    public function getTotalHours() : float
+    {
+        return $this->items->reduce(function (float $carry, ClientInvoiceItem $item) {
+            if ($item->invoiceable_type == 'shifts' || $item->invoiceable_type == 'shift_services') {
+                return add($carry, floatval($item->units));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the total number of 'hourly' charges on the invoice by
+     * adding the amounts for shift related items.
+     *
+     * @return float
+     */
+    public function getTotalHourlyCharges() : float
+    {
+        return $this->items->reduce(function (float $carry, ClientInvoiceItem $item) {
+            if ($item->invoiceable_type == 'shifts' || $item->invoiceable_type == 'shift_services') {
+                return add($carry, floatval($item->total));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the date range of the attached items.  Example:
+     * If invoice contains shifts for 10/01/2019, 10/15/2019, 10/31/2019
+     * This method should return [10/01/2019, 10/31/2019]
+     *
+     * @return string
+     */
+    public function getDateSpan() : string
+    {
+        if (empty($this->items)) {
+            return [null, null];
+        }
+
+        $ordered = $this->items->sortBy('date');
+        return optional(optional($ordered->first())->getDate())->format('m/d/Y')
+            . ' - ' .
+            optional(optional($ordered->last())->getDate())->format('m/d/Y');
+    }
 }

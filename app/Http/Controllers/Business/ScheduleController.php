@@ -84,7 +84,6 @@ class ScheduleController extends BaseController
     public function show(Schedule $schedule)
     {
         $this->authorize('read', $schedule);
-
         return new ScheduleResponse($schedule->load('client', 'services'));
     }
 

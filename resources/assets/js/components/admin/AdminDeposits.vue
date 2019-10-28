@@ -1,16 +1,33 @@
 <template>
     <b-card title="Admin Pending Deposits">
+
         <b-form-group>
-            <div class="d-flex">
-                <b-form-select v-model="chainId">
+
+            <div class="d-flex align-items-center mb-2" style="flex-wrap: wrap">
+
+                <b-form-select v-model="chainId" class="my-1 f-1" style="min-width: 430px">
+
                     <option value="">--Select a Chain--</option>
-                    <option v-for="chain in chains" :value="chain.id">{{ chain.name }} ({{ chain.id }})</option>
+                    <option v-for=" ( chain, k ) in chains" :value="chain.id" :key="k">{{ chain.name }} ({{ chain.id }})</option>
                 </b-form-select>
-                <b-btn variant="secondary" :disabled="!chainId" @click="loadInvoices()">Refresh</b-btn>
+
+                <b-btn class="my-1 mx-0 mx-sm-2" variant="secondary" :disabled="!chainId" @click="loadInvoices()">Refresh</b-btn>
             </div>
-            <b-btn variant="primary" v-if="chainLoaded" @click="generateInvoices()">Generate Invoices (1st)</b-btn>
-            <b-btn variant="info" v-if="chainLoaded && invoices.length > 0" @click="deposit()">Process Deposits (2nd)</b-btn>
+
+            <b-row>
+
+                <b-col>
+
+                    <b-btn variant="primary" v-if="chainLoaded" @click="generateInvoices()">Generate Invoices (1st)</b-btn>
+                    <b-btn variant="info" v-if="chainLoaded && invoices.length > 0" @click="deposit()">Process Deposits (2nd)</b-btn>
+                </b-col>
+            </b-row>
         </b-form-group>
+
+        <b-col class="my-2 text-right">
+
+            A limit of 2500 deposits can be returned
+        </b-col>
 
         <loading-card v-if="chainId && !chainLoaded"></loading-card>
 
@@ -28,7 +45,7 @@
                         </template>
                         <template slot="invoices" scope="row">
                             <ul>
-                                <li v-for="invoice in row.item.invoices">
+                                <li v-for="( invoice, i ) in row.item.invoices" :key="i">
                                     <a :href="invoiceUrl(invoice)" target="_blank">{{ invoice.name }}</a>: {{ invoice.pivot ? invoice.pivot.amount_applied : '' }}
                                 </li>
                             </ul>
@@ -49,7 +66,7 @@
                             <th>Error Type</th>
                             <th>Message</th>
                         </tr>
-                        <tr v-for="error in invoiceErrors">
+                        <tr v-for="( error, e ) in invoiceErrors" :key=" e ">
                             <td>{{ error.recipient }}</td>
                             <td>{{ error.exception }}</td>
                             <td>{{ error.message }}</td>

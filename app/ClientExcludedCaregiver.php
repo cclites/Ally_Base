@@ -33,6 +33,7 @@ class ClientExcludedCaregiver extends AuditableModel
     const REASON_UNHAPPY_CLIENT = 'unhappy_client';
     const REASON_NO_SHOWS = 'no_shows';
     const REASON_RETIRED = 'retired';
+    const REASON_OTHER = 'other';
     
     public function caregiver()
     {
@@ -57,6 +58,7 @@ class ClientExcludedCaregiver extends AuditableModel
             self::REASON_UNHAPPY_CLIENT,
             self::REASON_NO_SHOWS,
             self::REASON_RETIRED,
+            self::REASON_OTHER,
         ];
     }
 }

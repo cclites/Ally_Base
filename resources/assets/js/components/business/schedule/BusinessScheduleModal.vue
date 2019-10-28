@@ -6,6 +6,7 @@
                  size="xl"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
+                 scrollable
         >
             <loading-card text="Loading details" v-show="isLoading"></loading-card>
             <b-card no-body v-if="!isLoading">
@@ -425,6 +426,10 @@
                             </template>
                         </business-care-match>
                     </b-tab>
+                    <b-tab title="Audit Log" id="audit-log" >
+                        <audits-table :trail="auditLogItems" v-if="auditLogItems.length > 0"></audits-table>
+                        <div v-else>{{ emptyText }}</div>
+                    </b-tab>
                 </b-tabs>
             </b-card>
 
@@ -466,10 +471,12 @@
     import ShiftServices from "../../../mixins/ShiftServices";
     import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
     import { mapGetters } from 'vuex';
+    import FormatsStrings from "../../../mixins/FormatsStrings";
+    import AuditsTable from '../../../components/AuditsTable';
 
     export default {
-        components: {ScheduleGroupModal, ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates],
+        components: {ScheduleGroupModal, ConfirmationModal, AuditsTable},
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings],
 
         props: {
             model: Boolean,
@@ -520,6 +527,8 @@
                 groupModal: false,
                 warnings: [],
                 loadingQuickbooksConfig: false,
+                auditLogItems: [],
+                emptyText: 'No results',
             }
         },
 
@@ -772,7 +781,6 @@
 
                 this.billingType = schedule.fixed_rates ? 'fixed' : 'hourly';
                 this.defaultRates = this.caregiverAssignmentMode ? false : schedule.client_rate == null;
-                console.log('init defaultRates: ', this.defaultRates, schedule.client_rate);
                 this.warnings = [];
 
                 // Initialize form
@@ -1050,9 +1058,14 @@
             onChangeHoursType(newVal, oldVal) {
                 this.handleChangedHoursType(this.form, newVal, oldVal);
             },
-        },
 
+            async fetchAuditLog(){
+                let response =  await axios.get(`/business/reports/audit-log?schedule_id=${this.selectedSchedule.id}`);
+                this.auditLogItems = response.data;
+            }
+        },
         watch: {
+
             form: {
                 handler(obj){
                     this.checkForWarnings(this);
@@ -1078,6 +1091,7 @@
             },
 
             selectedSchedule(val) {
+
                 // Force back to first tab
                 this.resetTabs();
 
@@ -1092,6 +1106,10 @@
                     this.cgMode = 'all';
                 } else {
                     this.cgMode = 'client';
+                }
+
+                if(this.selectedSchedule.id){
+                    this.fetchAuditLog();
                 }
             },
 
@@ -1123,10 +1141,20 @@
                 }
             },
         },
+
     }
 </script>
 
 <style scoped>
+
+    #audit-log .table{
+        table-layout: fixed;
+
+    }
+    .table-wrapper{
+        max-height: 800px;
+        overflow-y: auto;
+    }
     .table th, .table td {
         padding: 0.35rem 0.5rem;
         min-width: 80px;

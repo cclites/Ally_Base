@@ -23,7 +23,7 @@ class DepositInvoiceController extends Controller
 {
     public function index(Request $request, CaregiverInvoiceQuery $caregiverInvoiceQuery, BusinessInvoiceQuery $businessInvoiceQuery)
     {
-        if ($request->expectsJson()) {
+        if ($request->filled('json')) {
 
             if ($request->filled('paid')) {
                 if ($request->paid) {
@@ -35,22 +35,32 @@ class DepositInvoiceController extends Controller
                 }
             }
 
-            if ($chainId = $request->input('chain_id')) {
-                $chain = BusinessChain::findOrFail($chainId);
-                $caregiverInvoiceQuery->forBusinessChain($chain);
-                $businessInvoiceQuery->forBusinessChain($chain);
+            if ( $chainId = $request->input( 'chain_id' ) ) {
+
+                $chain = BusinessChain::findOrFail( $chainId );
+                $caregiverInvoiceQuery->forBusinessChain( $chain );
+                $businessInvoiceQuery->forBusinessChain( $chain );
             }
 
-            if ($request->has('start_date')) {
-                $startDate = Carbon::parse($request->start_date)->toDateTimeString();
-                $endDate = Carbon::parse($request->end_date)->toDateString() . ' 23:59:59';
-                $caregiverInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
-                $businessInvoiceQuery->whereBetween('created_at', [$startDate, $endDate]);
+            if ( $request->has( 'start_date' ) ) {
+                $startDate = Carbon::parse( $request->start_date )->toDateTimeString();
+                $endDate   = Carbon::parse( $request->end_date )->toDateString() . ' 23:59:59';
+                $caregiverInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
+                $businessInvoiceQuery->whereBetween( 'created_at', [ $startDate, $endDate ] );
             }
 
-            $caregiverInvoices = $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains'])->get();
-            $businessInvoices = $businessInvoiceQuery->with(['business', 'business.chain'])->get();
+            $caregiverInvoiceQuery->with(['caregiver', 'caregiver.businessChains']);
+            $businessInvoiceQuery->with(['business', 'business.chain']);
 
+            $count = (clone $caregiverInvoiceQuery)->count() + (clone $businessInvoiceQuery)->count();
+            $limit = 5000;
+            if ( $count > $limit ) {
+                // Limit deposit return for performance reasons
+                return new ErrorResponse(400, "The number of deposits to display is $count which exceeds the limit of $limit. Please adjust your filters and re-run.");
+            }
+
+            $caregiverInvoices = $caregiverInvoiceQuery->get();
+            $businessInvoices = $businessInvoiceQuery->get();
             $invoices = $caregiverInvoices->merge($businessInvoices);
 
             return DepositInvoiceResponse::collection($invoices);
@@ -134,6 +144,34 @@ class DepositInvoiceController extends Controller
         }
 
         return new ErrorResponse(500, "The invoice could not be removed.");
+    }
+
+    public function update( Request $request, $id, $type )
+    {
+        switch( $type ){
+
+            case 'caregiver_invoices':
+
+                $invoice = CaregiverInvoice::find( $id );
+                break;
+            case 'business_invoices':
+
+                $invoice = BusinessInvoice::find( $id );
+                break;
+            default:
+
+                return new ErrorResponse( 500, 'Invalid invoice type.' );
+                break;
+        }
+        $data = $request->validate([
+
+            'notes' => 'required|max:255'
+        ]);
+
+        if( $invoice->update( $request->toArray() ) ) return new SuccessResponse( 'invoice has been updatd.');
+
+        return new ErrorResponse( 500, 'invoice could not be updated.');
+
     }
 
     public function destroyCaregiverInvoice(CaregiverInvoice $invoice)

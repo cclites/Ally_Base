@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
+use ErrorException;
 
 class AcornImportProcessor extends BaseImportProcessor
 {
@@ -62,8 +63,14 @@ END;
      */
     function getStartTime($rowNo, int $offset = 0)
     {
-        $carbon = new Carbon($this->worksheet->getValue('Actual Clock In', $rowNo), $this->business->timezone);
-        return $carbon->addSeconds($offset);
+        try {
+
+            $carbon = new Carbon($this->worksheet->getValue('Actual Clock In', $rowNo), $this->business->timezone);
+            return $carbon->addSeconds($offset);
+        } catch( \Exception $e ){
+
+            throw new ErrorException( "Improper Date format detected on Row #" . $rowNo );
+        }
     }
 
     /**
@@ -116,6 +123,8 @@ END;
         // Get evaluated Bill Total column
         $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo, true);
         // Divide bill total by total hours to get provider hourly rate
+        if( ( $this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo) ) == 0 ) throw new ErrorException( "Row #" . $rowNo . " has zero hours issue" );
+
         return round($billTotal / ($this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo)), 2);
     }
 
@@ -129,6 +138,9 @@ END;
     {
         $mileageAmount = $this->worksheet->getValue('Mileage', $rowNo);
         $mileageRate = $this->business->mileage_rate;
+
+        if( $mileageRate == 0 ) throw new ErrorException( "Business " . $this->business->name . " has zero mileage rate, caught on Row #" . $rowNo );
+
         return round(
             bcdiv($mileageAmount, $mileageRate, 4),
             2

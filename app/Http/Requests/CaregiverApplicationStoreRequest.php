@@ -46,6 +46,9 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'worked_here_before' => 'boolean',
             'worked_before_location' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:200',
+            'certification' => 'nullable|string',
+            'license_number' => 'nullable|string',
+            'training_school' => 'nullable|string',
             'preferred_start_date' => 'nullable|date',
             'preferred_days' => 'nullable|array',
             'preferred_times' => 'nullable|array',
@@ -108,6 +111,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'reference_3_phone' => ['nullable', new PhonePossible()],
             'reference_3_relationship' => 'nullable|string|max:100',
             'heard_about' => 'nullable|array',
+            'caregiver_signature' => 'required'
         ];
     }
 

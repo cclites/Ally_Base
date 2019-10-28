@@ -12,6 +12,7 @@ use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
+use App\SmsThread;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
@@ -62,6 +63,7 @@ use App\PhoneNumber;
  * @property-read \App\Contracts\UserRole $role
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
+ * @property-read \App\SmsThread $smsThreads
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereAccessGroupId($value)
@@ -238,6 +240,15 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function setupStatusHistory()
     {
         return $this->hasMany(SetupStatusHistory::class);
+    }
+
+    /**
+     *  Get messages sent by user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function smsThreads(){
+        return $this->hasMany(SmsThread::class);
     }
     
     ///////////////////////////////////////////
@@ -545,6 +556,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 return collect(OfficeUser::$availableNotifications);
             case 'caregiver':
                 return collect(Caregiver::$availableNotifications);
+            case 'client':
+                return collect(Client::$availableNotifications);
             default:
                 return collect([]);
         }

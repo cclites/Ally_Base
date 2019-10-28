@@ -33,9 +33,6 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#preferences" class="nav-link">Preferences</a>
-        </li>
-        <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Payers</a>
         </li>
         <li class="nav-item">
@@ -65,10 +62,16 @@
             <a data-toggle="tab" role="tab" href="#contacts" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#preferences" class="nav-link">Preferences</a>
+        </li>
+        <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
     </ul>
 
@@ -81,7 +84,6 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
-                <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Payers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Caregivers &amp; Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
@@ -91,6 +93,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
                 <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -220,6 +223,9 @@
         </div>
         <div class="tab-pane" id="misc">
             <client-misc-tab :client="{{ $client }}"></client-misc-tab>
+        </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <notification-preferences :admin="true" :user="{{ $client->user }}" :notifications="{{ $notifications }}"></notification-preferences>
         </div>
     </div>
 @endsection

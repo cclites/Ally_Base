@@ -646,6 +646,7 @@ class TriggerNotificationsTest extends TestCase
             'preferred_times' => [8],
             'preferred_shift_length' => [1],
             'heard_about' => [],
+            'caregiver_signature' => 'test',
         ]);
 
         Notification::assertNothingSent();

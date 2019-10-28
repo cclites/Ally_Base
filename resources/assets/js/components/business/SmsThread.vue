@@ -35,6 +35,11 @@
                 </div>
             </b-col>
         </b-row>
+        <b-row class="mb-4">
+            <b-col>
+                <h4>Sent By: {{ sentBy }}</h4>
+            </b-col>
+        </b-row>
         <b-row>
             <b-col>
                 <h4>Replies</h4>
@@ -62,7 +67,6 @@ export default {
     data: () => ({
         busy: true,
         showRecipients: false,
-
         perPage: 25,
         currentPage: 1,
         sortBy: 'created_at',
@@ -98,14 +102,21 @@ export default {
 
             let unique = [];
             this.thread.recipients.forEach(item => {
-                console.log(item);
                 if (unique.findIndex(x => x.user_id == item.user_id) < 0) {
                     unique.push(item);
                 }
             });
 
             return unique.sort( (a, b) => a.name > b.name ? 1 : -1);
-        }
+        },
+
+        sentBy(){
+            if(this.thread.sender){
+                return this.thread.sender.nameLastFirst;
+            } else {
+                return 'Unknown';
+            }
+        },
     },
 
     methods: {

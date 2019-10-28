@@ -62,6 +62,7 @@
                     There is already an entry for the selected days.
                 </b-alert>
                 <b-form-group label="Specific Days Not Available to be Referred / Vacation Days">
+                    <p class="text-danger">Please click 'Add' <u>before</u> saving preferences.</p>
                     <b-form inline class="mb-2 align-items-baseline" @submit.prevent="addDayOff()">
                         <label for="dayoff_start" class="mr-2">Date</label>
                         <date-picker v-model="dayoff_start" id="dayoff_date_start" class="mb-2 mr-2" placeholder="Select Start" required></date-picker>
@@ -69,12 +70,6 @@
 
                         <label for="dayoff_reason" class="mr-2 ml-4">Description</label>
                         <b-input type="text" v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" maxlength="156" required />
-<!--                        <b-select v-model="dayoff_reason" id="dayoff_reason" class="mb-2 mr-2" required>-->
-<!--                            <option value="">&#45;&#45; Select &#45;&#45;</option>-->
-<!--                            <option value="family">Will be away with family</option>-->
-<!--                            <option value="other">Other</option>-->
-<!--                        </b-select>-->
-
                         <b-button variant="info" type="submit">Add</b-button>
                     </b-form>
                     <div class="table-responsive">

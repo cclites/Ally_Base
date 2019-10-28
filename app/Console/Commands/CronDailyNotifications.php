@@ -115,7 +115,7 @@ class CronDailyNotifications extends Command
             \Notification::send($users, new NoProspectContact($prospect));
             $sent = $sent->merge($users);
 
-            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $prospect->id);
+            TriggeredReminder::markTriggered(NoProspectContact::getKey(), $prospect->id);
         }
 
     }
@@ -201,5 +201,6 @@ class CronDailyNotifications extends Command
     {
         //TODO
     }
+
 
 }

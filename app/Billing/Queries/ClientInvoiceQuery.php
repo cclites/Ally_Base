@@ -4,6 +4,7 @@
 namespace App\Billing\Queries;
 
 
+use App\Billing\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Payer;
 use App\BusinessChain;
@@ -131,6 +132,39 @@ class ClientInvoiceQuery extends BaseQuery
             $q->where('id', $invoiceIdOrName)->
                 orWhere('name', $invoiceIdOrName);
         });
+
+        return $this;
+    }
+
+    /**
+     * Filter by invoices that have a Claim attached.
+     *
+     * @param bool $transmittedOnly
+     * @return $this
+     */
+    public function hasClaim(bool $transmittedOnly = false) : self
+    {
+        if ($transmittedOnly) {
+            $this->whereHas('claimInvoice', function ($q) {
+                $q->whereIn('status', ClaimStatus::transmittedStatuses());
+            });
+        } else {
+            $this->whereHas('claimInvoice');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter by date the invoice was created at.  Expects an 
+     * array of two UTC dates.
+     * 
+     * @param array $range
+     * @return $this
+     */
+    public function forDateRange(array $range) : self
+    {
+        $this->whereBetween('created_at', [$range[0], $range[1]]);
 
         return $this;
     }

@@ -15,6 +15,8 @@ use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -171,6 +173,7 @@ class ClientController extends BaseController
             'payments',
             'payments.invoices',
             'user.documents',
+            'user.notificationPreferences',
             'medications',
             'meta',
             'notes.creator',
@@ -190,17 +193,11 @@ class ClientController extends BaseController
         ->append('last_service_date');
 
         if (empty($client->careDetails)) {
-            $careDetails = new CareDetails();
-            $careDetails->client_id = $client->id;
-            $careDetails->save();
-            $client->load('careDetails');
+            $client['careDetails'] = CareDetails::make(['client_id' => $client->id]);
         }
 
         if (empty($client->skilledNursingPoc)) {
-            $skilledNursingPoc = new SkilledNursingPoc();
-            $skilledNursingPoc->client_id = $client->id;
-            $skilledNursingPoc->save();
-            $client->load('skilledNursingPoc');
+            $client['skilledNursingPoc'] = SkilledNursingPoc::make(['client_id' => $client->id]);
         }
 
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
@@ -245,7 +242,16 @@ class ClientController extends BaseController
             ->orWhere('id', $client->sales_person_id)
             ->get();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices'));
+        $notifications = $client->user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+                'disabled' => $cls::DISABLED,
+            ];
+        });
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices', 'notifications'));
     }
 
     public function edit(Client $client)
@@ -416,6 +422,27 @@ class ClientController extends BaseController
     }
 
     /**
+     * Update caregiver's user notification settings.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $data = $request->validated();
+
+        if ($client->user()->update($data)) {
+            return new SuccessResponse('Client\'s notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating the Client\'s notification options.  Please try again.');
+    }
+
+    /**
      * Update the Client's preferences.
      *
      * @param UpdateClientPreferencesRequest $request
@@ -481,5 +508,22 @@ class ClientController extends BaseController
 
         // Use the reload page redirect to update the timestamp
         return new SuccessResponse('A training email was dispatched to the Client.', null, '.');
+    }
+
+    /**
+     * Update caregiver's user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $client->user->syncNotificationPreferences($request->validated());
+
+        return new SuccessResponse('Client\'s notification preferences have been saved.');
     }
 }

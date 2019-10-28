@@ -33,6 +33,7 @@ class DepositInvoice extends Resource
     {
         return [
             'invoice_type' => $this->resource instanceof Model ? maps_from_model($this->resource) : null,
+            'notes' => $this->resource->notes ?? '',
             'invoice_id' => $this->resource->id,
             'name' => $this->resource->getName(),
             'date' => $this->resource->getDate(),
@@ -44,6 +45,9 @@ class DepositInvoice extends Resource
             'caregiver' => $this->whenLoaded('caregiver'),
             'caregiver_on_hold' => $this->whenLoaded('caregiver', function() {
                 return $this->resource->caregiver->isOnHold();
+            }),
+            'payment_hold_notes' => $this->whenLoaded('caregiver', function() {
+                return optional( $this->resource->caregiver->paymentHold )->notes;
             }),
             'business' => $this->whenLoaded('business'),
             'business_on_hold' => $this->whenLoaded('business', function() {

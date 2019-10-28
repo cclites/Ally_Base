@@ -106,6 +106,19 @@ class ClientInvoiceController extends Controller
         return $viewGenerator->generateClientInvoice($invoice);
     }
 
+    public function update( Request $request, ClientInvoice $invoice )
+    {
+        $data = $request->validate([
+
+            'notes' => 'required|max:255'
+        ]);
+
+        if( $invoice->update( $request->toArray() ) ) return new SuccessResponse( 'invoice has been updatd.');
+
+        return new ErrorResponse( 500, 'invoice could not be updated.');
+
+    }
+
     public function destroy(ClientInvoice $invoice)
     {
         if ($invoice->payments()->exists()) {

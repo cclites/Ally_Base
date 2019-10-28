@@ -150,9 +150,9 @@
         },
 
         mounted() {
-            axios.get('/business/settings/deactivation-reasons')
+            axios.get(`/business/settings/deactivation-reasons?business_id=${this.client.business_id}`)
                 .then( ({ data }) => {
-                    this.deactivationReasons = data;        
+                    this.deactivationReasons = data;
                 });
         },
     }

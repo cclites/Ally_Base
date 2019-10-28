@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
@@ -61,7 +62,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
-    
+
     /**
      * Get the business relation.
      *
@@ -85,7 +86,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     /**
      * Get the thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function replies()
     {
@@ -95,18 +96,29 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     /**
      * Get the unread thread replies relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function unreadReplies()
     {
         return $this->hasMany(SmsThreadReply::class)
             ->whereNull('read_at');
     }
-    
+
+    /**
+     *  Get the sender
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     */
+    public function sender()
+    {
+        return $this->belongsTo(User::Class, 'user_id', 'id');
+    }
+
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
-    
+
     /**
      * Get the thread recipients.
      *
@@ -133,7 +145,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
-    
+
     /**
      * Gets shifts that are checked in between given given start and end dates.
      * Automatically applies timezone transformation.
@@ -170,6 +182,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 
         return $query;
     }
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
@@ -182,7 +195,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      */
     public function isAcceptingReplies()
     {
-        if (! $this->can_reply) {
+        if (!$this->can_reply) {
             return false;
         }
 
@@ -194,14 +207,14 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 
         return true;
     }
-    
+
     /**
      * Check if the thread was created with the given user as a recipient.
      *
      * @param string|null $user_id
      * @return boolean
      */
-    public function hasRecipient(?string $user_id = null) : bool 
+    public function hasRecipient(?string $user_id = null): bool
     {
         if (empty($user_id)) {
             return false;

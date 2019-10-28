@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Caregiver;
 use App\Note;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
@@ -10,6 +11,9 @@ use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateNoteRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Response;
+
 
 class NoteController extends Controller
 {
@@ -124,11 +128,82 @@ class NoteController extends Controller
             ->when($request->filled('type'), function ($query) use ($request) {
                 return $query->where('type', $request->type);
             })
-            // ->when($request->filled('tags'), function ($query) use ($request) {
-            //     return $query->where('tags', 'like', '%'.$request->tags.'%');
-            // })
+            ->when($request->filled('free_form'), function ($query) use ($request) {
+                return $query->where('body', 'like', '%' . $request->free_form . '%')
+                       ->orWhere('tags', 'like', '%' . $request->free_form . '%');
+            })
             ->get();
 
+        if($request->print){
+            return $this->printReport($notes);
+        }
+
         return response()->json($notes);
+    }
+
+    /**
+     * @param $role
+     * @param $id
+     * @param $type
+     * @return PDF or XLS
+     */
+    public function download($role, $id, $type)
+    {
+        if($role === 'caregiver'){
+            $user = \App\Caregiver::find($id)->load('notes');
+        }else if($role === 'client') {
+            $user = \App\Client::find($id)->load('notes');
+        }
+
+        if($type === 'pdf'){
+            $pdf = \PDF::loadView('business.notes', ['user'=>$user]);
+            return $pdf->download( $user->name . '_notes.pdf' );
+        }else if($type === 'excel'){
+            return $this->generateXls($user);
+        }
+    }
+
+    /**
+     * Generate xls file
+     *
+     * @param $user
+     */
+    public function generateXls($user)
+    {
+        $xls = $user->notes->map(function($note){
+            return [
+                'Title' => $note->title,
+                'Created By' => $note->creator->name,
+                'Tags' => $note->tags,
+                'Date' => \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $note->created_at)->format('m/d/Y  h:i:s A'),
+                'Note' => $note->body
+            ];
+        })->toArray();
+
+        Excel::create($user->name . '_Notes', function($excel) use($xls){
+            $excel->sheet('Sheet 1', function($sheet) use($xls){
+                $sheet->fromArray($xls);
+            });
+        })->download('xls');
+    }
+
+     /** Get the PDF printed output of the report.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function printReport($data) : \Illuminate\Http\Response
+    {
+        $html = response(view('business.reports.communication_notes',['data'=>$data]))->getContent();
+        $snappy = \App::make('snappy.pdf');
+
+        return Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="Notes.pdf"'
+            )
+        );
     }
 }

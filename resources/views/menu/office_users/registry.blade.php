@@ -78,6 +78,7 @@
         <li><a href="{{ route('business.claim-remits.index') }}">Remits</a></li>
         <li><a href="{{ route('business.reports.claims.ar-aging') }}">AR Aging Report</a></li>
         <li><a href="{{ route('business.reports.claims.transmissions') }}">Transmissions Report</a></li>
+        <li><a href="{{ route('business.reports.claims.remit-application') }}">Remit Application Report</a></li>
     </ul>
 </li>
 @endif
@@ -118,5 +119,6 @@
         <li><a href="{{ route('business.settings.bank_accounts.index') }}">Bank Accounts</a></li>
         <li><a href="{{ route('business.activities.index') }}">Activities</a></li>
         <li><a href="{{ route('business.quickbooks.index') }}">Quickbooks</a></li>
+        <li><a href="{{ route('business.email.templates') }}">Email Templates</a></li>
     </ul>
 </li>

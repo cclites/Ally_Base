@@ -22,7 +22,7 @@ class ClientMetaController extends BaseController
     {
         $this->authorize('update', $client);
 
-        $customFields = $this->businessChain()->fields()->forClients()->get();
+        $customFields = $client->business->chain->fields()->forClients()->get();
 
         $rules = [];
         foreach ($customFields as $field) {

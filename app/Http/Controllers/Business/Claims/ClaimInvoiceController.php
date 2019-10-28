@@ -31,12 +31,17 @@ class ClaimInvoiceController extends BaseController
         $query = ClaimInvoice::with(['items' => function ($q) {
             $q->orderByRaw('claimable_type desc, date asc');
         }])->forRequestedBusinesses()
-            ->forDateRange($filters['start_date'], $filters['end_date'])
             ->forPayer($filters['payer_id'])
             ->forClient($filters['client_id'])
             ->forClientType($filters['client_type'])
             ->searchForInvoiceId($filters['invoice_id'])
             ->whereIn('status', ClaimStatus::transmittedStatuses());
+
+        if ($request->getDateSearchType() == 'invoice') {
+            $query->whereInvoicedBetween($filters['start_date'], $filters['end_date']);
+        } else {
+            $query->whereDatesOfServiceBetween($filters['start_date'], $filters['end_date']);
+        }
 
         if (! $filters['inactive']) {
             $query->forActiveClientsOnly();
@@ -121,9 +126,12 @@ class ClaimInvoiceController extends BaseController
      *
      * @param ClaimInvoice $claim
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function show(ClaimInvoice $claim)
     {
+        $this->authorize('read', $claim);
+
         return response()->json(new ClaimInvoiceResource($claim));
     }
 
@@ -186,6 +194,7 @@ class ClaimInvoiceController extends BaseController
             'client' => $claim->client,
             'itemGroups' => $groups,
             'clientPayer' => $claim->getClientPayer(),
+            'render' => 'html',
         ]);
 
         if ($request->filled('download')) {

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Audit;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\GatewayTransaction;
@@ -34,6 +35,7 @@ use App\Billing\PaymentLog;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
+
 
 /**
  * App\Client
@@ -88,6 +90,7 @@ use App\SalesPerson;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Audit $auditTrail
  * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
@@ -328,6 +331,15 @@ class Client extends AuditableModel implements
     const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
     const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
     const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        \App\Notifications\ChargePaymentNotification::class,
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -972,5 +984,21 @@ class Client extends AuditableModel implements
         }
 
         return $this->addresses->first();
+    }
+
+    /**
+     * Gets a formatted list of audits.
+     *
+     * @return array
+     */
+    public function auditTrail()
+    {
+        $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
+                 ->orWhere(function($q){
+                     $q->whereIn('auditable_type', ['App\User', 'clients'])
+                         ->where('auditable_id', $this->id);
+                 })
+                ->get();
+        return $audits;
     }
 }

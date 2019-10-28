@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\Http\Requests\SendTextRequest;
+use App\Providers\AuthServiceProvider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
@@ -119,6 +120,7 @@ class CommunicationController extends Controller
             'message' => $request->message,
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
+            'user_id' => auth()->user()->id,
         ];
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);
@@ -133,7 +135,6 @@ class CommunicationController extends Controller
 
                 } catch (\Exception $ex) {
                     app('sentry')->captureException($ex);
-                    \Log::error($ex->getMessage());
                     $failed[] = "{$recipient->name} {$recipient->smsNumber->national_number}";
                 }
             }
@@ -193,8 +194,7 @@ class CommunicationController extends Controller
     public function threadShow(SmsThread $thread)
     {
         $this->authorize('read', $thread);
-        $thread->load(['recipients', 'replies']);
-
+        $thread->load(['recipients', 'replies', 'sender']);
         $thread->unreadReplies()->update(['read_at' => Carbon::now()]);
 
         if (request()->wantsJson()) {

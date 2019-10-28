@@ -73,6 +73,7 @@ Vue.component('client-contacts-modal', require('./components/ClientContactsModal
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
+Vue.component('number-input', require('./components/NumberInput'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -94,6 +95,7 @@ Vue.component('caregiver-task-list', require('./components/caregivers/TaskList')
 Vue.component('admin-control-file', require('./components/admin/ControlFile'));
 Vue.component('admin-communication-log', require('./components/admin/CommunicationLog'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
+Vue.component('admin-note-import', require('./components/admin/import/AdminNoteImport'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
 Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
 Vue.component('admin-bucket-report', require('./components/admin/AdminBucketReport'));
@@ -139,7 +141,10 @@ Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSe
 
 Vue.component('paid-billed-audit-report', require('./components/admin/reports/PaidBilledAuditReport.vue'));
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
+Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
+Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
+
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));
@@ -355,6 +360,8 @@ Vue.component('business-task-details', require('./components/business/tasks/Task
 Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
 Vue.component('report-list', require('./components/ReportList'));
+Vue.component('email-templates', require('./components/business/Templates/EmailTemplates'));
+Vue.component('caregiver-expiration-notice', require('./components/business/Templates/CaregiverExpirationNotice'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
@@ -394,8 +401,12 @@ Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));
 Vue.component('business-claim-invoice-aging-report', require('./components/business/claims/ClaimInvoiceAgingReport'));
 Vue.component('business-claim-transmissions-report', require('./components/business/claims/ClaimTransmissionsReport'));
+Vue.component('business-remit-application-report', require('./components/business/claims/reports/RemitApplicationReport'));
 Vue.component('remit-application-history', require('./components/business/claims/RemitApplicationHistory'));
 Vue.component('claim-adjustment-history', require('./components/business/claims/ClaimAdjustmentHistory'));
+
+Vue.component('invoice-summary-by-client-type-report', require('./components/business/reports/InvoiceSummaryByClientTypeReport'));
+Vue.component('invoice-summary-by-client-report', require('./components/business/reports/InvoiceSummaryByClientReport'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

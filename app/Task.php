@@ -123,7 +123,6 @@ class Task extends AuditableModel implements BelongsToBusinessesInterface
 
             // keep log of task edits
             if (auth()->check()) {
-                // dd('wut');
                 $task->editHistory()->create(['user_id' => auth()->user()->id]);
             }
         });
