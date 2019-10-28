@@ -2,10 +2,8 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Bus\Queueable;
 
 class ChargePaymentNotification extends BaseNotification
 {
@@ -31,7 +29,8 @@ class ChargePaymentNotification extends BaseNotification
     /**
      * Create a new notification instance.
      *
-     * @return void
+     * @param $recipient
+     * @param $type
      */
     public function __construct($recipient, $type)
     {
