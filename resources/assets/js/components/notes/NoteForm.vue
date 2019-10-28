@@ -192,13 +192,11 @@
 
             async loadReferralSources() {
                 console.log('loadReferralSources called');
-                if(this.client){
-                    let business_id = this.client.business_id;
-                }else{
-                    let business_id = this.caregiver.business_id;
+                let userType = 'client';
+                if(this.caregiver){
+                    let userType = 'caregiver';
                 }
-
-                const response = await axios.get(`/business/referral-sources?json=1&business_id=` + business_id);
+                const response = await axios('/business/referral-sources?type=' + userType + '&json=1');
                 this.referral_sources = response.data;
             },
 
