@@ -251,6 +251,13 @@
                         category: 5,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Payments vs Deposits Report',
+                        url: 'reports/payments-vs-deposits',
+                        description: 'This report shows all incoming payments and outgoing deposits for each chain for a given period.',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 

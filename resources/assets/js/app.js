@@ -143,6 +143,7 @@ Vue.component('paid-billed-audit-report', require('./components/admin/reports/Pa
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
+Vue.component('payments-vs-deposits-report', require('./components/admin/reports/PaymentsVsDepositsReport.vue'));
 
 
 // Office User
