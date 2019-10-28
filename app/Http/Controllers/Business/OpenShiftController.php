@@ -20,10 +20,11 @@ class OpenShiftController extends BaseController
         if( request()->filled( 'json' ) ){
 
             $query = Schedule::forRequestedBusinesses()
-                ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service', 'schedule_requests' ])
-                ->ordered();
-                // ->whereDoesntHave( 'caregiver' );
-                // ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ]);
+                ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])
+                ->withCount( 'schedule_requests' )
+                ->ordered()
+                ->whereDoesntHave( 'caregiver' )
+                ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ]);
 
             $start = Carbon::now();
             $end   = Carbon::parse( 'today +31 days' );
@@ -31,6 +32,8 @@ class OpenShiftController extends BaseController
             $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )->get();
 
             $events = new ScheduleEventsResponse( $schedules );
+
+            // dd( $events->toArray() );
 
             return [ 'events' => $events->toArray() ];
         }

@@ -10,7 +10,7 @@
 
           <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="date" :perPage=" 1000 ">
 
-            <template slot="date" scope="data">
+            <template slot="start" scope="data">
 
               {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time }}
             </template>
@@ -43,14 +43,20 @@
         fields       : [
 
           {
-            key        : 'date',
+            key        : 'start',
             label      : 'Shift Date',
-            sortable   : false,
+            sortable   : true,
             shouldShow : true,
           },
           {
             key        : 'client',
             label      : 'Client',
+            sortable   : true,
+            shouldShow : true,
+          },
+          {
+            key        : 'requests',
+            label      : 'Requests',
             sortable   : true,
             shouldShow : true,
           },
