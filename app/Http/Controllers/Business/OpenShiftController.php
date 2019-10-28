@@ -31,9 +31,12 @@ class OpenShiftController extends BaseController
 
             $events = new ScheduleEventsResponse( $schedules );
 
-            return $events;
+            return [ 'events' => $events->toArray() ];
         }
-        return view( 'open_shifts' );
+
+        $chain = $this->businessChain();
+
+        return view( 'open_shifts', [ 'business' => $this->business() ]);
     }
 
     /**

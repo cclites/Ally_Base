@@ -208,6 +208,7 @@ Vue.component('business-shift-report', require('./components/BusinessShiftReport
 Vue.component('business-scheduled-payments', require('./components/business/reports/ScheduledPaymentsReport.vue'));
 // Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
 // Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
+Vue.component('open-shifts', require('./components/business/schedule/OpenShifts.vue'));
 Vue.component('business-schedule', require('./components/business/schedule/BusinessSchedule.vue'));
 Vue.component('business-schedule-modal', require('./components/business/schedule/BusinessScheduleModal'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
