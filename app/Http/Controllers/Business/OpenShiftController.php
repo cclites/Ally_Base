@@ -31,7 +31,7 @@ class OpenShiftController extends BaseController
 
             $events = new ScheduleEventsResponse( $schedules );
 
-            return response()->json( $events );
+            return $events;
         }
         return view( 'open_shifts' );
     }
