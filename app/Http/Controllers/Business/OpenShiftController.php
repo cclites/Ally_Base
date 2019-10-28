@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
+use App\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 
-class OpenShiftController extends Controller
+
+class OpenShiftController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -13,6 +17,22 @@ class OpenShiftController extends Controller
      */
     public function index()
     {
+        if( request()->filled( 'json' ) ){
+
+
+            $query = Schedule::forRequestedBusinesses()
+                ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service'])
+                ->ordered();
+
+            $start = Carbon::now();
+            $end   = Carbon::parse( 'today +31 days' );
+
+            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )->get();
+
+            $events = new ScheduleEventsResponse( $schedules );
+
+            return response()->json( $events );
+        }
         return view( 'open_shifts' );
     }
 
