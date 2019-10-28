@@ -28,7 +28,8 @@
 
     props: {
 
-      'business' : Object,
+      'business'  : Object,
+      'role_type' : String
     },
     data() {
 

@@ -128,6 +128,8 @@ Route::group([
 
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@show')->name('caregivers.shift.show');
 
+
+    Route::get( 'schedule/open-shifts', 'Caregivers\ScheduleController@openShifts' )->name('schedule.open-shifts');
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');

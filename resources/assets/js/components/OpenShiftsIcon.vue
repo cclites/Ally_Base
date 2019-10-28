@@ -18,12 +18,14 @@
     import { mapGetters } from 'vuex';
     export default {
 
+        props : {
+
+        },
         data() {
 
             return {
             }
         },
-
         async mounted() {
 
             await this.$store.dispatch( 'notifications/start' ); // Erik TODO => have this grab new open shifts count
