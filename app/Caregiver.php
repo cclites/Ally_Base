@@ -313,6 +313,13 @@ class Caregiver extends AuditableModel implements
         return $this->hasMany(Payment::class);
     }
 
+    public function schedule_requests()
+    {
+        return $this->belongsToMany( Schedule::class, 'caregiver_schedule_requests' )
+            ->withTimestamps()
+            ->withPivot([ 'status' ]);
+    }
+
     public function phoneNumber()
     {
         return $this->hasOne(PhoneNumber::class, 'user_id', 'id')

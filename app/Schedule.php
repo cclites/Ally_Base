@@ -211,6 +211,13 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(ScheduleGroup::class, 'group_id');
     }
 
+    public function schedule_requests()
+    {
+        return $this->belongsToMany( Caregiver::class, 'caregiver_schedule_requests' )
+            ->withTimestamps()
+            ->withPivot([ 'status' ]);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

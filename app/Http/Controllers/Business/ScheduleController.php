@@ -47,7 +47,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service'])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service', 'schedule_requests'])
             ->ordered();
 
         // Filter by client or caregiver
@@ -65,7 +65,7 @@ class ScheduleController extends BaseController
         $end = Carbon::parse($request->input('end', 'First day of next month'));
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse($schedules);
+        $events = new ScheduleEventsResponse( $schedules );
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
         return [
