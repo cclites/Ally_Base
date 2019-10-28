@@ -251,6 +251,13 @@
                         category: 5,
                         allowed: ['admin'],
                     },
+                    {
+                        name: 'Charges vs Deposits Report',
+                        url: 'reports/charges-vs-deposits',
+                        description: 'This report shows all incoming charges and outgoing deposits for each chain for a given period.',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
 
                     // Shared between admin and office users
 
