@@ -580,6 +580,7 @@ Route::group([
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
     Route::get('deposits/import', 'Admin\DepositsController@import')->name('deposits.import');
     Route::post('deposits/import', 'Admin\DepositsController@processImport')->name( 'deposits.process_import' );
+    Route::post('deposits/finalize-import', 'Admin\DepositsController@finalizeImport')->name( 'deposits.finalize_import' );
     Route::post('deposits/deposit/{chain}', 'Admin\DepositsController@processDeposits')->name('deposits.deposit');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('deposits/{deposit}/{view?}', 'Admin\DepositsController@show')->name('deposits.show');

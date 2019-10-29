@@ -59,6 +59,7 @@
 
                 <b-col lg="12" v-for="( res, i ) in results" :key=" i ">
 
+                    <hr />
                     <b-row class="align-items-center">
 
                         <b-col sm="12" md="3">
@@ -94,7 +95,6 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <hr />
                 </b-col>
             </b-row>
         </transition>
@@ -133,12 +133,28 @@
 
         methods: {
 
-            createDeposits(){
+            async createDeposits(){
 
                 if( this.results.some( value => !value.caregiver_id ) ) alert( 'all values must be mapped to a caregiver' );
                 else {
 
-                    console.log( 'you good dawg' );
+                    this.submitting = true;
+                    const form = new Form({
+
+                        invoices : this.results
+                    });
+
+                    try {
+
+                        const response = await form.post( '/admin/deposits/finalize-import' );
+                        console.log( response );
+                        this.submitting = false;
+                    }
+                    catch ( err ) {
+
+                        console.error( err );
+                        this.submitting = false;
+                    }
                 }
             },
             resetForm(){
@@ -190,7 +206,6 @@
                 this.form.post( '/admin/deposits/import' ) // ERIK TODO => make real endpoint
                     .then( response => {
 
-                        console.log( response );
                         this.results = Object.values( response.data ).filter( res => res.name != null ).map( res => {
 
                             let caregiver_id = '';
@@ -215,7 +230,6 @@
                     })
                     .catch( error => {
 
-                        console.error( error );
                     })
                     .finally( () => {
 
