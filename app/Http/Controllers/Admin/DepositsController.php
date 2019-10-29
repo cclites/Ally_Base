@@ -101,11 +101,6 @@ class DepositsController extends Controller
         return view('admin.deposits.adjustment');
     }
 
-    public function import()
-    {
-        return view( 'admin.deposits.import' );
-    }
-
     public function manualDeposit(Request $request)
     {
         $request->validate([

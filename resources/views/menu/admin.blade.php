@@ -52,11 +52,6 @@
     </a>
 </li>
 <li>
-    <a class="" href="{{ route('admin.deposits.import') }}" aria-expanded="false">
-        <i class="fa fa-money"></i><span class="hide-menu">Adjustment Imports</span>
-    </a>
-</li>
-<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-upload"></i><span class="hide-menu">Shift Imports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.import') }}">Shift Importer</a></li>

@@ -109,7 +109,6 @@ Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFa
 Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
-Vue.component('admin-adjustment-import', require('./components/admin/AdminAdjustmentImport'));
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
 Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
 Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));

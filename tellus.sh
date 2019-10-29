@@ -1,1 +1,0 @@
-php artisan import:tellus-typecode-data storage/app/public/tellus/xml-schema.xsd storage/app/public/tellus/typecode-dictionary.xlsx
