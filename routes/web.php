@@ -577,8 +577,9 @@ Route::group([
     Route::post('deposits/failed/{deposit}', 'Admin\DepositsController@markFailed')->name('deposits.mark_failed');
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
-    Route::get('deposits/import', 'Admin\DepositsController@import')->name('deposits.import');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
+    Route::get('deposits/import', 'Admin\DepositsController@import')->name('deposits.import');
+    Route::post('deposits/import', 'Admin\DepositsController@processImport')->name( 'deposits.process_import' );
     Route::post('deposits/deposit/{chain}', 'Admin\DepositsController@processDeposits')->name('deposits.deposit');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('deposits/{deposit}/{view?}', 'Admin\DepositsController@show')->name('deposits.show');
