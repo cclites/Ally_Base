@@ -2,7 +2,7 @@
 
   <div>
 
-    <b-card :title=" business.name ">
+    <b-card :title=" active_business ? active_business.name : '' ">
 
       <loading-card v-show=" loading " />
 
@@ -28,20 +28,21 @@
 
     props: {
 
-      'business'  : Object,
-      'role_type' : String
+      'businesses' : Array,
+      'role_type'  : String
     },
     data() {
 
       return {
 
-        loading      : false,
-        filtersReady : false,
-        // clients      : this.client ? [this.client] : [],
-        // caregivers   : this.caregiver ? [this.caregiver] : [],
-        events       : [],
-        eventsLoaded : false,
-        fields       : [
+        loading         : false,
+        filtersReady    : false,
+        // clients         : this.client ? [this.client] : [],
+        // caregivers      : this.caregiver ? [this.caregiver] : [],
+        events          : [],
+        eventsLoaded    : false,
+        active_business : null,
+        fields : [
 
           {
             key        : 'start',
@@ -75,6 +76,7 @@
     mounted() {
 
       this.loadFiltersData();
+      this.active_business = this.businesses[ 0 ] || null;
     },
 
     computed: {
@@ -86,7 +88,22 @@
           return '';
         }
 
-        let url = '/business/open-shifts?json=1';
+        let url = '';
+
+        switch( this.role_type ){
+
+          case 'caregiver':
+
+            url += '/schedule/open-shifts';
+            break;
+          case 'office_user':
+
+            url += '/business/open-shifts';
+        }
+
+        url += '?json=1';
+
+        url += '&businesses=' + this.active_business.id;
 
         /*
 
@@ -255,7 +272,10 @@
         }
 
         this.loading = true;
-        axios.get( this.eventsUrl )
+
+        const form = new Form();
+
+        form.get( this.eventsUrl )
             .then( ({ data }) => {
 
                 this.events = data.events.map( event => {

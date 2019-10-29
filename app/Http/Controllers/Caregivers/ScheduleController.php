@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\Business;
+use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
@@ -38,12 +40,16 @@ class ScheduleController extends BaseController
 
     public function openShifts()
     {
-
         $caregiver = auth()->user()->role;
 
         if( request()->filled( 'json' ) ){
 
             // get business dynamically
+            $businessId = request()->input( 'businesses', null );
+
+            if( empty( $businessId ) ) return new ErrorResponse( 500, 'Schedules could not be received' );
+
+            $setting = Business::find( $businessId )->open_shifts_setting;
 
             $query = Schedule::forRequestedBusinesses()
                 ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])

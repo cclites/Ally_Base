@@ -4,7 +4,7 @@
 
 @section('content')
     <open-shifts
-        :business="{{ $active_business OR '{}' }}"
+        :businesses="{{ $businesses }}"
         default-view="{{ $business->calendar_default_view ?? 'timelineWeek' }}"
         role_type="{{ $role_type }}">
     </open-shifts>
