@@ -15,13 +15,9 @@ class ReferralSourceController extends BaseController
     public function index(Request $request)
     {
         $type = $request->type;
+        $chain = auth()->user()->getChain();
 
-        if( request()->input( 'business_id', null ) ){
-
-            $chain = Business::find( request()->input( 'business_id' ) )->chain;
-            $this->setBusinessChainAs( $chain );
-        }
-        $referralsources = $this->businessChain()
+        $referralsources = $chain
             ->referralSources()
             ->forType($type)
             ->ordered()

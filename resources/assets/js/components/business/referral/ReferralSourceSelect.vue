@@ -29,12 +29,11 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'sourceType', 'businessId'],
+        props: ['value', 'sourceType', 'businessId', 'caregiver'],
 
         data() {
 
             return {
-
                 showReferralModal : false,
                 referralSources   : null,
                 business_id       : this.businessId || ''
@@ -64,7 +63,11 @@
                 }
             },
             async loadReferralSources() {
-                const response = await axios(`/business/referral-sources?type=${this.sourceType}&business_id=${this.business_id}`);
+                let userType = 'client';
+                if(this.$props.caregiver){
+                    userType = 'caregiver';
+                }
+                const response = await axios(`/business/referral-sources?type=` + userType + `&json=1`);
                 this.referralSources = response.data || null;
             }
         },
