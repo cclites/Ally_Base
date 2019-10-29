@@ -411,12 +411,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function setAvailability(array $data) {
 
         $availability = $this->availability()->firstOrNew([]);
-
-
         $availability->fill($data);
-
-        \Log::info($availability);
-        \Log::info(gettype($availability));
 
         $saved = $availability->save();
 

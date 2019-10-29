@@ -74,7 +74,7 @@
                     </b-form>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
-                            :items="form.days_off"
+                            :items="form.daysOff"
                             :fields="daysOffFields"
                             sort-by="date"
                             :sort-desc="false"
@@ -137,7 +137,7 @@
                     maximum_shift_hours: this.caregiver.availability ? this.caregiver.availability.maximum_shift_hours : 24,
                     maximum_miles: this.caregiver.availability ? this.caregiver.availability.maximum_miles : 20,
                     preferences: this.caregiver.preferences,
-                    days_off: this.caregiver.days_off ? this.caregiver.days_off : [],
+                    daysOff: this.caregiver.days_off ? this.caregiver.days_off : [],
                 }),
                 dayoff_reason: '',
                 dayoff_start: '',
