@@ -130,6 +130,32 @@ class DepositsController extends Controller
         return view( 'admin.deposits.import' );
     }
 
+    public function finalizeImport( Request $request )
+    {
+
+        $request->validate([
+
+            'invoices.*.caregiver_id' => 'required|exists:caregivers,id',
+            'invoices.*.amount'       => 'required',
+            'invoices.*.notes'        => 'nullable|max:255'
+        ]);
+
+
+        \DB::beginTransaction();
+
+        foreach( $request->invoices as $data ) {
+
+            $amount = (float) $data[ 'amount' ];
+            $caregiver = Caregiver::findOrFail( $data[ 'caregiver_id' ] );
+
+            SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $amount, $data[ 'notes' ] ?? '' );
+        }
+
+        \DB::commit();
+
+        return new CreatedResponse( count( $request->invoices ) . " invoices created" );
+    }
+
 
     public function processImport(Request $request)
     {
@@ -171,12 +197,12 @@ class DepositsController extends Controller
 
             if( array_key_exists( $name, $aggregation ) ){
 
-                $aggregation[ $name ][ 'amount' ] += $amount;
+                $aggregation[ $name ][ 'amount' ] += ( float ) $amount;
                 $aggregation[ $name ][ 'rows'   ] .= ", $rowNo";
             } else {
 
                 $aggregation[ $name ][ 'name'   ] = $name;
-                $aggregation[ $name ][ 'amount' ] = $amount;
+                $aggregation[ $name ][ 'amount' ] = ( float ) $amount;
                 $aggregation[ $name ][ 'rows'   ] = "$rowNo";
             }
         }

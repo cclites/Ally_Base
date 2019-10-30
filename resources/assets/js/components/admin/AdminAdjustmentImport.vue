@@ -147,7 +147,7 @@
                     try {
 
                         const response = await form.post( '/admin/deposits/finalize-import' );
-                        console.log( response );
+                        this.resetForm();
                         this.submitting = false;
                     }
                     catch ( err ) {
@@ -188,6 +188,8 @@
                 if ( this.submitting ) return; // debounce
                 this.submitting = true;
 
+                const notes = _.cloneDeep( this.form.notes ); // save for later
+
                 let formData = new FormData();
                 formData.append( 'file', this.form.file );
                 formData.append( 'type', this.form.type );
@@ -203,8 +205,9 @@
                     }
                 });
 
-                this.form.post( '/admin/deposits/import' ) // ERIK TODO => make real endpoint
+                this.form.post( '/admin/deposits/import' )
                     .then( response => {
+
 
                         this.results = Object.values( response.data ).filter( res => res.name != null ).map( res => {
 
@@ -224,7 +227,8 @@
                                 caregiver_id : caregiver_id,
                                 name         : res.name,
                                 amount       : res.amount,
-                                rows         : res.rows
+                                rows         : res.rows,
+                                notes
                             }
                         });
                     })
