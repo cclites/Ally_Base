@@ -55,7 +55,7 @@ class ChargePaymentNotification extends BaseNotification
      */
     public function toMail($notifiable)
     {
-        $subject = $this->type === 'client' ? "Upcoming Senior Care Charge" : "Upcoming Senior Care Payment";
+        $subject = $this->type == 'client' ? "Upcoming Senior Care Charge" : "Upcoming Senior Care Payment";
 
         return (new MailMessage)
             ->subject($subject)

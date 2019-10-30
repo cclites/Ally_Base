@@ -1,7 +1,7 @@
 @component('mail::message')
     ## Hello!
 
-    @if($type === 'client')
+    @if($type == 'client')
         Please be aware that we will be charging your payment method on file for senior care services.
     @else
         Please be aware that we will be depositing a payment into your account for senior care services.
@@ -16,5 +16,4 @@
     Business Hours:
     Monday - Friday
     9am - 5pm Eastern
-
 @endcomponent

@@ -113,7 +113,7 @@ class CronChargePaymentNotifications extends Command
             }
 
             $this->log("Sending client {$client->name} a notification...");
-            \Notification::send($client->user, new ChargePaymentNotification($client, $client->role_type));
+            \Notification::send($client->user, new ChargePaymentNotification($client->user, $client->role_type));
             TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id, $expiration);
             $this->clients->push([
                 'id' => $client->id,
@@ -137,7 +137,7 @@ class CronChargePaymentNotifications extends Command
             }
 
             $this->log("Sending caregiver {$caregiver->name} a notification...");
-            \Notification::send($caregiver->user, new ChargePaymentNotification($caregiver, $caregivers->type));
+            \Notification::send($caregiver->user, new ChargePaymentNotification($caregiver->user, $caregiver->role_type));
             TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id, $expiration);
             $this->caregivers->push([
                 'id' => $caregiver->id,
