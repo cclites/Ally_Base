@@ -55,7 +55,7 @@
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-upload"></i><span class="hide-menu">Imports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.import') }}">Shift Importer</a></li>
-        <li><a href="{{ route('admin.imports.index') }}">Import History</a></li>
+        <li><a href="{{ route('admin.imports.index') }}">Shift Import History</a></li>
         <li><a href="{{ route('admin.deposits.import') }}">Adjustment Importer</a></li>
         <li><a href="{{ route('admin.note-import') }}">Note Importer</a></li>
     </ul>
