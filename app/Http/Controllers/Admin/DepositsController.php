@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Billing\Actions\ProcessChainDeposits;
+use App\Billing\CaregiverInvoice;
 use App\Billing\View\DepositViewGenerator;
 use App\Billing\View\Html\HtmlDepositView;
 use App\Billing\View\Pdf\PdfDepositView;
@@ -17,9 +18,32 @@ use App\Responses\Resources\DepositLog;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Imports\Worksheet;
 
 class DepositsController extends Controller
 {
+
+    /**
+     * @var Decimal
+     */
+    private $amount = 0.00;
+
+    /**
+     * miscellaneous variables to assist the import
+     */
+    private $name;
+    private $rows = [];
+
+    /**
+     * @var \App\Imports\Worksheet
+     */
+    public $worksheet;
+
+    /**
+     * @var \App\Business
+     */
+    public $business;
+
     public function index(Request $request)
     {
         if ($request->expectsJson() && $request->input('json')) {
@@ -99,6 +123,91 @@ class DepositsController extends Controller
     public function depositAdjustment()
     {
         return view('admin.deposits.adjustment');
+    }
+
+    public function import()
+    {
+        return view( 'admin.deposits.import' );
+    }
+
+    public function finalizeImport( Request $request )
+    {
+
+        $request->validate([
+
+            'invoices.*.caregiver_id' => 'required|exists:caregivers,id',
+            'invoices.*.amount'       => 'required',
+            'invoices.*.notes'        => 'nullable|max:255'
+        ]);
+
+
+        \DB::beginTransaction();
+
+        foreach( $request->invoices as $data ) {
+
+            $amount = (float) $data[ 'amount' ];
+            $caregiver = Caregiver::findOrFail( $data[ 'caregiver_id' ] );
+
+            SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $amount, $data[ 'notes' ] ?? '' );
+        }
+
+        \DB::commit();
+
+        return new CreatedResponse( count( $request->invoices ) . " invoices created" );
+    }
+
+
+    public function processImport(Request $request)
+    {
+        $request->validate([
+
+            'business_id' => 'required|exists:businesses,id',
+            'file'        => 'required|file',
+            'type'        => 'required|in:caregiver',
+            'notes'       => 'nullable|max:255'
+        ]);
+
+        $this->business = Business::findOrFail( $request->business_id );
+        $file = $request->file( 'file' )->getPathname();
+
+        $this->worksheet = new Worksheet( $file );
+
+        return $this->handleImport();
+    }
+
+    /**
+     * 
+     * strange issue where the worksheet is not grabbing the correct totalRows.. had to revise the algorithm to work around it
+     */
+    public function handleImport()
+    {
+        $aggregation = [];
+
+        for( $rowNo = 2, $totalRows = $this->worksheet->getRowCount(); $rowNo <= $totalRows; $rowNo++ ) {
+            // for every row..
+
+            $name   = $this->worksheet->getValue( 'Caregiver Name', $rowNo );
+            $amount = $this->worksheet->getValue( 'Expenses', $rowNo );
+
+            if( empty( $name ) || empty( $amount ) ) {
+                // that isnt empty..
+
+                continue;
+            }
+
+            if( array_key_exists( $name, $aggregation ) ){
+
+                $aggregation[ $name ][ 'amount' ] += ( float ) $amount;
+                $aggregation[ $name ][ 'rows'   ] .= ", $rowNo";
+            } else {
+
+                $aggregation[ $name ][ 'name'   ] = $name;
+                $aggregation[ $name ][ 'amount' ] = ( float ) $amount;
+                $aggregation[ $name ][ 'rows'   ] = "$rowNo";
+            }
+        }
+
+        return $aggregation;
     }
 
     public function manualDeposit(Request $request)
