@@ -146,6 +146,7 @@ class DepositsController extends Controller
         foreach( $request->invoices as $data ) {
 
             $amount = (float) $data[ 'amount' ];
+
             $caregiver = Caregiver::findOrFail( $data[ 'caregiver_id' ] );
 
             SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $amount, $data[ 'notes' ] ?? '' );
@@ -195,11 +196,17 @@ class DepositsController extends Controller
                 continue;
             }
 
+
             if( array_key_exists( $name, $aggregation ) ){
 
                 $aggregation[ $name ][ 'amount' ] += ( float ) $amount;
                 $aggregation[ $name ][ 'rows'   ] .= ", $rowNo";
             } else {
+
+                if( $caregiver = Caregiver::where( 'import_identifier', trim( $name ) )->first() ){
+
+                    $aggregation[ $name ][ 'caregiver_id' ] = $caregiver->id;
+                } else $aggregation[ $name ][ 'caregiver_id' ] = null;
 
                 $aggregation[ $name ][ 'name'   ] = $name;
                 $aggregation[ $name ][ 'amount' ] = ( float ) $amount;

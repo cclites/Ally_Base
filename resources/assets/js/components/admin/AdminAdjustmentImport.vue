@@ -70,7 +70,7 @@
 
                             <b-form-group label="Caregiver" label-for="caregiver_id">
 
-                                <b-form-select id="caregiver_id" v-model=" results[ i ].caregiver_id ">
+                                <b-form-select id="caregiver_id" v-model=" res.caregiver_id ">
 
                                     <option value="">--Unmatched Caregiver--</option>
                                     <option v-for=" caregiver in caregivers" :value=" caregiver.id " :key=" caregiver.id ">{{ caregiver.nameLastFirst }}</option>
@@ -80,7 +80,8 @@
                         </b-col>
                         <b-col sm="12" md="3">
 
-                            {{ res.name }}
+                            {{ res.name }}<br />
+                            <b-button variant="info" size="sm" @click=" saveMapping( res.caregiver_id, res.name ) ">Save Mapping</b-button>
                         </b-col>
                         <b-col sm="12" md="3">
 
@@ -133,6 +134,11 @@
 
         methods: {
 
+            async saveMapping( id, name ) {
+
+                const form = new Form({ id, name });
+                const response = await form.post( '/admin/import/map/caregiver' );
+            },
             async createDeposits(){
 
                 if( this.results.some( value => !value.caregiver_id ) ) alert( 'all values must be mapped to a caregiver' );
@@ -208,23 +214,25 @@
                 this.form.post( '/admin/deposits/import' )
                     .then( response => {
 
-
                         this.results = Object.values( response.data ).filter( res => res.name != null ).map( res => {
 
-                            let caregiver_id = '';
+                            let caregiver_id = res.caregiver_id || null;
 
-                            for( let i = 0; i < this.caregivers.length; i++ ){
+                            if( !caregiver_id ){
 
-                                if( ( this.caregivers[ i ].lastname + ', ' + this.caregivers[ i ].firstname ) == res.name ){
+                                for( let i = 0; i < this.caregivers.length; i++ ){
 
-                                    caregiver_id = this.caregivers[ i ].id;
-                                    break;
+                                    if( ( this.caregivers[ i ].lastname + ', ' + this.caregivers[ i ].firstname ) == res.name ){
+
+                                        caregiver_id = this.caregivers[ i ].id;
+                                        break;
+                                    }
                                 }
                             }
 
                             return {
 
-                                caregiver_id : caregiver_id,
+                                caregiver_id : caregiver_id || '',
                                 name         : res.name,
                                 amount       : res.amount,
                                 rows         : res.rows,
