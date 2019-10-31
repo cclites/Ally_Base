@@ -240,7 +240,7 @@ function is_office_user() {
 }
 
 /**
- * Check if the logged in user is an office user
+ * Check if the logged in user is a caregiver
  *
  * @return bool
  */

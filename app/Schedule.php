@@ -222,6 +222,28 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     /// Mutators
     ///////////////////////////////////////////
 
+
+    public function setStartsAtAttribute($value) {
+        if ($value instanceof \DateTimeInterface && $this->business) {
+            $value->setTimezone(new \DateTimeZone($this->business->timezone));
+        }
+        $this->attributes['starts_at'] = $value;
+    }
+
+    ///////////////////////////////////////////
+    /// Instance Methods
+    ///////////////////////////////////////////
+
+    /**
+     * gets the latest shift request for a given caregiver, or null if there is none
+     */
+    public function latest_request_for( $caregiver_id )
+    {
+        if( $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->count() == 0 ) return null;
+
+        return $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->orderBy( 'created_at', 'desc' )->first()->pivot;
+    }
+
     /**
      * Get whether of not the schedule will be converted by
      * the schedule converter CRON.
@@ -257,13 +279,6 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return Carbon::parse($this->attributes['starts_at'], $this->getTimezone());
     }
 
-    public function setStartsAtAttribute($value) {
-        if ($value instanceof \DateTimeInterface && $this->business) {
-            $value->setTimezone(new \DateTimeZone($this->business->timezone));
-        }
-        $this->attributes['starts_at'] = $value;
-    }
-
     /**
      * Returns the first available connected shift that is currently
      * clocked in.
@@ -283,10 +298,6 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     {
         return $this->getShiftStatus();
     }
-
-    ///////////////////////////////////////////
-    /// Instance Methods
-    ///////////////////////////////////////////
 
     /**
      * @param iterable $services
@@ -334,7 +345,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             return self::UNCONFIRMED;
         }
         // Suppress missed clock in status for now
-//        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        // return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
         return self::SCHEDULED;
     }
 

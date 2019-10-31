@@ -18,7 +18,7 @@ class CreateTableCaregiverScheduleRequests extends Migration
             $table->increments( 'id' );
             $table->unsignedInteger( 'caregiver_id' )->index();
             $table->unsignedInteger( 'schedule_id' )->index();
-            $table->string( 'status', 35 )->index();
+            $table->enum( 'status', [ 'pending', 'denied', 'cancelled', 'approved' ])->default( 'pending' )->index();
             $table->timestamps();
 
             $table->foreign( 'schedule_id' )

@@ -130,6 +130,7 @@ Route::group([
 
 
     Route::get( 'schedule/open-shifts', 'Caregivers\ScheduleController@openShifts' )->name('schedule.open-shifts');
+    Route::post( 'schedule/open-shifts/{schedule}', 'Caregivers\ScheduleController@requestShift' )->name( 'schedule.request' );
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
