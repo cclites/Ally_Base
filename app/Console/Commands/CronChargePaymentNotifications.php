@@ -4,13 +4,12 @@ namespace App\Console\Commands;
 
 use App\Mail\CronResults\ChargePaymentNotificationResults;
 use App\Notifications\ChargePaymentNotification;
+use Illuminate\Support\Collection;
 use Illuminate\Console\Command;
 use App\TriggeredReminder;
 use Carbon\Carbon;
-use App\User;
-use Illuminate\Mail\Mailable;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Collection;
+use App\Caregiver;
+use App\Client;
 
 class CronChargePaymentNotifications extends Command
 {
@@ -97,30 +96,24 @@ class CronChargePaymentNotifications extends Command
      */
     protected function sendPaymentNotifications()
     {
-        $query = User::where('email', 'NOT LIKE', '%@allyms.com')
-            ->where('email', 'NOT LIKE', '%noemail%');
-
         $date = Carbon::now('America/New_York');
         $end = $date->setTimezone('UTC')->toDateTimeString();
         $start = $date->subHours(24)->setTimezone('UTC')->toDateTimeString();
         $expiration = $date->addHours(24)->subMinutes(1)->setTimezone('UTC')->toDateTimeString();
 
         $this->log("Searching for clients with recent payments...");
-        $clients = with(clone $query)->join('payments', 'payments.client_id', '=', 'users.id')
-            ->whereBetween('payments.created_at', [$start, $end])
-            ->get();
-
+        $clients = $this->getMatchingClients([$start, $end]);
         $this->log("Found a total of {$clients->count()} clients with recent payments.");
-        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $clients->pluck('id'));
 
+        $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $clients->pluck('id'));
         foreach ($clients as $client) {
             if ($triggered->contains($client->id)) {
                 $this->log("Client {$client->name} has already been sent a notification for this charge.");
                 continue;
             }
 
-            $this->log("Sending client {$client->name} a notification.");
-            \Notification::send($client, new ChargePaymentNotification($client, 'client'));
+            $this->log("Sending client {$client->name} a notification...");
+            \Notification::send($client->user, new ChargePaymentNotification($client->user, $client->role_type));
             TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $client->id, $expiration);
             $this->clients->push([
                 'id' => $client->id,
@@ -133,21 +126,18 @@ class CronChargePaymentNotifications extends Command
 
         /* Handle Caregiver recipients*/
         $this->log("Searching for caregivers with recent deposits...");
-        $caregivers = with(clone $query)->join('deposits', 'deposits.caregiver_id', '=', 'users.id')
-            ->whereBetween('deposits.created_at', [$start, $end])
-            ->get();
+        $caregivers = $this->getMatchingCaregivers([$start, $end]);
         $this->log("Found a total of {$caregivers->count()} caregivers with recent deposits.");
 
         $triggered = TriggeredReminder::getTriggered(ChargePaymentNotification::getKey(), $caregivers->pluck('id'));
-
         foreach ($caregivers as $caregiver) {
             if ($triggered->contains($caregiver->id)) {
                 $this->log("Caregiver {$caregiver->name} has already been sent a notification for this deposit.");
                 continue;
             }
 
-            $this->log("Sending caregiver {$caregiver->name} a notification.");
-            \Notification::send($caregiver, new ChargePaymentNotification($caregiver, 'caregiver'));
+            $this->log("Sending caregiver {$caregiver->name} a notification...");
+            \Notification::send($caregiver->user, new ChargePaymentNotification($caregiver->user, $caregiver->role_type));
             TriggeredReminder::markTriggered(ChargePaymentNotification::getKey(), $caregiver->id, $expiration);
             $this->caregivers->push([
                 'id' => $caregiver->id,
@@ -159,6 +149,44 @@ class CronChargePaymentNotifications extends Command
         }
 
         $this->log("Operation complete.");
+    }
+
+    /**
+     * Get clients with recent payments.
+     *
+     * @param array $dateRange
+     * @return Collection
+     */
+    public function getMatchingClients(array $dateRange) : Collection
+    {
+        return Client::whereHas('user', function ($q) {
+            $q->whereNotNull('email')
+                ->where('email', 'NOT LIKE', '%@allyms.com')
+                ->where('email', 'NOT LIKE', '%noemail%');
+        })->whereHas('payments', function ($q) use ($dateRange) {
+            $q->whereBetween('created_at', $dateRange);
+        })
+            ->with('user')
+            ->get();
+    }
+
+    /**
+     * Get Caregivers with recent deposits.
+     *
+     * @param array $dateRange
+     * @return Collection
+     */
+    public function getMatchingCaregivers(array $dateRange) : Collection
+    {
+        return Caregiver::whereHas('user', function ($q) {
+            $q->whereNotNull('email')
+                ->where('email', 'NOT LIKE', '%@allyms.com')
+                ->where('email', 'NOT LIKE', '%noemail%');
+        })->whereHas('deposits', function ($q) use ($dateRange) {
+            $q->whereBetween('created_at', $dateRange);
+        })
+            ->with('user')
+            ->get();
     }
 
     /**

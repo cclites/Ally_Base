@@ -23,6 +23,7 @@ class HtmlPaymentView implements PaymentViewStrategy
      */
     function generate(ContactableInterface $payer, Payment $payment, array $invoiceObjects)
     {
-        return response(view($this->view, compact("payer", "payment", "invoiceObjects")));
+        $render = 'html';
+        return response(view($this->view, compact("payer", "payment", "invoiceObjects", 'render')));
     }
 }

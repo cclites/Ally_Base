@@ -11,7 +11,7 @@
         @endif
     </div>
     <div class="text-right header-right">
-        <div class="h1">Invoice #{{ $invoice->getName() }}</div>
+        <div class="h3">Invoice #{{ $invoice->getName() }}</div>
         <br>
         <table class="header-right-table">
             <tr>

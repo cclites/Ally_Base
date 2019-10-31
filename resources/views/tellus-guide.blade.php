@@ -44,6 +44,7 @@
 
         .bg-info {
             color: white;
+            background-color: #1e88e5!important;
         }
 
         .header-right-table {
