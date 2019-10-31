@@ -44,15 +44,24 @@ class ScheduleController extends BaseController
 
         if( request()->filled( 'json' ) ){
 
-            // get business dynamically
+            // get business dynamically, needs to be plural because 'scopeForRequestedBusinesses' will pick it up
             $businessId = request()->input( 'businesses', null );
 
             if( empty( $businessId ) ) return new ErrorResponse( 500, 'Schedules could not be received' );
 
-            $setting = Business::find( $businessId )->open_shifts_setting;
+            $setting = Business::findOrFail( $businessId )->open_shifts_setting;
+
+            if( !in_array( $setting, [ Business::OPEN_SHIFTS_LIMITED, Business::OPEN_SHIFTS_UNLIMITED ] ) ) return new ErrorResponse( 500, 'Invalid registry setting' );
 
             $query = Schedule::forRequestedBusinesses()
-                ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])
+                ->with([ 'client' ])
+                ->whereHas( 'client.rates', function ( $query ) use ( $setting, $caregiver ) {
+
+                    if( $setting === Business::OPEN_SHIFTS_LIMITED ){
+
+                        $query->where( 'caregiver_id', $caregiver->id );
+                    }
+                })
                 ->withCount( 'schedule_requests' )
                 ->ordered()
                 ->whereDoesntHave( 'caregiver' )
