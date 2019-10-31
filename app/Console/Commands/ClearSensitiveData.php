@@ -755,7 +755,10 @@ class ClearSensitiveData extends Command
         if ($this->fastMode) {
             ClientContact::whereRaw(1)->update([
                 'name' => $this->faker->name,
-                'phone_number' => $this->generatePhoneNumber(),
+                'phone1' => $this->generatePhoneNumber(),
+                'phone2' => $this->generatePhoneNumber(),
+                'work_phone' => $this->generatePhoneNumber(),
+                'fax_number' => $this->generatePhoneNumber(),
                 'email' => $this->faker->email,
                 'address' => $this->faker->streetAddress
             ]);
@@ -768,9 +771,11 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function(ClientContact $contact) {
                 $contact->update([
-
                     'name' => $this->faker->name,
-                    'phone_number' => $this->generatePhoneNumber(),
+                    'phone1' => $this->generatePhoneNumber(),
+                    'phone2' => $this->generatePhoneNumber(),
+                    'work_phone' => $this->generatePhoneNumber(),
+                    'fax_number' => $this->generatePhoneNumber(),
                     'email' => $this->faker->email,
                     'address' => $this->faker->streetAddress
                 ]);
