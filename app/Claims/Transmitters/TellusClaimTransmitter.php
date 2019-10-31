@@ -2,16 +2,19 @@
 
 namespace App\Claims\Transmitters;
 
+use App\Business;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
-use App\Services\HhaExchangeService;
+use App\Services\TellusValidationException;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
+use App\Services\TellusService;
 use App\Claims\ClaimInvoice;
-use App\HhaFile;
+use App\Shift;
+use App\TellusTypecode;
 use Illuminate\Support\Collection;
 
-class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
+class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
     /**
      * Timestamp format string.
@@ -36,16 +39,24 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         // payer_code (if payer != private pay)
         // service_code
 
-        // required for hha:
-        // hha_username
-        // hha_password
-        // caregiver ID
+        // required for tellus:
+        // tellus_username
+        // tellus_password
+        // caregiver EIN
+        // business zip
+        // client DOB
+        // client diagnosis codes
+        // plan code (see getPlanCode())
+        // VisitID  shift id ?
+        // client evv address
 
         $errors = collect(parent::validateClaim($claim));
 
-        if (empty($claim->business->hha_username) || empty($claim->business->getHhaPassword())) {
-            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings').'#claims']);
+        if (empty($claim->business->tellus_username) || empty($claim->business->getTellusPassword())) {
+            $errors->push(['message' => 'Your Tellus Credentials have not been setup.', 'url' => route('business-settings') . '#claims']);
         }
+
+        // TODO: finish adding validation
 
         return $errors->isEmpty() ? null : $errors->toArray();
     }
@@ -56,32 +67,33 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param ClaimInvoice $claim
      * @return bool
      * @throws \App\Claims\Exceptions\ClaimTransmissionException
+     * @throws TellusValidationException
      */
     public function send(ClaimInvoice $claim): bool
     {
+        $tellus = new TellusService(
+            $claim->business->tellus_username,
+            $claim->business->getTellusPassword(),
+            config('services.tellus.endpoint')
+        );
+
         try {
-            $hha = new HhaExchangeService(
-                $claim->business->hha_username,
-                $claim->business->getHhaPassword(),
-                $claim->business->ein
-            );
+            if ($tellus->submitClaim($this->getData($claim))) {
+                // Success
+                return true;
+            }
+        } catch (TellusValidationException $ex) {
+            if ($ex->hasErrors()) {
+                throw $ex;
+            }
+            throw new ClaimTransmissionException('Error submitting claim XML to Tellus: ' . $ex->getMessage());
+        } catch (TellusApiException $ex) {
+            throw new ClaimTransmissionException('Error connecting to Tellus: ' . $ex->getMessage());
+        } catch (ClaimTransmissionException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
-            throw new ClaimTransmissionException('Unable to login to HHAeXchange SFTP server.  Please check your credentials and try again.');
-        }
-
-        $filename = $hha->getFilename();
-        $hha->addItems($this->getData($claim));
-        if ($hha->uploadCsv($filename)) {
-            // Success
-
-            // create new HhaFile for the Claim
-            $claim->hhaFiles()->create([
-                'filename' => substr($filename, 0,  strlen($filename) - 4),
-                'status' => HhaFile::STATUS_PENDING,
-            ]);
-
-            return true;
+            throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
         throw new ClaimTransmissionException('An unexpected error occurred.');
@@ -155,85 +167,137 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     }
 
     /**
-     * Map claimable service activities to their corresponding duties codes.
+     * Map collection of activities to their corresponding duties codes.
      *
-     * @param string $activities
+     * @param \Illuminate\Support\Collection $activities
      * @return string
      */
-    public function mapActivities(string $activities): string
+    public function mapActivities(Collection $activities) : string
     {
-        // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
-        if (empty($activities)) {
+        if ($activities->isEmpty()) {
             return '';
         }
 
-        // Check here for duties codes: https://s3.amazonaws.com/hhaxsupport/SupportDocs/EDI+Guides/EDI+Code+Table+Guides/EDI+Code+Table+Guide_PACHC.pdf
-        $duties = collect(explode(',', $activities))->map(function ($code) {
-            switch (trim($code)) {
+        $activities = $activities->map(function ($activity) {
+            if (! empty($activity->business_id)) {
+                // return a default code for any custom activity
+                return 'S9122';
+            }
+
+            switch ($activity->code) {
                 case '001': // Bathing - Shower
+                    return 'S5199';
                 case '002': // Bathing - Bed
-                    return '304';
+                    return 'S5199';
                 case '003': // Dressing
-                    return '123';
+                    return 'S5199';
                 case '005': // Hygiene - Hair Care
+                    return 'S5199';
                 case '006': // Shave
+                    return 'S5199';
                 case '004': // Hygiene - Mouth Care
-                    return '122';
+                    return 'S5199';
                 case '007': // Incontinence Care
-                    return '141';
+                    return 'S5131';
                 case '021': // Medication Reminders
-                    return '118';
+                    return 'S5185';
                 case '020': // Turning & Repositioning
-                    return '125';
+                    return 'S5131';
                 case '022': // Safety Supervision
-                    return '140';
+                    return 'S5131';
                 case '008': // Toileting
-                    return '127';
+                    return 'S5199';
                 case '009': // Catheter Care
-                    return '142';
+                    return 'C1729';
                 case '023': // Meal Preparation
-                    return '115';
+                    return 'S5131';
                 case '025': // Homemaker Services
-                    return '116';
+                    return 'S5131';
                 case '026': // Transportation
-                    return '120';
+                    return 'S5131';
                 case '024': // Feeding
-                    return '129';
+                    return 'S5131';
                 case '010': // Ostomy Care
-                    return '143';
+                    return 'S5199';
                 case '027': // Ambulation
-                    return '128';
+                    return 'S5131';
                 case '011': // Companion Care
+                    return 'S5136';
+                case '028': // Wound Care
+                    return 'S9097';
+                case '029': // Respite Care (Skilled Nursing)
+                    return 'S9125';
+                case '030': // Respite Care (General)
+                    return 'S5151';
                 default:
-                    // return a default code for any custom (or missing) activity
-                    return '201';
+                    return 'S9122';
             }
         });
 
-        return implode('|', $duties->toArray());
+        return implode('|', $activities->toArray());
     }
 
     /**
-     * Format the SSN.
+     * Lookup typecode data from the database.
      *
-     * @param string|null $ssn
+     * @param string $category
+     * @param string $textCode
+     * @return array
+     * @throws ClaimTransmissionException
+     */
+    public function tcLookup(string $category, string $textCode) : array
+    {
+        $typeCode = TellusTypecode::where('category', $category)
+            ->where('text_code', 'LIKE', $textCode)
+            ->first();
+
+        if (empty($typeCode)) {
+            throw new ClaimTransmissionException("Error mapping values to Tellus dictionary: Invalid text code value \"$textCode\" for $category.");
+        }
+
+        return [$typeCode->description, $typeCode->code];
+    }
+
+    /**
+     * Convert the shifts check in or out method into
+     * a valid VerificationType.
+     *
+     * @param string|null $checkedInOutMethod
      * @return string
      */
-    private function cleanSsn(?string $ssn) : string
+    protected function getVerificationType(?string $checkedInOutMethod)
     {
-        if (empty($ssn)) {
-            return '';
+        switch ($checkedInOutMethod) {
+            case Shift::METHOD_TELEPHONY:
+                return 'IVR';
+            case Shift::METHOD_GEOLOCATION:
+                return 'GPS';
+            default:
+                return 'NON';
         }
+    }
 
-        if (strpos($ssn, '-') >= 0) {
-            $ssn = str_replace('-', '', $ssn);
+    /**
+     * Convert the business timezone into the corresponding code.
+     *
+     * @param Business $business
+     * @return string
+     */
+    protected function getBusinessTimezone(Business $business) : string
+    {
+        switch ($business->timezone) {
+            case 'America/Chicago':
+                return 'CHIC';
+            case 'America/Denver':
+                return 'DENV';
+            case 'America/Phoenix':
+                return 'PHOE';
+            case 'America/Los_Angeles':
+                return 'LANG';
+            case 'America/New_York':
+            default:
+                return 'NEWY';
         }
-
-        if (strpos($ssn, '*') >= 0) {
-            $ssn = str_replace('*', '0', $ssn);
-        }
-
-        return $ssn[0].$ssn[1].$ssn[2].'-'.$ssn[3].$ssn[4].'-'.$ssn[5].$ssn[6].$ssn[7].$ssn[8];
     }
 
     /**
@@ -242,9 +306,9 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param ClaimInvoice $claim
      * @return bool
      */
-    public function isTestMode(ClaimInvoice $claim) : bool
+    public function isTestMode(ClaimInvoice $claim): bool
     {
-        return $claim->business->hha_username == "test";
+        return $claim->business->tellus_username == "test";
     }
 
     /**
@@ -254,18 +318,22 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return null|string
      * @throws \Exception
      */
-    public function test(ClaimInvoice $claim) : ?string
+    public function test(ClaimInvoice $claim): ?string
     {
-        $hha = new HhaExchangeService(
-            $claim->business->hha_username,
-            $claim->business->getHhaPassword(),
-            $claim->business->ein
+        $tellus = new TellusService(
+            $claim->business->tellus_username,
+            $claim->business->getTellusPassword(),
+            config('services.tellus.endpoint')
         );
 
-        $hha->addItems($this->getData($claim));
-        $csv = $hha->getCsv();
-        $filename = 'test-claims/hha_' . md5($claim->id . uniqid() . microtime()) . '.csv';
-        \Storage::disk('public')->put($filename, $csv);
+        $xml = $tellus->convertArrayToXML($this->getData($claim));
+
+        if ($errors = $tellus->getValidationErrors($xml)) {
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        }
+
+        $filename = 'test-claims/tellus_' . md5($claim->id . uniqid() . microtime()) . '.xml';
+        \Storage::disk('public')->put($filename, $xml);
         return "/storage/$filename";
     }
 }

@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
+use App\Services\TellusValidationException;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -64,6 +65,9 @@ class ClaimTransmissionController extends BaseController
                 $data['test_result'] = $testFile;
             }
             return new SuccessResponse('Claim was transmitted successfully.', $data);
+        } catch (TellusValidationException $ex) {
+            // Handle returning list of validation errors
+            return new ErrorResponse(420, 'Could not submit because of an error with Claim XML data.', ['tellus_errors' => $ex->getErrors()]);
         } catch (ClaimTransmissionException $ex) {
             return new ErrorResponse(500, $ex->getMessage());
         } catch (\Exception $ex) {
