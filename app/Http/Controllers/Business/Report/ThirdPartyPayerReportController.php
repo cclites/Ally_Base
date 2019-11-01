@@ -31,13 +31,12 @@ class ThirdPartyPayerReportController extends Controller
 
             $timezone = auth()->user()->role->getTimezone();
 
-            $this->authorize('read', Business::find($request->business));
+            $report->query()->forRequestedBusinesses();
 
             $report->setTimezone($timezone)
                 ->applyFilters(
                     $request->start,
                     $request->end,
-                    $request->business,
                     $request->type,
                     $request->client,
                     $request->payer
