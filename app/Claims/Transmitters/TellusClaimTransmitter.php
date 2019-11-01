@@ -22,7 +22,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      *
      * @var string
      */
-    protected $timeFormat = 'Y-m-d H:i';
+    protected $timeFormat = 'm/d/Y H:i:s';
 
     /**
      * Validate a ClaimInvoice has all the required parameters to
@@ -137,7 +137,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ProviderNPI'            => $business->medicaid_npi_number, // OPTIONAL
             'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy, // OPTIONAL
             'ProviderNPIZipCode'     => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
-            'ProviderEin'            => $business->ein, // REQUIRED
+            'ProviderEin'            => str_replace('-', '', $business->ein), // REQUIRED
             'CaregiverFirstName'     => $service->caregiver_first_name,
             'CaregiverLastName'      => $service->caregiver_last_name,
             'CaregiverLicenseNumber' => $service->caregiver_medicaid_id, // OPTIONAL
@@ -214,7 +214,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             $data['ScheduledEndLongitude']  = $service->longitude ?? ''; // OPTIONAL
         }
 
-        return $data;
+        // clean empty values and return
+        return collect($data)->filter()->toArray();
     }
 
     /**
