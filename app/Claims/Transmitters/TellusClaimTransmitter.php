@@ -12,6 +12,7 @@ use App\Services\TellusService;
 use App\Claims\ClaimInvoice;
 use App\Shift;
 use App\TellusTypecode;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
@@ -105,65 +106,115 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      *
      * @param ClaimInvoiceItem $item
      * @return null|array
+     * @throws ClaimTransmissionException
      */
     public function mapClaimableRecord(ClaimInvoiceItem $item): ?array
     {
         if ($item->claimable_type != ClaimableService::class) {
-            // HHA DOES NOT SUPPORT EXPENSES
+            // TELLUS DOES NOT SUPPORT EXPENSES
             return null;
         }
 
         $claim = $item->claim;
+
         /** @var ClaimableService $service */
         $service = $item->claimable;
 
-        return [
-            $claim->business->ein ? str_replace('-', '', $claim->business->ein) : '', //    "Agency Tax ID", (required)
-            $claim->payer_code, //    "Payer ID", (required)
-            $claim->client_medicaid_id, //    "Medicaid Number", (required)
-            $service->caregiver_id, //    "Caregiver Code", (required)
-            $service->caregiver_first_name, //    "Caregiver First Name",
-            $service->caregiver_last_name, //    "Caregiver Last Name",
-            $service->caregiver_gender ? strtoupper($service->caregiver_gender) : '', //    "Caregiver Gender",
-            $service->caregiver_dob ?? '', //    "Caregiver Date of Birth",
-            $this->cleanSsn($service->caregiver_ssn), //    "Caregiver SSN",
-            $claim->id, //    "Schedule ID", (required)
-            $service->service_code, //    "Procedure Code", (required)
-            $service->scheduled_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule Start Time", (required)
-            $service->scheduled_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule End Time", (required)
-            $service->visit_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Visit Start Time", (required)
-            $service->visit_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Visit End Time", (required)
-            $service->getHasEvv() ? $service->evv_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV Start Time",
-            $service->getHasEvv() ? $service->evv_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV End Time",
-            str_limit($service->getAddress(), 100), //    "Service Location",
-            $this->mapActivities($service->activities), //    "Duties",
-            $service->checked_in_number, //    "Clock-In Phone Number",
-            $service->checked_in_latitude, //    "Clock-In Latitude",
-            $service->checked_in_longitude, //    "Clock-In Longitude",
-            '', //    "Clock-In EVV Other Info",
-            $service->checked_out_number, //    "Clock-Out Phone Number",
-            $service->checked_out_latitude, //    "Clock-Out Latitude",
-            $service->checked_out_longitude, //    "Clock-Out Longitude",
-            '', //    "Clock-Out EVV Other Info",
-            $claim->name, //    "Invoice Number",
-            // TODO: implement reason codes:
-            $service->getHasEvv() ? '' : '910', //    "Visit Edit Reason Code",
-            $service->getHasEvv() ? '' : '14', //    "Visit Edit Action Taken",
-            '', //    "Notes",
-            'N', //    "Is Deletion",
-            $item->id, //    "Invoice Line Item ID",
-            'N', //    "Missed Visit",
-            // TODO: implement reason codes?
-            '', //    "Missed Visit Reason Code",
-            '', //    "Missed Visit Action Taken Code",
-            $service->getHasEvv() ? '' : 'Y', //    "Timesheet Required",
-            $service->getHasEvv() ? '' : 'Y', //    "Timesheet Approved",
-            '', //    "User Field 1",
-            '', //    "User Field 2",
-            '', //    "User Field 3",
-            '', //    "User Field 4",
-            '', //    "User Field 5",
+        /** @var \App\Business $business */
+        $business = $claim->business;
+
+        $diagnosisCodes = $this->getDiagnosisCodes($claim);
+
+        $data = [
+            'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
+            'Jurisdiction'           => $this->tcLookup('Jurisdiction', $service->state ),
+            'Payer'                  => $this->tcLookup('Payer', $claim->payer_code ),
+            'Plan'                   => $this->tcLookup('Plan', $claim->plan_code ), // FMSP is only Acceptable Value
+            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL, PACE is only Acceptable Value
+            'DeliverySystem'         => $this->tcLookup( 'DeliverySystem', 'MCOR' ), // FFFS or MCOR.. no way to derive this from our system yet.
+            'ProviderName'           => $business->name,
+            'ProviderMedicaidId'     => $business->medicaid_id,
+            'ProviderNPI'            => $business->medicaid_npi_number, // OPTIONAL
+            'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy, // OPTIONAL
+            'ProviderNPIZipCode'     => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
+            'ProviderEin'            => $business->ein, // REQUIRED
+            'CaregiverFirstName'     => $service->caregiver_first_name,
+            'CaregiverLastName'      => $service->caregiver_last_name,
+            'CaregiverLicenseNumber' => $service->caregiver_medicaid_id, // OPTIONAL
+            'RecipientMedicaidId'    => $claim->client_medicaid_id,
+            'RecipientMemberId'      => '', // OPTIONAL
+            'RecipientFirstName'     => $claim->client_first_name,
+            'RecipientLastName'      => $claim->client_last_name,
+            'RecipientDob'           => Carbon::parse( $claim->client_dob )->format('m/d/Y'),
+            'ServiceAddress1'        => $service->address1,
+            'ServiceAddress2'        => $service->address2, // OPTIONAL
+            'ServiceCity'            => $service->city,
+            'ServiceState'           => $service->state,
+            'ServiceZip'             => $service->zip,
+            'VisitId'                => $service->id,
+            'ServiceCode'            => $service->service_code,
+            'ServiceCodeMod1'        => '', // OPTIONAL
+            'ServiceCodeMod2'        => '', // OPTIONAL
+            'DiagnosisCode1'         => $diagnosisCodes[ 0 ],
+            'DiagnosisCode2'         => $diagnosisCodes[ 1 ], // OPTIONAL && TODO
+            'DiagnosisCode3'         => $diagnosisCodes[ 2 ], // OPTIONAL && TODO
+            'DiagnosisCode4'         => $diagnosisCodes[ 3 ], // OPTIONAL && TODO
+            'StartVerificationType'  => $this->tcLookup( 'StartVerificationType', $this->getVerificationType($service->evv_method_in) ), // OPTIONAL
+            'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($service->evv_method_out) ), // OPTIONAL
+            'ScheduledStartDateTime' => $service->scheduled_start_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledEndDateTime'   => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledLatitude' => '',
+            'ScheduledLongitude' => '',
+            'ActualStartDateTime'    => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime'      => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartLatitude' => '',
+            'ActualStartLongitude' => '',
+            'ActualEndLatitude' => '',
+            'ActualEndLongitude' => '',
+            // 'UserField1'             => '', // OPTIONAL
+            // 'UserField2'             => '', // OPTIONAL
+            // 'UserField3'             => '', // OPTIONAL
+            // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO
+            // 'ReasonCode2' => '', // OPTIONAL && TODO
+            // 'ReasonCode3' => '', // OPTIONAL && TODO
+            // 'ReasonCode4' => '', // OPTIONAL && TODO
+            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
+            'VisitNote'              => $service->caregiver_comments ?? '', // OPTIONAL
+            'EndAddress1'            => $service->address1, // OPTIONAL
+            'EndAddress2'            => $service->address2, // OPTIONAL
+            'EndCity'                => $service->city, // OPTIONAL
+            'EndState'               => $service->state, // OPTIONAL
+            'EndZip'                 => $service->zip, // OPTIONAL
+            'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
+            // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
+            // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
+            // 'InvoiceUnits'           => '', // OPTIONAL && TODO
+            // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
+            'ScheduledEndLatitude' => '',
+            'ScheduledEndLongitude' => '',
+            // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
+            'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL
+            'Tasks'                  => '', // a wrapper element for the tasks
+            // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
         ];
+
+        // Set start EVV data (if exists)
+        if ($service->evv_method_in == Shift::METHOD_GEOLOCATION && filled($service->checked_in_latitude) && filled($service->checked_in_longitude)) {
+            $data['ScheduledLatitude'] = $service->latitude ?? ''; // OPTIONAL
+            $data['ScheduledLongitude'] = $service->longitude ?? ''; // OPTIONAL
+            $data['ActualStartLatitude'] = $service->checked_in_latitude; //OPTIONAL
+            $data['ActualStartLongitude'] = $service->checked_in_longitude; //OPTIONAL
+        }
+
+        // Set end EVV data (if exists)
+        if ($service->evv_method_out == Shift::METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
+            $data['ActualEndLatitude']      = $service->checked_out_latitude; // OPTIONAL
+            $data['ActualEndLongitude']     = $service->checked_out_longitude; //OPTIONAL
+            $data['ScheduledEndLatitude']   = $service->latitude ?? ''; // OPTIONAL
+            $data['ScheduledEndLongitude']  = $service->longitude ?? ''; // OPTIONAL
+        }
+
+        return $data;
     }
 
     /**
@@ -174,6 +225,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      */
     public function mapActivities(Collection $activities) : string
     {
+        // TODO: re-work this to read from hcpcs_procedure_code field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if ($activities->isEmpty()) {
             return '';
         }
@@ -298,6 +350,21 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             default:
                 return 'NEWY';
         }
+    }
+
+    /**
+     * Split client diagnosis codes from databased array.
+     *
+     * @param ClaimInvoice $claim
+     * @return array
+     */
+    protected function getDiagnosisCodes(ClaimInvoice $claim) : array
+    {
+        return array_pad(
+            array_map('trim', explode(',', $claim->client_medicaid_diagnosis_codes)),
+            4,
+            ''
+        );
     }
 
     /**
