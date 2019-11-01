@@ -10,7 +10,7 @@
                     <div class="form-inline">
 
                         <business-location-form-group
-                                v-model="form.business"
+                                v-model="form.businesses"
                                 :allow-all="true"
                                 class="mb-2 mr-2"
                                 :label="null"
@@ -145,7 +145,7 @@
         data() {
             return {
                 form: new Form({
-                    business: '',
+                    businesses: '',
                     start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     type: '',
@@ -182,7 +182,6 @@
                 items: [],
                 item:'',
                 hasRun: false,
-                businesses: [],
             }
         },
 
