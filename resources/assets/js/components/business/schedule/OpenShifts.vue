@@ -12,7 +12,7 @@
 
             <template slot="start" scope="data">
 
-                {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time }}
+                {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time + ' :: ' + data.item.id }}
             </template>
             <template slot="actions" scope="data">
 
@@ -39,11 +39,7 @@
 
     export default {
 
-        props: {
-
-            'businesses' : Array,
-            'role_type'  : String
-        },
+        props: [ 'businesses', 'role_type' ],
         data() {
 
             return {
@@ -96,7 +92,8 @@
         mounted() {
 
             this.loadFiltersData();
-            this.active_business = this.businesses[ 0 ] || null;
+            if( !Array.isArray( this.businesses ) ) this.active_business = this.businesses;
+            else this.active_business = this.businesses[ 0 ].id || null;
         },
 
         computed: {
@@ -118,13 +115,13 @@
                         break;
                     case 'office_user':
 
-                        url = '/business/open-shifts';
+                        url = '/business/schedule/open-shifts';
                         break;
                 }
 
                 url += '?json=1';
 
-                url += '&businesses=' + this.active_business.id;
+                url += '&businesses=' + this.active_business;
 
                 /*
 

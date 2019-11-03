@@ -34,6 +34,7 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
+use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends BaseController
 {
@@ -48,7 +49,6 @@ class ScheduleController extends BaseController
     {
         $query = Schedule::forRequestedBusinesses()
             ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])
-            ->withCount( 'schedule_requests' )
             ->ordered();
 
         // Filter by client or caregiver
@@ -73,6 +73,55 @@ class ScheduleController extends BaseController
             'kpis' => $events->kpis(),
             'events' => $events->toArray(),
         ];
+    }
+
+    /**
+     * Display a listing of open shifts
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function openShifts()
+    {
+        if( request()->filled( 'json' ) ){
+
+            $query = Schedule::forRequestedBusinesses()
+                ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service', 'schedule_requests' ])
+                ->ordered()
+                ->whereDoesntHave( 'caregiver' )
+                ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ]);
+
+            $start = Carbon::now();
+            $end   = Carbon::parse( 'today +31 days' );
+
+            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )->get();
+
+            $events = new ScheduleEventsResponse( $schedules );
+
+            return [ 'events' => $events->toArray() ];
+        }
+
+        $chain = auth()->user()->getChain()->id;
+
+        return view( 'open_shifts', [ 'businesses' => $chain, 'role_type' => auth()->user()->role_type ]);
+    }
+
+    /**
+     * Get a simple count of shift requests for the top-header icon
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function openShiftRequests( Request $request )
+    {
+        $chain = auth()->user()->getChain();
+
+        $count = Schedule::forRequestedBusinesses([ $chain->id ])
+            ->with([ 'schedule_requests' ])
+            ->whereDoesntHave( 'caregiver' )
+            ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ])
+            ->count();
+
+        return response()->json( compact( 'count' ) );
     }
 
     /**

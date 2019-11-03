@@ -107,7 +107,7 @@ class ScheduleEvents implements Responsable
                 'has_overtime' => $schedule->hasOvertime(),
                 'added_to_past' => $schedule->added_to_past,
                 'service_types' => $this->getServiceTypes($schedule),
-                'requests_count' => $schedule->schedule_requests_count ?? null, // Erik TODO => make this a model relationship.. unique by caregiver_id
+                'requests_count' => $schedule->active_requests,
                 'request_status' => $request_status
             ], $additionalOptions);
         });

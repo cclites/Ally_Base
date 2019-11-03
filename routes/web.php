@@ -428,6 +428,8 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
+    Route::get('schedule/openShiftRequests', 'Business\ScheduleController@openShiftRequests')->name('schedule.openShiftRequests');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
@@ -436,9 +438,6 @@ Route::group([
     Route::patch('schedule/{schedule}/status', 'Business\ScheduleController@updateStatus')->name('schedule.update_status');
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');
-
-    /** Open Shifts */
-    Route::resource('open-shifts', 'Business\OpenShiftController');
 
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');

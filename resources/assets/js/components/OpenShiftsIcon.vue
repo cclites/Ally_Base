@@ -2,20 +2,19 @@
 
     <li class="nav-item pr-2">
 
-        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 55px" id="openShiftsDropdown" href="/business/open-shifts" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 55px" id="openShiftsDropdown" href="/business/schedule/open-shifts" aria-haspopup="true" aria-expanded="false">
 
             <i class="notification-icon open-shifts-icon"></i>
 
             <span class="badge badge-danger badge-notifications" v-if="total > 0">{{ total }}</span>
 
-            <b-tooltip target="openShiftsDropdown" placement="left" show title="You have open shifts to view" v-if="showTooltip"></b-tooltip>
+            <b-tooltip target="openShiftsDropdown" placement="left" title="View requests to open shifts"></b-tooltip>
         </a>
     </li>
 </template>
 
 <script>
 
-    import { mapGetters } from 'vuex';
     export default {
 
         props : {
@@ -24,47 +23,35 @@
         data() {
 
             return {
+
+                total: 0
             }
         },
         async mounted() {
 
-            await this.$store.dispatch( 'notifications/start' ); // Erik TODO => have this grab new open shifts count
+            await this.fetchRequestsCount();
         },
 
         methods: {
 
+            fetchRequestsCount(){
+
+                let form = new Form();
+
+                form.get( '/business/schedule/openShiftRequests' )
+                    .then( ({ data }) => {
+
+                        console.log( data );
+                        this.total = data.count;
+                    })
+                    .catch( e => {
+
+                    })
+            }
         },
 
         computed: {
 
-            ...mapGetters({ // Erik TODO => have this grab new open shifts count
-
-                notifications : 'notifications/notifications',
-                total         : 'notifications/total',
-            }),
-            items() {
-
-                let maxTitle = 36;
-                let maxDescription = 72;
-                return this.notifications.map( ( notification ) => {
-
-                    let data = JSON.parse(JSON.stringify(notification));
-                    if (data.message.length > maxDescription) {
-                        data.message = data.message.substring(0, maxDescription) + '..';
-                    }
-                    if (data.title.length > maxTitle) {
-                        data.title = data.title.substring(0, maxTitle) + '..';
-                    }
-                    data.time = moment.utc(data.created_at).local().format('LT');
-                    return data;
-                })
-            },
-            showTooltip() {
-                // Suppressed always temporarily
-
-                return false;
-                return this.notifications.length && window.location.pathname === '/business/schedule';
-            }
         }
     }
 </script>

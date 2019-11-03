@@ -245,6 +245,21 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * gets the total count of outstanding requests
+     */
+    public function getActiveRequestsAttribute()
+    {
+        $count = 0;
+
+        foreach( $this->schedule_requests->groupBy( 'pivot.caregiver_id' ) as $requester ){
+
+            if( $requester->sortByDesc( 'pivot.created_at' )->first()->pivot->status == 'pending' ) $count++;
+        }
+
+        return $count;
+    }
+
+    /**
      * Get whether of not the schedule will be converted by
      * the schedule converter CRON.
      *
