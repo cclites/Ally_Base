@@ -428,6 +428,8 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::get('schedule/requests/{schedule}', 'Business\ScheduleController@getScheduleRequests' )->name( 'schedule.getRequests' );
+    Route::post('schedule/requests/{schedule}', 'Business\ScheduleController@changeRequestStatus' )->name( 'schedule.changeRequestStatus' );
     Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
     Route::get('schedule/openShiftRequests', 'Business\ScheduleController@openShiftRequests')->name('schedule.openShiftRequests');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');

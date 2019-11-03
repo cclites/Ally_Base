@@ -131,6 +131,54 @@ class ScheduleController extends BaseController
      * @return \Illuminate\Contracts\Support\Responsable
      * @throws \Exception
      */
+    public function getScheduleRequests(Schedule $schedule)
+    {
+        $this->authorize('read', $schedule);
+        return new SuccessResponse( 'Successfully loaded schedule requests..', $schedule->load( 'schedule_requests' )->active_requests );
+    }
+
+    /**
+     * 
+     *
+     * @param \App\Schedule $schedule
+     * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
+     */
+    public function changeRequestStatus( Schedule $schedule )
+    {
+        $this->authorize( 'update', $schedule );
+
+        $action = request()->input( 'status' );
+        $request_id = request()->input( 'request' );
+
+        switch( $action ){
+
+            case 'accept':
+
+                $newStatus = 'approved'; // ERIK TODO => probably should get some constants in here÷..
+                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                // assign caregiver to shift
+                // text them? Ask Jason
+                break;
+            case 'reject':
+
+                $newStatus = 'denied'; // ERIK TODO => probably should get some constants in here÷..
+                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                // assign caregiver to shift
+                // text them? Ask Jason
+                break;
+        }
+
+        return new SuccessResponse( 'Successfully updated schedule request!', $newStatus );
+    }
+
+    /**
+     * Retrieve the details of a schedule
+     *
+     * @param \App\Schedule $schedule
+     * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
+     */
     public function show(Schedule $schedule)
     {
         $this->authorize('read', $schedule);

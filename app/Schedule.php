@@ -215,7 +215,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     {
         return $this->belongsToMany( Caregiver::class, 'caregiver_schedule_requests' )
             ->withTimestamps()
-            ->withPivot([ 'status' ]);
+            ->withPivot([ 'status', 'id' ]);
     }
 
     ///////////////////////////////////////////
@@ -245,18 +245,31 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * gets the total count of outstanding requests
+     * gets the most recent request status grouped by caregiver_id
      */
     public function getActiveRequestsAttribute()
     {
-        $count = 0;
+        $requests = [];
 
         foreach( $this->schedule_requests->groupBy( 'pivot.caregiver_id' ) as $requester ){
 
-            if( $requester->sortByDesc( 'pivot.created_at' )->first()->pivot->status == 'pending' ) $count++;
+            $requests[] = $requester->sortByDesc( 'pivot.created_at' )->first(); // interesting point here.. move CG info to vuex for global state so we dont need to constantly grab it everywhere
         }
 
-        return $count;
+        return array_values( $requests );
+    }
+
+    /**
+     * gets the total count of outstanding requests with an optional filter of status type
+     */
+    public function activeRequestsCount( $status = 'all' )
+    {
+        if( $status == 'all' ) return count( $this->active_requests );
+
+        return count( array_filter( $this->active_requests, function( $s ) use ( $status ){
+
+            return $s->pivot->status == $status;
+        }) );
     }
 
     /**

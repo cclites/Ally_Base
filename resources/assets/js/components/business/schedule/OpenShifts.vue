@@ -22,6 +22,11 @@
                     <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item ) " key="rescind">Cancel Request</b-button>
                 </transition>
             </template>
+            <template slot="requests_count" scope="data">
+
+                <a href="#" @click.prevent=" fetchRequestDetails( data.item.id ) " v-if=" data.item.requests_count > 0 ">{{ data.item.requests_count }} Request{{ data.item.requests_count > 1 ? 's' : '' }}</a>
+                <span v-else>0</span>
+            </template>
             <template slot="status" scope="data">
 
                 {{ data.item.status == 'OK' ? 'Open' : data.item.status }}
@@ -29,6 +34,15 @@
           </ally-table>
       </div>
     </b-card>
+
+    <b-modal id="schedule-requests-modal"
+        title="Schedule Requests"
+        size="xl"
+        v-model=" scheduleModal "
+        scrollable
+    >
+        <schedule-requests :selected-schedule=" selectedSchedule " v-if=" selectedSchedule !== null "></schedule-requests>
+    </b-modal>
   </div>
 </template>
 
@@ -36,6 +50,7 @@
 
     import FormatsDates from '../../../mixins/FormatsDates';
     import AuthUser from '../../../mixins/AuthUser';
+    import ScheduleRequests from './ScheduleRequests';
 
     export default {
 
@@ -44,14 +59,16 @@
 
             return {
 
-                loading         : false,
-                filtersReady    : false,
-                // clients         : this.client ? [this.client] : [],
-                // caregivers      : this.caregiver ? [this.caregiver] : [],
-                events          : [],
-                eventsLoaded    : false,
-                active_business : null,
-                isBusy          : false,
+                loading          : false,
+                filtersReady     : false,
+                // clients          : this.client ? [this.client] : [],
+                // caregivers       : this.caregiver ? [this.caregiver] : [],
+                events           : [],
+                eventsLoaded     : false,
+                active_business  : null,
+                isBusy           : false,
+                selectedSchedule : null,
+                scheduleModal    : false,
                 fields : [
 
                     {
@@ -239,6 +256,20 @@
 
         methods: {
 
+            fetchRequestDetails( request_id ){
+
+                axios.get( '/business/schedule/requests/' + request_id )
+                .then( response => {
+
+                    console.log( response );
+                    this.selectedSchedule = response.data.data;
+                    this.scheduleModal = true;
+                })
+                .catch( error => {
+
+                    alert( 'Error loading schedule details' );
+                });
+            },
             hasRequest( status ){
 
                 switch( status ){
@@ -877,6 +908,11 @@
             AuthUser
             //ManageCalendar, LocalStorage, FormatsNumbers, FormatsStrings
         ],
+
+        components: {
+
+            ScheduleRequests
+        }
     }
 </script>
 
