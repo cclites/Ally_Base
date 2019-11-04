@@ -74,13 +74,13 @@
                     </b-form>
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
-                            :items="form.daysOff"
+                            :items="form.days_off"
                             :fields="daysOffFields"
                             sort-by="date"
                             :sort-desc="false"
                         >
                             <template slot="actions" scope="row">
-                                <b-btn size="sm" variant="danger" @click="removeDayOff(row.item.start_date, row.item.end_date)">Remove</b-btn>
+                                <b-btn size="sm" variant="danger" @click="removeDayOff(row.index)">Remove</b-btn>
                             </template>
                         </b-table>
                     </div>
@@ -90,7 +90,7 @@
                     <b-form-textarea v-model="form.preferences" rows="3"></b-form-textarea>
                 </b-form-group>
                 <b-form-group>
-                    <b-btn @click="updatePreferences" variant="success">Save</b-btn>
+                    <b-btn @click="updatePreferences" variant="success">Save Availability Preferences</b-btn>
                 </b-form-group>
             </b-card>
         </b-col>
@@ -137,7 +137,7 @@
                     maximum_shift_hours: this.caregiver.availability ? this.caregiver.availability.maximum_shift_hours : 24,
                     maximum_miles: this.caregiver.availability ? this.caregiver.availability.maximum_miles : 20,
                     preferences: this.caregiver.preferences,
-                    daysOff: this.caregiver.days_off ? this.caregiver.days_off : [],
+                    days_off: this.caregiver.days_off ? this.caregiver.days_off : [],
                 }),
                 dayoff_reason: '',
                 dayoff_start: '',
@@ -168,8 +168,8 @@
                 }
                 let formattedEndDate = moment(this.dayoff_end).format('YYYY-MM-DD');
 
-                if (this.form.daysOff.findIndex(x => x.start_date == formattedStartDate && x.end_date == formattedEndDate) < 0) { // skip duplicates
-                    this.form.daysOff.push(
+                if (this.form.days_off.findIndex(x => x.start_date == formattedStartDate && x.end_date == formattedEndDate) < 0) { // skip duplicates
+                    this.form.days_off.push(
                         { start_date: formattedStartDate, end_date: formattedEndDate, description: this.dayoff_reason }
                     );
                 }else{
@@ -180,8 +180,8 @@
                 this.dayoff_end = '';
                 this.dayoff_reason = '';
             },
-            removeDayOff(start_date, end_date) {
-                this.form.daysOff = this.form.daysOff.filter(x => x.start_date != start_date );
+            removeDayOff(index) {
+                this.form.days_off.splice(index, 1);
             },
             updatePreferences() {
                 var url = '/business/caregivers/' + this.caregiver.id + '/preferences';
