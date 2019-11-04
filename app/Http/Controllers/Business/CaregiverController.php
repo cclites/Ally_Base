@@ -388,16 +388,30 @@ class CaregiverController extends BaseController
         return new SuccessResponse('Caregiver updated');
     }
 
+    /**
+     * Update the caregiver availability tab.
+     *
+     * @param UpdateCaregiverAvailabilityRequest $request
+     * @param Caregiver $caregiver
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
+     */
     public function preferences(UpdateCaregiverAvailabilityRequest $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);
 
-        $caregiver->update(['preferences' => $request->input('preferences')]);
-        $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
-        $caregiver->daysOff()->delete();
-        $caregiver->daysoff()->createMany($request->daysOff);
+        \DB::beginTransaction();
 
-        return new SuccessResponse('Caregiver availability preferences updated');
+        $caregiver->update(['preferences' => $request->preferencesData()]);
+        $caregiver->setAvailability($request->availabilityData());
+
+        $caregiver->daysOff()->delete();
+        $caregiver->daysoff()->createMany($request->daysOffData());
+
+        \DB::commit();
+
+        return new SuccessResponse('Caregiver availability preferences have been saved.', $caregiver->fresh()->daysOff);
     }
 
     public function skills(Request $request, Caregiver $caregiver)
