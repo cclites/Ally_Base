@@ -79,7 +79,8 @@ class ClientCaregiverController extends BaseController
         $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
 
         $caregivers = Caregiver::with('businesses')
-            ->forRequestedBusinesses()
+            ->forBusinesses([$client->business_id])
+            ->active()
             ->ordered()
             ->whereNotIn('caregivers.id', $excluded_caregivers->values())
             ->select('caregivers.id')

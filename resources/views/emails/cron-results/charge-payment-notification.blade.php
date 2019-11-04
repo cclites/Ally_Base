@@ -6,7 +6,7 @@
 
 **Emails sent to Clients:** {{ $clients->count() }}
 
-**Emails sent to Caregivers:** {{ $clients->count() }}
+**Emails sent to Caregivers:** {{ $caregivers->count() }}
 
 @if (! $errors->isEmpty())
 **Errors:**

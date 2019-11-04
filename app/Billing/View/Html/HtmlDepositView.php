@@ -22,6 +22,7 @@ class HtmlDepositView implements DepositViewStrategy
      */
     function generate(ContactableInterface $recipient, Deposit $deposit, array $invoiceObjects)
     {
-        return response(view($this->view, compact("recipient", "deposit", "invoiceObjects")));
+        $render = 'html';
+        return response(view($this->view, compact("recipient", "deposit", "invoiceObjects", 'render')));
     }
 }

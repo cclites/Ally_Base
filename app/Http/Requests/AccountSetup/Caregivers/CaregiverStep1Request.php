@@ -5,6 +5,7 @@ namespace App\Http\Requests\AccountSetup\Caregivers;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\PhonePossible;
 use App\Caregiver;
+use App\Rules\ValidSSN;
 
 class CaregiverStep1Request extends FormRequest
 {
