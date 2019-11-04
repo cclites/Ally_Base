@@ -99,4 +99,10 @@ return [
          */
         'mode' => env('QUICKBOOKS_MODE', 'sandbox'),
     ],
+
+    'confluence' => [
+        'host' => env('CONFLUENCE_HOST', 'jtrsolutions.atlassian.net'),
+        'username' => env('CONFLUENCE_USERNAME', ''),
+        'api_token' => env('CONFLUENCE_API_TOKEN', ''),
+    ],
 ];
