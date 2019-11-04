@@ -107,9 +107,9 @@
 </template>
 
 <script>
-    import BFormCheckbox from "bootstrap-vue/src/components/form-checkbox";
+    //import BFormCheckbox from "bootstrap-vue/src/components/form-checkbox";
     export default {
-        components: {BFormCheckbox},
+        //components: {BFormCheckbox},
         props: {
             connection: {
                 type: [Array, Object],

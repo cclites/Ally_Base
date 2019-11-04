@@ -371,7 +371,7 @@ Vue.component('admin-nachaach-entry-detail-modal', require('./components/admin/n
 /* Quickbooks */
 Vue.component('business-quickbooks-settings', require('./components/business/quickbooks/QuickbooksSettings'));
 Vue.component('business-quickbooks-connect-settings', require('./components/business/quickbooks/QuickbooksConnectSettings'));
-//Vue.component('business-quickbooks-general-settings', require('./components/business/quickbooks/QuickbooksGeneralSettings'));
+Vue.component('business-quickbooks-general-settings', require('./components/business/quickbooks/QuickbooksGeneralSettings'));
 Vue.component('business-quickbooks-client-map-settings', require('./components/business/quickbooks/QuickbooksClientMapSettings'));
 // Vue.component('quickbooks-general-mapping', require('./components/business/quickbooks/tabs/GeneralMapping'));
 // Vue.component('quickbooks-rate-mapping', require('./components/business/quickbooks/tabs/RateMapping'));
