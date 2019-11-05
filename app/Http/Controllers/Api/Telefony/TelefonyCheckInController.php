@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Caregiver;
@@ -13,6 +14,9 @@ class TelefonyCheckInController extends BaseVoiceController
 
     /**
      * Return check in response.
+     *
+     * @return mixed
+     * @throws TelefonyMessageException
      */
     public function checkInResponse()
     {
@@ -38,6 +42,10 @@ class TelefonyCheckInController extends BaseVoiceController
 
     /**
      * Check in caregiver if identity confirmed by pressing 1.
+     *
+     * @param Caregiver $caregiver
+     * @return mixed
+     * @throws TelefonyMessageException
      */
     public function checkIn(Caregiver $caregiver)
     {
@@ -91,8 +99,7 @@ class TelefonyCheckInController extends BaseVoiceController
                 sprintf('If this is %s, press 1 to finish clocking in<PAUSE>press 3 to re-enter.<PAUSE>press 0 to return to the main menu<PAUSE>', $caregiver->firstname),
                 $gather
             );
-        }
-        else {
+        } else {
             $this->telefony->say(
                 sprintf('There were no matches for, %s<PAUSE>', implode(',,', str_split($digits)))
             );
@@ -104,6 +111,10 @@ class TelefonyCheckInController extends BaseVoiceController
 
     /**
      * Check in caregiver.
+     *
+     * @param Caregiver $caregiver
+     * @return mixed
+     * @throws TelefonyMessageException
      */
     protected function checkInCaregiver(Caregiver $caregiver)
     {
@@ -121,19 +132,16 @@ class TelefonyCheckInController extends BaseVoiceController
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 \Log::error($e->getMessage());
             }
-        }
-        else {
+        } else {
             try {
                 if ($shift = $clockIn->clockInWithoutSchedule($this->client)) {
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 \Log::error($e->getMessage());
             }
         }
