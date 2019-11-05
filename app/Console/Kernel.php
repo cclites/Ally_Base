@@ -75,8 +75,8 @@ class Kernel extends ConsoleKernel
             ->everyThirtyMinutes()
             ->withoutOverlapping();
 
-//        $schedule->command('cron:charge_payment_notifications')
-//            ->dailyAt('23:30'); // 6:30 PM EST / 7:30 EDT
+        $schedule->command('cron:charge_payment_notifications')
+            ->dailyAt('23:30'); // 6:30 PM EST / 7:30 EDT
     }
 
     /**
