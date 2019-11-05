@@ -251,7 +251,7 @@ class ClientController extends BaseController
             ];
         });
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices', 'notifications'));
+        return view('business.clients.show', compact('client', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices', 'notifications'));
     }
 
     public function edit(Client $client)

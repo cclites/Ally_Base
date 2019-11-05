@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Ethnicity;
+use App\Http\Requests\ClientCareMatchRequest;
 use App\Rules\ValidEnum;
 use App\Scheduling\CareMatch;
 use Carbon\Carbon;
@@ -26,41 +27,25 @@ class CareMatchController extends BaseController
         return view('business.care_match.index');
     }
 
-    function clientMatch(Request $request, Client $client)
+    /**
+     * Match caregivers to the given client using the specified criteria.
+     *
+     * @param ClientCareMatchRequest $request
+     * @param Client $client
+     * @return \App\Caregiver[]|\Illuminate\Database\Eloquent\Collection
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    function clientMatch(ClientCareMatchRequest $request, Client $client)
     {
         $this->authorize('read', $client);
 
-        $request->validate([
-            'starts_at' => 'nullable|date',
-            'duration' => 'nullable|integer|required_if:exclude_overtime,1',
-            'matches_activities' => 'nullable|numeric', // should be a decimal representing the minimum percent match
-//            'matches_preferences' => 'boolean',
-            'matches_gender' => 'nullable|string',
-            'matches_certification' => 'nullable|string',
-            'matches_language' => 'nullable|string',
-            'matches_days' => 'nullable|array',
-            'matches_existing_assignments' => 'boolean',
-            'exclude_overtime' => 'boolean',
-            'radius' => 'nullable|numeric',
-            'rating' => 'nullable|numeric',
-            'smoking' => 'required|in:1,0,client',
-            'ethnicity' => 'nullable|in:client,select',
-            'ethnicities' => 'required_if:ethnicity,select|array',
-        ], [
-            'starts_at.*' => 'The start date and time are invalid.',
-            'duration.*' => 'The start time and end time are required for overtime calculations.',
-            'ethnicities.*' => 'You must select at least one ethnicity',
-        ]);
+        $data = $request->validated();
 
         $this->careMatch->matchesClientActivities($client, $request->matches_activities);
 
         if ($request->starts_at) {
-            $this->careMatch->matchesTime(Carbon::parse($request->starts_at, $this->business()->timezone), $request->duration);
+            $this->careMatch->matchesTime(Carbon::parse($request->starts_at, $client->business->getTimezone()), $request->duration);
         }
-
-//        if ($request->matches_preferences) {
-//            $this->careMatch->matchesClientPreferences($client);
-//        }
 
         if ($request->matches_gender) {
             $preferences['gender'] = $request->matches_gender === 'client' ? optional($client->preferences)->gender : $request->matches_gender;

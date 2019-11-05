@@ -94,13 +94,12 @@ class ThirdPartyPayerReport extends BaseReport
      *
      * @param string $start
      * @param string $end
-     * @param int $business
      * @param string|null $type
      * @param int|null $client
      * @param int|null $payer
      * @return ThirdPartyPayerReport
      */
-    public function applyFilters(string $start, string $end, int $business, ?string $type, ?int $client, ?int $payer): self
+    public function applyFilters(string $start, string $end, ?string $type, ?int $client, ?int $payer): self
     {
         $this->start = (new Carbon($start . ' 00:00:00',$this->timezone));
         $this->end = (new Carbon($end . ' 23:59:59',$this->timezone));
@@ -113,8 +112,6 @@ class ThirdPartyPayerReport extends BaseReport
 //            $q->whereIn('invoiceable_type', ['shifts', 'shift_services'])
 //                ->whereBetween('date', [$this->start, $this->end]);
 //        });
-
-        $this->query->forBusiness($business);
 
         if (filled($type)) {
             $this->query->whereHas('client', function ($q) use ($type) {
@@ -204,7 +201,7 @@ class ThirdPartyPayerReport extends BaseReport
             'evv' => $shift->isVerified(),
             'service_id' => $shift->service->id,
             'service' => trim("{$shift->service->code} {$shift->service->name}"),
-            'date' => Carbon::parse($shift->checked_in_time->toDateTimeString(), $this->timezone)->toDateString(),
+            'date' => $shift->checked_in_time->toDateTimeString(),
             'start' => $shift->checked_in_time->toDateTimeString(),
             'end' => $shift->checked_out_time->toDateTimeString(),
             'code' => $invoice->client->medicaid_diagnosis_codes,
