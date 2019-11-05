@@ -9,6 +9,7 @@ use App\Events\ShiftFlagsCouldChange;
 class TelefonyCheckInController extends BaseVoiceController
 {
     const PromptForCaregiverPhone = 'Please enter your own ten digit phone number for identification';
+    const AlreadyClockedOutMessage = 'You are already clocked in.  Please clock out first.';
 
     /**
      * Return check in response.
@@ -110,7 +111,7 @@ class TelefonyCheckInController extends BaseVoiceController
         $clockIn->setNumber($this->number->national_number);
 
         if ($caregiver->isClockedIn()) {
-            throw new TelefonyMessageException('You are already clocked in.  Please clock out first.');
+            throw new TelefonyMessageException(self::AlreadyClockedOutMessage);
         }
 
         // Try to find schedule with caregiver
