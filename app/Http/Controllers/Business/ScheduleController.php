@@ -145,48 +145,73 @@ class ScheduleController extends BaseController
      * @return \Illuminate\Contracts\Support\Responsable
      * @throws \Exception
      */
-    public function changeRequestStatus( Schedule $schedule, ScheduleEditor $editor )
+    public function changeRequestStatus( Request $request, Schedule $schedule, ScheduleAggregator $aggregator )
     {
         $this->authorize( 'update', $schedule );
 
-        $action = request()->input( 'status' );
-        $request_id = request()->input( 'request' );
+        $action = $request->status;
 
         DB::beginTransaction();
-        try {
+        switch( $action ){
 
-            switch( $action ){
+            case 'accept':
 
-                case 'accept':
+                $newStatus = 'approved'; // ERIK TODO => move this to a constant
+                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request->schedule_request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
-                    $newStatus = 'approved'; // ERIK TODO => move this to a constant
-                    if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                $client = Client::find( $schedule->client_id );
 
-                    // Check if Caregiver is assigned to the client
-                    // $this->ensureCaregiverAssignmentAndCreateDefaultRates( $request ); // im not sure this is entirely necessary.. there are no services?
+                if ( $request->caregiver_id && !$client->hasCaregiver( $request->caregiver_id ) ) {
 
-                    // Also there is a function in the 'creator' to verify the max hours.. should probably be using this..
+                    // Create default rates based on the rates in the request
+                    ClientRate::add( $client, [
 
-                    $schedule->update([ 'status' => Schedule::SCHEDULED ]); // is this the right status?
+                        'caregiver_id'          => $request->caregiver_id,
+                        'effective_start'       => date('Y') . '-01-01',
+                        'effective_end'         => '9999-12-31',
+                        'caregiver_hourly_rate' => 0,
+                        'client_hourly_rate'    => 0,
+                        'caregiver_fixed_rate'  => 0,
+                        'client_fixed_rate'     => 0,
+                        'service_id'            => $schedule->service_id,
+                        'payer_id'              => $schedule->payer_id,
+                    ]);
 
-                    // ERIK TODO => text them? notification? Ask Jason
-                    break;
-                case 'reject':
+                    // Clear out the rates for all services so they are
+                    // pulled from the defaults that were just created.
+                    $request->caregiver_rate = null;
+                    $request->client_rate    = null;
+                }
 
-                    $newStatus = 'denied'; // ERIK TODO => move this to a constant
-                    if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                // Verify we are not going above hours
+                $totalHours    = $aggregator->getTotalScheduledHoursForWeekOf( $schedule->starts_at, $schedule->client_id );
+                $newTotalHours = $totalHours - ($schedule->duration / 60);
+                if ( $newTotalHours > $client->max_weekly_hours ) {
 
-                    // ERIK TODO => text them? notification? Ask Jason
-                    break;
-                default:
+                    return new ErrorResponse( 500, 'The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.' );
+                }
 
-                    return new ErrorResponse( 500, 'You do not have permission to perform that request.' );
-                    break;
-            }
-        } catch ( AutomaticCaregiverAssignmentException $ex ) {
+                // Update the schedule
+                $schedule->update([
 
-            DB::rollBack();
-            return new ErrorResponse( $ex->getStatusCode(), $ex->getMessage() );
+                    'caregiver_rate' => $request->caregiver_rate,
+                    'client_rate'    => $request->client_rate,
+                    'caregiver_id'   => $request->caregiver_id
+                ]);
+
+                // ERIK TODO => text them? notification? Ask Jason
+                break;
+            case 'reject':
+
+                $newStatus = 'denied'; // ERIK TODO => move this to a constant
+                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request->schedule_request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+
+                // ERIK TODO => text them? notification? Ask Jason
+                break;
+            default:
+
+                return new ErrorResponse( 500, 'You do not have permission to perform that request.' );
+                break;
         }
 
         DB::commit();
@@ -755,7 +780,6 @@ class ScheduleController extends BaseController
                 if ($request->hours_type != Shift::HOURS_DEFAULT) {
                     throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                 }
-
                 // Create default rates based on the rates in the request
                 ClientRate::add($client, [
                     'caregiver_id' => $request->caregiver_id,
@@ -768,7 +792,6 @@ class ScheduleController extends BaseController
                     'service_id' => null, // Set default rates for ALL services
                     'payer_id' => $request->payer_id,
                 ]);
-
             } else { // service breakout
                 // Create default rates for each *UNIQUE* service entry
                 $shouldBeServiceSpecific = $request->hasMultipleUniqueServices();
@@ -777,11 +800,9 @@ class ScheduleController extends BaseController
                     if (app(RateFactory::class)->matchingRateExists($client, Carbon::parse($request->starts_at)->toDateString(), $service['service_id'], $service['payer_id'], $request->caregiver_id)) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you have different rates for the same service/payer.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
-
                     if ($service['hours_type'] != Shift::HOURS_DEFAULT) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
-
                     // Create default rates based on the rates in the request
                     ClientRate::add($client, [
                         'caregiver_id' => $request->caregiver_id,
@@ -799,10 +820,8 @@ class ScheduleController extends BaseController
                     $service['client_rate'] = null;
                 }
             }
-
             return true;
         }
-
         return false;
     }
 }

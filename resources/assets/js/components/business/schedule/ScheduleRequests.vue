@@ -48,7 +48,7 @@
 
                     return {};
                 }
-            },
+            }
         },
         data(){
 
@@ -71,11 +71,12 @@
                 this.loading = true;
                 let form = new Form({
 
-                    'status'  : status,
-                    'request' : schedule.pivot.id
+                    'status'              : status,
+                    'schedule_request_id' : schedule.pivot.id,
+                    'caregiver_id'        : schedule.pivot.caregiver_id
                 });
 
-                form.post( '/business/schedule/requests/' + schedule.id )
+                form.post( '/business/schedule/requests/' + schedule.pivot.schedule_id )
                     .then( res => {
 
                         console.log( res );
