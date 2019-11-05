@@ -138,36 +138,56 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * 
      *
      * @param \App\Schedule $schedule
      * @return \Illuminate\Contracts\Support\Responsable
      * @throws \Exception
      */
-    public function changeRequestStatus( Schedule $schedule )
+    public function changeRequestStatus( Schedule $schedule, ScheduleEditor $editor )
     {
         $this->authorize( 'update', $schedule );
 
         $action = request()->input( 'status' );
         $request_id = request()->input( 'request' );
 
-        switch( $action ){
+        DB::beginTransaction();
+        try {
 
-            case 'accept':
+            switch( $action ){
 
-                $newStatus = 'approved'; // ERIK TODO => probably should get some constants in here÷..
-                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
-                // assign caregiver to shift
-                // text them? Ask Jason
-                break;
-            case 'reject':
+                case 'accept':
 
-                $newStatus = 'denied'; // ERIK TODO => probably should get some constants in here÷..
-                if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
-                // assign caregiver to shift
-                // text them? Ask Jason
-                break;
+                    $newStatus = 'approved'; // ERIK TODO => move this to a constant
+                    if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+
+                    // Check if Caregiver is assigned to the client
+                    // $this->ensureCaregiverAssignmentAndCreateDefaultRates( $request ); // im not sure this is entirely necessary.. there are no services?
+
+                    // Also there is a function in the 'creator' to verify the max hours.. should probably be using this..
+
+                    $schedule->update([ 'status' => Schedule::SCHEDULED ]); // is this the right status?
+
+                    // ERIK TODO => text them? notification? Ask Jason
+                    break;
+                case 'reject':
+
+                    $newStatus = 'denied'; // ERIK TODO => move this to a constant
+                    if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+
+                    // ERIK TODO => text them? notification? Ask Jason
+                    break;
+                default:
+
+                    return new ErrorResponse( 500, 'You do not have permission to perform that request.' );
+                    break;
+            }
+        } catch ( AutomaticCaregiverAssignmentException $ex ) {
+
+            DB::rollBack();
+            return new ErrorResponse( $ex->getStatusCode(), $ex->getMessage() );
         }
+
+        DB::commit();
 
         return new SuccessResponse( 'Successfully updated schedule request!', $newStatus );
     }
