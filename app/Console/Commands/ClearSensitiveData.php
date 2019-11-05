@@ -991,20 +991,20 @@ class ClearSensitiveData extends Command
         );
 
         // Change all user passwords
-        User::whereRaw(1)->update(['password' => bcrypt($password)]);
+        optional(User::whereRaw(1))->update(['password' => bcrypt($password)]);
         $this->advance();
 
         // reset demo users account info
-        User::find(1)->update(['firstname' => 'Demo', 'lastname' => 'Client', 'username' => 'client@allyms.com']);
+        optional(User::find(1))->update(['firstname' => 'Demo', 'lastname' => 'Client', 'username' => 'client@allyms.com']);
         $this->advance();
 
-        User::find(2)->update(['firstname' => 'Demo', 'lastname' => 'User', 'username' => 'officeuser@allyms.com']);
+        optional(User::find(2))->update(['firstname' => 'Demo', 'lastname' => 'User', 'username' => 'officeuser@allyms.com']);
         $this->advance();
 
-        User::find(3)->update(['firstname' => 'Demo', 'lastname' => 'Caregiver', 'username' => 'caregiver@allyms.com']);
+        optional(User::find(3))->update(['firstname' => 'Demo', 'lastname' => 'Caregiver', 'username' => 'caregiver@allyms.com']);
         $this->advance();
 
-        User::whereEmail('admin@allyms.com')->update(['firstname' => 'Admin', 'lastname' => 'User', 'username' => 'admin@allyms.com']);
+        optional(User::whereEmail('admin@allyms.com'))->update(['firstname' => 'Admin', 'lastname' => 'User', 'username' => 'admin@allyms.com']);
         $this->advance();
 
         $this->finish();
