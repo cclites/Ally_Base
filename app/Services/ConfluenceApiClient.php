@@ -74,7 +74,6 @@ class ConfluenceApiClient
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
         if (!($data = curl_exec($ch))) {
-            dd(curl_getinfo($ch));
             \Log::error('Confluence post error:  Invalid Response. ' . print_r(curl_getinfo($ch), true));
             return false;
         }
