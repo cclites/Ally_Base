@@ -145,7 +145,7 @@ Vue.component('total-charges-report', require('./components/admin/reports/TotalC
 Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
 Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
-
+Vue.component('admin-ten-ninety-nine', require('./components/admin/taxes/TenNinetyNine.vue'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));

@@ -69,3 +69,6 @@
         <li><a href="{{ route('admin.control-file') }}">Control File</a></li>
     </ul>
 </li>
+<li>
+    <a href="{{ route('admin.taxes.ten_ninety_nine') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">1099</span></a>
+</li>
