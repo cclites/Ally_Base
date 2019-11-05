@@ -2,9 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use App\Services\TelefonyManager;
 use Exception;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
@@ -14,7 +14,7 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        //
+        TelefonyMessageException::class,
     ];
 
     /**
@@ -30,13 +30,13 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
-     *
-     * @param  \Exception  $exception
+     * @param \Exception $exception
      * @return void
+     * @throws Exception
      */
     public function report(Exception $exception)
     {
+        // Send reportable errors to Sentry if it is configured
         if (config('sentry.dsn') && app()->bound('sentry') && $this->shouldReport($exception)){
             app('sentry')->captureException($exception);
         }
