@@ -16,10 +16,16 @@ class CreateTableCaregiverScheduleRequests extends Migration
         Schema::create( 'caregiver_schedule_requests', function ( Blueprint $table ) {
 
             $table->increments( 'id' );
-            $table->unsignedInteger( 'caregiver_id' )->index();
-            $table->unsignedInteger( 'schedule_id' )->index();
+            $table->unsignedInteger( 'business_id' )->index()->nullable();
+            $table->unsignedInteger( 'caregiver_id' )->index()->nullable();
+            $table->unsignedInteger( 'schedule_id' )->index()->nullable();
             $table->enum( 'status', [ 'pending', 'denied', 'cancelled', 'approved' ])->default( 'pending' )->index();
             $table->timestamps();
+
+            $table->foreign( 'business_id' )
+                ->references( 'id' )
+                ->on( 'businesses' )
+                ->onDelete( 'CASCADE' );
 
             $table->foreign( 'schedule_id' )
                 ->references( 'id' )
@@ -29,7 +35,7 @@ class CreateTableCaregiverScheduleRequests extends Migration
             $table->foreign( 'caregiver_id' )
                 ->references( 'id' )
                 ->on( 'caregivers' )
-                ->onDelete( 'CASCADE' );
+                ->onDelete( 'set null' );
         });
     }
 

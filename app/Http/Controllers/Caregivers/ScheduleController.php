@@ -93,7 +93,7 @@ class ScheduleController extends BaseController
         $caregiver_id = auth()->user()->id;
 
         // create model relationship for this.. replace all instances ( below here as well as in the event response too )
-        $status = $schedule->fresh()->latest_request_for( $caregiver_id )->status;
+        $status = optional( $schedule->fresh()->latest_request_for( $caregiver_id ) )->status;
 
         switch( $status ){
 
@@ -101,13 +101,13 @@ class ScheduleController extends BaseController
             case 'cancelled':
                 // create a pending
 
-                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'pending' ]);
+                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'pending', 'business_id' => $schedule->business_id ]);
                 break;
             case 'pending':
             case 'approved':
                 // create a cancelled
 
-                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'cancelled' ]);
+                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'cancelled', 'business_id' => $schedule->business_id ]);
                 // if approved, will also need to flag the schedule/shift as caregiver_cancelled
                 break;
             default:
