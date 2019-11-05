@@ -5,7 +5,7 @@
                 <p>
                     <strong>{{ caregiver.name }}</strong>
                 </p>
-                <p v-if="address">
+                <p v-if="address && address.address1">
                     {{ address.address1 }}<br />
                     <span v-if="address.address2">{{ address.address2 }}<br /></span>
                     {{ address.city }}, {{ address.state }} {{ address.zip }}
