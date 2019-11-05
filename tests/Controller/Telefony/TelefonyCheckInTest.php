@@ -76,7 +76,7 @@ class TelefonyCheckInTest extends TelefonyBase
         $this->assertTrue($shift->exists());
         $this->assertTrue($this->caregiver->isClockedIn());
 
-        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
-        $response->assertSee(TelefonyCheckInController::AlreadyClockedOutMessage);
+        $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1])
+            ->assertSee(TelefonyCheckInController::AlreadyClockedOutMessage);
     }
 }
