@@ -22,7 +22,7 @@
                     <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
                     Accept
                 </b-button>
-                <b-button variant="danger" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( schedule, 'reject' ) " v-if=" [ 'pending', 'approved' ].includes( schedule.pivot.status ) ">
+                <b-button variant="danger" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( schedule, 'reject' ) " v-if=" ( 'pending' == schedule.pivot.status && schedule.pivot.caregiver_id == null ) || ( schedule.pivot.status == 'approved' && schedule.pivot.caregiver_id == schedule.id )">
 
                     <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
                     Reject

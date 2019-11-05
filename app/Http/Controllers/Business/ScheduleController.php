@@ -206,6 +206,15 @@ class ScheduleController extends BaseController
                 $newStatus = 'denied'; // ERIK TODO => move this to a constant
                 if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request->schedule_request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
+                // Update the schedule
+                if( !empty( $schedule->caregiver_id ) ){
+
+                    $schedule->update([
+
+                        'caregiver_id'   => null
+                    ]);
+                }
+
                 // ERIK TODO => text them? notification? Ask Jason
                 break;
             default:
