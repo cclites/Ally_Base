@@ -29,7 +29,7 @@
                 <!-- Open Shifts Feature -->
                 <!-- ============================================================== -->
                 @if( is_office_user() && Auth::user()->can( 'view-open-shifts' ) )
-                    <open-shifts-icon></open-shifts-icon>
+                    <open-shifts-icon business="{{ $active_business ?? null }}"></open-shifts-icon>
                 @endif
                 <!-- ============================================================== -->
                 <!-- Tasks -->

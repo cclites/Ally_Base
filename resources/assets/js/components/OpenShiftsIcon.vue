@@ -14,17 +14,34 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 
     export default {
 
         props : {
 
+            business : {
+
+                type : String,
+                default : null
+            }
         },
         data() {
 
             return {
 
                 total: 0
+            }
+        },
+        computed : {
+
+            ...mapGetters({
+
+                getBusiness : 'getBusiness'
+            }),
+            current_business(){
+
+                return this.business ? JSON.parse( this.business ) : null;
             }
         },
         async mounted() {
@@ -36,7 +53,10 @@
 
             fetchRequestsCount(){
 
-                let form = new Form();
+                let form = new Form({
+
+                    business_id : this.current_business.id
+                });
 
                 form.get( '/business/schedule/openShiftRequests' )
                     .then( ({ data }) => {
@@ -48,10 +68,6 @@
 
                     })
             }
-        },
-
-        computed: {
-
         }
     }
 </script>

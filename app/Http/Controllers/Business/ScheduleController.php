@@ -113,13 +113,15 @@ class ScheduleController extends BaseController
      */
     public function openShiftRequests( Request $request )
     {
-        $chain = auth()->user()->getChain();
-
-        $count = Schedule::forRequestedBusinesses([ $chain->id ])
-            ->with([ 'schedule_requests' ])
-            ->whereDoesntHave( 'caregiver' )
-            ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ])
+        $count = \DB::table( 'caregiver_schedule_requests' )
+            ->where( 'business_id', $request->business_id )
             ->count();
+
+        // $count = Schedule::forRequestedBusinesses([ $chain->id ])
+        //     ->with([ 'schedule_requests' ])
+        //     ->whereDoesntHave( 'caregiver' )
+        //     ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ])
+        //     ->count();
 
         return response()->json( compact( 'count' ) );
     }
