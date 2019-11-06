@@ -221,7 +221,6 @@
                 axios.get(`/business/status-aliases?business_id=${this.form.business_id}`)
                     .then( ({ data }) => {
                         this.statusAliases = data.client;
-                        console.log('new aliases: '.this.statusAliases);
                     })
                     .catch(() => {});
             },
@@ -229,7 +228,6 @@
 
         watch: {
             'form.business_id'(newVal, oldVal) {
-                console.log('Changed business location', newVal);
                 this.fetchStatusAliases();
             },
 
