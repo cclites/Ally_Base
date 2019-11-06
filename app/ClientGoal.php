@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\ClientGoal
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class ClientGoal extends AuditableModel
 {
+    use SoftDeletes;
+
     protected $table = 'client_goals';
 
     protected $guarded = ['id'];
