@@ -6,15 +6,18 @@
         <a class="has-arrow" href="{{ route('clock_out') }}" aria-expanded="false"><i class="fa fa-calendar-check-o"></i><span class="hide-menu">Clock Out</span></a>
     </li>
 @endif
-<li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span></a>
-    <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('schedule') }}">Calendar</a></li>
-        @can( 'view-open-shifts' )
-
-            <li><a href="{{ route('schedule.open-shifts') }}">Open Shifts</a></li>
-        @endcan
-    </ul>
+<li>
+    <a href="{{ route('schedule') }}" aria-expanded="false">
+        <i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span>
+    </a>
 </li>
+@can( 'view-open-shifts' )
+<li>
+    <a href="{{ route('schedule.open-shifts') }}" aria-expanded="false">
+        <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>
+    </a>
+</li>
+@endcan
 <li>
 </li>
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)

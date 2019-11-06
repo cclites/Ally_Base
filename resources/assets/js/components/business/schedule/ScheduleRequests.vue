@@ -19,14 +19,14 @@
                 <div class="f-1">{{ request.pivot.status }}</div>
                 <div class="f-1">
 
-                    <b-button variant="success" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( request, 'accept' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
+                    <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'accept' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
 
-                        <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
+                        <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
                         Accept
                     </b-button>
-                    <b-button variant="danger" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( request, 'reject' ) " v-if=" ( 'pending' == request.pivot.status && request.pivot.caregiver_id == null ) || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
+                    <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'reject' ) " v-if=" ( 'pending' == request.pivot.status && request.pivot.caregiver_id == null ) || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
 
-                        <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
+                        <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
                         Reject
                     </b-button>
                 </div>
@@ -55,6 +55,7 @@
             return {
 
                 loading  : false,
+                busy     : false,
                 requests : []
             }
         },
@@ -88,7 +89,7 @@
             },
             respondToRequest( schedule, status ){
 
-                this.loading = true;
+                this.busy = true;
                 let form = new Form({
 
                     'status'              : status,
@@ -108,7 +109,7 @@
                     })
                     .finally( () => {
 
-                        this.loading = false;
+                        this.busy = false;
                     });
             }
         },
