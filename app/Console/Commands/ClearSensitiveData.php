@@ -4,12 +4,14 @@ namespace App\Console\Commands;
 
 use App\Address;
 use App\Audit;
-use App\Billing\BusinessInvoice;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\CaregiverInvoiceItem;
+use App\Billing\ClaimPayment;
+use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\Payments\Methods\BankAccount;
 use App\BusinessChain;
+use App\CareDetails;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\CaregiverLicense;
@@ -23,6 +25,8 @@ use App\Claims\ClaimInvoice;
 use App\Claims\ClaimRemit;
 use App\Client;
 use App\Billing\Payments\Methods\CreditCard;
+use App\ClientExcludedCaregiver;
+use App\ClientGoal;
 use App\ClientMedication;
 use App\CommunicationLog;
 use App\EmergencyContact;
@@ -67,6 +71,21 @@ class ClearSensitiveData extends Command
      */
     protected $fastMode = false;
 
+    // SoftDeletes models for reference:
+    // CarePlan
+    // Document
+    // Question
+    // QuickbooksService
+    // Schedule
+    // Task
+    // FailedTransaction
+    // ClaimAdjustment
+    // ClaimRemit
+    // Client
+    // Caregiver
+    // OfficeUser
+    // Admin
+
     /**
      * Execute the console command.
      *
@@ -91,12 +110,15 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
+        $this->cleanClientMedication();
+        exit;
+
         // Fix encryption
         $this->clearAuditLog();
         $this->clearCommunicationsLog();
-        $this->cleanCaregivers();
+        $this->cleanEncryptedClientData();
+        $this->cleanEncryptedCaregiverData();
         $this->cleanCaregiverApplications();
-        $this->cleanClients();
         $this->cleanClientMedication();
         $this->clean3rdPartyCredentials();
         $this->cleanFinancialAccounts();
@@ -104,6 +126,8 @@ class ClearSensitiveData extends Command
 
         if (! $this->option('fix-only')) {
             // Only execute these options if fix-only if OFF
+            $this->cleanCaregiversData();
+            $this->cleanClientsData();
             $this->cleanUserData();
             $this->cleanAddresses();
             $this->cleanPhoneNumbers();
@@ -115,13 +139,17 @@ class ClearSensitiveData extends Command
             $this->cleanClaimData();
             $this->cleanChains();
             $this->cleanBusinesses();
-            $this->cleanBusinessInvoices();
+            $this->cleanBusinessInvoiceItems();
             $this->cleanClientInvoices();
-            $this->cleanCaregiverInvoices();
+            $this->cleanClientInvoiceItems();
+            $this->cleanCaregiverInvoiceItems();
             $this->cleanCaregiverLicenses();
             $this->cleanCaregiverMeta();
             $this->cleanCaregiverRestrictions();
             $this->cleanCarePlans();
+            $this->cleanClientCareDetails();
+            $this->cleanExcludedCaregivers();
+            $this->cleanClientGoals();
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -131,9 +159,116 @@ class ClearSensitiveData extends Command
         return 0;
     }
 
+    public function cleanClientCareDetails()
+    {
+        $query = CareDetails::query();
+
+        $this->startProgress(
+            'Cleaning client care details...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'medication_overseer' => $this->faker->sentence,
+                'allergies' => $this->faker->sentence,
+                'pharmacy_name' => $this->faker->sentence,
+                'pharmacy_number' => $this->faker->sentence,
+                'safety_instructions' => $this->faker->sentence,
+                'toileting_instructions' => $this->faker->sentence,
+                'bathing_frequency' => $this->faker->sentence,
+                'bathing_instructions' => $this->faker->sentence,
+                'hearing_instructions' => $this->faker->sentence,
+                'feeding_instructions' => $this->faker->sentence,
+                'diet_likes' => $this->faker->sentence,
+                'skin_conditions' => $this->faker->sentence,
+                'hair_frequency' => $this->faker->sentence,
+                'shaving_instructions' => $this->faker->sentence,
+                'dressing_instructions' => $this->faker->sentence,
+                'housekeeping_instructions' => $this->faker->sentence,
+                'supplies_instructions' => $this->faker->sentence,
+                'comments' => $this->faker->sentence,
+                'instructions' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (CareDetails $item) {
+                if (filled($item->getOriginal('medication_overseer'))) {
+                    $item->medication_overseer = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('allergies'))) {
+                    $item->allergies = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('pharmacy_name'))) {
+                    $item->pharmacy_name = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('pharmacy_number'))) {
+                    $item->pharmacy_number = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('safety_instructions'))) {
+                    $item->safety_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('toileting_instructions'))) {
+                    $item->toileting_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('bathing_frequency'))) {
+                    $item->bathing_frequency = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('bathing_instructions'))) {
+                    $item->bathing_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('hearing_instructions'))) {
+                    $item->hearing_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('feeding_instructions'))) {
+                    $item->feeding_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('diet_likes'))) {
+                    $item->diet_likes = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('skin_conditions'))) {
+                    $item->skin_conditions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('hair_frequency'))) {
+                    $item->hair_frequency = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('shaving_instructions'))) {
+                    $item->shaving_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('dressing_instructions'))) {
+                    $item->dressing_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('housekeeping_instructions'))) {
+                    $item->housekeeping_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('supplies_instructions'))) {
+                    $item->supplies_instructions = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('comments'))) {
+                    $item->comments = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('instructions'))) {
+                    $item->instructions = $this->faker->sentence;
+                }
+                if ($item->getOriginal('notes')) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
     public function cleanCarePlans()
     {
-        $query = CarePlan::query();
+        $query = CarePlan::withTrashed();
 
         $this->startProgress(
             'Cleaning care plans...',
@@ -155,6 +290,68 @@ class ClearSensitiveData extends Command
                 $item->name = $this->faker->name;
                 if ($item->getOriginal('notes')) {
                     $item->notes = $this->faker->sentence;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientGoals()
+    {
+        $query = ClientGoal::withTrashed();
+
+        $this->startProgress(
+            'Cleaning client goals...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'question' => $this->faker->sentence.'?',
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $item->question = $this->faker->sentence.'?';
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanExcludedCaregivers()
+    {
+        $query = ClientExcludedCaregiver::whereNotNull('note');
+
+        $this->startProgress(
+            'Cleaning client excluded caregivers...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'note' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                if (filled($item->getOriginal('note'))) {
+                    $item->note = $this->faker->sentence;
                 }
                 $item->save();
                 $this->advance();
@@ -231,7 +428,7 @@ class ClearSensitiveData extends Command
         );
 
         if ($this->fastMode) {
-            $name = strtoupper($this->faker->randomLetter().$this->faker->randomLetter().$this->faker->randomLetter());
+            $name = strtoupper($this->faker->randomLetter() . $this->faker->randomLetter() . $this->faker->randomLetter());
             $query->update([
                 'name' => $name,
                 'description' => "$name Certification",
@@ -244,7 +441,7 @@ class ClearSensitiveData extends Command
         $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function (CaregiverLicense $item) {
-                $item->name = strtoupper($this->faker->randomLetter().$this->faker->randomLetter().$this->faker->randomLetter());
+                $item->name = strtoupper($this->faker->randomLetter() . $this->faker->randomLetter() . $this->faker->randomLetter());
                 $item->description = $item->name . ' Certification';
                 $item->save();
                 $this->advance();
@@ -255,12 +452,12 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanBusinessInvoices()
+    public function cleanBusinessInvoiceItems()
     {
         $query = BusinessInvoiceItem::query();
 
         $this->startProgress(
-            'Cleaning business invoices...',
+            'Cleaning business invoice items...',
             $query->count()
         );
 
@@ -292,12 +489,12 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanCaregiverInvoices()
+    public function cleanCaregiverInvoiceItems()
     {
         $query = CaregiverInvoiceItem::query();
 
         $this->startProgress(
-            'Cleaning caregiver invoices...',
+            'Cleaning caregiver invoice items...',
             $query->count()
         );
 
@@ -327,10 +524,38 @@ class ClearSensitiveData extends Command
 
     public function cleanClientInvoices()
     {
-        $query = ClientInvoiceItem::query();
+        $query = ClientInvoice::whereNotNull('notes');
 
         $this->startProgress(
             'Cleaning client invoices...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update(['notes' => $this->faker->sentence]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) {
+                $item->notes = $this->faker->sentence;
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientInvoiceItems()
+    {
+        $query = ClientInvoiceItem::query();
+
+        $this->startProgress(
+            'Cleaning client invoice items...',
             $query->count()
         );
 
@@ -512,6 +737,7 @@ class ClearSensitiveData extends Command
         $this->cleanClaimableExpenses();
         $this->cleanClaimRemits();
         $this->cleanClaimAdjustments();
+        $this->cleanClaimPayments();
     }
 
     public function cleanClaimableServices()
@@ -665,7 +891,7 @@ class ClearSensitiveData extends Command
 
     public function cleanClaimRemits()
     {
-        $query = ClaimRemit::whereNotNull('notes');
+        $query = ClaimRemit::withTrashed()->whereNotNull('notes')->orWhereNotNull('reference');
         $this->startProgress(
             'Cleaning claim remits...',
             $query->count()
@@ -673,6 +899,7 @@ class ClearSensitiveData extends Command
 
         if ($this->fastMode) {
             $query->update([
+                'reference' => $this->faker->randomNumber(9),
                 'notes' => $this->faker->sentence,
             ]);
 
@@ -683,7 +910,13 @@ class ClearSensitiveData extends Command
         $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function ($item) {
-                $item->update(['notes' => $this->faker->sentence]);
+                if (filled($item->getOriginal('reference'))) {
+                    $item->reference = $this->faker->randomNumber(9);
+                }
+                if (filled($item->getOriginal('notes'))) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
                 $this->advance();
             });
             \DB::commit();
@@ -694,7 +927,7 @@ class ClearSensitiveData extends Command
 
     public function cleanClaimAdjustments()
     {
-        $query = ClaimAdjustment::whereNotNull('note');
+        $query = ClaimAdjustment::withTrashed()->whereNotNull('note');
         $this->startProgress(
             'Cleaning claim adjustments...',
             $query->count()
@@ -713,6 +946,42 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function ($item) {
                 $item->update(['note' => $this->faker->sentence]);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClaimPayments()
+    {
+        $query = ClaimPayment::whereNotNull('notes')->orWhereNotNull('reference');
+        $this->startProgress(
+            'Cleaning claim payments...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'reference' => $this->faker->randomNumber(9),
+                'notes' => $this->faker->sentence,
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (ClaimPayment $item) {
+                if ($item->getOriginal('reference')) {
+                    $item->reference = $this->faker->randomNumber(9);
+                }
+                if ($item->getOriginal('notes')) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
                 $this->advance();
             });
             \DB::commit();
@@ -824,6 +1093,7 @@ class ClearSensitiveData extends Command
                 'side_effects' => Crypt::encrypt($this->faker->sentence),
                 'notes' => Crypt::encrypt($this->faker->sentence),
                 'tracking' => Crypt::encrypt($this->faker->sentence),
+                'route' => Crypt::encrypt($this->faker->sentence),
             ]);
 
             $this->finish();
@@ -840,6 +1110,7 @@ class ClearSensitiveData extends Command
                 $item->side_effects = $this->faker->sentence;
                 $item->notes = $this->faker->sentence;
                 $item->tracking = $this->faker->sentence;
+                $item->route = $this->faker->word;
                 $item->save();
 
                 $this->advance();
@@ -903,16 +1174,50 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanCaregivers()
+    public function cleanEncryptedCaregiverData()
     {
+        $query = Caregiver::withTrashed()->whereNotNull('ssn');
+
         $this->startProgress(
-            'Cleaning Caregiver records...',
-            Caregiver::count()
+            'Cleaning encrypted caregiver records...',
+            $query->count()
         );
 
         if ($this->fastMode) {
-            Caregiver::whereRaw(1)->update([
+            $query->update([
                 'ssn' => Crypt::encrypt($this->generateSsn()),
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Caregiver $caregiver) {
+                if ($caregiver->getOriginal('ssn')) {
+                    $caregiver->ssn = $this->generateSsn();
+                }
+                $caregiver->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanCaregiversData()
+    {
+        $query = Caregiver::withTrashed();
+
+        $this->startProgress(
+            'Cleaning Caregiver records...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
                 'deactivation_note' => null,
                 'preferences' => null,
                 'w9_name' => $this->faker->name,
@@ -926,16 +1231,9 @@ class ClearSensitiveData extends Command
             return;
         }
 
-        Caregiver::chunk(400, function ($collection) {
+        $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function (Caregiver $caregiver) {
-                if (! $caregiver->user) {
-                    $this->advance();
-                    return;
-                }
-                if ($caregiver->getOriginal('ssn')) {
-                    $caregiver->ssn = $this->generateSsn();
-                }
                 if ($caregiver->getOriginal('deactivation_note')) {
                     $caregiver->deactivation_note = $this->faker->sentence;
                 }
@@ -966,15 +1264,110 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanClients()
+    public function cleanClientsData()
     {
+        $query = Client::withTrashed();
+
         $this->startProgress(
             'Cleaning Client records...',
-            Client::count()
+            $query->count()
         );
 
         if ($this->fastMode) {
-            Client::whereRaw(1)->update([
+            $query->update([
+                'import_identifier' => $this->faker->name,
+                'ltci_name' => $this->faker->name,
+                'ltci_address' => $this->faker->streetAddress,
+                'ltci_policy' => $this->faker->randomNumber(9),
+                'ltci_claim' => $this->faker->randomNumber(9),
+                'medicaid_id' => $this->faker->randomNumber(9),
+                'hospital_number' => $this->generatePhoneNumber(),
+                'ltci_phone' => $this->generatePhoneNumber(),
+                'ltci_fax' => $this->generatePhoneNumber(),
+                'travel_directions' => $this->faker->sentence,
+                'disaster_planning' => $this->faker->sentence,
+                'discharge_reason' => $this->faker->sentence,
+                'discharge_disposition' => $this->faker->sentence,
+                'discharge_internal_notes' => $this->faker->sentence,
+                'discharge_condition' => $this->faker->randomElement(['Good', 'Poor', 'Same']),
+                'discharge_goals_eval' => $this->faker->randomElement(['Good', 'Poor', 'Same']),
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Client $client) {
+                if (filled($client->getOriginal('import_identifier'))) {
+                    $client->import_identifier = $this->faker->name;
+                }
+                if (filled($client->getOriginal('ltci_name'))) {
+                    $client->ltci_name = $this->faker->name;
+                }
+                if (filled($client->getOriginal('ltci_address'))) {
+                    $client->ltci_address = $this->faker->streetAddress;
+                }
+                if (filled($client->getOriginal('ltci_policy'))) {
+                    $client->ltci_policy = $this->faker->randomNumber(9);
+                }
+                if (filled($client->getOriginal('ltci_claim'))) {
+                    $client->ltci_claim = $this->faker->randomNumber(9);
+                }
+                if (filled($client->getOriginal('medicaid_id'))) {
+                    $client->medicaid_id = $this->faker->randomNumber(9);
+                }
+                if (filled($client->getOriginal('hospital_number'))) {
+                    $client->hospital_number = $this->generatePhoneNumber();
+                }
+                if (filled($client->getOriginal('ltci_phone'))) {
+                    $client->ltci_phone = $this->generatePhoneNumber();
+                }
+                if (filled($client->getOriginal('ltci_fax'))) {
+                    $client->ltci_fax = $this->generatePhoneNumber();
+                }
+                if (filled($client->getOriginal('travel_directions'))) {
+                    $client->travel_directions = $this->faker->sentence;
+                }
+                if (filled($client->getOriginal('disaster_planning'))) {
+                    $client->disaster_planning = $this->faker->sentence;
+                }
+                if (filled($client->getOriginal('discharge_reason'))) {
+                    $client->discharge_reason = $this->faker->sentence;
+                }
+                if (filled($client->getOriginal('discharge_disposition'))) {
+                    $client->discharge_disposition = $this->faker->sentence;
+                }
+                if (filled($client->getOriginal('discharge_internal_notes'))) {
+                    $client->discharge_internal_notes = $this->faker->sentence;
+                }
+                if (filled($client->getOriginal('discharge_condition'))) {
+                    $client->discharge_condition = $this->faker->randomElement(['Good', 'Poor', 'Same']);
+                }
+                if (filled($client->getOriginal('discharge_goals_eval'))) {
+                    $client->discharge_goals_eval = $this->faker->randomElement(['Good', 'Poor', 'Same']);
+                }
+                $client->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanEncryptedClientData()
+    {
+        $query = Client::withTrashed()->whereNotNull('ssn');
+
+        $this->startProgress(
+            'Cleaning encrypted client records...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
                 'ssn' => Crypt::encrypt($this->generateSsn()),
             ]);
 
@@ -982,13 +1375,9 @@ class ClearSensitiveData extends Command
             return;
         }
 
-        Client::chunk(400, function ($collection) {
+        $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function (Client $client) {
-                if (! $client->user) {
-                    $this->advance();
-                    return;
-                }
                 if ($client->getOriginal('ssn')) {
                     $client->ssn = $this->generateSsn();
                     $client->save();
@@ -1158,7 +1547,8 @@ class ClearSensitiveData extends Command
                 'work_phone' => $this->generatePhoneNumber(),
                 'fax_number' => $this->generatePhoneNumber(),
                 'email' => $this->faker->email,
-                'address' => $this->faker->streetAddress
+                'address' => $this->faker->streetAddress,
+                'relationship_custom' => $this->faker->randomElement(['Son', 'Wife', 'Husband', 'Daughter', 'Sister', 'Brother']),
             ]);
 
             $this->finish();
@@ -1175,7 +1565,8 @@ class ClearSensitiveData extends Command
                     'work_phone' => $this->generatePhoneNumber(),
                     'fax_number' => $this->generatePhoneNumber(),
                     'email' => $this->faker->email,
-                    'address' => $this->faker->streetAddress
+                    'address' => $this->faker->streetAddress,
+                    'relationship_custom' => $this->faker->randomElement(['Son', 'Wife', 'Husband', 'Daughter', 'Sister', 'Brother']),
                 ]);
                 $this->advance();
             });
