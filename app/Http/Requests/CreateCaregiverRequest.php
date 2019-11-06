@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
+use App\StatusAlias;
+
 class CreateCaregiverRequest extends UpdateCaregiverRequest
 {
     public function rules()
@@ -8,6 +10,7 @@ class CreateCaregiverRequest extends UpdateCaregiverRequest
         $rules = [
             'username' => 'required|unique:users',
             'password' => 'required_unless:no_username,1|nullable|confirmed',
+            'status_alias_id' => 'required',
         ] + parent::rules();
 
         if ($this->input('no_username')) {
@@ -20,10 +23,39 @@ class CreateCaregiverRequest extends UpdateCaregiverRequest
         return $rules;
     }
 
-    public function filtered()
+    public function messages()
     {
         return [
+            'status_alias_id.*' => 'The status field is required.',
+        ] + parent::messages();
+    }
+
+    public function filtered()
+    {
+        $data = [
             'password' => bcrypt($this->validated()['password'] ?? str_random())
         ] + parent::filtered();
+
+        if ($data['status_alias_id'] == -1) {
+            // inactive
+            $data['active'] = 0;
+            $data['status_alias_id'] = null;
+        } else if ($data['status_alias_id'] == 0) {
+            // active
+            $data['active'] = 1;
+            $data['status_alias_id'] = null;
+        } else {
+            // status alias
+            $statusAlias = StatusAlias::find($data['status_alias_id']);
+            if (empty($statusAlias)) {
+                $data['active'] = 1;
+                $data['status_alias_id'] = null;
+            } else {
+                $data['active'] = $statusAlias->active;
+                $data['status_alias_id'] = $statusAlias->id;
+            }
+        }
+
+        return $data;
     }
 }
