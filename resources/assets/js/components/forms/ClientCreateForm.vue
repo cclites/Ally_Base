@@ -47,6 +47,16 @@
                                           field="business_id"
                                           help-text="Select the office location for the client.">
             </business-location-form-group>
+            <b-form-group label="Status">
+                <b-form-select name="status_alias_id" v-model="form.status_alias_id">
+                    <option value="0">Active</option>
+                    <option value="-1">Inactive</option>
+                    <option v-for="item in statusAliases" :key="item.id" :value="item.id">
+                        {{ item.name }} ({{ item.active ? 'Active' : 'Inactive' }})
+                    </option>
+                </b-form-select>
+                <input-help :form="form" field="status_alias_id" text=""></input-help>
+            </b-form-group>
         </b-col>
         <b-col lg="6">
             <b-form-group label="Email Address" label-for="email">
@@ -163,6 +173,7 @@
 
         data() {
             return {
+                statusAliases: [],
                 form: new Form({
                     firstname: this.value.firstname || null,
                     lastname: this.value.lastname || null,
@@ -179,12 +190,9 @@
                     business_id: this.value.business_id || "",
                     password: this.value.password || null,
                     password_confirmation: this.value.password_confirmation || null,
-                    business_id : this.value.business_id,
+                    status_alias_id: "0",
                 }),
             }
-        },
-
-        mounted() {
         },
 
         methods: {
@@ -207,9 +215,24 @@
                     this.form.password_confirmation = '';
                 }
             },
+
+            async fetchStatusAliases() {
+                this.statusAliases = [];
+                axios.get(`/business/status-aliases?business_id=${this.form.business_id}`)
+                    .then( ({ data }) => {
+                        this.statusAliases = data.client;
+                        console.log('new aliases: '.this.statusAliases);
+                    })
+                    .catch(() => {});
+            },
         },
 
         watch: {
+            'form.business_id'(newVal, oldVal) {
+                console.log('Changed business location', newVal);
+                this.fetchStatusAliases();
+            },
+
             form: {
                 handler(obj){
                     this.$emit('input', obj);
@@ -229,6 +252,9 @@
             },
         },
 
+        async mounted() {
+            await this.fetchStatusAliases();
+        }
     }
 </script>
 

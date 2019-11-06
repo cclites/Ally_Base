@@ -2,7 +2,9 @@
 namespace App\Http\Requests;
 
 use App\Client;
+use App\Http\Controllers\Business\StatusAliasController;
 use App\Rules\ValidSSN;
+use App\StatusAlias;
 
 class CreateClientRequest extends BusinessRequest
 {
@@ -25,6 +27,7 @@ class CreateClientRequest extends BusinessRequest
             'ssn' => ['nullable', new ValidSSN()],
             'agreement_status' => 'required',
             'gender' => 'nullable|in:M,F',
+            'status_alias_id' => 'required',
         ];
 
         if ($this->input('no_username')) {
@@ -44,6 +47,7 @@ class CreateClientRequest extends BusinessRequest
             'username.required_unless' => 'The username is required unless you check the "Let Client Choose" box.',
             'password.required_unless' => 'A password is required unless you check the "Let Client Choose" box.',
             'username.unique' => 'This username is taken. Please use a different one.',
+            'status_alias_id.*' => 'The status field is required.',
         ];
     }
 
@@ -53,6 +57,26 @@ class CreateClientRequest extends BusinessRequest
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         $data['password'] = bcrypt($data['password'] ?? str_random());
+
+        if ($data['status_alias_id'] == -1) {
+            // inactive
+            $data['active'] = 0;
+            $data['status_alias_id'] = null;
+        } else if ($data['status_alias_id'] == 0) {
+            // active
+            $data['active'] = 1;
+            $data['status_alias_id'] = null;
+        } else {
+            // status alias
+            $statusAlias = StatusAlias::find($data['status_alias_id']);
+            if (empty($statusAlias)) {
+                $data['active'] = 1;
+                $data['status_alias_id'] = null;
+            } else {
+                $data['active'] = $statusAlias->active;
+                $data['status_alias_id'] = $statusAlias->id;
+            }
+        }
 
         return $data;
     }
