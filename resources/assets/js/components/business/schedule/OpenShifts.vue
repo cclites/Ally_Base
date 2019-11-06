@@ -24,7 +24,7 @@
             </template>
             <template slot="requests_count" scope="data">
 
-                <a href="#" @click.prevent=" fetchRequestDetails( data.item ) " v-if=" data.item.requests_count > 0 ">{{ data.item.requests_count }} Request{{ data.item.requests_count > 1 ? 's' : '' }}</a>
+                <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 ">{{ data.item.requests_count }} Request{{ data.item.requests_count > 1 ? 's' : '' }}</a>
                 <span v-else>0</span>
             </template>
             <template slot="status" scope="data">
@@ -256,19 +256,10 @@
 
         methods: {
 
-            fetchRequestDetails( schedule ){
+            showRequestModal( schedule_id ){
 
-                axios.get( '/business/schedule/requests/' + schedule.id )
-                .then( response => {
-
-                    console.log( response );
-                    this.selectedSchedule = response.data.data;
-                    this.scheduleModal = true;
-                })
-                .catch( error => {
-
-                    alert( 'Error loading schedule details' );
-                });
+                this.selectedSchedule = schedule_id;
+                this.scheduleModal = true;
             },
             hasRequest( status ){
 

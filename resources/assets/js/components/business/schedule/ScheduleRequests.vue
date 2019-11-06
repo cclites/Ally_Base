@@ -10,23 +10,26 @@
             <div class="text-uppercase font-bold f-1">Status</div>
             <div class="text-uppercase font-bold f-1">Actions</div>
         </div>
-        <div v-for=" schedule in selectedSchedule " :key=" schedule.id " class="d-flex align-items-center my-2">
+        <div v-if=" !loading ">
 
-            <div class="f-1">{{ schedule.pivot.id + ' :: ' + schedule.nameLastFirst }}</div>
-            <div class="f-1">{{ formatDateFromUTC( schedule.pivot.created_at ) }}</div>
-            <div class="f-1">{{ schedule.pivot.status }}</div>
-            <div class="f-1">
+            <div v-for=" request in requests " :key=" request.id " class="d-flex align-items-center my-2">
 
-                <b-button variant="success" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( schedule, 'accept' ) " v-if=" [ 'pending', 'denied' ].includes( schedule.pivot.status ) && !anyApproved ">
+                <div class="f-1">{{ request.pivot.id + ' :: ' + request.nameLastFirst }}</div>
+                <div class="f-1">{{ formatDateFromUTC( request.pivot.created_at ) }}</div>
+                <div class="f-1">{{ request.pivot.status }}</div>
+                <div class="f-1">
 
-                    <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                    Accept
-                </b-button>
-                <b-button variant="danger" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( schedule, 'reject' ) " v-if=" ( 'pending' == schedule.pivot.status && schedule.pivot.caregiver_id == null ) || ( schedule.pivot.status == 'approved' && schedule.pivot.caregiver_id == schedule.id )">
+                    <b-button variant="success" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( request, 'accept' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
 
-                    <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                    Reject
-                </b-button>
+                        <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
+                        Accept
+                    </b-button>
+                    <b-button variant="danger" size="sm" type="button" :disabled=" loading " @click=" respondToRequest( request, 'reject' ) " v-if=" ( 'pending' == request.pivot.status && request.pivot.caregiver_id == null ) || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
+
+                        <i v-if=" loading " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
+                        Reject
+                    </b-button>
+                </div>
             </div>
         </div>
     </div>
@@ -41,31 +44,48 @@
         mixins : [ FormatsDates ],
         props  : {
 
-            selectedSchedule: {
+            selectedScheduleId: {
 
-                type: Array,
-                default() {
-
-                    return {};
-                }
+                type    : Number,
+                default : null
             }
         },
         data(){
 
             return {
 
-                loading : false
+                loading  : false,
+                requests : []
             }
         },
         computed : {
 
             anyApproved(){
 
-                return this.selectedSchedule.some( s => s.pivot.status == 'approved' );
+                return this.requests.some( r => r.pivot.status == 'approved' );
             }
         },
         methods: {
 
+            async fetchRequests(){
+
+                console.log( 'loading...' );
+                this.loading = true;
+                axios.get( '/business/schedule/requests/' + this.selectedScheduleId )
+                .then( response => {
+
+                    console.log( 'loaded: ', response );
+                    this.requests = response.data.data;
+                })
+                .catch( error => {
+
+                    alert( 'Error loading schedule details' );
+                })
+                .finally( () => {
+
+                    this.loading = false;
+                });
+            },
             respondToRequest( schedule, status ){
 
                 this.loading = true;
@@ -91,6 +111,10 @@
                         this.loading = false;
                     });
             }
+        },
+        async mounted(){
+
+            await this.fetchRequests();
         }
     }
 </script>

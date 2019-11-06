@@ -127,7 +127,16 @@
             />
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
-        
+
+        <b-modal id="schedule-requests-modal"
+            title="Schedule Requests"
+            size="xl"
+            v-model=" requestsModal "
+            scrollable
+        >
+            <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" requestsModal && selectedScheduleId "></schedule-requests>
+        </b-modal>
+
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
                                 @updateEvent="updateEvent"
@@ -245,9 +254,10 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
+    import ScheduleRequests from './ScheduleRequests';
 
     export default {
-        components: {BusinessLocationFormGroup},
+        components: {BusinessLocationFormGroup, ScheduleRequests},
         props: {
             'business': Object,
             'caregiver': Object,
@@ -279,9 +289,11 @@
                 caregivers: this.caregiver ? [this.caregiver] : [],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
+                requestsModal: false,
                 notesModal: false,
                 clockOutModal: false,
                 selectedEvent: {},
+                selectedScheduleId: null,
                 events: [],
                 start: '',
                 end: '',
@@ -858,8 +870,11 @@
 
             renderEvent: function( event, element, view ) {
                 let note = '';
+                let requests = '';
 
                 if (event.note) {
+                    // adds the widget-icon for the note
+
                     note = $('<span/>', {
                         class: 'fc-note-btn',
                         html: $('<i/>', {
@@ -877,15 +892,36 @@
                     });
                 }
 
+                if( event.requests_count ){
+                    // adds the widget-icon for shift requests
+
+                    requests = $('<span/>', {
+                        class: 'fc-note-btn',
+                        html: $('<i/>', {
+                            class: 'fa fa-hand-paper-o',
+                        }),
+                    });
+
+                    let vm = this;
+                    requests.click((e) => {
+                        console.log( 'hey clicked!', event );
+                        vm.selectedScheduleId = event.id;
+                        vm.hidePreview();
+                        vm.requestsModal = true;
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                }
+
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
-                    this.renderAgendaWeekEvent(content, event, note);
+                    this.renderAgendaWeekEvent(content, event, note, requests);
                 } else if (view.name == 'timelineDay') {
-                    this.renderTimelineDayEvent(content, event, note);
+                    this.renderTimelineDayEvent(content, event, note, requests);
                 } else if (view.name == 'timelineWeek') {
-                    this.renderTimelineWeekEvent(content, event, note);
+                    this.renderTimelineWeekEvent(content, event, note, requests);
                 } else {
-                    this.renderDefaultEvent(content, event, note);
+                    this.renderDefaultEvent(content, event, note, requests);
                 }
 
                 this.resetScrollPosition = true;
@@ -910,41 +946,41 @@
                 return this.caregiverView ? event.client : event.caregiver;
             },
 
-            renderTimelineDayEvent(content, event, note) {
+            renderTimelineDayEvent(content, event, note, requests) {
                 let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderTimelineWeekEvent(content, event, note) {
+            renderTimelineWeekEvent(content, event, note, requests) {
                 let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderAgendaWeekEvent(content, event, note) {
+            renderAgendaWeekEvent(content, event, note, requests) {
                 let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderDefaultEvent(content, event, note) {
+            renderDefaultEvent(content, event, note, requests) {
                 let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
                 content.html(title);
-                content.parent().prepend(note);
+                content.parent().prepend(note, requests);
             },
 
             resourceRender(resource, $td)  {
