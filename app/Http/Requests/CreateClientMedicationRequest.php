@@ -32,7 +32,7 @@ class CreateClientMedicationRequest extends FormRequest
             'notes' => 'nullable|string',
             'tracking' => 'nullable|string',
             'route' => 'nullable|string',
-            'new_changed' => 'nullable|string',
+            'was_changed' => 'nullable|boolean',
         ];
     }
 }
