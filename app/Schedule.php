@@ -14,6 +14,7 @@ use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 
 /**
@@ -696,6 +697,23 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
         // TODO: this does not properly handle shifts that expand more than two days
         return [$start, $end];
+    }
+
+    /**
+     * Get a collection of all the schedule services, whether
+     * it is a breakout or regular schedule.
+     *
+     * @return Collection
+     */
+    public function getServices() : Collection
+    {
+        if ($this->services->count() > 0) {
+            return $this->services->map(function (ScheduleService $scheduleService) {
+                return $scheduleService->service;
+            })->toBase();
+        }
+
+        return collect([$this->service]);
     }
 
     ///////////////////////////////////////////

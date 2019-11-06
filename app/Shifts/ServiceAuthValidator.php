@@ -108,9 +108,11 @@ class ServiceAuthValidator
      */
     public function shiftExceedsServiceAuthorization(Shift $shift) : ?ClientAuthorization
     {
+        $serviceIds = $shift->getServices()->pluck('id')->toArray();
+
         // Enumerate the shift dates and check service auths for all of them
         foreach ($shift->getDateSpan() as $day) {
-            foreach ($this->client->getActiveServiceAuths($day) as $auth) {
+            foreach ($this->client->getActiveServiceAuths($day, $serviceIds) as $auth) {
                 $query = $this->getMatchingShiftsQuery($auth, $day);
 
                 if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
@@ -146,9 +148,11 @@ class ServiceAuthValidator
      */
     public function scheduleExceedsServiceAuthorization(Schedule $schedule) : ?ClientAuthorization
     {
+        $serviceIds = $schedule->getServices()->pluck('id')->toArray();
+
         // Enumerate the shift dates and check service auths for all of them
         foreach ($schedule->getDateSpan() as $day) {
-            foreach ($this->client->getActiveServiceAuths($day) as $auth) {
+            foreach ($this->client->getActiveServiceAuths($day, $serviceIds) as $auth) {
                 if ($auth->getUnitType() === ClientAuthorization::UNIT_TYPE_FIXED) {
                     // If fixed limit then just check the count of the fixed shifts
                     $total = 1; // the current schedule

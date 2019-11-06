@@ -10,7 +10,7 @@
                     <div class="form-inline">
 
                         <business-location-form-group
-                                v-model="form.business"
+                                v-model="form.businesses"
                                 :allow-all="true"
                                 class="mb-2 mr-2"
                                 :label="null"
@@ -145,7 +145,7 @@
         data() {
             return {
                 form: new Form({
-                    business: '',
+                    businesses: '',
                     start: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                     end: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                     type: '',
@@ -169,7 +169,7 @@
                     { key: 'payer', label: 'Payer', sortable: true, },
                     { key: 'service', label: 'Service Code & Type', sortable: true },
                     { key: 'service_auth', label: 'Authorization Number', sortable: true, formatter: x => x ? x : '-' },
-                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDate(x) },
+                    { key: 'date', label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     { key: 'start', label: 'Start', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'end', label: 'End', sortable: true, formatter: x => this.formatTimeFromUTC(x) },
                     { key: 'units', label: 'Units', sortable: true },
@@ -182,7 +182,6 @@
                 items: [],
                 item:'',
                 hasRun: false,
-                businesses: [],
             }
         },
 

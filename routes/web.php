@@ -447,11 +447,6 @@ Route::group([
     Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
     Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');
     Route::get('communication/sms-other-replies', 'Business\CommunicationController@otherReplies')->name('communication.sms-other-replies');
-
-    Route::get('email/templates', 'Business\EmailTemplateController@index')->name('email.templates');
-    Route::post('email/templates', 'Business\EmailTemplateController@store')->name('email.templates.store');
-    Route::patch('email/templates/{template}', 'Business\EmailTemplateController@update')->name('email.templates.update');
-    Route::delete('email/templates/{template}', 'Business\EmailTemplateController@destroy')->name('email.templates.destroy');
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');
@@ -583,6 +578,9 @@ Route::group([
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
+    Route::get('deposits/import', 'Admin\DepositsController@import')->name('deposits.import');
+    Route::post('deposits/import', 'Admin\DepositsController@processImport')->name( 'deposits.process_import' );
+    Route::post('deposits/finalize-import', 'Admin\DepositsController@finalizeImport')->name( 'deposits.finalize_import' );
     Route::post('deposits/deposit/{chain}', 'Admin\DepositsController@processDeposits')->name('deposits.deposit');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('deposits/{deposit}/{view?}', 'Admin\DepositsController@show')->name('deposits.show');
@@ -607,6 +605,7 @@ Route::group([
     Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
     Route::get('reports/total_charges_report', 'Admin\Reports\TotalChargesReportController@index')->name('reports.total_charges_report');
     Route::get('reports/total_deposits_report', 'Admin\Reports\TotalDepositsReportController@index')->name('reports.total_deposits_report');
+    Route::get('reports/charges-vs-deposits', 'Admin\Reports\ChargesVsDepositsReportController@index')->name('reports.charges-vs-deposits');
 
     Route::get('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');

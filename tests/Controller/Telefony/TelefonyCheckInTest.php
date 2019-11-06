@@ -62,4 +62,21 @@ class TelefonyCheckInTest extends TelefonyBase
         $response->assertSee('You have successfully clocked in.');
         $this->assertTrue(Shift::where('caregiver_id', $this->caregiver->id)->exists());
     }
+
+    /** @test */
+    function it_will_hang_up_if_the_caregiver_is_already_clocked_in()
+    {
+        $schedule = $this->createSchedule();
+        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
+        $response->assertSee('You have successfully clocked in.');
+
+        $shift = Shift::where(['schedule_id' => $schedule->id])
+            ->where(['caregiver_id' => $this->caregiver->id]);
+
+        $this->assertTrue($shift->exists());
+        $this->assertTrue($this->caregiver->isClockedIn());
+
+        $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1])
+            ->assertSee(TelefonyCheckInController::AlreadyClockedOutMessage);
+    }
 }

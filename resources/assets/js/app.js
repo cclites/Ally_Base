@@ -109,6 +109,7 @@ Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFa
 Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
+Vue.component('admin-adjustment-import', require('./components/admin/AdminAdjustmentImport'));
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
 Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
 Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));
@@ -143,6 +144,7 @@ Vue.component('paid-billed-audit-report', require('./components/admin/reports/Pa
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
+Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
 
 
 // Office User
@@ -359,8 +361,6 @@ Vue.component('business-task-details', require('./components/business/tasks/Task
 Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
 Vue.component('report-list', require('./components/ReportList'));
-Vue.component('email-templates', require('./components/business/Templates/EmailTemplates'));
-Vue.component('caregiver-expiration-notice', require('./components/business/Templates/CaregiverExpirationNotice'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
