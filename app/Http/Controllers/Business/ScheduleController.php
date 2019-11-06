@@ -7,6 +7,7 @@ use App\Billing\ScheduleService;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\CaregiverScheduleRequest;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -117,12 +118,6 @@ class ScheduleController extends BaseController
             ->where( 'business_id', $request->business_id )
             ->count();
 
-        // $count = Schedule::forRequestedBusinesses([ $chain->id ])
-        //     ->with([ 'schedule_requests' ])
-        //     ->whereDoesntHave( 'caregiver' )
-        //     ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ])
-        //     ->count();
-
         return response()->json( compact( 'count' ) );
     }
 
@@ -156,7 +151,7 @@ class ScheduleController extends BaseController
 
             case 'accept':
 
-                $newStatus = 'approved'; // ERIK TODO => move this to a constant
+                $newStatus = CaregiverScheduleRequest::REQUEST_APPROVED;
                 if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request->schedule_request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
                 $client = Client::find( $schedule->client_id );
@@ -203,7 +198,7 @@ class ScheduleController extends BaseController
                 break;
             case 'reject':
 
-                $newStatus = 'denied'; // ERIK TODO => move this to a constant
+                $newStatus = CaregiverScheduleRequest::REQUEST_DENIED;
                 if( !DB::table( 'caregiver_schedule_requests' )->where( 'id', $request->schedule_request_id )->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
                 // Update the schedule
@@ -211,7 +206,7 @@ class ScheduleController extends BaseController
 
                     $schedule->update([
 
-                        'caregiver_id'   => null
+                        'caregiver_id' => null
                     ]);
                 }
 

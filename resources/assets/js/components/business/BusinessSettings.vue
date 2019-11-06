@@ -144,7 +144,7 @@
                                                v-model="businessSettings.open_shifts_setting"
                                 >
                                     <option :value=" 'off' ">Off</option>
-                                    <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
+                                    <!-- <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option> -->
                                     <option :value=" 'limited' ">On - Caregivers see open shifts for only their assigned clients</option>
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="open_shifts_setting"

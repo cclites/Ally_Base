@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Caregivers;
 
 use App\Business;
+use App\CaregiverScheduleRequest;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
@@ -98,13 +99,13 @@ class ScheduleController extends BaseController
         switch( $status ){
 
             case null:
-            case 'cancelled':
+            case CaregiverScheduleRequest::REQUEST_CANCELLED:
                 // create a pending
 
                 $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'pending', 'business_id' => $schedule->business_id ]);
                 break;
-            case 'pending':
-            case 'approved':
+            case CaregiverScheduleRequest::REQUEST_PENDING:
+            case CaregiverScheduleRequest::REQUEST_APPROVED:
                 // create a cancelled
 
                 $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'cancelled', 'business_id' => $schedule->business_id ]);
