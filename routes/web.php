@@ -387,7 +387,7 @@ Route::group([
 
     Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
 
-    Route::get('ten-ninety-nine', 'Business\TenNinetyNineController@index')->name('business.ten_ninety_nine');
+    Route::get('business-1099', 'Business\Business1099Controller@index')->name('business-1099');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
@@ -616,7 +616,7 @@ Route::group([
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
-    Route::get('taxes/ten-ninety-nine', 'Admin\TenNinetyNineController@index')->name('taxes.ten_ninety_nine');
+    Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
 
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');

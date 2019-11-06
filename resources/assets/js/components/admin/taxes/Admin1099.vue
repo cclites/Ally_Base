@@ -1,6 +1,6 @@
 <template>
     <b-card
-            header="1099 Steps"
+            header="1099"
             header-text-variant="white"
             header-bg-variant="info"
     >

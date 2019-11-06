@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Business;
 
-use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class TenNinetyNineController extends BaseController
+class Business1099Controller extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +14,7 @@ class TenNinetyNineController extends BaseController
      */
     public function index()
     {
-        return view_component('admin-ten-ninety-nine', '1099 Steps');
+        //
     }
 
     /**
