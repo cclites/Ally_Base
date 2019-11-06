@@ -14,12 +14,9 @@ class ReferralSourceController extends BaseController
 {
     public function index(Request $request)
     {
-        $type = $request->type;
-        $chain = auth()->user()->getChain();
-
-        $referralsources = $chain
+        $referralsources = $this->businessChain()
             ->referralSources()
-            ->forType($type)
+            ->forType($request->type)
             ->ordered()
             ->get();
 
