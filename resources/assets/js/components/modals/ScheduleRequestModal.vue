@@ -1,6 +1,6 @@
 <template>
 
-    <b-modal id="detailsModal" title="Schedule Requests" v-model="showModal" size="lg">
+    <b-modal id="detailsModal" title="Open Shift Requests" v-model="showModal" size="lg">
 
         <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId "></schedule-requests>
     </b-modal>

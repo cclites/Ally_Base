@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Business;
+use App\Billing\ClientRate;
 use App\CaregiverScheduleRequest;
 use App\Client;
 use App\Responses\ErrorResponse;
@@ -152,7 +153,7 @@ class CaregiverScheduleRequestController extends BaseController
 
                 // ERIK TODO => text them? notification? Ask Jason
                 break;
-            case 'reject':
+            case 'denied':
 
                 $newStatus = CaregiverScheduleRequest::REQUEST_DENIED;
                 if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );

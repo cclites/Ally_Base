@@ -24,10 +24,10 @@
                         <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
                         Accept
                     </b-button>
-                    <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'reject' ) " v-if=" ( 'pending' == request.pivot.status && request.pivot.caregiver_id == null ) || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
+                    <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'denied' ) " v-if=" !anyApproved || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
 
                         <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                        Reject
+                        Decline
                     </b-button>
                 </div>
             </div>
