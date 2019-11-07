@@ -9,7 +9,14 @@ use App\Billing\CaregiverInvoiceItem;
 use App\Billing\ClaimPayment;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payer;
+use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Business;
 use App\BusinessChain;
 use App\CareDetails;
 use App\Caregiver;
@@ -24,14 +31,20 @@ use App\Claims\ClaimAdjustment;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimRemit;
 use App\Client;
-use App\Billing\Payments\Methods\CreditCard;
+use App\ClientContact;
 use App\ClientExcludedCaregiver;
 use App\ClientGoal;
 use App\ClientMedication;
+use App\ClientMeta;
+use App\ClientNarrative;
+use App\ClientOnboarding;
 use App\CommunicationLog;
+use App\Document;
 use App\EmergencyContact;
 use App\Note;
+use App\OnboardingActivity;
 use App\PhoneNumber;
+use App\QuickbooksConnection;
 use App\ScheduleNote;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
@@ -39,9 +52,6 @@ use App\Traits\Console\HasProgressBars;
 use App\User;
 use Crypt;
 use Illuminate\Console\Command;
-use App\Business;
-use App\ClientContact;
-use App\QuickbooksConnection;
 
 class ClearSensitiveData extends Command
 {
@@ -72,19 +82,19 @@ class ClearSensitiveData extends Command
     protected $fastMode = false;
 
     // SoftDeletes models for reference:
-    // CarePlan
-    // Document
+    // X CarePlan
+    // X Document
+    // X ClaimAdjustment
+    // X ClaimRemit
+    // X Client
+    // X Caregiver
+    // Admin
     // Question
     // QuickbooksService
     // Schedule
     // Task
     // FailedTransaction
-    // ClaimAdjustment
-    // ClaimRemit
-    // Client
-    // Caregiver
     // OfficeUser
-    // Admin
 
     /**
      * Execute the console command.
@@ -110,11 +120,14 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
-        $this->cleanClientMedication();
+        $this->cleanPayments();
         exit;
 
-        // Fix encryption
+        // Always run
+        $this->clearPasswordResets();
         $this->clearAuditLog();
+
+        // Fix encryption
         $this->clearCommunicationsLog();
         $this->cleanEncryptedClientData();
         $this->cleanEncryptedCaregiverData();
@@ -150,6 +163,16 @@ class ClearSensitiveData extends Command
             $this->cleanClientCareDetails();
             $this->cleanExcludedCaregivers();
             $this->cleanClientGoals();
+            $this->cleanClientMeta();
+            $this->cleanClientNarrative();
+            $this->cleanClientOnboarding();
+            $this->cleanClientPayers();
+            $this->cleanDeposits();
+            $this->cleanPayments();
+            $this->cleanDocuments();
+            $this->cleanGatewayTransaction();
+            $this->cleanPayers();
+            $this->cleanPayments();
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -157,6 +180,260 @@ class ClearSensitiveData extends Command
         $this->info('Success.');
 
         return 0;
+    }
+
+    public function cleanPayers()
+    {
+        $query = Payer::query();
+
+        $this->startProgress(
+            'Cleaning Payers...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'email' => $this->faker->email,
+                'address1' => $this->faker->streetAddress,
+                'npi_number' => $this->faker->randomNumber(9),
+                'phone_number' => $this->generatePhoneNumber(),
+                'fax_number' => $this->generatePhoneNumber(),
+                'contact_name' => $this->faker->name,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Payer $item) {
+                if (filled($item->getOriginal('email'))) {
+                    $item->email = $this->faker->email;
+                }
+                if (filled($item->getOriginal('address1'))) {
+                    $item->address1 = $this->faker->streetAddress;
+                }
+                if (filled($item->getOriginal('npi_number'))) {
+                    $item->npi_number = $this->faker->randomNumber(9);
+                }
+                if (filled($item->getOriginal('phone_number'))) {
+                    $item->phone_number = $this->generatePhoneNumber();
+                }
+                if (filled($item->getOriginal('fax_number'))) {
+                    $item->fax_number = $this->generatePhoneNumber();
+                }
+                if (filled($item->getOriginal('contact_name'))) {
+                    $item->contact_name = $this->faker->name;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function clearPasswordResets()
+    {
+        $this->startProgress('Clearing password resets...', 1);
+        \DB::table('password_resets')->truncate();
+        $this->finish();
+    }
+
+    public function cleanGatewayTransaction()
+    {
+        $query = GatewayTransaction::query();
+
+        $this->startProgress(
+            'Cleaning transaction records...',
+            $query->count()
+        );
+
+        // always fast mode
+        $query->update([
+            'routing_number' => $this->faker->randomNumber(4),
+            'account_number' => $this->faker->randomNumber(4),
+        ]);
+        $this->finish();
+    }
+
+    public function cleanDeposits()
+    {
+        $query = Deposit::query();
+
+        $this->startProgress(
+            'Cleaning Deposit...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'notes' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Deposit $item) {
+                if (filled($item->getOriginal('notes'))) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanPayments()
+    {
+        $query = Payment::query();
+
+        $this->startProgress(
+            'Cleaning Payments...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'notes' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Payment $item) {
+                if (filled($item->getOriginal('notes'))) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanDocuments()
+    {
+        $query = Document::withTrashed();
+
+        $this->startProgress(
+            'Cleaning documents...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'original_filename' => $this->faker->word.'.pdf',
+                'description' => $this->faker->word,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Document $item) {
+                $item->original_filename = $this->faker->word.'.pdf';
+                $item->description = $this->faker->word;
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientPayers()
+    {
+        $query = ClientPayer::whereNotNull('notes')->orWhereNotNull('policy_number');
+
+        $this->startProgress(
+            'Cleaning client payers...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'policy_number' => $this->faker->randomNumber(9),
+                'notes' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (ClientPayer $item) {
+                if (filled($item->getOriginal('notes'))) {
+                    $item->notes = $this->faker->sentence;
+                }
+                if (filled($item->getOriginal('policy_number'))) {
+                    $item->policy_number = $this->faker->randomNumber(9);
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientOnboarding()
+    {
+        $this->startProgress(
+            'Cleaning client onboarding data...',
+            ClientOnboarding::count()
+        );
+
+        // This feature is no longer used
+        ClientOnboarding::truncate();
+        OnboardingActivity::truncate();
+
+        $this->finish();
+    }
+
+    public function cleanClientNarrative()
+    {
+        $query = ClientNarrative::query();
+
+        $this->startProgress(
+            'Cleaning ClientNarrative...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'notes' => $this->faker->sentence,
+            ]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (ClientNarrative $item) {
+                if (filled($item->getOriginal('notes'))) {
+                    $item->notes = $this->faker->sentence;
+                }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
     }
 
     public function cleanClientCareDetails()
@@ -257,6 +534,34 @@ class ClearSensitiveData extends Command
                 if ($item->getOriginal('notes')) {
                     $item->notes = $this->faker->sentence;
                 }
+                $item->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanClientMeta()
+    {
+        $query = ClientMeta::query();
+
+        $this->startProgress(
+            'Cleaning client custom fields...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update(['value' => $this->faker->word]);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (ClientMeta $item) {
+                $item->value = $this->faker->word;
                 $item->save();
                 $this->advance();
             });
@@ -1616,6 +1921,7 @@ class ClearSensitiveData extends Command
             CreditCard::whereRaw(1)->update([
                 'name_on_card' => $this->faker->name,
                 'number' => Crypt::encrypt($this->faker->creditCardNumber),
+                'nickname' => $this->faker->word,
             ]);
 
             BankAccount::whereRaw(1)->update([
@@ -1634,6 +1940,7 @@ class ClearSensitiveData extends Command
             $collection->each(function (CreditCard $card) {
                 $card->name_on_card = $this->faker->name;
                 $card->number = $this->faker->creditCardNumber;
+                $card->nickname = $this->faker->word;
                 $card->save();
                 $this->advance();
             });
@@ -1692,7 +1999,11 @@ class ClearSensitiveData extends Command
         );
 
         if ($this->fastMode) {
-            Note::whereRaw(1)->update(['body' => $this->faker->sentence]);
+            Note::whereRaw(1)->update([
+                'body' => $this->faker->sentence,
+                'title' => $this->faker->sentence,
+                'tags' => $this->faker->word,
+            ]);
             ScheduleNote::whereRaw(1)->update(['note' => $this->faker->sentence]);
 
             $this->finish();
@@ -1702,7 +2013,11 @@ class ClearSensitiveData extends Command
         Note::chunk(500, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function (Note $note) {
-                $note->update(['body' => $this->faker->sentence]);
+                $note->update([
+                    'body' => $this->faker->sentence,
+                    'title' => $this->faker->sentence,
+                    'tags' => $this->faker->word,
+                ]);
                 $this->advance();
             });
             \DB::commit();
