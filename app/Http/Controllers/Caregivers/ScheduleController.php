@@ -54,7 +54,8 @@ class ScheduleController extends BaseController
 
             if( empty( $businessId ) ) return new ErrorResponse( 500, 'Schedules could not be received' );
 
-            $setting = Business::findOrFail( $businessId )->open_shifts_setting;
+            $business = Business::findOrFail( $businessId );
+            $setting = $business->open_shifts_setting;
 
             if( !in_array( $setting, [ Business::OPEN_SHIFTS_LIMITED, Business::OPEN_SHIFTS_UNLIMITED ] ) ) return new ErrorResponse( 500, 'Invalid registry setting' );
 
@@ -72,10 +73,7 @@ class ScheduleController extends BaseController
                 });
             }
 
-            $start = Carbon::now();
-            $end   = Carbon::parse( 'today +31 days' );
-
-            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )
+            $schedules = $query->inTheNextMonth( $business->timezone )
                 ->get()
                 ->map( function( Schedule $schedule ) {
 

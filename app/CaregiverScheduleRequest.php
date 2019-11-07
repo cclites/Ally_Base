@@ -62,6 +62,46 @@ class CaregiverScheduleRequest extends Pivot
     // QUERY SCOPES
     // **********************************************************
 
+    /**
+     * Get only requests for schedules that are open, without a caregiver
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeForOpenSchedules( $query )
+    {
+        $query->whereHas( 'schedule', function( $q ){
+
+            $q->whereOpen();
+        });
+    }
+
+    /**
+     * Get only requests that are 'pending'
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeWherePending( $query )
+    {
+        $query->where( 'status', self::REQUEST_PENDING );
+    }
+
+    /**
+     * Get only requests that are 'pending'
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeForSchedulesInTheNextMonth( $query, $timezone )
+    {
+        $query->whereHas( 'schedule', function( $q ) use ( $timezone ){
+
+            $q->inTheNextMonth( $timezone );
+        });
+    }
+
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************

@@ -891,6 +891,24 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * Get only schedules that start between now and 31 days from now
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $start
+     * @param string $end
+     * @return void
+     */
+    public function scopeInTheNextMonth($query, $timezone )
+    {
+        $query->whereBetween( 'starts_at', [
+
+            Carbon::parse( 'now', $timezone ),
+            Carbon::parse( 'today +31 days', $timezone )
+        ]);
+    }
+
+    /**
      * Only include shifts that can still be clocked in to.
      *
      * @see self::canBeClockedIn()   This should be the same logic as canBeClockedIn()

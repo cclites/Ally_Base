@@ -55,10 +55,11 @@ import { mapGetters } from 'vuex';
 
                 let form = new Form({
 
-                    business_id : this.current_business.id
+                    business_id : this.current_business.id,
+                    count       : true
                 });
 
-                form.get( '/business/schedule/openShiftRequests' )
+                form.get( '/business/schedule/requests' )
                     .then( ({ data }) => {
 
                         console.log( data );

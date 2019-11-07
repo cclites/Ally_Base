@@ -59,9 +59,8 @@ class CaregiverScheduleRequestController extends BaseController
 
             $outstanding_request->update([ 'status' => $request->status ]);
             $outstanding_request->touch();
+            return new SuccessResponse( "Schedule request updated", [ 'status' => $request->status ]);
         }
-
-        return new SuccessResponse( "Schedule request updated to: " . $request->status, [ 'status' => $request->status ]);
     }
 
     /**

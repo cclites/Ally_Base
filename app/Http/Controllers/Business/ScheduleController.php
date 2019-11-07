@@ -83,6 +83,8 @@ class ScheduleController extends BaseController
      */
     public function openShifts()
     {
+        if( !is_office_user() ) abort( 403 );
+
         if( request()->filled( 'json' ) ){
 
             $query = Schedule::forRequestedBusinesses()
@@ -101,24 +103,9 @@ class ScheduleController extends BaseController
             return [ 'events' => $events->toArray() ];
         }
 
-        $chain = auth()->user()->getChain()->id;
+        $chain = $this->businessChain()->id;
 
         return view( 'open_shifts', [ 'businesses' => $chain, 'role_type' => auth()->user()->role_type ]);
-    }
-
-    /**
-     * Get a simple count of shift requests for the top-header icon
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function openShiftRequests( Request $request )
-    {
-        $count = \DB::table( 'caregiver_schedule_requests' )
-            ->where( 'business_id', $request->business_id )
-            ->count();
-
-        return response()->json( compact( 'count' ) );
     }
 
     /**

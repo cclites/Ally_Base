@@ -431,7 +431,7 @@ Route::group([
     Route::get('schedule/requests/{schedule}', 'Business\ScheduleController@getScheduleRequests' )->name( 'schedule.getRequests' );
     Route::post('schedule/requests/{schedule}', 'Business\ScheduleController@changeRequestStatus' )->name( 'schedule.changeRequestStatus' );
 
-    Route::get('schedule/openShiftRequests', 'Business\ScheduleController@openShiftRequests')->name('schedule.openShiftRequests');
+    Route::get( 'schedule/requests', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
 
     Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');

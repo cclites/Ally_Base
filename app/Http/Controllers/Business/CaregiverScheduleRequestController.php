@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\CaregiverScheduleRequest;
+use App\Responses\ErrorResponse;
 use Illuminate\Http\Request;
 
 class CaregiverScheduleRequestController extends BaseController
@@ -12,9 +14,21 @@ class CaregiverScheduleRequestController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index( Request $request )
     {
-        //
+
+        $business = Business::findOrFail( $request->business_id );
+
+        if( $request->input( 'count', false ) ){
+
+            $count = CaregiverScheduleRequest::forOpenSchedules()
+                ->wherePending()
+                ->forSchedulesInTheNextMonth( $business->timezone )
+                ->where( 'business_id', $business->id )
+                ->count();
+
+            return response()->json( compact( 'count' ) );
+        }
     }
 
     /**
