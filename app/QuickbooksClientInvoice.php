@@ -6,7 +6,7 @@ use App\Billing\ClientInvoice;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-class QuickbooksClientInvoice extends Model
+class QuickbooksClientInvoice extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.

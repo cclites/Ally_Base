@@ -6,7 +6,7 @@ use App\Services\QuickbooksOnlineService;
 use Crypt;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 
-class QuickbooksConnection extends BaseModel
+class QuickbooksConnection extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.
