@@ -332,7 +332,7 @@
             async fetch() {
                 this.waitingToGenerate = false;
                 this.loadingTable = true;
-                let url = `/business/quickbooks-queue?json=1&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/quickbooks-queue?json=1&businesses=${this.business_id}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;
