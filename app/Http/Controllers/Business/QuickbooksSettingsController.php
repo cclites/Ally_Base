@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Http\Requests\UpdateQuickbooksCustomerMappingRequest;
 use App\Http\Requests\UpdateQuickbooksSettingsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\QuickbooksConnectionResource;
@@ -185,19 +186,20 @@ class QuickbooksSettingsController extends BaseController
     /**
      * Update the customer mapping settings.
      *
-     * @param Request $request
+     * @param UpdateQuickbooksCustomerMappingRequest $request
      * @param Business $business
      * @return SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Exception
      */
-    public function customersUpdate(Request $request, Business $business)
+    public function customersUpdate(UpdateQuickbooksCustomerMappingRequest $request, Business $business)
     {
         $this->authorize('read', $business);
 
+        $data = $request->filtered();
+
         \DB::beginTransaction();
 
-        foreach ($request->clients as $mapping) {
+        foreach ($data['clients'] as $mapping) {
             $client = Client::where('business_id', $business->id)
                 ->where('id', $mapping['id'])
                 ->first();
@@ -270,7 +272,7 @@ class QuickbooksSettingsController extends BaseController
         }
 
         // Create new customer relationship.
-        [$customerId, $customerName] = $api->createCustomer($client);
+        [$customerId, $customerName] = $api->createCustomer($client, $business->quickbooksConnection);
         $customer = $client->quickbooksCustomer()->create([
             'business_id' => $business->id,
             'name' => $customerName,
