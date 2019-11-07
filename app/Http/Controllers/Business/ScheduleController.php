@@ -85,27 +85,36 @@ class ScheduleController extends BaseController
     {
         if( !is_office_user() ) abort( 403 );
 
+        $chain = $this->businessChain();
+
         if( request()->filled( 'json' ) ){
 
-            $query = Schedule::forRequestedBusinesses()
-                ->with([ 'client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service', 'schedule_requests' ])
+            $results = Schedule::forRequestedBusinesses()
+                ->with([ 'client', 'schedule_requests' ])
                 ->ordered()
-                ->whereDoesntHave( 'caregiver' )
-                ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ]);
+                ->inTheNextMonth( $chain->businesses->first()->timezone )
+                ->whereOpen()
+                ->get();
 
-            $start = Carbon::now();
-            $end   = Carbon::parse( 'today +31 days' );
 
-            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )->get();
+            $schedules = $results->map( function( Schedule $schedule ) {
 
-            $events = new ScheduleEventsResponse( $schedules );
+                return [
 
-            return [ 'events' => $events->toArray() ];
+                    'id'                => $schedule->id,
+                    'start'             => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
+                    'client'            => $schedule->client->nameLastFirst(),
+                    'client_id'         => $schedule->client->id,
+                    'start_time'        => $schedule->starts_at->copy()->format('g:i A'),
+                    'end_time'          => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                    'requests_count'    => $schedule->schedule_requests->count()
+                ];
+            });
+
+            return [ 'events' => $schedules, 'requests' => [] ];
         }
 
-        $chain = $this->businessChain()->id;
-
-        return view( 'open_shifts', [ 'businesses' => $chain, 'role_type' => auth()->user()->role_type ]);
+        return view( 'open_shifts', [ 'businesses' => $chain->id, 'role_type' => auth()->user()->role_type ]);
     }
 
     /**

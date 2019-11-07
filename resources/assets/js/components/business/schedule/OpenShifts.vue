@@ -39,7 +39,7 @@
         v-model=" scheduleModal "
         scrollable
     >
-        <schedule-requests :selected-schedule=" selectedSchedule " v-if=" scheduleModal && selectedSchedule "></schedule-requests>
+        <schedule-requests :selected-schedule-id=" selectedSchedule " v-if=" scheduleModal && selectedSchedule "></schedule-requests>
     </b-modal>
   </div>
 </template>
@@ -136,7 +136,7 @@
             showRequestModal( schedule_id ){
 
                 this.selectedSchedule = schedule_id;
-                this.scheduleModal = true;
+                this.scheduleModal    = true;
             },
             hasRequest( status ){
 
