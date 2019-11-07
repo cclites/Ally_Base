@@ -209,7 +209,7 @@ class ShiftController extends BaseController
 
         // Clean up any shift relationships.
         $shift->activities()->detach();
-        $shift->goals()->delete();
+        $shift->goals()->detach();
         $shift->questions()->detach();
         $shift->issues()->delete();
         $shift->shiftFlags()->delete();
