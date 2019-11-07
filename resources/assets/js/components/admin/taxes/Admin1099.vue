@@ -56,6 +56,11 @@
                         description: 'Display missing or malformed SSNs for Caregivers',
                         url: 'reports/bad-ssn-report/caregivers'
                     },
+                    {
+                        name: 'Update 1099s',
+                        description: 'Send Clients/Caregivers reminders to update 1099s',
+                        url: 'update-1099-reminder'
+                    },
 
                 ],
             }
