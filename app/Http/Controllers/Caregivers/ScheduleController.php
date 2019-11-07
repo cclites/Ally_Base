@@ -40,6 +40,9 @@ class ScheduleController extends BaseController
         return $events;
     }
 
+    /**
+     * I think this belongs in the schedule controller because an 'open-shift' is an attribute of a schedule, not its own entity..
+     */
     public function openShifts()
     {
         $caregiver = auth()->user()->role;
@@ -56,70 +59,40 @@ class ScheduleController extends BaseController
             if( !in_array( $setting, [ Business::OPEN_SHIFTS_LIMITED, Business::OPEN_SHIFTS_UNLIMITED ] ) ) return new ErrorResponse( 500, 'Invalid registry setting' );
 
             $query = Schedule::forRequestedBusinesses()
-                ->with([ 'client', 'schedule_requests' => function( $q ) use ( $caregiver ){
+                ->with([ 'client' ])
+                ->whereDoesntHave( 'caregiver' )
+                ->ordered();
+
+            if( $setting === Business::OPEN_SHIFTS_LIMITED ){
+                // check to see if you should only grab related caregiver-cients
+
+                $query->whereHas( 'client.rates', function ( $q ) use ( $caregiver ) {
 
                     $q->where( 'caregiver_id', $caregiver->id );
-                }])
-                ->whereHas( 'client.rates', function ( $query ) use ( $setting, $caregiver ) {
-
-                    if( $setting === Business::OPEN_SHIFTS_LIMITED ){
-
-                        $query->where( 'caregiver_id', $caregiver->id );
-                    }
-                })
-                ->ordered()
-                ->whereDoesntHave( 'caregiver' )
-                ->whereIn( 'status', [ Schedule::CAREGIVER_CANCELED, Schedule::OPEN_SHIFT, Schedule::OK ]);
+                });
+            }
 
             $start = Carbon::now();
             $end   = Carbon::parse( 'today +31 days' );
 
-            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )->get();
+            $schedules = $query->whereBetween( 'starts_at', [ $start, $end ] )
+                ->get()
+                ->map( function( Schedule $schedule ) {
 
-            $events = new ScheduleEventsResponse( $schedules );
+                return [
 
-            // dd( $events->toArray() );
+                    'id'         => $schedule->id,
+                    'start'      => $schedule->starts_at->format( \DateTime::ISO8601 ),
+                    'client'     => $schedule->client->nameLastFirst(),
+                    'client_id'  => $schedule->client->id,
+                    'start_time' => $schedule->starts_at->format('g:i A'),
+                    'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                ];
+            });
 
-            return [ 'events' => $events->toArray() ];
+            return [ 'events' => $schedules, 'requests' => $caregiver->schedule_requests ];
         }
 
         return view( 'open_shifts', [ 'businesses' => $caregiver->businesses, 'role_type' => auth()->user()->role_type ]);
-    }
-
-    public function requestShift( Schedule $schedule )
-    {
-
-        if( !is_caregiver() ) abort( 403 );
-
-        $caregiver_id = auth()->user()->id;
-
-        // create model relationship for this.. replace all instances ( below here as well as in the event response too )
-        $status = optional( $schedule->fresh()->latest_request_for( $caregiver_id ) )->status;
-
-        switch( $status ){
-
-            case null:
-            case CaregiverScheduleRequest::REQUEST_CANCELLED:
-                // create a pending
-
-                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'pending', 'business_id' => $schedule->business_id ]);
-                break;
-            case CaregiverScheduleRequest::REQUEST_PENDING:
-            case CaregiverScheduleRequest::REQUEST_APPROVED:
-                // create a cancelled
-
-                $schedule->schedule_requests()->attach( $caregiver_id, [ 'status' => 'cancelled', 'business_id' => $schedule->business_id ]);
-                // if approved, will also need to flag the schedule/shift as caregiver_cancelled
-                break;
-            default:
-                // this is either invalid or denied.. which the caregiver shouldnt be able to do anything with
-
-                return new ErrorResponse( 500, 'Unable to request shift at this time, please contact support' );
-                break;
-        }
-
-        $status = $schedule->fresh()->latest_request_for( $caregiver_id )->status;
-
-        return new SuccessResponse( "Schedule request updated to: " . $status, compact( 'status' ) );
     }
 }

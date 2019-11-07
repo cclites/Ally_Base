@@ -54,7 +54,6 @@ class CaregiverScheduleRequest extends Pivot
         return $this->belongsTo( Schedule::class );
     }
 
-
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -67,5 +66,17 @@ class CaregiverScheduleRequest extends Pivot
     // OTHER FUNCTIONS
     // **********************************************************
 
+    /**
+     * fetchable path for the resource, dynamic to the role of the current user
+     */
+    public function path()
+    {
+        $url = '/schedule/requests/' . $this->id;
 
+        if( is_caregiver() ) return '/caregiver' . $url;
+
+        if( is_office_user() ) return '/business' . $url;
+
+        return ''; // maybe this can be something else..
+    }
 }

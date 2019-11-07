@@ -82,9 +82,6 @@ class ScheduleEvents implements Responsable
 
             $title = $this->resolveEventTitle($schedule);
 
-            if( is_caregiver() && $schedule->schedule_requests->count() ) $request_status = $schedule->schedule_requests->sortByDesc( 'pivot.created_at' )->first()->pivot->status;
-            else $request_status = null;
-
             return array_merge([
                 'id' => $schedule->id,
                 'title' => $title,
@@ -108,7 +105,6 @@ class ScheduleEvents implements Responsable
                 'added_to_past' => $schedule->added_to_past,
                 'service_types' => $this->getServiceTypes($schedule),
                 'requests_count' => $schedule->activeRequestsCount(),
-                'request_status' => $request_status
             ], $additionalOptions);
         });
     }

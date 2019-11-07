@@ -27,10 +27,8 @@
                 <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 ">{{ data.item.requests_count }} Request{{ data.item.requests_count > 1 ? 's' : '' }}</a>
                 <span v-else>0</span>
             </template>
-            <template slot="status" scope="data">
 
-                {{ data.item.status == 'OK' ? 'Open' : data.item.status }}
-            </template>
+            <template slot="status" scope="data">{{ 'Open' }}</template>
           </ally-table>
       </div>
     </b-card>
@@ -61,8 +59,6 @@
 
                 loading          : false,
                 filtersReady     : false,
-                // clients          : this.client ? [this.client] : [],
-                // caregivers       : this.caregiver ? [this.caregiver] : [],
                 events           : [],
                 eventsLoaded     : false,
                 active_business  : null,
@@ -95,32 +91,22 @@
                         sortable   : true,
                         shouldShow : true,
                     },
-                    // {
-                    //   key: 'created_at',
-                    //   label: 'First date referred',
-                    //   sortable: true,
-                    //   shouldShow: true,
-                    //   formatter: x => { return this.formatDateFromUTC(x) }
-                    // },
                 ]
             }
         },
 
         mounted() {
 
-            this.loadFiltersData();
+            // this will be for when we allow caregivers to switch between businesses
             if( !Array.isArray( this.businesses ) ) this.active_business = this.businesses;
             else this.active_business = this.businesses[ 0 ].id || null;
+
+            this.fetchEvents();
         },
 
         computed: {
 
             eventsUrl() {
-
-                if ( !this.filtersReady ) {
-
-                    return '';
-                }
 
                 let url = '';
 
@@ -140,118 +126,8 @@
 
                 url += '&businesses=' + this.active_business;
 
-                /*
-
-                if (this.filterCaregiverId > -1) {
-                    url += '&caregiver_id=' + this.filterCaregiverId;
-                    if (this.filterClientId > -1) {
-                        url += '&client_id=' + this.filterClientId;
-                    }
-                }
-                else if (this.filterClientId > -1) {
-                    url += '&client_id=' + this.filterClientId;
-                }
-
-                if (this.filterBusinessId) {
-                    url += '&businesses[]=' + this.filterBusinessId;
-                }
-                */
-
                 return url;
-            },
-
-            /*
-                rememberFilters() {
-                    return this.isFilterable && this.officeUserSettings.calendar_remember_filters;
-                },
-
-                calendarHeight() {
-                    return 'auto';
-                    // return window.innerHeight - (this.fullscreen ? 180 : 400);
-                },
-
-                config() {
-                    return {
-                        height: this.calendarHeight,
-                        eventBorderColor: '#333',
-                        eventOverlap: false,
-                        nextDayThreshold: this.officeUserSettings.calendar_next_day_threshold || '09:00:00',
-                        nowIndicator: true,
-                        resourceAreaWidth: '280px',
-                        resourceColumns: [
-                            {
-                                labelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
-                                field: 'title',
-                            },
-                            {
-                                labelText: 'S',
-                                field: 'scheduled',
-                                width: '30px',
-                            },
-                            {
-                                labelText: 'C',
-                                field: 'completed',
-                                width: '30px',
-                            },
-                            {
-                                labelText: 'P',
-                                field: 'projected',
-                                width: '30px',
-                            }
-                        ],
-                        resourceRender: this.resourceRender,
-                        views: {
-                            timelineWeek: {
-                                slotLabelFormat: 'ddd D',
-                                slotDuration: '24:00'
-                            },
-                        },
-                        customButtons: {
-                            caregiverView: {
-                                text: this.caregiverView ? 'Client View' : 'Caregiver View',
-                                click: this.caregiverViewToggle
-                            },
-                            fullscreen: {
-                                text: ' ',
-                                click: this.fullscreenToggle
-                            },
-                            print: {
-                                text: ' ',
-                                click: this.printCalendar
-                            }
-                        },
-                        firstDay: this.weekStart,
-                    }
-                },
-
-                filteredEvents() { return this.getFilteredEvents(); },
-
-                kpis() { return this.getKpis(); },
-
-                resources() { return this.getResources(); },
-
-                filteredCaregiverResources() {
-                    return (this.filterCaregiverId > -1 && !this.caregiver);
-                },
-
-                filteredClientResources() {
-                    return (this.filterClientId > -1 && !this.client) || this.filterClientId === -2;
-                },
-
-                currentClient() {
-                    if (this.clients && this.filterClientId !== -1) {
-                        return this.clients.find(x => x.id === this.filterClientId);
-                    }
-                    return this.client;
-                },
-
-                currentCaregiver() {
-                    if (this.caregivers && this.filterCaregiverId !== -1) {
-                        return this.caregivers.find(x => x.id === this.filterCaregiverId);
-                    }
-                    return this.caregiver;
-                }
-            */
+            }
         },
 
         methods: {
@@ -263,27 +139,19 @@
             },
             hasRequest( status ){
 
-                switch( status ){
-
-                    case 'pending':
-                    case 'denied':
-                    case 'approved':
-                        return true;
-
-                        break;
-                    case 'cancelled':
-                    default:
-
-                        return false;
-                        break;
-                }
+                return status == 'cancelled' ? true : false;
             },
             requestShift( schedule ){
 
-                this.isBusy = true;
-                const form = new Form();
+                if( this.role_type != 'caregiver' ) return false;
 
-                form.post( `/schedule/open-shifts/${schedule.id}` )
+                this.isBusy = true;
+                const form = new Form({
+
+                    status : this.hasRequest( schedule.status )
+                });
+
+                form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
@@ -297,16 +165,7 @@
                         this.isBusy = false;
                     });
             },
-            loadFiltersData() {
-
-                this.filtersReady = true;
-            },
             fetchEvents( savePosition = false ) {
-
-                if ( !this.filtersReady ) {
-
-                return;
-                }
 
                 this.loading = true;
 
@@ -315,31 +174,20 @@
                 form.get( this.eventsUrl )
                     .then( ({ data }) => {
 
-                        this.events = data.events.map( event => {
+                        console.log( 'returned schedules: ', data.events );
 
-                            event.resourceId      = event[ this.resourceIdField ];
-                            return event;
-                        });
-
+                        this.events = data.events;
                         this.eventsLoaded = true;
                     })
                     .catch( e => {
 
-                        console.log( 'error getting events:' );
-                        console.log( e );
+                        console.error( 'error getting events:' );
+                        console.error( e );
                     })
                     .finally( () => {
 
                         this.loading = false;
                     });
-            },
-        },
-
-        watch: {
-
-            eventsUrl( val, old ) {
-
-                this.fetchEvents();
             },
         },
 

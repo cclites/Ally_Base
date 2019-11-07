@@ -128,9 +128,9 @@ Route::group([
 
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@show')->name('caregivers.shift.show');
 
+    Route::post( 'schedule/requests/{schedule}', 'Caregivers\CaregiverScheduleRequestController@store' )->name( 'schedule.request.store' );
 
     Route::get( 'schedule/open-shifts', 'Caregivers\ScheduleController@openShifts' )->name('schedule.open-shifts');
-    Route::post( 'schedule/open-shifts/{schedule}', 'Caregivers\ScheduleController@requestShift' )->name( 'schedule.request' );
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
@@ -430,8 +430,10 @@ Route::group([
 
     Route::get('schedule/requests/{schedule}', 'Business\ScheduleController@getScheduleRequests' )->name( 'schedule.getRequests' );
     Route::post('schedule/requests/{schedule}', 'Business\ScheduleController@changeRequestStatus' )->name( 'schedule.changeRequestStatus' );
-    Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
+
     Route::get('schedule/openShiftRequests', 'Business\ScheduleController@openShiftRequests')->name('schedule.openShiftRequests');
+
+    Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
