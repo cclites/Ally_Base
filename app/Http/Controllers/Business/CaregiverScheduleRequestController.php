@@ -27,7 +27,7 @@ class CaregiverScheduleRequestController extends BaseController
 
             $business = Business::findOrFail( $request->business_id );
 
-            $query = CaregiverScheduleRequest::forOpenSchedules()
+            $count = CaregiverScheduleRequest::forOpenSchedules()
                 ->wherePending()
                 ->forSchedulesInTheNextMonth( $business->timezone )
                 ->where( 'business_id', $business->id )
