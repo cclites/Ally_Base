@@ -205,4 +205,14 @@ class QuickbooksConnection extends BaseModel
 
         return true;
     }
+
+    /**
+     * Get the name_format setting for the connection.
+     *
+     * @return string
+     */
+    public function getNameFormat() : string
+    {
+        return $this->name_format;
+    }
 }

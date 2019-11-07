@@ -270,7 +270,7 @@ class QuickbooksSettingsController extends BaseController
         }
 
         // Create new customer relationship.
-        [$customerId, $customerName] = $api->createCustomer($client);
+        [$customerId, $customerName] = $api->createCustomer($client, $business->quickbooksConnection);
         $customer = $client->quickbooksCustomer()->create([
             'business_id' => $business->id,
             'name' => $customerName,
