@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Business;
 use App\Caregiver;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -16,6 +15,20 @@ class HomeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Handle redirect from the root url.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function root()
+    {
+        if (\Auth::check()) {
+            return redirect()->route('home');
+        } else {
+            return redirect('login');
+        }
     }
 
     /**
