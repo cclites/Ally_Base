@@ -8,7 +8,7 @@
 
       <div v-show="! loading" class="table-responsive">
 
-          <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="date" :perPage=" 1000 " :isBusy=" isBusy ">
+          <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" isBusy ">
 
             <template slot="start" scope="data">
 
@@ -18,8 +18,8 @@
 
                 <transition mode="out-in" name="slide-fade">
 
-                    <b-button variant="success" size="sm" class="btn-block" v-if=" !hasRequest( data.item.request_status ) " @click=" requestShift( data.item ) " key="request">Request Shift</b-button>
-                    <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item ) " key="rescind">Cancel Request</b-button>
+                    <b-button variant="success" size="sm" class="btn-block" v-if=" !hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
+                    <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
                 </transition>
             </template>
             <template slot="requests_count" scope="data">
@@ -28,7 +28,7 @@
                 <span v-else>0</span>
             </template>
 
-            <template slot="status" scope="data">{{ 'Open' }}</template>
+            <template slot="status" scope="data">Open</template>
           </ally-table>
       </div>
     </b-card>
@@ -65,6 +65,7 @@
                 isBusy           : false,
                 selectedSchedule : null,
                 scheduleModal    : false,
+                requests         : [],
                 fields : [
 
                     {
@@ -90,7 +91,7 @@
                         label      : 'Status',
                         sortable   : true,
                         shouldShow : true,
-                    },
+                    }
                 ]
             }
         },
@@ -139,21 +140,35 @@
             },
             hasRequest( status ){
 
-                return status == 'cancelled' ? true : false;
+                switch( status ){
+
+                    case null:
+                    case 'cancelled':
+
+                        return false;
+                        break;
+                    case 'pending':
+                    case 'denied':
+                    case 'approved':
+
+                        return true;
+                        break;
+                }
             },
-            requestShift( schedule ){
+            requestShift( schedule, status ){
 
                 if( this.role_type != 'caregiver' ) return false;
 
                 this.isBusy = true;
                 const form = new Form({
 
-                    status : this.hasRequest( schedule.status )
+                    status : status
                 });
 
                 form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
+                        console.log( res );
                         schedule.request_status = res.data.data.status;
                     })
                     .catch( e => {
@@ -174,9 +189,22 @@
                 form.get( this.eventsUrl )
                     .then( ({ data }) => {
 
-                        console.log( 'returned schedules: ', data.events );
+                        console.log( 'returned schedules: ', data );
 
-                        this.events = data.events;
+                        this.requests = data.requests;
+                        this.events   = data.events.map( e => {
+
+                            for( let i = 0; i < this.requests.length; i++ ){
+
+                                if( this.requests[ i ].schedule_id == e.id ){
+
+                                    e.request_status = this.requests[ i ].status;
+                                    break;
+                                }
+                            }
+                            return e;
+                        });
+
                         this.eventsLoaded = true;
                     })
                     .catch( e => {

@@ -422,6 +422,14 @@ class Caregiver extends AuditableModel implements
     /// Instance Methods
     ///////////////////////////////////////////
 
+    public function getMappedScheduleRequestsAttribute()
+    {
+        return $this->schedule_requests->map( function( $s ){
+
+            return $s->pivot;
+        });
+    }
+
     public function getAddress(): ?Address
     {
         return $this->address;

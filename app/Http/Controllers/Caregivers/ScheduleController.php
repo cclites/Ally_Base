@@ -60,7 +60,7 @@ class ScheduleController extends BaseController
 
             $query = Schedule::forRequestedBusinesses()
                 ->with([ 'client' ])
-                ->whereDoesntHave( 'caregiver' )
+                ->whereOpen()
                 ->ordered();
 
             if( $setting === Business::OPEN_SHIFTS_LIMITED ){
@@ -82,15 +82,15 @@ class ScheduleController extends BaseController
                 return [
 
                     'id'         => $schedule->id,
-                    'start'      => $schedule->starts_at->format( \DateTime::ISO8601 ),
+                    'start'      => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
                     'client'     => $schedule->client->nameLastFirst(),
                     'client_id'  => $schedule->client->id,
-                    'start_time' => $schedule->starts_at->format('g:i A'),
-                    'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                    'start_time' => $schedule->starts_at->copy()->format('g:i A'),
+                    'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A')
                 ];
             });
 
-            return [ 'events' => $schedules, 'requests' => $caregiver->schedule_requests ];
+            return [ 'events' => $schedules, 'requests' => $caregiver->mapped_schedule_requests ];
         }
 
         return view( 'open_shifts', [ 'businesses' => $caregiver->businesses, 'role_type' => auth()->user()->role_type ]);

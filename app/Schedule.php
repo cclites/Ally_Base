@@ -239,9 +239,15 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function latest_request_for( $caregiver_id )
     {
-        if( $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->count() == 0 ) return null;
+        return optional( $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->first() )->pivot;
+    }
 
-        return $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->orderBy( 'created_at', 'desc' )->first()->pivot;
+    /**
+     * is this the only criteria?
+     */
+    public function getIsOpenAttribute()
+    {
+        return $this->caregiver_id === null;
     }
 
     /**
@@ -871,6 +877,17 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         $from = Carbon::parse($fromDate, $timezone)->subHour();
 
         $query->where('starts_at', '>=', $from);
+    }
+
+    /**
+     * Get only schedules that are open, without a caregiver
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeWhereOpen($query)
+    {
+        $query->whereDoesntHave( 'caregiver' );
     }
 
     /**

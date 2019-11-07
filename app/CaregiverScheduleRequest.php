@@ -79,4 +79,15 @@ class CaregiverScheduleRequest extends Pivot
 
         return ''; // maybe this can be something else..
     }
+
+    public static function is_acceptable_status( $status )
+    {
+        return in_array( $status, [
+
+            self::REQUEST_APPROVED,
+            self::REQUEST_DENIED,
+            self::REQUEST_PENDING,
+            self::REQUEST_CANCELLED
+        ]);
+    }
 }
