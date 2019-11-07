@@ -135,7 +135,12 @@ class QuickbooksOnlineInvoice
             if ($requiredCustomerMap) {
                 throw new \Exception('Could not find a Customer Client relationship.');
             }
-            $qbInvoice->customerName = $client->name;
+            if ($connection->name_format == 'last_first') {
+                $qbInvoice->customerName = $client->nameLastFirst();
+            }
+            else {
+                $qbInvoice->customerName = $client->name;
+            }
         }
 
         /** @var ClientInvoiceItem $invoiceItem */

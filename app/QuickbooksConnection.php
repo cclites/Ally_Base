@@ -36,9 +36,10 @@ class QuickbooksConnection extends BaseModel
      */
     protected $dates = ['last_connected_at'];
 
-
     const FEE_TYPE_REGISTRY = 'registry';
     const FEE_TYPE_CLIENT = 'client';
+    const NAME_FORMAT_LAST_FIRST = 'last_first';
+    const NAME_FORMAT_FIRST_LAST = 'first_last';
 
     // **********************************************************
     // RELATIONSHIPS
