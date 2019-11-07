@@ -128,14 +128,7 @@
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
 
-        <b-modal id="schedule-requests-modal"
-            title="Schedule Requests"
-            size="xl"
-            v-model=" requestsModal "
-            scrollable
-        >
-            <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" requestsModal && selectedScheduleId "></schedule-requests>
-        </b-modal>
+        <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId "></schedule-request-modal>
 
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
@@ -254,10 +247,10 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
-    import ScheduleRequests from './ScheduleRequests';
+    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
 
     export default {
-        components: {BusinessLocationFormGroup, ScheduleRequests},
+        components: {BusinessLocationFormGroup, ScheduleRequestModal},
         props: {
             'business': Object,
             'caregiver': Object,

@@ -33,14 +33,7 @@
       </div>
     </b-card>
 
-    <b-modal id="schedule-requests-modal"
-        title="Schedule Requests"
-        size="xl"
-        v-model=" scheduleModal "
-        scrollable
-    >
-        <schedule-requests :selected-schedule-id=" selectedSchedule " v-if=" scheduleModal && selectedSchedule "></schedule-requests>
-    </b-modal>
+    <schedule-request-modal v-model=" scheduleModal " :selected-schedule-id=" selectedSchedule "></schedule-request-modal>
   </div>
 </template>
 
@@ -48,7 +41,7 @@
 
     import FormatsDates from '../../../mixins/FormatsDates';
     import AuthUser from '../../../mixins/AuthUser';
-    import ScheduleRequests from './ScheduleRequests';
+    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
 
     export default {
 
@@ -227,7 +220,7 @@
 
         components: {
 
-            ScheduleRequests
+            ScheduleRequestModal
         }
     }
 </script>
