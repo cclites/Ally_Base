@@ -14,7 +14,7 @@
 
             <div v-for=" request in requests " :key=" request.id " class="d-flex align-items-center my-2">
 
-                <div class="f-1">{{ request.pivot.id + ' :: ' + request.nameLastFirst }}</div>
+                <div class="f-1">{{ request.nameLastFirst }}</div>
                 <div class="f-1">{{ formatDateFromUTC( request.pivot.created_at ) }}</div>
                 <div class="f-1">{{ request.pivot.status }}</div>
                 <div class="f-1">
@@ -72,32 +72,38 @@
 
                 console.log( 'loading...' );
                 this.loading = true;
-                axios.get( '/business/schedule/requests/' + this.selectedScheduleId )
-                .then( response => {
 
-                    console.log( 'loaded: ', response );
-                    this.requests = response.data.data;
-                })
-                .catch( error => {
+                const form = new Form({
 
-                    alert( 'Error loading schedule details' );
-                })
-                .finally( () => {
-
-                    this.loading = false;
+                    schedule : this.selectedScheduleId
                 });
+
+                form.get( '/business/schedule/requests/' )
+                    .then( response => {
+
+                        console.log( 'loaded: ', response );
+                        this.requests = response.data.data;
+                    })
+                    .catch( error => {
+
+                        alert( 'Error loading schedule details' );
+                    })
+                    .finally( () => {
+
+                        this.loading = false;
+                    });
             },
             respondToRequest( schedule, status ){
 
                 this.busy = true;
                 let form = new Form({
 
-                    'status'              : status,
-                    'schedule_request_id' : schedule.pivot.id,
-                    'caregiver_id'        : schedule.pivot.caregiver_id
+                    'status'       : status,
+                    'schedule_id'  : schedule.pivot.schedule_id,
+                    'caregiver_id' : schedule.pivot.caregiver_id
                 });
 
-                form.post( '/business/schedule/requests/' + schedule.pivot.schedule_id )
+                form.patch( '/business/schedule/requests/' + schedule.pivot.id )
                     .then( res => {
 
                         console.log( res );

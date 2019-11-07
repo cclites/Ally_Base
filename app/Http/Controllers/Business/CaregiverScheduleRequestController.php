@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Business;
 
 use App\Business;
 use App\CaregiverScheduleRequest;
+use App\Client;
 use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
+use App\Schedule;
+use App\Scheduling\ScheduleAggregator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CaregiverScheduleRequestController extends BaseController
 {
@@ -17,11 +22,12 @@ class CaregiverScheduleRequestController extends BaseController
     public function index( Request $request )
     {
 
-        $business = Business::findOrFail( $request->business_id );
-
         if( $request->input( 'count', false ) ){
+            // maybe this can be organized better.. this is for the top-notification-icon
 
-            $count = CaregiverScheduleRequest::forOpenSchedules()
+            $business = Business::findOrFail( $request->business_id );
+
+            $query = CaregiverScheduleRequest::forOpenSchedules()
                 ->wherePending()
                 ->forSchedulesInTheNextMonth( $business->timezone )
                 ->where( 'business_id', $business->id )
@@ -29,6 +35,11 @@ class CaregiverScheduleRequestController extends BaseController
 
             return response()->json( compact( 'count' ) );
         }
+
+        $schedule = Schedule::findOrFail( $request->schedule );
+
+        $this->authorize( 'read', $schedule );
+        return new SuccessResponse( 'Successfully loaded schedule requests..', $schedule->schedule_requests );
     }
 
     /**
@@ -81,10 +92,93 @@ class CaregiverScheduleRequestController extends BaseController
      * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CaregiverScheduleRequest $caregiverScheduleRequest)
+    public function update(Request $request, CaregiverScheduleRequest $caregiverScheduleRequest, ScheduleAggregator $aggregator)
     {
-        //
+        // validate request object
+
+        $schedule = Schedule::findOrFail( $request->schedule_id );
+
+        $this->authorize( 'update', $schedule );
+
+        $action = $request->status;
+
+        DB::beginTransaction();
+        switch( $action ){
+
+            case 'accept':
+
+                $newStatus = CaregiverScheduleRequest::REQUEST_APPROVED;
+                if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+
+                $client = Client::find( $schedule->client_id );
+
+                if ( $request->caregiver_id && !$client->hasCaregiver( $request->caregiver_id ) ) {
+
+                    // Create default rates based on the rates in the request
+                    ClientRate::add( $client, [
+
+                        'caregiver_id'          => $request->caregiver_id,
+                        'effective_start'       => date('Y') . '-01-01',
+                        'effective_end'         => '9999-12-31',
+                        'caregiver_hourly_rate' => 0,
+                        'client_hourly_rate'    => 0,
+                        'caregiver_fixed_rate'  => 0,
+                        'client_fixed_rate'     => 0,
+                        'service_id'            => $schedule->service_id,
+                        'payer_id'              => $schedule->payer_id,
+                    ]);
+
+                    // Clear out the rates for all services so they are
+                    // pulled from the defaults that were just created.
+                    $request->caregiver_rate = null;
+                    $request->client_rate    = null;
+                }
+
+                // Verify we are not going above hours
+                $totalHours    = $aggregator->getTotalScheduledHoursForWeekOf( $schedule->starts_at, $schedule->client_id );
+                $newTotalHours = $totalHours - ($schedule->duration / 60);
+                if ( $newTotalHours > $client->max_weekly_hours ) {
+
+                    return new ErrorResponse( 500, 'The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.' );
+                }
+
+                // Update the schedule
+                $schedule->update([
+
+                    'caregiver_rate' => $request->caregiver_rate,
+                    'client_rate'    => $request->client_rate,
+                    'caregiver_id'   => $request->caregiver_id
+                ]);
+
+                // ERIK TODO => text them? notification? Ask Jason
+                break;
+            case 'reject':
+
+                $newStatus = CaregiverScheduleRequest::REQUEST_DENIED;
+                if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+
+                // Update the schedule
+                if( !empty( $schedule->caregiver_id ) ){
+
+                    $schedule->update([
+
+                        'caregiver_id' => null
+                    ]);
+                }
+
+                // ERIK TODO => text them? notification? Ask Jason
+                break;
+            default:
+
+                return new ErrorResponse( 500, 'You do not have permission to perform that request.' );
+                break;
+        }
+
+        DB::commit();
+
+        return new SuccessResponse( 'Successfully updated schedule request!', $newStatus );
     }
+
 
     /**
      * Remove the specified resource from storage.

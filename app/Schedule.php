@@ -251,34 +251,6 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * gets the most recent request status grouped by caregiver_id
-     */
-    public function getActiveRequestsAttribute()
-    {
-        $requests = [];
-
-        foreach( $this->schedule_requests->groupBy( 'pivot.caregiver_id' ) as $requester ){
-
-            $requests[] = $requester->sortByDesc( 'pivot.created_at' )->first(); // interesting point here.. move CG info to vuex for global state so we dont need to constantly grab it everywhere
-        }
-
-        return array_values( $requests );
-    }
-
-    /**
-     * gets the total count of outstanding requests with an optional filter of status type
-     */
-    public function activeRequestsCount( $status = 'all' )
-    {
-        if( $status == 'all' ) return count( $this->active_requests );
-
-        return count( array_filter( $this->active_requests, function( $s ) use ( $status ){
-
-            return $s->pivot->status == $status;
-        }) );
-    }
-
-    /**
      * Get whether of not the schedule will be converted by
      * the schedule converter CRON.
      *

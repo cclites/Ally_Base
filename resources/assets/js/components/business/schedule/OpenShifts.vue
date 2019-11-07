@@ -12,7 +12,7 @@
 
             <template slot="start" scope="data">
 
-                {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time + ' :: ' + data.item.id }}
+                {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time }}
             </template>
             <template slot="actions" scope="data">
 
