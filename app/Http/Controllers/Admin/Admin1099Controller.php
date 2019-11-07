@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Business;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -82,5 +83,13 @@ class Admin1099Controller extends BaseController
     public function destroy($id)
     {
         //
+    }
+
+    public function RegistryEmailList(){
+
+        $emails = Business::whereNotNull('contact_email')->pluck('contact_email')->toArray();
+        $emailString = implode(",", $emails);
+
+        return view_component('admin-registry-emails', 'Registry Emails', ['emails' => $emailString]);
     }
 }

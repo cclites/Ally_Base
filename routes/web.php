@@ -614,9 +614,11 @@ Route::group([
     Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
 
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
-    Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
+    Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
+    // 1099 related
     Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
+    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list');
 
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');
