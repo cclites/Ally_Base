@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientAuthorization;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\ConfirmationResponse;
@@ -11,6 +13,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Shift;
+use App\ShiftConfirmation;
 use App\ShiftFlag;
 use App\ShiftIssue;
 use App\Shifts\RateFactory;
@@ -201,10 +204,31 @@ class ShiftController extends BaseController
         if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
-        if ($shift->delete()) {
-            return new SuccessResponse("This shift has been deleted.");
+
+        \DB::beginTransaction();
+
+        // Clean up any shift relationships.
+        $shift->activities()->detach();
+        $shift->goals()->delete();
+        $shift->questions()->detach();
+        $shift->issues()->delete();
+        $shift->shiftFlags()->delete();
+        $shift->statusHistory()->delete();
+        $shift->services()->delete();
+        $shift->expenses()->delete();
+
+        try {
+            if ($shift->delete()) {
+                \DB::commit();
+                return new SuccessResponse("This shift has been deleted.");
+            }
+
+        } catch (\Exception $ex) {
+            // Handle foreign key exceptions (should not occur and should be handled by isReadOnly())
+            app('sentry')->captureException($ex);
         }
-        return new ErrorResponse(500, "This shift could not be deleted.");
+
+        return new ErrorResponse(400, 'This shift could not be deleted.  Please contact Ally.');
     }
 
     public function confirm(Shift $shift)
