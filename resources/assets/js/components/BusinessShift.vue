@@ -81,10 +81,10 @@
                                         <date-picker v-model="endDate" @input="changedEndDate(endDate)"/>
                                     </td>
                                     <td>
-                                        <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
+                                        <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" id="startTime" />
                                     </td>
                                     <td>
-                                        <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
+                                        <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" id="endTime" />
                                     </td>
                                     <td v-if="business.co_mileage">
                                         <b-form-input
@@ -756,7 +756,6 @@
             },
 
             resetForm(shift) {
-                console.log('New Shift', shift);
                 if (!shift) {
                     shift = {};
                 }

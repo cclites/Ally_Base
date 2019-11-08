@@ -459,11 +459,13 @@
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             },
 
-            generateReportDisabled(){
+            generateReportDisabled() {
+                if (!this.filters.start_date || !this.filters.end_date) {
+                    return false;
+                }
 
-                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))
-                    && this.clientsLoaded && this.caregiversLoaded && this.servicesLoaded)
-                {
+                else if (moment(this.filters.start_date, 'MM/DD/YYYY').isSameOrBefore(moment(this.filters.end_date, 'MM/DD/YYYY'))
+                    && this.clientsLoaded && this.caregiversLoaded && this.servicesLoaded) {
                     return false;
                 }
 

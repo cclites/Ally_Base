@@ -71,7 +71,6 @@
             loadData() {
                 axios.get('/business/activities')
                     .then(response => {
-                        console.log('fetched activities');
                         if (Array.isArray(response.data)) {
                             this.activities = response.data;
                         }

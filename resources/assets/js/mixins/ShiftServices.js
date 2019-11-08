@@ -196,12 +196,11 @@ export default {
         },
 
         handleChangedBillingType(form, type) {
-            console.log('handleChangedBillingType', form);
             if (type === 'services') {
+                console.log('clearing service');
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
-                    console.log('added service from handleChangedBillingType');
                     this.addService({duration: this.scheduledHours || this.duration || 1 });
                 }
             } else {
@@ -212,7 +211,6 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
-            console.log('handleChangedDefaultRates', value, form);
             // initiated from watcher
             if (value) {
                 this.fetchDefaultRate(form);
@@ -224,7 +222,6 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
-                console.log('handleChangedDefaultRates: use defaults is off, do nothing');
                 // if (! form.default_rates) {
                 //     console.log('skipped');
                 //     return;
