@@ -22,7 +22,7 @@
                             <b-form-group label="Caregiver" class="form-inline">
                                 <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
                                     <option value="">All Caregivers</option>
-                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -30,7 +30,7 @@
                             <b-form-group label="Client" class="form-inline">
                                 <b-form-select v-model="filters.client_id" ref="clientFilter">
                                     <option value="">All Clients</option>
-                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -185,7 +185,7 @@
         />
 
         <!-- Details modal -->
-        <shift-details-modal v-model="detailsModal" :shift="selectedItem">
+        <shift-details-modal v-if="detailsModal" v-model="detailsModal" :shift="selectedItem">
             <template slot="buttons" scope="row">
                 <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
@@ -197,6 +197,7 @@
         </shift-details-modal>
 
         <add-shift-modal
+            v-if="addShiftModal"
             v-model="addShiftModal"
             :caregiver="{id: filters.caregiver_id}"
             :client="{id: filters.client_id}"
@@ -227,6 +228,7 @@
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import ShiftFlags from "../mixins/ShiftFlags";
     import Constants from '../mixins/Constants';
+    import {mapGetters} from "vuex";
 
     export default {
         components: {
@@ -275,8 +277,6 @@
                     service_id: '',
                 },
                 includeAllFlags: false,
-                clients: [],
-                caregivers: [],
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
@@ -296,24 +296,34 @@
                 loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
-                services: [],
-                clientsLoaded: false,
-                caregiversLoaded: false,
-                servicesLoaded: false,
-
             }
         },
 
         async mounted() {
+            this.$store.commit('filters/setBusiness', this.filters.business_id);
             this.loadFiltersFromStorage();
             this.setInitialFields();
-            await this.loadFiltersData();
+            await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services']);
             if (this.autoload) {
                 this.loadData();
             }
         },
 
         computed: {
+            ...mapGetters({
+                clientsLoaded: 'filters/isClientsLoaded',
+                caregiversLoaded: 'filters/isCaregiversLoaded',
+                servicesLoaded: 'filters/isServicesLoaded',
+                clientList: 'filters/clientList',
+                caregivers: 'filters/caregiverList',
+                services: 'filters/serviceList',
+            }),
+            clients() {
+                if (! this.filters.client_type) {
+                    return this.clientList;
+                }
+                return this.clientList.filter(x => x.client_type == this.filters.client_type);
+            },
             availableFields() {
                 let fields = [
                     'Flags',
@@ -563,26 +573,6 @@
                 }
             },
 
-            async loadFiltersData() {
-                await axios.get('/business/clients').
-                        then(response => {
-                            this.clients = response.data;
-                            this.clientsLoaded = true;
-                        });
-
-                await axios.get('/business/caregivers').
-                        then(response => {
-                            this.caregivers = response.data;
-                            this.caregiversLoaded = true;
-                        });
-
-                await axios.get('/business/services?json=1').
-                        then(response => {
-                            this.services = response.data;
-                            this.servicesLoaded = true;
-                        });
-            },
-
             details(item) {
                 let component = this;
                 axios.get('/business/shifts/' + item.id)
@@ -748,6 +738,9 @@
         },
 
         watch: {
+            'filters.business_id'(newVal) {
+                this.$store.commit('filters/setBusiness', newVal);
+            },
             sortBy(val) {
                 this.setLocalStorage('sortBy', val);
             },

@@ -1,4 +1,5 @@
 import RateFactory from "../classes/RateFactory";
+import {mapGetters} from "vuex";
 
 export default {
     // Common data shared between shift and schedule services
@@ -9,12 +10,13 @@ export default {
             defaultRates: true,
             clientPayers: [],
             clientRates: [],
-            services: [],
         }
     },
 
     computed: {
-
+        ...mapGetters({
+            services: 'filters/serviceList',
+        }),
         defaultService() {
             return this.services.find(item => item.default === true) || {};
         },
@@ -71,12 +73,7 @@ export default {
     methods: {
 
         async fetchServices() {
-            let response = await axios.get('/business/services?json=1');
-            if (Array.isArray(response.data)) {
-                this.services = response.data;
-            } else {
-                this.services = [];
-            }
+            await this.$store.dispatch('filters/fetchResources', 'services');
         },
 
         async loadClientRates(clientId) {

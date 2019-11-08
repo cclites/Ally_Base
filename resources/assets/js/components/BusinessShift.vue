@@ -33,7 +33,7 @@
                                     v-model="form.client_id"
                                     @input="changedClient(form.client_id)"
                             >
-                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="client_id" text=""></input-help>
                         </b-form-group>
@@ -45,7 +45,7 @@
                                     v-model="form.caregiver_id"
                                     @input="changedCaregiver(form.caregiver_id)"
                             >
-                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
@@ -595,8 +595,6 @@
                 endTime: '',
                 endDate: '',
                 deleted: false,
-                clients: [],
-                caregivers: [],
                 clientAllyPct: 0.05,
                 paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
                 submitting: false,
@@ -606,19 +604,20 @@
                 loadingQuickbooksConfig: false,
             }
         },
-        mounted() {
+        async mounted() {
             if (this.shift) {
                 this.changedShift(this.shift);
             }
             if (this.isOfficeUserOrAdmin) {
-                this.loadClientCaregiverData();
-                this.fetchServices(); // from ShiftServices mixin
+                await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services']);
             }
             this.loadAllyPctFromClient();
             this.fixDateTimes();
         },
         computed: {
             ...mapGetters({
+                clients: 'filters/clientList',
+                caregivers: 'filters/caregiverList',
                 quickbooksServices: 'quickbooks/services',
                 quickbooksBusiness: 'quickbooks/businessId',
                 quickbooksIsAuthorized: 'quickbooks/isAuthorized',
@@ -995,10 +994,6 @@
                         console.log('Invalid time?');
                     }
                 });
-            },
-            loadClientCaregiverData() {
-                axios.get('/business/clients').then(response => this.clients = response.data);
-                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
             },
             loadCaregiverRates() {
                 if (!this.form.caregiver_id || !this.form.client_id) return;
