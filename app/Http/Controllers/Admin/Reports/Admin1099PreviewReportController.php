@@ -11,6 +11,11 @@ class Admin1099PreviewReportController extends Controller
     public function index(Admin1099PreviewReport $report, Request $request){
 
         if($request->json){
+
+            $request->validate([
+                'year'=> 'required',
+            ]);
+
             $report->applyFilters(
                 $request->year,
                 $request->business_id,
@@ -18,8 +23,7 @@ class Admin1099PreviewReportController extends Controller
                 $request->caregiver_id
             );
 
-            $data = $report->rows();
-            return response()->json([ 'data' => $data]);
+            return response()->json($report->rows());
         }
 
         return view_component(

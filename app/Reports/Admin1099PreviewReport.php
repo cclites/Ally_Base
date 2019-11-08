@@ -8,16 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Admin1099PreviewReport extends BaseReport
 {
     protected $threshold = 600;
-    protected $rows;
+    protected $report;
+    protected $rawQuery;
+    protected $query;
 
     public function __construct()
     {
-        $this->query = Client::with([
-            'shifts',
-            'shifts.payment',
-            'caregivers',
-            'caregivers.addresses',
-        ]);
     }
 
     /**
@@ -25,58 +21,80 @@ class Admin1099PreviewReport extends BaseReport
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
      */
-    public function query()
+    public function query() : self
     {
         return $this->query;
     }
 
+    /**
+     * Build a raw query
+     *
+     * @param string $year
+     * @param int|null $businessId
+     * @param int|null $clientId
+     * @param int|null $caregiverId
+     * @return $this
+     */
     public function applyFilters(string $year, ?int $businessId, ?int $clientId, ?int $caregiverId) : self
     {
+        // Disable full group by mode
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
 
         // IMPORTANT NOTE
         // The 1099 query needs to stay consistent year to year, we need to use the client payment date as the basis for inclusion in the tax year.
 
-        $query = "SELECT c.id as client_id, CONCAT(u1.firstname, ' ', u1.lastname) as client_name, u1.email as client_email, c.client_type, c.default_payment_type, c.ssn as client_ssn, 
-a1.address1 as client_address1, a1.address2 as client_address2, a1.city as client_city, a1.state as client_state, a1.zip as client_zip,
+        $this->query = "SELECT c.id as client_id, u1.firstname as client_fname, u1.lastname as client_lname, u1.email as client_email, 
 b.id as business_id, b.name as business_name,
-u2.id as caregiver_id, CONCAT(u2.firstname, ' ', u2.lastname) as caregiver_name, u2.email as caregiver_email, c2.ssn as caregiver_ssn,
-a2.address1 as caregiver_address1, a2.address2 as caregiver_address2, a2.city as caregiver_city, a2.state as caregiver_state, a2.zip as caregiver_zip,
+u2.id as caregiver_id, u2.firstname as caregiver_fname, u2.lastname as caregiver_lname, 
  sum(h.caregiver_shift) as payment_total
-FROM clients c
+FROM clients c 
 INNER JOIN shifts s ON s.client_id = c.id
 INNER JOIN payments p ON s.payment_id = p.id
-INNER JOIN shift_cost_history h ON h.id = s.id
-INNER JOIN users u1 ON u1.id = s.client_id
-INNER JOIN users u2 ON u2.id = s.caregiver_id
-INNER JOIN caregivers c2 ON c2.id = u2.id
-INNER JOIN businesses b ON c.business_id = b.id
-LEFT JOIN addresses a1 ON a1.id = (SELECT id FROM addresses WHERE user_id = u1.id ORDER BY `type` LIMIT 1)
-LEFT JOIN addresses a2 ON a2.id = (SELECT id FROM addresses WHERE user_id = u2.id ORDER BY `type` LIMIT 1)
-WHERE p.created_at BETWEEN" . $year . "-01-01 00:00:00 AND " . $year . "-12-31 23:59:59 ";
+INNER JOIN shift_cost_history h ON h.id = s.id";
 
-        if($businessId){
-            $query .= "AND c.business_id=" . $businessId . " ";
-        }
+        $this->query .= " INNER JOIN users u1 ON u1.id = s.client_id";
 
         if($clientId){
-            $query .= "AND c.id=" . $clientId . " ";
+            $this->query .= " AND u1.id = $clientId ";
         }
+
+        $this->query .= " INNER JOIN users u2 ON u2.id = s.caregiver_id 
+                    INNER JOIN caregivers c2 ON c2.id = u2.id";
 
         if($caregiverId){
-            $query .= "AND c2.id=" . $caregiverId . " ";
+            $this->query .= " AND c2.id = $caregiverId ";
         }
 
- $query .="GROUP BY s.client_id, s.caregiver_id
+        $this->query .= " INNER JOIN businesses b ON c.business_id = b.id ";
+
+        if($businessId){
+            $this->query .= " AND b.id = $businessId ";
+        }
+
+        $this->query .= " WHERE p.created_at BETWEEN '{$year}-01-01 00:00:00' AND '{$year}-12-31 23:59:59'
+GROUP BY s.client_id, s.caregiver_id
 HAVING payment_total > ?";
 
-        // Get rows
-        $this->rows = \DB::select($query, [$this->threshold]);
+        return $this;
     }
 
-    protected function results()
+    /**
+     * Map the results
+     *
+     * @return iterable
+     */
+    protected function results(): iterable
     {
-        // TODO: Implement results() method.
-        \Log::info($this->rows);
+        return collect(\DB::select($this->query, [$this->threshold]))->map(function($row){
+
+            return[
+                'client_fname' => $row->client_fname,
+                'client_lname' => $row->client_lname,
+                'caregiver_fname' => $row->caregiver_fname,
+                'caregiver_lname' => $row->caregiver_lname,
+                'location' => $row->business_name,
+                'total' => $row->payment_total
+            ];
+        });
     }
 }

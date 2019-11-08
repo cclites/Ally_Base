@@ -31,7 +31,12 @@
         <b-row>
             <b-col lg="12">
 
-                <div class="table-responsive" >
+                <div class="d-flex justify-content-center" v-if="busy">
+                    <div class="my-5">
+                        <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                    </div>
+                </div>
+                <div v-else class="table-responsive" >
                     <b-table
                             class="bad-ssn-report"
                             :items="items"
@@ -84,7 +89,7 @@
                 totalRows: 0,
                 perPage: 50,
                 currentPage: 1,
-                sortBy: 'name',
+                sortBy: 'business',
                 busy: false,
                 emptyText: 'All Client Types',
                 selectSize: 2,

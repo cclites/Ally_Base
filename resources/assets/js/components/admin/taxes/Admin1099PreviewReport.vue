@@ -55,61 +55,121 @@
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>
         </div>
+        <div v-else>
+            <b-row>
+                <b-col>
+                    <b-table
+                            class="payers-summary-table"
+                            :items="items"
+                            :fields="fields"
+                            :sort-by="sortBy"
+                            :empty-text="emptyText"
+                            :busy="busy"
+                            :current-page="currentPage"
+                            :per-page="perPage"
+                    >
+                    </b-table>
+                </b-col>
+            </b-row>
+        </div>
+
+        <b-row v-if="this.items.length > 0">
+            <b-col lg="6" >
+                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            </b-col>
+        </b-row>
+        <b-row v-else>
+            <b-col class="text-center">{{ emptyText }}</b-col>
+        </b-row>
     </b-card>
 </template>
 
 <script>
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+
     export default {
         name: "Admin1099PreviewReport",
+        mixins: [FormatsNumbers],
         props: {},
         data() {
             return {
+                start_date: 2017, //arbitrary start year
+                end_date: moment().year(),
                 form: new Form({
                         business_id: '',
                         client_id: '',
                         caregiver_id: '',
-                        year: '2017',
+                        year: '',
                         json: 1,
                 }),
                 businesses: [],
                 caregivers: [],
                 clients: [],
-                end: moment().year(),
-                busy: false
+                items: [],
+                busy: false,
+                totalRows: 0,
+                perPage: 100,
+                currentPage: 1,
+                sortBy: 'client_lname',
+                sortDesc: false,
+                emptyText: "No records to display",
+                fields: [
+                    {key: 'client_fname', label: 'Client First Name', sortable: true,},
+                    {key: 'client_lname', label: 'Client Last Name', sortable: true,},
+                    {key: 'caregiver_fname', label: 'Caregiver First Name', sortable: true,},
+                    {key: 'caregiver_lname', label: 'Caregiver Last Name', sortable: true,},
+                    {key: 'location', label: 'Location', sortable: true,},
+                    {key: 'total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                ],
             }
         },
         methods: {
             async loadFilters() {
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
-                axios.get('/admin/caregivers').then(response => this.caregivers = response.data);
-                axios.get('/admin/clients').then(response => this.clients = response.data);
             },
 
             generate(){
-
+                this.busy = true;
+                this.form.get('/admin/preview-1099-report')
+                    .then( ({ data }) => {
+                        this.items = data;
+                        this.totalRows = this.items.length;
+                    })
+                    .catch(e => {})
+                    .finally(() => {
+                        this.busy = false;
+                        this.footClone = true;
+                    })
             },
         },
         watch: {
-            'form.businessId'(newVal, oldVal){
+            'form.business_id'(newVal, oldVal){
 
-                /*
-                if(newVal !== oldval){
+                if(newVal !== oldVal){
                     axios.get('/admin/clients?json=1&id=' + this.form.business_id).then(response => this.clients = response.data);
-                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id).then(response => this.clients = response.data);
-                }*/
+                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id).then(response => this.caregivers = response.data);
+                    this.client_id='';
+                    this.caregiver_id='';
+                }
 
             },
 
-            'form.caregiverId'(newVal, oldVal){},
+            'form.caregiver_id'(newVal, oldVal){},
 
-            'form.clientId'(newVal, oldVal){},
+            'form.client_id'(newVal, oldVal){},
         },
         computed: {
             years(){
                 let x = [];
-                var i = this.form.year; while( i <= this.end){
+                let i = this.start_date;
+                while( i <= this.end_date){
                     x.push(i++);
                 };
+
+                this.form.year = this.start_date;
                 return x;
             },
 
