@@ -75,9 +75,6 @@ Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'))
 Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
 Vue.component('number-input', require('./components/NumberInput'));
 
-Vue.component('custom-multi-select', require('./components/dropdowns/CustomMultiSelect'));
-
-
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
 Vue.component('client-invoice-history', require('./components/clients/ClientInvoiceHistory'));
@@ -150,6 +147,7 @@ Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport
 Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
 Vue.component('admin-ten-ninety-nine', require('./components/admin/taxes/Admin1099.vue'));
 Vue.component('admin-registry-emails', require('./components/admin/AdminRegistryEmails.vue'));
+Vue.component('admin-1099-preview', require('./components/admin/taxes/Admin1099PreviewReport'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));

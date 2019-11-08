@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\Reports\Admin1099PreviewReport;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -85,6 +86,11 @@ class Admin1099Controller extends BaseController
         //
     }
 
+    /**
+     * Generates a list of emails for all registries and returns it in a view
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function RegistryEmailList(){
 
         $emails = Business::whereNotNull('contact_email')->pluck('contact_email')->toArray();
@@ -92,4 +98,5 @@ class Admin1099Controller extends BaseController
 
         return view_component('admin-registry-emails', 'Registry Emails', ['emails' => $emailString]);
     }
+
 }

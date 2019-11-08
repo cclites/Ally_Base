@@ -618,7 +618,8 @@ Route::group([
 
     // 1099 related
     Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
-    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list');
+    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list'); //preview-1099-report
+    Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
 
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');

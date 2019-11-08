@@ -61,6 +61,16 @@
                         description: 'Send Clients/Caregivers reminders to update 1099s',
                         url: 'update-1099-reminder'
                     },
+                    {
+                        name: '1099 Preview Report',
+                        description: 'Review 1099s',
+                        url: 'preview-1099-report'
+                    },
+                    {
+                        name: '1099 Creation',
+                        description: 'Artisan command to run that will calculate and populate (append to) a 1099 table',
+                        url: 'generate-1099'
+                    },
 
                 ],
             }
