@@ -197,7 +197,6 @@ export default {
 
         handleChangedBillingType(form, type) {
             if (type === 'services') {
-                console.log('clearing service');
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
