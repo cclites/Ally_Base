@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
+
 /**
  * App\EmergencyContact
  *
@@ -94,5 +96,25 @@ class EmergencyContact extends AuditableModel
                 $item->update(['priority' => $index]);
                 $index = $index + 1;
             });
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'name' => $faker->name,
+            'phone_number' => $faker->simple_phone,
+        ];
     }
 }

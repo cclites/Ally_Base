@@ -2,6 +2,8 @@
 namespace App;
 
 
+use App\Traits\ScrubsForSeeding;
+
 /**
  * App\ScheduleNote
  *
@@ -31,5 +33,24 @@ class ScheduleNote extends AuditableModel
 
     public function schedules() {
         return $this->hasMany(Schedule::class, 'note_id');
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'note' => $faker->sentence,
+        ];
     }
 }

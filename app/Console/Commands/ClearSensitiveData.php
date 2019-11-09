@@ -52,6 +52,7 @@ use App\Traits\Console\HasProgressBars;
 use App\User;
 use Crypt;
 use Illuminate\Console\Command;
+use OwenIt\Auditing\Auditable;
 
 class ClearSensitiveData extends Command
 {
@@ -107,9 +108,12 @@ class ClearSensitiveData extends Command
             exit('This command cannot be run in production.');
         }
 
-        // Instantiate the faker library for dummy data
-        // Do not instantiate this in the constructor since production does not have this library
+        // Instantiate the faker library for dummy data.
+        // Cannot instantiate this in the constructor since
+        // production does not have this library.
         $this->faker = \Faker\Factory::create();
+        $this->faker->addProvider(new \App\Fakers\Ssn($this->faker));
+        $this->faker->addProvider(new \App\Fakers\SimplePhone($this->faker));
 
         if ($this->option('reset-key')) {
             $this->info('Setting a new application key...');
@@ -120,33 +124,38 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
-        $this->cleanPayments();
+        $this->scrubModel(Note::class);
         exit;
 
-        // Always run
+        // Truncate large and otherwise useless tables.
         $this->clearPasswordResets();
         $this->clearAuditLog();
+        $this->clearCommunicationsLog();
+        $this->cleanClientOnboarding();
 
         // Fix encryption
-        $this->clearCommunicationsLog();
         $this->cleanEncryptedClientData();
         $this->cleanEncryptedCaregiverData();
-        $this->cleanCaregiverApplications();
-        $this->cleanClientMedication();
-        $this->clean3rdPartyCredentials();
-        $this->cleanFinancialAccounts();
         $this->cleanEncryptedClaimsData();
+        $this->clean3rdPartyCredentials();
+        $this->scrubModel(CaregiverApplication::class);
+        $this->scrubModel(ClientMedication::class);
+        $this->scrubModel(CreditCard::class);
+        $this->scrubModel(BankAccount::class);
 
         if (! $this->option('fix-only')) {
+            $this->scrubModel(Payment::class);
+
             // Only execute these options if fix-only if OFF
-            $this->cleanCaregiversData();
-            $this->cleanClientsData();
-            $this->cleanUserData();
-            $this->cleanAddresses();
-            $this->cleanPhoneNumbers();
-            $this->cleanEmergencyContacts();
-            $this->cleanClientContacts();
-            $this->cleanNotes();
+            $this->scrubModel(Caregiver::class);
+            $this->scrubModel(Client::class);
+            $this->scrubModel(User::class);
+            $this->scrubModel(Address::class);
+            $this->scrubModel(PhoneNumber::class);
+            $this->scrubModel(EmergencyContact::class);
+            $this->scrubModel(ClientContact::class);
+            $this->scrubModel(Note::class);
+            $this->scrubModel(ScheduleNote::class);
             $this->cleanShifts();
             $this->cleanSmsData();
             $this->cleanClaimData();
@@ -165,14 +174,12 @@ class ClearSensitiveData extends Command
             $this->cleanClientGoals();
             $this->cleanClientMeta();
             $this->cleanClientNarrative();
-            $this->cleanClientOnboarding();
             $this->cleanClientPayers();
             $this->cleanDeposits();
             $this->cleanPayments();
             $this->cleanDocuments();
             $this->cleanGatewayTransaction();
             $this->cleanPayers();
-            $this->cleanPayments();
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -181,6 +188,146 @@ class ClearSensitiveData extends Command
 
         return 0;
     }
+
+    /**
+     * Scrub data from the given class using the
+     * ScrubsForSeeding trait methods.
+     *
+     * @param string $class
+     */
+    public function scrubModel(string $class) : void
+    {
+        $query = call_user_func("{$class}::getScrubQuery");
+        $objectName = str_replace('_', ' ', snake_case(str_plural(class_basename($class))));
+
+        $this->startProgress(
+            "Cleaning $objectName...",
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $data = call_user_func("{$class}::getScrubbedData", $this->faker, $this->fastMode);
+            $query->update($data);
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) use ($class) {
+            \DB::beginTransaction();
+            $collection->each(function ($item) use ($class) {
+                $data = call_user_func("{$class}::getScrubbedData", $this->faker, $this->fastMode);
+
+                foreach ($data as $key => $val) {
+                    // Do not set any values that were previously empty
+                    if (empty($item->getOriginal($key))) {
+                        unset($data[$key]);
+                    }
+                }
+
+                if (count($data)) {
+                    $item->update($data);
+                }
+
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function clearCommunicationsLog()
+    {
+        $this->startProgress('Clearing communications log...',1);
+
+        CommunicationLog::truncate();
+
+        $this->finish();
+    }
+
+    public function clearAuditLog()
+    {
+        $this->startProgress('Clearing audit log...',1);
+
+        Audit::truncate();
+
+        $this->finish();
+    }
+
+    public function clearPasswordResets()
+    {
+        $this->startProgress('Clearing password resets...', 1);
+        \DB::table('password_resets')->truncate();
+        $this->finish();
+    }
+
+    public function cleanClientOnboarding()
+    {
+        $this->startProgress('Clearing client onboarding data...',1);
+
+        // This feature appears to no longer be in use.
+        ClientOnboarding::truncate();
+        OnboardingActivity::truncate();
+
+        $this->finish();
+    }
+
+    public function clean3rdPartyCredentials()
+    {
+        $this->startProgress(
+            'Clearing 3rd party credentials...',
+            Business::count() + 1
+        );
+
+        // TODO: implement fast mode?
+
+        // Clear HHA/Tellus credentials
+        Business::chunk(200, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Business $business) {
+                if (filled($business->hha_password)) {
+                    $business->setHhaPassword('password');
+                }
+
+                if (filled($business->tellus_password)) {
+                    $business->setTellusPassword('password');
+                }
+
+                $business->save();
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        // Clear Quickbooks access tokens
+        QuickbooksConnection::whereRaw(1)->update(['access_token' => null]);
+        $this->advance();
+
+        $this->finish();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function cleanPayers()
     {
@@ -231,13 +378,6 @@ class ClearSensitiveData extends Command
             \DB::commit();
         });
 
-        $this->finish();
-    }
-
-    public function clearPasswordResets()
-    {
-        $this->startProgress('Clearing password resets...', 1);
-        \DB::table('password_resets')->truncate();
         $this->finish();
     }
 
@@ -386,20 +526,6 @@ class ClearSensitiveData extends Command
             });
             \DB::commit();
         });
-
-        $this->finish();
-    }
-
-    public function cleanClientOnboarding()
-    {
-        $this->startProgress(
-            'Cleaning client onboarding data...',
-            ClientOnboarding::count()
-        );
-
-        // This feature is no longer used
-        ClientOnboarding::truncate();
-        OnboardingActivity::truncate();
 
         $this->finish();
     }
@@ -1295,190 +1421,6 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanPhoneNumbers()
-    {
-        $this->startProgress(
-            'Cleaning phone numbers...',
-            PhoneNumber::count()
-        );
-
-        if ($this->fastMode) {
-            PhoneNumber::whereRaw(1)->update([
-                'national_number' => $this->generatePhoneNumber(),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        PhoneNumber::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $item->update(['national_number' => $this->generatePhoneNumber()]);
-
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanAddresses()
-    {
-        $this->startProgress(
-            'Cleaning addresses...',
-            Address::count()
-        );
-
-        if ($this->fastMode) {
-            Address::whereRaw(1)->update([
-                'address1' => $this->faker->streetAddress,
-                'latitude' => $this->faker->latitude,
-                'longitude' => $this->faker->longitude,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        Address::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $item->address1 = $this->faker->streetAddress;
-                $item->latitude = $item->latitude + (float) rand() / (float) getrandmax();
-                $item->longitude = $item->longitude - (float) rand() / (float) getrandmax();
-                $item->save();
-
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function clearCommunicationsLog()
-    {
-        $this->startProgress(
-            'Clearing communications log...',
-            1
-        );
-
-        CommunicationLog::truncate();
-
-        $this->finish();
-    }
-
-    public function clearAuditLog()
-    {
-        $this->startProgress(
-            'Clearing audit log...',
-            1
-        );
-
-        Audit::truncate();
-
-        $this->finish();
-    }
-
-    public function cleanClientMedication()
-    {
-        $this->startProgress(
-            'Cleaning Client medication records...',
-            ClientMedication::count()
-        );
-
-        if ($this->fastMode) {
-            ClientMedication::whereRaw(1)->update([
-                'type' => Crypt::encrypt($this->faker->sentence),
-                'dose' => Crypt::encrypt($this->faker->sentence),
-                'frequency' => Crypt::encrypt($this->faker->randomDigit),
-                'description' => Crypt::encrypt($this->faker->sentence),
-                'side_effects' => Crypt::encrypt($this->faker->sentence),
-                'notes' => Crypt::encrypt($this->faker->sentence),
-                'tracking' => Crypt::encrypt($this->faker->sentence),
-                'route' => Crypt::encrypt($this->faker->sentence),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        ClientMedication::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $item->type = $this->faker->sentence;
-                $item->dose = $this->faker->sentence;
-                $item->frequency = $this->faker->randomDigit;
-                $item->description = $this->faker->sentence;
-                $item->side_effects = $this->faker->sentence;
-                $item->notes = $this->faker->sentence;
-                $item->tracking = $this->faker->sentence;
-                $item->route = $this->faker->word;
-                $item->save();
-
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanUserData()
-    {
-        $this->startProgress(
-            'Cleaning personal user data...',
-            User::count()
-        );
-
-        if ($this->fastMode) {
-            User::where('role_type', '<>', 'admin')->whereRaw(1)->update([
-                'date_of_birth' => $this->faker->date('Y-m-d', '-30 years'),
-                'lastname' => 'User',
-                'username' => \DB::raw("CONCAT('user', id)"),
-                'email' => \DB::raw("CONCAT('user', id, '@test.com')"),
-                'notification_email' => \DB::raw("CONCAT('user', id, '@test.com')"),
-                'notification_phone' => $this->faker->phoneNumber,
-                'remember_token' => null,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        User::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($user) {
-                if ($user->date_of_birth) {
-                    $user->date_of_birth = $this->faker->date('Y-m-d', '-30 years');
-                }
-                if ($user->lastname) {
-                    $user->lastname = $this->faker->lastName;
-                }
-                if (in_array($user->role_type, ['caregiver', 'client'])) {
-                    $user->email = $this->faker->email;
-                }
-                if ($user->notification_email) {
-                    $user->notification_email = $user->email ? $user->email : $this->faker->email;
-                }
-                if ($user->notification_phone) {
-                    $user->notification_phone = $this->faker->phoneNumber;
-                }
-                if ($user->remember_token) {
-                    $user->remember_token = null;
-                }
-                $user->save();
-
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
     public function cleanEncryptedCaregiverData()
     {
         $query = Caregiver::withTrashed()->whereNotNull('ssn');
@@ -1504,156 +1446,6 @@ class ClearSensitiveData extends Command
                     $caregiver->ssn = $this->generateSsn();
                 }
                 $caregiver->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanCaregiversData()
-    {
-        $query = Caregiver::withTrashed();
-
-        $this->startProgress(
-            'Cleaning Caregiver records...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'deactivation_note' => null,
-                'preferences' => null,
-                'w9_name' => $this->faker->name,
-                'w9_business_name' => $this->faker->company,
-                'w9_address' => $this->faker->streetAddress,
-                'w9_employer_id_number' => $this->faker->randomNumber(9),
-                'medicaid_id' => $this->faker->randomNumber(9),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (Caregiver $caregiver) {
-                if ($caregiver->getOriginal('deactivation_note')) {
-                    $caregiver->deactivation_note = $this->faker->sentence;
-                }
-                if ($caregiver->getOriginal('preferences')) {
-                    $caregiver->preferences = $this->faker->sentence;
-                }
-                if ($caregiver->getOriginal('w9_name')) {
-                    $caregiver->w9_name = $this->faker->name;
-                }
-                if ($caregiver->getOriginal('w9_business_name')) {
-                    $caregiver->w9_business_name = $this->faker->company;
-                }
-                if ($caregiver->getOriginal('w9_address')) {
-                    $caregiver->w9_address = $this->faker->streetAddress;
-                }
-                if ($caregiver->getOriginal('w9_employer_id_number')) {
-                    $caregiver->w9_employer_id_number = $this->faker->randomNumber(9);
-                }
-                if ($caregiver->getOriginal('medicaid_id')) {
-                    $caregiver->medicaid_id = $this->faker->randomNumber(9);
-                }
-                $caregiver->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClientsData()
-    {
-        $query = Client::withTrashed();
-
-        $this->startProgress(
-            'Cleaning Client records...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'import_identifier' => $this->faker->name,
-                'ltci_name' => $this->faker->name,
-                'ltci_address' => $this->faker->streetAddress,
-                'ltci_policy' => $this->faker->randomNumber(9),
-                'ltci_claim' => $this->faker->randomNumber(9),
-                'medicaid_id' => $this->faker->randomNumber(9),
-                'hospital_number' => $this->generatePhoneNumber(),
-                'ltci_phone' => $this->generatePhoneNumber(),
-                'ltci_fax' => $this->generatePhoneNumber(),
-                'travel_directions' => $this->faker->sentence,
-                'disaster_planning' => $this->faker->sentence,
-                'discharge_reason' => $this->faker->sentence,
-                'discharge_disposition' => $this->faker->sentence,
-                'discharge_internal_notes' => $this->faker->sentence,
-                'discharge_condition' => $this->faker->randomElement(['Good', 'Poor', 'Same']),
-                'discharge_goals_eval' => $this->faker->randomElement(['Good', 'Poor', 'Same']),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (Client $client) {
-                if (filled($client->getOriginal('import_identifier'))) {
-                    $client->import_identifier = $this->faker->name;
-                }
-                if (filled($client->getOriginal('ltci_name'))) {
-                    $client->ltci_name = $this->faker->name;
-                }
-                if (filled($client->getOriginal('ltci_address'))) {
-                    $client->ltci_address = $this->faker->streetAddress;
-                }
-                if (filled($client->getOriginal('ltci_policy'))) {
-                    $client->ltci_policy = $this->faker->randomNumber(9);
-                }
-                if (filled($client->getOriginal('ltci_claim'))) {
-                    $client->ltci_claim = $this->faker->randomNumber(9);
-                }
-                if (filled($client->getOriginal('medicaid_id'))) {
-                    $client->medicaid_id = $this->faker->randomNumber(9);
-                }
-                if (filled($client->getOriginal('hospital_number'))) {
-                    $client->hospital_number = $this->generatePhoneNumber();
-                }
-                if (filled($client->getOriginal('ltci_phone'))) {
-                    $client->ltci_phone = $this->generatePhoneNumber();
-                }
-                if (filled($client->getOriginal('ltci_fax'))) {
-                    $client->ltci_fax = $this->generatePhoneNumber();
-                }
-                if (filled($client->getOriginal('travel_directions'))) {
-                    $client->travel_directions = $this->faker->sentence;
-                }
-                if (filled($client->getOriginal('disaster_planning'))) {
-                    $client->disaster_planning = $this->faker->sentence;
-                }
-                if (filled($client->getOriginal('discharge_reason'))) {
-                    $client->discharge_reason = $this->faker->sentence;
-                }
-                if (filled($client->getOriginal('discharge_disposition'))) {
-                    $client->discharge_disposition = $this->faker->sentence;
-                }
-                if (filled($client->getOriginal('discharge_internal_notes'))) {
-                    $client->discharge_internal_notes = $this->faker->sentence;
-                }
-                if (filled($client->getOriginal('discharge_condition'))) {
-                    $client->discharge_condition = $this->faker->randomElement(['Good', 'Poor', 'Same']);
-                }
-                if (filled($client->getOriginal('discharge_goals_eval'))) {
-                    $client->discharge_goals_eval = $this->faker->randomElement(['Good', 'Poor', 'Same']);
-                }
-                $client->save();
                 $this->advance();
             });
             \DB::commit();
@@ -1695,274 +1487,6 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanCaregiverApplications()
-    {
-        $this->startProgress(
-            'Cleaning Caregiver applications...',
-            CaregiverApplication::count()
-        );
-
-        if ($this->fastMode) {
-            CaregiverApplication::whereRaw(1)->update([
-                'date_of_birth' => $this->faker->date('Y-m-d', '-30 years'),
-                'last_name' => 'User',
-                'email' => \DB::raw("CONCAT('user', id, '@test.com')"),
-                'ssn' => Crypt::encrypt($this->generateSsn()),
-                'address' => $this->faker->streetAddress,
-                'cell_phone' => $this->generatePhoneNumber(),
-                'home_phone' => $this->generatePhoneNumber(),
-                'emergency_contact_name' => $this->faker->name,
-                'emergency_contact_phone' => $this->generatePhoneNumber(),
-                'driving_violations_desc' => $this->faker->sentence,
-                'criminal_history_desc' => $this->faker->sentence,
-                'injury_status_desc' => $this->faker->sentence,
-                'employer_1_name' => $this->faker->company,
-                'employer_1_phone' => $this->generatePhoneNumber(),
-                'employer_1_supervisor_name' => $this->faker->firstName,
-                'employer_2_name' => $this->faker->company,
-                'employer_2_phone' => $this->generatePhoneNumber(),
-                'employer_2_supervisor_name' => $this->faker->firstName,
-                'employer_3_name' => $this->faker->company,
-                'employer_3_phone' => $this->generatePhoneNumber(),
-                'employer_3_supervisor_name' => $this->faker->firstName,
-                'reference_1_name' => $this->faker->name,
-                'reference_1_phone' => $this->generatePhoneNumber(),
-                'reference_2_name' => $this->faker->name,
-                'reference_2_phone' => $this->generatePhoneNumber(),
-                'reference_3_name' => $this->faker->name,
-                'reference_3_phone' => $this->generatePhoneNumber(),
-            ]);
-            $this->finish();
-            return;
-        }
-
-        CaregiverApplication::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (CaregiverApplication $application) {
-                if ($application->date_of_birth) {
-                    $application->date_of_birth = $this->faker->date('Y-m-d', '-30 years');
-                }
-                if ($application->last_name) {
-                    $application->last_name = $this->faker->lastName;
-                }
-                $application->email = $this->faker->email;
-                if ($application->getOriginal('ssn')) {
-                    $application->ssn = $this->generateSsn();
-                }
-                if ($application->address) {
-                    $application->address = $this->faker->streetAddress;
-                }
-                if ($application->cell_phone) {
-                    $application->cell_phone = $this->generatePhoneNumber();
-                }
-                if ($application->home_phone) {
-                    $application->home_phone = $this->generatePhoneNumber();
-                }
-                if ($application->emergency_contact_name) {
-                    $application->emergency_contact_name = $this->faker->name;
-                }
-                if ($application->emergency_contact_phone) {
-                    $application->emergency_contact_phone = $this->generatePhoneNumber();
-                }
-                if ($application->driving_violations_desc) {
-                    $application->driving_violations_desc = $this->faker->sentence;
-                }
-                if ($application->criminal_history_desc) {
-                    $application->criminal_history_desc = $this->faker->sentence;
-                }
-                if ($application->injury_status_desc) {
-                    $application->injury_status_desc = $this->faker->sentence;
-                }
-                if ($application->employer_1_name) {
-                    $application->employer_1_name = $this->faker->company;
-                }
-                if ($application->employer_1_phone) {
-                    $application->employer_1_phone = $this->generatePhoneNumber();
-                }
-                if ($application->employer_1_supervisor_name) {
-                    $application->employer_1_supervisor_name = $this->faker->firstName;
-                }
-                if ($application->employer_1_reason_for_leaving) {
-                    $application->employer_1_reason_for_leaving = $this->faker->sentence;
-                }
-                if ($application->employer_2_name) {
-                    $application->employer_2_name = $this->faker->company;
-                }
-                if ($application->employer_2_phone) {
-                    $application->employer_2_phone = $this->generatePhoneNumber();
-                }
-                if ($application->employer_2_supervisor_name) {
-                    $application->employer_2_supervisor_name = $this->faker->firstName;
-                }
-                if ($application->employer_2_reason_for_leaving) {
-                    $application->employer_2_reason_for_leaving = $this->faker->sentence;
-                }
-                if ($application->employer_3_name) {
-                    $application->employer_3_name = $this->faker->company;
-                }
-                if ($application->employer_3_phone) {
-                    $application->employer_3_phone = $this->generatePhoneNumber();
-                }
-                if ($application->employer_3_supervisor_name) {
-                    $application->employer_3_supervisor_name = $this->faker->firstName;
-                }
-                if ($application->employer_3_reason_for_leaving) {
-                    $application->employer_3_reason_for_leaving = $this->faker->sentence;
-                }
-                if ($application->reference_1_name) {
-                    $application->reference_1_name = $this->faker->name;
-                }
-                if ($application->reference_1_phone) {
-                    $application->reference_1_phone = $this->generatePhoneNumber();
-                }
-                if ($application->reference_2_name) {
-                    $application->reference_2_name = $this->faker->name;
-                }
-                if ($application->reference_2_phone) {
-                    $application->reference_2_phone = $this->generatePhoneNumber();
-                }
-                if ($application->reference_3_name) {
-                    $application->reference_3_name = $this->faker->name;
-                }
-                if ($application->reference_3_phone) {
-                    $application->reference_3_phone = $this->generatePhoneNumber();
-                }
-                $application->save();
-
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClientContacts()
-    {
-        $this->startProgress(
-            'Cleaning Client Contact records...',
-            ClientContact::count()
-        );
-
-        if ($this->fastMode) {
-            ClientContact::whereRaw(1)->update([
-                'name' => $this->faker->name,
-                'phone1' => $this->generatePhoneNumber(),
-                'phone2' => $this->generatePhoneNumber(),
-                'work_phone' => $this->generatePhoneNumber(),
-                'fax_number' => $this->generatePhoneNumber(),
-                'email' => $this->faker->email,
-                'address' => $this->faker->streetAddress,
-                'relationship_custom' => $this->faker->randomElement(['Son', 'Wife', 'Husband', 'Daughter', 'Sister', 'Brother']),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        ClientContact::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (ClientContact $contact) {
-                $contact->update([
-                    'name' => $this->faker->name,
-                    'phone1' => $this->generatePhoneNumber(),
-                    'phone2' => $this->generatePhoneNumber(),
-                    'work_phone' => $this->generatePhoneNumber(),
-                    'fax_number' => $this->generatePhoneNumber(),
-                    'email' => $this->faker->email,
-                    'address' => $this->faker->streetAddress,
-                    'relationship_custom' => $this->faker->randomElement(['Son', 'Wife', 'Husband', 'Daughter', 'Sister', 'Brother']),
-                ]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanEmergencyContacts()
-    {
-        $this->startProgress(
-            'Cleaning Emergency Contact records...',
-            EmergencyContact::count()
-        );
-
-        if ($this->fastMode) {
-            EmergencyContact::whereRaw(1)->update([
-                'name' => $this->faker->name,
-                'phone_number' => $this->generatePhoneNumber()
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        EmergencyContact::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (EmergencyContact $contact) {
-                $contact->update(['name' => $this->faker->name, 'phone_number' => $this->generatePhoneNumber()]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanFinancialAccounts() : void
-    {
-        $this->startProgress(
-            'Cleaning financial account data...',
-            CreditCard::count() + BankAccount::count()
-        );
-
-        if ($this->fastMode) {
-            CreditCard::whereRaw(1)->update([
-                'name_on_card' => $this->faker->name,
-                'number' => Crypt::encrypt($this->faker->creditCardNumber),
-                'nickname' => $this->faker->word,
-            ]);
-
-            BankAccount::whereRaw(1)->update([
-                'name_on_account' => $this->faker->name,
-                'routing_number' => Crypt::encrypt('091000019'),
-                'account_number' => Crypt::encrypt($this->faker->bankAccountNumber),
-                'nickname' => $this->faker->word,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        CreditCard::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (CreditCard $card) {
-                $card->name_on_card = $this->faker->name;
-                $card->number = $this->faker->creditCardNumber;
-                $card->nickname = $this->faker->word;
-                $card->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        BankAccount::chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (BankAccount $account) {
-                $account->name_on_account = $this->faker->name;
-                $account->routing_number = '091000019';
-                $account->account_number = $this->faker->bankAccountNumber;
-                $account->nickname = $this->faker->word;
-                $account->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
     public function cleanSmsData()
     {
         $this->startProgress(
@@ -1991,49 +1515,6 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanNotes()
-    {
-        $this->startProgress(
-            'Cleaning Notes...',
-            Note::count() + ScheduleNote::count()
-        );
-
-        if ($this->fastMode) {
-            Note::whereRaw(1)->update([
-                'body' => $this->faker->sentence,
-                'title' => $this->faker->sentence,
-                'tags' => $this->faker->word,
-            ]);
-            ScheduleNote::whereRaw(1)->update(['note' => $this->faker->sentence]);
-
-            $this->finish();
-            return;
-        }
-
-        Note::chunk(500, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (Note $note) {
-                $note->update([
-                    'body' => $this->faker->sentence,
-                    'title' => $this->faker->sentence,
-                    'tags' => $this->faker->word,
-                ]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-        ScheduleNote::chunk(500, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (ScheduleNote $note) {
-                $note->update(['note' => $this->faker->sentence]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
     public function cleanShifts()
     {
         $this->startProgress(
@@ -2051,40 +1532,6 @@ class ClearSensitiveData extends Command
         $this->advance();
 
         // TODO: implement slow mode?
-
-        $this->finish();
-    }
-
-    public function clean3rdPartyCredentials()
-    {
-        $this->startProgress(
-            'Clearing 3rd party credentials...',
-            Business::count() + 1
-        );
-
-        // TODO: implement fast mode?
-
-        // Clear HHA/Tellus credentials
-        Business::chunk(200, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (Business $business) {
-                if (filled($business->hha_password)) {
-                    $business->setHhaPassword('password');
-                }
-
-                if (filled($business->tellus_password)) {
-                    $business->setTellusPassword('password');
-                }
-
-                $business->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        // Clear Quickbooks access tokens
-        QuickbooksConnection::whereRaw(1)->update(['access_token' => null]);
-        $this->advance();
 
         $this->finish();
     }

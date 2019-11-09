@@ -13,6 +13,7 @@ use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
 use App\SmsThread;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
@@ -101,6 +102,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     use \OwenIt\Auditing\Auditable;
     use HasAddressesAndNumbers;
     use HasMetaData;
+    use ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
 
     /**
      * The attributes that are mass assignable.
@@ -611,5 +613,41 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function getTimezone(): string
     {
         return $this->role->getTimezone();
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery() : Builder
+    {
+        return static::parentGetScrubQuery()
+            ->where('role_type', '<>', 'admin');
+    }
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        $email = $faker->email;
+        return [
+            'date_of_birth' => $faker->date('Y-m-d', '-30 years'),
+            'lastname' => 'User',
+            'username' => $fast ? \DB::raw("CONCAT('user', id)") : $email,
+            'email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $email,
+            'notification_email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $email,
+            'notification_phone' => $faker->simple_phone,
+            'remember_token' => null,
+        ];
     }
 }

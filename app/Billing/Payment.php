@@ -6,12 +6,13 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Business;
 use App\Businesses\Timezone;
-use App\Caregiver;
 use App\Client;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\PaymentFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
+use App\Traits\ScrubsForSeeding;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -62,6 +63,7 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
+    use ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
 
     protected $table = 'payments';
     protected $guarded = ['id'];
@@ -214,4 +216,31 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         event(new PaymentFailed($this));
     }
 
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker) : array
+    {
+        return [
+            'notes' => $faker->sentence,
+        ];
+    }
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery() : Builder
+    {
+        return static::parentGetScrubQuery()->whereNotNull('notes');
+    }
 }

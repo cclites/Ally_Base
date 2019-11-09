@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
 use Illuminate\Support\Facades\Crypt;
 use App\Client;
 
@@ -28,6 +29,8 @@ use App\Client;
  */
 class ClientMedication extends BaseModel
 {
+    use ScrubsForSeeding;
+
     protected $guarded = ['id'];
 
     public function setTypeAttribute($value)
@@ -124,4 +127,30 @@ class ClientMedication extends BaseModel
     {
         return $this->belongsTo(Client::class); 
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'type' => $faker->sentence,
+            'dose' => $faker->sentence,
+            'frequency' => $faker->randomDigit,
+            'description' => $faker->sentence,
+            'side_effects' => $faker->sentence,
+            'notes' => $faker->sentence,
+            'tracking' => $faker->sentence,
+            'route' => $faker->word,
+        ];
+    }
+
 }

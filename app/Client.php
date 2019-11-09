@@ -25,6 +25,7 @@ use App\Traits\HasDefaultRates;
 use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
 use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
@@ -247,6 +248,7 @@ class Client extends AuditableModel implements
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
     use CanHaveEmptyEmail, CanHaveEmptyUsername;
+    use ScrubsForSeeding;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -1000,5 +1002,38 @@ class Client extends AuditableModel implements
                  })
                 ->get();
         return $audits;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'import_identifier' => $faker->name,
+            'ltci_name' => $faker->name,
+            'ltci_address' => $faker->streetAddress,
+            'ltci_policy' => $faker->randomNumber(9),
+            'ltci_claim' => $faker->randomNumber(9),
+            'medicaid_id' => $faker->randomNumber(9),
+            'hospital_number' => $faker->simple_phone,
+            'ltci_phone' => $faker->simple_phone,
+            'ltci_fax' => $faker->simple_phone,
+            'travel_directions' => $faker->sentence,
+            'disaster_planning' => $faker->sentence,
+            'discharge_reason' => $faker->sentence,
+            'discharge_disposition' => $faker->sentence,
+            'discharge_internal_notes' => $faker->sentence,
+            'discharge_condition' => $faker->randomElement(['Good', 'Poor', 'Same']),
+            'discharge_goals_eval' => $faker->randomElement(['Good', 'Poor', 'Same']),
+        ];
     }
 }

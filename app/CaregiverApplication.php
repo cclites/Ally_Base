@@ -6,6 +6,7 @@ use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 use App\Traits\HasSSNAttribute;
 use App\Signature;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 
 /**
@@ -203,6 +204,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
 {
     use BelongsToOneChain;
     use HasSSNAttribute;
+    use ScrubsForSeeding;
 
     protected $guarded = ['id'];
 
@@ -301,5 +303,49 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
     public function signature()
     {
         return $this->morphOne(Signature::class, 'signable');
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'date_of_birth' => $faker->date('Y-m-d', '-30 years'),
+            'last_name' => 'User',
+            'email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $faker->email,
+            'ssn' => $faker->ssn,
+            'address' => $faker->streetAddress,
+            'cell_phone' => $faker->simple_phone,
+            'home_phone' => $faker->simple_phone,
+            'emergency_contact_name' => $faker->name,
+            'emergency_contact_phone' => $faker->simple_phone,
+            'driving_violations_desc' => $faker->sentence,
+            'criminal_history_desc' => $faker->sentence,
+            'injury_status_desc' => $faker->sentence,
+            'employer_1_name' => $faker->company,
+            'employer_1_phone' => $faker->simple_phone,
+            'employer_1_supervisor_name' => $faker->firstName,
+            'employer_2_name' => $faker->company,
+            'employer_2_phone' => $faker->simple_phone,
+            'employer_2_supervisor_name' => $faker->firstName,
+            'employer_3_name' => $faker->company,
+            'employer_3_phone' => $faker->simple_phone,
+            'employer_3_supervisor_name' => $faker->firstName,
+            'reference_1_name' => $faker->name,
+            'reference_1_phone' => $faker->simple_phone,
+            'reference_2_name' => $faker->name,
+            'reference_2_phone' => $faker->simple_phone,
+            'reference_3_name' => $faker->name,
+            'reference_3_phone' => $faker->simple_phone,
+        ];
     }
 }

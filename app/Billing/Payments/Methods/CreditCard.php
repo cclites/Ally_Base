@@ -8,6 +8,7 @@ use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\Payments\PaymentMethodType;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
+use App\Traits\ScrubsForSeeding;
 use App\User;
 use Carbon\Carbon;
 use Crypt;
@@ -38,6 +39,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;
+    use ScrubsForSeeding;
 
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
@@ -246,5 +248,25 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     public function getDisplayValue(): string
     {
         return strtoupper($this->type) .  ' *' . $this->last_four;
+    }
+    
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'name_on_card' => $faker->name,
+            'number' => $faker->creditCardNumber,
+            'nickname' => $faker->word,
+        ];
     }
 }
