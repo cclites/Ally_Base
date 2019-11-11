@@ -22,6 +22,14 @@ class AddIndexesToSignaturesTable extends Migration
             $table->index('effective_start');
             $table->index('effective_end');
         });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->index('active');
+        });
+
+        Schema::table('clients', function (Blueprint $table) {
+            $table->index('client_type');
+        });
     }
 
     /**
@@ -38,6 +46,12 @@ class AddIndexesToSignaturesTable extends Migration
         Schema::table('client_payers', function (Blueprint $table) {
             $table->dropIndex(['effective_start']);
             $table->dropIndex(['effective_end']);
+        });
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['active']);
+        });
+        Schema::table('clients', function (Blueprint $table) {
+            $table->dropIndex(['client_type']);
         });
     }
 }
