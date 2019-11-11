@@ -726,7 +726,9 @@ Route::group([
     Route::get('/control-file', 'Admin\ControlFileController@index')->name('control-file');
 });
 
+
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
+Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');
 
 Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function () {

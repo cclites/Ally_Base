@@ -382,6 +382,14 @@
                         Send Training Email
                     </b-button>
 
+                    <b-button variant="secondary"
+                              type="button"
+                              :href="'/impersonate/' + client.id"
+                              v-if="isAdmin"
+                    >
+                        Impersonate
+                    </b-button>
+
 <!--                    <b-button v-if="client.onboarding_step < 6" @click="startOnboarding()" variant="info">-->
 <!--                        Start Client Onboarding-->
 <!--                    </b-button>-->

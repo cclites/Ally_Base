@@ -10,7 +10,17 @@ class ImpersonateController extends Controller
 {
     public function impersonate(User $user)
     {
-        $user->impersonate();
+        if(auth()->user()->role_type === 'office_user'){
+            \Session::put('impersonate', $user->id);
+            $session_key = \Auth::getName();
+
+            if ($session_key) {
+                \Session::put($session_key, $user->id);
+            }
+        }else{
+            $user->impersonate();
+        }
+
         return redirect('/');
     }
 

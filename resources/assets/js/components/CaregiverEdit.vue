@@ -234,6 +234,14 @@
                         <i class="fa fa-spinner fa-spin" v-if="sendingTrainingEmail"></i>
                         Send Training Email
                     </b-button>
+
+                    <b-button variant="secondary"
+                              type="button"
+                              :href="'/impersonate/' + caregiver.id"
+                              v-if="isAdmin"
+                    >
+                        Impersonate
+                    </b-button>
                 </b-col>
             </b-row>
             <b-row class="mt-4">
