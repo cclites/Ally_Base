@@ -76,21 +76,42 @@ export default {
             await this.$store.dispatch('filters/fetchResources', 'services');
         },
 
-        async loadClientRates(clientId) {
-            if (clientId) {
-                const response = await axios.get(`/business/clients/${clientId}/rates`);
-                this.clientRates = response.data;
-                this.fetchAllRates();
+        async loadClientPayersAndRatesData(clientId, resetPayers = false) {
+            if (! clientId) {
+                return;
             }
+
+            await axios.get(`/business/clients/${clientId}/payers-and-rates`)
+                .then( ({ data }) => {
+                    this.clientRates = data.rates;
+                    this.clientPayers = data.payers;
+
+                    this.paymentType = data.payment_type;
+                    this.clientAllyPct = data.percentage_fee;
+
+                    this.fetchAllRates();
+                    if (resetPayers) {
+                        this.resetServicePayers();
+                    }
+                })
+                .catch(() => {});
         },
 
-        async loadClientPayers(clientId, resetPayers = false) {
-            if (clientId) {
-                const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
-                this.clientPayers = response.data;
-                if (resetPayers) this.resetServicePayers();
-            }
-        },
+        // async loadClientRates(clientId) {
+        //     if (clientId) {
+        //         const response = await axios.get(`/business/clients/${clientId}/rates`);
+        //         this.clientRates = response.data;
+        //         this.fetchAllRates();
+        //     }
+        // },
+        //
+        // async loadClientPayers(clientId, resetPayers = false) {
+        //     if (clientId) {
+        //         const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
+        //         this.clientPayers = response.data;
+        //         if (resetPayers) this.resetServicePayers();
+        //     }
+        // },
 
         initServicesFromObject(objectThatContainsServices)
         {

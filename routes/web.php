@@ -271,6 +271,7 @@ Route::group([
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
     Route::get('clients/{client}/payers', 'Business\ClientPayerController@index')->name('clients.payers.index');
     Route::get('clients/{client}/payers/unique', 'Business\ClientPayerController@uniquePayers')->name('clients.payers.unique');
+    Route::get('clients/{client}/payers-and-rates', 'Business\ShiftController@clientRateData')->name('clients.payers.unique');
     Route::patch('clients/{client}/payers', 'Business\ClientPayerController@update')->name('clients.payers.update');
     Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
     Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');

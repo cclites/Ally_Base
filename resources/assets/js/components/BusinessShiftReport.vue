@@ -584,7 +584,6 @@
                         shift.checked_out_time = shift.checked_out_time ? moment.utc(shift.checked_out_time).local().format('L LT') : '(Still clocked in)';
                         component.selectedItem = shift;
                         component.detailsModal = true;
-                        console.log(component.selectedItem);
                     })
                     .catch(function(error) {
                         alert('Error loading shift details');

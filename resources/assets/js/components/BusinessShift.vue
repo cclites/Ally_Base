@@ -721,9 +721,10 @@
                 if (clientId) {
                     this.loading = true;
                     try {
+                        await this.loadClientPayersAndRatesData(clientId);
                         this.loadAllyPctFromClient(clientId);
-                        await this.loadClientRates(clientId);
-                        await this.loadClientPayers(clientId);
+                        // await this.loadClientRates(clientId);
+                        // await this.loadClientPayers(clientId);
                     }
                     catch (e) {}
                     this.loading = false
@@ -1028,10 +1029,10 @@
                 }
 
                 if (!this.form.client_id) return;
-                axios.get(`/business/clients/${this.form.client_id}/payment_type`).then(response => {
-                    this.clientAllyPct = response.data.percentage_fee;
-                    this.paymentType = response.data.payment_type;
-                });
+                // axios.get(`/business/clients/${this.form.client_id}/payment_type`).then(response => {
+                //     this.clientAllyPct = response.data.percentage_fee;
+                //     this.paymentType = response.data.payment_type;
+                // });
             },
             changedDailyRates() {
                 if (this.form.caregiver_id) {

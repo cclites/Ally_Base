@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientAuthorization;
+use App\Billing\ClientPayer;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
+use App\Client;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\ConfirmationResponse;
@@ -80,7 +82,18 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['service', 'services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'clientSignature', 'caregiverSignature', 'statusHistory', 'goals', 'questions', 'address']);
+        $shift->load([
+            'service', 'services', 'activities', 'issues', 'schedule',
+            'client' => function ($q) { $q->select('id'); },
+            'client.user' => function ($q) {
+                $q->select('id', 'firstname', 'lastname');
+            },
+            'client.goals', 'caregiver',
+            'caregiver.user' => function ($q) {
+                $q->select('id', 'firstname', 'lastname');
+            },
+            'clientSignature', 'caregiverSignature', 'statusHistory', 'goals', 'questions', 'address'
+        ]);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
@@ -379,5 +392,34 @@ class ShiftController extends BaseController
         }
 
         return new ErrorResponse(500, 'The shift could not be clocked out.');
+    }
+
+    /**
+     * Fetch the client payers and rates data required
+     * by the ShiftServices mixin.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function clientRateData(Client $client)
+    {
+        // unique payers
+        $uniquePayers = ClientPayer::where('client_id', $client->id)
+            ->with('payer')
+            ->groupBy('payer_id')
+            ->select('payer_id')->get()
+            ->map(function(ClientPayer $clientPayer) use ($client) {
+                 return [
+                     'id' => $clientPayer->payer_id,
+                     'name' => $clientPayer->payer_id === 0 ? $client->name : $clientPayer->payer->name,
+                 ];
+            });
+
+        return response()->json([
+            'payers' => $uniquePayers,
+            'rates' => $client->rates()->ordered()->get(),
+            'payment_type' => $client->getPaymentType(),
+            'percentage_fee' => $client->getAllyPercentage(),
+        ]);
     }
 }
