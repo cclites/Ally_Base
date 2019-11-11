@@ -237,7 +237,7 @@
 
                     <b-button variant="secondary"
                               type="button"
-                              :href="'/impersonate/' + caregiver.id"
+                              :href="'/business/impersonate/' + caregiver.id"
                               v-if="isAdmin"
                     >
                         Impersonate

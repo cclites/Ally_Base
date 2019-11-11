@@ -384,7 +384,7 @@
 
                     <b-button variant="secondary"
                               type="button"
-                              :href="'/impersonate/' + client.id"
+                              :href="'/business/impersonate/' + client.id"
                               v-if="isAdmin"
                     >
                         Impersonate
