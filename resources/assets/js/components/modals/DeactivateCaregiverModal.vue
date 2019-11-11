@@ -10,6 +10,13 @@
                     </div>
                     <div v-else class="text-info">They have no future scheduled shifts.</div>
 
+                    <div v-if="caregiver.open_invoices > 0">This caregiver has <span class="text-danger">{{ this.caregiver.open_invoices }}</span>
+                      open invoices.
+                    </div>
+                    <div v-else class="text-success">
+                        They have no open invoices.
+                    </div>
+
                     <b-form-group slabel-for="inactive_at" class="mt-4">
                         <date-picker
                             v-model="inactive_at"
@@ -90,6 +97,11 @@
             },
 
             archiveCaregiver () {
+
+                if (! confirm('This will prevent any charges or deposits from being completed. Please be sure to check that there are no outstanding invoices or payments.')) {
+                    return;
+                }
+
                 let form = new Form ();
                 let url = `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}&deactivation_reason_id=${this.deactivation_reason_id}&note=${this.deactivation_note}`;
                 form.submit ('delete', url);

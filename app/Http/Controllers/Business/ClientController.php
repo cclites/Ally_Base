@@ -219,6 +219,8 @@ class ClientController extends BaseController
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
+        $client->open_invoices = $client->hasOpenInvoices();
+
         // append payment metrics and future schedule count
         if (! empty($client->default_payment_id)) {
             $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
@@ -236,6 +238,7 @@ class ClientController extends BaseController
         $auths = (new ClientAuthController())->listByClient($client->id);
 
         $invoiceQuery = new ClientInvoiceQuery();
+
         $invoices = $invoiceQuery->forClient($client->id, false)
             ->get()
             ->map(function (ClientInvoice $item) {

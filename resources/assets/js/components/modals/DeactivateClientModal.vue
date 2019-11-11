@@ -15,6 +15,17 @@
                     </div>
                 </b-col>
             </b-row>
+
+            <b-row>
+                <b-col class="text-center">
+                    <div v-if="client.open_invoices > 0">This client has <span class="text-danger">{{ this.client.open_invoices }}</span>
+                        open invoices.
+                    </div>
+                    <div v-else class="text-success">
+                        They have no open invoices.
+                    </div>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="6">
                     <b-form-group label-for="inactive_at" class="mt-4">
@@ -144,6 +155,9 @@
 
             archiveClient () {
 
+                if ( ! confirm('This will prevent any charges or deposits from being completed. Please be sure to check that there are no outstanding invoices or payments.')) {
+                    return;
+                }
                 let url = `/business/clients/${this.client.id}/deactivate`;
                 this.form.submit ('post', url);
             },

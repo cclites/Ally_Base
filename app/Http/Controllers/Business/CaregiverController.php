@@ -176,6 +176,7 @@ class CaregiverController extends BaseController
         $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->setup_url = $caregiver->setup_url;
+        $caregiver->open_invoices = $caregiver->hasOpenInvoices();
 
         $notifications = $caregiver->user->getAvailableNotifications()->map(function ($cls) {
             return [
