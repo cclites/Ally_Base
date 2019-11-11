@@ -173,7 +173,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
+                                            <b-form-select v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -253,7 +253,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
+                                            <b-form-select v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -581,7 +581,6 @@
                     return {};
                 }
             },
-            'activities': Array,
             'admin': Number,
             'is_modal': 0,
             'payment_type': {},
@@ -609,13 +608,14 @@
                 this.changedShift(this.shift);
             }
             if (this.isOfficeUserOrAdmin) {
-                await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services']);
+                await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services', 'activities']);
             }
             this.loadAllyPctFromClient();
             this.fixDateTimes();
         },
         computed: {
             ...mapGetters({
+                activityList: 'filters/activityList',
                 clients: 'filters/clientList',
                 caregivers: 'filters/caregiverList',
                 quickbooksServices: 'quickbooks/services',
@@ -624,6 +624,14 @@
                 quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
             }),
 
+            activities() {
+                console.log('filtering activities');
+                if (! this.client || ! this.business.id) {
+                    return this.activityList.filter(x => x.business_id == null);
+                }
+                console.log('filtering based on business ', this.business.id);
+                return this.activityList.filter(x => x.business_id == null || x.business_id == this.business.id);
+            },
             selectedClient() {
                 return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
             },

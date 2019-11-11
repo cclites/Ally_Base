@@ -12,6 +12,7 @@ const state = {
     // business resources
     clients: [],
     caregivers: [],
+    activities: [],
 };
 
 // getters
@@ -60,6 +61,16 @@ const getters = {
     },
     isServicesLoaded(state) {
         return state.loaded.includes('services');
+    },
+
+    activityList(state) {
+        return state.activities;
+    },
+    isActivitiesLoading(state) {
+        return state.loading.includes('activities');
+    },
+    isActivitiesLoaded(state) {
+        return state.loaded.includes('activities');
     },
 
     isOrWasLoaded(state, resource) {

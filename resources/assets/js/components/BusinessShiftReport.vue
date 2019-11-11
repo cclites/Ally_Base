@@ -303,7 +303,7 @@
             this.$store.commit('filters/setBusiness', this.filters.business_id);
             this.loadFiltersFromStorage();
             this.setInitialFields();
-            await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services']);
+            await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services', 'activities']);
             if (this.autoload) {
                 this.loadData();
             }

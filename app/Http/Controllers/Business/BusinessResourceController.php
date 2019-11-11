@@ -127,4 +127,25 @@ class BusinessResourceController extends BaseController
             })
             ->values();
     }
+
+    /**
+     * Return a list of activities.
+     *
+     * @param Request $request
+     * @return Collection
+     */
+    public function activitiesResource(Request $request) : Collection
+    {
+        $data = \DB::table('activities')
+            ->select('id', 'name', 'code', 'business_id')
+            ->whereIn('business_id', $this->businessChain()->businesses->pluck('id'))
+            ->orWhereNull('business_id')
+            ->orderBy('name')
+            ->get();
+
+        return $data->map(function ($item) {
+                return (array) $item;
+            })
+            ->values();
+    }
 }
