@@ -544,6 +544,7 @@ Route::group([
     /* Caregiver 1099s */
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
+    Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
@@ -728,7 +729,6 @@ Route::group([
 
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
-Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');
 
 Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function () {
