@@ -562,6 +562,10 @@
         mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices, Constants],
 
         props: {
+            'isRoot': {
+                type: Boolean,
+                default: false,
+            },
             'shift': {
                 required: true,
                 type: Object,
@@ -625,11 +629,9 @@
             }),
 
             activities() {
-                console.log('filtering activities');
                 if (! this.client || ! this.business.id) {
                     return this.activityList.filter(x => x.business_id == null);
                 }
-                console.log('filtering based on business ', this.business.id);
                 return this.activityList.filter(x => x.business_id == null || x.business_id == this.business.id);
             },
             selectedClient() {
@@ -702,6 +704,12 @@
         },
         methods: {
             changedShift(shift) {
+                if (this.isRoot) {
+                    // If we are not working from the SHR or other parent
+                    // page, we need to inform the filters store what
+                    // business we are working with.
+                    this.$store.commit('filters/setBusiness', shift.business_id);
+                }
                 this.resetForm(shift);
                 this.changedClient(shift.client_id);
             },

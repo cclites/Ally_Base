@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Arr;
 use App\Events\ShiftFlagsCouldChange;
+use Illuminate\Support\Collection;
 
 class ShiftController extends BaseController
 {
@@ -83,19 +84,39 @@ class ShiftController extends BaseController
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
-        $data = $shift->toArray();
-        $data += [
+        // TODO: move this to a resource
+        // This is just a quick attempt to slim down some of the data
+        // returned from the ajax call.  This is complicated because
+        // the business-shift component is used in the SHR as well
+        // as it's own shift view and shift duplicate pages.  Syncing
+        // all 3 will require more work.
+        $data = array_merge($shift->toArray(), [
             'client_name' => $shift->client->name(),
             'caregiver_name' => $shift->caregiver->name(),
-            'address' => optional($shift->address)->only(['latitude', 'longitude']),
-        ];
+            'activities' => $shift->activities->only(['id', 'name', 'code'])->toArray(),
+            'caregiver' => [
+                'name' => $shift->caregiver->name,
+                'id' => $shift->caregiver->id,
+            ],
+            'client' => [
+                'name' => $shift->client->name,
+                'id' => $shift->client->id,
+                'goals' => $shift->client->goals,
+                'business_id' => $shift->client->business_id,
+            ],
+            'schedule' => [
+                'notes' => $shift->schedule->notes,
+            ],
+            'goals' => $shift->goals->map(function ($item) {
+                return array_only($item->toArray(), ['id', 'pivot']);
+            })->values()->toArray(),
+        ]);
 
         if ($request->expectsJson()) {
             return response()->json($data);
         }
 
-        $activities = $shift->business->allActivities();
-        return view('business.shifts.show', compact('shift', 'activities'));
+        return view('business.shifts.show', compact('shift'));
     }
 
     /**
