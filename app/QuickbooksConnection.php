@@ -6,7 +6,7 @@ use App\Services\QuickbooksOnlineService;
 use Crypt;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 
-class QuickbooksConnection extends BaseModel
+class QuickbooksConnection extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.
@@ -36,9 +36,10 @@ class QuickbooksConnection extends BaseModel
      */
     protected $dates = ['last_connected_at'];
 
-
     const FEE_TYPE_REGISTRY = 'registry';
     const FEE_TYPE_CLIENT = 'client';
+    const NAME_FORMAT_LAST_FIRST = 'last_first';
+    const NAME_FORMAT_FIRST_LAST = 'first_last';
 
     // **********************************************************
     // RELATIONSHIPS
@@ -203,5 +204,15 @@ class QuickbooksConnection extends BaseModel
         }
 
         return true;
+    }
+
+    /**
+     * Get the name_format setting for the connection.
+     *
+     * @return string
+     */
+    public function getNameFormat() : string
+    {
+        return $this->name_format;
     }
 }
