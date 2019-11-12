@@ -32,7 +32,7 @@ class SkilledNursingPocController extends BaseController
         $data = SkilledNursingPoc::convertFormData($request->validated());
 
         if ($client->skilledNursingPoc()->updateOrCreate(['client_id' => $client->id], $data)) {
-            return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc);
+            return new SuccessResponse('Skilled Nursing Plan of Care has been saved successfully.', $client->fresh()->skilledNursingPoc, '.');
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the Skilled Nursing Plan of Care.  Please try again.');
@@ -56,6 +56,11 @@ class SkilledNursingPocController extends BaseController
             },
             'contacts',
         ])->first();
+
+        if (empty($client->skilledNursingPoc) || empty($client->careDetails)) {
+            // Do not allow printing unless they have both POC and Care Details records saved.
+            return redirect()->to(route('business.clients.edit', ['client' => $client]).'#care_plans');
+        }
 
         $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->supplies);
         $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($client->careDetails->safety_measures);

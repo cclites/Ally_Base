@@ -411,7 +411,7 @@
                         }
                     }
                 }
-                return null;
+                return 0;
             },
 
             getStartsAt() {

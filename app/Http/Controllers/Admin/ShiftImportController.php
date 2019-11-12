@@ -48,7 +48,14 @@ class ShiftImportController extends Controller
         $file = $request->file('file')->getPathname();
 
         $import = ImportManager::open($request->provider, $business, $file);
-        return $import->handle();
+
+        try {
+
+            return $import->handle();
+        } catch( \Exception $e ){
+
+            return new ErrorResponse( 500, $e->getMessage() );
+        }
     }
 
     public function store(Request $request)

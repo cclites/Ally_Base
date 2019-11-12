@@ -4,7 +4,7 @@
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item"><a href="/caregiver/clients">My Clients</a></li>
+    <li class="breadcrumb-item"><a href="/caregiver/clients?active=1">My Clients</a></li>
     <li class="breadcrumb-item active">Client Narrative</li>
 @endsection
 

@@ -120,16 +120,28 @@
                         this.formModal = false;
                     })
             },
+
+            fetch() {
+                axios.get(`/business/questions?business=${this.business.id}`)
+                    .then( ({ data }) => {
+                        this.items = data;
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    })
+            },
         },
 
         mounted() {
-            axios.get(`/business/questions?business=${this.business.id}`)
-                .then( ({ data }) => {
-                    this.items = data;
-                })
-                .catch(e => {
-                    console.log(e);
-                })
+            this.fetch();
+        },
+
+        watch: {
+            business(newValue, oldValue) {
+                if (newValue) {
+                    this.fetch();
+                }
+            }
         },
     }
 </script>

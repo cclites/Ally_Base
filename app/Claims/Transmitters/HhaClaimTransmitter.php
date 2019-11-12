@@ -41,17 +41,6 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         // hha_password
         // caregiver ID
 
-        // required for tellus:
-        // tellus_username
-        // tellus_password
-        // caregiver EIN
-        // business zip
-        // client DOB
-        // client diagnosis codes
-        // plan code (see getPlanCode())
-        // VisitID  shift id ?
-        // client evv address
-
         $errors = collect(parent::validateClaim($claim));
 
         if (empty($claim->business->hha_username) || empty($claim->business->getHhaPassword())) {
