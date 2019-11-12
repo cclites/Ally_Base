@@ -1,8 +1,8 @@
 <?php
+
 namespace App;
 
 use Illuminate\Support\Facades\Crypt;
-use App\Client;
 
 /**
  * App\ClientMedication
@@ -28,7 +28,32 @@ use App\Client;
  */
 class ClientMedication extends BaseModel
 {
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = ['was_changed' => 'boolean'];
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     protected $guarded = ['id'];
+
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
 
     public function setTypeAttribute($value)
     {
@@ -59,7 +84,7 @@ class ClientMedication extends BaseModel
     {
         return empty($this->attributes['frequency']) ? null : Crypt::decrypt($this->attributes['frequency']);
     }
-    
+
     public function setDescriptionAttribute($value)
     {
         $this->attributes['description'] = Crypt::encrypt($value);
@@ -110,18 +135,8 @@ class ClientMedication extends BaseModel
         return empty($this->attributes['route']) ? null : Crypt::decrypt($this->attributes['route']);
     }
 
-    public function setNewChangedAttribute($value)
-    {
-        $this->attributes['new_changed'] = Crypt::encrypt($value);
-    }
-
     public function getNewChangedAttribute()
     {
-        return empty($this->attributes['new_changed']) ? null : Crypt::decrypt($this->attributes['new_changed']);
-    }
-
-    public function client()
-    {
-        return $this->belongsTo(Client::class); 
+        return $this->was_changed ? '(C)' : '(N)';
     }
 }

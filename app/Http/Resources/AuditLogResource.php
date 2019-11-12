@@ -82,7 +82,7 @@ class AuditLogResource extends Resource
                 $hiddenAttributes = collect(['number']);
                 break;
             case (new ClientMedication)->getMorphClass():
-                $hiddenAttributes = collect(['type', 'dose', 'frequency', 'description', 'side_effects', 'notes', 'tracking', 'route', 'new_changed']);
+                $hiddenAttributes = collect(['type', 'dose', 'frequency', 'description', 'side_effects', 'notes', 'tracking', 'route']);
                 break;
         }
 

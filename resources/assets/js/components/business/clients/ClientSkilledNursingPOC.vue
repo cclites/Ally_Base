@@ -7,8 +7,16 @@
 
         <b-row>
             <b-col>
+                <b-alert :show="!client.skilled_nursing_poc || !client.care_details" variant="info">
+                    You cannot print the client's POC until you have saved this form as well as the Detailed Client Care Needs form.
+                </b-alert>
                 <b-form-group class="float-lg-right action-buttons">
-                    <b-btn @click="generatePdf()" variant="primary" class="text-right"><i class="fa fa-print"></i> Print</b-btn>
+                    <b-btn v-if="client.skilled_nursing_poc && client.care_details"
+                            @click="generatePdf()"
+                            variant="primary"
+                            class="text-right">
+                        <i class="fa fa-print"></i> Print
+                    </b-btn>
                     <b-btn variant="success" @click.prevent="save()" :disabled="busy" class="text-right mr-2">Save Changes</b-btn>
                 </b-form-group>
             </b-col>
@@ -91,7 +99,7 @@
             </b-form-checkbox-group>
         </b-form-group>
 
-        <b-form-group label="Prognosis" class="mb-2 mr-2">
+        <b-form-group label="Prognosis" class="mb-2 mr-2" label-class="required">
             <b-form-radio-group v-model="form.prognosis">
                 <b-form-radio v-for="(label, key) in options.prognosis" :key="key" :value="key">{{ label }}</b-form-radio>
             </b-form-radio-group>
