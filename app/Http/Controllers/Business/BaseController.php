@@ -47,6 +47,18 @@ class BaseController extends Controller
     }
 
     /**
+     * Get business IDs from the current chain and filter them
+     * by the ones allowed by the current logged in user.
+     *
+     * @return mixed
+     */
+    protected function authorizedBusinessIds()
+    {
+        $businessIds = $this->businessChain()->businesses->pluck('id')->toArray();
+        return auth()->user()->filterAttachedBusinesses($businessIds);
+    }
+
+    /**
      * Override the active business chain (used for Admins)
      *
      * @param \App\BusinessChain $businessChain

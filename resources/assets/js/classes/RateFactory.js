@@ -47,7 +47,7 @@ class RateFactory {
 
     static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
     {
-        effectiveDate = moment(effectiveDate).format('YYYY-MM-DD');
+        effectiveDate = moment(effectiveDate, 'MM/DD/YYYY').format('YYYY-MM-DD');
         let effectiveRates = ratesArray.filter(item => {
             return item.effective_start <= effectiveDate
                 && item.effective_end >=effectiveDate;
