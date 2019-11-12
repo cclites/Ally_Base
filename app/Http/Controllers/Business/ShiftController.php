@@ -106,7 +106,13 @@ class ShiftController extends BaseController
         $data = array_merge($shift->toArray(), [
             'client_name' => $shift->client->name(),
             'caregiver_name' => $shift->caregiver->name(),
-            'activities' => empty($shift->activities) ? [] : $shift->activities->only(['id', 'name', 'code'])->toArray(),
+            'activities' => $shift->activities->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'code' => $item->code,
+                ];
+            }),
             'caregiver' => [
                 'name' => $shift->caregiver->name,
                 'id' => $shift->caregiver->id,
