@@ -1,5 +1,4 @@
 import RateFactory from "../classes/RateFactory";
-import {mapGetters} from "vuex";
 
 export default {
     // Common data shared between shift and schedule services
@@ -10,13 +9,12 @@ export default {
             defaultRates: true,
             clientPayers: [],
             clientRates: [],
+            services: [],
         }
     },
 
     computed: {
-        ...mapGetters({
-            services: 'filters/serviceList',
-        }),
+
         defaultService() {
             return this.services.find(item => item.default === true) || {};
         },
@@ -73,45 +71,29 @@ export default {
     methods: {
 
         async fetchServices() {
-            await this.$store.dispatch('filters/fetchResources', 'services');
-        },
-
-        async loadClientPayersAndRatesData(clientId, resetPayers = false) {
-            if (! clientId) {
-                return;
+            let response = await axios.get('/business/services?json=1');
+            if (Array.isArray(response.data)) {
+                this.services = response.data;
+            } else {
+                this.services = [];
             }
-
-            await axios.get(`/business/clients/${clientId}/payers-and-rates`)
-                .then( ({ data }) => {
-                    this.clientRates = data.rates;
-                    this.clientPayers = data.payers;
-
-                    this.paymentType = data.payment_type;
-                    this.clientAllyPct = data.percentage_fee;
-
-                    this.fetchAllRates();
-                    if (resetPayers) {
-                        this.resetServicePayers();
-                    }
-                })
-                .catch(() => {});
         },
 
-        // async loadClientRates(clientId) {
-        //     if (clientId) {
-        //         const response = await axios.get(`/business/clients/${clientId}/rates`);
-        //         this.clientRates = response.data;
-        //         this.fetchAllRates();
-        //     }
-        // },
-        //
-        // async loadClientPayers(clientId, resetPayers = false) {
-        //     if (clientId) {
-        //         const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
-        //         this.clientPayers = response.data;
-        //         if (resetPayers) this.resetServicePayers();
-        //     }
-        // },
+        async loadClientRates(clientId) {
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/rates`);
+                this.clientRates = response.data;
+                this.fetchAllRates();
+            }
+        },
+
+        async loadClientPayers(clientId, resetPayers = false) {
+            if (clientId) {
+                const response = await axios.get(`/business/clients/${clientId}/payers/unique`);
+                this.clientPayers = response.data;
+                if (resetPayers) this.resetServicePayers();
+            }
+        },
 
         initServicesFromObject(objectThatContainsServices)
         {
@@ -217,10 +199,12 @@ export default {
         },
 
         handleChangedBillingType(form, type) {
+            console.log('handleChangedBillingType', form);
             if (type === 'services') {
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
+                    console.log('added service from handleChangedBillingType');
                     this.addService({duration: this.scheduledHours || this.duration || 1 });
                 }
             } else {
@@ -231,6 +215,7 @@ export default {
         },
 
         handleChangedDefaultRates(form, value) {
+            console.log('handleChangedDefaultRates', value, form);
             // initiated from watcher
             if (value) {
                 this.fetchDefaultRate(form);
@@ -242,6 +227,7 @@ export default {
                     service.caregiver_rate = null;
                 }
             } else {
+                console.log('handleChangedDefaultRates: use defaults is off, do nothing');
                 // if (! form.default_rates) {
                 //     console.log('skipped');
                 //     return;

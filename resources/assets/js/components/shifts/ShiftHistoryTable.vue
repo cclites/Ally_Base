@@ -74,6 +74,13 @@
             }
         },
 
+        computed: {
+        },
+
+        mounted() {
+
+        },
+
         methods: {
             formatTooltip(item)
             {
