@@ -14,7 +14,7 @@ class AlterTableBusinessAddSettingOpenShift extends Migration
     public function up()
     {
         Schema::table( 'businesses', function (Blueprint $table) {
-            $table->enum('open_shifts_setting', [ 'off', 'limited', 'unlimited' ])->default( 'off' )->after( 'timezone' );
+            $table->string( 'open_shifts_setting', 50 )->default( 'off' )->after( 'timezone' );
         });
     }
 

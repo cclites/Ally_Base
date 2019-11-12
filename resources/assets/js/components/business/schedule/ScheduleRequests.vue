@@ -3,6 +3,11 @@
     <div>
 
         <h3>Active Requests on this Schedule</h3>
+        <h5><b>Client:</b> {{ schedule.client ? schedule.client.name : '' }} </h5>
+        <h5><b>Shift Date:</b> {{ scheduled_time }} </h5>
+
+        <hr />
+        <h5><b>Requests</b></h5>
         <div class="d-flex align-items-center mt-4">
 
             <div class="text-uppercase font-bold f-1">Caregiver Name</div>
@@ -56,7 +61,8 @@
 
                 loading  : false,
                 busy     : false,
-                requests : []
+                requests : [],
+                schedule : {}
             }
         },
         computed : {
@@ -64,6 +70,12 @@
             anyApproved(){
 
                 return this.requests.some( r => r.pivot.status == 'approved' );
+            },
+            scheduled_time(){
+
+                if( !this.schedule ) return '';
+
+                else return this.formatDateFromUTC( this.schedule.start ) + ' ' + this.schedule.start_time + ' - ' + this.schedule.end_time;
             }
         },
         methods: {
@@ -73,19 +85,16 @@
                 console.log( 'loading...' );
                 this.loading = true;
 
-                const form = new Form({
-
-                    schedule : this.selectedScheduleId
-                });
-
-                form.get( '/business/schedule/requests/' )
+                axios.get( `/business/schedule/requests/${this.selectedScheduleId}` )
                     .then( response => {
 
                         console.log( 'loaded: ', response );
-                        this.requests = response.data.data;
+                        this.requests = response.data.data.requests;
+                        this.schedule = response.data.data.schedule;
                     })
                     .catch( error => {
 
+                        console.error( error );
                         alert( 'Error loading schedule details' );
                     })
                     .finally( () => {
@@ -122,6 +131,15 @@
         async mounted(){
 
             await this.fetchRequests();
+        },
+        watch: {
+
+            async selectedScheduleId( oldVal, newVal ){
+
+                this.requests = [];
+                this.schedule = {};
+                await this.fetchRequests();
+            }
         }
     }
 </script>

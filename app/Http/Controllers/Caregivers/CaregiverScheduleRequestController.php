@@ -53,7 +53,7 @@ class CaregiverScheduleRequestController extends BaseController
         if( empty( $outstanding_request ) ){
             // no existing relationship, create one
 
-            $schedule->schedule_requests()->attach( $caregiver->id, [ 'status' => $request->status, 'business_id' => $schedule->business_id ]);
+            $schedule->schedule_requests()->attach( $caregiver->id, [ 'status' => $request->status, 'business_id' => $schedule->business_id, 'client_id' => $schedule->client_id ]);
             return new SuccessResponse( "Schedule requested.", [ 'status' => $request->status ]);
         } else {
 

@@ -37,10 +37,13 @@ class CaregiverScheduleRequestController extends BaseController
             return response()->json( compact( 'count' ) );
         }
 
-        $schedule = Schedule::findOrFail( $request->schedule );
+        $schedule = Schedule::with([ 'client' ])->findOrFail( $request->schedule );
+        $schedule[ 'start' ]      = $schedule->starts_at->copy()->format( \DateTime::ISO8601 );
+        $schedule[ 'start_time' ] = $schedule->starts_at->copy()->format( 'g:i A' );
+        $schedule[ 'end_time' ]   = $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' );
 
         $this->authorize( 'read', $schedule );
-        return new SuccessResponse( 'Successfully loaded schedule requests..', $schedule->schedule_requests );
+        return new SuccessResponse( 'Successfully loaded schedule requests..', [ 'requests' => $schedule->schedule_requests, 'schedule' => $schedule ]);
     }
 
     /**

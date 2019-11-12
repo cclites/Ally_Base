@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\ClientRate;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CaregiverScheduleRequest extends Pivot
@@ -44,6 +45,11 @@ class CaregiverScheduleRequest extends Pivot
         return $this->belongsTo( Caregiver::class );
     }
 
+    public function client()
+    {
+        return $this->belongsTo( Client::class );
+    }
+
     public function business()
     {
         return $this->belongsTo( Business::class );
@@ -52,6 +58,14 @@ class CaregiverScheduleRequest extends Pivot
     public function schedule()
     {
         return $this->belongsTo( Schedule::class );
+    }
+
+    /**
+     * 
+     */
+    public function caregiver_client_relationship_exists()
+    {
+        return $this->hasOne( ClientRate::class )->where( 'client_id', 'client_id' )->where( 'caregiver_id', 'caregiver_id' );
     }
 
     // **********************************************************
@@ -122,6 +136,7 @@ class CaregiverScheduleRequest extends Pivot
 
     public static function is_acceptable_status( $status )
     {
+        // could probably change this to return the array itself and then call it using if( in_array() ) to extend the usefullness of this..
         return in_array( $status, [
 
             self::REQUEST_APPROVED,

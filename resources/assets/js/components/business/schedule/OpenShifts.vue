@@ -24,8 +24,11 @@
             </template>
             <template slot="requests_count" scope="data">
 
-                <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 ">{{ data.item.requests_count }} Request{{ data.item.requests_count > 1 ? 's' : '' }}</a>
-                <span v-else>0</span>
+                <div class="text-center">
+
+                    <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count }}</a>
+                    <span v-else>0</span>
+                </div>
             </template>
 
             <template slot="status" scope="data">Open</template>
@@ -153,12 +156,8 @@
                 if( this.role_type != 'caregiver' ) return false;
 
                 this.isBusy = true;
-                const form = new Form({
 
-                    status : status
-                });
-
-                form.post( `/schedule/requests/${schedule.id}` )
+                axios.post( `/schedule/requests/${schedule.id}`, { status : status } )
                     .then( res => {
 
                         console.log( res );
@@ -177,9 +176,7 @@
 
                 this.loading = true;
 
-                const form = new Form();
-
-                form.get( this.eventsUrl )
+                axios.get( this.eventsUrl )
                     .then( ({ data }) => {
 
                         console.log( 'returned schedules: ', data );
