@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers\Business\Report;
 
-use App\Client;
 use App\Http\Controllers\Business\BaseController;
-use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\ShiftHistoryItemResource;
 use App\Reports\ShiftHistoryReport;
-use App\Responses\ErrorResponse;
 use App\Reports\ShiftsReport;
-use Illuminate\Http\Request;
+use App\Responses\ErrorResponse;
 use App\Shift;
+use Illuminate\Http\Request;
 
 class ShiftHistoryReportController extends BaseController
 {
@@ -47,7 +45,7 @@ class ShiftHistoryReportController extends BaseController
                 // Limit shift history to 1000 shifts for performance reasons
                 return new ErrorResponse(400, 'There are too many shifts to display.  Please adjust your filters and re-run.');
             }
-
+    
             if ($request->input('export')) {
                 return $report->setDateFormat('m/d/Y g:i A', $timezone)
                     ->download();
@@ -57,8 +55,8 @@ class ShiftHistoryReportController extends BaseController
         }
 
         return view_component('business-shift-report', 'Shift History', [
-            'admin' => (int)is_admin(),
-            'imports' => is_admin() ? \App\Import::orderBy('id', 'DESC')->where('type', 'shift')->get()->toArray() : [],
+            'admin' => (int) is_admin(),
+            'imports' => is_admin() ? \App\Import::orderBy( 'id', 'DESC')->where( 'type', 'shift' )->get()->toArray() : [],
             'autoload' => $request->autoload ? 1 : 0,
             'activities' => $this->business()->allActivities(), // TODO: replace this
         ], [

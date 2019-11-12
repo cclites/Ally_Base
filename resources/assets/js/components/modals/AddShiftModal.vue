@@ -2,6 +2,7 @@
     <b-modal title="Create a Manual Shift" v-model="showModal" size="xl" class="modal-fit-more" :no-close-on-backdrop="true">
         <b-container fluid>
             <business-shift 
+                :activities="activities"
                 :caregiver="caregiver"
                 :client="client"
                 :shift="{}"
@@ -26,6 +27,13 @@
 
 <script>
     export default {
+        data() { 
+            return {
+                activities: [],
+                isMounted: false,
+            }
+        },
+
         props: {
             value: {},
             caregiver: {
@@ -42,12 +50,6 @@
             },
         },
 
-        data() {
-            return {
-                isMounted: false,
-            }
-        },
-
         computed: {
             showModal: {
                 get() {
@@ -62,17 +64,35 @@
             },
             submitting() {
                 return this.isMounted ? this.$refs.businessShift.submitting : false;
-            },
+            }
         },
 
         methods: {
+            loadData() {
+                axios.get('/business/activities')
+                    .then(response => {
+                        console.log('fetched activities');
+                        if (Array.isArray(response.data)) {
+                            this.activities = response.data;
+                        }
+                        else {
+                            this.activities = [];
+                        }
+                    }).catch(e => {
+                        console.log('axios error:');
+                        console.log(e);
+                    });
+            },
+
             saveShift() {
                 this.$refs.businessShift.saveShift();
             },
+
         },
 
-        async mounted() {
+        mounted() {
             this.isMounted = true;
+            this.loadData();
         },
     }
 </script>

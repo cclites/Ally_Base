@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientAuthorization;
-use App\Billing\ClientPayer;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
-use App\Client;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\ConfirmationResponse;
@@ -25,7 +23,6 @@ use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Arr;
 use App\Events\ShiftFlagsCouldChange;
-use Illuminate\Support\Collection;
 
 class ShiftController extends BaseController
 {
@@ -82,54 +79,23 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load([
-            'service', 'services', 'activities', 'issues', 'schedule',
-            'client' => function ($q) { $q->select('id'); },
-            'client.user' => function ($q) {
-                $q->select('id', 'firstname', 'lastname');
-            },
-            'client.goals', 'caregiver',
-            'caregiver.user' => function ($q) {
-                $q->select('id', 'firstname', 'lastname');
-            },
-            'clientSignature', 'caregiverSignature', 'statusHistory', 'goals', 'questions', 'address'
-        ]);
+        $shift->load(['service', 'services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'clientSignature', 'caregiverSignature', 'statusHistory', 'goals', 'questions', 'address']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
-        // TODO: move this to a resource
-        // This is just a quick attempt to slim down some of the data
-        // returned from the ajax call.  This is complicated because
-        // the business-shift component is used in the SHR as well
-        // as it's own shift view and shift duplicate pages.  Syncing
-        // all 3 will require more work.
-        $data = array_merge($shift->toArray(), [
+        $data = $shift->toArray();
+        $data += [
             'client_name' => $shift->client->name(),
             'caregiver_name' => $shift->caregiver->name(),
-            'activities' => $shift->activities->only(['id', 'name', 'code'])->toArray(),
-            'caregiver' => [
-                'name' => $shift->caregiver->name,
-                'id' => $shift->caregiver->id,
-            ],
-            'client' => [
-                'name' => $shift->client->name,
-                'id' => $shift->client->id,
-                'goals' => $shift->client->goals,
-                'business_id' => $shift->client->business_id,
-            ],
-            'schedule' => [
-                'notes' => $shift->schedule->notes,
-            ],
-            'goals' => $shift->goals->map(function ($item) {
-                return array_only($item->toArray(), ['id', 'pivot']);
-            })->values()->toArray(),
-        ]);
+            'address' => optional($shift->address)->only(['latitude', 'longitude']),
+        ];
 
         if ($request->expectsJson()) {
             return response()->json($data);
         }
 
-        return view('business.shifts.show', compact('shift'));
+        $activities = $shift->business->allActivities();
+        return view('business.shifts.show', compact('shift', 'activities'));
     }
 
     /**
@@ -392,34 +358,5 @@ class ShiftController extends BaseController
         }
 
         return new ErrorResponse(500, 'The shift could not be clocked out.');
-    }
-
-    /**
-     * Fetch the client payers and rates data required
-     * by the ShiftServices mixin.
-     *
-     * @param Client $client
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function clientRateData(Client $client)
-    {
-        // unique payers
-        $uniquePayers = ClientPayer::where('client_id', $client->id)
-            ->with('payer')
-            ->groupBy('payer_id')
-            ->select('payer_id')->get()
-            ->map(function(ClientPayer $clientPayer) use ($client) {
-                 return [
-                     'id' => $clientPayer->payer_id,
-                     'name' => $clientPayer->payer_id === 0 ? $client->name : $clientPayer->payer->name,
-                 ];
-            });
-
-        return response()->json([
-            'payers' => $uniquePayers,
-            'rates' => $client->rates()->ordered()->get(),
-            'payment_type' => $client->getPaymentType(),
-            'percentage_fee' => $client->getAllyPercentage(),
-        ]);
     }
 }

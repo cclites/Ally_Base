@@ -271,7 +271,6 @@ Route::group([
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
     Route::get('clients/{client}/payers', 'Business\ClientPayerController@index')->name('clients.payers.index');
     Route::get('clients/{client}/payers/unique', 'Business\ClientPayerController@uniquePayers')->name('clients.payers.unique');
-    Route::get('clients/{client}/payers-and-rates', 'Business\ShiftController@clientRateData')->name('clients.payers.unique');
     Route::patch('clients/{client}/payers', 'Business\ClientPayerController@update')->name('clients.payers.update');
     Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
     Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
@@ -302,11 +301,8 @@ Route::group([
     Route::post('reports/overtime', 'Business\Report\BusinessCaregiverOvertimeReportController@index')->name('reports.overtime_data');
     //Route::post('reports/overtime', 'Business\ReportsController@overtimeData')->name('reports.overtime_data');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
-
-    // Shift history report
     Route::get('reports/shifts', 'Business\Report\ShiftHistoryReportController@index')->name('reports.shifts');
     Route::get('reports/shifts/reload/{shift}', 'Business\Report\ShiftHistoryReportController@reloadShift')->name('reports.shifts.reload');
-
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
     Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
 
@@ -468,8 +464,6 @@ Route::group([
     Route::resource('prospects', 'Business\ProspectController');
     Route::resource('contacts', 'Business\OtherContactController');
     Route::get('dropdown/{resource}', 'Business\DropdownResourceController@index');
-    Route::get('resources', 'Business\BusinessResourceController@multi');
-    Route::get('resources/{resource}', 'Business\BusinessResourceController@index');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksSettingsController@index')->name('quickbooks.index');

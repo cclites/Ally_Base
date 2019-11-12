@@ -17,7 +17,6 @@
                 header-bg-variant="info"
             >
                 <business-shift
-                    :is-root="true"
                     :shift="{{ $shift }}"
                     :caregiver="{{ $shift->caregiver }}"
                     :client="{{ $shift->client }}"
