@@ -106,7 +106,7 @@ class ShiftController extends BaseController
         $data = array_merge($shift->toArray(), [
             'client_name' => $shift->client->name(),
             'caregiver_name' => $shift->caregiver->name(),
-            'activities' => $shift->activities->only(['id', 'name', 'code'])->toArray(),
+            'activities' => empty($shift->activities) ? [] : $shift->activities->only(['id', 'name', 'code'])->toArray(),
             'caregiver' => [
                 'name' => $shift->caregiver->name,
                 'id' => $shift->caregiver->id,
@@ -118,9 +118,9 @@ class ShiftController extends BaseController
                 'business_id' => $shift->client->business_id,
             ],
             'schedule' => [
-                'notes' => $shift->schedule->notes,
+                'notes' => optional($shift->schedule)->notes,
             ],
-            'goals' => $shift->goals->map(function ($item) {
+            'goals' => empty($shift->goals) ? [] : $shift->goals->map(function ($item) {
                 return array_only($item->toArray(), ['id', 'pivot']);
             })->values()->toArray(),
         ]);
