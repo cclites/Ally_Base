@@ -46,6 +46,9 @@ const mutations = {
 // actions
 const actions = {
     async fetchConfig({commit}, businessId) {
+        if (businessId == null) {
+            return;
+        }
         await axios.get(`/business/quickbooks/${businessId}/config`)
             .then( ({ data }) => {
                 commit('setConfig', data ? data.data : []);
