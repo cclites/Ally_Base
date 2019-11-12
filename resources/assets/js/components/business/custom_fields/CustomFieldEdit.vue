@@ -46,10 +46,9 @@
                         <input-help :form="form" field="label" />
                     </b-form-group>
                 </b-col>
-
-                <!-- ------------------------------------------------------------------------ -->
+                
                 <b-col lg="6">
-                    <b-form-group label="Is this field required????" label-class="required">
+                    <b-form-group label="Is this field required?" label-class="required">
                         <b-form-radio-group v-model="form.required" name="required">
                             <b-form-radio :value="1">Yes</b-form-radio>
                             <b-form-radio :value="0">No</b-form-radio>
