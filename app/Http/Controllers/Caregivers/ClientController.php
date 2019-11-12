@@ -26,6 +26,10 @@ class ClientController extends BaseController
             ->with($this->includedRelations)
             ->orderByName();
 
+        if($request->active){
+            $query->where('active', $request->active);
+        }
+
         $clients = $query->get();
 
         if ($request->expectsJson()) {

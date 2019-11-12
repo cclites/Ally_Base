@@ -168,7 +168,7 @@
             async loadClients() {
                 this.showLoading('Loading clients..');
                 try {
-                    const response = await axios.get('/caregiver/clients');
+                    const response = await axios.get('/caregiver/clients?active=1');
                     this.clients = response.data;
                 }
                 catch (err) {
