@@ -16,10 +16,8 @@ export default {
     computed: {
         ...mapGetters({
             services: 'filters/serviceList',
+            defaultService: 'filters/defaultService',
         }),
-        defaultService() {
-            return this.services.find(item => item.default === true) || {};
-        },
 
         serviceHours()
         {

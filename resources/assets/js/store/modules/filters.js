@@ -62,6 +62,9 @@ const getters = {
     isServicesLoaded(state) {
         return state.loaded.includes('services');
     },
+    defaultService(state) {
+        return state.services.find(x => x.default === 1) || {};
+    },
 
     activityList(state) {
         return state.activities;
