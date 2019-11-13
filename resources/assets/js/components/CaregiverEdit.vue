@@ -62,12 +62,12 @@
                     <fieldset role="group" class="form-inline b-form-group form-group" id="ssn" aria-labelledby="ssn-label">
                         <legend class="col-form-legend pt-0 d-flex" id="ssn-label">
                             <div class="f-1">Social Security Number</div>
-                            <b-form-checkbox class="ml-auto" v-model="form.uses_ein_number">
+                            <b-form-checkbox class="ml-auto" v-model="form.uses_ein_number" value="1" unchecked-value="0">
                                 This is an EIN
                             </b-form-checkbox>
                         </legend>
                         <div role="group" class="" aria-labelledby="caregiver-label">
-                            <mask-input v-model="form.ssn" name="ssn" :type="form.uses_ein_number ? 'ein' : 'ssn'" class="w-100" />
+                            <mask-input v-model="form.ssn" name="ssn" type="ssn" class="w-100" />
                         </div>
                     </fieldset>
                     <b-form-group label="Gender">
