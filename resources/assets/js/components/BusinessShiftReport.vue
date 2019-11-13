@@ -19,20 +19,36 @@
                             </b-form-group>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Caregiver" class="form-inline">
-                                <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
-                                    <option value="">All Caregivers</option>
-                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
-                                </b-form-select>
-                            </b-form-group>
+                            <fieldset role="group" class="form-inline b-form-group form-group" id="caregiver" aria-labelledby="caregiver-label">
+                                <legend class="col-form-legend pt-0 d-flex" id="caregiver-label">
+                                    <div class="f-1">Caregiver</div>
+                                    <b-form-checkbox class="ml-auto" v-model="showInactiveCaregivers">
+                                        Show Inactive
+                                    </b-form-checkbox>
+                                </legend>
+                                <div role="group" class="" aria-labelledby="caregiver-label">
+                                    <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter" class="w-100">
+                                        <option value="">All Caregivers</option>
+                                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                </div>
+                            </fieldset>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Client" class="form-inline">
-                                <b-form-select v-model="filters.client_id" ref="clientFilter">
-                                    <option value="">All Clients</option>
-                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
-                                </b-form-select>
-                            </b-form-group>
+                            <fieldset role="group" class="form-inline b-form-group form-group" id="client" aria-labelledby="client-label">
+                                <legend class="col-form-legend pt-0 d-flex" id="client-label">
+                                    <div class="f-1">Client</div>
+                                    <b-form-checkbox class="ml-auto" v-model="showInactiveClients">
+                                        Show Inactive
+                                    </b-form-checkbox>
+                                </legend>
+                                <div role="group" class="" aria-labelledby="caregiver-label">
+                                    <b-form-select v-model="filters.client_id" ref="clientFilter" class="w-100">
+                                        <option value="">All Clients</option>
+                                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                </div>
+                            </fieldset>
                         </b-col>
                         <b-col xl="4" lg="6">
                             <b-form-group label="Payment Method" class="form-inline">
@@ -202,6 +218,8 @@
             :caregiver="{id: filters.caregiver_id}"
             :client="{id: filters.client_id}"
             @shift-created="onShiftCreate"
+            :show-inactive-clients="showInactiveClients"
+            :show-inactive-caregivers="showInactiveCaregivers"
         ></add-shift-modal>
 
         <edit-shift-modal
@@ -211,6 +229,8 @@
             @shift-updated="onShiftUpdate"
             @shift-deleted="onShiftDelete"
             @closed="editingShiftId = null"
+            :show-inactive-clients="showInactiveClients"
+            :show-inactive-caregivers="showInactiveCaregivers"
         />
     </div>
 </template>
@@ -296,6 +316,8 @@
                 loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
+                showInactiveClients: false,
+                showInactiveCaregivers: false,
             }
         },
 
@@ -315,14 +337,30 @@
                 caregiversLoaded: 'filters/isCaregiversLoaded',
                 servicesLoaded: 'filters/isServicesLoaded',
                 clientList: 'filters/clientList',
-                caregivers: 'filters/caregiverList',
+                caregiverList: 'filters/caregiverList',
                 services: 'filters/serviceList',
             }),
             clients() {
-                if (! this.filters.client_type) {
-                    return this.clientList;
+                return this.clientList.filter(x => {
+                    if (this.filters.client_type) {
+                        if (x.client_type != this.filters.client_type) {
+                            return false;
+                        };
+                    }
+
+                    if (! this.showInactiveClients) {
+                        return x.active == 1;
+                    }
+
+                    return true;
+                });
+            },
+            caregivers() {
+                if (this.showInactiveCaregivers) {
+                    return this.caregiverList;
                 }
-                return this.clientList.filter(x => x.client_type == this.filters.client_type);
+
+                return this.caregiverList.filter(x => x.active == 1);
             },
             availableFields() {
                 let fields = [

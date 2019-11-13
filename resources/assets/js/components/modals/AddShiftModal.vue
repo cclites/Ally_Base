@@ -8,6 +8,8 @@
                 ref="businessShift"
                 @shift-created="$emit('shift-created')"
                 is_modal="1"
+                :show-inactive-clients="showInactiveClients"
+                :show-inactive-caregivers="showInactiveCaregivers"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
@@ -39,6 +41,14 @@
                 default() {
                     return {};
                 }
+            },
+            showInactiveClients: {
+                type: Boolean,
+                default: false,
+            },
+            showInactiveCaregivers: {
+                type: Boolean,
+                default: false,
             },
         },
 

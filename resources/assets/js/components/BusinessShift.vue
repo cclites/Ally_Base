@@ -588,6 +588,14 @@
             'admin': Number,
             'is_modal': 0,
             'payment_type': {},
+            showInactiveClients: {
+                type: Boolean,
+                default: false,
+            },
+            showInactiveCaregivers: {
+                type: Boolean,
+                default: false,
+            },
         },
         data() {
             return {
@@ -620,14 +628,28 @@
         computed: {
             ...mapGetters({
                 activityList: 'filters/activityList',
-                clients: 'filters/clientList',
-                caregivers: 'filters/caregiverList',
+                clientList: 'filters/clientList',
+                caregiverList: 'filters/caregiverList',
                 quickbooksServices: 'quickbooks/services',
                 quickbooksBusiness: 'quickbooks/businessId',
                 quickbooksIsAuthorized: 'quickbooks/isAuthorized',
                 quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
             }),
 
+            clients() {
+                if (this.showInactiveClients) {
+                    return this.clientList;
+                }
+
+                return this.clientList.filter(x => x.active == 1);
+            },
+            caregivers() {
+                if (this.showInactiveCaregivers) {
+                    return this.caregiverList;
+                }
+
+                return this.caregiverList.filter(x => x.active == 1);
+            },
             activities() {
                 if (! this.client || ! this.business.id) {
                     return this.activityList.filter(x => x.business_id == null);
