@@ -61,10 +61,10 @@
                         <input-help :form="form" field="route" text="Enter information about how this medicine will be administered." />
                     </b-form-group>
 
-                    <b-form-group label="New/Changed" label-for="new_changed">
-                        <b-form-radio-group v-model="form.new_changed">
-                            <b-form-radio value="(N)">(N)ew</b-form-radio>
-                            <b-form-radio value="(C)">(C)hanged</b-form-radio>
+                    <b-form-group label="New/Changed" label-for="was_changed">
+                        <b-form-radio-group v-model="form.was_changed">
+                            <b-form-radio value="0">(N)ew</b-form-radio>
+                            <b-form-radio value="1">(C)hanged</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
 
@@ -172,7 +172,7 @@
                     },
                     {
                         label: 'New/Changed',
-                        key: 'new_changed',
+                        key: 'was_changed',
                         sortable: true,
                         shouldShow: true,
                     },
@@ -207,7 +207,7 @@
                     frequency: '',
                     notes: '',
                     tracking: '',
-                    new_changed: '',
+                    was_changed: 0,
                     route: '',
                 }),
             }
@@ -230,7 +230,7 @@
                     frequency: '',
                     notes: '',
                     tracking: '',
-                    new_changed: '',
+                    was_changed: 0,
                     route: '',
                 });
             },
@@ -250,7 +250,7 @@
                         'notes',
                         'tracking',
                         'route',
-                        'new_changed',
+                        'was_changed',
                     ].forEach(field => this.form[field] = medication[field]);
                 } else {
                     this.selected = {};

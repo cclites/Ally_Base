@@ -2,9 +2,9 @@
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Exceptions\TelefonyMessageException;
-use App\PhoneNumber;
 use App\Services\TelefonyManager;
 use Illuminate\Http\Request;
+use App\PhoneNumber;
 
 abstract class BaseVoiceController extends BaseTelefonyController
 {
@@ -18,6 +18,14 @@ abstract class BaseVoiceController extends BaseTelefonyController
      */
     protected $client;
 
+    /**
+     * BaseVoiceController constructor.
+     *
+     * @param Request $request
+     * @param TelefonyManager $telefony
+     * @param PhoneNumber $phoneNumber
+     * @throws TelefonyMessageException
+     */
     public function __construct(Request $request, TelefonyManager $telefony, PhoneNumber $phoneNumber)
     {
         parent::__construct($request, $telefony, $phoneNumber);

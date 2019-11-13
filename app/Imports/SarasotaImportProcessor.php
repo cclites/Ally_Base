@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
+use Exception;
 
 class SarasotaImportProcessor extends BaseImportProcessor
 {
@@ -81,7 +82,7 @@ END;
             return $carbon->addSeconds($offset);
         } catch( \Exception $e ){
 
-            throw new ErrorException( "Improper Date format detected on Row #" . $rowNo );
+            throw new Exception( "Improper Date format detected on Row #" . $rowNo );
         }
     }
 
@@ -142,7 +143,7 @@ END;
         $hours = (float) $this->worksheet->getValue('Hours', $rowNo);
         // Divide bill total by total hours to get provider hourly rate
 
-        if( $hours == 0 ) throw new ErrorException( "Row #" . $rowNo . " has zero hours issue" );
+        if( $hours == 0 ) throw new Exception( "Row #" . $rowNo . " has zero hours issue" );
 
         return round($billTotal / $hours, 2);
     }

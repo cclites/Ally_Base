@@ -37,7 +37,7 @@ class QuestionController extends Controller
      */
     public function store(CreateQuestionRequest $request)
     {
-        $business = Business::findOrFail($request->business);
+        $business = $request->getBusiness();
         $this->authorize('update', $business);
 
         if ($question = $business->questions()->create($request->filtered())) {

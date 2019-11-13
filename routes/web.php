@@ -13,9 +13,7 @@
 
 //Auth::loginUsingId(2);
 
-Route::get('/', function () {
-    return Auth::check() ? redirect()->route('home') : redirect()->route('login');
-});
+Route::get('/', 'HomeController@root')->name('root');
 
 Route::view('check-my-time', 'check-my-time');
 
@@ -452,12 +450,6 @@ Route::group([
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');
-    Route::get('accounting/claims', function () {
-        return view('business.accounting.claims');
-    })->name('accounting.claims');
-    // Route::get('accounting/receivables', 'Business\ReceivablesController@index')->name('accounting.receivables.index');
-    // Route::get('accounting/export', 'Business\AccountingExportController@index')->name('accounting.export.index');
-
     Route::get('franchisees', 'Business\FranchiseController@franchisees')->name('franchisees');
     Route::get('franchise/reports', 'Business\FranchiseController@reports')->name('franchise.reports');
     Route::get('franchise/payments', 'Business\FranchiseController@payments')->name('franchise.payments');

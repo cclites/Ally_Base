@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Client;
+use App\QuickbooksConnection;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 use QuickBooksOnline\API\Data\IPPIntuitEntity;
 use QuickBooksOnline\API\DataService\DataService;
@@ -189,20 +190,21 @@ class QuickbooksOnlineService
      * an array containing the customer id & name.
      *
      * @param \App\Client $client
+     * @param QuickbooksConnection $connection
      * @return array
      * @throws \QuickBooksOnline\API\Exception\IdsException
      */
-    public function createCustomer(Client $client) : array
+    public function createCustomer(Client $client, QuickbooksConnection $connection) : array
     {
         $address = $client->getBillingAddress();
-
+        $displayName = $connection->getNameFormat() == QuickbooksConnection::NAME_FORMAT_LAST_FIRST ? $client->nameLastFirst : $client->name;
         $data = [
             'PrimaryEmailAddr' => [
                 'Address' => $client->email,
             ],
             'GivenName' => $client->firstname,
             'FamilyName' => $client->lastname,
-            'DisplayName' => $client->nameLastFirst,
+            'DisplayName' => $displayName,
             'PrimaryPhone' => [
                 'FreeFormNumber' => optional($client->evvPhone)->number,
             ],

@@ -33,6 +33,16 @@
                 <input-help :form="form" field="ssn"
                             text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
             </b-form-group>
+            <b-form-group label="Status">
+                <b-form-select name="status_alias_id" v-model="form.status_alias_id">
+                    <option value="0">Active</option>
+                    <option value="-1">Inactive</option>
+                    <option v-for="item in statusAliases" :key="item.id" :value="item.id">
+                        {{ item.name }} ({{ item.active ? 'Active' : 'Inactive' }})
+                    </option>
+                </b-form-select>
+                <input-help :form="form" field="status_alias_id" text=""></input-help>
+            </b-form-group>
         </b-col>
         <b-col lg="6">
             <b-form-group label="Title" label-for="title" label-class="required">
@@ -135,6 +145,7 @@
 
         data() {
             return {
+                statusAliases: [],
                 form: new Form({
                     firstname: this.value.firstname || null,
                     lastname: this.value.lastname || null,
@@ -148,13 +159,10 @@
                     password_confirmation: this.value.password_confirmation || null,
                     title: this.value.title || null,
                     override: false,
-                    business_id: this.value.business_id || null
+                    business_id: this.value.business_id || '',
+                    status_alias_id: "0",
                 }),
             }
-        },
-
-        mounted() {
-
         },
 
         methods: {
@@ -177,6 +185,15 @@
                     this.form.password_confirmation = '';
                 }
             },
+
+            async fetchStatusAliases() {
+                this.statusAliases = [];
+                axios.get(`/business/status-aliases`)
+                    .then( ({ data }) => {
+                        this.statusAliases = data.caregiver;
+                    })
+                    .catch(() => {});
+            },
         },
 
         watch: {
@@ -188,6 +205,9 @@
             }
         },
 
+        async mounted() {
+            await this.fetchStatusAliases();
+        }
     }
 </script>
 

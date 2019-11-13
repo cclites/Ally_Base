@@ -64,11 +64,11 @@
 
         methods: {
             submit() {
-                let path = `/business/questions?business=${this.business.id}`;
+                let path = `/business/questions?business_id=${this.business.id}`;
                 let method = 'post';
 
                 if (this.question.id) {
-                    path = `/business/questions/${this.question.id}`;
+                    path = `/business/questions/${this.question.id}?business_id=${this.business.id}`;
                     method = 'patch';
                 }
 
