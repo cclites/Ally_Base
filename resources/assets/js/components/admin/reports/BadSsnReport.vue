@@ -12,7 +12,7 @@
                     label="Location"
             />
 
-            <b-form-group label="Client Type" class="form-group-label custom-multi-select mr-2" v-if="type === 'clients'">
+            <b-form-group label="Client Type" class="form-group-label custom-multi-select mr-2 mb-10" v-if="type === 'clients'">
                 <b-form-select v-model="form.client_types" :options="clientTypes" multiple :select-size="selectSize">
                     <template slot="first">
                         <option value="">{{ emptyText }}</option>
@@ -92,7 +92,7 @@
                 sortBy: 'business',
                 busy: false,
                 emptyText: 'All Client Types',
-                selectSize: 2,
+                selectSize: 0,
                 open: false,
                 fields: [
                     {
@@ -119,6 +119,12 @@
         computed: {
             url(){
                 return `/admin/reports/bad-ssn-report/${ this.type }?json=1`;
+            },
+
+            filterHeight(){
+                if(this.type === 'client'){
+                    return
+                }
             }
         },
 
@@ -159,7 +165,5 @@
 
 <style scoped>
     .custom-multi-select{
-        position: relative;
-        top: 14px;
     }
 </style>

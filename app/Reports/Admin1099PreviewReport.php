@@ -35,7 +35,7 @@ class Admin1099PreviewReport extends BaseReport
      * @param int|null $caregiverId
      * @return $this
      */
-    public function applyFilters(string $year, ?int $businessId, ?int $clientId, ?int $caregiverId) : self
+    public function applyFilters(string $year, ?int $businessId, ?int $clientId, ?int $caregiverId, ?string $caregiver1099) : self
     {
         // Disable full group by mode
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
@@ -43,7 +43,7 @@ class Admin1099PreviewReport extends BaseReport
         // IMPORTANT NOTE
         // The 1099 query needs to stay consistent year to year, we need to use the client payment date as the basis for inclusion in the tax year.
 
-        $this->query = "SELECT c.id as client_id, u1.firstname as client_fname, u1.lastname as client_lname, u1.email as client_email, 
+        $this->query = "SELECT c.id as client_id, u1.firstname as client_fname, u1.lastname as client_lname, u1.email as client_email, c.caregiver_1099 as caregiver_1099, 
 b.id as business_id, b.name as business_name,
 u2.id as caregiver_id, u2.firstname as caregiver_fname, u2.lastname as caregiver_lname, 
  sum(h.caregiver_shift) as payment_total
@@ -63,6 +63,12 @@ INNER JOIN shift_cost_history h ON h.id = s.id";
 
         if($caregiverId){
             $this->query .= " AND c2.id = $caregiverId ";
+        }
+
+        if($caregiver1099 && $caregiver1099 !== 'no'){
+            $this->query .= " AND c.caregiver_1099 = '$caregiver1099' ";
+        }elseif ($caregiver1099 && $caregiver1099 === 'no' ){
+            $this->query .= " AND c.caregiver_1099 is null ";
         }
 
         $this->query .= " INNER JOIN businesses b ON c.business_id = b.id ";
@@ -93,7 +99,8 @@ HAVING payment_total > ?";
                 'caregiver_fname' => $row->caregiver_fname,
                 'caregiver_lname' => $row->caregiver_lname,
                 'location' => $row->business_name,
-                'total' => $row->payment_total
+                'total' => $row->payment_total,
+                'caregiver_1099' => $row->caregiver_1099,
             ];
         });
     }

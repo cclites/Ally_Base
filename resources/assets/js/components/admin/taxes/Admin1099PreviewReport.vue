@@ -44,6 +44,18 @@
                 </b-form-select>
             </b-form-group>
 
+            <b-form-group label="Caregiver 1099" label-for="caregiver_1099" class="mr-2">
+                <b-form-select id="caregiver_1099"
+                               v-model="form.caregiver_1099"
+                >
+                    <option value="">All</option>
+                    <option value="no">No</option>
+                    <option value="client">Client</option>
+                    <option value="ally">Ally</option>
+
+                </b-form-select>
+            </b-form-group>
+
             <b-form-group label="&nbsp;" class="mr-2 mt-1">
                 <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate Preview</b-btn>
             </b-form-group>
@@ -103,6 +115,7 @@
                         client_id: '',
                         caregiver_id: '',
                         year: '',
+                        caregiver_1099: '',
                         json: 1,
                 }),
                 businesses: [],
@@ -121,6 +134,7 @@
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
                     {key: 'caregiver_fname', label: 'Caregiver First Name', sortable: true,},
                     {key: 'caregiver_lname', label: 'Caregiver Last Name', sortable: true,},
+                    {key: 'caregiver_1099', label: '1099 Status', sortable: true, formatter: x => { return _.startCase(x) }},
                     {key: 'location', label: 'Location', sortable: true,},
                     {key: 'total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                 ],

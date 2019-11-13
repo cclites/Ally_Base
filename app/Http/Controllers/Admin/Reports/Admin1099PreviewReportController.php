@@ -20,7 +20,8 @@ class Admin1099PreviewReportController extends Controller
                 $request->year,
                 $request->business_id,
                 $request->client_id,
-                $request->caregiver_id
+                $request->caregiver_id,
+                $request->caregiver_1099
             );
 
             return response()->json($report->rows());
