@@ -14,7 +14,7 @@
 
 <script>
     const TYPES = [
-        'phone','ssn','date','ein'
+        'phone','ssn','date'
     ];
     export default {
         data() {
@@ -73,7 +73,6 @@
         computed: {
             autocomplete() {
                 switch (this.type) {
-                    case 'ein':
                     case 'ssn':
                         return 'off';
                     default:
@@ -86,11 +85,6 @@
                         return {
                             'mask': '(###) ###-####',
                             'tokens': this.tokens
-                        };
-                    case 'ein':
-                        return {
-                            'mask': '**-*******',
-                            'tokens': this.tokens,
                         };
                     case 'ssn':
                         return {

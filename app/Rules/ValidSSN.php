@@ -6,16 +6,13 @@ use Illuminate\Contracts\Validation\Rule;
 
 class ValidSSN implements Rule
 {
-    protected $usesEin = false;
-
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($usesEin = false)
+    public function __construct()
     {
-        $this->usesEin = $usesEin;
     }
 
     /**
