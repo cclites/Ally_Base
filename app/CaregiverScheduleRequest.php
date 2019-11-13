@@ -60,13 +60,6 @@ class CaregiverScheduleRequest extends Pivot
         return $this->belongsTo( Schedule::class );
     }
 
-    /**
-     * 
-     */
-    public function caregiver_client_relationship_exists()
-    {
-        return $this->hasOne( ClientRate::class )->where( 'client_id', 'client_id' )->where( 'caregiver_id', 'caregiver_id' );
-    }
 
     // **********************************************************
     // MUTATORS
@@ -119,6 +112,14 @@ class CaregiverScheduleRequest extends Pivot
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
+
+    /**
+     * finds a related ClientRate between the caregiver and client associated with the Schedule Request
+     */
+    public function caregiver_client_relationship_exists()
+    {
+        return ClientRate::where( 'client_id', $this->client_id )->where( 'caregiver_id', $this->caregiver_id )->exists();
+    }
 
     /**
      * fetchable path for the resource, dynamic to the role of the current user

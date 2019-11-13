@@ -38,11 +38,19 @@ class CaregiverScheduleRequestController extends BaseController
         }
 
         $schedule = Schedule::with([ 'client' ])->findOrFail( $request->schedule );
+        $this->authorize( 'read', $schedule );
+
         $schedule[ 'start' ]      = $schedule->starts_at->copy()->format( \DateTime::ISO8601 );
         $schedule[ 'start_time' ] = $schedule->starts_at->copy()->format( 'g:i A' );
         $schedule[ 'end_time' ]   = $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' );
 
-        $this->authorize( 'read', $schedule );
+        $requests = $schedule->schedule_requests->map( function( $r ){
+
+            $req = CaregiverScheduleRequest::find( $r->pivot->id );
+            $r[ 'caregiver_client_relationship_exists' ] = $req->caregiver_client_relationship_exists();
+            return $r;
+        });
+
         return new SuccessResponse( 'Successfully loaded schedule requests..', [ 'requests' => $schedule->schedule_requests, 'schedule' => $schedule ]);
     }
 

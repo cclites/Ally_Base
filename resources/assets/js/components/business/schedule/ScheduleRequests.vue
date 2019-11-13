@@ -12,6 +12,7 @@
 
             <div class="text-uppercase font-bold f-1">Caregiver Name</div>
             <div class="text-uppercase font-bold f-1">Request Date</div>
+            <div class="text-uppercase font-bold f-1">CG Worked with Client Prev.?</div>
             <div class="text-uppercase font-bold f-1">Status</div>
             <div class="text-uppercase font-bold f-1">Actions</div>
         </div>
@@ -21,6 +22,7 @@
 
                 <div class="f-1">{{ request.nameLastFirst }}</div>
                 <div class="f-1">{{ formatDateFromUTC( request.pivot.created_at ) }}</div>
+                <div class="f-1">{{ request.caregiver_client_relationship_exists ? 'yes' : 'no' }}</div>
                 <div class="f-1">{{ request.pivot.status }}</div>
                 <div class="f-1">
 
