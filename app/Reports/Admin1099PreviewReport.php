@@ -101,7 +101,11 @@ HAVING payment_total > ?";
                 'location' => $row->business_name,
                 'total' => $row->payment_total,
                 'caregiver_1099' => $row->caregiver_1099,
+                'caregiver_1099_id' => $row->caregiver_id,
+                'caregiver_id' => $row->caregiver_id,
+                'client_id' => $row->client_id,
             ];
+
         });
     }
 }

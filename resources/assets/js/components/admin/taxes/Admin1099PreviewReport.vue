@@ -56,8 +56,29 @@
                 </b-form-select>
             </b-form-group>
 
+            <b-form-group label="1099 Status" label-for="created_status" class="mr-2">
+                <b-form-select id="created_status"
+                               v-model="form.status"
+                >
+                    <option value="">Any</option>
+                    <option value="1">Created</option>
+                    <option value="0">Not Yet Created</option>
+                </b-form-select>
+            </b-form-group>
+
+            <b-form-group label="Transmission Status" label-for="transmission_status" class="mr-2">
+                <b-form-select id="transmission_status"
+                               v-model="form.transmission"
+                >
+                    <option value="">All</option>
+                    <option value="1">Transmitted</option>
+                    <option value="0">Not Transmitted</option>
+                </b-form-select>
+            </b-form-group>
+
             <b-form-group label="&nbsp;" class="mr-2 mt-1">
-                <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate Preview</b-btn>
+                <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate</b-btn>
+                <b-btn variant="info" @click="transmitSelected()">Transmit Selected</b-btn>
             </b-form-group>
 
         </b-row>
@@ -80,6 +101,23 @@
                             :current-page="currentPage"
                             :per-page="perPage"
                     >
+                        <template slot="actions" scope="row">
+                            <b-btn @click="create(row.item)" class="btn btn-secondary" title="Create 1099"><i class="fa fa-plus mr-2"></i></b-btn>
+                            <b-btn v-if="row.item.caregiver_1099_id"
+                                   @click="edit(row.item.caregiver_1099_id)"
+                                   class="btn btn-secondary"
+                                   title="Edit 1099"
+                            >
+                                <i class="fa fa-edit mr-2"></i></b-btn>
+                        </template>
+
+                        <template slot="transmit" scope="row">
+                            <b-form-checkbox v-if="row.item.caregiver_1099_id"
+                                             v-model="transmitSelected"
+                                             :value="row.item.caregiver_1099_id"
+                            >
+                            </b-form-checkbox>
+                        </template>
                     </b-table>
                 </b-col>
             </b-row>
@@ -116,8 +154,11 @@
                         caregiver_id: '',
                         year: '',
                         caregiver_1099: '',
+                        status: '',
+                        transmission: '',
                         json: 1,
                 }),
+                transmitSelected: [],
                 businesses: [],
                 caregivers: [],
                 clients: [],
@@ -137,6 +178,8 @@
                     {key: 'caregiver_1099', label: '1099 Status', sortable: true, formatter: x => { return _.startCase(x) }},
                     {key: 'location', label: 'Location', sortable: true,},
                     {key: 'total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    'actions',
+                    'transmit'
                 ],
             }
         },
@@ -158,22 +201,37 @@
                         this.footClone = true;
                     })
             },
+
+            create(item){
+                let data = new Form({item});
+                this.data.post('/admin/business-1099/create');
+            },
+
+            edit(id){
+                axios.get('/admin/business-1099/' + id);
+            },
+
+            transmit(){
+                let data = new Form({transmitSelected});
+
+                this.data.get('/admin/business-1099/transmit')
+                    .then(response => {
+                    })
+                    .catch( e => {
+                    })
+                    .finally(() => {
+                    });
+            },
         },
         watch: {
             'form.business_id'(newVal, oldVal){
-
                 if(newVal !== oldVal){
                     axios.get('/admin/clients?json=1&id=' + this.form.business_id).then(response => this.clients = response.data);
                     axios.get('/admin/caregivers?json=1&id=' + this.form.business_id).then(response => this.caregivers = response.data);
                     this.client_id='';
                     this.caregiver_id='';
                 }
-
             },
-
-            'form.caregiver_id'(newVal, oldVal){},
-
-            'form.client_id'(newVal, oldVal){},
         },
         computed: {
             years(){
@@ -201,5 +259,13 @@
 </script>
 
 <style scoped>
+    i.fa.fa-edit,
+    i.fa.fa-plus{
+        position: relative;
+        left: 4px;
+    }
 
+    button.btn.btn-secondary{
+        padding: 2px;
+    }
 </style>

@@ -386,6 +386,10 @@ Route::group([
     Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
 
     Route::get('business-1099', 'Business\Business1099Controller@index')->name('business-1099');
+    Route::get('business-1099/{id}', 'Business\Business1099Controller@show')->name('business-1099-edit');
+    Route::post('business-1099/create', 'Business\Business1099Controller@create')->name('business-1099-create');
+    Route::patch('business-1099/update', 'Business\Business1099Controller@update')->name('business-1099-update');
+    Route::get('business-1099/transmit', 'Business\Business1099Controller@transmit')->name('business-1099-transmit');
 
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');

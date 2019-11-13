@@ -13,7 +13,7 @@ class CreateTable1099s extends Migration
      */
     public function up()
     {
-        Schema::create('1099s', function(Blueprint $table)
+        Schema::create('caregiver_1099s', function(Blueprint $table)
         {
             $table->increments('id');
             $table->integer('client_id')->unsigned()->nullable();
@@ -32,6 +32,11 @@ class CreateTable1099s extends Migration
             $table->string('caregiver_address3')->nullable();
             $table->integer('business_id')->unsigned()->nullable();
             $table->decimal('total_amount', 9)->nullable();
+            $table->smallInteger('year')->nullable();
+            $table->integer('created_by')->unsigned()->nullable();
+            $table->integer('modified_by')->unsigned()->nullable();
+            $table->dateTime('transmitted_at')->nullable();
+            $table->integer('transmitted_by')->unsigned()->nullable();
             $table->timestamps();
             $table->foreign('client_id', 'fk_client_id')->references('id')->on('clients')->onDelete('set null');
             $table->foreign('caregiver_id', 'fk_caregiver_id')->references('id')->on('caregivers')->onDelete('set null');
@@ -46,6 +51,6 @@ class CreateTable1099s extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('1099s');
+        Schema::dropIfExists('caregiver_1099s');
     }
 }
