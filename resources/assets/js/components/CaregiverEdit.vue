@@ -59,9 +59,17 @@
                         </b-form-select>
                         <input-help :form="form" field="status_alias_id" :text="showStatusHelp"></input-help>
                     </b-form-group>
-                    <b-form-group label="Social Security Number" label-for="ssn">
-                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
-                    </b-form-group>
+                    <fieldset role="group" class="form-inline b-form-group form-group" id="ssn" aria-labelledby="ssn-label">
+                        <legend class="col-form-legend pt-0 d-flex" id="ssn-label">
+                            <div class="f-1">Social Security Number</div>
+                            <b-form-checkbox class="ml-auto" v-model="form.uses_ein_number">
+                                This is an EIN
+                            </b-form-checkbox>
+                        </legend>
+                        <div role="group" class="" aria-labelledby="caregiver-label">
+                            <mask-input v-model="form.ssn" name="ssn" :type="form.uses_ein_number ? 'ein' : 'ssn'" class="w-100" />
+                        </div>
+                    </fieldset>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
                             <b-form-radio value="M">Male</b-form-radio>
@@ -296,6 +304,7 @@
                     pets_dogs_okay: this.caregiver.pets_dogs_okay,
                     pets_cats_okay: this.caregiver.pets_cats_okay,
                     pets_birds_okay: this.caregiver.pets_birds_okay,
+                    uses_ein_number: this.caregiver.uses_ein_number,
                 }),
                 passwordModal: false,
                 active: this.caregiver.active,

@@ -204,6 +204,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         'pets_cats_okay',
         'pets_birds_okay',
         'ethnicity',
+        'uses_ein_number',
     ];
     protected $appends = [ 'masked_ssn' ];
     protected $attributes = [];
