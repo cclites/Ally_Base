@@ -3,7 +3,7 @@
         <div v-if="activities.length > 0">
             <h5>Service Needs / ADLs for this visit</h5>
             <ul>
-                <li v-for="activity in activities.sort((a,b) => a.code - b.code)" :key="activity.id">
+                <li v-for="activity in activities" :key="activity.id">
                     {{ activity.code }} - {{ activity.name }}
                 </li>
             </ul>
@@ -23,11 +23,18 @@
                 type: Object,
                 required: true,
             },
-            activities: {
-                type: Array,
-                default: [],
-            },
-        }
+        },
+        computed: {
+            activities() {
+                if (! this.carePlan || !this.carePlan.activities) {
+                    return [];
+                }
+
+                return this.carePlan.activities.sort( (a,b) => {
+                    return a.code - b.code;
+                });
+            }
+        },
     }
 </script>
 

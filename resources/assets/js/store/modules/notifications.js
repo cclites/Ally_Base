@@ -44,7 +44,6 @@ const actions = {
     async fetch(context) {
         await axios.get('/business/notifications/preview')
             .then( ({ data }) => {
-                console.log('repsonse:', data);
                 context.commit('update', data ? data : {notifications: [], total: 0});
             })
             .catch(e => {
