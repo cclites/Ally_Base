@@ -15,6 +15,7 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\AuditableModel;
 use App\Billing\Payer;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use App\Business;
 use App\Client;
@@ -609,5 +610,26 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return "${businessId}-${nextId}";
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'client_last_name' => $faker->lastName,
+            'client_dob' => $faker->date('Y-m-d', '-30 years'),
+            'client_medicaid_id' => $faker->randomNumber(8),
+        ];
     }
 }

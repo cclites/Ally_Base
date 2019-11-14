@@ -3,6 +3,7 @@ namespace App;
 
 use App\Billing\Payer;
 use App\Billing\Service;
+use App\Traits\ScrubsForSeeding;
 
 
 /**
@@ -262,5 +263,27 @@ class BusinessChain extends AuditableModel
      */
     public function getCityStateZipAttribute(){
         return $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'address1' => $faker->streetAddress,
+            'address2' => null,
+            'phone1' => $faker->simple_phone,
+            'phone2' => $faker->simple_phone,
+        ];
     }
 }

@@ -18,6 +18,7 @@ use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
 use App\BusinessCommunications;
+use App\Traits\ScrubsForSeeding;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -980,5 +981,33 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getTimezone(): string
     {
         return $this->timezone ? $this->timezone : config('ally.local_timezone');
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'address1' => $faker->streetAddress,
+            'address2' => null,
+            'contact_name' => $faker->name,
+            'contact_email' => $faker->companyEmail,
+            'contact_phone' => $faker->simple_phone,
+            'outgoing_sms_number' => $faker->simple_phone,
+            'ein' => $faker->randomNumber(9, true),
+            'medicaid_id' => $faker->randomNumber(9, true),
+            'medicaid_npi_number' => $faker->randomNumber(9, true),
+            'medicaid_npi_taxonomy' => $faker->randomNumber(9, true),
+        ];
     }
 }

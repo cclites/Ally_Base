@@ -46,6 +46,8 @@ use App\OnboardingActivity;
 use App\PhoneNumber;
 use App\QuickbooksConnection;
 use App\ScheduleNote;
+use App\Shift;
+use App\SmsThread;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
 use App\Traits\Console\HasProgressBars;
@@ -124,7 +126,7 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
-        $this->scrubModel(Note::class);
+        $this->scrubModel(Business::class);
         exit;
 
         // Truncate large and otherwise useless tables.
@@ -156,11 +158,18 @@ class ClearSensitiveData extends Command
             $this->scrubModel(ClientContact::class);
             $this->scrubModel(Note::class);
             $this->scrubModel(ScheduleNote::class);
-            $this->cleanShifts();
-            $this->cleanSmsData();
-            $this->cleanClaimData();
-            $this->cleanChains();
-            $this->cleanBusinesses();
+            $this->scrubModel(Shift::class);
+            $this->scrubModel(SmsThread::class);
+            $this->scrubModel(SmsThreadReply::class);
+            $this->scrubModel(SmsThreadRecipient::class);
+            $this->scrubModel(ClaimInvoice::class);
+            $this->scrubModel(ClaimableService::class);
+            $this->scrubModel(ClaimableExpense::class);
+            $this->scrubModel(ClaimRemit::class);
+            $this->scrubModel(ClaimAdjustment::class);
+            $this->scrubModel(ClaimPayment::class);
+            $this->scrubModel(BusinessChain::class);
+            $this->scrubModel(Business::class);
             $this->cleanBusinessInvoiceItems();
             $this->cleanClientInvoices();
             $this->cleanClientInvoiceItems();
@@ -1014,122 +1023,6 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanChains()
-    {
-        $query = BusinessChain::query();
-
-        $this->startProgress(
-            'Cleaning business chain data...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'address1' => $this->faker->streetAddress,
-                'address2' => null,
-                'phone1' => $this->generatePhoneNumber(),
-                'phone2' => $this->generatePhoneNumber(),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (BusinessChain $item) {
-                if (filled($item->address1)) {
-                    $item->address1 = $this->faker->streetAddress;
-                }
-                if (filled($item->address2)) {
-                    $item->address2 = null;
-                }
-                if (filled($item->phone1)) {
-                    $item->phone1 = $this->generatePhoneNumber();
-                }
-                if (filled($item->phone2)) {
-                    $item->phone2 = $this->generatePhoneNumber();
-                }
-
-                $item->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanBusinesses()
-    {
-        $query = Business::query();
-
-        $this->startProgress(
-            'Cleaning business data...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'address1' => $this->faker->streetAddress,
-                'address2' => null,
-                'contact_name' => $this->faker->name,
-                'contact_email' => $this->faker->companyEmail,
-                'contact_phone' => $this->generatePhoneNumber(),
-                'outgoing_sms_number' => $this->generatePhoneNumber(),
-                'ein' => $this->faker->randomNumber(9, true),
-                'medicaid_id' => $this->faker->randomNumber(9, true),
-                'medicaid_npi_number' => $this->faker->randomNumber(9, true),
-                'medicaid_npi_taxonomy' => $this->faker->randomNumber(10, true),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (Business $item) {
-                if (filled($item->address1)) {
-                    $item->address1 = $this->faker->streetAddress;
-                }
-                if (filled($item->address2)) {
-                    $item->address2 = null;
-                }
-                if (filled($item->contact_name)) {
-                    $item->contact_name = $this->faker->name;
-                }
-                if (filled($item->contact_email)) {
-                    $item->contact_email = $this->faker->companyEmail;
-                }
-                if (filled($item->contact_phone)) {
-                    $item->contact_phone = $this->generatePhoneNumber();
-                }
-                if (filled($item->outgoing_sms_number)) {
-                    $item->outgoing_sms_number = $this->generatePhoneNumber();
-                }
-                if (filled($item->ein)) {
-                    $item->ein = $this->faker->randomNumber(9, true);
-                }
-                if (filled($item->medicaid_id)) {
-                    $item->medicaid_id = $this->faker->randomNumber(9, true);
-                }
-                if (filled($item->medicaid_npi_number)) {
-                    $item->medicaid_npi_number = $this->faker->randomNumber(9, true);
-                }
-                if (filled($item->medicaid_npi_taxonomy)) {
-                    $item->medicaid_npi_taxonomy = $this->faker->randomNumber(10, true);
-                }
-
-                $item->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
     public function cleanEncryptedClaimsData()
     {
         $query = ClaimableService::whereNotNull('caregiver_ssn');
@@ -1159,16 +1052,6 @@ class ClearSensitiveData extends Command
         });
 
         $this->finish();
-    }
-
-    public function cleanClaimData()
-    {
-        $this->cleanClaimInvoices();
-        $this->cleanClaimableServices();
-        $this->cleanClaimableExpenses();
-        $this->cleanClaimRemits();
-        $this->cleanClaimAdjustments();
-        $this->cleanClaimPayments();
     }
 
     public function cleanClaimableServices()
@@ -1249,178 +1132,6 @@ class ClearSensitiveData extends Command
         $this->finish();
     }
 
-    public function cleanClaimInvoices()
-    {
-        $query = ClaimInvoice::query();
-        $this->startProgress(
-            'Cleaning claim invoices...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'client_last_name' => $this->faker->lastName,
-                'client_dob' => $this->faker->date('Y-m-d', '-30 years'),
-                'client_medicaid_id' => $this->faker->randomNumber(8),
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $item->update([
-                    'client_last_name' => $this->faker->lastName,
-                    'client_dob' => $this->faker->date('Y-m-d', '-30 years'),
-                    'client_medicaid_id' => $this->faker->randomNumber(8),
-                ]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClaimableExpenses()
-    {
-        $query = ClaimableExpense::query();
-        $this->startProgress(
-            'Cleaning claimable expenses...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'caregiver_last_name' => $this->faker->lastName,
-                'notes' => $this->faker->sentence,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $data = [
-                    'caregiver_last_name' => $this->faker->lastName,
-                ];
-                if (isset($item->notes)) {
-                    $data['notes'] = $this->faker->sentence;
-                }
-                $item->update($data);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClaimRemits()
-    {
-        $query = ClaimRemit::withTrashed()->whereNotNull('notes')->orWhereNotNull('reference');
-        $this->startProgress(
-            'Cleaning claim remits...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'reference' => $this->faker->randomNumber(9),
-                'notes' => $this->faker->sentence,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                if (filled($item->getOriginal('reference'))) {
-                    $item->reference = $this->faker->randomNumber(9);
-                }
-                if (filled($item->getOriginal('notes'))) {
-                    $item->notes = $this->faker->sentence;
-                }
-                $item->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClaimAdjustments()
-    {
-        $query = ClaimAdjustment::withTrashed()->whereNotNull('note');
-        $this->startProgress(
-            'Cleaning claim adjustments...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'note' => $this->faker->sentence,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function ($item) {
-                $item->update(['note' => $this->faker->sentence]);
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanClaimPayments()
-    {
-        $query = ClaimPayment::whereNotNull('notes')->orWhereNotNull('reference');
-        $this->startProgress(
-            'Cleaning claim payments...',
-            $query->count()
-        );
-
-        if ($this->fastMode) {
-            $query->update([
-                'reference' => $this->faker->randomNumber(9),
-                'notes' => $this->faker->sentence,
-            ]);
-
-            $this->finish();
-            return;
-        }
-
-        $query->chunk(400, function ($collection) {
-            \DB::beginTransaction();
-            $collection->each(function (ClaimPayment $item) {
-                if ($item->getOriginal('reference')) {
-                    $item->reference = $this->faker->randomNumber(9);
-                }
-                if ($item->getOriginal('notes')) {
-                    $item->notes = $this->faker->sentence;
-                }
-                $item->save();
-                $this->advance();
-            });
-            \DB::commit();
-        });
-
-        $this->finish();
-    }
-
     public function cleanEncryptedCaregiverData()
     {
         $query = Caregiver::withTrashed()->whereNotNull('ssn');
@@ -1483,55 +1194,6 @@ class ClearSensitiveData extends Command
             });
             \DB::commit();
         });
-
-        $this->finish();
-    }
-
-    public function cleanSmsData()
-    {
-        $this->startProgress(
-            'Cleaning SMS data...',
-            SmsThreadRecipient::select('user_id')->distinct()->count('user_id')
-        );
-
-        if ($this->fastMode) {
-            SmsThreadRecipient::whereRaw(1)->update(['number' => $this->generatePhoneNumber()]);
-            SmsThreadReply::whereRaw(1)->update(['from_number' => $this->generatePhoneNumber()]);
-
-            $this->finish();
-            return;
-        }
-
-        $recipients = SmsThreadRecipient::select('user_id')->groupBy('user_id');
-        $recipients->get()->each(function (SmsThreadRecipient $recipient) {
-            $number = PhoneNumber::where('user_id', $recipient->user_id)->first();
-            $number = $number ? $number->national_number : $this->generatePhoneNumber();
-            SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $number]);
-            SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $number]);
-
-            $this->advance();
-        });
-
-        $this->finish();
-    }
-
-    public function cleanShifts()
-    {
-        $this->startProgress(
-            'Cleaning Shift EVV data...',
-            3
-        );
-
-        \DB::statement('UPDATE shifts SET caregiver_comments = ? WHERE caregiver_comments IS NOT NULL', [$this->faker->sentence]);
-        $this->advance();
-
-        \DB::statement('UPDATE shifts SET checked_in_latitude = checked_in_latitude + RAND(), checked_out_latitude = checked_out_latitude + RAND() WHERE checked_in_latitude IS NOT NULL');
-        $this->advance();
-
-        \DB::statement('UPDATE shifts SET checked_in_number = "555555555", checked_out_number = "555555555" WHERE checked_in_number IS NOT NULL');
-        $this->advance();
-
-        // TODO: implement slow mode?
 
         $this->finish();
     }

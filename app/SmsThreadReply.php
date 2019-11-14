@@ -4,6 +4,7 @@ namespace App;
 use App\Traits\BelongsToOneBusiness;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\SmsThreadReplyCreated;
+use App\Traits\ScrubsForSeeding;
 
 /**
  * App\SmsThreadReply
@@ -86,5 +87,27 @@ class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
     public function thread()
     {
         return $this->belongsTo(SmsThread::class);
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'from_number' => $faker->simple_phone,
+            'to_number' => $faker->simple_phone,
+            'message' => $faker->sentence,
+            'media_url' => $faker->url,
+        ];
     }
 }

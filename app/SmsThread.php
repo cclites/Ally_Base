@@ -4,6 +4,7 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 
 /**
@@ -221,5 +222,25 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
         }
 
         return $this->recipients()->where('user_id', $user_id)->exists();
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'from_number' => $faker->simple_phone,
+            'message' => $faker->sentence,
+        ];
     }
 }

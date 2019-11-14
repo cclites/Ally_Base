@@ -7,6 +7,7 @@ use App\Billing\Service;
 use App\AuditableModel;
 use App\Caregiver;
 use App\Shift;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 
 /**
@@ -241,5 +242,36 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function getHasEvv(): bool
     {
         return $this->has_evv == 1 ? true : false;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'caregiver_last_name' => $faker->lastName,
+            'caregiver_dob' => $faker->date('Y-m-d', '-30 years'),
+            'caregiver_medicaid_id' => $faker->randomNumber(8),
+            'address1' => $faker->streetAddress,
+            'latitude' => $faker->latitude,
+            'longitude' => $faker->longitude,
+            'checked_in_number' => $faker->simple_phone,
+            'checked_out_number' => $faker->simple_phone,
+            'checked_in_latitude' => $faker->latitude,
+            'checked_in_longitude' => $faker->longitude,
+            'checked_out_latitude' => $faker->latitude,
+            'checked_out_longitude' => $faker->longitude,
+            'caregiver_comments' => $faker->sentence,
+        ];
     }
 }

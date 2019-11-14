@@ -29,6 +29,7 @@ use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use App\Events\ShiftDeleted;
@@ -1382,5 +1383,31 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         $query->whereHas('shiftFlags', function ($q) use ($flags) {
             $q->whereIn('flag', $flags);
         });
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'checked_in_number' => $faker->simple_phone,
+            'checked_out_number' => $faker->simple_phone,
+            'caregiver_comments' => $faker->sentence,
+            'checked_in_latitude' => $faker->latitude,
+            'checked_out_latitude' => $faker->latitude,
+            'checked_in_longitude' => $faker->longitude,
+            'checked_out_longitude' => $faker->longitude,
+            'other_expenses_desc' => $faker->sentence,
+        ];
     }
 }

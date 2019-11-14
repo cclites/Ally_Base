@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
+
 /**
  * App\SmsThreadRecipient
  *
@@ -55,5 +57,24 @@ class SmsThreadRecipient extends BaseModel
     public function user()
     {
         return $this->belongsTo(\App\User::class);
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    {
+        return [
+            'number' => $faker->simple_phone,
+        ];
     }
 }
