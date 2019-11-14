@@ -69,8 +69,9 @@
                     let form = new Form();
                     form.submit('delete', '/admin/chains/' + this.chain.id + '/users/' + user.id)
                         .then(response => {
-                            this.users = this.users.filter(item => item.id !== user.id);
+                            this.loadUsers();
                         })
+                        .catch(() => {})
                 }
             }
 
