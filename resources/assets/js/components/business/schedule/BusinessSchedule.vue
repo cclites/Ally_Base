@@ -128,7 +128,7 @@
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
 
-        <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId "></schedule-request-modal>
+        <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
 
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
@@ -248,6 +248,7 @@
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
     import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
+    import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
 
     export default {
         components: {BusinessLocationFormGroup, ScheduleRequestModal},
@@ -282,11 +283,9 @@
                 caregivers: this.caregiver ? [this.caregiver] : [],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
-                requestsModal: false,
                 notesModal: false,
                 clockOutModal: false,
                 selectedEvent: {},
-                selectedScheduleId: null,
                 events: [],
                 start: '',
                 end: '',
@@ -323,6 +322,11 @@
         },
 
         computed: {
+
+            requestEvents(){
+
+                return this.events.filter( e => e.requests_count > 0 );
+            },
             eventsUrl() {
                 if (!this.filtersReady || !this.end) {
                     return '';
@@ -440,6 +444,12 @@
         },
 
         methods: {
+
+            calendarRequestResponded( data ){
+
+                this.requestResponded( data );
+                this.fetchEvents(); // this should take care of background color, icon
+            },
             getFilteredEvents() {
                 let events = this.events;
 
@@ -575,7 +585,7 @@
                 if (! this.hoverShift.id) {
                     return;
                 }
-            
+
                 if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at.date).isBefore(moment())) {
                     if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
                         return;
@@ -810,9 +820,11 @@
                 let event = this.events.find(item => {
                     return item.id === id;
                 });
+                console.log( 'found event here:', event );
                 if (event) {
                     event.backgroundColor = this.getEventBackground(data);
                     event.note = data.note;
+                    event.requests_count = data.requests_count;
                     event.status = data.status;
                 }
             },
@@ -885,19 +897,19 @@
                     });
                 }
 
-                if( event.requests_count ){
+                if( event.requests_count > 0 ){
                     // adds the widget-icon for shift requests
 
                     requests = $('<span/>', {
-                        class: 'fc-note-btn',
+                        class: 'fc-note-btn hand-icon-sizing',
                         html: $('<i/>', {
-                            class: 'fa fa-hand-paper-o',
+                            class: 'solid-open-shifts-icon',
                         }),
                     });
 
                     let vm = this;
                     requests.click((e) => {
-                        console.log( 'hey clicked!', event );
+                        vm.selectedEvent = event;
                         vm.selectedScheduleId = event.id;
                         vm.hidePreview();
                         vm.requestsModal = true;
@@ -1083,13 +1095,14 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
     }
 </script>
 
 <style lang="scss">
     .fc-view-container { font-size: 0.9em; }
     .fc-event { text-align: left!important; }
+    .hand-icon-sizing { height: 20px; width: 20px; }
     .fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
     .fc-event { cursor: pointer; }
     .fc-note-btn:hover {

@@ -3270,6 +3270,7 @@ $color_cerulean_approx: #00aeef;
 $url_0: url(../../assets/images/tooltip/tooltip1.svg);
 $url_1: url(../../assets/images/tooltip/shape1.svg);
 
+$solid_open_shift_icon: url(../../assets/images/solidHand.svg);
 $open_shift_icon: url(../../assets/images/question.svg);
 
 //@extend-elements
@@ -4128,6 +4129,15 @@ Contact app Page
     display:block;
 }
 
+
+.solid-open-shifts-icon {
+
+    position: absolute;
+    background: $solid_open_shift_icon no-repeat center;
+    background-size: 100% 100%;
+    width: 20px;
+    height: 20px;
+}
 
 
 .open-shifts-icon {
