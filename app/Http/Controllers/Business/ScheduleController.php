@@ -90,7 +90,10 @@ class ScheduleController extends BaseController
         if( request()->filled( 'json' ) ){
 
             $results = Schedule::forRequestedBusinesses()
-                ->with([ 'client', 'schedule_requests' ])
+                ->with([ 'client', 'schedule_requests' => function( $q ){
+
+                    return $q->where( 'status', 'pending' );
+                }])
                 ->ordered()
                 ->inTheNextMonth( $chain->businesses->first()->timezone )
                 ->whereOpen()

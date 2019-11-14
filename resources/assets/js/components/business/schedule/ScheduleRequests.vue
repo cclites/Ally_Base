@@ -3,7 +3,7 @@
     <div>
 
         <h3>Active Requests on this Schedule</h3>
-        <h5><b>Client:</b> {{ schedule.client ? schedule.client.name : '' }} </h5>
+        <h5><b>Client:</b> {{ schedule ? schedule.client.name : '' }} </h5>
         <h5><b>Shift Date:</b> {{ scheduled_time }} </h5>
 
         <hr />
@@ -26,10 +26,10 @@
                 <div class="f-1">{{ request.pivot.status }}</div>
                 <div class="f-1">
 
-                    <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'accept' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
+                    <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'approved' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
 
                         <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                        Accept
+                        Approve
                     </b-button>
                     <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'denied' ) " v-if=" !anyApproved || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
 
@@ -64,7 +64,7 @@
                 loading  : false,
                 busy     : false,
                 requests : [],
-                schedule : {}
+                schedule : null
             }
         },
         computed : {
@@ -104,21 +104,31 @@
                         this.loading = false;
                     });
             },
-            respondToRequest( schedule, status ){
+            respondToRequest( request, status ){
+
+                if( ![ 'denied', 'approved' ].includes( status ) ) return false;
 
                 this.busy = true;
                 let form = new Form({
 
                     'status'       : status,
-                    'schedule_id'  : schedule.pivot.schedule_id,
-                    'caregiver_id' : schedule.pivot.caregiver_id
+                    'schedule_id'  : request.pivot.schedule_id,
+                    'caregiver_id' : request.pivot.caregiver_id
                 });
 
-                form.patch( '/business/schedule/requests/' + schedule.pivot.id )
+                form.patch( '/business/schedule/requests/' + request.pivot.id )
                     .then( res => {
 
-                        console.log( res );
-                        schedule.pivot.status = res.data.data;
+                        console.log( 'response from the change: ', res );
+                        request.pivot.status = res.data.data;
+
+                        this.$emit( 'request-response', { status: res.data.data, schedule_id: request.pivot.schedule_id });
+
+                        if( status === 'denied' ){
+
+                            const index = this.requests.map( el => el.pivot.schedule_id ).indexOf( request.pivot.schedule_id );
+                            this.requests.splice( index, 1 );
+                        }
                     })
                     .catch( e => {
 
@@ -139,7 +149,7 @@
             async selectedScheduleId( oldVal, newVal ){
 
                 this.requests = [];
-                this.schedule = {};
+                this.schedule = null;
                 await this.fetchRequests();
             }
         }

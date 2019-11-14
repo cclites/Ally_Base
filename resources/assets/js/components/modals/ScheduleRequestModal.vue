@@ -1,8 +1,13 @@
 <template>
 
-    <b-modal id="detailsModal" title="Open Shift Requests" v-model="showModal" size="lg">
+    <b-modal ref="schedule-request-modal" title="Open Shift Requests" v-model="showModal" size="lg">
 
-        <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId "></schedule-requests>
+        <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId " @request-response=" requestResponse "></schedule-requests>
+
+        <div slot="modal-footer">
+
+            <b-btn variant="info" @click=" showModal = false ">Close</b-btn>
+        </div>
     </b-modal>
 </template>
 
@@ -19,7 +24,7 @@
 
                 type: Number,
                 default: null,
-            },
+            }
         },
 
         computed: {
@@ -35,6 +40,14 @@
                     this.$emit( 'input', value );
                 }
             },
+        },
+
+        methods: {
+
+            requestResponse( value ){
+
+                this.$emit( 'request-response', value );
+            }
         },
 
         components: {

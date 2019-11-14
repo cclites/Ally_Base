@@ -37,7 +37,10 @@ class CaregiverScheduleRequestController extends BaseController
             return response()->json( compact( 'count' ) );
         }
 
-        $schedule = Schedule::with([ 'client' ])->findOrFail( $request->schedule );
+        $schedule = Schedule::with([ 'client', 'schedule_requests' => function( $q ){
+
+            return $q->where( 'status', 'pending' );
+        }])->findOrFail( $request->schedule );
         $this->authorize( 'read', $schedule );
 
         $schedule[ 'start' ]      = $schedule->starts_at->copy()->format( \DateTime::ISO8601 );
@@ -46,7 +49,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $requests = $schedule->schedule_requests->map( function( $r ){
 
-            $req = CaregiverScheduleRequest::find( $r->pivot->id );
+            $req = CaregiverScheduleRequest::find( $r->pivot->id ); // this may not be necessary, I may be able to pass this event in from eagar loading it above with the schedule..
             $r[ 'caregiver_client_relationship_exists' ] = $req->caregiver_client_relationship_exists();
             return $r;
         });
@@ -117,7 +120,7 @@ class CaregiverScheduleRequestController extends BaseController
         DB::beginTransaction();
         switch( $action ){
 
-            case 'accept':
+            case 'approved':
 
                 $newStatus = CaregiverScheduleRequest::REQUEST_APPROVED;
                 if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );

@@ -12,7 +12,7 @@
 
             <template slot="start" scope="data">
 
-                {{ formatDateFromUTC( data.item.start ) + ' ' + data.item.start_time + '-' + data.item.end_time }}
+                {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
             </template>
             <template slot="actions" scope="data">
 
@@ -36,7 +36,7 @@
       </div>
     </b-card>
 
-    <schedule-request-modal v-model=" scheduleModal " :selected-schedule-id=" selectedSchedule "></schedule-request-modal>
+    <schedule-request-modal v-model=" scheduleModal " :selected-schedule-id=" selectedSchedule " @request-response=" requestResponded "></schedule-request-modal>
   </div>
 </template>
 
@@ -45,6 +45,7 @@
     import FormatsDates from '../../../mixins/FormatsDates';
     import AuthUser from '../../../mixins/AuthUser';
     import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
+    import { mapActions } from 'vuex';
 
     export default {
 
@@ -129,6 +130,37 @@
 
         methods: {
 
+            ...mapActions({
+
+                updateCount : 'openShiftRequests/updateCount'
+            }),
+
+            requestResponded( data ){
+
+                const status = data.status;
+                let schedule = this.events.find( e => e.id === data.schedule_id );
+
+                if( status == 'denied' ){
+
+                    // remove a mark from the row
+                    schedule.requests_count--;
+
+                    // remove a mark from the notifcation icon
+                    this.updateCount( -1 );
+
+                    return false;
+                }
+
+                // remove the entire row
+                const index = this.events.findIndex( e => e.id === data.schedule_id );
+                this.events.splice( index, 1 );
+
+                // close the modal
+                this.scheduleModal = false;
+
+                // remove all marks within row from notification icon
+                this.updateCount( -schedule.requests_count );
+            },
             showRequestModal( schedule_id ){
 
                 this.selectedSchedule = schedule_id;

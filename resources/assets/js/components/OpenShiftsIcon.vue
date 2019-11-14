@@ -6,7 +6,7 @@
 
             <i class="notification-icon open-shifts-icon"></i>
 
-            <span class="badge badge-danger badge-notifications" v-if="total > 0">{{ total }}</span>
+            <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>
 
             <b-tooltip target="openShiftsDropdown" placement="left" title="View requests to open shifts"></b-tooltip>
         </a>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
     export default {
 
@@ -30,14 +30,13 @@ import { mapGetters } from 'vuex';
 
             return {
 
-                total: 0
             }
         },
         computed : {
 
             ...mapGetters({
 
-                getBusiness : 'getBusiness'
+                total : 'openShiftRequests/count'
             }),
             current_business(){
 
@@ -51,7 +50,11 @@ import { mapGetters } from 'vuex';
 
         methods: {
 
-            fetchRequestsCount(){
+            ...mapActions({
+
+                setCount : 'openShiftRequests/setCount',
+            }),
+            async fetchRequestsCount(){
 
                 let form = new Form({
 
@@ -63,7 +66,7 @@ import { mapGetters } from 'vuex';
                     .then( ({ data }) => {
 
                         console.log( data );
-                        this.total = data.count;
+                        this.setCount( data.count );
                     })
                     .catch( e => {
 

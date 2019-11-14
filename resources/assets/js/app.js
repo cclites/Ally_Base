@@ -74,6 +74,7 @@ Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
 Vue.component('number-input', require('./components/NumberInput'));
+Vue.component('async-loading-effect', require('./components/AsyncLoadingEffect'));
 
 Vue.component('avery-modal', require('./components/modals/AveryModal'));
 
