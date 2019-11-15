@@ -897,7 +897,7 @@
                     });
                 }
 
-                if( event.requests_count > 0 ){
+                if( !event.caregiver_id && event.requests_count > 0 ){
                     // adds the widget-icon for shift requests
 
                     requests = $('<span/>', {

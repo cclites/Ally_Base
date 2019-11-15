@@ -36,6 +36,10 @@ class CaregiverScheduleRequest extends Pivot
     const REQUEST_PENDING   = 'pending';
     const REQUEST_CANCELLED = 'cancelled';
 
+    // misc error code constants
+    const ERROR_SCHEDULE_TAKEN_RACE_CONDITION = 501;
+    const ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN = 502;
+
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************

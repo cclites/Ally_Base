@@ -54,7 +54,7 @@
                 </div>
             </div>
         </div>
-        <div v-if=" warnings && warnings.length ">
+        <div v-if=" warnings && warnings.length " class="mt-4">
 
             <b-alert v-for=" ( warning, index ) in warnings " :key=" index" variant="warning" show>
 
@@ -144,7 +144,6 @@
             },
             async fetchRequests(){
 
-                console.log( 'loading...' );
                 this.loading = true;
 
                 axios.get( `/business/schedule/requests/${this.selectedScheduleId}` )
@@ -156,7 +155,6 @@
                     })
                     .catch( error => {
 
-                        console.error( error );
                         alert( 'Error loading schedule details' );
                     })
                     .finally( () => {
@@ -179,10 +177,9 @@
                 form.patch( '/business/schedule/requests/' + request.pivot.id )
                     .then( res => {
 
-                        console.log( 'response from the change: ', res );
                         request.pivot.status = res.data.data;
 
-                        this.$emit( 'request-response', { status: res.data.data, schedule_id: request.pivot.schedule_id });
+                        this.$emit( 'request-response', { status: res.data.data, schedule: this.schedule, request: request });
 
                         if( status === 'denied' ){
 

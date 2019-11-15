@@ -44,9 +44,9 @@
 
         methods: {
 
-            requestResponse( value ){
+            requestResponse( data ){
 
-                this.$emit( 'request-response', value );
+                this.$emit( 'request-response', data );
             }
         },
 

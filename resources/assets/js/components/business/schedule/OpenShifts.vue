@@ -154,12 +154,13 @@
                 axios.post( `/schedule/requests/${schedule.id}`, { status : status } )
                     .then( res => {
 
-                        console.log( res );
                         schedule.request_status = res.data.data.status;
                     })
                     .catch( e => {
 
-                        console.log( 'error requesting shift', e );
+                        alert( 'error requesting shift, please refresh or contact support' );
+                        const index = this.events.findIndex( e => e.id == schedule.id );
+                        this.events.splice( index, 1 );
                     })
                     .finally( () => {
 

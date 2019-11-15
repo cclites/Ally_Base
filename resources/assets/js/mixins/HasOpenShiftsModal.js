@@ -20,10 +20,10 @@ export default {
         requestResponded( data ){
 
             const status = data.status;
-            let schedule = this.events.find( e => e.id === data.schedule_id );
+            let schedule = this.events.find( e => e.id === data.request.pivot.schedule_id );
 
             // only applicable when on the schedule calendar
-            if( this.selectedEvent ) this.handleCalendarProgogation( status );
+            if( this.selectedEvent ) this.handleCalendarPropogation( status, data.schedule, data.request );
 
             if( status == 'denied' ){
 
@@ -57,36 +57,14 @@ export default {
             this.selectedScheduleId = schedule_id;
             this.requestsModal    = true;
         },
-        handleCalendarPropogation( newStatus ){
+        handleCalendarPropogation( newStatus, schedule, request ){
 
-            this.selectedEvent.requests_count = ( newStatus == 'denied' ? this.selectedEvent.requests_count-- : 0 ); // if approved, set to zero and close the modal anyways
-            if( newStatus == 'approved' ) this.approveScheduleRequest();
+            this.selectedEvent.requests_count = ( newStatus == 'denied' ? this.selectedEvent.requests_count -= 1 : 0 ); // if approved, set to zero and close the modal anyways
 
-            console.log( 'updating this event: ', this.selectedEvent );
-            this.updateEvent( this.selectedEvent.id, this.selectedEvent );
+            if( newStatus == 'approved' || ( newStatus == 'denied' && this.selectedEvent.requests_count == 0 ) ){
+
+                this.updateEvent( this.selectedEvent.id, this.selectedEvent );
+            }
         },
-        approveScheduleRequest(){
-
-            let form = new Form({
-
-                status : 'approved'
-            });
-
-            // Submit form
-            let url = `/business/schedule/${this.selectedEvent.id}`;
-
-            form.hideErrorsFor( 449 ).patch( url )
-                .then( response => {
-
-                    this.fetchEvents( true );
-                })
-                .catch( error => {
-
-                    this.handleErrors( error ); // ERIK TODO => handle the over-hours.. it is error 449
-                })
-                .finally( () => {
-
-                });
-        }
     }
 }
