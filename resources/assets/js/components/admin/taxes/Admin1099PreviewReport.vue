@@ -205,6 +205,8 @@
 
             create(item){
                 let data = new Form({item});
+                data.item.year = this.form.year;
+                data.item.business_id = this.form.business_id;
                 data.post('/admin/business-1099/create');
             },
 

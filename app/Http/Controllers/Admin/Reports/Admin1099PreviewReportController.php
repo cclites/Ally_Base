@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 
 class Admin1099PreviewReportController extends Controller
 {
-    public function index(Admin1099PreviewReport $report, Request $request){
+    public function index(Request $request){
 
         if($request->json){
 
@@ -17,7 +17,7 @@ class Admin1099PreviewReportController extends Controller
                 'business_id' => 'required',
             ]);
 
-            $data = $report->applyFilters(
+            $data = new Admin1099PreviewReport(
                 $request->year,
                 $request->business_id,
                 $request->client_id,

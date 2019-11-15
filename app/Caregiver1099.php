@@ -9,6 +9,28 @@ class Caregiver1099 extends Model
     protected $query;
     protected $threshold = 600;
     protected $rows;
+    protected $year;
+    protected $business_id;
+    protected $client_id;
+    protected $caregiver_id;
+    protected $caregiver_1099;
+    protected $created;
+    protected $transmitted;
+    protected $caregiver_1099_id;
+
+    public function __construct(array $attributes = array())
+    {
+        $this->year = $attributes[0];
+        $this->business_id = $attributes[1];
+        $this->client_id = $attributes[2];
+        $this->caregiver_id = $attributes[3];
+        $this->caregiver_1099 = $attributes[4];
+        $this->created = $attributes[5];
+        $this->transmitted = $attributes[6];
+        $this->caregiver_1099_id = $attributes[7];
+
+        return $this->generateQuery();
+    }
 
     // Relations
     public function caregiver(){
@@ -17,15 +39,19 @@ class Caregiver1099 extends Model
 
 
     // Instance Methods
-    public function generateQuery(string $year, int $businessId, ?int $clientId, ?int $caregiverId, ?string $caregiver1099, ?int $created, ?int $transmitted)
+    public function generateQuery()
     {
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
 
         // IMPORTANT NOTE
         // The 1099 query needs to stay consistent year to year, we need to use the client payment date as the basis for inclusion in the tax year.
-        $year = (int)$year;
-        $businessId = (int)$businessId;
-        $threshold = 600;
+        $year = (int)$this->year;
+        $businessId = (int)$this->business_id;
+        $clientId = (int)$this->client_id;
+        $caregiverId = (int)$this->caregiver_id;
+        $caregiver1099 = (string)$this->caregiver_1099;
+        $created = (int)$this->created;
+        $transmitted = (int)$this->transmitted;
 
         $query = "SELECT c.id as client_id, 
                     u1.firstname as client_fname, 
@@ -92,6 +118,6 @@ class Caregiver1099 extends Model
                               HAVING payment_total > ?";
 
         // Get rows
-        return \DB::select($query, [$threshold]);
+        $this->rows = \DB::select($query, [$this->threshold]);
     }
 }
