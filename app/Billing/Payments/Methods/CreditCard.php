@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
@@ -12,6 +13,7 @@ use App\Traits\ScrubsForSeeding;
 use App\User;
 use Carbon\Carbon;
 use Crypt;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Billing\Payments\Methods\CreditCard
@@ -101,13 +103,12 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     /// Other Methods
     ///////////////////////////////////////////
 
-
-    function getBillingName(): string
+    public function getBillingName(): string
     {
         return $this->name_on_card;
     }
 
-    function getBillingAddress(): ?\App\Address
+    public function getBillingAddress(): ?\App\Address
     {
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
             return $address;
@@ -117,7 +118,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getBillingPhone(): ?\App\PhoneNumber
+    public function getBillingPhone(): ?\App\PhoneNumber
     {
         if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
             return $phone;
@@ -127,9 +128,9 @@ class CreditCard extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getPaymentType(): PaymentMethodType
+    public function getPaymentType(): PaymentMethodType
     {
-        return $this->type === "amex" ? PaymentMethodType::AMEX() : PaymentMethodType::CC();
+        return $this->type === 'amex' ? PaymentMethodType::AMEX() : PaymentMethodType::CC();
     }
 
     /**
@@ -174,11 +175,11 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     public function canBeMergedWith(ChargeableInterface $newPaymentMethod)
     {
         if ($newPaymentMethod instanceof self) {
-            if (!$newPaymentMethod->number) {
+            if (! $newPaymentMethod->number) {
                 return true;
             }
             // If number is present, check that there are no differences
-            if (!array_diff($this->only('number'), $newPaymentMethod->only('number'))) {
+            if (! array_diff($this->only('number'), $newPaymentMethod->only('number'))) {
                 return true;
             }
         }
@@ -193,7 +194,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     public function mergeWith(ChargeableInterface $newPaymentMethod)
     {
         // This loop provides support for mutations (encrypted values)
-        foreach(array_keys($newPaymentMethod->getAttributes()) as $key) {
+        foreach (array_keys($newPaymentMethod->getAttributes()) as $key) {
             $this->$key = $newPaymentMethod->$key;
         }
         return $this->save();
@@ -247,21 +248,22 @@ class CreditCard extends AuditableModel implements ChargeableInterface
      */
     public function getDisplayValue(): string
     {
-        return strtoupper($this->type) .  ' *' . $this->last_four;
+        return strtoupper($this->type) . ' *' . $this->last_four;
     }
-    
+
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-    
+
     /**
      * Get an array of scrubbed data to replace the original.
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'name_on_card' => $faker->name,

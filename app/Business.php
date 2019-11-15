@@ -21,6 +21,7 @@ use App\BusinessCommunications;
 use App\Traits\ScrubsForSeeding;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Business
@@ -993,9 +994,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'address1' => $faker->streetAddress,

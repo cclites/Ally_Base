@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Shift
@@ -1395,9 +1396,10 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'checked_in_number' => $faker->simple_phone,

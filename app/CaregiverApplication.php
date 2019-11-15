@@ -8,6 +8,7 @@ use App\Traits\HasSSNAttribute;
 use App\Signature;
 use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * \App\CaregiverApplication
@@ -314,9 +315,10 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'date_of_birth' => $faker->date('Y-m-d', '-30 years'),

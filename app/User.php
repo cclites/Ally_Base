@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasMetaData;
 use App\PhoneNumber;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\User
@@ -635,14 +636,15 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         $email = $faker->email;
         return [
             'date_of_birth' => $faker->date('Y-m-d', '-30 years'),
-            'lastname' => 'User',
+            'lastname' => $fast ? 'User' : $faker->lastName,
             'username' => $fast ? \DB::raw("CONCAT('user', id)") : $email,
             'email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $email,
             'notification_email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $email,

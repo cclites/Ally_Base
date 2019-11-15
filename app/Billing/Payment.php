@@ -11,8 +11,6 @@ use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\PaymentFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
-use App\Traits\ScrubsForSeeding;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -63,7 +61,6 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
-    use ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
 
     protected $table = 'payments';
     protected $guarded = ['id'];
@@ -216,31 +213,33 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         event(new PaymentFailed($this));
     }
 
-
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-
-    /**
-     * Get an array of scrubbed data to replace the original.
-     *
-     * @param \Faker\Generator $faker
-     * @return array
-     */
-    public static function getScrubbedData(\Faker\Generator $faker) : array
-    {
-        return [
-            'notes' => $faker->sentence,
-        ];
-    }
+    use \App\Traits\ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
 
     /**
      * Get the query used to identify records that will be scrubbed.
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function getScrubQuery() : Builder
+    public static function getScrubQuery() : \Illuminate\Database\Eloquent\Builder
     {
         return static::parentGetScrubQuery()->whereNotNull('notes');
+    }
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'notes' => $faker->sentence,
+        ];
     }
 }

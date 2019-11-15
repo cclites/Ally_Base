@@ -4,6 +4,7 @@ namespace App;
 use App\Billing\Payer;
 use App\Billing\Service;
 use App\Traits\ScrubsForSeeding;
+use Illuminate\Database\Eloquent\Model;
 
 
 /**
@@ -275,9 +276,10 @@ class BusinessChain extends AuditableModel
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'address1' => $faker->streetAddress,

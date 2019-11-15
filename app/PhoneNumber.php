@@ -4,6 +4,7 @@ namespace App;
 use App\Traits\ScrubsForSeeding;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\PhoneNumber
@@ -238,9 +239,10 @@ class PhoneNumber extends AuditableModel
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'national_number' => $faker->simple_phone,

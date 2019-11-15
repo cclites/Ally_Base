@@ -36,6 +36,7 @@ use App\Billing\PaymentLog;
 use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
+use Illuminate\Database\Eloquent\Model;
 
 
 /**
@@ -1013,9 +1014,10 @@ class Client extends AuditableModel implements
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
             'import_identifier' => $faker->name,

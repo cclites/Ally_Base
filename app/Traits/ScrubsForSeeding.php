@@ -11,9 +11,10 @@ trait ScrubsForSeeding
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
      * @return array
      */
-    abstract public static function getScrubbedData(\Faker\Generator $faker, bool $fast) : array;
+    abstract public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array;
 
     /**
      * Get the query used to identify records that will be scrubbed.
