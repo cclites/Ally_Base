@@ -22,6 +22,9 @@ export default {
             const status = data.status;
             let schedule = this.events.find( e => e.id === data.schedule_id );
 
+            // only applicable when on the schedule calendar
+            if( this.selectedEvent ) this.handleCalendarProgogation( status );
+
             if( status == 'denied' ){
 
                 // remove a mark from the row
@@ -30,20 +33,13 @@ export default {
                 // remove a mark from the notifcation icon
                 this.updateCount( -1 );
 
-                if( this.selectedEvent ){
-                    // only applicable when on the schedule calendar
-
-                    this.selectedEvent.requests_count--;
-                    console.log( 'updating this event: ', this.selectedEvent );
-                    this.updateEvent( this.selectedEvent.id, this.selectedEvent );
-                }
-
                 if( schedule.requests_count == 0 ){
+                    // no more requests? close the modal
 
                     this.requestsModal = false;
                 }
 
-                return false;
+                return;
             }
 
             // remove the entire row
@@ -61,5 +57,36 @@ export default {
             this.selectedScheduleId = schedule_id;
             this.requestsModal    = true;
         },
+        handleCalendarPropogation( newStatus ){
+
+            this.selectedEvent.requests_count = ( newStatus == 'denied' ? this.selectedEvent.requests_count-- : 0 ); // if approved, set to zero and close the modal anyways
+            if( newStatus == 'approved' ) this.approveScheduleRequest();
+
+            console.log( 'updating this event: ', this.selectedEvent );
+            this.updateEvent( this.selectedEvent.id, this.selectedEvent );
+        },
+        approveScheduleRequest(){
+
+            let form = new Form({
+
+                status : 'approved'
+            });
+
+            // Submit form
+            let url = `/business/schedule/${this.selectedEvent.id}`;
+
+            form.hideErrorsFor( 449 ).patch( url )
+                .then( response => {
+
+                    this.fetchEvents( true );
+                })
+                .catch( error => {
+
+                    this.handleErrors( error ); // ERIK TODO => handle the over-hours.. it is error 449
+                })
+                .finally( () => {
+
+                });
+        }
     }
 }

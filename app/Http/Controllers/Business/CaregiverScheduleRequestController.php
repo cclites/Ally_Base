@@ -37,7 +37,7 @@ class CaregiverScheduleRequestController extends BaseController
             return response()->json( compact( 'count' ) );
         }
 
-        $schedule = Schedule::with([ 'client', 'schedule_requests' => function( $q ){
+        $schedule = Schedule::with([ 'services', 'client', 'schedule_requests' => function( $q ){
 
             return $q->where( 'status', 'pending' );
         }])->findOrFail( $request->schedule );

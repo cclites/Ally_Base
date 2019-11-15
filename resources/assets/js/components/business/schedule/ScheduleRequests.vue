@@ -14,7 +14,7 @@
             <div class="text-uppercase font-bold f-1">Request Date</div>
             <div class="text-uppercase font-bold f-1">CG Worked with Client Prev.?</div>
             <div class="text-uppercase font-bold f-1">Status</div>
-            <div class="text-uppercase font-bold f-1">Actions</div>
+            <div class="text-uppercase font-bold f-1" style="min-width: 300px">Actions</div>
         </div>
         <div v-if=" !loading ">
 
@@ -24,20 +24,42 @@
                 <div class="f-1">{{ formatDateFromUTC( request.pivot.created_at ) }}</div>
                 <div class="f-1">{{ request.caregiver_client_relationship_exists ? 'yes' : 'no' }}</div>
                 <div class="f-1">{{ request.pivot.status }}</div>
-                <div class="f-1">
+                <div class="f-1" style="min-width: 300px">
 
-                    <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'approved' ) " v-if=" [ 'pending', 'denied' ].includes( request.pivot.status ) && !anyApproved ">
+                    <transition name="slide-fade" mode="out-in">
 
-                        <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                        Approve
-                    </b-button>
-                    <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'denied' ) " v-if=" !anyApproved || ( request.pivot.status == 'approved' && request.pivot.caregiver_id == request.id )">
+                        <div v-if=" !chosenRequest || request.pivot.id != chosenRequest.pivot.id " key="first">
 
-                        <i v-if=" busy " class="fa fa-spinner fa-spin mr-2" size="sm"></i>
-                        Decline
-                    </b-button>
+                            <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" checkRequest( request ) ">
+
+                                Check Warnings
+                            </b-button>
+                            <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'denied' ) ">
+
+                                Decline
+                            </b-button>
+                        </div>
+                        <div v-else key="second">
+
+                            <b-button variant="info" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'approved' ) ">
+
+                                Approve
+                            </b-button>
+                            <b-button variant="default" size="sm" type="button" :disabled=" busy " @click=" cancelRequest() ">
+
+                                Cancel
+                            </b-button>
+                        </div>
+                    </transition>
                 </div>
             </div>
+        </div>
+        <div v-if=" warnings && warnings.length ">
+
+            <b-alert v-for=" ( warning, index ) in warnings " :key=" index" variant="warning" show>
+
+                <strong>{{ warning.label }}:</strong> {{ warning.description }}
+            </b-alert>
         </div>
     </div>
 </template>
@@ -45,10 +67,11 @@
 <script>
 
     import FormatsDates from '../../../mixins/FormatsDates';
+    import ScheduleMethods from '../../../mixins/ScheduleMethods';
 
     export default {
 
-        mixins : [ FormatsDates ],
+        mixins : [ FormatsDates, ScheduleMethods ],
         props  : {
 
             selectedScheduleId: {
@@ -61,18 +84,17 @@
 
             return {
 
-                loading  : false,
-                busy     : false,
-                requests : [],
-                schedule : null
+                loading         : false,
+                busy            : false,
+                requests        : [],
+                schedule        : null,
+                checkingRequest : false,
+                chosenRequest   : null,
+                warnings        : null,
             }
         },
         computed : {
 
-            anyApproved(){
-
-                return this.requests.some( r => r.pivot.status == 'approved' );
-            },
             scheduled_time(){
 
                 if( !this.schedule ) return '';
@@ -82,6 +104,44 @@
         },
         methods: {
 
+            cancelRequest(){
+
+                this.chosenRequest = null;
+                this.checkingRequest = false;
+                this.warnings = null;
+            },
+            checkRequest( request ){
+
+                if( this.chosenRequest ) this.cancelRequest();
+
+                this.chosenRequest = request;
+                this.busy = true;
+
+                let form = new Form({
+
+                    caregiver  : request.pivot.caregiver_id,
+                    client     : request.pivot.client_id,
+                    duration   : this.getDuration(),
+                    starts_at  : this.getStartsAt(),
+                    id         : this.schedule.id,
+                    payer_id   : this.schedule.payer_id,
+                    service_id : this.schedule.service_id,
+                    services   : this.schedule.services || null, // ERIK TODO => check if this is necessary, this isnt included with the requests modal.. 
+                });
+
+                form.alertOnResponse = false; // wtf is this
+                form.post( '/business/schedule/warnings' )
+                    .then( ({ data }) => {
+
+                        this.warnings = data;
+                        this.checkingRequest = true;
+                    })
+                    .catch( e => {} )
+                    .finally( () => {
+
+                        this.busy = false;
+                    })
+            },
             async fetchRequests(){
 
                 console.log( 'loading...' );
@@ -148,9 +208,11 @@
 
             async selectedScheduleId( oldVal, newVal ){
 
+                this.cancelRequest();
                 this.requests = [];
                 this.schedule = null;
                 await this.fetchRequests();
+                this.setDataFromSchedule();
             }
         }
     }
