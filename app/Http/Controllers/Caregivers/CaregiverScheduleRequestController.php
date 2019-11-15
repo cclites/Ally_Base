@@ -50,7 +50,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $outstanding_request = $schedule->latest_request_for( $caregiver->id );
 
-        if( $outstanding_request->status == CaregiverScheduleRequest::REQUEST_DENIED ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
+        if( optional( $outstanding_request )->status == CaregiverScheduleRequest::REQUEST_DENIED ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
 
         if( empty( $outstanding_request ) ){
             // no existing relationship, create one
