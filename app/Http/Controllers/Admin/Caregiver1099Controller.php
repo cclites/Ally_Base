@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Business;
+namespace App\Http\Controllers\Admin;
 
+use App\Business\Caregiver1099;
+use App\Caregiver;
+use App\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class Business1099Controller extends Controller
+class Caregiver1099Controller extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -33,9 +36,27 @@ class Business1099Controller extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+
+
     public function store(Request $request)
     {
-        //
+        /*$data = Client::find($request->item['client_id'])->load([
+                        'addresses',
+                        'caregivers',
+                        'caregivers.addresses'
+                    ])
+                    ->whereHas(Caregiver::class, function ($q) use($request){
+                       $q->where('id', $request['caregiver_id']);
+                    })->get();*/
+
+        $data = Client::where('clients.id', $request->item['client_id'])
+            ->whereHas('caregivers', function ($q) use($request){
+                $q->where('caregivers.id', $request['caregiver_id']);
+            })->get();
+
+
+        \Log::info(json_encode($data));
     }
 
     /**

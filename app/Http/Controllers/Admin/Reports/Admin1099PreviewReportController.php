@@ -14,17 +14,20 @@ class Admin1099PreviewReportController extends Controller
 
             $request->validate([
                 'year'=> 'required',
+                'business_id' => 'required',
             ]);
 
-            $report->applyFilters(
+            $data = $report->applyFilters(
                 $request->year,
                 $request->business_id,
                 $request->client_id,
                 $request->caregiver_id,
-                $request->caregiver_1099
+                $request->caregiver_1099,
+                $request->created,
+                $request->transmitted
             );
 
-            return response()->json($report->rows());
+            return response()->json($data);
         }
 
         return view_component(

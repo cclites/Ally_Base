@@ -15,7 +15,12 @@ class CaregiverController extends Controller
      */
     public function index(Request $request)
     {
-        $caregivers = Caregiver::query()->active()->orderByName();
+        if(filled($request->active)){
+            $caregivers = Caregiver::query()->orderByName();
+        }else{
+            $caregivers = Caregiver::query()->active()->orderByName();
+        }
+
 
         if(filled($request->id)){
             $caregivers->forRequestedBusinesses([$request->id]);

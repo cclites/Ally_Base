@@ -385,12 +385,6 @@ Route::group([
 
     Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
 
-    Route::get('business-1099', 'Business\Business1099Controller@index')->name('business-1099');
-    Route::get('business-1099/{id}', 'Business\Business1099Controller@show')->name('business-1099-edit');
-    Route::post('business-1099/create', 'Business\Business1099Controller@create')->name('business-1099-create');
-    Route::patch('business-1099/update', 'Business\Business1099Controller@update')->name('business-1099-update');
-    Route::get('business-1099/transmit', 'Business\Business1099Controller@transmit')->name('business-1099-transmit');
-
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
     Route::get('statements/payments/{payment}/itemized', 'Business\StatementController@itemizePayment')->name('statements.payment.itemized');
@@ -616,6 +610,11 @@ Route::group([
     Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
     Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list'); //preview-1099-report
     Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
+    Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
+    Route::get('business-1099/{id}', 'Admin\Caregiver1099Controller@show')->name('business-1099-edit');
+    Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
+    Route::patch('business-1099/update', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
+    Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
 
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');

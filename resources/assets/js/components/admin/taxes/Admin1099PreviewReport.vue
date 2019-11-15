@@ -58,7 +58,7 @@
 
             <b-form-group label="1099 Status" label-for="created_status" class="mr-2">
                 <b-form-select id="created_status"
-                               v-model="form.status"
+                               v-model="form.created"
                 >
                     <option value="">Any</option>
                     <option value="1">Created</option>
@@ -68,7 +68,7 @@
 
             <b-form-group label="Transmission Status" label-for="transmission_status" class="mr-2">
                 <b-form-select id="transmission_status"
-                               v-model="form.transmission"
+                               v-model="form.transmitted"
                 >
                     <option value="">All</option>
                     <option value="1">Transmitted</option>
@@ -154,8 +154,8 @@
                         caregiver_id: '',
                         year: '',
                         caregiver_1099: '',
-                        status: '',
-                        transmission: '',
+                        created: '',
+                        transmitted: '',
                         json: 1,
                 }),
                 transmitSelected: [],
@@ -175,7 +175,7 @@
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
                     {key: 'caregiver_fname', label: 'Caregiver First Name', sortable: true,},
                     {key: 'caregiver_lname', label: 'Caregiver Last Name', sortable: true,},
-                    {key: 'caregiver_1099', label: '1099 Status', sortable: true, formatter: x => { return _.startCase(x) }},
+                    {key: 'caregiver_1099', label: 'Caregiver 1099', sortable: true, formatter: x => { return _.startCase(x) }},
                     {key: 'location', label: 'Location', sortable: true,},
                     {key: 'total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     'actions',
@@ -190,6 +190,7 @@
 
             generate(){
                 this.busy = true;
+                this.totalRows = 0;
                 this.form.get('/admin/preview-1099-report')
                     .then( ({ data }) => {
                         this.items = data;
@@ -204,7 +205,7 @@
 
             create(item){
                 let data = new Form({item});
-                this.data.post('/admin/business-1099/create');
+                data.post('/admin/business-1099/create');
             },
 
             edit(id){
@@ -214,7 +215,7 @@
             transmit(){
                 let data = new Form({transmitSelected});
 
-                this.data.get('/admin/business-1099/transmit')
+                data.get('/admin/business-1099/transmit')
                     .then(response => {
                     })
                     .catch( e => {
@@ -226,8 +227,8 @@
         watch: {
             'form.business_id'(newVal, oldVal){
                 if(newVal !== oldVal){
-                    axios.get('/admin/clients?json=1&id=' + this.form.business_id).then(response => this.clients = response.data);
-                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id).then(response => this.caregivers = response.data);
+                    axios.get('/admin/clients?json=1&id=' + this.form.business_id + '&active=1').then(response => this.clients = response.data);
+                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id + '&active=1').then(response => this.caregivers = response.data);
                     this.client_id='';
                     this.caregiver_id='';
                 }
