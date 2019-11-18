@@ -371,7 +371,7 @@ class ClearSensitiveData extends Command
         // Clear Quickbooks access tokens
         QuickbooksConnection::whereRaw(1)->update([
             'access_token' => null,
-            'desktop_api_key' => md5(Carbon::now()->toDateTimeString())
+            'desktop_api_key' => \DB::raw("CONCAT(business_id, '" . substr(md5(Carbon::now()->toDateTimeString()), 0, 29) . "')"),
         ]);
         $this->advance();
 
