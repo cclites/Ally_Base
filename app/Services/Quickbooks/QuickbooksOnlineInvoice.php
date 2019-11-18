@@ -148,7 +148,7 @@ class QuickbooksOnlineInvoice
             $lineItem = new QuickbooksOnlineInvoiceItem();
             $lineItem->quantity = $invoiceItem->units;
 
-            if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY) {
+            if ($connection->getFeeType($client) == QuickbooksConnection::FEE_TYPE_REGISTRY) {
                 // Use the provider/registry rates
 
                 if (empty($invoiceItem->getInvoiceable())) {

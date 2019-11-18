@@ -215,4 +215,17 @@ class QuickbooksConnection extends AuditableModel
     {
         return $this->name_format;
     }
+
+    /**
+     * Get the connections fee type based on a client's client type.
+     *
+     * @param Client $client
+     * @return string
+     */
+    public function getFeeType(Client $client) : string
+    {
+        $field = "fee_type_" . strtolower($client->client_type);
+
+        return $this->$field;
+    }
 }

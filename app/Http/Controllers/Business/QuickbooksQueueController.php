@@ -90,7 +90,7 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(500, 'An unexpected error occurred trying to connect to the Quickbooks API.  Please try again.');
         }
 
-        if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
+        if ($connection->getFeeType($client) == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
             return new ErrorResponse(500, 'Invoices must be charged and paid in full in order to transmit registry fees.');
         }
 
@@ -160,7 +160,7 @@ class QuickbooksQueueController extends Controller
             return new ErrorResponse(401, 'You must configure your Quickbooks Desktop connection in order to use this feature.  Please visit the Settings > Quickbooks area to manage your Quickbooks configuration.  Note: this includes setting up all service mappings.');
         }
 
-        if ($connection->fee_type == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
+        if ($connection->getFeeType($client) == QuickbooksConnection::FEE_TYPE_REGISTRY && $invoice->getAmountDue() > 0) {
             return new ErrorResponse(500, 'Invoices must be charged and paid in full in order to transmit registry fees.');
         }
 
