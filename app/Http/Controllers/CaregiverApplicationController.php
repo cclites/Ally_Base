@@ -178,7 +178,7 @@ class CaregiverApplicationController extends BusinessBaseController
             return new SuccessResponse('Application Deleted');
         }
 
-        return new ErrorResponse('Unable to delete application');
+        return new ErrorResponse(500, 'Unable to delete application');
 
     }
 
@@ -190,7 +190,7 @@ class CaregiverApplicationController extends BusinessBaseController
             return new SuccessResponse('Application has been archived');
         }
 
-        return new ErrorResponse('Unable to archive application');
+        return new ErrorResponse(500, 'Unable to archive application');
     }
 
     /**

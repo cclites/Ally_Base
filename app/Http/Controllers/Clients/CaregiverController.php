@@ -30,7 +30,7 @@ class CaregiverController extends Controller
         return response()->json([
             'caregiver'=>$caregiver,
             'address'=>$caregiver->getAddress(),
-            'phone'=>$caregiver->getPhoneNumber()->number
+            'phone'=>$caregiver->getPhoneNumber()
         ]);
 
     }

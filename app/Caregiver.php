@@ -207,6 +207,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         'pets_cats_okay',
         'pets_birds_okay',
         'ethnicity',
+        'uses_ein_number',
     ];
     protected $appends = [ 'masked_ssn' ];
     protected $attributes = [];
@@ -412,9 +413,14 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      * @return \App\CaregiverAvailability|false
      */
     public function setAvailability(array $data) {
+
         $availability = $this->availability()->firstOrNew([]);
         $availability->fill($data);
-        return $availability->save() ? $availability : false;
+
+        $saved = $availability->save();
+
+        return $saved ? $availability : false;
+
     }
 
     /**

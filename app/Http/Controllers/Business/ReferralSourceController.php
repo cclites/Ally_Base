@@ -15,9 +15,7 @@ class ReferralSourceController extends BaseController
     public function index(Request $request)
     {
         $type = $request->type;
-        $chain = auth()->user()->getChain();
-
-        $referralsources = $chain
+        $referralsources = $this->businessChain()
             ->referralSources()
             ->forType($type)
             ->ordered()
@@ -29,7 +27,7 @@ class ReferralSourceController extends BaseController
 
         $referralsources = ReferralSource::orderResources($referralsources);
 
-        return view('business.referral.list', compact('referralsources', 'edit', 'create', 'type'));
+        return view('business.referral.list', compact('referralsources', 'type'));
     }
 
     public function create()

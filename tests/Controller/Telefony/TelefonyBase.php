@@ -15,9 +15,24 @@ class TelefonyBase extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @var \App\Business
+     */
     public $business;
+
+    /**
+     * @var \App\Caregiver
+     */
     public $caregiver;
+
+    /**
+     * @var \App\Client
+     */
     public $client;
+
+    /**
+     * @var \App\PhoneNumber
+     */
     public $phone;
 
     public function setUp()

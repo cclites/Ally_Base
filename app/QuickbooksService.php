@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class QuickbooksService extends BaseModel
+class QuickbooksService extends AuditableModel
 {
     use SoftDeletes;
 

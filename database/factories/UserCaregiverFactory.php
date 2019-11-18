@@ -10,6 +10,7 @@ $factory->define(Caregiver::class, function(Faker $faker) {
     $user_data = userFactory($faker);
     $ssn = $faker->randomNumber(3) . '-' . $faker->randomNumber(2) . '-' . $faker->randomNumber(4);
     return array_merge($user_data, [
+        'uses_ein_number' => false,
         'ssn' => $ssn,
         'title' => $faker->randomElement(['CNA', 'LPN', 'RN']),
         'hire_date' => $faker->date(),
@@ -31,6 +32,7 @@ $factory->state(Caregiver::class, 'w9', function(Faker $faker) {
     ]);
     $address = factory(Address::class)->make();
     return array_merge($user_data, [
+        'uses_ein_number' => false,
         'ssn' => $ssn,
         'title' => $faker->randomElement(['CNA', 'LPN', 'RN']),
         'hire_date' => $faker->date(),

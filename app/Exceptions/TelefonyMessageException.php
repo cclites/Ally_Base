@@ -11,5 +11,4 @@ namespace App\Exceptions;
  */
 class TelefonyMessageException extends \Exception
 {
-
 }

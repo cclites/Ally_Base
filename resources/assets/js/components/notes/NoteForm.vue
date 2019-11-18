@@ -194,7 +194,7 @@
                 console.log('loadReferralSources called');
                 let userType = 'client';
                 if(this.caregiver){
-                    let userType = 'caregiver';
+                    userType = 'caregiver';
                 }
                 const response = await axios('/business/referral-sources?type=' + userType + '&json=1');
                 this.referral_sources = response.data;

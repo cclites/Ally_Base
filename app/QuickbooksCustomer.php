@@ -2,7 +2,7 @@
 
 namespace App;
 
-class QuickbooksCustomer extends BaseModel
+class QuickbooksCustomer extends AuditableModel
 {
     /**
      * The attributes that aren't mass assignable.

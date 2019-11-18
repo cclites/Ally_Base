@@ -20,8 +20,10 @@
                                 <th>Caregiver:</th>
                                 <td>
                                     <div class="mb-2">{{ viewTitle }}</div>
-                                    <b-button v-if="!selectedCaregiver.id" size="sm" @click="fetchCaregiver(selectedEvent.caregiver_id)">Show Details</b-button>
-                                    <b-button v-else size="sm" @click="selectedCaregiver = {}">Hide Details</b-button>
+                                    <div v-if="selectedEvent && selectedEvent.caregiver_id">
+                                        <b-button v-if="!selectedCaregiver.id" size="sm" @click="fetchCaregiver(selectedEvent.caregiver_id)">Show Details</b-button>
+                                        <b-button v-else size="sm" @click="selectedCaregiver = {}">Hide Details</b-button>
+                                    </div>
                                 </td>
                             </tr>
 

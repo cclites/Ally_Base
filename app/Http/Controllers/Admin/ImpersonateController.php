@@ -16,7 +16,7 @@ class ImpersonateController extends Controller
 
     public function stopImpersonating()
     {
-        if (auth()->user()->impersonator()) {
+        if (\Auth::check() && auth()->user()->impersonator()) {
             auth()->user()->stopImpersonating();
             return redirect()->route('admin.users.index');
         }
