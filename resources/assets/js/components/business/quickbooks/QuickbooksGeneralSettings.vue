@@ -5,46 +5,36 @@
         <div v-else class="mb-2">
             <b-row>
                 <b-col lg="6">
-                    <h3>General Settings</h3>
-                </b-col>
-            </b-row>
-            <b-row class="mb-4">
-                <b-col lg="6">
-                    <b-form-group label="Customer Name Format" label-for="name_format" label-class="required">
-                        <b-select name="name_format" id="name_format" v-model="form.name_format" :disabled="busy">
-                            <option value="">-- Select Name Format --</option>
-                            <option value="first_last">John Doe</option>
-                            <option value="last_first">Doe, John</option>
-                        </b-select>
-                        <input-help :form="form" field="name_format" text="Select how we should format client names when we create customers."></input-help>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Fee Type" label-for="fee_type" label-class="required">
-                        <b-select name="fee_type" id="fee_type" v-model="form.fee_type" :disabled="busy">
-                            <option value="">-- Select Fee Type --</option>
-                            <option value="registry">Registry (Amount paid to registry)</option>
-                            <option value="client">Client (Amount paid by client)</option>
-                        </b-select>
-                        <input-help :form="form" field="fee_type" text="Select the fee type used to calculate invoice amounts."></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row class="mb-2" align-h="end">
-                <b-col lg="6">
-                    <h3>Service Mapping</h3>
-                </b-col>
-                <b-col md="6" class="text-right">
-                    <b-btn v-if="connection.is_desktop" variant="success" href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank" :disabled="busy">
-                        How to Sync Quickbooks Services
-                    </b-btn>
-                    <b-btn v-else variant="success" @click="refreshServices()" :disabled="busy">
-                        Sync Quickbooks Services
-                    </b-btn>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col md="6">
+                    <b-row>
+                        <b-col lg="12">
+                            <h3>General Settings</h3>
+                        </b-col>
+                    </b-row>
+                    <b-row class="mb-4">
+                        <b-col lg="12">
+                            <b-form-group label="Customer Name Format" label-for="name_format" label-class="required">
+                                <b-select name="name_format" id="name_format" v-model="form.name_format" :disabled="busy">
+                                    <option value="">-- Select Name Format --</option>
+                                    <option value="first_last">John Doe</option>
+                                    <option value="last_first">Doe, John</option>
+                                </b-select>
+                                <input-help :form="form" field="name_format" text="Select how we should format client names when we create customers."></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12" class="d-flex">
+                            <h3 class="f-1">Service Mapping</h3>
+                            <div class="ml-auto">
+                                <b-btn v-if="connection.is_desktop" variant="success" href="https://jtrsolutions.atlassian.net/wiki/spaces/AKB/pages/20316176/Setting+up+Ally+for+Quickbooks+Desktop" target="_blank" :disabled="busy">
+                                    How to Sync Quickbooks Services
+                                </b-btn>
+                                <b-btn v-else variant="success" @click="refreshServices()" :disabled="busy">
+                                    Sync Quickbooks Services
+                                </b-btn>
+                            </div>
+                        </b-col>
+                    </b-row>
                     <b-form-group label="Shift Service Overrides" label-for="allow_shift_overrides">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="form.allow_shift_overrides" />
@@ -77,8 +67,7 @@
                         </b-select>
                         <input-help :form="form" field="expense_service_id" text="Select the service to use for shift expenses."></input-help>
                     </b-form-group>
-                </b-col>
-                <b-col lg="6">
+
                     <b-form-group label="Refund Service" label-for="refund_service_id" label-class="required">
                         <b-select name="refund_service_id" id="refund_service_id" v-model="form.refund_service_id" :disabled="busy">
                             <option value="">-- Map Refund Service --</option>
@@ -95,8 +84,26 @@
                         <input-help :form="form" field="adjustment_service_id" text="Select the service to use for manual adjustments."></input-help>
                     </b-form-group>
                 </b-col>
-            </b-row>
 
+                <b-col lg="6">
+                    <b-row class="mb-2">
+                        <b-col lg="12">
+                            <h3>Fee Type By Client Type</h3>
+                            <div class="text-muted">Select the fee type used to calculate invoice amounts on a client type basis.</div>
+                        </b-col>
+                    </b-row>
+                    <b-row class="mb-1" v-for="clientType in clientTypeOptions" :key="clientType.value">
+                        <b-col md="12">
+                            <b-form-group :label="clientType.text">
+                                <b-form-radio-group stacked v-model="form['fee_type_'+clientType.value.toLowerCase()]" :name="clientType.value" class="">
+                                    <b-radio value="registry">Registry (Amount paid to registry)</b-radio>
+                                    <b-radio value="client">Client (Amount paid to client)</b-radio>
+                                </b-form-radio-group>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col md="6">
                     <b-btn variant="info" @click="save()" :disabled="busy">Save Changes</b-btn>
@@ -107,7 +114,11 @@
 </template>
 
 <script>
+    import Constants from "../../../mixins/Constants";
+
     export default {
+        mixins: [Constants],
+
         props: {
             connection: {
                 type: [Array, Object],
@@ -123,7 +134,11 @@
             return {
                 form: new Form({
                     name_format: this.connection.name_format || '',
-                    fee_type: this.connection.fee_type || 'registry',
+                    fee_type_lead_agency: this.connection.fee_type_lead_agency || 'registry',
+                    fee_type_ltci: this.connection.fee_type_ltci || 'registry',
+                    fee_type_medicaid: this.connection.fee_type_medicaid || 'registry',
+                    fee_type_private_pay: this.connection.fee_type_private_pay || 'registry',
+                    fee_type_va: this.connection.fee_type_va || 'registry',
                     shift_service_id: this.connection.shift_service_id || '',
                     mileage_service_id: this.connection.mileage_service_id || '',
                     adjustment_service_id: this.connection.adjustment_service_id || '',

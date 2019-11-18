@@ -30,6 +30,22 @@ export default {
                 { value: 'white', text: 'White or Caucasian' },
             ],
             smsLength: 160,
+
+            CLIENT_TYPES: {
+                LEAD_AGENCY: 'lead_agency',
+                LTCI: 'LTCI',
+                MEDICAID: 'medicaid',
+                PRIVATE_PAY: 'private_pay',
+                VA: 'VA',
+            },
+            clientTypeOptions: [
+                { value: 'lead_agency', text: 'Lead Agency' },
+                { value: 'LTCI', text: 'LTCI' },
+                { value: 'medicaid', text: 'Medicaid' },
+                { value: 'private_pay', text: 'Private Pay' },
+                { value: 'VA', text: 'VA' },
+            ],
+            // TODO: refactor frontend to use clientTypeOptions and remove 'clientTypes' to formalize convention
             clientTypes: [
                 {value:'lead_agency', text:'Lead Agency'},
                 {value:'LTCI', text:'LTCI'},
