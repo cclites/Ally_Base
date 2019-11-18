@@ -1410,6 +1410,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             'checked_in_longitude' => $faker->longitude,
             'checked_out_longitude' => $faker->longitude,
             'other_expenses_desc' => $faker->sentence,
+            'checked_in_ip' => $faker->ipv4,
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
+use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\PaymentLog;
@@ -56,15 +57,23 @@ use App\ReferralSource;
 use App\SalesPerson;
 use App\ScheduleNote;
 use App\Shift;
+use App\ShiftConfirmation;
+use App\ShiftGoal;
+use App\ShiftIssue;
+use App\ShiftQuestion;
+use App\Signature;
+use App\SkilledNursingPoc;
 use App\SmsThread;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
+use App\SystemNotification;
+use App\Task;
+use App\TimesheetEntry;
 use App\Traits\Console\HasProgressBars;
 use App\User;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Console\Command;
-use OwenIt\Auditing\Auditable;
 
 class ClearSensitiveData extends Command
 {
@@ -121,14 +130,14 @@ class ClearSensitiveData extends Command
             $this->fastMode = true;
         }
 
-        $this->scrubModel(SalesPerson::class);
-        exit;
-
         // Truncate large and otherwise useless tables.
         $this->clearPasswordResets();
         $this->clearAuditLog();
         $this->clearCommunicationsLog();
         $this->cleanClientOnboarding();
+        $this->truncateOldSchedulesTable();
+        $this->truncateSystemExceptions();
+        $this->truncateUsersDeleted();
 
         // Fix encryption
         $this->cleanEncryptedClientData();
@@ -192,6 +201,16 @@ class ClearSensitiveData extends Command
             $this->scrubModel(QuickbooksConnection::class);
             $this->scrubModel(ReferralSource::class);
             $this->scrubModel(SalesPerson::class);
+            $this->scrubModel(ShiftConfirmation::class);
+            $this->scrubModel(ShiftExpense::class);
+            $this->scrubModel(ShiftQuestion::class);
+            $this->scrubModel(ShiftIssue::class);
+            $this->scrubModel(ShiftGoal::class);
+            $this->scrubModel(Signature::class);
+            $this->scrubModel(SkilledNursingPoc::class);
+            $this->cleanSystemNotifications();
+            $this->scrubModel(Task::class);
+            $this->scrubModel(TimesheetEntry::class);
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -199,6 +218,44 @@ class ClearSensitiveData extends Command
         $this->info('Success.');
 
         return 0;
+    }
+
+    /**
+     * Clear out the unused users_deleted table.
+     */
+    public function truncateUsersDeleted() : void
+    {
+        \DB::table('users_deleted')->truncate();
+    }
+
+    /**
+     * Clear out old notifications before cleaning the table.
+     */
+    public function cleanSystemNotifications() : void
+    {
+        $this->info("Clearing old system notifications...");
+        // Delete notifications that are more than 3 months old
+        SystemNotification::where('created_at', '<', Carbon::now()->subMonths(1))
+            ->delete();
+
+        $this->scrubModel(SystemNotification::class);
+    }
+
+    /**
+     * Clear the unused system_exceptions table.  This was replaced
+     * by 'system notifications'.
+     */
+    public function truncateSystemExceptions()
+    {
+        \DB::table('system_exceptions')->truncate();
+    }
+
+    /**
+     * Clear the unused schedules_old table.
+     */
+    public function truncateOldSchedulesTable() : void
+    {
+        \DB::table('schedules_old')->truncate();
     }
 
     /**
