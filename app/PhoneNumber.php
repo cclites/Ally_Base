@@ -1,8 +1,10 @@
 <?php
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\PhoneNumber
@@ -225,5 +227,25 @@ class PhoneNumber extends AuditableModel
         $phone = new self();
         $phone->input($number);
         return $phone->national_number;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'national_number' => $faker->simple_phone,
+        ];
     }
 }

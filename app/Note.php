@@ -3,6 +3,8 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use App\Traits\ScrubsForSeeding;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Note
@@ -82,5 +84,27 @@ class Note extends AuditableModel implements BelongsToBusinessesInterface
     public function creator()
     {
         return $this->belongsTo('App\User', 'created_by');
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'body' => $faker->sentence,
+            'title' => $faker->sentence,
+            'tags' => $faker->word,
+        ];
     }
 }

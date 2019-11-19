@@ -6,7 +6,6 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Business;
 use App\Businesses\Timezone;
-use App\Caregiver;
 use App\Client;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\PaymentFailed;
@@ -214,4 +213,33 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         event(new PaymentFailed($this));
     }
 
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery() : \Illuminate\Database\Eloquent\Builder
+    {
+        return static::parentGetScrubQuery()->whereNotNull('notes');
+    }
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'notes' => $faker->sentence,
+        ];
+    }
 }

@@ -21,12 +21,14 @@ use App\Traits\HasDefaultRates;
 use App\Traits\HasPaymentHold;
 use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
+use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
 use App\Traits\CanHaveEmptyEmail;
 use App\Traits\CanHaveEmptyUsername;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Caregiver
@@ -167,6 +169,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
+    use ScrubsForSeeding;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -841,5 +844,30 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         }
 
         return config('ally.local_timezone');
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'deactivation_note' => $fast ? null : $faker->sentence,
+            'preferences' => $fast ? null : $faker->sentence,
+            'w9_name' => $faker->name,
+            'w9_business_name' => $faker->company,
+            'w9_address' => $faker->streetAddress,
+            'w9_employer_id_number' => $faker->randomNumber(9),
+            'medicaid_id' => $faker->randomNumber(9),
+        ];
     }
 }

@@ -280,4 +280,29 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
     {
         $builder->whereIn('business_id', $businessIds);
     }
+    
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+    
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'lastname' => $faker->lastName,
+            'email' => $faker->email,
+            'date_of_birth' => $faker->dateTimeThisCentury->format('Y-m-d'),
+            'phone' => $faker->simple_phone,
+            'address1' => $faker->streetAddress,
+            'referred_by' => $faker->name,
+        ];
+    }
 }
