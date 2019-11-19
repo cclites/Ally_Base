@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
-use App\Reports\Admin1099PreviewReport;
+use App\Caregiver1099;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -17,15 +17,29 @@ class Admin1099PreviewReportController extends Controller
                 'business_id' => 'required',
             ]);
 
-            $data = new Admin1099PreviewReport(
-                $request->year,
-                $request->business_id,
-                $request->client_id,
-                $request->caregiver_id,
-                $request->caregiver_1099,
-                $request->created,
-                $request->transmitted
+            $caregiver1099s = new Caregiver1099(
+                $request->all()
             );
+
+            $records = $caregiver1099s->records();
+
+            $data = collect($records)->map(function($record){
+
+                return[
+                    'client_fname' => $record->client_fname,
+                    'client_lname' => $record->client_lname,
+                    'caregiver_fname' => $record->caregiver_fname,
+                    'caregiver_lname' => $record->caregiver_lname,
+                    'business_name' => $record->business_name,
+                    'payment_total' => $record->payment_total,
+                    'caregiver_1099' => $record->caregiver_1099,
+                    'caregiver_1099_id' => $record->caregiver_1099_id,
+                    'caregiver_id' => $record->caregiver_id,
+                    'client_id' => $record->client_id,
+                    'transmitted' => $record->transmitted_at,
+                ];
+
+            });
 
             return response()->json($data);
         }

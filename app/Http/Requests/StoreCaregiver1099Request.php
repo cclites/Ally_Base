@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCaregiver1099Request extends FormRequest
+class StoreCaregiver1099Request extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,11 +27,15 @@ class UpdateCaregiver1099Request extends FormRequest
      */
     public function rules()
     {
+
+        \Log::info(json_encode($this->all()));
+
         return [
             'year' => 'required|integer',
             'business_id' => 'required|integer',
             'client_id' => 'required|integer',
             'caregiver_id' => 'required|integer',
+            'payment_total' => 'required|numeric'
         ];
     }
 }

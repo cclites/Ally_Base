@@ -31,9 +31,9 @@ class CreateTable1099s extends Migration
             $table->string('caregiver_address2')->nullable();
             $table->string('caregiver_address3')->nullable();
             $table->integer('business_id')->unsigned()->nullable();
-            $table->decimal('total_amount', 9)->nullable();
-            $table->smallInteger('year')->nullable();
-            $table->integer('created_by')->unsigned()->nullable();
+            $table->decimal('payment_total', 9);
+            $table->smallInteger('year');
+            $table->string('created_by');
             $table->integer('modified_by')->unsigned()->nullable();
             $table->dateTime('transmitted_at')->nullable();
             $table->integer('transmitted_by')->unsigned()->nullable();
@@ -41,6 +41,7 @@ class CreateTable1099s extends Migration
             $table->foreign('client_id', 'fk_client_id')->references('id')->on('clients')->onDelete('set null');
             $table->foreign('caregiver_id', 'fk_caregiver_id')->references('id')->on('caregivers')->onDelete('set null');
             $table->foreign('business_id', 'fk_business_id')->references('id')->on('businesses')->onDelete('set null');
+            $table->unique(['client_id', 'caregiver_id', 'year', 'payment_total'], 'unique_1099_index');
         });
     }
 

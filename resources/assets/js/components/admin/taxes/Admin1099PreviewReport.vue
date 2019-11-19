@@ -100,9 +100,10 @@
                             :busy="busy"
                             :current-page="currentPage"
                             :per-page="perPage"
+                            ref="table"
                     >
                         <template slot="actions" scope="row">
-                            <b-btn @click="create(row.item)" class="btn btn-secondary" title="Create 1099"><i class="fa fa-plus mr-2"></i></b-btn>
+                            <b-btn @click="create(row)" class="btn btn-secondary" title="Create 1099"><i class="fa fa-plus mr-2"></i></b-btn>
                             <b-btn v-if="row.item.caregiver_1099_id"
                                    @click="edit(row.item.caregiver_1099_id)"
                                    class="btn btn-secondary"
@@ -140,6 +141,8 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
+    /****************************/
+
     export default {
         name: "Admin1099PreviewReport",
         mixins: [FormatsNumbers],
@@ -176,8 +179,8 @@
                     {key: 'caregiver_fname', label: 'Caregiver First Name', sortable: true,},
                     {key: 'caregiver_lname', label: 'Caregiver Last Name', sortable: true,},
                     {key: 'caregiver_1099', label: 'Caregiver 1099', sortable: true, formatter: x => { return _.startCase(x) }},
-                    {key: 'location', label: 'Location', sortable: true,},
-                    {key: 'total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
+                    {key: 'business_name', label: 'Location', sortable: true,},
+                    {key: 'payment_total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     'actions',
                     'transmit'
                 ],
@@ -203,11 +206,30 @@
                     })
             },
 
-            create(item){
-                let data = new Form({item});
-                data.item.year = this.form.year;
-                data.item.business_id = this.form.business_id;
-                data.post('/admin/business-1099/create');
+            create(row){
+
+                let index = row.index;
+
+                console.log("INDEX IS " + index);
+
+                let data = new Form({
+                    'year': this.form.year,
+                    'business_id': this.form.business_id,
+                    'client_id' : row.item.client_id,
+                    'caregiver_id' : row.item.caregiver_id,
+                    'payment_total' : row.item.payment_total,
+                });
+
+                data.post('/admin/business-1099/create')
+                    .then(response => {
+                        //this.items.splice(index, 1, response.data);
+                        this.items[index] = response.data;
+                        this.$refs.table.refresh();
+                    })
+                    .catch( e => {
+                    })
+                    .finally(() => {
+                    });
             },
 
             edit(id){
@@ -224,6 +246,7 @@
                     })
                     .finally(() => {
                     });
+
             },
         },
         watch: {

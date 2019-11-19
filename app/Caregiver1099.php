@@ -8,28 +8,15 @@ class Caregiver1099 extends Model
 {
     protected $query;
     protected $threshold = 600;
-    protected $rows;
-    protected $year;
-    protected $business_id;
-    protected $client_id;
-    protected $caregiver_id;
-    protected $caregiver_1099;
-    protected $created;
-    protected $transmitted;
-    protected $caregiver_1099_id;
+    protected $records;
+    protected $filters = [];
+    protected $table = 'caregiver_1099s';
+    protected $guarded = [];
 
-    public function __construct(array $attributes = array())
+    public function __construct(array $attributes)
     {
-        $this->year = $attributes[0];
-        $this->business_id = $attributes[1];
-        $this->client_id = $attributes[2];
-        $this->caregiver_id = $attributes[3];
-        $this->caregiver_1099 = $attributes[4];
-        $this->created = $attributes[5];
-        $this->transmitted = $attributes[6];
-        $this->caregiver_1099_id = $attributes[7];
-
-        return $this->generateQuery();
+        $this->addAttributes($attributes);
+        $this->generateQuery();
     }
 
     // Relations
@@ -37,7 +24,9 @@ class Caregiver1099 extends Model
         return belongsTo(Caregiver::class);
     }
 
-
+    public function records(){
+        return $this->records;
+    }
     // Instance Methods
     public function generateQuery()
     {
@@ -45,13 +34,7 @@ class Caregiver1099 extends Model
 
         // IMPORTANT NOTE
         // The 1099 query needs to stay consistent year to year, we need to use the client payment date as the basis for inclusion in the tax year.
-        $year = (int)$this->year;
-        $businessId = (int)$this->business_id;
-        $clientId = (int)$this->client_id;
-        $caregiverId = (int)$this->caregiver_id;
-        $caregiver1099 = (string)$this->caregiver_1099;
-        $created = (int)$this->created;
-        $transmitted = (int)$this->transmitted;
+
 
         $query = "SELECT c.id as client_id, 
                     u1.firstname as client_fname, 
@@ -85,39 +68,67 @@ class Caregiver1099 extends Model
                     LEFT JOIN addresses a1 ON a1.id = (SELECT id FROM addresses WHERE user_id = u1.id ORDER BY `type` LIMIT 1)
                     LEFT JOIN addresses a2 ON a2.id = (SELECT id FROM addresses WHERE user_id = u2.id ORDER BY `type` LIMIT 1)
                     LEFT JOIN caregiver_1099s ct on ct.client_id = c.id AND ct.caregiver_id = c2.id
-                    WHERE p.created_at BETWEEN '$year-01-01 00:00:00' AND '$year-12-31 23:59:59'
-                    AND c.business_id = $businessId ";
+                    WHERE p.created_at BETWEEN '" . $this->filters['year']['value'] ."-01-01 00:00:00' AND '" . $this->filters['year']['value'] ."-12-31 23:59:59'
+                    AND c.business_id = " .  $this->filters['business_id']['value'];
 
-                    if($clientId){
-                        $query .= " AND u1.id = " . (int)$clientId;
+                    if(filled($this->filters['client_id']['value'])){
+                        $query .= " AND u1.id = " . $this->filters['client_id']['value'];
                     }
 
-                    if($caregiverId){
-                        $query .= " AND c2.id =" .  (int)$caregiverId;
+                    if($this->filters['caregiver_id']['value']){
+                        $query .= " AND c2.id =" .  $this->filters['caregiver_id']['value'];
                     }
 
-                    if($caregiver1099 && $caregiver1099 !== 'no'){
-                        $query .= " AND c.caregiver_1099 = '" . (string)$caregiver1099 . "' ";
-                    }elseif ($caregiver1099 && $caregiver1099 === 'no' ){
-                        $query .= " AND c.caregiver_1099 is null ";
+                    if( array_key_exists('caregiver_1099', $this->filters)){
+                        if( $this->filters['caregiver_1099']['value'] && $this->filters['caregiver_1099']['value'] !== 'no'){
+                            $query .= " AND c.caregiver_1099 = '" . (string)$this->filters['caregiver_1099']['value'] . "' ";
+                        }elseif ( $this->filters['caregiver_1099']['value'] && $this->filters['caregiver_1099']['value'] === 'no' ){
+                            $query .= " AND c.caregiver_1099 is null ";
+                        }
                     }
 
-                    if($transmitted && $transmitted === 1){
-                        $query .= " AND ct.transmitted_at is not null ";
-                    }elseif($transmitted && $transmitted === 0){
-                        $query .= " AND ct.transmitted_at is null ";
+                    if( array_key_exists('transmitted', $this->filters)) {
+                        if ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value'] === 1) {
+                            $query .= " AND ct.transmitted_at is not null ";
+                        } elseif ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value']) {
+                            $query .= " AND ct.transmitted_at is null ";
+                        }
                     }
 
-                    if($created && $created === 1){
-                        $query .= " AND ct.id is not null ";
-                    }elseif($created && $created === 0){
-                        $query .= " AND ct.id is null ";
+                    if( array_key_exists('created', $this->filters)) {
+                        if ($this->filters['created']['value'] && $this->filters['created']['value'] === 1) {
+                            $query .= " AND ct.id is not null ";
+                        } elseif ($this->filters['created']['value'] && $this->filters['created']['value'] === 0) {
+                            $query .= " AND ct.id is null ";
+                        }
                     }
 
                     $query .= " GROUP BY s.client_id, s.caregiver_id
                               HAVING payment_total > ?";
-
         // Get rows
-        $this->rows = \DB::select($query, [$this->threshold]);
+
+        $this->records =  \DB::select($query, [$this->threshold]);
+    }
+
+    /**
+     * Set dynamic model attributes
+     *
+     * @param string $attributes
+     * @return Model|void
+     */
+    public function addAttributes($attributes)
+    {
+        foreach ($attributes as $attribute=>$value){
+            $this->filters[$attribute] = [ 'name'=> $attribute, 'value' => $value];
+        }
+    }
+
+    public function getAttribute($key)
+    {
+        //if (!$this->getOriginal($key)) {
+            //return $this->dynamic_fields[$key];
+        //}
+
+        //parent::getAttribute($key);
     }
 }
