@@ -205,7 +205,7 @@ class QuickbooksConnection extends AuditableModel
 
         return true;
     }
-
+    
     /**
      * Get the name_format setting for the connection.
      *
@@ -224,8 +224,28 @@ class QuickbooksConnection extends AuditableModel
      */
     public function getFeeType(Client $client) : string
     {
-        $field = "fee_type_" . strtolower($client->client_type);
+        $field = 'fee_type_' . strtolower($client->client_type);
 
         return $this->$field;
+    }
+    
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+    
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'company_name' => $faker->company,
+        ];
     }
 }

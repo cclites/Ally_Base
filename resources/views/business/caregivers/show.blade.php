@@ -92,6 +92,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment_statement" role="tab">Pay Statements</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
+                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+                <a class="dropdown-item" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
             </div>
         </li>
     </ul>

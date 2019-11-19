@@ -21,12 +21,6 @@ Route::group(['prefix' => 'qb', 'as' => 'qb.'], function() {
     Route::post('/invoices/results', 'Api\Quickbooks\QuickbooksDesktopController@invoiceResults')->name('invoices.results');
 });
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// caregiver shift routes
-
 // Backwards Compatibility with Telefony v1
 Route::redirect('/caregiver/greeting', url('/api/telefony'));
 

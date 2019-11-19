@@ -2,6 +2,8 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Traits\ScrubsForSeeding;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * \App\Billing\ClaimPayment
@@ -61,5 +63,26 @@ class ClaimPayment extends AuditableModel
         }
 
         return $str;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'reference' => $faker->randomNumber(9),
+            'notes' => $faker->sentence,
+        ];
     }
 }

@@ -10,6 +10,7 @@ use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\Gateway\ECSPayment;
 use App\Contracts\GeocodeInterface;
+use App\Services\ConfluenceApiClient;
 use App\Services\DummyGeocodeService;
 use App\Services\GeocodeManager;
 use App\Services\QuickbooksOnlineService;
@@ -54,6 +55,14 @@ class AppServiceProvider extends ServiceProvider
                 config('services.quickbooks.client_secret'),
                 route('business.quickbooks.authorization'),
                 config('services.quickbooks.mode')
+            );
+        });
+
+        $this->app->singleton(ConfluenceApiClient::class, function() {
+            return new ConfluenceApiClient(
+                config('services.confluence.host'),
+                config('services.confluence.username'),
+                config('services.confluence.api_token')
             );
         });
     }

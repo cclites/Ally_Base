@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\ClientGoal
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class ClientGoal extends AuditableModel
 {
+    use SoftDeletes;
+
     protected $table = 'client_goals';
 
     protected $guarded = ['id'];
@@ -66,4 +69,23 @@ class ClientGoal extends AuditableModel
         $builder->where('track_goal_progress', $areTracked);
     }
 
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'question' => $faker->sentence.'?',
+        ];
+    }
 }

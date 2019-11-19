@@ -563,4 +563,42 @@ class CareDetails extends AuditableModel
 
         return implode(',', $value);
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'medication_overseer' => $faker->sentence,
+            'allergies' => $faker->sentence,
+            'pharmacy_name' => $faker->sentence,
+            'pharmacy_number' => $faker->sentence,
+            'safety_instructions' => $faker->sentence,
+            'toileting_instructions' => $faker->sentence,
+            'bathing_frequency' => $faker->sentence,
+            'bathing_instructions' => $faker->sentence,
+            'hearing_instructions' => $faker->sentence,
+            'feeding_instructions' => $faker->sentence,
+            'diet_likes' => $faker->sentence,
+            'skin_conditions' => $faker->sentence,
+            'hair_frequency' => $faker->sentence,
+            'shaving_instructions' => $faker->sentence,
+            'dressing_instructions' => $faker->sentence,
+            'housekeeping_instructions' => $faker->sentence,
+            'supplies_instructions' => $faker->sentence,
+            'comments' => $faker->sentence,
+            'instructions' => $faker->sentence,
+        ];
+    }
 }

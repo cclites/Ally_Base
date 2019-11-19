@@ -1,8 +1,9 @@
 <?php
+
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
 use Illuminate\Support\Facades\Crypt;
-use App\Client;
 
 /**
  * App\ClientMedication
@@ -28,7 +29,34 @@ use App\Client;
  */
 class ClientMedication extends BaseModel
 {
+    use ScrubsForSeeding;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = ['was_changed' => 'boolean'];
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     protected $guarded = ['id'];
+
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
 
     public function setTypeAttribute($value)
     {
@@ -59,7 +87,7 @@ class ClientMedication extends BaseModel
     {
         return empty($this->attributes['frequency']) ? null : Crypt::decrypt($this->attributes['frequency']);
     }
-    
+
     public function setDescriptionAttribute($value)
     {
         $this->attributes['description'] = Crypt::encrypt($value);
@@ -110,18 +138,34 @@ class ClientMedication extends BaseModel
         return empty($this->attributes['route']) ? null : Crypt::decrypt($this->attributes['route']);
     }
 
-    public function setNewChangedAttribute($value)
-    {
-        $this->attributes['new_changed'] = Crypt::encrypt($value);
-    }
-
     public function getNewChangedAttribute()
     {
-        return empty($this->attributes['new_changed']) ? null : Crypt::decrypt($this->attributes['new_changed']);
+        return $this->was_changed ? '(C)' : '(N)';
     }
 
-    public function client()
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
-        return $this->belongsTo(Client::class); 
+        return [
+            'type' => $faker->sentence,
+            'dose' => $faker->sentence,
+            'frequency' => $faker->randomDigit,
+            'description' => $faker->sentence,
+            'side_effects' => $faker->sentence,
+            'notes' => $faker->sentence,
+            'tracking' => $faker->sentence,
+            'route' => $faker->word,
+        ];
     }
 }

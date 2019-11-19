@@ -8,6 +8,7 @@ use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
+use App\Claims\Transmitters\TellusClaimTransmitter;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use App\Billing\ClientInvoice;
@@ -15,10 +16,12 @@ use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\AuditableModel;
 use App\Billing\Payer;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use App\Business;
 use App\Client;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Claims\ClaimInvoice
@@ -564,8 +567,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             case ClaimService::HHA():
                 return new HhaClaimTransmitter();
             case ClaimService::TELLUS():
-                throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
-//                return new TellusClaimTransmitter();
+                return new TellusClaimTransmitter();
                 break;
             case ClaimService::CLEARINGHOUSE():
                 throw new ClaimTransmissionException('Claim service not yet supported.');
@@ -609,5 +611,27 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return "${businessId}-${nextId}";
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'client_last_name' => $faker->lastName,
+            'client_dob' => $faker->date('Y-m-d', '-30 years'),
+            'client_medicaid_id' => $faker->randomNumber(8),
+        ];
     }
 }

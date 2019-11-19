@@ -197,4 +197,29 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
     {
         return [static::TYPE_CLIENT, static::TYPE_CAREGIVER];
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'organization' => $faker->company,
+            'source_owner' => $faker->company,
+            'contact_name' => $faker->name,
+            'phone' => $faker->simple_phone,
+            'web_address' => $faker->url,
+            'work_phone' => $faker->simple_phone,
+        ];
+    }
 }
