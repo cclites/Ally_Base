@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Client;
-
 class ConfluenceApiClient
 {
     public $username = '';
@@ -12,11 +10,11 @@ class ConfluenceApiClient
 
     /**
      * ConfluenceApiClient Constructor.
-     * @param string $host
-     * @param string $username
-     * @param string $apiToken
+     * @param null|string $host
+     * @param null|string $username
+     * @param null|string $apiToken
      */
-    public function __construct(string $host, string $username, string $apiToken)
+    public function __construct(?string $host, ?string $username, ?string $apiToken)
     {
         $this->host = $host;
         $this->username = $username;
