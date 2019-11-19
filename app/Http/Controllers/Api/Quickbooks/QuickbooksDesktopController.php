@@ -77,8 +77,23 @@ class QuickbooksDesktopController extends Controller
             ->get()
             ->map(function (ClientInvoice $invoice) use ($request) {
                 try {
-                    return QuickbooksOnlineInvoice::fromClientInvoice($request->connection(), $invoice, false)
+                    $data = QuickbooksOnlineInvoice::fromClientInvoice($request->connection(), $invoice, false)
                         ->toDesktopArray();
+
+                    // Attach customer data to invoice
+                    /** @var \App\Client $client */
+                    $client = $invoice->client;
+                    $address = empty($client->billingAddress) ? $client->evvAddress : $client->billingAddress;
+                    return array_merge($data, [
+                        'CustomerAddr1' => optional($address)->address1,
+                        'CustomerAddr2' => optional($address)->address2,
+                        'CustomerCity' => optional($address)->city,
+                        'CustomerState' => optional($address)->state,
+                        'CustomerPostalCode' => optional($address)->zip,
+                        'CustomerPhone' => optional($client->evvPhone)->number,
+                        'CustomerEmail' => $invoice->client->hasNoEmail() ? '' : $client->email,
+                    ]);
+
                 } catch (\Exception $ex) {
                     // Most likely a problem with determining the ally fee.
                     // This should not happen often.
