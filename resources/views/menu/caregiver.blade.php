@@ -29,7 +29,7 @@
     </a>
 </li>
 <li>
-    <a href="{{ route('caregivers.clients') }}" aria-expanded="false">
+    <a href="{{ route('caregivers.clients') }}?active=1" aria-expanded="false">
         <i class="fa fa-users"></i><span class="hide-menu">My Clients</span>
     </a>
 </li>

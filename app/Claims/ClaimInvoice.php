@@ -8,6 +8,7 @@ use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
 use App\Claims\Contracts\ClaimTransmitterInterface;
+use App\Claims\Transmitters\TellusClaimTransmitter;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use App\Billing\ClientInvoice;
@@ -566,8 +567,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             case ClaimService::HHA():
                 return new HhaClaimTransmitter();
             case ClaimService::TELLUS():
-                throw new ClaimTransmissionException('Claim service "Tellus" not yet supported.');
-//                return new TellusClaimTransmitter();
+                return new TellusClaimTransmitter();
                 break;
             case ClaimService::CLEARINGHOUSE():
                 throw new ClaimTransmissionException('Claim service not yet supported.');

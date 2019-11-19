@@ -120,7 +120,6 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         } catch (ClaimTransmissionException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
-            \Log::info($ex->getMessage());
             app('sentry')->captureException($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
