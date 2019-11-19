@@ -26,18 +26,35 @@ class MergeDuplicateClientsCommand extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \Exception
      */
     public function handle()
     {
+        //31920 31951
         $old = Client::findOrFail($this->argument('client_1'));
         $client = Client::findOrFail($this->argument('client_2'));
 
-        if ($old->hasActiveShift()) {
-            $this->error('You cannot delete this client because they have an active shift clocked in.');
+        if ($old->business_id != $client->business_id) {
+            $this->error("You cannot merge $old->name with $client->name because they belong to different businesses.");
             return 0;
         }
 
-        if (! $this->confirm("Merge client $old->name (#$old->id) into $client->name (#$client->id)?")) {
+        if ($old->hasActiveShift()) {
+            $this->error("You cannot deactivate client $old->name because they have an active shift clocked in.");
+            return 0;
+        }
+
+        if ($old->payments()->exists()) {
+            $this->error("You cannot merge $old->name because they have made payments with their own payment methods and these need to be moved manually.");
+            return 0;
+        }
+
+        if (! $this->confirm("Merge client $old->name (#$old->id) into $client->name (#$client->id)?\nThis will copy over any invoices and shift related data and then de-activate the old client.")) {
+            $this->info("Cancelled.");
+            return 0;
+        }
+
+        if (! $this->confirm("ARE YOU SURE?  THIS CANNOT BE UNDONE")) {
             $this->info("Cancelled.");
             return 0;
         }
@@ -67,7 +84,7 @@ class MergeDuplicateClientsCommand extends Command
         $old->clearFutureSchedules();
 
         \DB::table('timesheets')->where('client_id', $old->id)->update(['client_id' => $client->id]);
-        \DB::table('shifts')->where('clienrt_id', $old->id)->update(['client_id' => $client->id]);
+        \DB::table('shifts')->where('client_id', $old->id)->update(['client_id' => $client->id]);
         \DB::table('shift_adjustments')->where('client_id', $old->id)->update(['client_id' => $client->id]);
         \DB::table('shift_confirmations')->where('client_id', $old->id)->update(['client_id' => $client->id]);
         \DB::table('client_authorizations')->where('client_id', $old->id)->update(['client_id' => $client->id]);
@@ -97,7 +114,7 @@ class MergeDuplicateClientsCommand extends Command
 
         \DB::commit();
 
-        $this->info("Client have been merged into client #$client->id.");
+        $this->info("Client $old->name (#$old->id) has been merged into $client->name (#$client->id).");
 
         return 0;
     }
