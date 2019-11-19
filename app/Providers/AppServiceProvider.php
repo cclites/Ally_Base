@@ -60,9 +60,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(ConfluenceApiClient::class, function() {
             return new ConfluenceApiClient(
-                config('services.confluence.host'),
-                config('services.confluence.username'),
-                config('services.confluence.api_token')
+                config('services.confluence.host', ''),
+                config('services.confluence.username', ''),
+                config('services.confluence.api_token', '')
             );
         });
     }
