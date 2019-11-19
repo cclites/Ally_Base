@@ -41,21 +41,22 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="client.medications" class="mt-5">
-            <client-medication :client="client" :medications="client.medications" class="w-100" />
+        <b-row v-if="client.medications" class="mt-2">
+            <caregiver-client-medications :client="client" :medications="client.medications" class="w-100" />
         </b-row>
     </div>
 
 </template>
 
 <script>
+    import CaregiverClientMedications from "./CaregiverClientMedications";
     import CareDetailsDisplay from '../CareDetailsDisplay'
     import CaregiverCarePlan from "./CaregiverCarePlan";
 
     export default {
         name: "CaregiverClientDetails",
 
-        components: {CaregiverCarePlan, CareDetailsDisplay},
+        components: {CaregiverClientMedications, CaregiverCarePlan, CareDetailsDisplay},
 
         props: {
             client: {

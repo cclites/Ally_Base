@@ -2,17 +2,13 @@
 
 namespace App\Reports;
 
-use App\Billing\GatewayTransaction;
-use App\Billing\Invoiceable\ShiftService;
-use App\Billing\Payer;
+use App\Http\Resources\ShiftHistoryItemResource;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Billing\Queries\OfflineClientInvoiceQuery;
+use App\Billing\Payer;
 use App\Business;
-use App\Http\Resources\ShiftHistoryItemResource;
-use App\Shift;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Shift;
 
 class ShiftHistoryReport extends BusinessResourceReport
 {
@@ -53,7 +49,7 @@ class ShiftHistoryReport extends BusinessResourceReport
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query() : \Illuminate\Database\Eloquent\Builder
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         return $this->query;
     }
@@ -64,7 +60,7 @@ class ShiftHistoryReport extends BusinessResourceReport
      * @param string $timezone
      * @return ShiftHistoryReport
      */
-    public function setTimezone(string $timezone) : self
+    public function setTimezone(string $timezone): self
     {
         $this->timezone = $timezone;
 
@@ -76,7 +72,7 @@ class ShiftHistoryReport extends BusinessResourceReport
      *
      * @return \Illuminate\Support\Collection
      */
-    protected function results() : ?iterable
+    protected function results(): ?iterable
     {
         return $this->query->get()->map(function (Shift $shift) {
             return (new ShiftHistoryItemResource($shift))->toArray(null);
@@ -101,7 +97,7 @@ class ShiftHistoryReport extends BusinessResourceReport
      * @param string|null $serviceId
      * @return ShiftHistoryReport
      */
-    public function applyFilters(string $startDate, string $endDate, ?string $importId, ?int $clientId, ?int $caregiverId, ?string $paymentMethod, ?string $status, ?string $confirmed, ?string $clientType, ?string $flagType, ?array $flags, ?string $serviceId) : self
+    public function applyFilters(string $startDate, string $endDate, ?string $importId, ?int $clientId, ?int $caregiverId, ?string $paymentMethod, ?string $status, ?string $confirmed, ?string $clientType, ?string $flagType, ?array $flags, ?string $serviceId): self
     {
         // Restrict businesses
         $this->query->forRequestedBusinesses();
@@ -120,7 +116,7 @@ class ShiftHistoryReport extends BusinessResourceReport
 
         if (filled($paymentMethod)) {
             $methodClass = null;
-            switch($paymentMethod) {
+            switch ($paymentMethod) {
                 case 'credit_card':
                     $methodClass = CreditCard::class;
                     break;
@@ -133,10 +129,10 @@ class ShiftHistoryReport extends BusinessResourceReport
             }
             if ($methodClass) {
                 $method_type = maps_from_class($methodClass) ?? $methodClass;
-                $this->query->whereHas('client', function($q) use ($methodClass, $method_type) {
+                $this->query->whereHas('client', function ($q) use ($methodClass, $method_type) {
                     $q->where('default_payment_type', $method_type);
                     if ($methodClass === Business::class) {
-                        $q->orWhereHas('primaryPayer', function($q) {
+                        $q->orWhereHas('primaryPayer', function ($q) {
                             $q->where('payer_id', '!=', Payer::PRIVATE_PAY_ID);
                         });
                     }
@@ -160,15 +156,14 @@ class ShiftHistoryReport extends BusinessResourceReport
         if (filled($confirmed)) {
             if ($confirmed === 'unconfirmed') {
                 $this->query->where('status', Shift::WAITING_FOR_CONFIRMATION);
-            }
-            else {
+            } else {
                 // confirmed statuses
-                $this->query->whereNotIn('status',  [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
+                $this->query->whereNotIn('status', [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
             }
         }
 
         if (filled($clientType)) {
-            $this->query->whereHas('client', function($query) use ($clientType) {
+            $this->query->whereHas('client', function ($query) use ($clientType) {
                 $query->where('client_type', $clientType);
             });
         }
@@ -177,8 +172,7 @@ class ShiftHistoryReport extends BusinessResourceReport
             if ($flagType && $flagType !== 'any') {
                 if ($flagType === 'none') {
                     $this->query->doesntHave('shiftFlags');
-                }
-                else if (is_array($flags) && count($flags) > 0) {
+                } else if (is_array($flags) && count($flags) > 0) {
                     $this->query->whereFlagsIn($flags);
                 }
             }

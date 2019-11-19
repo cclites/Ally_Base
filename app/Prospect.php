@@ -5,6 +5,8 @@ namespace App;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToBusinesses;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 /**
  * App\Prospect
@@ -86,6 +88,7 @@ use Illuminate\Database\Eloquent\Builder;
 class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToBusinesses;
+    use SoftDeletes;
 
     protected $table = 'prospects';
     protected $guarded = ['id'];
@@ -102,6 +105,10 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
         static::addGlobalScope('ignore_clients', function ($builder) {
             $builder->whereNull('client_id');
         });
+
+        // Need to add global scope here because the above
+        // is overriding the trait's behavior
+        static::addGlobalScope(new SoftDeletingScope);
     }
 
     ///////////////////////////////////////////

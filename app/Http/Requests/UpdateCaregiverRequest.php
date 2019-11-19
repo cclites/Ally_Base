@@ -29,6 +29,7 @@ class UpdateCaregiverRequest extends FormRequest
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => ['required_unless:no_username,1', 'nullable', Rule::unique('users')->ignore(optional($caregiver)->id)],
             'date_of_birth' => 'nullable|date',
+            'uses_ein_number' => 'required|boolean',
             'ssn' => [
                 'nullable',
                 new ValidSSN(),

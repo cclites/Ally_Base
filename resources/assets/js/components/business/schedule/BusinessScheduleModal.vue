@@ -679,15 +679,14 @@
                 this.changedClient(schedule.client_id);
             },
 
-            changedClient(clientId) {
+            async changedClient(clientId) {
                 if (!clientId || this.client_id === clientId) {
                     return;
                 }
                 this.loadCaregivers(clientId);
+                await this.loadClientPayersAndRatesData(clientId);
                 this.loadAllyPctFromClient(clientId);
                 this.loadCarePlans(clientId);
-                this.loadClientRates(clientId);
-                this.loadClientPayers(clientId);
             },
 
             changedCaregiver(caregiverId) {
@@ -947,13 +946,12 @@
                 }
             },
 
-            loadClientData() {
+            async loadClientData() {
                 if (this.client_id) {
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers(this.client_id);
+                    await this.loadClientPayersAndRatesData(this.client_id);
                     this.loadAllyPctFromClient(this.client_id);
-                    this.loadClientRates(this.client_id);
-                    this.loadClientPayers(this.client_id);
                 }
             },
 

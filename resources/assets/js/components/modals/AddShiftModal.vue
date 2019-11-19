@@ -2,13 +2,14 @@
     <b-modal title="Create a Manual Shift" v-model="showModal" size="xl" class="modal-fit-more" :no-close-on-backdrop="true">
         <b-container fluid>
             <business-shift 
-                :activities="activities"
                 :caregiver="caregiver"
                 :client="client"
                 :shift="{}"
                 ref="businessShift"
                 @shift-created="$emit('shift-created')"
                 is_modal="1"
+                :show-inactive-clients="showInactiveClients"
+                :show-inactive-caregivers="showInactiveCaregivers"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
@@ -27,13 +28,6 @@
 
 <script>
     export default {
-        data() { 
-            return {
-                activities: [],
-                isMounted: false,
-            }
-        },
-
         props: {
             value: {},
             caregiver: {
@@ -48,6 +42,20 @@
                     return {};
                 }
             },
+            showInactiveClients: {
+                type: Boolean,
+                default: false,
+            },
+            showInactiveCaregivers: {
+                type: Boolean,
+                default: false,
+            },
+        },
+
+        data() {
+            return {
+                isMounted: false,
+            }
         },
 
         computed: {
@@ -64,35 +72,17 @@
             },
             submitting() {
                 return this.isMounted ? this.$refs.businessShift.submitting : false;
-            }
+            },
         },
 
         methods: {
-            loadData() {
-                axios.get('/business/activities')
-                    .then(response => {
-                        console.log('fetched activities');
-                        if (Array.isArray(response.data)) {
-                            this.activities = response.data;
-                        }
-                        else {
-                            this.activities = [];
-                        }
-                    }).catch(e => {
-                        console.log('axios error:');
-                        console.log(e);
-                    });
-            },
-
             saveShift() {
                 this.$refs.businessShift.saveShift();
             },
-
         },
 
-        mounted() {
+        async mounted() {
             this.isMounted = true;
-            this.loadData();
         },
     }
 </script>

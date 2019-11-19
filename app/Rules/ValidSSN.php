@@ -13,7 +13,6 @@ class ValidSSN implements Rule
      */
     public function __construct()
     {
-
     }
 
     /**
