@@ -105,7 +105,9 @@ class ConfluenceApiClient
         }
 
         if (! empty($data)) {
-            $data = json_encode($data);
+            if (! $isFileUpload) {
+                $data = json_encode($data);
+            }
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
 
