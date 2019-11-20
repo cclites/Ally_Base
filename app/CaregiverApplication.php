@@ -224,6 +224,9 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
         'previously_injured' => 'boolean',
         'lift_25_lbs' => 'boolean',
         'workmans_comp' => 'boolean',
+        'has_cell_phone' => 'boolean',
+        'has_smart_phone' => 'boolean',
+        'can_text' => 'boolean',
     ];
 
     ////////////////////////////////////
