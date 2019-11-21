@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Imports\Worksheet;
-use App\Shifts\ShiftFactory;
 use App\Business;
 use App\User;
 use App\Client;
@@ -180,7 +179,7 @@ class NoteImportController extends Controller
             'notes.*.tags'         => 'nullable',
             'notes.*.type'         => 'nullable',
             'notes.*.rowNo'        => 'nullable',
-            'notes.*.created_at'   => 'nullable',
+            'notes.*.created_at'   => 'sometimes|required|date',
         ]);
 
         /** @var Notes[]|\Illuminate\Support\Collection $notes */
@@ -191,7 +190,7 @@ class NoteImportController extends Controller
             $client    = Client::find($data['client_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
             $caregiver = Caregiver::find($data['caregiver_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
 
-            $note = factory( Note::class )->make([
+            $note = Note::make([
 
                 'business_id'  => $data[ 'business_id' ],
                 'caregiver_id' => $data[ 'caregiver_id' ],
@@ -201,7 +200,7 @@ class NoteImportController extends Controller
                 'tags'         => $data[ 'tags' ],
                 'created_by'   => $data[ 'created_by' ],
                 'type'         => $data[ 'type' ],
-                'created_at'   => $data[ 'created_at' ],
+                'created_at'   => $data[ 'created_at' ] ?? now(),
             ]);
 
             $note[ 'rowNo' ] = $data[ 'rowNo' ];
