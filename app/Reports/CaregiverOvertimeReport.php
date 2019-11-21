@@ -66,14 +66,12 @@ class CaregiverOvertimeReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $status) : self
     {
-        $this->end = $end;
-        $this->start = $start;
 
-        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
-        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
-        $this->query->whereHas('shifts', function ($q) use ($start, $end) {
-            $q->whereBetween('checked_in_time', [$start, $end]);
+        $this->query->whereHas('shifts', function ($q){
+            $q->whereBetween('checked_in_time', [$this->start, $this->end]);
         });
 
         if(filled($caregiver_id)){
@@ -95,22 +93,19 @@ class CaregiverOvertimeReport extends BaseReport
      */
     protected function results() : iterable
     {
-        $start = (new Carbon($this->start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
-        $end = (new Carbon($this->end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
-
         $record = $this->query
                     ->groupBy('caregivers.id')
-                    ->get()->map(function(Caregiver $caregiver) use ($start, $end ){
+                    ->get()->map(function(Caregiver $caregiver){
 
                     $worked = 0;
                     $futureScheduled = 0;
                     $total = 0;
 
-                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$start, $end] )->where('checked_out_time', '!=', null )->get() as $shift) {
+                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
                         $worked += $shift->duration();
                     }
 
-                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$start, $end] )->where('checked_out_time', null )->get() as $shift) {
+                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
                         $worked += $shift->duration();
                         $futureScheduled += $shift->remaining();
                     }
