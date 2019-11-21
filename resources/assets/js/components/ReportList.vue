@@ -478,7 +478,7 @@
                         name: 'Caregiver Statistics',
                         url: 'reports/caregiver-stats',
                         description: 'See caregiver stats',
-                        category: 2,
+                        category: 3,
                         allowed: ['office_user'],
                     },
                     {
