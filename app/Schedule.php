@@ -766,6 +766,17 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     ////////////////////////////////////
 
     /**
+     * Get only schedules that can be clocked in.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeThatCanBeClockedIn($query)
+    {
+        return $query->whereDoesntHave('shifts');
+    }
+
+    /**
      * Get only schedules for the given client.
      *
      * @param [type] $query
@@ -781,6 +792,28 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         }
 
         return $query->where('client_id', $client);
+    }
+
+    /**
+     * Filter schedules by caregiver.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param mixed $caregiver
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForCaregiver($query, $caregiver)
+    {
+        if (empty($caregiver)) {
+            return $query;
+        }
+
+        if (is_object($caregiver)) {
+            $caregiver = $caregiver->id;
+        } elseif (is_array($caregiver)) {
+            $caregiver = $caregiver['id'];
+        }
+
+        return $query->where('caregiver_id', $caregiver);
     }
 
     /**
@@ -832,6 +865,32 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             Carbon::parse($end, $timezone)
         ]);
     }
+
+    /**
+     * Get schedules that exist between the given times.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeBetweenDates($query, Carbon $start, Carbon $end)
+    {
+        switch(\DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
+            case 'mysql':
+                $endFormat = "`starts_at` + INTERVAL `duration` MINUTE";
+                break;
+            case 'sqlite':
+                $endFormat = "datetime(starts_at, '+' || duration || ' minutes')";
+                break;
+        }
+
+        return $query->whereRaw(
+                '( (starts_at >= ? AND starts_at <= ?) OR (starts_at < ? AND ' . $endFormat . ' >= ?) )',
+                [$start, $end, $start, $start]
+            );
+    }
+
 
 
     /**
