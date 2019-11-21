@@ -582,12 +582,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function canBeClockedIn()
     {
-        if ($this->services->count() || $this->fixed_rates) {
-            // Only allow service breakout and fixed rate schedules to be clocked in to once
-            return $this->shifts()->count() === 0;
-        }
-
-        return true;
+        return $this->shifts()->count() === 0;
     }
 
     /**
