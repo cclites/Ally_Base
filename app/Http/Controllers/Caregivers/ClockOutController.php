@@ -108,7 +108,7 @@ class ClockOutController extends BaseController
             ]);
         }
 
-        if ($shift->business->co_caregiver_signature) {
+        if ($shift->business->require_caregiver_signatures) {
             $request->validate([
                 'caregiver_signature' => 'required'
             ]);
