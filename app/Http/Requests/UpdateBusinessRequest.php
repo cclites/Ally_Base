@@ -25,6 +25,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'location_exceptions' => 'required|bool',
             'timesheet_exceptions' => 'required|bool',
             'require_signatures' => 'required|bool',
+            'require_caregiver_signatures' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'shift_rounding_method' => 'required|in:none,shift,individual',
             'calendar_default_view' => 'required',
