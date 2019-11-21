@@ -45,6 +45,25 @@ export default {
                 { value: 'private_pay', text: 'Private Pay' },
                 { value: 'VA', text: 'VA' },
             ],
+
+            PAYMENT_METHOD_TYPES: {
+                NONE: 'NONE',
+                MANUAL: 'MANUAL',
+                CC: 'CC',
+                AMEX: 'AMEX',
+                ACH: 'ACH',
+                ACH_P: "ACH-P",
+                TRUST: 'TRUST',
+            },
+            paymentMethodTypeOptions: [
+                { value: 'NONE', text: 'None' },
+                { value: 'MANUAL', text: 'Manual' },
+                { value: 'CC', text: 'CC' },
+                { value: 'AMEX', text: 'American Express' },
+                { value: 'ACH', text: 'ACH' },
+                { value: 'ACH-P', text: 'ACH-P' },
+                { value: 'TRUST', text: 'Trust' },
+            ],
             // TODO: refactor frontend to use clientTypeOptions and remove 'clientTypes' to formalize convention
             clientTypes: [
                 {value:'lead_agency', text:'Lead Agency'},
