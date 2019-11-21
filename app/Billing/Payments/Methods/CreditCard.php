@@ -267,7 +267,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         return [
             'name_on_card' => $faker->name,
-            'number' => $faker->creditCardNumber,
+            'number' => $fast ? \Crypt::encrypt($faker->creditCardNumber) : $faker->creditCardNumber,
             'nickname' => $faker->word,
         ];
     }

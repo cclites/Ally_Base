@@ -314,8 +314,8 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     {
         return [
             'name_on_account' => $faker->name,
-            'routing_number' => '091000019',
-            'account_number' => $faker->bankAccountNumber,
+            'routing_number' => $fast ? \Crypt::encrypt('091000019') : '091000019',
+            'account_number' => $fast ? \Crypt::encrypt($faker->bankAccountNumber) : $faker->bankAccountNumber,
             'nickname' => $faker->word,
         ];
     }

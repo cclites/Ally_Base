@@ -327,7 +327,7 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
             'date_of_birth' => $faker->date('Y-m-d', '-30 years'),
             'last_name' => 'User',
             'email' => $fast ? \DB::raw("CONCAT('user', id, '@test.com')") : $faker->email,
-            'ssn' => $faker->ssn,
+            'ssn' => $fast ? \Crypt::encrypt($faker->ssn) : $faker->ssn,
             'address' => $faker->streetAddress,
             'cell_phone' => $faker->simple_phone,
             'home_phone' => $faker->simple_phone,

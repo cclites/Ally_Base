@@ -158,14 +158,14 @@ class ClientMedication extends BaseModel
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
-            'type' => $faker->sentence,
-            'dose' => $faker->sentence,
-            'frequency' => $faker->randomDigit,
-            'description' => $faker->sentence,
-            'side_effects' => $faker->sentence,
-            'notes' => $faker->sentence,
-            'tracking' => $faker->sentence,
-            'route' => $faker->word,
+            'type' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'dose' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'frequency' => $fast ? \Crypt::encrypt($faker->randomDigit) : $faker->randomDigit,
+            'description' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'side_effects' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'notes' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'tracking' => $fast ? \Crypt::encrypt($faker->sentence) : $faker->sentence,
+            'route' => $fast ? \Crypt::encrypt($faker->word) : $faker->word,
         ];
     }
 }
