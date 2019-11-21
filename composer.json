@@ -4,6 +4,8 @@
     "keywords": [],
     "license": "",
     "type": "project",
+    "version": "1.0.0",
+    "time": "2019-11-20",
     "require": {
         "php": ">=7.2.0",
         "ext-bcmath": "*",
