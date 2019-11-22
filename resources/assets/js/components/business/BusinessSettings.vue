@@ -302,9 +302,10 @@
                         <b-col lg="6">
                             <b-form-group label="Caregiver Signature" label-for="caregiverSignatureOption" label-class="required">
                                 <b-form-select id="caregiverSignatureOption"
-                                               v-model="businessSettings.co_caregiver_signature">
-                                    <option :value="1">Show</option>
-                                    <option :value="0">Do Not Show</option>
+                                               v-model="caregiverSignatureOption">
+                                    <option value="do_not_show">Do Not Show</option>
+                                    <option value="show">Show, Do Not Require</option>
+                                    <option value="required">Show &amp; Require</option>
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="co_caregiver_signature" text=""></input-help>
                             </b-form-group>
@@ -600,7 +601,22 @@
                         require_signatures: 0,
                     }
                 },
+                caregiverSignatureMapping: {
+                    required: {
+                        co_caregiver_signature: 1,
+                        require_caregiver_signatures: 1,
+                    },
+                    show: {
+                        co_caregiver_signature: 1,
+                        require_caregiver_signatures: 0,
+                    },
+                    do_not_show: {
+                        co_caregiver_signature: 0,
+                        require_caregiver_signatures: 0,
+                    }
+                },
                 signatureOption: null,
+                caregiverSignatureOption: null,
                 tabIndex: 0,
             }
         },
@@ -662,6 +678,7 @@
                     timesheet_exceptions: business.timesheet_exceptions,
                     shift_rounding_method: business.shift_rounding_method,
                     require_signatures: business.require_signatures,
+                    require_caregiver_signatures: business.require_caregiver_signatures,
                     co_mileage: business.co_mileage,
                     co_injuries: business.co_injuries,
                     co_comments: business.co_comments,
@@ -713,10 +730,24 @@
                     }
                 }
             },
+            getCaregiverSignatureOption(business) {
+                for (var option of Object.keys(this.caregiverSignatureMapping)) {
+                    let obj = this.caregiverSignatureMapping[option];
+                    console.log('caregiver options:',option, obj);
+                    if (business.require_caregiver_signatures === obj.require_caregiver_signatures && business.co_caregiver_signature === obj.co_caregiver_signature) {
+                        return option;
+                    }
+                }
+            },
 
             updateSignatureValues() {
                 if (!this.signatureOption) return;
                 Object.assign(this.businessSettings, this.signatureMapping[this.signatureOption]);
+            },
+
+            updateCaregiverSignatureValues() {
+                if (!this.caregiverSignatureOption) return;
+                Object.assign(this.businessSettings, this.caregiverSignatureMapping[this.caregiverSignatureOption]);
             },
 
         },
@@ -727,18 +758,24 @@
 
                 this.updateSignatureValues()
             },
+            caregiverSignatureOption() {
+
+                this.updateCaregiverSignatureValues()
+            },
 
             business(business, oldBusiness) {
                 console.dir(business);
                 if (!oldBusiness && business) {
                     this.businessSettings = this.makeForm (business);
-                    this.signatureOption = this.getSignatureOption (business);
+                    this.signatureOption = this.getSignatureOption(business);
+                    this.caregiverSignatureOption = this.getCaregiverSignatureOption(business);
                     return;
                 }
 
                 if (business.id !== oldBusiness.id) {
                     this.businessSettings = this.makeForm(business);
                     this.signatureOption = this.getSignatureOption(business);
+                    this.caregiverSignatureOption = this.getCaregiverSignatureOption(business);
                 }
             },
             'businessSettings.allow_client_confirmations': function(value) {
