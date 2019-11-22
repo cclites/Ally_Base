@@ -135,4 +135,57 @@ class Caregiver1099Controller extends Controller
     {
         //
     }
+
+    public function transmit(Request $request)
+    {
+        $transmitIds = $request->all();
+
+        $caregiver1099s = collect();
+
+        foreach($transmitIds as $transmitId){
+            $caregiver1099s[] = Caregiver1099::find($transmitId);
+        }
+
+        $csv = $this->toCsv($caregiver1099s);
+
+        return \Response::make($csv, 200, [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="Transmission.csv"',
+        ]);
+
+    }
+
+    /**
+     * @param $data
+     * @return string
+     */
+    private function toCsv($rows){
+
+        if (empty($rows)) {
+            return '';
+        }
+
+        // Build header
+        $headerRow = collect($rows[0])
+            ->keys()
+            ->map(function ($key) {
+                return $key === 'id' ? 'ID' : ucwords(str_replace('_', ' ', $key));
+            })
+            ->toArray();
+
+        // Build rows
+        $csv[] = '"' . implode('","', $headerRow) . '"';
+        foreach ($rows as $row=>$value) {
+
+            $csv[] = '"' . implode('","', $value) . '"';
+
+        }
+
+        $report = implode("\r\n", $csv);
+
+        return \Response::make($report, 200, [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="Payroll-Export-Report.csv"',
+        ]);
+    }
 }

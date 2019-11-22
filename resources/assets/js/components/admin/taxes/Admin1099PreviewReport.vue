@@ -78,7 +78,7 @@
 
             <b-form-group label="&nbsp;" class="mr-2 mt-1">
                 <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate</b-btn>
-                <b-btn variant="info" @click="transmitSelected()">Transmit Selected</b-btn>
+                <b-btn variant="info" @click="transmit()">Transmit Selected</b-btn>
             </b-form-group>
 
         </b-row>
@@ -253,9 +253,19 @@
             },
 
             transmit(){
-                let data = new Form({transmitSelected});
-                data.get('/admin/business-1099/transmit')
+                let data = new Form( this.transmitSelected );
+                data.get('/admin/business-1099/transmit/')
+
                     .then(response => {
+
+                        var fileURL = window.URL.createObjectURL(new Blob([response]));
+                        var fileLink = document.createElement('a');
+                        fileLink.href = fileURL;
+                        fileLink.setAttribute('download', 'Transmission.csv');
+                        document.body.appendChild(fileLink);
+                        fileLink.click();
+                        fileLink.remove();
+
                     })
                     .catch( e => {
                     })
