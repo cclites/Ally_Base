@@ -145,9 +145,12 @@ Vue.component('total-charges-report', require('./components/admin/reports/TotalC
 Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
 Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
 Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
-Vue.component('admin-ten-ninety-nine', require('./components/admin/taxes/Admin1099.vue'));
+
 Vue.component('admin-registry-emails', require('./components/admin/AdminRegistryEmails.vue'));
 Vue.component('admin-1099-preview', require('./components/admin/taxes/Admin1099PreviewReport'));
+Vue.component('caregiver-1099-edit', require('./components/admin/taxes/Caregiver1099Edit'));
+Vue.component('admin-ten-ninety-nine', require('./components/admin/taxes/Admin1099.vue'));
+
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));

@@ -73,9 +73,10 @@ class Admin1099PreviewReport extends BaseReport
                 'caregiver_id' => $row->caregiver_id,
                 'client_id' => $row->client_id,
                 'transmitted' => $row->transmitted_at,
+                'id' => $row->caregiver_1099_id,
             ];
 
-        });
+        })->values();
     }
 
     /**

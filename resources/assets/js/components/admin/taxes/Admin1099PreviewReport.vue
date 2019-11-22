@@ -92,7 +92,7 @@
             <b-row>
                 <b-col>
                     <b-table
-                            class="payers-summary-table"
+                            class="admin-1099-report"
                             :items="items"
                             :fields="fields"
                             :sort-by="sortBy"
@@ -103,9 +103,9 @@
                             ref="table"
                     >
                         <template slot="actions" scope="row">
-                            <b-btn @click="create(row)" class="btn btn-secondary" title="Create 1099"><i class="fa fa-plus mr-2"></i></b-btn>
-                            <b-btn v-if="row.item.caregiver_1099_id"
-                                   @click="edit(row.item.caregiver_1099_id)"
+                            <b-btn @click="create(row)" class="btn btn-secondary" title="Create 1099"  v-if="!row.item.id"><i class="fa fa-plus mr-2"></i></b-btn>
+                            <b-btn v-if="row.item.id"
+                                   @click="edit(row.item.id)"
                                    class="btn btn-secondary"
                                    title="Edit 1099"
                             >
@@ -113,9 +113,9 @@
                         </template>
 
                         <template slot="transmit" scope="row">
-                            <b-form-checkbox v-if="row.item.caregiver_1099_id"
+                            <b-form-checkbox v-if="row.item.id"
                                              v-model="transmitSelected"
-                                             :value="row.item.caregiver_1099_id"
+                                             :value="row.item.id"
                             >
                             </b-form-checkbox>
                         </template>
@@ -135,8 +135,19 @@
         <b-row v-else>
             <b-col class="text-center">{{ emptyText }}</b-col>
         </b-row>
+
+        <b-modal
+                id="caregiver-1099-edit"
+                v-if="showCaregiver1099editModal"
+        >
+            <caregiver-1099-edit :editcaregiver1099="caregiver1099"></caregiver-1099-edit>
+        </b-modal>
     </b-card>
 </template>
+
+
+
+
 
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
@@ -166,6 +177,7 @@
                 caregivers: [],
                 clients: [],
                 items: [],
+                caregiver1099: [],
                 busy: false,
                 totalRows: 0,
                 perPage: 100,
@@ -173,6 +185,7 @@
                 sortBy: 'client_lname',
                 sortDesc: false,
                 emptyText: "No records to display",
+                showCaregiver1099editModal: false,
                 fields: [
                     {key: 'client_fname', label: 'Client First Name', sortable: true,},
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
@@ -192,38 +205,35 @@
             },
 
             generate(){
-                this.busy = true;
                 this.totalRows = 0;
                 this.form.get('/admin/preview-1099-report')
                     .then( ({ data }) => {
                         this.items = data;
-                        this.totalRows = this.items.length;
+                        this.totalRows = this.data.length;
                     })
                     .catch(e => {})
                     .finally(() => {
-                        this.busy = false;
-                        this.footClone = true;
                     })
             },
 
-            create(row){
+            create(record){
 
-                let index = row.index;
-
-                console.log("INDEX IS " + index);
+                let index = record.index;
 
                 let data = new Form({
                     'year': this.form.year,
                     'business_id': this.form.business_id,
-                    'client_id' : row.item.client_id,
-                    'caregiver_id' : row.item.caregiver_id,
-                    'payment_total' : row.item.payment_total,
+                    'client_id' : record.item.client_id,
+                    'caregiver_id' : record.item.caregiver_id,
+                    'payment_total' : record.item.payment_total,
                 });
 
                 data.post('/admin/business-1099/create')
                     .then(response => {
-                        //this.items.splice(index, 1, response.data);
+
                         this.items[index] = response.data;
+
+                        //this.items.splice(index, 0, response.data);
                         this.$refs.table.refresh();
                     })
                     .catch( e => {
@@ -233,7 +243,20 @@
             },
 
             edit(id){
-                axios.get('/admin/business-1099/' + id);
+                axios.get('/admin/business-1099/' + id)
+                .then(response => {
+
+                    console.log("RESPONSE");
+                    console.log(response.data);
+
+                    this.caregiver1099 = response.data;
+                    this.showCaregiver1099editModal = true;
+
+                })
+                    .catch( e => {
+                    })
+                    .finally(() => {
+                });
             },
 
             transmit(){
