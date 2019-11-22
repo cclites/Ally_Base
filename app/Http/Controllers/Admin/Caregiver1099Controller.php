@@ -6,8 +6,11 @@ use App\Admin\Queries\Caregiver1099Query;
 use App\Caregiver1099;
 use App\Caregiver;
 use App\Client;
+use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\storeCaregiver1099Request;
+use App\Http\Requests\UpdateCaregiver1099Request;
 use App\Http\Controllers\Controller;
 
 class Caregiver1099Controller extends Controller
@@ -45,19 +48,14 @@ class Caregiver1099Controller extends Controller
         $records = $query->_query($request->all());
         $recordBucket = [];
 
-        foreach($records as $record){
-
-            $record = (array)$record;
+        foreach($records as $record)
+        {
             $originalRecord = clone $record;
-
+            $record = (array)$record;
 
             $record['year'] = $request->year;
             $record['created_by'] = auth()->user()->nameLastFirst();
             $record['payment_total'] = floatval($record['payment_total']);
-
-            //Store these for the return data object
-            $originalRecord['caregiver_1099'] = $record['caregiver_1099'];
-            $originalRecord['business_name'] = $record['business_name'];
 
             // These fields are used for filtering the 1099 preview report, but are not
             // actually part of a the caregiver_1099 model
@@ -69,12 +67,9 @@ class Caregiver1099Controller extends Controller
             $caregiver1099 = new Caregiver1099($record);
 
             $caregiver1099->save();
-            $recordBucket[] = $caregiver1099->fresh();
-
-
         }
-        return response()->json($recordBucket);
 
+        return new SuccessResponse("Caregiver 1099 has been created");
     }
 
     /**
@@ -85,9 +80,6 @@ class Caregiver1099Controller extends Controller
      */
     public function show($id)
     {
-        $caregiver1099 = Caregiver1099::find($id);
-        //return view_component('caregiver-1099-edit', 'Edit Caregiver 1099', compact('caregiver1099') );
-        return response()->json($caregiver1099);
 
     }
 
@@ -99,7 +91,16 @@ class Caregiver1099Controller extends Controller
      */
     public function edit($id)
     {
-        //
+        $caregiver1099 = Caregiver1099::find($id);
+
+        //decode the ssns
+        $decodedClientSsn = decrypt($caregiver1099->client_ssn);
+        $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
+
+        $caregiver1099->client_ssn = "***-**-" . substr($decodedClientSsn, -4);
+        $caregiver1099->caregiver_ssn = "***-**-" . substr($decodedCaregiverSsn, -4);
+
+        return response()->json($caregiver1099);
     }
 
     /**
@@ -109,9 +110,19 @@ class Caregiver1099Controller extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateCaregiver1099Request $request, $id)
     {
-        //
+        $caregiver1099 = Caregiver1099::find($id);
+        $caregiver1099->fill($request->all());
+
+        $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
+        $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
+
+        if($caregiver1099->save()){
+            return new SuccessResponse("Caregiver 1099 has been updated");
+        }
+
+        return new ErrorResponse("Unable to update Caregiver 1099");
     }
 
     /**

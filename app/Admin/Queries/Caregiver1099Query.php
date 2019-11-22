@@ -45,7 +45,7 @@ class Caregiver1099Query
                     c.caregiver_1099,
                     a1.address1 as client_address1, 
                     a1.address2 as client_address2,
-                    CONCAT(a1.city, ', ', a1.state, ' ', a1.zip) as client_address3,
+                    CONCAT(a1.city, ',  ', a1.state, ' ', a1.zip) as client_address3,
                     b.id as business_id, 
                     b.name as business_name,
                     u2.id as caregiver_id, 
@@ -54,7 +54,7 @@ class Caregiver1099Query
                     c2.ssn as caregiver_ssn,
                     a2.address1 as caregiver_address1, 
                     a2.address2 as caregiver_address2,
-                    CONCAT(a2.city, ',', a2.state, ' ', a2.zip) as caregiver_address3,
+                    CONCAT(a2.city, ',  ', a2.state, ' ', a2.zip) as caregiver_address3,
                     ct.id as caregiver_1099_id,
                     ct.transmitted_at,
                     sum(h.caregiver_shift) as payment_total

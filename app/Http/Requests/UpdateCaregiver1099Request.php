@@ -32,6 +32,17 @@ class UpdateCaregiver1099Request extends FormRequest
             'business_id' => 'required|integer',
             'client_id' => 'required|integer',
             'caregiver_id' => 'required|integer',
+            'client_fname' => 'required|string',
+            'client_lname' => 'required|string',
+            'client_address1' => 'required|string',
+            'client_address2' => 'string',
+            'client_address3' => 'required|string',
+            'caregiver_fname' => 'required|string',
+            'caregiver_lname' => 'required|string',
+            'caregiver_address1' => 'required|string',
+            'caregiver_address2' => 'string',
+            'caregiver_address3' => 'required|string',
+
         ];
     }
 }

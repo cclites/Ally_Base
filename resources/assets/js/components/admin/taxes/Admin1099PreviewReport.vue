@@ -137,13 +137,16 @@
         </b-row>
 
         <b-modal
-                id="caregiver-1099-edit"
-                v-if="showCaregiver1099editModal"
+                v-model="caregiver1099Edit"
+                @ok.prevent="save()"
+                @cancel="hideModal()"
+                ok-variant="info"
+                size="lg"
         >
-            <caregiver-1099-edit :editcaregiver1099="caregiver1099"></caregiver-1099-edit>
+            <caregiver-1099-edit-modal :caregiver1099="caregiver1099"></caregiver-1099-edit-modal>
         </b-modal>
     </b-card>
-</template>
+</template>b
 
 
 
@@ -178,6 +181,8 @@
                 clients: [],
                 items: [],
                 caregiver1099: [],
+                caregiver1099Edit: false,
+                showCaregiver1099editModal: false,
                 busy: false,
                 totalRows: 0,
                 perPage: 100,
@@ -185,7 +190,6 @@
                 sortBy: 'client_lname',
                 sortDesc: false,
                 emptyText: "No records to display",
-                showCaregiver1099editModal: false,
                 fields: [
                     {key: 'client_fname', label: 'Client First Name', sortable: true,},
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
@@ -230,11 +234,7 @@
 
                 data.post('/admin/business-1099/create')
                     .then(response => {
-
-                        this.items[index] = response.data;
-
-                        //this.items.splice(index, 0, response.data);
-                        this.$refs.table.refresh();
+                        this.generate();
                     })
                     .catch( e => {
                     })
@@ -245,23 +245,15 @@
             edit(id){
                 axios.get('/admin/business-1099/' + id)
                 .then(response => {
-
-                    console.log("RESPONSE");
-                    console.log(response.data);
-
                     this.caregiver1099 = response.data;
-                    this.showCaregiver1099editModal = true;
-
+                    this.caregiver1099Edit = true;
                 })
-                    .catch( e => {
-                    })
-                    .finally(() => {
-                });
+                .catch( e => {})
+                .finally(() => {});
             },
 
             transmit(){
                 let data = new Form({transmitSelected});
-
                 data.get('/admin/business-1099/transmit')
                     .then(response => {
                     })
@@ -270,6 +262,16 @@
                     .finally(() => {
                     });
 
+            },
+
+            save(){
+                let data = new Form( this.caregiver1099 );
+                data.patch('/admin/business-1099/' + this.caregiver1099.id)
+                .then(response => {
+                    this.generate();
+                })
+                .catch( e => {})
+                .finally(() => {});
             },
         },
         watch: {
