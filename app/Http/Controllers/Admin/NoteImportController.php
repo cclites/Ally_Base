@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Imports\Worksheet;
-use App\Shifts\ShiftFactory;
 use App\Business;
 use App\User;
 use App\Client;
@@ -136,7 +135,8 @@ class NoteImportController extends Controller
                 'tags'         => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
                 'created_by'   => $this->worksheet->getValue( 'Created By', $rowNo ), // Jason said he would manually turn these into user id's
                 'type'         => strtolower( $this->worksheet->getValue( 'Type', $rowNo ) ),
-                'rowNo'        => $rowNo
+                'rowNo'        => $rowNo,
+                'created_at'   => $this->worksheet->getValue( 'Date', $rowNo )
             ]);
 
             // and push the newly created object into the collection to return for the front-end response
@@ -178,18 +178,19 @@ class NoteImportController extends Controller
             'notes.*.title'        => 'nullable',
             'notes.*.tags'         => 'nullable',
             'notes.*.type'         => 'nullable',
-            'notes.*.rowNo'        => 'nullable'
+            'notes.*.rowNo'        => 'nullable',
+            'notes.*.created_at'   => 'sometimes|required|date',
         ]);
 
         /** @var Notes[]|\Illuminate\Support\Collection $notes */
         $notes = collect();
         foreach( $request->notes as $data ) {
 
-            $createdBy = User::find($data['created_by']);
-            $client    = Client::find($data['client_id']);
-            $caregiver = Caregiver::find($data['caregiver_id']);
+            $createdBy = User::find($data['created_by']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
+            $client    = Client::find($data['client_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
+            $caregiver = Caregiver::find($data['caregiver_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
 
-            $note = factory( Note::class )->make([
+            $note = Note::make([
 
                 'business_id'  => $data[ 'business_id' ],
                 'caregiver_id' => $data[ 'caregiver_id' ],
@@ -198,7 +199,8 @@ class NoteImportController extends Controller
                 'title'        => $data[ 'title' ],
                 'tags'         => $data[ 'tags' ],
                 'created_by'   => $data[ 'created_by' ],
-                'type'         => $data[ 'type' ]
+                'type'         => $data[ 'type' ],
+                'created_at'   => $data[ 'created_at' ] ?? now(),
             ]);
 
             $note[ 'rowNo' ] = $data[ 'rowNo' ];

@@ -99,20 +99,6 @@
             <b-row>
 
                 <b-col lg="4">
-                    <b-form-group label="Cell Phone*">
-                        <mask-input v-model="form.cell_phone" name="cell_phone"></mask-input>
-                        <input-help :form="form" field="cell_phone" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-
-                <b-col lg="4">
-                    <b-form-group label="Cell Phone Provider">
-                        <b-form-input v-model="form.cell_phone_provider"></b-form-input>
-                        <input-help :form="form" field="cell_phone_provider" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-
-                <b-col lg="4">
                     <b-form-group label="Home Phone">
                         <mask-input v-model="form.home_phone" name="home_phone"></mask-input>
                         <input-help :form="form" field="home_phone" text=""></input-help>
@@ -138,12 +124,13 @@
 
             <b-row>
                 <b-col lg="6">
-                    <b-form-checkbox id="worked_here_before"
-                                     v-model="form.worked_here_before"
-                                     :value="true"
-                                     :unchecked-value="false">
-                        Have you worked with {{ businessChain.name }} before?
-                    </b-form-checkbox>
+                    <b-form-group :label="`Have you worked with ${businessChain.name} before?`">
+                        <b-form-radio-group v-model="form.worked_here_before">
+                            <b-radio :value="true">Yes</b-radio>
+                            <b-radio :value="false">No</b-radio>
+                            <input-help :form="form" field="worked_here_before" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Which Location?" v-show="form.worked_here_before">
@@ -195,6 +182,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Availability</div>
+                    <em>Note: Home Care is a 24x7 business.  It is normal to be expected to work some weekends and Holidays.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -232,7 +220,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Driving History</div>
-                    <em>{{ businessChain.name }} will be reviewing your driving history. Untruthfulness will cause your application to be immediately rejected.</em>
+                    <em>As part of the background screening process, a check of your driving record may be request by a family seeking your services.  Failure to disclose tickets or an accident will cause your application to be immediately rejected.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -302,7 +290,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Criminal History</div>
-                    <em>{{ businessChain.name }} will be reviewing your criminal history. Untruthfulness will cause your application to be immediately rejected.</em>
+                    <em>As part of the background screening process, a criminal background check will be run on all referral candidates.  Failure to disclose an arrest or conviction will cause your application to be rejected.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -533,6 +521,57 @@
                 </b-row>
                 <hr :key="i" v-if="i != 3">
             </template>
+            <!-- Technology -->
+            <b-row>
+                <b-col>
+                    <div class="h5">Technology</div>
+                    <em>{{ businessChain.name }} will use telephony, emails, texts and phone calls to offer you referrals and to communicate and verify home referrals and visits for it's clients.  Your ability to communicate via phone, text message and email is necessary to be referred by {{ businessChain.name }}.</em>
+                </b-col>
+            </b-row>
+            <hr>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Do you have a cell phone?">
+                        <b-form-radio-group v-model="form.has_cell_phone">
+                            <b-radio :value="true">Yes</b-radio>
+                            <b-radio :value="false">No</b-radio>
+                            <input-help :form="form" field="has_cell_phone" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row v-show="form.has_cell_phone">
+                <b-col lg="6">
+                    <b-form-group label="Cell Phone Number">
+                        <mask-input v-model="form.cell_phone" name="cell_phone"></mask-input>
+                        <input-help :form="form" field="cell_phone" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Cell Phone Provider">
+                        <b-form-input v-model="form.cell_phone_provider"></b-form-input>
+                        <input-help :form="form" field="cell_phone_provider" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Is it a smart phone? (Receives text messages and email)">
+                        <b-form-radio-group v-model="form.has_smart_phone">
+                            <b-radio :value="true">Yes</b-radio>
+                            <b-radio :value="false">No</b-radio>
+                            <input-help :form="form" field="has_smart_phone" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Do you email and text on a regular basis?">
+                        <b-form-radio-group v-model="form.can_text">
+                            <b-radio :value="true">Yes</b-radio>
+                            <b-radio :value="false">No</b-radio>
+                            <input-help :form="form" field="can_text" text=""></input-help>
+                        </b-form-radio-group>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <!-- How did you hear about us? -->
             <b-row>
                 <b-col>
@@ -546,7 +585,7 @@
             <b-row class="space-above">
                 <b-col>
                     <p>
-                        We're an <b>equal opportunity employer</b>. All applicants will be considered for employment
+                        We're an <b>equal opportunity home care referral agency</b>. All applicants will be considered for employment
                         without attention to race, color, religion, sex, sexual orientation, gender identity, national origin,
                         veteran or disability status
                     </p>
@@ -603,7 +642,7 @@
                 days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 times: ['Mornings', 'Afternoons', 'Evenings', 'Nights'],
                 shifts: [1, 4, 8, 12],
-                travelRadius: [5, 10, 15, 20],
+                travelRadius: [5, 10, 15, 20, 30, 40],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
                 states: new States(),
                 form: new Form({
@@ -691,7 +730,10 @@
                     reference_3_relationship: '',
                     heard_about: '',
                     caregiver_signature: null,
-                    acknowledged_terms: true // todo decide how to acknowledge terms
+                    acknowledged_terms: true, // todo decide how to acknowledge terms
+                    has_cell_phone: false,
+                    has_smart_phone: false,
+                    can_text: false,
                 })
             }
         },

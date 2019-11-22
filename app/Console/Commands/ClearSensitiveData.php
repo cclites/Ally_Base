@@ -399,8 +399,9 @@ class ClearSensitiveData extends Command
         $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
             $collection->each(function (ClaimableService $item) {
-                $item->caregiver_ssn = $this->faker->ssn;
-                $item->save();
+                $item->update([
+                    'caregiver_ssn' => $this->faker->ssn,
+                ]);
                 $this->advance();
             });
             \DB::commit();
@@ -431,9 +432,10 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function (Caregiver $caregiver) {
                 if ($caregiver->getOriginal('ssn')) {
-                    $caregiver->ssn = $this->faker->ssn;
+                    $caregiver->update([
+                        'ssn' => $this->faker->ssn,
+                    ]);
                 }
-                $caregiver->save();
                 $this->advance();
             });
             \DB::commit();
@@ -464,8 +466,9 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function (Client $client) {
                 if ($client->getOriginal('ssn')) {
-                    $client->ssn = $this->faker->ssn;
-                    $client->save();
+                    $client->update([
+                        'ssn' => $this->faker->ssn,
+                    ]);
                 }
                 $this->advance();
             });

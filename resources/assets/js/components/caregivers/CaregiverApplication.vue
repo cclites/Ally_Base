@@ -18,10 +18,6 @@
                     <td>Email:</td>
                     <td>{{ application.email }}</td>
                 </tr>
-                <tr>
-                    <td>Cell Phone:</td>
-                    <td>{{ application.cell_phone }} {{ application.cell_phone_provider }}</td>
-                </tr>
                 <tr v-if="application.date_of_birth">
                     <td>Date of Birth:</td>
                     <td>{{ application.date_of_birth }}</td>
@@ -357,6 +353,27 @@
                     <td>Reference Relationship:</td>
                     <td>{{ application.reference_3_relationship }}</td>
                 </tr>
+
+                <tr v-if="application.has_cell_phone">
+                    <td>Cell Phone:</td>
+                    <td>{{ application.cell_phone }}</td>
+                </tr>
+
+                <tr v-if="application.cell_phone_provider">
+                    <td>Cell Phone Provider:</td>
+                    <td>{{ application.cell_phone_provider }}</td>
+                </tr>
+
+                <tr v-if="application.has_cell_phone">
+                    <td>Has Smart Phone:</td>
+                    <td>{{ application.has_smart_phone ? 'Yes' : 'No' }}</td>
+                </tr>
+
+                <tr v-if="application.has_cell_phone">
+                    <td>Texts and Emails Regularly:</td>
+                    <td>{{ application.can_text ? 'Yes' : 'No' }}</td>
+                </tr>
+
                 <tr v-if="application.heard_about">
                     <td>Heard about:</td>
                     <td>{{ application.heard_about }}</td>

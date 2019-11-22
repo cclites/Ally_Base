@@ -1140,7 +1140,7 @@
 
             // Watch if the business changes and refresh the current quickbooks settings.
             async business(newVal, oldVal) {
-                if (newVal && newVal.id != oldVal.id) {
+                if (newVal && newVal.id) {
                     this.loadingQuickbooksConfig = true;
                     await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
                     await this.$store.dispatch('quickbooks/fetchServices');
