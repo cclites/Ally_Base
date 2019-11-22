@@ -2,7 +2,7 @@
     <b-container>
         <b-row>
             <b-col class="mt-5">
-                <h2>{{ businessChain.name }} Contractor Application</h2>
+                <h2 class="text-center">{{ businessChain.name }} Caregiver Application</h2>
             </b-col>
         </b-row>
 
@@ -585,7 +585,7 @@
             <b-row class="space-above">
                 <b-col>
                     <p>
-                        We're an <b>equal opportunity home care referral agency</b>. All applicants will be considered for employment
+                        We're an <b>equal opportunity home care referral agency</b>. All applicants will be considered for caregiving opportunities
                         without attention to race, color, religion, sex, sexual orientation, gender identity, national origin,
                         veteran or disability status
                     </p>
