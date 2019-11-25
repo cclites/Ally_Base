@@ -4,6 +4,8 @@
     "keywords": [],
     "license": "",
     "type": "project",
+    "version": "1.0.0",
+    "time": "2019-11-20",
     "require": {
         "php": ">=7.2.0",
         "ext-bcmath": "*",
@@ -41,7 +43,7 @@
         "barryvdh/laravel-debugbar": "^3.2",
         "barryvdh/laravel-ide-helper": "dev-master",
         "filp/whoops": "~2.0",
-        "fzaninotto/faker": "~1.4",
+        "fzaninotto/faker": "~1.8",
         "laravel/homestead": "^6.1",
         "mockery/mockery": "0.9.*",
         "overtrue/phplint": "^1.1",

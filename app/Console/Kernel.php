@@ -7,6 +7,7 @@ use App\Console\Commands\CronChargePaymentNotifications;
 use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
+use App\Console\Commands\GenerateItemizedReconciliationReport;
 use App\Console\Commands\ImportGenerationsCaregivers;
 use App\Console\Commands\ImportPaychexCaregivers;
 use App\Console\Commands\ScheduledPaymentsCsv;
@@ -37,6 +38,7 @@ class Kernel extends ConsoleKernel
         AchOfflineChargeCommand::class,
         CronHhaCheckStatus::class,
         CronChargePaymentNotifications::class,
+        GenerateItemizedReconciliationReport::class,
     ];
 
     /**

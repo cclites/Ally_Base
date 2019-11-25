@@ -50,4 +50,34 @@ class PaymentLog extends BaseModel
     {
         $this->payment()->associate($payment);
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery() : \Illuminate\Database\Eloquent\Builder
+    {
+        return static::parentGetScrubQuery()->whereNotNull('error_message');
+    }
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'error_message' => $faker->sentence,
+        ];
+    }
 }

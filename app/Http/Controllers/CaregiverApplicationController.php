@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Business;
 use App\BusinessChain;
 use App\CaregiverApplication;
+use App\Http\Requests\UpdateCaregiverApplicationRequest;
 use App\Signature;
 use App\Http\Controllers\Business\BaseController as BusinessBaseController;
 use App\Http\Requests\CaregiverApplicationStoreRequest;
@@ -146,12 +147,12 @@ class CaregiverApplicationController extends BusinessBaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\CaregiverApplicationStoreRequest $request
+     * @param UpdateCaregiverApplicationRequest $request
      * @param \App\CaregiverApplication $application
-     * @return \Illuminate\Http\Response
+     * @return SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(CaregiverApplicationStoreRequest $request, CaregiverApplication $application)
+    public function update(UpdateCaregiverApplicationRequest $request, CaregiverApplication $application)
     {
         $this->authorize('update', $application);
 

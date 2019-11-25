@@ -30,6 +30,41 @@ export default {
                 { value: 'white', text: 'White or Caucasian' },
             ],
             smsLength: 160,
+
+            CLIENT_TYPES: {
+                LEAD_AGENCY: 'lead_agency',
+                LTCI: 'LTCI',
+                MEDICAID: 'medicaid',
+                PRIVATE_PAY: 'private_pay',
+                VA: 'VA',
+            },
+            clientTypeOptions: [
+                { value: 'lead_agency', text: 'Lead Agency' },
+                { value: 'LTCI', text: 'LTCI' },
+                { value: 'medicaid', text: 'Medicaid' },
+                { value: 'private_pay', text: 'Private Pay' },
+                { value: 'VA', text: 'VA' },
+            ],
+
+            PAYMENT_METHOD_TYPES: {
+                NONE: 'NONE',
+                MANUAL: 'MANUAL',
+                CC: 'CC',
+                AMEX: 'AMEX',
+                ACH: 'ACH',
+                ACH_P: "ACH-P",
+                TRUST: 'TRUST',
+            },
+            paymentMethodTypeOptions: [
+                { value: 'NONE', text: 'None' },
+                { value: 'MANUAL', text: 'Manual' },
+                { value: 'CC', text: 'CC' },
+                { value: 'AMEX', text: 'American Express' },
+                { value: 'ACH', text: 'ACH' },
+                { value: 'ACH-P', text: 'ACH-P' },
+                { value: 'TRUST', text: 'Trust' },
+            ],
+            // TODO: refactor frontend to use clientTypeOptions and remove 'clientTypes' to formalize convention
             clientTypes: [
                 {value:'lead_agency', text:'Lead Agency'},
                 {value:'LTCI', text:'LTCI'},

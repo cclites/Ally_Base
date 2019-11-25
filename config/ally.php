@@ -30,4 +30,16 @@ return [
      * and SMS data.
      */
     'communication_log' => env('COMMUNICATION_LOG', false),
+
+    'data_dump' => [
+        /**
+         * The ID of the confluence document that contains the Ally database dumps.
+         */
+        'confluence_content_id' => env('DATA_DUMP_CONFLUENCE_CONTENT_ID', ''),
+
+        /**
+         * The password for the protected database dump zip files.
+         */
+        'zip_password' => env('DATA_DUMP_ZIP_PASSWORD', ''),
+    ],
 ];

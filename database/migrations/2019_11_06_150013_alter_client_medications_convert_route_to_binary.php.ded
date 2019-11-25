@@ -28,8 +28,11 @@ class AlterClientMedicationsConvertRouteToBinary extends Migration
             }
             $item->was_changed = false;
             if ($newChanged = $item->getOriginal('new_changed')) {
-                if (Crypt::decrypt($newChanged) == '(C)') {
-                    $item->was_changed = true;
+                try {
+                    if (Crypt::decrypt($newChanged) == '(C)') {
+                        $item->was_changed = true;
+                    }
+                } catch (\Exception $ex) {
                 }
             }
             $item->save();

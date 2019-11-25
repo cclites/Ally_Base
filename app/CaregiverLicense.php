@@ -2,6 +2,7 @@
 namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\CaregiverLicense
@@ -67,5 +68,27 @@ class CaregiverLicense extends AuditableModel
     public function scopeWhereApplicable($query)
     {
         return $query->where( 'expires_at', '>', self::INAPPLICABLE_DATE );
+    }
+    
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        $name = strtoupper($faker->randomLetter() . $faker->randomLetter() . $faker->randomLetter());
+        return [
+            'name' => $name,
+            'description' => $name . ' Certification',
+        ];
     }
 }

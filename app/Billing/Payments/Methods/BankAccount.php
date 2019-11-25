@@ -12,8 +12,10 @@ use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\ACHPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
+use App\Traits\ScrubsForSeeding;
 use App\User;
 use Crypt;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Billing\Payments\Methods\BankAccount
@@ -43,6 +45,7 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;
+    use ScrubsForSeeding;
 
     protected $table = 'bank_accounts';
     protected $guarded = ['id'];
@@ -293,5 +296,27 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     public function getDisplayValue(): string
     {
         return 'ACH *' . $this->last_four;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'name_on_account' => $faker->name,
+            'routing_number' => $fast ? \Crypt::encrypt('091000019') : '091000019',
+            'account_number' => $fast ? \Crypt::encrypt($faker->bankAccountNumber) : $faker->bankAccountNumber,
+            'nickname' => $faker->word,
+        ];
     }
 }

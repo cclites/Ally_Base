@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\Model;
 
 class ClientContact extends Model
@@ -217,5 +218,32 @@ class ClientContact extends Model
                 $item->update(['emergency_priority' => $index]);
                 $index = $index + 1;
             });
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'name' => $faker->name,
+            'phone1' => $faker->simple_phone,
+            'phone2' => $faker->simple_phone,
+            'work_phone' => $faker->simple_phone,
+            'fax_number' => $faker->simple_phone,
+            'email' => $faker->email,
+            'address' => $faker->streetAddress,
+            'relationship_custom' => $faker->randomElement(['Son', 'Wife', 'Husband', 'Daughter', 'Sister', 'Brother']),
+        ];
     }
 }

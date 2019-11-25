@@ -11,6 +11,8 @@
                 :client="shift.client"
                 @shift-updated="$emit('shift-updated', shift.id)"
                 @shift-deleted="$emit('shift-deleted', shift.id)"
+                :show-inactive-clients="showInactiveClients"
+                :show-inactive-caregivers="showInactiveCaregivers"
             ></business-shift>
         </b-container>
     </b-modal>
@@ -32,6 +34,14 @@
             activities: {
                 type: Array,
                 default: [],
+            },
+            showInactiveClients: {
+                type: Boolean,
+                default: false,
+            },
+            showInactiveCaregivers: {
+                type: Boolean,
+                default: false,
             },
         },
 

@@ -232,5 +232,39 @@ class SkilledNursingPoc extends AuditableModel
         return implode(',', $value);
     }
 
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
 
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'medical_record_number' => $faker->randomNumber(9),
+            'provider_number' => $faker->randomNumber(9),
+            'principal_diagnosis_icd_cm' => $faker->sentence,
+            'principal_diagnosis' => $faker->sentence,
+            'surgical_procedure_icd_cm' => $faker->sentence,
+            'surgical_procedure' => $faker->sentence,
+            'other_diagnosis_icd_cm' => $faker->sentence,
+            'other_diagnosis' => $faker->sentence,
+            'other_diagnosis_icd_cm1' => $faker->sentence,
+            'other_diagnosis1' => $faker->sentence,
+            'other_diagnosis_icd_cm2' => $faker->sentence,
+            'other_diagnosis2' => $faker->sentence,
+            'physician_name' => $faker->name,
+            'physician_address' => $faker->streetAddress,
+            'physician_phone' => $faker->simple_phone,
+            'mobility_instructions' => $faker->sentence,
+            'mobility_other' => $faker->sentence,
+        ];
+    }
 }

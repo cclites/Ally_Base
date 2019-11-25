@@ -67,20 +67,18 @@ class ClientController extends BaseController
      * Return the current available schedules for a caregiver and client
      *
      * @param \App\Client $client
-     * @param \App\Scheduling\ScheduleAggregator $aggregator
      * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
-    public function currentSchedules(Client $client, ScheduleAggregator $aggregator)
+    public function currentSchedules(Client $client)
     {
         $start = new Carbon('-2 hours', Timezone::getTimezone($client->business_id));
         $end = new Carbon('+2 hours', Timezone::getTimezone($client->business_id));
-        $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
-            ->where('client_id', $client->id)
-            ->getSchedulesBetween($start, $end);
 
-        $schedules = $schedules->filter(function(Schedule $schedule) {
-            return $schedule->canBeClockedIn();
-        });
+        $schedules = Schedule::forClient($client->id)
+            ->forCaregiver($this->caregiver()->id)
+            ->betweenDates($start, $end)
+            ->thatCanBeClockedIn()
+            ->get();
 
         // Sort schedules by closest starts_at
         if ($schedules->count() > 1) {
@@ -113,7 +111,7 @@ class ClientController extends BaseController
 
         if ($request->filled('shift')) {
             $shift = Shift::findOrFail($request->shift);
-            
+
             if (! empty($shift->checked_in_time)) {
                 $start = $shift->checked_in_time;
             }

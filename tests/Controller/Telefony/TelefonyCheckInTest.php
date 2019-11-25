@@ -5,6 +5,7 @@ use App\Caregiver;
 use App\Http\Controllers\Api\Telefony\TelefonyCheckInController;
 use App\PhoneNumber;
 use App\Shift;
+use Carbon\Carbon;
 
 class TelefonyCheckInTest extends TelefonyBase
 {
@@ -78,5 +79,26 @@ class TelefonyCheckInTest extends TelefonyBase
 
         $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1])
             ->assertSee(TelefonyCheckInController::AlreadyClockedOutMessage);
+    }
+
+    /** @test */
+    function a_caregiver_should_not_be_able_to_clock_into_the_same_schedule_twice()
+    {
+        $schedule = $this->createSchedule();
+        $this->assertCount(0, $schedule->shifts);
+
+        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
+        $response->assertSee('You have successfully clocked in.');
+        $this->assertCount(1, $schedule->fresh()->shifts);
+
+        /** @var \App\Shift $shift */
+        $shift = $schedule->shifts()->first();
+        $shift->update(['checked_out_time' => Carbon::now()]);
+        $shift->statusManager()->ackClockOut(false);
+
+        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
+        $response->assertSee('You have successfully clocked in.');
+        $this->assertCount(1, $schedule->fresh()->shifts);
+        $this->assertCount(2, $this->caregiver->fresh()->shifts);
     }
 }

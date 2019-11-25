@@ -90,7 +90,11 @@ class OfficeUserController extends Controller
 
     public function destroy(Request $request, BusinessChain $chain, OfficeUser $user)
     {
+        \DB::beginTransaction();
+
+        $user->user->update(['active' => false]);
         if ($user->delete()) {
+            \DB::commit();
             return new SuccessResponse('The user has been deleted.');
         }
         

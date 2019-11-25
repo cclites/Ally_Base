@@ -15,8 +15,6 @@ $factory->define(CaregiverApplication::class, function (Faker $faker) {
         'city' => $faker->city,
         'state' => $faker->stateAbbr,
         'zip' => $faker->postcode,
-        'cell_phone' => $faker->phoneNumber,
-        'cell_phone_provider' => $faker->word,
         'home_phone' => $faker->phoneNumber,
         'email' => $faker->safeEmail,
         'emergency_contact_name' => $faker->name,
@@ -86,5 +84,10 @@ $factory->define(CaregiverApplication::class, function (Faker $faker) {
         'reference_3_name' => $faker->name,
         'reference_3_phone' => '',
         'reference_3_relationship' => $faker->word,
+        'has_cell_phone' => true,
+        'cell_phone' => $faker->phoneNumber,
+        'cell_phone_provider' => $faker->word,
+        'has_smart_phone' => $faker->boolean(),
+        'can_text' => $faker->boolean(),
     ];
 });

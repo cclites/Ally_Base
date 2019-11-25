@@ -5,6 +5,8 @@ namespace App;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToBusinesses;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 /**
  * App\Prospect
@@ -86,6 +88,7 @@ use Illuminate\Database\Eloquent\Builder;
 class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 {
     use BelongsToBusinesses;
+    use SoftDeletes;
 
     protected $table = 'prospects';
     protected $guarded = ['id'];
@@ -102,6 +105,10 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
         static::addGlobalScope('ignore_clients', function ($builder) {
             $builder->whereNull('client_id');
         });
+
+        // Need to add global scope here because the above
+        // is overriding the trait's behavior
+        static::addGlobalScope(new SoftDeletingScope);
     }
 
     ///////////////////////////////////////////
@@ -272,5 +279,30 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
         $builder->whereIn('business_id', $businessIds);
+    }
+    
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+    
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'lastname' => $faker->lastName,
+            'email' => $faker->email,
+            'date_of_birth' => $faker->dateTimeThisCentury->format('Y-m-d'),
+            'phone' => $faker->simple_phone,
+            'address1' => $faker->streetAddress,
+            'referred_by' => $faker->name,
+        ];
     }
 }

@@ -110,7 +110,7 @@ abstract class BaseImport extends Command
             foreach($metaFields as $field) {
                 $value = $this->resolve($field, $row);
                 if (strlen($value)) {
-                    $model->setMeta($field, $value);
+                    $model->setMeta(substr($field, 0, 32), $value);
                 }
             }
         }
@@ -239,7 +239,7 @@ abstract class BaseImport extends Command
         $cellValue = $this->getValue($this->sheet, $field, $row);
 
         $methodName = 'resolve' . studly_case($field);
-        if (method_exists($this, $methodName)) {
+        if ($field != '' && method_exists($this, $methodName)) {
             return $this->$methodName($row, $cellValue);
         }
 
