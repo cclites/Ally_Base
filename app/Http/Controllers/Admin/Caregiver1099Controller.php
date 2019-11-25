@@ -11,6 +11,7 @@ use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\storeCaregiver1099Request;
 use App\Http\Requests\UpdateCaregiver1099Request;
+use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
 
 class Caregiver1099Controller extends Controller
@@ -136,20 +137,43 @@ class Caregiver1099Controller extends Controller
         //
     }
 
-    public function transmit(Request $request)
+    public function transmit(Transmit1099Request $request)
     {
-        $transmitIds = $request->all();
+        $transmitIds = explode(",", $request->transmitSelected);
+        $transmitted = false;
 
         $caregiver1099s = collect();
 
-        foreach($transmitIds as $transmitId){
-            $caregiver1099s[] = Caregiver1099::find($transmitId);
+        foreach($transmitIds as $transmitId=>$value){
+
+            $caregiver1099 = Caregiver1099::find($value);
+            $transmitted = $caregiver1099->transmitted_by ? true : false;
+
+            if(! $transmitted){
+                \Log::info("Already transmitted. Do not transmit again");
+                $caregiver1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
+            }
+
+            //decrypt ssns
+            $decodedClientSsn = decrypt($caregiver1099->client_ssn);
+            $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
+
+            // Mask SSNs for admins in UI
+            if(env('APP_ENV') === 'testing'){
+                $caregiver1099->client_ssn = "***-**-" . substr($decodedClientSsn, -4);
+                $caregiver1099->caregiver_ssn = "***-**-" . substr($decodedCaregiverSsn, -4);
+            }else{
+                $caregiver1099->client_ssn = $decodedClientSsn;
+                $caregiver1099->caregiver_ssn = $decodedCaregiverSsn;
+            }
+
+            $caregiver1099s->push($caregiver1099);
         }
 
         $csv = $this->toCsv($caregiver1099s);
 
-        return \Response::make($csv, 200, [
-            'Content-type' => 'text/csv',
+        return \Response::make(json_encode($csv), 200, [
+            'Content-type' => 'application/csv',
             'Content-Disposition' => 'attachment; filename="Transmission.csv"',
         ]);
 
@@ -165,6 +189,8 @@ class Caregiver1099Controller extends Controller
             return '';
         }
 
+        \Log::info($rows);
+
         // Build header
         $headerRow = collect($rows[0])
             ->keys()
@@ -173,19 +199,18 @@ class Caregiver1099Controller extends Controller
             })
             ->toArray();
 
-        // Build rows
+        // Add header
         $csv[] = '"' . implode('","', $headerRow) . '"';
-        foreach ($rows as $row=>$value) {
 
-            $csv[] = '"' . implode('","', $value) . '"';
+        // build rows
+        foreach ($rows as $row) {
 
+            $data = collect($row)
+                    ->toArray();
+
+            $csv[] = '"' . implode('","', $data) . '"';
         }
 
-        $report = implode("\r\n", $csv);
-
-        return \Response::make($report, 200, [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="Payroll-Export-Report.csv"',
-        ]);
+        return implode("\r\n", $csv);
     }
 }

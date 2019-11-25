@@ -113,11 +113,14 @@
                         </template>
 
                         <template slot="transmit" scope="row">
-                            <b-form-checkbox v-if="row.item.id"
+                            <b-form-checkbox v-if="row.item.id && ! row.item.transmitted"
                                              v-model="transmitSelected"
                                              :value="row.item.id"
                             >
                             </b-form-checkbox>
+                            <div v-else-if="row.item.transmitted">
+                                Transmitted
+                            </div>
                         </template>
                     </b-table>
                 </b-col>
@@ -253,23 +256,23 @@
             },
 
             transmit(){
-                let data = new Form( this.transmitSelected );
-                data.get('/admin/business-1099/transmit/')
 
+                let url = '/admin/business-1099/transmit?transmitSelected=' + this.transmitSelected;
+
+                axios.get(url)
                     .then(response => {
+                        let csv = response.data;
 
-                        var fileURL = window.URL.createObjectURL(new Blob([response]));
-                        var fileLink = document.createElement('a');
-                        fileLink.href = fileURL;
-                        fileLink.setAttribute('download', 'Transmission.csv');
-                        document.body.appendChild(fileLink);
-                        fileLink.click();
-                        fileLink.remove();
+                        var hiddenElement = document.createElement('a');
+                        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                        hiddenElement.target = '_blank';
+                        hiddenElement.download = 'Transmission_Report.csv';
+                        hiddenElement.click();
 
                     })
-                    .catch( e => {
-                    })
+                    .catch( e => {})
                     .finally(() => {
+                        this.generate();
                     });
 
             },
