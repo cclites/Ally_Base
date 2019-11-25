@@ -11,6 +11,7 @@ $factory->define(CreditCard::class, function (Faker $faker) {
         'name_on_card' => $faker->name,
         'number' => $faker->creditCardNumber,
         'expiration_month' => $faker->creditCardExpirationDate->format('m'),
-        'expiration_year' => $faker->creditCardExpirationDate->format('Y')
+        'expiration_year' => $faker->creditCardExpirationDate->format('Y'),
+        'type' => 'visa',
     ];
 });
