@@ -178,6 +178,6 @@ trait CreatesClientInvoiceResources
             ? "340415772202528"
             : "4111111111111111";
 
-        return factory(CreditCard::class)->create(['number' => $number]);
+        return factory(CreditCard::class)->create(['number' => $number, 'type' => $type]);
     }
 }
