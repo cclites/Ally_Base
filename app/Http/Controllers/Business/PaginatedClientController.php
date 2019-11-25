@@ -84,7 +84,7 @@ class PaginatedClientController extends BaseController
                 // stream the avery pdf
 
                 $clients = array_chunk( $query->whereHas( 'address' )->get()->toArray(), 3 );
-                $pdf = PDF::loadView( 'avery-labels', [ 'clients' => $clients ] );
+                $pdf = PDF::loadView( 'avery-labels', [ 'users' => $clients ] );
                 return $pdf->stream( 'avery-labels.pdf' );
             }
 

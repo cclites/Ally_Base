@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\User;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class PaginatedCaregiverController extends BaseController
 {
@@ -69,9 +70,28 @@ class PaginatedCaregiverController extends BaseController
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $results = $query->offset($offset)
-            ->limit($perPage)
-            ->get();
+        // pagination controls
+        if( $request->input( 'avery', 0 ) == 0 ){
+            // dont apply limits for avery printout
+
+            $results = $query->offset($offset)
+                ->limit($perPage)
+                ->get();
+        } else {
+            // stream the avery pdf
+
+            $caregivers = array_chunk( $query->whereHas( 'caregiver.address' )->get()->map( function( $c ){
+
+                return [
+
+                    'name' => $c->name,
+                    'address' => $c->caregiver->address
+                ];
+            })->toArray(), 3 );
+
+            $pdf = PDF::loadView( 'avery-labels', [ 'users' => $caregivers ] );
+            return $pdf->stream( 'avery-labels.pdf' );
+        }
 
         return response()->json(compact('total', 'results'));
     }

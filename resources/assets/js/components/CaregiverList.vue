@@ -1,8 +1,11 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="12">
+            <b-col sm="6" class="my-1">
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
+            </b-col>
+            <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
+                <a href="JavaScript:Void(0)" @click=" averyLabels() " class="btn btn-info">Avery 5160 PDF</a>
             </b-col>
         </b-row>
         <b-row class="mb-2">
@@ -176,6 +179,11 @@
         },
 
         methods: {
+
+            averyLabels(){
+
+                window.open( this.listUrl + '&avery=1' );
+            },
             loadTable() {
                 this.$refs.table.refresh();
             },

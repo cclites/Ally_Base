@@ -45,7 +45,7 @@
 
     <table cellspacing="0" cellpadding="0" border="1">
 
-        @foreach( $clients as $row => $cols )
+        @foreach( $users as $row => $cols )
 
             <tr>
 
