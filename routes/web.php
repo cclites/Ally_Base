@@ -657,6 +657,10 @@ Route::group([
     Route::post('knowledge-manager/attachments', 'Admin\KnowledgeAttachmentController@store');
     Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 
+    /* Avery 5160 Printout */
+    Route::get('avery-printout', 'Admin\AveryController@index')->name( 'avery.index' );
+    Route::get( 'avery-printout/printLabels', 'Admin\AveryController@printLabels' )->name( 'avery.printLabels' );
+
     /* Invoices */
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index')->name('invoices.clients');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');

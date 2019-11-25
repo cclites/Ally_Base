@@ -362,6 +362,9 @@ Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
 Vue.component('report-list', require('./components/ReportList'));
 
+/* Avery 5160 */
+Vue.component('avery-printout', require('./components/admin/AveryPrintout'));
+
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
 Vue.component('admin-nachaach-batch', require('./components/admin/nacha-ach/Batch'));

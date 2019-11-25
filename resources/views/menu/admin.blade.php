@@ -47,6 +47,11 @@
     <a href="{{ route('admin.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
 </li>
 <li>
+    <a class="" href="{{ route('admin.avery.index') }}" aria-expanded="false">
+        <i class="fa fa-address-book"></i><span class="hide-menu">Avery 5160</span>
+    </a>
+</li>
+<li>
     <a class="" href="{{ route('admin.knowledge.manager') }}" aria-expanded="false">
         <i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>
     </a>
