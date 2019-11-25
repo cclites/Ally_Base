@@ -310,9 +310,14 @@
             },
 
             disableGenerate(){
+                /*
                 if(this.businesses.length && this.clients.length && this.caregivers.length){
                     return false;
+                }*/
+                if(this.businesses.length){
+                    return false;
                 }
+
                 return true;
             }
         },
