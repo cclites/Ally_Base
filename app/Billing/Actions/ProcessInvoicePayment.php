@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Billing\Actions;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\PaymentMethodError;
-use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Queries\PaymentQuery;
@@ -23,14 +23,12 @@ class ProcessInvoicePayment
      */
     protected $paymentQuery;
 
-
     public function __construct(ProcessPayment $paymentProcessor, ApplyPayment $paymentApplicator, PaymentQuery $paymentQuery)
     {
         $this->paymentProcessor = $paymentProcessor;
         $this->paymentApplicator = $paymentApplicator;
         $this->paymentQuery = $paymentQuery;
     }
-
 
     /**
      * @param \App\Billing\ClientInvoice $invoice
@@ -39,6 +37,7 @@ class ProcessInvoicePayment
      * @return \App\Billing\Payment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentAmountError
      */
     function payInvoice(ClientInvoice $invoice, PaymentMethodStrategy $strategy, ?float $amount = null): Payment
     {
@@ -61,6 +60,7 @@ class ProcessInvoicePayment
      * @return \App\Billing\Payment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentAmountError
      */
     function payInvoices(iterable $invoices, PaymentMethodStrategy $strategy): Payment
     {
@@ -91,7 +91,7 @@ class ProcessInvoicePayment
     protected function sumInvoiceAmounts(iterable $invoices): float
     {
         $amount = 0.0;
-        foreach($invoices as $invoice) {
+        foreach ($invoices as $invoice) {
             $amount = add($amount, $invoice->getAmountDue());
         }
         return $amount;
@@ -101,10 +101,11 @@ class ProcessInvoicePayment
      * @param ClientInvoice[] $invoices
      * @param \App\Billing\Payment $payment
      * @return void
+     * @throws \App\Billing\Exceptions\PaymentAmountError
      */
     protected function applyPayment(iterable $invoices, Payment $payment): void
     {
-        foreach($invoices as $invoice) {
+        foreach ($invoices as $invoice) {
             if ($amount = $payment->getAmountAvailable()) {
                 if ($amount > $invoice->getAmountDue()) {
                     $amount = $invoice->getAmountDue();

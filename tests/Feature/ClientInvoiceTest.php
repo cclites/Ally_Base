@@ -323,7 +323,4 @@ class ClientInvoiceTest extends TestCase
 
         $this->assertEquals(Shift::WAITING_FOR_CHARGE, $shift->fresh()->status);
     }
-
-
-
 }
