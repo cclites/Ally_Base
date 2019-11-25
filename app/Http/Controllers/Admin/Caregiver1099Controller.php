@@ -137,11 +137,16 @@ class Caregiver1099Controller extends Controller
         //
     }
 
-    public function transmit(Transmit1099Request $request)
+    /**
+     * Creates a csv file of 1099s for transmission
+     * TODO: Convert to IRS format for direct transmission
+     *
+     * @param Transmit1099Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function transmit(Transmit1099Request $request): Response
     {
         $transmitIds = explode(",", $request->transmitSelected);
-        $transmitted = false;
-
         $caregiver1099s = collect();
 
         foreach($transmitIds as $transmitId=>$value){
@@ -150,8 +155,10 @@ class Caregiver1099Controller extends Controller
             $transmitted = $caregiver1099->transmitted_by ? true : false;
 
             if(! $transmitted){
-                \Log::info("Already transmitted. Do not transmit again");
                 $caregiver1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
+            }else if($transmitted){
+                \Log::info("Already transmitted. Do not transmit again");
+                continue;
             }
 
             //decrypt ssns
