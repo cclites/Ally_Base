@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class PaginatedClientController extends BaseController
 {
@@ -71,11 +72,22 @@ class PaginatedClientController extends BaseController
             $total = $query->count();
 
             // pagination controls
-            $per_page     = $request->input( 'perPage', 50 );
-            $current_page = $request->input( 'page', 1 );
-            $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
+            if( $request->input( 'avery', 0 ) == 0 ){
+                // dont apply limits for avery printout
 
-            $clients = $query->get();
+                $per_page     = $request->input( 'perPage', 50 );
+                $current_page = $request->input( 'page', 1 );
+                $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
+
+                $clients = $query->get();
+            } else {
+                // stream the avery pdf
+
+                $clients = array_chunk( $query->whereHas( 'address' )->get()->toArray(), 3 );
+                $pdf = PDF::loadView( 'avery-labels', [ 'clients' => $clients ] );
+                return $pdf->stream( 'avery-labels.pdf' );
+            }
+
 
             $data = [
 
