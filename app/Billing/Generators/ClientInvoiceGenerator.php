@@ -343,6 +343,16 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         ];
     }
 
+    /**
+     * Get the actual amount of the fee that is to be
+     * added and charged to the invoice.
+     *
+     * @param float $amount
+     * @param InvoiceableInterface $invoiceable
+     * @param ClientPayer $clientPayer
+     * @param int $decimalPrecision
+     * @return float
+     */
     protected function getAllyFee(float $amount, InvoiceableInterface $invoiceable, ClientPayer $clientPayer, $decimalPrecision = 4): float
     {
         if ($invoiceable->hasFeeIncluded()) {

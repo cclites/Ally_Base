@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests;
 
 use App\Billing\ClientPayer;
@@ -14,13 +15,10 @@ use App\Shift;
  * Note: This trait requires a $client property to be defined
  *
  * @package Tests
- *
- *
  */
 trait CreatesClientInvoiceResources
 {
-    private function createAllowancePayer(float $allowance, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31',
-        string $allocation_type = ClientPayer::ALLOCATION_MONTHLY): ClientPayer
+    private function createAllowancePayer(float $allowance, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', string $allocation_type = ClientPayer::ALLOCATION_MONTHLY): ClientPayer
     {
         $payer = factory(Payer::class)->create();
         $clientPayer = new ClientPayer([
@@ -80,7 +78,6 @@ trait CreatesClientInvoiceResources
     {
         return $this->createSplitPayer($splitPercentage, $effective_start, $effective_end, Payer::PRIVATE_PAY_ID);
     }
-
 
 
     private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface

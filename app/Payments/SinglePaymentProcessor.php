@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Payments;
 
 use App\Billing\ClientInvoice;
@@ -17,7 +18,16 @@ use Carbon\Carbon;
  */
 class SinglePaymentProcessor
 {
-
+    /**
+     * Create Payment for a Client.
+     *
+     * @param Client $client
+     * @param $amount
+     * @param bool $adjustment
+     * @param null $notes
+     * @return mixed
+     * @throws \App\Billing\Exceptions\PaymentMethodError
+     */
     public static function chargeClient(Client $client, $amount, $adjustment = false, $notes = null)
     {
         $method = $client->getPaymentMethod();
@@ -74,5 +84,4 @@ class SinglePaymentProcessor
         }
         return $transaction;
     }
-
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Traits;
-
 
 use App\Shifts\CostCalculator;
 
@@ -24,7 +22,7 @@ trait HasAllyFeeTrait
             ? multiply(divide($paymentAmount, add(1, $allyPct)), $allyPct)
             : multiply($paymentAmount, $allyPct);
 
-        return (float) round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
+        return (float)round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
     }
 
     /**

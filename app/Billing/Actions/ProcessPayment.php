@@ -1,16 +1,14 @@
 <?php
+
 namespace App\Billing\Actions;
 
-use App\Billing\Exceptions\PayerAssignmentError;
 use App\Billing\Exceptions\PaymentAmountError;
 use App\Billing\Exceptions\PaymentMethodDeclined;
 use App\Billing\Exceptions\PaymentMethodError;
-use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Business;
 use App\User;
-
 
 class ProcessPayment
 {
@@ -26,10 +24,11 @@ class ProcessPayment
      * @return \App\Billing\Payment|null
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
+     * @throws PaymentAmountError
      */
     function charge(PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
     {
-        if ($amount <= 0)  {
+        if ($amount <= 0) {
             throw new PaymentAmountError("The payment amount cannot be less than $0");
         }
 
@@ -78,6 +77,11 @@ class ProcessPayment
     }
 
     /**
+     * Get a CALCULATED ESTIMATE of what the Ally fee was that was charged
+     * based on the payment method used.  This becomes the stored value
+     * for system allotment, but could potentially be different than
+     * the numbers used to generate the invoice.
+     *
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float $amount
      * @return float|null
