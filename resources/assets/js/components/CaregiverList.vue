@@ -182,7 +182,7 @@
 
             averyLabels(){
 
-                window.open( this.listUrl + '&avery=1' );
+                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.listUrl + '&avery=1' );
             },
             loadTable() {
                 this.$refs.table.refresh();
