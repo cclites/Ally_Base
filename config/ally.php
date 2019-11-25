@@ -10,6 +10,7 @@ return [
     'credit_card_fee' => '0.05',
     'amex_card_fee' => '0.06',
     'trust_fee' => '0.07',
+    'gateway' => env('GATEWAY_DRIVER', 'ECS'),
 
     /**
      * Flag to turn on/off the functionality of PreventDuplicatePosts

@@ -30,14 +30,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function bindInterfaces()
     {
-        if($this->app->runningUnitTests()) {
-            $this->app->bind(CreditCardPaymentInterface::class, DummyGateway::class);
-            $this->app->bind(ACHDepositInterface::class, DummyGateway::class);
-            $this->app->bind(ACHPaymentInterface::class, DummyGateway::class);
-        } else {
+        if (config('ally.gateway') == 'ECS') {
             $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
             $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
             $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
+        } else {
+            $this->app->bind(CreditCardPaymentInterface::class, DummyGateway::class);
+            $this->app->bind(ACHDepositInterface::class, DummyGateway::class);
+            $this->app->bind(ACHPaymentInterface::class, DummyGateway::class);
         }
 
         $this->app->bind(ChatServiceInterface::class, function() {
