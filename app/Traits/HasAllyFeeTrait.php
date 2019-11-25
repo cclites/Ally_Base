@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Billing\BillingCalculator;
-use App\Shifts\ShiftCostCalculator;
 
 trait HasAllyFeeTrait
 {
@@ -34,7 +33,7 @@ trait HasAllyFeeTrait
      */
     public function getAllyHourlyRate($caregiverRate = null, $providerFee = null)
     {
-        $amount = add($caregiverRate, $providerFee, ShiftCostCalculator::DECIMAL_PLACES);
+        $amount = add($caregiverRate, $providerFee, BillingCalculator::DECIMAL_PLACES);
         return $this->getAllyFee($amount, false);
     }
 
