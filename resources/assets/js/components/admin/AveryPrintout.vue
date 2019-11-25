@@ -129,6 +129,12 @@
                 status       : "all"
             };
         },
+        computed: {
+
+            user_id(){
+                return 1337;
+            }
+        },
         methods: {
 
             async getClients() {
@@ -163,9 +169,9 @@
 
                 console.log( 'testing..' );
 
-                // this.loaded = 0;
-                // let url = '/admin/avery-printout/printLabels?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                //     '&chain_id=' + this.chain_id + '&paid=' + this.paid + '&client_id=' + this.client_id;
+                this.loading = true;
+
+                const url = '/admin/avery-printout/printLabels?start_date=' + this.start_date + '&end_date=' + this.end_date + '&chain_id=' + this.chain_id + '&active=' + this.status + '&user_id=' + this.user_id;
                 // const response = await axios.get(url);
                 // this.items = response.data.data.map(item => {
                 //     item.chain_name = (item.client && item.client.business && item.client.business.chain) ? item.client.business.chain.name : "";
