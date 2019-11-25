@@ -33,7 +33,7 @@
                                     v-model="form.client_id"
                                     @input="changedClient(form.client_id)"
                             >
-                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="client_id" text=""></input-help>
                         </b-form-group>
@@ -45,7 +45,7 @@
                                     v-model="form.caregiver_id"
                                     @input="changedCaregiver(form.caregiver_id)"
                             >
-                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
@@ -81,10 +81,10 @@
                                         <date-picker v-model="endDate" @input="changedEndDate(endDate)"/>
                                     </td>
                                     <td>
-                                        <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
+                                        <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" id="startTime" />
                                     </td>
                                     <td>
-                                        <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
+                                        <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" id="endTime" />
                                     </td>
                                     <td v-if="business.co_mileage">
                                         <b-form-input
@@ -173,7 +173,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
+                                            <b-form-select v-model="form.hours_type" name="hours_type" style="min-width: 80px;" @change="(x) => onChangeHoursType(x, this.form.hours_type)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -253,7 +253,7 @@
                                             </b-form-select>
                                         </td>
                                         <td>
-                                            <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
+                                            <b-form-select v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
                                                 <option value="default">REG</option>
                                                 <option value="holiday">HOL</option>
                                                 <option value="overtime">OT</option>
@@ -562,6 +562,10 @@
         mixins: [AuthUser, FormatsNumbers, FormatsDates, ShiftServices, Constants],
 
         props: {
+            'isRoot': {
+                type: Boolean,
+                default: false,
+            },
             'shift': {
                 required: true,
                 type: Object,
@@ -581,10 +585,17 @@
                     return {};
                 }
             },
-            'activities': Array,
             'admin': Number,
             'is_modal': 0,
             'payment_type': {},
+            showInactiveClients: {
+                type: Boolean,
+                default: false,
+            },
+            showInactiveCaregivers: {
+                type: Boolean,
+                default: false,
+            },
         },
         data() {
             return {
@@ -595,8 +606,6 @@
                 endTime: '',
                 endDate: '',
                 deleted: false,
-                clients: [],
-                caregivers: [],
                 clientAllyPct: 0.05,
                 paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
                 submitting: false,
@@ -606,25 +615,47 @@
                 loadingQuickbooksConfig: false,
             }
         },
-        mounted() {
+        async mounted() {
             if (this.shift) {
                 this.changedShift(this.shift);
             }
             if (this.isOfficeUserOrAdmin) {
-                this.loadClientCaregiverData();
-                this.fetchServices(); // from ShiftServices mixin
+                await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services', 'activities']);
             }
             this.loadAllyPctFromClient();
             this.fixDateTimes();
         },
         computed: {
             ...mapGetters({
+                activityList: 'filters/activityList',
+                clientList: 'filters/clientList',
+                caregiverList: 'filters/caregiverList',
                 quickbooksServices: 'quickbooks/services',
                 quickbooksBusiness: 'quickbooks/businessId',
                 quickbooksIsAuthorized: 'quickbooks/isAuthorized',
                 quickbooksAllowMapping: 'quickbooks/mapServiceFromShifts',
             }),
 
+            clients() {
+                if (this.showInactiveClients) {
+                    return this.clientList;
+                }
+
+                return this.clientList.filter(x => x.active == 1);
+            },
+            caregivers() {
+                if (this.showInactiveCaregivers) {
+                    return this.caregiverList;
+                }
+
+                return this.caregiverList.filter(x => x.active == 1);
+            },
+            activities() {
+                if (! this.client || ! this.business.id) {
+                    return this.activityList.filter(x => x.business_id == null);
+                }
+                return this.activityList.filter(x => x.business_id == null || x.business_id == this.business.id);
+            },
             selectedClient() {
                 return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
             },
@@ -695,6 +726,12 @@
         },
         methods: {
             changedShift(shift) {
+                if (this.isRoot) {
+                    // If we are not working from the SHR or other parent
+                    // page, we need to inform the filters store what
+                    // business we are working with.
+                    this.$store.commit('filters/setBusiness', shift.business_id);
+                }
                 this.resetForm(shift);
                 this.changedClient(shift.client_id);
             },
@@ -706,9 +743,10 @@
                 if (clientId) {
                     this.loading = true;
                     try {
+                        await this.loadClientPayersAndRatesData(clientId);
                         this.loadAllyPctFromClient(clientId);
-                        await this.loadClientRates(clientId);
-                        await this.loadClientPayers(clientId);
+                        // await this.loadClientRates(clientId);
+                        // await this.loadClientPayers(clientId);
                     }
                     catch (e) {}
                     this.loading = false
@@ -757,7 +795,6 @@
             },
 
             resetForm(shift) {
-                console.log('New Shift', shift);
                 if (!shift) {
                     shift = {};
                 }
@@ -996,10 +1033,6 @@
                     }
                 });
             },
-            loadClientCaregiverData() {
-                axios.get('/business/clients').then(response => this.clients = response.data);
-                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
-            },
             loadCaregiverRates() {
                 if (!this.form.caregiver_id || !this.form.client_id) return;
                 axios.get('/business/clients/' + this.form.client_id + '/caregivers/' + this.form.caregiver_id).then(response => {
@@ -1018,10 +1051,10 @@
                 }
 
                 if (!this.form.client_id) return;
-                axios.get(`/business/clients/${this.form.client_id}/payment_type`).then(response => {
-                    this.clientAllyPct = response.data.percentage_fee;
-                    this.paymentType = response.data.payment_type;
-                });
+                // axios.get(`/business/clients/${this.form.client_id}/payment_type`).then(response => {
+                //     this.clientAllyPct = response.data.percentage_fee;
+                //     this.paymentType = response.data.payment_type;
+                // });
             },
             changedDailyRates() {
                 if (this.form.caregiver_id) {
@@ -1107,7 +1140,7 @@
 
             // Watch if the business changes and refresh the current quickbooks settings.
             async business(newVal, oldVal) {
-                if (newVal && newVal.id != oldVal.id) {
+                if (newVal && newVal.id) {
                     this.loadingQuickbooksConfig = true;
                     await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
                     await this.$store.dispatch('quickbooks/fetchServices');

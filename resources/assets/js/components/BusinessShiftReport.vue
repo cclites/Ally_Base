@@ -19,20 +19,36 @@
                             </b-form-group>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Caregiver" class="form-inline">
-                                <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
-                                    <option value="">All Caregivers</option>
-                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                                </b-form-select>
-                            </b-form-group>
+                            <fieldset role="group" class="form-inline b-form-group form-group" id="caregiver" aria-labelledby="caregiver-label">
+                                <legend class="col-form-legend pt-0 d-flex" id="caregiver-label">
+                                    <div class="f-1">Caregiver</div>
+                                    <b-form-checkbox class="ml-auto" v-model="showInactiveCaregivers">
+                                        Show Inactive
+                                    </b-form-checkbox>
+                                </legend>
+                                <div role="group" class="" aria-labelledby="caregiver-label">
+                                    <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter" class="w-100">
+                                        <option value="">All Caregivers</option>
+                                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                </div>
+                            </fieldset>
                         </b-col>
                         <b-col xl="4" lg="6">
-                            <b-form-group label="Client" class="form-inline">
-                                <b-form-select v-model="filters.client_id" ref="clientFilter">
-                                    <option value="">All Clients</option>
-                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                                </b-form-select>
-                            </b-form-group>
+                            <fieldset role="group" class="form-inline b-form-group form-group" id="client" aria-labelledby="client-label">
+                                <legend class="col-form-legend pt-0 d-flex" id="client-label">
+                                    <div class="f-1">Client</div>
+                                    <b-form-checkbox class="ml-auto" v-model="showInactiveClients">
+                                        Show Inactive
+                                    </b-form-checkbox>
+                                </legend>
+                                <div role="group" class="" aria-labelledby="caregiver-label">
+                                    <b-form-select v-model="filters.client_id" ref="clientFilter" class="w-100">
+                                        <option value="">All Clients</option>
+                                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                </div>
+                            </fieldset>
                         </b-col>
                         <b-col xl="4" lg="6">
                             <b-form-group label="Payment Method" class="form-inline">
@@ -185,7 +201,7 @@
         />
 
         <!-- Details modal -->
-        <shift-details-modal v-model="detailsModal" :shift="selectedItem">
+        <shift-details-modal v-if="detailsModal" v-model="detailsModal" :shift="selectedItem">
             <template slot="buttons" scope="row">
                 <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
@@ -197,10 +213,13 @@
         </shift-details-modal>
 
         <add-shift-modal
+            v-if="addShiftModal"
             v-model="addShiftModal"
             :caregiver="{id: filters.caregiver_id}"
             :client="{id: filters.client_id}"
             @shift-created="onShiftCreate"
+            :show-inactive-clients="showInactiveClients"
+            :show-inactive-caregivers="showInactiveCaregivers"
         ></add-shift-modal>
 
         <edit-shift-modal
@@ -210,6 +229,8 @@
             @shift-updated="onShiftUpdate"
             @shift-deleted="onShiftDelete"
             @closed="editingShiftId = null"
+            :show-inactive-clients="showInactiveClients"
+            :show-inactive-caregivers="showInactiveCaregivers"
         />
     </div>
 </template>
@@ -227,6 +248,7 @@
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import ShiftFlags from "../mixins/ShiftFlags";
     import Constants from '../mixins/Constants';
+    import {mapGetters} from "vuex";
 
     export default {
         components: {
@@ -275,8 +297,6 @@
                     service_id: '',
                 },
                 includeAllFlags: false,
-                clients: [],
-                caregivers: [],
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
@@ -296,24 +316,52 @@
                 loadingShifts: false,
                 localStoragePrefix: 'shift_report_',
                 location: 'all',
-                services: [],
-                clientsLoaded: false,
-                caregiversLoaded: false,
-                servicesLoaded: false,
-
+                showInactiveClients: false,
+                showInactiveCaregivers: false,
             }
         },
 
         async mounted() {
+            this.$store.commit('filters/setBusiness', this.filters.business_id);
             this.loadFiltersFromStorage();
             this.setInitialFields();
-            await this.loadFiltersData();
+            await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers', 'services', 'activities']);
             if (this.autoload) {
                 this.loadData();
             }
         },
 
         computed: {
+            ...mapGetters({
+                clientsLoaded: 'filters/isClientsLoaded',
+                caregiversLoaded: 'filters/isCaregiversLoaded',
+                servicesLoaded: 'filters/isServicesLoaded',
+                clientList: 'filters/clientList',
+                caregiverList: 'filters/caregiverList',
+                services: 'filters/serviceList',
+            }),
+            clients() {
+                return this.clientList.filter(x => {
+                    if (this.filters.client_type) {
+                        if (x.client_type != this.filters.client_type) {
+                            return false;
+                        };
+                    }
+
+                    if (! this.showInactiveClients) {
+                        return x.active == 1;
+                    }
+
+                    return true;
+                });
+            },
+            caregivers() {
+                if (this.showInactiveCaregivers) {
+                    return this.caregiverList;
+                }
+
+                return this.caregiverList.filter(x => x.active == 1);
+            },
             availableFields() {
                 let fields = [
                     'Flags',
@@ -449,11 +497,13 @@
                         + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags});
             },
 
-            generateReportDisabled(){
+            generateReportDisabled() {
+                if (!this.filters.start_date || !this.filters.end_date) {
+                    return false;
+                }
 
-                if( moment(this.filters.start_date).isSameOrBefore(moment(this.filters.end_date))
-                    && this.clientsLoaded && this.caregiversLoaded && this.servicesLoaded)
-                {
+                else if (moment(this.filters.start_date, 'MM/DD/YYYY').isSameOrBefore(moment(this.filters.end_date, 'MM/DD/YYYY'))
+                    && this.clientsLoaded && this.caregiversLoaded && this.servicesLoaded) {
                     return false;
                 }
 
@@ -563,26 +613,6 @@
                 }
             },
 
-            async loadFiltersData() {
-                await axios.get('/business/clients').
-                        then(response => {
-                            this.clients = response.data;
-                            this.clientsLoaded = true;
-                        });
-
-                await axios.get('/business/caregivers').
-                        then(response => {
-                            this.caregivers = response.data;
-                            this.caregiversLoaded = true;
-                        });
-
-                await axios.get('/business/services?json=1').
-                        then(response => {
-                            this.services = response.data;
-                            this.servicesLoaded = true;
-                        });
-            },
-
             details(item) {
                 let component = this;
                 axios.get('/business/shifts/' + item.id)
@@ -592,7 +622,6 @@
                         shift.checked_out_time = shift.checked_out_time ? moment.utc(shift.checked_out_time).local().format('L LT') : '(Still clocked in)';
                         component.selectedItem = shift;
                         component.detailsModal = true;
-                        console.log(component.selectedItem);
                     })
                     .catch(function(error) {
                         alert('Error loading shift details');
@@ -748,6 +777,9 @@
         },
 
         watch: {
+            'filters.business_id'(newVal) {
+                this.$store.commit('filters/setBusiness', newVal);
+            },
             sortBy(val) {
                 this.setLocalStorage('sortBy', val);
             },

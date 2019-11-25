@@ -27,12 +27,17 @@ class CaregiverOvertimeReport extends BaseReport
     protected $end;
 
     /**
+     * @var date
+     */
+    protected $start;
+
+    /**
      * CaregiverOvertimeReport constructor.
      */
     public function __construct()
     {
         $this->query = Caregiver::forRequestedBusinesses()
-                        ->with('shifts', 'schedules')
+                        ->with('schedules')
                         ->ordered();
     }
 
@@ -61,13 +66,12 @@ class CaregiverOvertimeReport extends BaseReport
      */
     public function applyFilters(string $start, string $end, ?int $caregiver_id, ?string $status) : self
     {
-        $this->end = $end;
 
-        $start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
-        $end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
+        $this->start = (new Carbon($start . ' 00:00:00', $this->timezone))->setTimezone('UTC');
+        $this->end = (new Carbon($end . ' 23:59:59', $this->timezone))->setTimezone('UTC');
 
-        $this->query->whereHas('shifts', function ($q) use ($start, $end) {
-            $q->whereBetween('checked_in_time', [$start, $end]);
+        $this->query->whereHas('shifts', function ($q){
+            $q->whereBetween('checked_in_time', [$this->start, $this->end]);
         });
 
         if(filled($caregiver_id)){
@@ -97,11 +101,11 @@ class CaregiverOvertimeReport extends BaseReport
                     $futureScheduled = 0;
                     $total = 0;
 
-                    foreach($caregiver->shifts->where('checked_out_time', '!=', null) as $shift) {
+                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
                         $worked += $shift->duration();
                     }
 
-                    foreach($caregiver->shifts->where('checked_out_time', null) as $shift) {
+                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
                         $worked += $shift->duration();
                         $futureScheduled += $shift->remaining();
                     }
@@ -112,7 +116,7 @@ class CaregiverOvertimeReport extends BaseReport
 
                     $futureScheduled += $duration;
 
-                    $worked = round($worked / 60, 2);
+                    $worked = round($worked, 2);
                     $futureScheduled = round($futureScheduled / 60, 2);
                     $total = round($worked + $futureScheduled, 2);
 

@@ -161,6 +161,7 @@
                     override: false,
                     business_id: this.value.business_id || '',
                     status_alias_id: "0",
+                    uses_ein_number: 0,
                 }),
             }
         },

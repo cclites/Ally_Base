@@ -304,4 +304,29 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
     {
         return null;
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'email' => $faker->email,
+            'address1' => $faker->streetAddress,
+            'npi_number' => $faker->randomNumber(9),
+            'phone_number' => $faker->simple_phone,
+            'fax_number' => $faker->simple_phone,
+            'contact_name' => $faker->name,
+        ];
+    }
 }

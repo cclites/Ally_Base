@@ -75,4 +75,25 @@ class Document extends AuditableModel
     {
         return storage_path('app/documents/'.$this->filename);
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'original_filename' => $faker->word.'.pdf',
+            'description' => $faker->word,
+        ];
+    }
 }

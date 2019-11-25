@@ -3,11 +3,13 @@
 namespace App\Claims;
 
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\BelongsToOneBusiness;
 use App\AuditableModel;
 use App\Billing\Payer;
 use App\Business;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Claims\ClaimRemit
@@ -237,5 +239,26 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
         }, floatval(0));
 
         $this->update(['amount_applied' => $totalApplied]);
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'reference' => $faker->randomNumber(9),
+            'notes' => $faker->sentence,
+        ];
     }
 }

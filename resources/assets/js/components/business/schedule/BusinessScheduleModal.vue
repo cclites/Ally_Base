@@ -679,15 +679,14 @@
                 this.changedClient(schedule.client_id);
             },
 
-            changedClient(clientId) {
+            async changedClient(clientId) {
                 if (!clientId || this.client_id === clientId) {
                     return;
                 }
                 this.loadCaregivers(clientId);
+                await this.loadClientPayersAndRatesData(clientId);
                 this.loadAllyPctFromClient(clientId);
                 this.loadCarePlans(clientId);
-                this.loadClientRates(clientId);
-                this.loadClientPayers(clientId);
             },
 
             changedCaregiver(caregiverId) {
@@ -697,7 +696,7 @@
                 // no show or open shift and a new caregiver is set otherwise
                 // saving the schedule will clear the caregiver_id because of
                 // its status.
-                if (caregiverId && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
+                if (caregiverId && (['CAREGIVER_CANCELED', 'CAREGIVER_NOSHOW', 'OPEN_SHIFT']).includes(this.form.status)) {
                     this.form.status = 'OK';
                 }
             },
@@ -947,13 +946,12 @@
                 }
             },
 
-            loadClientData() {
+            async loadClientData() {
                 if (this.client_id) {
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers(this.client_id);
+                    await this.loadClientPayersAndRatesData(this.client_id);
                     this.loadAllyPctFromClient(this.client_id);
-                    this.loadClientRates(this.client_id);
-                    this.loadClientPayers(this.client_id);
                 }
             },
 
@@ -1127,7 +1125,7 @@
 
             // Watch if the business changes and refresh the current quickbooks settings.
             async business(newVal, oldVal) {
-                if (newVal && newVal.id != oldVal.id) {
+                if (newVal && newVal.id) {
                     this.loadingQuickbooksConfig = true;
                     await this.$store.dispatch('quickbooks/fetchConfig', newVal.id);
                     await this.$store.dispatch('quickbooks/fetchServices');

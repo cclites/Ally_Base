@@ -5,7 +5,9 @@ namespace App\Claims;
 use App\Claims\Contracts\ClaimableInterface;
 use App\AuditableModel;
 use App\Shift;
+use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Claims\ClaimableExpense
@@ -118,5 +120,26 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public function getEndTime(): ?Carbon
     {
         return null;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'caregiver_last_name' => $faker->lastName,
+            'notes' => $faker->sentence,
+        ];
     }
 }

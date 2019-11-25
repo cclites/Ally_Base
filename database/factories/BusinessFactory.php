@@ -26,6 +26,7 @@ $factory->define(Business::class, function(Faker $faker) {
             $chain = BusinessChain::inRandomOrder()->first();
             if (!$chain) $chain = factory(BusinessChain::class)->create();
             return $chain->id;
-        }
+        },
+        'require_caregiver_signatures' => false,
     ];
 });

@@ -38,7 +38,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'city' => 'required|string|max:255',
             'state' => 'required|string|size:2',
             'zip' => 'required|string|min:5',
-            'cell_phone' => ['required', new PhonePossible()],
+            'cell_phone' => ['nullable', new PhonePossible()],
             'cell_phone_provider' => 'nullable|string|max:60',
             'home_phone' => ['nullable', new PhonePossible()],
             'emergency_contact_name' => 'nullable|string|max:100',
@@ -53,7 +53,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'preferred_days' => 'nullable|array',
             'preferred_times' => 'nullable|array',
             'preferred_shift_length' => 'nullable|array',
-            'work_weekends' => 'boolean',
+//            'work_weekends' => 'boolean',
             'travel_radius' => 'nullable|integer',
             'vehicle' => 'nullable|string',
             'dui' => 'boolean',
@@ -111,7 +111,10 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'reference_3_phone' => ['nullable', new PhonePossible()],
             'reference_3_relationship' => 'nullable|string|max:100',
             'heard_about' => 'nullable|array',
-            'caregiver_signature' => 'required'
+            'caregiver_signature' => 'required',
+            'has_cell_phone' => 'required|boolean',
+            'has_smart_phone' => 'required|boolean',
+            'can_text' => 'required|boolean',
         ];
     }
 
@@ -143,7 +146,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'employer_3_phone',
             'reference_1_phone',
             'reference_2_phone',
-            'reference_3_phone'
+            'reference_3_phone',
         ];
         foreach($phoneNumberFields as $field) {
             if ($number = $data[$field] ?? null) {

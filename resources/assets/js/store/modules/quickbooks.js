@@ -23,7 +23,8 @@ const getters = {
         if (! state.config) {
             return false;
         }
-        return !!state.config.access_token;
+        return (state.config.is_desktop && !!state.config.desktop_api_key) ||
+            (! state.config.is_desktop && !!state.config.access_token);
     },
     mapServiceFromShifts(state) {
         if (! state.config) {
@@ -46,6 +47,9 @@ const mutations = {
 // actions
 const actions = {
     async fetchConfig({commit}, businessId) {
+        if (businessId == null) {
+            return;
+        }
         await axios.get(`/business/quickbooks/${businessId}/config`)
             .then( ({ data }) => {
                 commit('setConfig', data ? data.data : []);

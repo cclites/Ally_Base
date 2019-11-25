@@ -45,12 +45,11 @@
                         />
                         <input-help :form="form" field="label" />
                     </b-form-group>
-
-
                 </b-col>
+                
                 <b-col lg="6">
                     <b-form-group label="Is this field required?" label-class="required">
-                        <b-form-radio-group v-model="form.required" name="required" required>
+                        <b-form-radio-group v-model="form.required" name="required">
                             <b-form-radio :value="1">Yes</b-form-radio>
                             <b-form-radio :value="0">No</b-form-radio>
                         </b-form-radio-group>
@@ -168,7 +167,7 @@
                     user_type: this.getOriginal('user_type'),
                     type: this.getOriginal('type'),
                     label: this.getOriginal('label'),
-                    required: this.getOriginal('required', false),
+                    required: this.getOriginal('required', 0),
                     default_value: this.getOriginal('default_value'),
                     options: [],
                 }),
