@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\ActiveBusiness;
+use App\Billing\Gateway\DummyGateway;
 use App\Businesses\SettingsRepository;
 use App\Contracts\ChatServiceInterface;
 use App\Billing\Gateway\ACHDepositInterface;
@@ -29,9 +30,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function bindInterfaces()
     {
-        $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
-        $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
-        $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
+        if($this->app->runningUnitTests()) {
+            $this->app->bind(CreditCardPaymentInterface::class, DummyGateway::class);
+            $this->app->bind(ACHDepositInterface::class, DummyGateway::class);
+            $this->app->bind(ACHPaymentInterface::class, DummyGateway::class);
+        } else {
+            $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
+            $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
+            $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
+        }
+
         $this->app->bind(ChatServiceInterface::class, function() {
             $slack = new Slack(config('services.slack.endpoint'));
             return $slack->setChannel(config('services.slack.channel'))

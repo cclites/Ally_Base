@@ -2,12 +2,14 @@
 
 namespace App\Billing\Actions;
 
+use App\Billing\BillingCalculator;
 use App\Billing\Exceptions\PaymentAmountError;
 use App\Billing\Exceptions\PaymentMethodDeclined;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Business;
+use App\FeeOverrideRule;
 use App\User;
 
 class ProcessPayment
@@ -38,6 +40,8 @@ class ProcessPayment
             }
 
             // Get payment method owner
+            $client = null;
+            $business = null;
             if ($owner = $strategy->getPaymentMethod()->getOwnerModel()) {
                 if ($owner instanceof User) {
                     $client = $owner->client;
@@ -45,6 +49,12 @@ class ProcessPayment
                 if ($owner instanceof Business) {
                     $business = $owner;
                 }
+            }
+
+            // Check for a business fee override
+            $businessId = optional($business)->id ?? optional($client)->business_id;
+            if ($feeOverride = \App\Billing\FeeOverrideRule::lookup($businessId, $strategy->getPaymentMethod()->getPaymentType())) {
+                $this->setAllyFee(BillingCalculator::calculateAllyFee($amount, $feeOverride->getRate(), true));
             }
 
             $payment = new Payment([
