@@ -2,7 +2,8 @@
 
 namespace App\Traits;
 
-use App\Shifts\CostCalculator;
+use App\Billing\BillingCalculator;
+use App\Shifts\ShiftCostCalculator;
 
 trait HasAllyFeeTrait
 {
@@ -17,12 +18,11 @@ trait HasAllyFeeTrait
      */
     public function getAllyFee($paymentAmount, bool $allyFeeIncluded = false)
     {
-        $allyPct = $this->getCachedAllyPercentage();
-        $amount = $allyFeeIncluded
-            ? multiply(divide($paymentAmount, add(1, $allyPct)), $allyPct)
-            : multiply($paymentAmount, $allyPct);
-
-        return (float)round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
+        return BillingCalculator::calculateAllyFee(
+            $paymentAmount,
+            $this->getCachedAllyPercentage(),
+            $allyFeeIncluded
+        );
     }
 
     /**
@@ -34,7 +34,7 @@ trait HasAllyFeeTrait
      */
     public function getAllyHourlyRate($caregiverRate = null, $providerFee = null)
     {
-        $amount = add($caregiverRate, $providerFee, CostCalculator::DECIMAL_PLACES);
+        $amount = add($caregiverRate, $providerFee, ShiftCostCalculator::DECIMAL_PLACES);
         return $this->getAllyFee($amount, false);
     }
 

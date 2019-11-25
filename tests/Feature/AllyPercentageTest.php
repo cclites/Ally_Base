@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Billing\BillingCalculator;
 use App\Client;
 use Tests\CreatesClientInvoiceResources;
 use Tests\TestCase;
@@ -30,7 +31,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->client->business);
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
     }
 
 
@@ -42,7 +43,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->createCreditCard('visa'));
 
-        $this->assertEquals(config('ally.credit_card_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getCreditCardRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -53,7 +54,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->createCreditCard('amex'));
 
-        $this->assertEquals(config('ally.amex_card_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getAmexRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -64,7 +65,7 @@ class AllyPercentageTest extends TestCase
         $clientPayer = $this->createBalancePayer();
         $clientPayer->payer->setProviderPay();
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -77,6 +78,6 @@ class AllyPercentageTest extends TestCase
         $clientPayer2 = $this->createSplitPayer(0.50);
         $clientPayer2->payer->setProviderPay();
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
     }
 }

@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Audit;
+use App\Billing\BillingCalculator;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\GatewayTransaction;
@@ -899,8 +900,7 @@ class Client extends AuditableModel implements
             return $payer->getAllyPercentage();
         }
 
-        // Default to CC fee
-        return (float) config('ally.credit_card_fee');
+        return BillingCalculator::getDefaultRate();
     }
 
     /**

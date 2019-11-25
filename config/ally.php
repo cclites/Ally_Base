@@ -6,10 +6,10 @@ return [
      */
     'local_timezone' => env('LOCAL_TIMEZONE', 'America/New_York'),
 
-    'medicaid_fee' => '0.03',
     'bank_account_fee' => '0.03',
     'credit_card_fee' => '0.05',
     'amex_card_fee' => '0.06',
+    'trust_fee' => '0.07',
 
     /**
      * Flag to turn on/off the functionality of PreventDuplicatePosts
