@@ -22,7 +22,7 @@ class PaginatedClientController extends BaseController
             $query = Client::forRequestedBusinesses();
 
             // sorting controls using the BaseModel class
-            $this->orderedColumn = $request->input( 'sortBy', 'users.lastname' ); // Erik TODO => this may need adjustments
+            $this->orderedColumn = $request->input( 'sort', 'users.lastname' ); // Erik TODO => this may need adjustments
             $order = $request->input( 'sortDirection', 'asc' );
             $query->ordered( $order );
 
@@ -71,23 +71,11 @@ class PaginatedClientController extends BaseController
             // grab total before pagination
             $total = $query->count();
 
-            // pagination controls
-            if( $request->input( 'avery', 0 ) == 0 ){
-                // dont apply limits for avery printout
+            $per_page     = $request->input( 'perPage', 50 );
+            $current_page = $request->input( 'page', 1 );
+            $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
 
-                $per_page     = $request->input( 'perPage', 50 );
-                $current_page = $request->input( 'page', 1 );
-                $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );
-
-                $clients = $query->get();
-            } else {
-                // stream the avery pdf
-
-                $clients = array_chunk( $query->whereHas( 'address' )->get()->toArray(), 3 );
-                $pdf = PDF::loadView( 'avery-labels', [ 'users' => $clients ] );
-                return $pdf->stream( 'avery-labels.pdf' );
-            }
-
+            $clients = $query->get();
 
             $data = [
 

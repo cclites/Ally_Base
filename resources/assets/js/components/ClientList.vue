@@ -149,6 +149,8 @@
                 loading: false,
                 statuses: {caregiver: [], client: []},
                 localStoragePrefix: 'client_list_',
+                paginatedEndpoint : '/business/clients/paginate?json=1',
+                averyEndpoint : '/business/clients/averyLabels?userType=client'
             }
         },
 
@@ -167,17 +169,16 @@
                     : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
             },
 
-            listUrl() {
+            listFilters() {
 
                 // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
 
-                let query = '/business/clients/paginate?json=1';
-                query += '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
+                let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
                 // pagination controls
                 query += '&page=' + this.currentPage;
                 query += '&perPage=' + this.perPage;
-                query += '&sortBy=' + this.sortBy;
+                query += '&sort=' + this.sortBy;
                 query += '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
 
                 let active = this.filters.status;
@@ -226,7 +227,7 @@
 
                 this.loading = true;
 
-                axios.get( this.listUrl )
+                axios.get( this.paginatedEndpoint + this.listFilters )
                     .then( res => {
 
                         console.log( 'response: ', res );
@@ -254,7 +255,7 @@
             },
             averyLabels(){
 
-                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.listUrl + '&avery=1' );
+                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.averyEndpoint + this.listFilters );
             },
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
@@ -314,7 +315,7 @@
 
         watch: {
 
-            async listUrl() {
+            async listFilters() {
 
                 if( !this.loading ){
 

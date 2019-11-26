@@ -29,7 +29,6 @@ class DropdownResourceController extends BaseController
         'sales-people',
         'marketing-clients',
         'clients-for-chain',
-        'caregivers-for-chain',
         'services'
     ];
 
@@ -127,23 +126,6 @@ class DropdownResourceController extends BaseController
         $clients = $query->get();
 
         return response()->json( new ClientDropdownResource( $clients ) );
-    }
-
-    protected function caregiversForChain(Request $request)
-    {
-        $query = Caregiver::forChains( $request->chain );
-
-        if( $request->active == 'active' ) {
-
-            $query->active();
-        } else if ( $request->active == 'inactive' ) {
-
-            $query->inactive();
-        } // else just do all
-
-        $caregivers = $query->get();
-
-        return response()->json(new CaregiverDropdownResource( $caregivers ));
     }
 
     public function services(Request $request)

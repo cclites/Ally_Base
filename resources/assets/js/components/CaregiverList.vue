@@ -143,6 +143,8 @@
                     search: '',
                 }),
                 localStoragePrefix: 'caregiver_list_',
+                paginatedEndpoint : '/business/caregivers/paginate?json=1',
+                averyEndpoint : '/business/caregivers/averyLabels?userType=caregiver'
             }
         },
 
@@ -152,7 +154,7 @@
         },
 
         computed: {
-            listUrl() {
+            listFilters() {
 
                 let active = '';
                 let aliasId = '';
@@ -174,7 +176,7 @@
                     }
                 }
 
-                return `/business/caregivers/paginate?search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
+                return `&search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
             },
         },
 
@@ -182,7 +184,7 @@
 
             averyLabels(){
 
-                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.listUrl + '&avery=1' );
+                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.averyEndpoint + this.listFilters );
             },
             loadTable() {
                 this.$refs.table.refresh();
@@ -192,7 +194,7 @@
                 this.loading = true;
 
                 let sort = ctx.sortBy == null ? '' : ctx.sortBy;
-                return axios.get(this.listUrl + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                return axios.get( this.paginatedEndpoint + this.listFilters + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.results || [];

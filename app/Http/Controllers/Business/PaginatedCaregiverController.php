@@ -70,28 +70,9 @@ class PaginatedCaregiverController extends BaseController
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        // pagination controls
-        if( $request->input( 'avery', 0 ) == 0 ){
-            // dont apply limits for avery printout
-
-            $results = $query->offset($offset)
-                ->limit($perPage)
-                ->get();
-        } else {
-            // stream the avery pdf
-
-            $caregivers = array_chunk( $query->whereHas( 'caregiver.address' )->get()->map( function( $c ){
-
-                return [
-
-                    'name' => $c->name,
-                    'address' => $c->caregiver->address
-                ];
-            })->toArray(), 3 );
-
-            $pdf = PDF::loadView( 'avery-labels', [ 'users' => $caregivers ] );
-            return $pdf->stream( 'avery-labels.pdf' );
-        }
+        $results = $query->offset($offset)
+            ->limit($perPage)
+            ->get();
 
         return response()->json(compact('total', 'results'));
     }
