@@ -24,8 +24,8 @@
 
         table td {
             width: 33.3%;
-            /* background-color: red;
-            border: 3px solid black; */
+            /* background-color: red; */
+            /* border: 3px solid black; */
             padding: 15px 5px 15px;
             font-family: Arial, Helvetica;
             line-height: 1.25em;
@@ -46,6 +46,11 @@
             padding-left: 55px;
             padding-right: 0px;
         }
+
+        .error-field {
+
+            background-color: #ffb8b8;
+        }
     </style>
 @endpush
 
@@ -59,16 +64,16 @@
 
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
-                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 10px;padding-bottom: 0px" @endif>
+                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 0px;padding-bottom: 0px" @endif @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) >= 30 ) class="error-field" @endif>
 
                         {{ $cols[ $col ][ 'name' ] }}
 
                         @if( $cols[ $col ][ 'address' ][ 'address1' ] )
 
-                            <div>{{ $cols[ $col ][ 'address' ][ 'address1' ] }}</div>
+                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) >= 30 ? '*' : '' ) }}</div>
                         @else
 
-                            <div>{{ '-- NO ADDRESS LINE 1 --' }}</div>
+                            <br />
                         @endif
 
                         @if( $cols[ $col ][ 'address' ][ 'address2' ] )
