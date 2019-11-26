@@ -26,7 +26,7 @@
             width: 33.3%;
             /* background-color: red; */
             /* border: 3px solid black; */
-            padding: 15px 5px 15px;
+            padding: 5px 5px 15px;
             font-family: Arial, Helvetica;
             line-height: 1.25em;
             font-size: 14px;
@@ -49,7 +49,7 @@
 
         .error-field {
 
-            background-color: #ffb8b8;
+            color: #ffb8b8 !important;
         }
     </style>
 @endpush
@@ -64,7 +64,13 @@
 
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
-                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 0px;padding-bottom: 0px" @endif @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif>
+                    <td
+                        @if( $row === 0 || $row % 10 == 10 ) style="padding-top: 55px" @endif
+                        @if( $row % 10 <= 8 ) style="padding-top: 5px;padding-bottom: 15px;" @endif
+                        @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif
+                        @if( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ) class="error-field" @endif
+                        @if( strlen( $cols[ $col ][ 'address' ][ 'city' ] ) > 30 ) class="error-field" @endif
+                    >
 
                         {{ $cols[ $col ][ 'name' ] }}
 
