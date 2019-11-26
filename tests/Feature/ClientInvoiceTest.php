@@ -4,21 +4,15 @@ namespace Tests\Feature;
 
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\ClientPayer;
-use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\Generators\ClientInvoiceGenerator;
-use App\Billing\Invoiceable\ShiftAdjustment;
-use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Payment;
-use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Shift;
 use Tests\CreatesClientInvoiceResources;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -56,8 +50,8 @@ class ClientInvoiceTest extends TestCase
         $payments = factory(Payment::class, 2)->create();
         $invoice->payments()->saveMany($payments, [['amount_applied' => 0], ['amount_applied' => 0]]);
 
-        $this->assertCount(2, $invoice->payments,  'The invoice did not collect the payments.');
-        $this->assertCount(1, $payments[0]->invoices,  'The payment did not relate to the invoice.');
+        $this->assertCount(2, $invoice->payments, 'The invoice did not collect the payments.');
+        $this->assertCount(1, $payments[0]->invoices, 'The payment did not relate to the invoice.');
     }
 
     /**
@@ -264,7 +258,6 @@ class ClientInvoiceTest extends TestCase
     }
 
 
-
     /**
      * @test
      */
@@ -330,7 +323,4 @@ class ClientInvoiceTest extends TestCase
 
         $this->assertEquals(Shift::WAITING_FOR_CHARGE, $shift->fresh()->status);
     }
-
-
-
 }

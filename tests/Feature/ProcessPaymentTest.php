@@ -9,10 +9,8 @@ use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Payments\Methods\CreditCard;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProcessPaymentTest extends TestCase

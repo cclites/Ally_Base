@@ -82,7 +82,8 @@ class ProcessChainPayments
                 $paymentMethod = $this->getPaymentMethod($invoices[0]);
                 $log->setPaymentMethod($paymentMethod);
                 $strategy = $this->methodFactory->getStrategy($paymentMethod);
-                $log->setPayment($this->paymentProcessor->payInvoices($invoices, $strategy));
+                $payment = $this->paymentProcessor->payInvoices($invoices, $strategy);
+                $log->setPayment($payment);
             }
             catch (\Exception $e) {
                 $log->setException($e);

@@ -39,5 +39,6 @@
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="SMS_DRIVER" value="log" />
         <env name="PREVENT_DUPE_POSTS" value="false" />
+        <env name="GATEWAY_DRIVER" value="dummy" />
     </php>
 </phpunit>

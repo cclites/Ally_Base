@@ -360,7 +360,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         }
         catch (\Exception $e) {}
 
-        return (float) config('ally.credit_card_fee');
+        return BillingCalculator::getDefaultRate();
     }
 
     // **********************************************************
