@@ -70,8 +70,6 @@ class OfficeUserController extends Controller
             'views_reports' => 'required|boolean'
         ]);
 
-        dd( $request->all() );
-
         $request->validate(
             ['businesses' => 'required|array', 'businesses.*' => 'required|exists:businesses,id'],
             ['*' => 'An office user needs to be assigned at least one location.']
@@ -85,7 +83,7 @@ class OfficeUserController extends Controller
 
         if ($user->update($data)) {
             $user->businesses()->sync($businessIds);
-            return new SuccessResponse('The user has been updated.', $user->toArray());
+            return new SuccessResponse('The user has been updated.', $user->refresh()->toArray());
         }
 
         return new ErrorResponse(500, 'Unknown error');
