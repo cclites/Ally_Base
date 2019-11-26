@@ -13,26 +13,28 @@
             font: inherit;
         }
         body {
-            line-height: 1;
-            height: 100%
+            height: 100%;
+            width: 100%;
         }
         table {
             border-collapse: collapse;
             border-spacing: 0;
+            width: 100%!important;
+        }
+        table tr:first-child td {
+
+            padding-top: 55px;
         }
 
-        body {
-            margin-top: 45px;
-            font-family: Arial, Helvetica;
-            font-size: 10px;
-        }
-        table {
-            width: 100%!important;
+        table tr td:first-child {
+
+            padding-right: 55px;
         }
         table td {
             width: 33.3%;
-            padding: 15px 20px;
+            padding: 0px 0px 20px;
             font-family: Arial, Helvetica;
+            line-height: 1;
             font-size: 18px;
             height: 96px;
             text-align: center;
