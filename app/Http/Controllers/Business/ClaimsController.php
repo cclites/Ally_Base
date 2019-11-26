@@ -144,6 +144,8 @@ class ClaimsController extends BaseController
                 $testFile = $transmitter->test($claim);
             } else {
                 $transmitter->send($claim);
+
+                dd( $claim );
                 $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
                     'service' => $service,
                 ]);

@@ -12,6 +12,7 @@ use App\Services\TellusApiException;
 use App\Services\TellusService;
 use App\Services\TellusValidationException;
 use App\Shift;
+use App\TellusFile;
 use App\TellusTypecode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -106,8 +107,15 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-            if ($tellus->submitClaim($this->getData($claim))) {
+            if ( $filename = $tellus->submitClaim($this->getData($claim))) {
                 // Success
+
+                // $claim->tellusFiles()->create([
+
+                //     'filename' => substr( $filename, 0, strlen( $filename ) - 4),
+                //     'status'   => TellusFile::STATUS_PENDING,
+                // ]);
+
                 return true;
             }
         } catch (TellusValidationException $ex) {

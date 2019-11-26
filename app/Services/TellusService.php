@@ -67,7 +67,10 @@ class TellusService
 
         list($httpCode, $response) = $this->sendXml($xml);
 
+        \Log::info( $response );
+
         $xml = new SimpleXMLElement($response);
+        \Log::info( $xml->batchId );
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
             // TODO: add some sort of databased log so we can see other users errors

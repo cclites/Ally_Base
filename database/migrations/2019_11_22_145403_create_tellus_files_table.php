@@ -27,7 +27,7 @@ class CreateTellusFilesTable extends Migration
 
         Schema::create('tellus_file_results', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('hha_file_id');
+            $table->unsignedInteger('tellus_file_id');
 
             $table->dateTime('service_date')->nullable();
             $table->string('reference_id')->nullable();
@@ -37,7 +37,7 @@ class CreateTellusFilesTable extends Migration
 
             $table->timestamps();
 
-            $table->foreign('hha_file_id')->references('id')->on('hha_files')->onDelete('CASCADE')->onUpdate('CASCADE');
+            $table->foreign('tellus_file_id')->references('id')->on('tellus_files')->onDelete('CASCADE')->onUpdate('CASCADE');
         });
     }
 
