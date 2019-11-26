@@ -113,8 +113,19 @@ class DropdownResourceController extends BaseController
 
     protected function clientsForChain(Request $request)
     {
-        $clients = Client::forChain($request->chain)->get();
-        return response()->json(new ClientDropdownResource($clients));
+        $query = Client::forChain( $request->chain );
+
+        if( $request->active == 'active' ) {
+
+            $query->active();
+        } else if ( $request->active == 'inactive' ) {
+
+            $query->inactive();
+        } // else just do all
+
+        $clients = $query->get();
+
+        return response()->json( new ClientDropdownResource( $clients ) );
     }
 
     public function services(Request $request)

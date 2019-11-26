@@ -1,8 +1,11 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="12">
+            <b-col sm="6" class="my-1">
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
+            </b-col>
+            <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
+                <a href="JavaScript:Void(0)" @click=" averyLabels() " class="btn btn-info">Avery 5160 PDF</a>
             </b-col>
         </b-row>
         <b-row class="mb-2">
@@ -140,6 +143,8 @@
                     search: '',
                 }),
                 localStoragePrefix: 'caregiver_list_',
+                paginatedEndpoint : '/business/caregivers/paginate?json=1',
+                averyEndpoint : '/business/caregivers/avery-labels?userType=caregiver'
             }
         },
 
@@ -149,7 +154,7 @@
         },
 
         computed: {
-            listUrl() {
+            listFilters() {
 
                 let active = '';
                 let aliasId = '';
@@ -171,11 +176,16 @@
                     }
                 }
 
-                return `/business/caregivers/paginate?search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
+                return `&search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
             },
         },
 
         methods: {
+
+            averyLabels(){
+
+                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.averyEndpoint + this.listFilters );
+            },
             loadTable() {
                 this.$refs.table.refresh();
             },
@@ -184,7 +194,7 @@
                 this.loading = true;
 
                 let sort = ctx.sortBy == null ? '' : ctx.sortBy;
-                return axios.get(this.listUrl + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                return axios.get( this.paginatedEndpoint + this.listFilters + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.results || [];

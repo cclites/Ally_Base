@@ -1,8 +1,11 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="12">
+            <b-col sm="6" class="my-1">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
+            </b-col>
+            <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
+                <a href="JavaScript:Void(0)" @click=" averyLabels() " class="btn btn-info">Avery 5160 PDF</a>
             </b-col>
         </b-row>
         <b-row class="mb-2">
@@ -146,6 +149,8 @@
                 loading: false,
                 statuses: {caregiver: [], client: []},
                 localStoragePrefix: 'client_list_',
+                paginatedEndpoint : '/business/clients/paginate?json=1',
+                averyEndpoint : '/business/clients/avery-labels?userType=client'
             }
         },
 
@@ -164,18 +169,11 @@
                     : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
             },
 
-            listUrl() {
+            listFilters() {
 
                 // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
 
-                let query = '/business/clients/paginate?json=1';
-                query += '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
-
-                // pagination controls
-                query += '&page=' + this.currentPage;
-                query += '&perPage=' + this.perPage;
-                query += '&sortBy=' + this.sortBy;
-                query += '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
+                let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
                 let active = this.filters.status;
                 let aliasId = '';
@@ -215,6 +213,10 @@
 
                 return query;
             },
+            paginationControls(){
+
+                return '&page=' + this.currentPage + '&perPage=' + this.perPage + '&sort=' + this.sortBy + '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
+            }
         },
 
         methods: {
@@ -223,7 +225,7 @@
 
                 this.loading = true;
 
-                axios.get( this.listUrl )
+                axios.get( this.paginatedEndpoint + this.listFilters + this.paginationControls )
                     .then( res => {
 
                         console.log( 'response: ', res );
@@ -248,6 +250,10 @@
 
                         this.loading = false;
                     });
+            },
+            averyLabels(){
+
+                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.averyEndpoint + this.listFilters );
             },
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
@@ -307,7 +313,15 @@
 
         watch: {
 
-            async listUrl() {
+            async listFilters() {
+
+                if( !this.loading ){
+
+                    await this.loadClients();
+                }
+            },
+
+            async paginationControls() {
 
                 if( !this.loading ){
 
