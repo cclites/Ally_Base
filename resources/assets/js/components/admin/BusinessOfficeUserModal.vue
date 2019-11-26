@@ -56,6 +56,10 @@
                             <b-form-checkbox v-for="business in businesses" :key="business.id" :value="business.id">{{ business.name }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
+
+                    <b-form-checkbox-group stacked v-model="form.views_reports" name="view_reports">
+                        <b-form-checkbox v-model="form.views_reports">Can View Reports</b-form-checkbox>
+                    </b-form-checkbox-group>
                 </b-col>
             </b-row>
         </b-container>
@@ -98,6 +102,7 @@
                     'password': '',
                     'password_confirmation': '',
                     'businesses': (this.selectedItem) ? this.selectedItem.businesses : [],
+                    'views_reports': (this.selectedItem) ? this.selectedItem.views_reports === 1 : false,
                 });
             },
             title() {

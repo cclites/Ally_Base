@@ -66,7 +66,7 @@ class OfficeUserController extends Controller
             'email' => 'required|email',
             'username' => Rule::unique('users')->ignore($user->id),
             'firstname' => 'required',
-            'lastname' => 'required',
+            'lastname' => 'required'
         ]);
 
         $request->validate(
