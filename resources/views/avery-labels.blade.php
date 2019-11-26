@@ -22,30 +22,29 @@
             width: 100%!important;
         }
 
-        /* table tr:first-child td {
-
-            padding-top: 55px;
-        } */
-
-        table tr td:first-child {
-
-            padding-right: 60px;
-        }
-
-        table tr td:last-child {
-
-            padding-left: 55px;
-        }
-
         table td {
             width: 33.3%;
-            padding: 15px 0px 15px;
+            /* background-color: red;
+            border: 3px solid black; */
+            padding: 15px 15px 15px;
             font-family: Arial, Helvetica;
             line-height: 1;
             font-size: 18px;
             height: 96px;
             text-align: center;
             vertical-align: middle;
+        }
+
+        table tr td:first-child {
+
+            padding-right: 55px;
+            padding-left: 0px;
+        }
+
+        table tr td:last-child {
+
+            padding-left: 55px;
+            padding-right: 0px;
         }
     </style>
 @endpush
@@ -64,19 +63,30 @@
 
                         {{ $cols[ $col ][ 'name' ] }}
 
-                        <div>{{ $cols[ $col ][ 'address' ][ 'address1' ] }}</div>
-                        @if($cols[ $col ][ 'address' ][ 'address2' ])
+                        @if( $cols[ $col ][ 'address' ][ 'address1' ] )
+
+                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) }}</div>
+                        @else
+
+                            <div>{{ '-- NO ADDRESS LINE 1 --' }}</div>
+                        @endif
+
+                        @if( $cols[ $col ][ 'address' ][ 'address2' ] )
 
                             <div>{{ $cols[ $col ][ 'address' ][ 'address2' ] }}</div>
+                        @else
+
+                            <br />
                         @endif
-                        @if($cols[ $col ][ 'address' ][ 'city' ] && $cols[ $col ][ 'address' ][ 'state' ])
+
+                        @if( $cols[ $col ][ 'address' ][ 'city' ] && $cols[ $col ][ 'address' ][ 'state' ] )
 
                             <span>{{ $cols[ $col ][ 'address' ][ 'city' ] }}</span>,
                             <span>{{ $cols[ $col ][ 'address' ][ 'state' ] }}</span>
                         @elseif($cols[ $col ][ 'address' ][ 'city' ])
 
                             {{ $cols[ $col ][ 'address' ][ 'city' ] }}
-                        @elseif($cols[ $col ][ 'address' ][ 'state' ])
+                        @elseif( $cols[ $col ][ 'address' ][ 'state' ])
 
                             {{ $cols[ $col ][ 'address' ][ 'state' ] }}
                         @endif
