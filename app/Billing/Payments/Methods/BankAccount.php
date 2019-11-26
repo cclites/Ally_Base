@@ -3,6 +3,7 @@
 namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
+use App\Billing\BillingCalculator;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Contracts\DepositableInterface;
 use App\Billing\GatewayTransaction;
@@ -267,7 +268,7 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
      */
     public function getAllyPercentage()
     {
-        return (float) config('ally.bank_account_fee');
+        return BillingCalculator::getBankAccountRate();
     }
 
     /**
