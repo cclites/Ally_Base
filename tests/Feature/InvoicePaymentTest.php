@@ -2,34 +2,32 @@
 
 namespace Tests\Feature;
 
-use App\Billing\Actions\ProcessInvoicePayment;
-use App\Billing\BillingCalculator;
-use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\Gateway\ACHDepositInterface;
-use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
-use App\Billing\Gateway\DummyGateway;
-use App\Billing\GatewayTransaction;
+use App\Billing\Generators\BusinessInvoiceGenerator;
+use App\Billing\Generators\CaregiverInvoiceGenerator;
+use App\Business;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Billing\Payments\CreditCardPayment;
+use App\Billing\Payments\PaymentMethodFactory;
+use App\Billing\Actions\ProcessInvoicePayment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Billing\Payments\PaymentMethodFactory;
+use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Payments\PaymentMethodType;
-use App\Client;
-use App\Billing\FeeOverrideRule;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\CreatesBusinesses;
 use Tests\CreatesClientInvoiceResources;
+use App\Billing\BillingCalculator;
+use App\Billing\FeeOverrideRule;
+use Tests\AssertsAllyFees;
 use Tests\TestCase;
+use App\Client;
 
 class InvoicePaymentTest extends TestCase
 {
     use RefreshDatabase;
     use CreatesClientInvoiceResources;
-
-    /** @var \App\Client */
-    private $client;
+    use AssertsAllyFees;
+    use CreatesBusinesses;
 
     /** @var ClientInvoiceGenerator */
     private $invoicer;
@@ -45,11 +43,6 @@ class InvoicePaymentTest extends TestCase
     private $clientPayer;
 
     /**
-     * @var \App\Business
-     */
-    private $business;
-
-    /**
      * @var \App\Billing\Payments\PaymentMethodFactory
      */
     protected $methodFactory;
@@ -60,8 +53,7 @@ class InvoicePaymentTest extends TestCase
 
         $this->methodFactory = new PaymentMethodFactory(app(ACHPaymentInterface::class), app(CreditCardPaymentInterface::class));
 
-        $this->client = factory(Client::class)->create();
-        $this->business = $this->client->business;
+        $this->createBusinessWithUsers(true);
         $this->clientPayer = $this->createBalancePayer();
         $this->invoicer = app(ClientInvoiceGenerator::class);
         $this->processor = app(ProcessInvoicePayment::class);
@@ -186,6 +178,26 @@ class InvoicePaymentTest extends TestCase
     }
 
     /** @test */
+    function payment_processor_should_only_use_overrides_for_the_current_business()
+    {
+        $otherBusiness = factory(Business::class)->create();
+        $override = FeeOverrideRule::create([
+            'business_id' => $otherBusiness->id,
+            'rate' => 0.02,
+            'payment_method_type' => PaymentMethodType::CC(),
+        ]);
+
+        $this->assertNotEquals(BillingCalculator::getCreditCardRate(), $override->rate);
+        $service = $this->createService(123.68);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, BillingCalculator::getCreditCardRate(), $feeCharged);
+    }
+
+    /** @test */
     function payment_processor_should_calculate_ally_fee_based_on_existing_overrides_for_provider_pay()
     {
         $override = FeeOverrideRule::create([
@@ -205,8 +217,42 @@ class InvoicePaymentTest extends TestCase
         $this->assertAllyFeeRate(123.68, $override->getRate(), $feeCharged);
     }
 
-    private function assertAllyFeeRate(float $paymentAmount, $expectedRate, $actualFee): void
+    /** @test */
+    function ally_fee_overrides_should_carry_through_to_deposit_invoices()
     {
-        $this->assertEquals(BillingCalculator::calculateAllyFee($paymentAmount, floatval($expectedRate), true), $actualFee);
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->business->id,
+            'rate' => 0.07,
+            'payment_method_type' => PaymentMethodType::ACH_P(),
+        ]);
+
+        $this->business->setBankAccount('paymentAccount', factory(BankAccount::class)->create(['user_id' => null, 'business_id' => $this->business->id]));
+        $this->client->setPaymentMethod($this->business);
+
+        $service = $this->createService(123.68);
+        $clientInvoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($clientInvoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, $override->rate, $feeCharged);
+
+        $this->assertEquals($clientInvoice->fresh()->amount, $clientInvoice->fresh()->amount_paid);
+
+        // check business invoice has the same ally fee rate
+        $businessInvoiceGenerator = app(BusinessInvoiceGenerator::class);
+        $businessInvoice = $businessInvoiceGenerator->generate($this->business);
+        $this->assertAllyFeeRate(123.68, $override->rate, $businessInvoice->items[0]->ally_rate);
+
+        // check caregiver invoice gets generated
+        $caregiverInvoiceGenerator = app(CaregiverInvoiceGenerator::class);
+        $caregiverInvoice = $caregiverInvoiceGenerator->generate($this->caregiver);
+
+        // caregiver amount should be 75% based on the create service helper
+        $this->assertEquals(multiply(.75, 123.68), $caregiverInvoice->amount);
+        $this->assertEquals($businessInvoice->items[0]->caregiver_rate, $caregiverInvoice->amount);
+
+        // check that all rates add up to client
+        $sum = $caregiverInvoice->amount + $businessInvoice->amount + $businessInvoice->items[0]->ally_rate;
+        $this->assertEquals($sum, $clientInvoice->amount);
     }
 }
