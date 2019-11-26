@@ -70,6 +70,8 @@ class OfficeUserController extends Controller
             'views_reports' => 'required|boolean'
         ]);
 
+        dd( $request->all() );
+
         $request->validate(
             ['businesses' => 'required|array', 'businesses.*' => 'required|exists:businesses,id'],
             ['*' => 'An office user needs to be assigned at least one location.']
