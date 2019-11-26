@@ -30,9 +30,15 @@
 
             padding-right: 55px;
         }
+
+        table tr td:last-child {
+
+            padding-left: 55px;
+        }
+
         table td {
             width: 33.3%;
-            padding: 0px 0px 20px;
+            padding: 15px 0px 15px;
             font-family: Arial, Helvetica;
             line-height: 1;
             font-size: 18px;
