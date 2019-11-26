@@ -185,7 +185,7 @@ Route::group([
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::get('caregivers/paginate', 'Business\PaginatedCaregiverController@index')->name('caregivers.paginate');
-    Route::get('caregivers/averyLabels', 'Business\AveryLabelController@index');
+    Route::get('caregivers/avery-labels', 'Business\AveryLabelController@index');
     Route::resource('caregivers', 'Business\CaregiverController');
     Route::post('caregivers/{caregiver}/reactivate', 'Business\CaregiverController@reactivate')->name('caregivers.reactivate');
     Route::post('caregivers/{caregiver}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
@@ -221,7 +221,7 @@ Route::group([
     Route::post('clients/referral-service-agreement', 'Business\ClientReferralServiceAgreementController@store')->name('clients.referral-service-agreement.store');
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::get('clients/paginate', 'Business\PaginatedClientController@index');
-    Route::get('clients/averyLabels', 'Business\AveryLabelController@index');
+    Route::get('clients/avery-labels', 'Business\AveryLabelController@index');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');

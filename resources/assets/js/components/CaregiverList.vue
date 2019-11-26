@@ -144,7 +144,7 @@
                 }),
                 localStoragePrefix: 'caregiver_list_',
                 paginatedEndpoint : '/business/caregivers/paginate?json=1',
-                averyEndpoint : '/business/caregivers/averyLabels?userType=caregiver'
+                averyEndpoint : '/business/caregivers/avery-labels?userType=caregiver'
             }
         },
 

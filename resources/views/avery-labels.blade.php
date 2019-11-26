@@ -49,7 +49,7 @@
 
             <tr>
 
-                @for( $col = 0; $col < 3; $col++ )
+                @for( $col = 0; $col < count( $cols ); $col++ )
 
                     <td>
 

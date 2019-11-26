@@ -17,47 +17,50 @@ class AveryLabelController extends BaseController
      */
     public function index(Request $request)
     {
-        $sortBy    = $request->input( 'sort', 'lastname' );
-        $sortOrder = $request->input( 'desc', false ) == 'true' ? 'desc' : 'asc';
-        $search    = $request->input( 'search', null );
-        $entity    = $request->input( 'userType', null );
-        if( !in_array( $entity, [ 'caregiver', 'client' ] ) ) abort( 404 ); // better error return? this is not an ajax call but opening up a new window with a pdf..
+        $entity = $request->input( 'userType', null );
+        if( !in_array( $entity, [ 'caregiver', 'client' ] ) ) abort( 404 );
 
         $query = User::with( $entity, "$entity.address" )
+            ->whereHas( "$entity.address" )
             ->where( 'role_type', $entity )
             ->forRequestedBusinesses();
 
-        if ( $search ) {
+        if( $search = $request->input( 'search' ) ) {
 
-            $query->where(function ($q) use ($search) {
+            $query->where( function ( $q ) use ( $search ) {
 
-                $q->where('users.email', 'LIKE', "%$search%")
+                $q->where( 'users.email', 'LIKE', "%$search%")
                     ->orWhere('users.id', 'LIKE', "%$search%")
                     ->orWhere('users.firstname', 'LIKE', "%$search%")
                     ->orWhere('users.lastname', 'LIKE', "%$search%");
             });
         }
 
-        // Default to active only, unless active is provided in the query string
+        if( $clientType = $request->input( 'client_type' ) ) {
+
+            $query->where( "$entity.client_type", $clientType );
+        }
+
+
+        if( $caseManagerId = $request->input( 'case_manager_id' ) ) {
+
+            $query->whereHas( "$entity.caseManager", function ( $q ) use ( $caseManagerId ) {
+
+                $q->where( 'id', $caseManagerId );
+            });
+        }
+
         if ( $request->input( 'active', 1 ) !== null ) {
 
-            $query->where( 'active', $request->input( 'active', 1 ) );
+            $query->where('active', $request->input( 'active', 1 ) );
         }
 
-        if ( $request->input( 'status' ) !== null ) {
+        if( $status = $request->input( 'status' ) ) {
 
-            $query->where( 'status_alias_id', $request->input( 'status', null ) );
+            $query->where( 'status_alias_id', $status );
         }
 
-        if ( $sortBy == 'lastname' || !$sortBy ) {
-
-            $query->orderByRaw( "users.lastname $sortOrder, users.firstname $sortOrder" );
-        } else {
-
-            $query->orderBy( $sortBy, $sortOrder );
-        }
-
-        $users = array_chunk( $query->whereHas( "$entity.address" )->get()->map( function( $u ) use ( $entity ){
+        $users = array_chunk( $query->get()->map( function( $u ) use ( $entity ){
 
             return [
 

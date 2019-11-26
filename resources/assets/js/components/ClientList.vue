@@ -150,7 +150,7 @@
                 statuses: {caregiver: [], client: []},
                 localStoragePrefix: 'client_list_',
                 paginatedEndpoint : '/business/clients/paginate?json=1',
-                averyEndpoint : '/business/clients/averyLabels?userType=client'
+                averyEndpoint : '/business/clients/avery-labels?userType=client'
             }
         },
 
@@ -174,12 +174,6 @@
                 // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
 
                 let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
-
-                // pagination controls
-                query += '&page=' + this.currentPage;
-                query += '&perPage=' + this.perPage;
-                query += '&sort=' + this.sortBy;
-                query += '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
 
                 let active = this.filters.status;
                 let aliasId = '';
@@ -219,6 +213,10 @@
 
                 return query;
             },
+            paginationControls(){
+
+                return '&page=' + this.currentPage + '&perPage=' + this.perPage + '&sort=' + this.sortBy + '&sortDirection=' + ( this.sortDesc ? 'desc' : 'asc' );
+            }
         },
 
         methods: {
@@ -227,7 +225,7 @@
 
                 this.loading = true;
 
-                axios.get( this.paginatedEndpoint + this.listFilters )
+                axios.get( this.paginatedEndpoint + this.listFilters + this.paginationControls )
                     .then( res => {
 
                         console.log( 'response: ', res );
@@ -316,6 +314,14 @@
         watch: {
 
             async listFilters() {
+
+                if( !this.loading ){
+
+                    await this.loadClients();
+                }
+            },
+
+            async paginationControls() {
 
                 if( !this.loading ){
 
