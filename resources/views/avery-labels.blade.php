@@ -21,14 +21,15 @@
             border-spacing: 0;
             width: 100%!important;
         }
-        table tr:first-child td {
+
+        /* table tr:first-child td {
 
             padding-top: 55px;
-        }
+        } */
 
         table tr td:first-child {
 
-            padding-right: 55px;
+            padding-right: 60px;
         }
 
         table tr td:last-child {
@@ -59,7 +60,7 @@
 
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
-                    <td>
+                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 5px;padding-bottom: 0px" @endif>
 
                         {{ $cols[ $col ][ 'name' ] }}
 
