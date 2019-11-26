@@ -49,7 +49,7 @@
 
         .error-field {
 
-            color: #ffb8b8 !important;
+            color: red !important;
         }
     </style>
 @endpush
@@ -65,8 +65,9 @@
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
                     <td
-                        @if( $row === 0 || $row % 10 == 10 ) style="padding-top: 55px" @endif
-                        @if( $row % 10 <= 8 ) style="padding-top: 5px;padding-bottom: 15px;" @endif
+                        @if( $row % 10 == 0 ) style="padding-top: 55px" @endif
+                        @if( $row % 10 >= 3 && $row % 10 < 6 ) style="padding-top: 0px;padding-bottom: 20px;" @endif
+                        @if( $row % 10 >= 6 && $row % 10 <= 9 ) style="padding-top: 0px;padding-bottom: 15px;" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ) class="error-field" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'city' ] ) > 30 ) class="error-field" @endif
