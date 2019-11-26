@@ -9,7 +9,7 @@ use App\Client;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\storeCaregiver1099Request;
+use App\Http\Requests\StoreCaregiver1099Request;
 use App\Http\Requests\UpdateCaregiver1099Request;
 use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
