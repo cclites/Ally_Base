@@ -6,6 +6,7 @@ use App\Audit;
 use App\Billing\BillingCalculator;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
+use App\Billing\FeeOverrideRule;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
@@ -54,7 +55,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed|null $ssn
  * @property string|null $agreement_status
  * @property string|null $deleted_at
- * @property float|null $fee_override
  * @property float $max_weekly_hours
  * @property \Carbon\Carbon|null $inquiry_date
  * @property \Carbon\Carbon|null $service_start_date
@@ -266,7 +266,6 @@ class Client extends AuditableModel implements
         'backup_payment_id',
         'ssn',
         'onboard_status',
-        'fee_override',
         'max_weekly_hours',
         'inquiry_date',
         'service_start_date',
@@ -886,14 +885,19 @@ class Client extends AuditableModel implements
     }
 
     /**
-     * Get the ally fee percentage for this entity
+     * Get the ally fee percentage for this entity.
+     * This is merely an estimate and should NOT be used in the billing system.
      *
      * @return float
      */
     public function getAllyPercentage()
     {
-        if ($this->fee_override) {
-            return (float) $this->fee_override;
+        try {
+            if ($override = FeeOverrideRule::lookup($this->business_id, $this->getPaymentType())) {
+                return $override->getRate();
+            }
+        }
+        catch (Billing\Exceptions\PaymentMethodError $ex) {
         }
 
         if ($payer = $this->primaryPayer) {

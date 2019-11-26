@@ -122,7 +122,7 @@ class InvoicePaymentTest extends TestCase
     function the_system_should_calculate_ally_fee_of_a_payment_to_match_the_invoiced_fee()
     {
         $cc = factory(CreditCard::class)->create();
-        $amex = factory(CreditCard::class)->create(['type' => 'amex']);
+        $amex = factory(CreditCard::class)->states('amex')->create();
         $bankAccount = factory(BankAccount::class)->create();
 
         $this->client->setPaymentMethod($cc);
@@ -187,7 +187,7 @@ class InvoicePaymentTest extends TestCase
             'payment_method_type' => PaymentMethodType::CC(),
         ]);
 
-        $this->assertNotEquals(BillingCalculator::getCreditCardRate(), $override->rate);
+        $this->assertNotEquals(BillingCalculator::getCreditCardRate(), $override->getRate());
         $service = $this->createService(123.68);
         $invoice = $this->invoicer->generateAll($this->client)[0];
         $this->client->setPaymentMethod(factory(CreditCard::class)->create());
@@ -234,14 +234,14 @@ class InvoicePaymentTest extends TestCase
         $this->processor->payInvoice($clientInvoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
 
         $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
-        $this->assertAllyFeeRate(123.68, $override->rate, $feeCharged);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $feeCharged);
 
         $this->assertEquals($clientInvoice->fresh()->amount, $clientInvoice->fresh()->amount_paid);
 
         // check business invoice has the same ally fee rate
         $businessInvoiceGenerator = app(BusinessInvoiceGenerator::class);
         $businessInvoice = $businessInvoiceGenerator->generate($this->business);
-        $this->assertAllyFeeRate(123.68, $override->rate, $businessInvoice->items[0]->ally_rate);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $businessInvoice->items[0]->ally_rate);
 
         // check caregiver invoice gets generated
         $caregiverInvoiceGenerator = app(CaregiverInvoiceGenerator::class);

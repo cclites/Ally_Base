@@ -15,3 +15,8 @@ $factory->define(CreditCard::class, function (Faker $faker) {
         'type' => 'visa',
     ];
 });
+
+$factory->state(CreditCard::class, 'amex', [
+    'number' => '378734493671000',
+    'type' => 'amex',
+]);
