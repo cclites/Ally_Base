@@ -64,13 +64,13 @@
 
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
-                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 0px;padding-bottom: 0px" @endif @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) >= 30 ) class="error-field" @endif>
+                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 0px;padding-bottom: 0px" @endif @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif>
 
                         {{ $cols[ $col ][ 'name' ] }}
 
                         @if( $cols[ $col ][ 'address' ][ 'address1' ] )
 
-                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) >= 30 ? '*' : '' ) }}</div>
+                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ? '*' : '' ) }}</div>
                         @else
 
                             <br />
@@ -78,7 +78,7 @@
 
                         @if( $cols[ $col ][ 'address' ][ 'address2' ] )
 
-                            <div>{{ $cols[ $col ][ 'address' ][ 'address2' ] }}</div>
+                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address2' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ? '*' : '' ) }}</div>
                         @else
 
                             <br />
