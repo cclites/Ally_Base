@@ -26,11 +26,11 @@
             width: 33.3%;
             /* background-color: red;
             border: 3px solid black; */
-            padding: 15px 15px 15px;
+            padding: 15px 5px 15px;
             font-family: Arial, Helvetica;
-            line-height: 1;
-            font-size: 18px;
-            height: 96px;
+            line-height: 1.25em;
+            font-size: 14px;
+            height: 104px;
             text-align: center;
             vertical-align: middle;
         }
@@ -59,13 +59,13 @@
 
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
-                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 5px;padding-bottom: 0px" @endif>
+                    <td @if( $row === 0 ) style="padding-top:55px" @endif @if( $row % 10 >= 4 ) style="padding-top: 10px;padding-bottom: 0px" @endif>
 
                         {{ $cols[ $col ][ 'name' ] }}
 
                         @if( $cols[ $col ][ 'address' ][ 'address1' ] )
 
-                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) }}</div>
+                            <div>{{ $cols[ $col ][ 'address' ][ 'address1' ] }}</div>
                         @else
 
                             <div>{{ '-- NO ADDRESS LINE 1 --' }}</div>
