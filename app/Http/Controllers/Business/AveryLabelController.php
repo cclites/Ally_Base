@@ -38,7 +38,10 @@ class AveryLabelController extends BaseController
 
         if( $clientType = $request->input( 'client_type' ) ) {
 
-            $query->where( "$entity.client_type", $clientType );
+            $query->whereHas( $entity, function( $q ) use ( $clientType ){
+
+                $q->where( "client_type", $clientType );
+            });
         }
 
 
