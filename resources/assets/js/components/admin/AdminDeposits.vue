@@ -102,16 +102,18 @@
             </div>
         </div>
 
+        <pin-confirmation-model ref="pinModal" />
     </b-card>
 </template>
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import PinConfirmationModel from "../PinConfirmationModal";
 
     export default {
         name: "AdminDeposits",
-
+        components: {PinConfirmationModel},
         mixins: [FormatsDates, FormatsNumbers],
 
         props: {
@@ -270,12 +272,16 @@
                 return `/admin/deposits/${id}/${view}`;
             },
 
-            async uninvoice(invoice) {
-                console.log(invoice);
-                const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
-                let form = new Form({});
-                await form.submit("delete", `/admin/invoices/${type}/${invoice.invoice_id}`);
-                this.invoices = this.invoices.filter(i => invoice.invoice_id != i.invoice_id || invoice.invoice_type != i.invoice_type);
+            async uninvoice(invoice) {``
+                this.$refs.pinModal.confirm(`Un-invoice #${invoice.name}`, pin => {
+                    const type = (invoice.invoice_type === 'business_invoices') ?  'businesses' : 'caregivers';
+                    let form = new Form({});
+                    form.submit("delete", `/admin/invoices/${type}/${invoice.invoice_id}?pin=${pin}`)
+                        .then(response => {
+                            this.invoices = this.invoices.filter(i => invoice.invoice_id != i.invoice_id || invoice.invoice_type != i.invoice_type);
+                        })
+                        .catch(() => {})
+                });
             },
         },
 
