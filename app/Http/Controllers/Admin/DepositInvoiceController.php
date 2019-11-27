@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\AdminPin;
 use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
 use App\Billing\Contracts\DepositInvoiceInterface;
@@ -135,6 +136,10 @@ class DepositInvoiceController extends Controller
 
     public function destroyBusinessInvoice(BusinessInvoice $invoice)
     {
+        if (! AdminPin::verify(request()->pin, 'un-invoice')) {
+            return new ErrorResponse(422, "Invalid PIN.");
+        }
+
         if ($invoice->deposits()->exists()) {
             return new ErrorResponse(400, 'This invoice cannot be removed because it has deposits assigned.');
         }
@@ -176,6 +181,10 @@ class DepositInvoiceController extends Controller
 
     public function destroyCaregiverInvoice(CaregiverInvoice $invoice)
     {
+        if (! AdminPin::verify(request()->pin, 'un-invoice')) {
+            return new ErrorResponse(400, "Invalid PIN.");
+        }
+
         if ($invoice->deposits()->exists()) {
             return new ErrorResponse(400, 'This invoice cannot be removed because it has deposits assigned.');
         }
