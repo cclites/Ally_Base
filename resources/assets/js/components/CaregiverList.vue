@@ -5,7 +5,7 @@
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
             <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
-                <a href="JavaScript:Void(0)" @click=" averyLabels() " class="btn btn-info">Avery 5160 PDF</a>
+                <b-link href="#" @click=" averyModal = true " class="btn btn-info">Avery 5160 PDF</b-link>
             </b-col>
         </b-row>
         <b-row class="mb-2">
@@ -68,6 +68,8 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <avery-modal v-model=" averyModal " :callback=" averyLabels "></avery-modal>
     </b-card>
 </template>
 
@@ -144,7 +146,8 @@
                 }),
                 localStoragePrefix: 'caregiver_list_',
                 paginatedEndpoint : '/business/caregivers/paginate?json=1',
-                averyEndpoint : '/business/caregivers/avery-labels?userType=caregiver'
+                averyEndpoint : '/business/caregivers/avery-labels?userType=caregiver',
+                averyModal : false,
             }
         },
 
@@ -184,7 +187,7 @@
 
             averyLabels(){
 
-                if( confirm( 'FYI: This will skip those without an address on file.' ) ) window.open( this.averyEndpoint + this.listFilters );
+                window.open( this.averyEndpoint + this.listFilters );
             },
             loadTable() {
                 this.$refs.table.refresh();
