@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class PaginatedClientController extends BaseController
 {
@@ -21,7 +22,7 @@ class PaginatedClientController extends BaseController
             $query = Client::forRequestedBusinesses();
 
             // sorting controls using the BaseModel class
-            $this->orderedColumn = $request->input( 'sortBy', 'users.lastname' ); // Erik TODO => this may need adjustments
+            $this->orderedColumn = $request->input( 'sort', 'users.lastname' ); // Erik TODO => this may need adjustments
             $order = $request->input( 'sortDirection', 'asc' );
             $query->ordered( $order );
 
@@ -70,7 +71,6 @@ class PaginatedClientController extends BaseController
             // grab total before pagination
             $total = $query->count();
 
-            // pagination controls
             $per_page     = $request->input( 'perPage', 50 );
             $current_page = $request->input( 'page', 1 );
             $query->limit( $per_page )->offset( $per_page * ( $current_page - 1 ) );

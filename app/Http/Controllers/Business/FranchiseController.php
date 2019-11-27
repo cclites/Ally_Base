@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 
 class FranchiseController extends Controller
 {
@@ -14,6 +15,8 @@ class FranchiseController extends Controller
 
     public function reports()
     {
+        if( !Gate::allows( 'view-reports' ) ) abort( 403);
+
         return view('business.franchise.reports');
     }
 

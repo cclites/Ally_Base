@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\AdminPin;
 use App\Billing\ClientInvoice;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
@@ -121,6 +122,10 @@ class ClientInvoiceController extends Controller
 
     public function destroy(ClientInvoice $invoice)
     {
+        if (! AdminPin::verify(request()->pin, 'un-invoice')) {
+            return new ErrorResponse(422, "Invalid PIN.");
+        }
+
         if ($invoice->payments()->exists()) {
             return new ErrorResponse(400, "This invoice cannot be removed because it has payments assigned.");
         }

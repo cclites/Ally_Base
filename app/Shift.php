@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\BillingCalculator;
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
@@ -21,7 +22,7 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Payments\MileageExpenseCalculator;
 use App\Shifts\Contracts\ShiftDataInterface;
-use App\Shifts\CostCalculator;
+use App\Shifts\ShiftCostCalculator;
 use App\Shifts\Data\ClockData;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftFactory;
@@ -667,11 +668,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     /**
      * Return an instance of the CostCalculator for this shift
      *
-     * @return \App\Shifts\CostCalculator
+     * @return \App\Shifts\ShiftCostCalculator
      */
     public function costs()
     {
-        return new CostCalculator($this);
+        return new ShiftCostCalculator($this);
     }
 
     /**
@@ -789,8 +790,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return $this->client->getAllyPercentage();
         }
 
-        // Default to CC fee
-        return (float)config('ally.credit_card_fee');
+        return BillingCalculator::getDefaultRate();
     }
 
     /**

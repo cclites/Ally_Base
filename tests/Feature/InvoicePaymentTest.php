@@ -2,26 +2,32 @@
 
 namespace Tests\Feature;
 
-use App\Billing\Actions\ProcessInvoicePayment;
-use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\GatewayTransaction;
+use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\Generators\BusinessInvoiceGenerator;
+use App\Billing\Generators\CaregiverInvoiceGenerator;
+use App\Business;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
-use App\Billing\Payment;
-use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Payments\PaymentMethodFactory;
+use App\Billing\Actions\ProcessInvoicePayment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Client;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Billing\Gateway\ACHPaymentInterface;
+use App\Billing\Payments\PaymentMethodType;
+use Tests\CreatesBusinesses;
 use Tests\CreatesClientInvoiceResources;
+use App\Billing\BillingCalculator;
+use App\Billing\FeeOverrideRule;
+use Tests\AssertsAllyFees;
 use Tests\TestCase;
+use App\Client;
 
 class InvoicePaymentTest extends TestCase
 {
     use RefreshDatabase;
     use CreatesClientInvoiceResources;
-
-    /** @var \App\Client */
-    private $client;
+    use AssertsAllyFees;
+    use CreatesBusinesses;
 
     /** @var ClientInvoiceGenerator */
     private $invoicer;
@@ -36,16 +42,22 @@ class InvoicePaymentTest extends TestCase
      */
     private $clientPayer;
 
+    /**
+     * @var \App\Billing\Payments\PaymentMethodFactory
+     */
+    protected $methodFactory;
+
     protected function setUp()
     {
         parent::setUp();
 
-        $this->client = factory(Client::class)->create();
+        $this->methodFactory = new PaymentMethodFactory(app(ACHPaymentInterface::class), app(CreditCardPaymentInterface::class));
+
+        $this->createBusinessWithUsers(true);
         $this->clientPayer = $this->createBalancePayer();
         $this->invoicer = app(ClientInvoiceGenerator::class);
         $this->processor = app(ProcessInvoicePayment::class);
     }
-
 
     /**
      * @test
@@ -55,7 +67,8 @@ class InvoicePaymentTest extends TestCase
         $this->createService(20.00);
         $invoice = $this->invoicer->generateAll($this->client)[0];
 
-        $payment = $this->processor->payInvoice($invoice, new DummyCreditCard());
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $payment = $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
 
         $this->assertEquals(20.00, $payment->amount);
         $this->assertCount(1, $payment->invoices);
@@ -69,7 +82,8 @@ class InvoicePaymentTest extends TestCase
         $this->createService(100.00);
         $invoice = $this->invoicer->generateAll($this->client)[0];
 
-        $payment = $this->processor->payInvoice($invoice, new DummyCreditCard());
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $payment = $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
 
         $this->assertEquals(4.76, $payment->getAllyFee());
     }
@@ -87,10 +101,11 @@ class InvoicePaymentTest extends TestCase
         $this->createService(42.00);
         $invoice = $this->invoicer->generateAll($this->client)[0];
 
-        $payment = $this->processor->payInvoice($invoice, new DummyCreditCard());
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $payment = $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
         $invoiceable1 = $invoice->items[0]->invoiceable;
         $invoiceable2 = $invoice->items[1]->invoiceable;
-
 
         $this->assertEquals(4.00, $payment->getAllyFee());
         $this->assertEquals(2.00, $invoiceable1->getAllyRate());
@@ -101,49 +116,143 @@ class InvoicePaymentTest extends TestCase
     // TODO: unapplying_a_payment_should_remove_the_old_allocated_ally_fees
     // TODO: reapplying_a_payment_should_add_the_new_allocated_ally_fees
 
-}
-
-class DummyCreditCard implements PaymentMethodStrategy
-{
-
-    public function charge(float $amount, string $currency = "USD"): ?GatewayTransaction
+    /**
+     * @test
+     */
+    function the_system_should_calculate_ally_fee_of_a_payment_to_match_the_invoiced_fee()
     {
-        $transaction = factory(GatewayTransaction::class)->make(['transaction_type' => 'sale', 'amount' => $amount]);
-        $transaction->id = 123;
-        return $transaction;
+        $cc = factory(CreditCard::class)->create();
+        $amex = factory(CreditCard::class)->states('amex')->create();
+        $bankAccount = factory(BankAccount::class)->create();
+
+        $this->client->setPaymentMethod($cc);
+        $service = $this->createService(100.00);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(100, BillingCalculator::getCreditCardRate(), $feeCharged);
+
+        $this->client->setPaymentMethod($bankAccount);
+        $service = $this->createService(100.00);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(100, BillingCalculator::getBankAccountRate(), $feeCharged);
+
+        $this->client->setPaymentMethod($amex);
+        $service = $this->createService(100.00);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(100, BillingCalculator::getAmexRate(), $feeCharged);
     }
 
-    public function refund(
-        ?GatewayTransaction $transaction,
-        float $amount,
-        string $currency = "USD"
-    ): ?GatewayTransaction {
-        $transaction = factory(GatewayTransaction::class)->make(['transaction_type' => 'credit', 'amount' => $amount]);
-        $transaction->id = 123;
-        return $transaction;
+    /** @test */
+    function ally_fee_should_use_ach_p_when_business_is_the_payment_method()
+    {
+        $this->business->setBankAccount('paymentAccount', factory(BankAccount::class)->create(['user_id' => null, 'business_id' => $this->business->id]));
+        $this->client->setPaymentMethod($this->business);
+        $service = $this->createService(100.00);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(100, BillingCalculator::getBankAccountRate(), $feeCharged);
     }
 
-    public function getPaymentMethod(): ChargeableInterface
+    /** @test */
+    function payment_processor_should_calculate_ally_fee_based_on_existing_overrides_for_private_pay()
     {
-        return new CreditCard();
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->business->id,
+            'rate' => 0.02,
+            'payment_method_type' => PaymentMethodType::CC(),
+        ]);
+
+        $service = $this->createService(123.68);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $feeCharged);
     }
 
-    public function getPaymentType(): string
+    /** @test */
+    function payment_processor_should_only_use_overrides_for_the_current_business()
     {
-        return 'CC';
+        $otherBusiness = factory(Business::class)->create();
+        $override = FeeOverrideRule::create([
+            'business_id' => $otherBusiness->id,
+            'rate' => 0.02,
+            'payment_method_type' => PaymentMethodType::CC(),
+        ]);
+
+        $this->assertNotEquals(BillingCalculator::getCreditCardRate(), $override->getRate());
+        $service = $this->createService(123.68);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, BillingCalculator::getCreditCardRate(), $feeCharged);
     }
-}
 
-
-class DummyBankAccount extends DummyCreditCard
-{
-    public function getPaymentMethod(): ChargeableInterface
+    /** @test */
+    function payment_processor_should_calculate_ally_fee_based_on_existing_overrides_for_provider_pay()
     {
-        return new BankAccount();
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->business->id,
+            'rate' => 0.06,
+            'payment_method_type' => PaymentMethodType::ACH_P(),
+        ]);
+
+        $this->business->setBankAccount('paymentAccount', factory(BankAccount::class)->create(['user_id' => null, 'business_id' => $this->business->id]));
+        $this->client->setPaymentMethod($this->business);
+
+        $service = $this->createService(123.68);
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($invoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $feeCharged);
     }
 
-    public function getPaymentType(): string
+    /** @test */
+    function ally_fee_overrides_should_carry_through_to_deposit_invoices()
     {
-        return 'ACH';
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->business->id,
+            'rate' => 0.07,
+            'payment_method_type' => PaymentMethodType::ACH_P(),
+        ]);
+
+        $this->business->setBankAccount('paymentAccount', factory(BankAccount::class)->create(['user_id' => null, 'business_id' => $this->business->id]));
+        $this->client->setPaymentMethod($this->business);
+
+        $service = $this->createService(123.68);
+        $clientInvoice = $this->invoicer->generateAll($this->client)[0];
+        $this->processor->payInvoice($clientInvoice, $this->methodFactory->getStrategy($this->client->getPaymentMethod()));
+
+        $feeCharged = floatval($service->meta()->where('key', 'ally_fee_charged')->first()->value);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $feeCharged);
+
+        $this->assertEquals($clientInvoice->fresh()->amount, $clientInvoice->fresh()->amount_paid);
+
+        // check business invoice has the same ally fee rate
+        $businessInvoiceGenerator = app(BusinessInvoiceGenerator::class);
+        $businessInvoice = $businessInvoiceGenerator->generate($this->business);
+        $this->assertAllyFeeRate(123.68, $override->getRate(), $businessInvoice->items[0]->ally_rate);
+
+        // check caregiver invoice gets generated
+        $caregiverInvoiceGenerator = app(CaregiverInvoiceGenerator::class);
+        $caregiverInvoice = $caregiverInvoiceGenerator->generate($this->caregiver);
+
+        // caregiver amount should be 75% based on the create service helper
+        $this->assertEquals(multiply(.75, 123.68), $caregiverInvoice->amount);
+        $this->assertEquals($businessInvoice->items[0]->caregiver_rate, $caregiverInvoice->amount);
+
+        // check that all rates add up to client
+        $sum = $caregiverInvoice->amount + $businessInvoice->amount + $businessInvoice->items[0]->ally_rate;
+        $this->assertEquals($sum, $clientInvoice->amount);
     }
 }

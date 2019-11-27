@@ -1,6 +1,8 @@
 <?php
 namespace App\Scheduling;
 
+use App\Billing\BillingCalculator;
+
 class ScheduleCostCalculator
 {
     /**
@@ -59,20 +61,20 @@ class ScheduleCostCalculator
 
     public function getProviderFee()
     {
-        return bcmul($this->duration(), $this->schedule->getProviderFee(), self::DEFAULT_SCALE);
+        return bcmul($this->duration(), $this->schedule->getProviderFee(), BillingCalculator::DEFAULT_SCALE);
     }
 
     public function getCaregiverCost()
     {
-        return bcmul($this->duration(), $this->schedule->getCaregiverRate(), self::DEFAULT_SCALE);
+        return bcmul($this->duration(), $this->schedule->getCaregiverRate(), BillingCalculator::DEFAULT_SCALE);
     }
 
     public function getTotalCost()
     {
         return bcadd(
-            bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
+            bcadd($this->getProviderFee(), $this->getCaregiverCost(), BillingCalculator::DEFAULT_SCALE),
             $this->getAllyFee(),
-            self::DEFAULT_SCALE
+            BillingCalculator::DEFAULT_SCALE
         );
     }
 }
