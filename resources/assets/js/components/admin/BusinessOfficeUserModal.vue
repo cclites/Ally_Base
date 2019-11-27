@@ -57,7 +57,7 @@
                         </b-form-checkbox-group>
                     </b-form-group>
 
-                    <b-form-checkbox v-model="form.views_reports">Can View Reports</b-form-checkbox>
+                    <b-form-checkbox v-model="form.views_reports">Restrict Access to Reports</b-form-checkbox>
                 </b-col>
             </b-row>
         </b-container>
