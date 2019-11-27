@@ -107,7 +107,7 @@
                         <span v-if="row.item.client_on_hold">- On Hold</span>
                     </template>
                     <template slot="actions" scope="row">
-                        <b-button @click="uninvoice(row.item.id)" variant="danger" v-if="!row.item.has_claim">Uninvoice</b-button>
+                        <b-button @click="uninvoice(row.item)" variant="danger" v-if="!row.item.has_claim">Uninvoice</b-button>
                         <b-button v-if="! row.item.client.user.payment_hold" @click="addHold(row.item)" variant="danger">Add Hold</b-button>
                         <b-button v-if="row.item.client.user.payment_hold" @click="removeHold(row.item)" variant="primary">Remove Hold</b-button>
                     </template>
@@ -119,16 +119,18 @@
             </div>
         </div>
 
+        <pin-confirmation-model ref="pinModal" />
     </b-card>
 </template>
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import PinConfirmationModel from "../PinConfirmationModal";
 
     export default {
         name: "AdminPayments",
-
+        components: {PinConfirmationModel},
         mixins: [FormatsDates, FormatsNumbers],
 
         props: {
@@ -308,16 +310,20 @@
                 return `/admin/invoices/clients/${id}/${view}`;
             },
 
-
             paymentUrl(id, view="") {
                 return `/admin/charges/${id}/${view}`;
             },
 
-            async uninvoice(id) {
-                let form = new Form({});
-                await form.submit("delete", "/admin/invoices/clients/" + id);
-                this.invoices = this.invoices.filter(i => i.id != id);
-            }
+            async uninvoice(invoice) {
+                this.$refs.pinModal.confirm(`Un-invoice #${invoice.name}`, pin => {
+                    let form = new Form();
+                    form.submit("delete", `/admin/invoices/clients/${invoice.id}?pin=${pin}`)
+                        .then(response => {
+                            this.invoices = this.invoices.filter(i => i.id != invoice.id);
+                        })
+                        .catch(() => {})
+                });
+            },
         },
 
         watch: {
