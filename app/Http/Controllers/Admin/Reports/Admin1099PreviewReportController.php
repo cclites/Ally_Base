@@ -18,7 +18,7 @@ class Admin1099PreviewReportController extends Controller
                 'business_id' => 'required',
             ]);
 
-            $query = new Caregiver1099Query; // ->$records;
+            $query = new Caregiver1099Query;
             $records = $query->_query($request->all());
 
 
@@ -31,6 +31,7 @@ class Admin1099PreviewReportController extends Controller
                     'caregiver_lname' => $record->caregiver_lname,
                     'business_name' => $record->business_name,
                     'payment_total' => $record->payment_total,
+                    'caregiver_1099_amount' =>$record->caregiver_1099_amount,
                     'caregiver_1099' => $record->caregiver_1099,
                     'caregiver_1099_id' => $record->caregiver_1099_id,
                     'caregiver_id' => $record->caregiver_id,

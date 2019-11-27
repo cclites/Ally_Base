@@ -119,7 +119,7 @@
                             >
                             </b-form-checkbox>
                             <div v-else-if="row.item.transmitted">
-                                Transmitted
+                                {{ formatDateTimeFromUTC(row.item.transmitted) }}
                             </div>
                         </template>
                     </b-table>
@@ -157,12 +157,13 @@
 
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsDates from "../../../mixins/FormatsDates";
 
     /****************************/
 
     export default {
         name: "Admin1099PreviewReport",
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDates],
         props: {},
         data() {
             return {
@@ -284,7 +285,9 @@
                     this.generate();
                 })
                 .catch( e => {})
-                .finally(() => {});
+                .finally(() => {
+                    this.caregiver1099Edit = false;
+                });
             },
         },
         watch: {
@@ -310,14 +313,9 @@
             },
 
             disableGenerate(){
-                /*
-                if(this.businesses.length && this.clients.length && this.caregivers.length){
-                    return false;
-                }*/
                 if(this.businesses.length){
                     return false;
                 }
-
                 return true;
             }
         },
