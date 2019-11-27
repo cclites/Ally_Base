@@ -13,7 +13,7 @@
 
         <div class="avery-image-container">
 
-            <img src="" />
+            <img src="/images/avery_help.jpg" />
         </div>
         <hr/>
 
@@ -22,9 +22,9 @@
             Notes:<br />
             * This will skip those without an address on file<br/><br />
             * Each line is limited and will only display 30 characters<br/><br />
-            <span style="padding-left:25px">If the system truncates a row, you will see an asterick *</span><br/>
+            <span style="padding-left:25px">If the system truncates a row, you will see an asterisk *</span><br/>
             <span style="padding-left:25px">We recommend that you page through and fix any truncated rows</span><br /><br />
-            * We recommend that you print 1 page first to test alignment before printing all pages
+            * We recommend that you print the first 3 pages to test alignment before printing all pages
         </div>
 
         <div slot="modal-footer">
@@ -145,3 +145,19 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+
+    .avery-image-container {
+
+        margin: 25px auto;
+        height: 450px;
+        width: 450px;
+    }
+
+    .avery-image-container > img {
+
+        height: 100%;
+        width: 100%;
+    }
+</style>
