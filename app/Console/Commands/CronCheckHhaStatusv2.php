@@ -3,27 +3,27 @@
 namespace App\Console\Commands;
 
 use App\Billing\ClaimStatus;
-use App\HhaFile;
-use App\HhaFileResult;
+use App\Claims\ClaimInvoiceHhaFile;
+use App\Claims\ClaimInvoiceHhaFileResult;
 use App\Services\HhaExchangeService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class CronHhaCheckStatus extends Command
+class CronHhaCheckStatusv2 extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'hha:check-status';
+    protected $signature = 'hha:check-status-v2';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Check all stored HHA services for new response files and update the related claims.';
+    protected $description = 'Check all stored HHA services for new response files and update the related claims (2.0).';
 
     /**
      * Keep a log of the CRON process.
@@ -52,17 +52,17 @@ class CronHhaCheckStatus extends Command
      */
     public function handle()
     {
-        $pendingFiles = HhaFile::where('status', HhaFile::STATUS_PENDING)->get();
+        $pendingFiles = ClaimInvoiceHhaFile::where('status', ClaimInvoiceHhaFile::STATUS_PENDING)->get();
 
         if ($pendingFiles->count() === 0) {
             $this->status('There are no pending files.');
             return;
         }
 
-        /** @var \App\HhaFile $hhaFile */
+        /** @var \App\Claims\ClaimInvoiceHhaFile $hhaFile */
         foreach ($pendingFiles as $hhaFile) {
             /** @var \App\Business $business */
-            $business = $hhaFile->claim->invoice->client->business;
+            $business = $hhaFile->claimInvoice->business;
             $this->status('Business ID ' . $business->id . ' - Checking for file: ' . $hhaFile->filename . '...');
 
             try {
@@ -88,12 +88,12 @@ class CronHhaCheckStatus extends Command
                 $this->status('Parsing response file...');
                 if ($this->parseResponse($result, $hhaFile)) {
                     $this->status('Claim accepted.');
-                    $hhaFile->update(['status' => HhaFile::STATUS_ACCEPTED]);
-                    $hhaFile->claim->update(['status' => ClaimStatus::ACCEPTED()]);
+                    $hhaFile->update(['status' => ClaimInvoiceHhaFile::STATUS_ACCEPTED]);
+                    $hhaFile->claimInvoice->update(['status' => ClaimStatus::ACCEPTED()]);
                  } else {
                     $this->status('Claim rejected.');
-                    $hhaFile->update(['status' => HhaFile::STATUS_REJECTED]);
-                    $hhaFile->claim->update(['status' => ClaimStatus::REJECTED()]);
+                    $hhaFile->update(['status' => ClaimInvoiceHhaFile::STATUS_REJECTED]);
+                    $hhaFile->claimInvoice()->update(['status' => ClaimStatus::REJECTED()]);
                 }
 
                 \DB::commit();
@@ -111,10 +111,10 @@ class CronHhaCheckStatus extends Command
      * whether the claim was accepted or not.
      *
      * @param string $response
-     * @param HhaFile $hhaFile
+     * @param ClaimInvoiceHhaFile $hhaFile
      * @return bool
      */
-    protected function parseResponse(string $response, HhaFile $hhaFile) : bool
+    protected function parseResponse(string $response, ClaimInvoiceHhaFile $hhaFile) : bool
     {
         $header = null;
         $hasFailure = false;
@@ -133,7 +133,7 @@ class CronHhaCheckStatus extends Command
                 throw new \InvalidArgumentException("Invalid response file line: $line");
             }
 
-            $result = HhaFileResult::create([
+            $result = ClaimInvoiceHhaFileResult::create([
                 'hha_file_id' => $hhaFile->id,
                 'reference_id' => $csv[9],
                 'service_code' => $csv[10],

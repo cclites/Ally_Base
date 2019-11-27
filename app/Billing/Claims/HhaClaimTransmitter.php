@@ -7,6 +7,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Invoiceable\ShiftService;
+use App\Claims\ClaimInvoiceHhaFile;
 use App\HhaFile;
 use App\Services\HhaExchangeService;
 use App\Shift;
@@ -81,7 +82,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // create new HhaFile for the Claim
             $claim->hhaFiles()->create([
                 'filename' => substr($filename, 0,  strlen($filename) - 4),
-                'status' => HhaFile::STATUS_PENDING,
+                'status' => ClaimInvoiceHhaFile::STATUS_PENDING,
             ]);
 
             return true;
