@@ -2,7 +2,6 @@
 
 namespace App\Claims;
 
-use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
@@ -174,6 +173,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     public function statuses()
     {
         return $this->hasMany(ClaimInvoiceStatusHistory::class);
+    }
+
+    /**
+     * Get the HhaFiles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function hhaFiles()
+    {
+        return $this->hasMany(ClaimInvoiceHhaFile::class, 'claim_invoice_id', 'id');
     }
 
     // **********************************************************

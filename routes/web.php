@@ -504,6 +504,7 @@ Route::group([
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
     Route::get('claims/{claim}/print', 'Business\Claims\ClaimInvoiceController@print');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
+    Route::get('claims/{claim}/results', 'Business\Claims\ClaimResultsController@show')->name('claims.results');
     Route::resource('claims/{claim}/item', 'Business\Claims\ClaimInvoiceItemController');
     Route::post('claim-remits/{claimRemit}/adjust', 'Business\Claims\ClaimRemitAdjustmentController@store');
     Route::resource('claim-remits', 'Business\Claims\ClaimRemitController');
