@@ -137,7 +137,7 @@ class DepositInvoiceController extends Controller
     public function destroyBusinessInvoice(BusinessInvoice $invoice)
     {
         if (! AdminPin::verify(request()->pin, 'un-invoice')) {
-            return new ErrorResponse(400, "Invalid PIN.");
+            return new ErrorResponse(422, "Invalid PIN.");
         }
 
         if ($invoice->deposits()->exists()) {

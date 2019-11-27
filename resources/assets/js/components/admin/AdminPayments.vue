@@ -316,7 +316,7 @@
 
             async uninvoice(invoice) {
                 this.$refs.pinModal.confirm(`Un-invoice #${invoice.name}`, pin => {
-                    let form = new Form();
+                    let form = new Form({});
                     form.submit("delete", `/admin/invoices/clients/${invoice.id}?pin=${pin}`)
                         .then(response => {
                             this.invoices = this.invoices.filter(i => i.id != invoice.id);
