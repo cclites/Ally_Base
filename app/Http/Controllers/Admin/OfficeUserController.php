@@ -83,7 +83,8 @@ class OfficeUserController extends Controller
 
         if ($user->update($data)) {
             $user->businesses()->sync($businessIds);
-            return new SuccessResponse('The user has been updated.', $user->refresh()->toArray());
+            $resource = new OfficeUserResource($user);
+            return new SuccessResponse('The user has been updated.', $resource->toArray($request));
         }
 
         return new ErrorResponse(500, 'Unknown error');

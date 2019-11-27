@@ -15,7 +15,7 @@ class FranchiseController extends Controller
 
     public function reports()
     {
-        if( !Gate::allows( 'view-reports' ) ) abort( 403, 'You do not have access to view this page' );
+        if( !Gate::allows( 'view-reports' ) ) abort( 403);
 
         return view('business.franchise.reports');
     }

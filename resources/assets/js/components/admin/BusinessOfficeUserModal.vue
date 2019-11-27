@@ -57,7 +57,7 @@
                         </b-form-checkbox-group>
                     </b-form-group>
 
-                    <b-form-checkbox v-model="form.views_reports">Restrict Access to Reports</b-form-checkbox>
+                    <b-form-checkbox v-model="form.views_reports" :unchecked-value="0" :value="1">Can View Reports</b-form-checkbox>
                 </b-col>
             </b-row>
         </b-container>
@@ -100,7 +100,7 @@
                     'password': '',
                     'password_confirmation': '',
                     'businesses': (this.selectedItem && this.selectedItem.businesses ) ? this.selectedItem.businesses : [],
-                    'views_reports': (this.selectedItem) ? this.selectedItem.views_reports === 1 : false,
+                    'views_reports': this.selectedItem.views_reports,
                 });
             },
             title() {

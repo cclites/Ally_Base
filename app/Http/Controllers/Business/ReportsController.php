@@ -46,7 +46,7 @@ class ReportsController extends BaseController
 
     public function index()
     {
-        if( !Gate::allows( 'view-reports' ) ) abort( 403, 'You do not have access to view this page' );
+        if( !Gate::allows( 'view-reports' ) ) abort( 403);
 
         $data['type'] = $this->business()->type;
         $data['role'] = ['role_type' => Auth::user()->role_type];
