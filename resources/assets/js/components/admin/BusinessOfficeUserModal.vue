@@ -56,6 +56,8 @@
                             <b-form-checkbox v-for="business in businesses" :key="business.id" :value="business.id">{{ business.name }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
+
+                    <b-form-checkbox v-model="form.views_reports" :unchecked-value="0" :value="1">Can View Reports</b-form-checkbox>
                 </b-col>
             </b-row>
         </b-container>
@@ -97,7 +99,8 @@
                     'lastname': (this.selectedItem) ? this.selectedItem.lastname : '',
                     'password': '',
                     'password_confirmation': '',
-                    'businesses': (this.selectedItem) ? this.selectedItem.businesses : [],
+                    'businesses': (this.selectedItem && this.selectedItem.businesses ) ? this.selectedItem.businesses : [],
+                    'views_reports': this.selectedItem.views_reports,
                 });
             },
             title() {
@@ -116,6 +119,7 @@
                 this.form.submit(method, url)
                     .then(response => {
                         // Push the newly created item without mutating the prop, requires the sync modifier
+                        console.log( 'response lmao: ', response );
                         let newItems = this.items;
                         if (this.selectedItem) {
                             let index = newItems.findIndex(item => item.id === this.selectedItem.id);

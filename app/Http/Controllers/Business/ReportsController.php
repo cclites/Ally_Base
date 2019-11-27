@@ -39,12 +39,15 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
+use Illuminate\Support\Facades\Gate;
 
 class ReportsController extends BaseController
 {
 
     public function index()
     {
+        if( !Gate::allows( 'view-reports' ) ) abort( 403);
+
         $data['type'] = $this->business()->type;
         $data['role'] = ['role_type' => Auth::user()->role_type];
 

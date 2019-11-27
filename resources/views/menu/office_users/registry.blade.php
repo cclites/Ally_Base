@@ -82,9 +82,13 @@
     </ul>
 </li>
 @endif
+
+@if ( Gate::allows( 'view-reports' ) )
 <li>
     <a href="{{ route('business.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
 </li>
+@endif
+
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
     <li>
         <a href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
