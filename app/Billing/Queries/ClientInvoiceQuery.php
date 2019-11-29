@@ -58,12 +58,15 @@ class ClientInvoiceQuery extends BaseQuery
             }
 
             $this->forBusinesses($businessIds);
-            return;
+
+            return $this;
         }
 
         if (count($businessIds)) {
             $this->forBusinesses($businessIds);
         }
+
+        return $this;
     }
 
     function forClient(int $clientId, bool $privatePayOnly = true): self
@@ -156,6 +159,18 @@ class ClientInvoiceQuery extends BaseQuery
     }
 
     /**
+     * Filter by invoices that do not have a claim attached.
+     *
+     * @return $this
+     */
+    public function doesNotHaveClaim() : self
+    {
+        $this->whereDoesntHave('claimInvoice');
+
+        return $this;
+    }
+
+    /**
      * Filter by date the invoice was created at.  Expects an 
      * array of two UTC dates.
      * 
@@ -165,6 +180,73 @@ class ClientInvoiceQuery extends BaseQuery
     public function forDateRange(array $range) : self
     {
         $this->whereBetween('created_at', [$range[0], $range[1]]);
+
+        return $this;
+    }
+
+    /**
+     * Filter by invoices that are paid in full.  This
+     * works with offline or online.
+     *
+     * @return $this
+     */
+    public function paidInFull()
+    {
+        $this->where(function ($q) {
+            $q->where(function ($q) {
+                $q->where('offline', 0)->whereColumn('amount_paid', '=', 'amount');
+            })
+            ->orWhere(function ($q) {
+                $q->where('offline', 1)->whereColumn('offline_amount_paid', '=', 'amount');
+            });
+        });
+
+        return $this;
+    }
+
+    /**
+     * Filter by invoices that are not paid in full.  This
+     * works with offline or online.
+     *
+     * @return $this
+     */
+    public function notPaidInFull()
+    {
+        $this->where(function ($q) {
+            $q->where(function ($q) {
+                $q->where('offline', 0)->whereColumn('amount_paid', '!=', 'amount');
+            })
+            ->orWhere(function ($q) {
+                $q->where('offline', 1)->whereColumn('offline_amount_paid', '<', 'amount');
+            });
+        });
+
+        return $this;
+    }
+
+    /**
+     * Filter by invoices that have a payer. This should hide
+     * adjustment invoices.
+     *
+     * @return $this
+     */
+    public function hasPayer() : self
+    {
+        $this->whereNotNull('client_payer_id');
+
+        return $this;
+    }
+
+    /**
+     * Filter by invoices that are for active Clients only.
+     *
+     * @return $this
+     */
+    public function forActiveClientsOnly() : self
+    {
+        $this->whereHas('client', function ($q) {
+            $q->active();
+        });
 
         return $this;
     }

@@ -74,7 +74,8 @@
         <i class="fa fa-file-text" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Claims</span>
     </a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('business.claims-queue') }}">Claims Queue</a></li>
+        <li><a href="{{ route('business.claims-create') }}">Create Claims</a></li>
+        <li><a href="{{ route('business.claims-queue') }}">Manage Claims</a></li>
         <li><a href="{{ route('business.claim-remits.index') }}">Remits</a></li>
         <li><a href="{{ route('business.reports.claims.ar-aging') }}">AR Aging Report</a></li>
         <li><a href="{{ route('business.reports.claims.transmissions') }}">Transmissions Report</a></li>

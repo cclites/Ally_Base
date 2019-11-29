@@ -116,13 +116,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Get the ClientInvoice relationship.
+     * Get the client invoices relationship.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function clientInvoice()
+    public function clientInvoices()
     {
-        return $this->belongsTo(ClientInvoice::class);
+        return $this->belongsToMany(ClientInvoice::class);
     }
 
     /**

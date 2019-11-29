@@ -2,6 +2,7 @@
 
 namespace App\Claims\Factories;
 
+use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
@@ -25,6 +26,123 @@ class ClaimInvoiceFactory
      * @var Collection
      */
     protected $warnings;
+
+    public function createFromClientInvoices(\Illuminate\Database\Eloquent\Collection $invoices) : array
+    {
+        $invoices->load([
+            'items',
+            'items.shift',
+            'items.shiftService',
+            'items.shiftService.shift',
+            'clientPayer'
+        ]);
+
+        $this->validate($invoices);
+
+        $type = $this->getClaimType($invoices);
+        $client = $type == ClaimInvoiceType::PAYER() ? null : $invoices->first()->client;
+        $business = $invoices->first()->client->business;
+        $payer = $invoices->first()->clientPayer->payer;
+
+        \DB::beginTransaction();
+        /** @var ClaimInvoice $claim */
+        $claim = ClaimInvoice::create([
+            'business_id' => $business->id,
+            'name' => $this->getInvoiceName($business->id),
+
+            // this will get re-written from the updateBalances() call below
+            'amount' => $invoices->sum('amount'),
+            'amount_due' => $invoices->sum('amount'),
+
+            'status' => ClaimStatus::CREATED(),
+            'transmission_method' => $payer->getTransmissionMethod(),
+
+            'client_id' => empty($client) ? null : $client->id,
+            'client_first_name' => empty($client) ? null : $client->first_name,
+            'client_last_name' => empty($client) ? null : $client->last_name,
+            'client_dob' => empty($client) ? null : $client->date_of_birth,
+            'client_medicaid_id' => empty($client) ? null : $client->medicaid_id,
+            'client_medicaid_diagnosis_codes' => empty($client) ? null : $client->medicaid_diagnosis_codes,
+
+            'payer_id' => $payer->id,
+            'payer_name' => $payer->name,
+            'payer_code' => $invoices->first()->getPayerCode(),
+            'plan_code' => $invoices->first()->getPlanCode(),
+        ]);
+
+        $claim->clientInvoices()->saveMany($invoices);
+
+        $items = $invoices->map(function (ClientInvoice $invoice) {
+            return $invoice->items->map(function (ClientInvoiceItem $item) {
+                switch ($item->invoiceable_type) {
+                    case InvoiceableType::SHIFT():
+                        return $this->convertShift($item);
+                    case InvoiceableType::SHIFT_SERVICE():
+                        return $this->convertService($item);
+                    case InvoiceableType::SHIFT_EXPENSE():
+                        return $this->convertExpense($item);
+                    case InvoiceableType::SHIFT_ADJUSTMENT():
+                        // Adjustments are not copied to Claim Invoices.
+                    default:
+                        return null;
+                }
+            })->filter();
+        })->flatten(1);
+
+        $claim->items()->saveMany($items);
+        $claim->updateBalance();
+
+        \DB::commit();
+
+        return [$claim, $this->warnings];
+    }
+
+    /**
+     * Get the type of claim based on a group of client invoices.
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $invoices
+     * @return ClaimInvoiceType
+     */
+    public function getClaimType(\Illuminate\Database\Eloquent\Collection $invoices) : ClaimInvoiceType
+    {
+        if ($invoices->count() === 1) {
+            return ClaimInvoiceType::SINGLE();
+        }
+
+        $totalClients = $invoices->unique('client_id')->values()->count();
+        if ($totalClients === 1) {
+            return ClaimInvoiceType::CLIENT();
+        } else {
+            return ClaimInvoiceType::PAYER();
+        }
+    }
+
+    /**
+     * Validate a claim can be created claim from a group of client invoices.
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $invoices
+     * @throws \InvalidArgumentException
+     */
+    public function validate(\Illuminate\Database\Eloquent\Collection $invoices) : void
+    {
+        foreach ($invoices as $invoice) {
+            // Cannot use null client payer (manual adjustments)
+            if (empty($invoice->clientPayer)) {
+                throw new \InvalidArgumentException('Invoice has no payer and cannot be used for a claim.');
+            }
+        }
+
+        // Fail if payers are not all the same
+        $totalPayers = $invoices->unique(function ($invoice) {
+            return optional($invoice->clientPayer)->payer_id;
+        })->values()->count();
+
+        if ($totalPayers > 1) {
+            throw new \InvalidArgumentException('You can only group invoices for the same payer.');
+        }
+
+        // TODO: Do not allow unique payer to be 'private pay' and have multiple client ids
+    }
 
     /**
      * Create a ClaimInvoice from a ClientInvoice.  Returns
