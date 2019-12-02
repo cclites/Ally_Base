@@ -110,11 +110,11 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             if ( $filename = $tellus->submitClaim($this->getData($claim))) {
                 // Success
 
-                // $claim->tellusFiles()->create([
+                $claim->tellusFiles()->create([
 
-                //     'filename' => substr( $filename, 0, strlen( $filename ) - 4),
-                //     'status'   => TellusFile::STATUS_PENDING,
-                // ]);
+                    'filename' => $filename,
+                    'status'   => TellusFile::STATUS_PENDING,
+                ]);
 
                 return true;
             }
@@ -270,7 +270,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
             'ActualEndLongitude' => '',
-            // 'UserField1'             => '', // OPTIONAL
+            'UserField1'             => $claim->id, // OPTIONAL
             // 'UserField2'             => '', // OPTIONAL
             // 'UserField3'             => '', // OPTIONAL
             // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO

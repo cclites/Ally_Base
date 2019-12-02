@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Contracts\SFTPReaderWriterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use DOMDocument;
 use SimpleXMLElement;
@@ -30,6 +31,11 @@ class TellusService
      */
     protected $endpoint;
 
+    /**
+     * @var \phpseclib\Net\SFTP
+     */
+    protected $sftp;
+
     public const TYPECODE_DICTIONARY_FILENAME = 'tellus/typecode-dictionary.xlsx';
     public const XML_SCHEMA_FILENAME = 'tellus/xml-schema.xsd';
 
@@ -46,6 +52,22 @@ class TellusService
         $this->password = $password;
         // Automatically handle replacing the username variable in the endpoint.
         $this->endpoint = str_replace("{username}", strtoupper($username), $endpoint);
+
+        $this->sftp = app(SFTPReaderWriterInterface::class, ['host' => config('services.tellus.sftp_host'), 'port' => config('services.tellus.sftp_port')]);
+    }
+
+    /**
+     * Log in to the SFTP server.
+     *
+     * @return bool
+     */
+    public function login() : bool
+    {
+        if (! $this->sftp->login($this->username, $this->password)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -53,11 +75,11 @@ class TellusService
      * Tellus API service using an XML file.
      *
      * @param array $records
-     * @return bool
+     * @return string
      * @throws TellusApiException
      * @throws TellusValidationException
      */
-    public function submitClaim(array $records) : bool
+    public function submitClaim(array $records) : string
     {
         $xml = $this->convertArrayToXML($records);
 
@@ -67,10 +89,7 @@ class TellusService
 
         list($httpCode, $response) = $this->sendXml($xml);
 
-        \Log::info( $response );
-
         $xml = new SimpleXMLElement($response);
-        \Log::info( $xml->batchId );
         if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
             // TODO: add some sort of databased log so we can see other users errors
@@ -89,7 +108,8 @@ class TellusService
             throw new TellusApiException("Unexpected response from Tellus.  Please try again.");
         }
 
-        return true;
+        // any extra error checking? I think the above exception serves as a catch-all and guarantees that this field is populated
+        return $xml->batchId;
     }
 
     /**
@@ -230,6 +250,34 @@ class TellusService
         }
 
         return $service;
+    }
+
+
+    /**
+     * Get the string results from a response xml file.
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    public function downloadResponse(string $filename)
+    {
+        if (! $this->login()) {
+            throw new \Exception('Your Tellus username and password was not accepted.  Please contact Tellus and let them know you are unable to login to their SFTP server.');
+        }
+
+        dd( $this->sftp->pwd() );
+        dd( $this->sftp->nlist( config( 'services.tellus.sftp_directory' ) ) );
+        $accepted = $this->sftp->get(
+            config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
+            false
+        );
+
+        $rejected = $this->sftp->get(
+            config('services.tellus.sftp_directory') . "/$filename" . "_REJECTED.XML",
+            false
+        );
+
+        dd( $rejected );
     }
 
     /**
