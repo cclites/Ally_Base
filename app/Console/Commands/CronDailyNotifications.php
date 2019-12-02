@@ -137,7 +137,7 @@ class CronDailyNotifications extends Command
                 continue;
             }
 
-            if (!  $license->caregiver->active) {
+            if (!optional( $license->caregiver )->active ) {
                 // skip inactive caregivers
                 continue;
             }
@@ -176,7 +176,7 @@ class CronDailyNotifications extends Command
                 continue;
             }
 
-            if (!  $license->caregiver->active) {
+            if (!optional( $license->caregiver )->active) {
                 // skip inactive caregivers
                 continue;
             }
