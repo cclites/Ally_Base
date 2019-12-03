@@ -44,7 +44,7 @@ class MigrateAdditionalClaimServiceData extends Migration
                         ->first();
 
                     if (filled($caregiverSignature)) {
-                        $service->caregiver_signature = $caregiverSignature->id;
+                        $service->caregiver_signature_id = $caregiverSignature->id;
                     }
 
                     $clientSignature = \DB::table('signatures')
@@ -55,7 +55,7 @@ class MigrateAdditionalClaimServiceData extends Migration
                         ->first();
 
                     if (filled($clientSignature)) {
-                        $service->client_signature = $clientSignature->id;
+                        $service->client_signature_id = $clientSignature->id;
                     }
 
                     $service->client_case_manager = optional($service->client->caseManager)->name_last_first;

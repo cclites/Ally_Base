@@ -66,7 +66,7 @@ class ClaimInvoiceFactoryTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function it_can_create_a_claim_invoice_from_a_client_invoice()
+    function it_can_create_a_claim_invoice_from_a_single_client_invoice()
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);

@@ -2,11 +2,13 @@
 
 namespace App\Claims\Factories;
 
+use App\Billing\ClientPayer;
 use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ClientInvoiceItem;
+use App\Client;
 use Illuminate\Support\Collection;
 use App\Billing\InvoiceableType;
 use App\Claims\ClaimInvoiceItem;
@@ -27,58 +29,73 @@ class ClaimInvoiceFactory
      */
     protected $warnings;
 
+    /**
+     * Create a single claim from multiple client invoices.
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $invoices
+     * @return array
+     * @throws \Exception
+     */
     public function createFromClientInvoices(\Illuminate\Database\Eloquent\Collection $invoices) : array
     {
         $invoices->load([
             'items',
             'items.shift',
+            'clientPayer',
+
+            'items.shift.client.caseManager',
+            'items.shift.clientSignature',
+            'items.shift.caregiverSignature',
+
+            'items.shiftExpense.shift.caregiver',
+            'items.shiftExpense.shift.client',
+
             'items.shiftService',
-            'items.shiftService.shift',
-            'clientPayer'
+            'items.shiftService.shift.client.caseManager',
+            'items.shiftService.shift.clientSignature',
+            'items.shiftService.shift.caregiverSignature',
         ]);
 
         $this->validate($invoices);
 
         $type = $this->getClaimType($invoices);
+        /** @var \App\Client $client */
         $client = $type == ClaimInvoiceType::PAYER() ? null : $invoices->first()->client;
+        /** @var \App\Business $business */
         $business = $invoices->first()->client->business;
-        $payer = $invoices->first()->clientPayer->payer;
+        /** @var \App\Billing\ClientPayer $clientPayer */
+        $clientPayer = $invoices->first()->clientPayer;
+        /** @var \App\Billing\Payer $payer */
+        $payer = $clientPayer->payer;
 
         \DB::beginTransaction();
         /** @var ClaimInvoice $claim */
         $claim = ClaimInvoice::create([
             'business_id' => $business->id,
-            'name' => $this->getInvoiceName($business->id),
-
-            // this will get re-written from the updateBalances() call below
-            'amount' => $invoices->sum('amount'),
-            'amount_due' => $invoices->sum('amount'),
-
-            'status' => ClaimStatus::CREATED(),
-            'transmission_method' => $payer->getTransmissionMethod(),
-
-            'client_id' => empty($client) ? null : $client->id,
-            'client_first_name' => empty($client) ? null : $client->first_name,
-            'client_last_name' => empty($client) ? null : $client->last_name,
-            'client_dob' => empty($client) ? null : $client->date_of_birth,
-            'client_medicaid_id' => empty($client) ? null : $client->medicaid_id,
-            'client_medicaid_diagnosis_codes' => empty($client) ? null : $client->medicaid_diagnosis_codes,
-
+            'client_id' => optional($client)->id,
             'payer_id' => $payer->id,
             'payer_name' => $payer->name,
             'payer_code' => $invoices->first()->getPayerCode(),
             'plan_code' => $invoices->first()->getPlanCode(),
+
+            'name' => $this->getInvoiceName($business->id),
+            'status' => ClaimStatus::CREATED(),
+            'transmission_method' => $payer->getTransmissionMethod(),
+
+            // this will get re-written from the updateBalances() call below
+            'amount' => $invoices->sum('amount'),
+            'amount_due' => $invoices->sum('amount'),
         ]);
 
         $claim->clientInvoices()->saveMany($invoices);
 
-        $items = $invoices->map(function (ClientInvoice $invoice) {
-            return $invoice->items->map(function (ClientInvoiceItem $item) {
+        $items = $invoices->map(function (ClientInvoice $invoice) use ($clientPayer) {
+            return $invoice->items->map(function (ClientInvoiceItem $item) use ($clientPayer) {
                 switch ($item->invoiceable_type) {
                     case InvoiceableType::SHIFT():
-                        return $this->convertShift($item);
+                        return $this->convertShift($item, $clientPayer);
                     case InvoiceableType::SHIFT_SERVICE():
-                        return $this->convertService($item);
+                        return $this->convertService($item, $clientPayer);
                     case InvoiceableType::SHIFT_EXPENSE():
                         return $this->convertExpense($item);
                     case InvoiceableType::SHIFT_ADJUSTMENT():
@@ -154,78 +171,22 @@ class ClaimInvoiceFactory
      */
     public function createFromClientInvoice(ClientInvoice $invoice): array
     {
-        $this->warnings = collect([]);
-
-        $invoice->load('items', 'items.shift', 'items.shiftService', 'items.shiftService.shift');
-
-        if (empty($invoice->clientPayer)) {
-            throw new \InvalidArgumentException('Invoice has no payer and cannot be used for a claim.');
-        }
-
-        $client = $invoice->client;
-        $business = $invoice->client->business;
-        $payer = $invoice->clientPayer->payer;
-
-        \DB::beginTransaction();
-        /** @var ClaimInvoice $claim */
-        $claim = ClaimInvoice::create([
-            'business_id' => $business->id,
-            'client_invoice_id' => $invoice->id,
-            'name' => $this->getInvoiceName($business->id),
-
-            // this will get re-written from the updateBalances() call below
-            'amount' => $invoice->amount,
-            'amount_due' => $invoice->amount,
-
-            'status' => ClaimStatus::CREATED(),
-            'transmission_method' => $payer->getTransmissionMethod(),
-
-            'client_id' => $client->id,
-            'client_first_name' => $client->first_name,
-            'client_last_name' => $client->last_name,
-            'client_dob' => $client->date_of_birth,
-            'client_medicaid_id' => $client->medicaid_id,
-            'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-
-            'payer_id' => $payer->id,
-            'payer_name' => $payer->name,
-            'payer_code' => $invoice->getPayerCode(),
-            'plan_code' => $invoice->getPlanCode(),
-        ]);
-
-        $items = $invoice->items->map(function (ClientInvoiceItem $item) {
-            switch ($item->invoiceable_type) {
-                case InvoiceableType::SHIFT():
-                    return $this->convertShift($item);
-                case InvoiceableType::SHIFT_SERVICE():
-                    return $this->convertService($item);
-                case InvoiceableType::SHIFT_EXPENSE():
-                    return $this->convertExpense($item);
-                case InvoiceableType::SHIFT_ADJUSTMENT():
-                    // Adjustments are not copied to Claim Invoices.
-                default:
-                    return null;
-            }
-        })->filter();
-
-        $claim->items()->saveMany($items);
-
-        $claim->updateBalance();
-
-        \DB::commit();
-
-        return [$claim, $this->warnings];
+        return $this->createFromClientInvoices(
+            ClientInvoice::where('id', $invoice->id)->get()
+        );
     }
 
     /**
      * Create a ClaimInvoiceItem from a Shift-based ClientInvoiceItem.
      *
      * @param ClientInvoiceItem $item
+     * @param ClientPayer $clientPayer
      * @return null|ClaimInvoiceItem
      */
-    protected function convertShift(ClientInvoiceItem $item): ?ClaimInvoiceItem
+    protected function convertShift(ClientInvoiceItem $item, ClientPayer $clientPayer): ?ClaimInvoiceItem
     {
         $shift = $item->getShift();
+        $client = $shift->client;
         $caregiver = $shift->caregiver;
         $evvAddress = $shift->address;
         if (empty($evvAddress)) {
@@ -238,7 +199,7 @@ class ClaimInvoiceFactory
             return null;
         }
 
-        $claimableService = $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
+        $claimableService = $this->createClaimableService($item, $shift, $service, $client, $caregiver, $evvAddress, $clientPayer);
 
         return ClaimInvoiceItem::make([
             'invoiceable_id' => $shift->id,
@@ -259,7 +220,7 @@ class ClaimInvoiceFactory
      * @param ClientInvoiceItem $item
      * @return null|ClaimInvoiceItem
      */
-    protected function convertService(ClientInvoiceItem $item): ?ClaimInvoiceItem
+    protected function convertService(ClientInvoiceItem $item, ClientPayer $clientPayer): ?ClaimInvoiceItem
     {
         /** @var \App\Shift $shift */
         if (empty($item->shiftService)) {
@@ -268,6 +229,8 @@ class ClaimInvoiceFactory
             return null;
         }
         $shift = $item->shiftService->shift;
+        /** @var \App\Client $client */
+        $client = $shift->client;
         $caregiver = $shift->caregiver;
         $evvAddress = $shift->address;
         if (empty($evvAddress)) {
@@ -277,7 +240,7 @@ class ClaimInvoiceFactory
         $shiftService = $item->shiftService;
         /** @var Service $service */
         $service = $item->shiftService->service;
-        $claimableService = $this->createClaimableService($item, $shift, $service, $caregiver, $evvAddress);
+        $claimableService = $this->createClaimableService($item, $shift, $service, $client, $caregiver, $evvAddress, $clientPayer);
 
         $claimItem = ClaimInvoiceItem::make([
             'invoiceable_id' => $shiftService->id,
@@ -314,6 +277,9 @@ class ClaimInvoiceFactory
 
         $claimableExpense = ClaimableExpense::create([
             'shift_id' => $shiftExpense->shift_id,
+            'client_id' => $shiftExpense->shift->client->id,
+            'client_first_name' => $shiftExpense->shift->client->first_name,
+            'client_last_name' => $shiftExpense->shift->client->last_name,
             'caregiver_id' => $shiftExpense->shift->caregiver->id,
             'caregiver_first_name' => $shiftExpense->shift->caregiver->first_name,
             'caregiver_last_name' => $shiftExpense->shift->caregiver->last_name,
@@ -341,14 +307,34 @@ class ClaimInvoiceFactory
      * @param ClientInvoiceItem $item
      * @param Shift $shift
      * @param Service $service
+     * @param Client $client
      * @param Caregiver $caregiver
      * @param Address|null $evvAddress
+     * @param ClientPayer $clientPayer
      * @return ClaimableService
      */
-    protected function createClaimableService(ClientInvoiceItem $item, Shift $shift, Service $service, Caregiver $caregiver, ?Address $evvAddress): ClaimableService
-    {
+    protected function createClaimableService(
+        ClientInvoiceItem $item,
+        Shift $shift,
+        Service $service,
+        Client $client,
+        Caregiver $caregiver,
+        ?Address $evvAddress,
+        ClientPayer $clientPayer
+    ): ClaimableService {
         return ClaimableService::create([
             'shift_id' => $shift->id,
+            'client_id' => $client->id,
+            'client_first_name' => $client->first_name,
+            'client_last_name' => $client->last_name,
+            'client_dob' => $client->date_of_birth,
+            'client_medicaid_id' => $client->medicaid_id,
+            'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
+            'client_case_manager' => optional($client->caseManager)->name_last_first,
+            'client_program_number' => $clientPayer->program_number,
+            'client_cirts_number' => $clientPayer->cirts_number,
+            'client_ltci_policy_number' => $client->getPolicyNumber(),
+            'client_ltci_claim_number' => $client->getClaimNumber(),
             'caregiver_id' => $caregiver->id,
             'caregiver_first_name' => $caregiver->first_name,
             'caregiver_last_name' => $caregiver->last_name,
@@ -384,6 +370,9 @@ class ClaimInvoiceFactory
             'service_code' => $service->code,
             'activities' => $shift->activities->implode('code', ','),
             'caregiver_comments' => $shift->caregiver_comments,
+            'client_signature_id' => optional($shift->clientSignature)->id,
+            'caregiver_signature_id' => optional($shift->caregiverSignature)->id,
+            'is_overtime' => $shift->hours_type == 'default' ? false : true,
         ]);
     }
 
