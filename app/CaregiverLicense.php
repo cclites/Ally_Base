@@ -69,6 +69,18 @@ class CaregiverLicense extends AuditableModel
     {
         return $query->where( 'expires_at', '>', self::INAPPLICABLE_DATE );
     }
+
+    /**
+     * Filter out Licenses that are artificially marked 'inapplicable'
+     *  this artificial attribute sets the expiration date to the year 1337
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereHasValidCaregiver($query)
+    {
+        return $query->whereHas( 'caregiver' );
+    }
     
     // **********************************************************
     // ScrubsForSeeding Methods
