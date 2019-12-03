@@ -126,7 +126,7 @@ class CronTellusCheckStatus extends Command
         $header = null;
         $hasFailure = false;
 
-        $xml = new SimpleXMLElement( $tellusFile );
+        $xml = new SimpleXMLElement( $response );
         dd( $xml );
 
         foreach (explode("\r\n", $response) as $line) {
