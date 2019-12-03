@@ -497,7 +497,7 @@ Route::group([
     Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
     Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
     Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
-    Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
+    Route::get('claims-ar/claim-results/{claim}/{service}', 'Business\ClaimsController@claimResults')->name('claims-ar.claim-results');
 
     /* New Claims & AR */
     Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');

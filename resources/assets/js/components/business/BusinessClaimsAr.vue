@@ -97,12 +97,9 @@
                 </template>
                 <template slot="claim_status" scope="row">
                     {{ formatStatus(row.item.claim_status) }}
-                    <span v-if="row.item.claim_service == 'HHA' && row.item.claim_status == 'REJECTED'">
-                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item.claim)"></i>
-<!--                        <b-btn size="xl" @click="hhaResultsModal = true">More</b-btn>-->
-                    </span>
-                    <span v-else-if="row.item.claim_service == 'TELLUS' && row.item.claim_status == 'REJECTED'">
-                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showTellusResults(row.item.claim)"></i>
+                    <span v-if=" [ 'HHA', 'TELLUS' ].includes( row.item.claim_service ) && row.item.claim_status == 'REJECTED'">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showNegativeResults( row.item.claim, row.item.claim_service )"></i>
+<!--                        <b-btn size="xl" @click="claimResultsModal = true">More</b-btn>-->
                     </span>
                 </template>
                 <template slot="actions" scope="row">
@@ -121,14 +118,14 @@
             </b-table>
         </div>
 
-        <b-modal id="hhaResultsModal"
+        <b-modal id="claimResultsModal"
              size="lg"
              :title="`HHA Results for Claim #${selectedClaim.id}`"
-             v-model="hhaResultsModal"
+             v-model="claimResultsModal"
         >
             <b-row>
                 <b-table bordered striped hover show-empty
-                         :items="hhaResults"
+                         :items="claimResults"
                          :fields="hhaFields"
                          sort-by="service_date"
                 >
@@ -391,8 +388,8 @@
                 transmissionPrivate: false,
                 missingFieldsModal: false,
                 selectedClaim: {},
-                hhaResultsModal: false,
-                hhaResults: [],
+                claimResultsModal: false,
+                claimResults: [],
                 hhaFields: {
                     service_date: { sortable: true, label: 'Date', formatter: x => this.formatDateTime(x) },
                     // reference_id: { sortable: true, label: 'Shift ID' },
@@ -438,20 +435,21 @@
         },
 
         methods: {
-            showHhaResults(claim) {
+
+            showNegativeResults( claim, service ) {
                 this.selectedClaim = claim;
 
-                axios.get(`/business/claims-ar/hha-results/${claim.id}`)
+                axios.get( `/business/claims-ar/claim-results/${claim.id}/${service}`)
                     .then( ({ data }) => {
-                        this.hhaResults = data;
+
+                        this.claimResults = data;
                     })
                     .catch(() => {
 
                     });
                 // claims-ar/hha-results
-                this.hhaResultsModal = true;
+                this.claimResultsModal = true;
             },
-
             formatStatus(status) {
                 return _.capitalize(_.startCase(status));
             },
