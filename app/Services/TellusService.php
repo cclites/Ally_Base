@@ -269,19 +269,19 @@ class TellusService
         }
 
         // dd( $this->sftp->nlist( config( 'services.tellus.sftp_directory' ) ) );
-        $accepted = $this->sftp->get(
-            config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
-            false
-        );
 
-        // dd( $accepted );
+        for( $i = 0; $i < count( $list ); $i++ ){
 
+            $accepted = $this->sftp->get(
+                config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
+                false
+            );
+        }
         $rejected = $this->sftp->get(
             config('services.tellus.sftp_directory') . "/$filename" . "_REJECTED.XML",
             false
         );
 
-        dd( $rejected );
     }
 
     /**
