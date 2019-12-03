@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Caregiver;
 use App\User;
-use Crypt;
+use App\PhoneNumber;
 
 class ImportCaregiversAdjustment extends BaseImport
 {
@@ -42,23 +42,30 @@ class ImportCaregiversAdjustment extends BaseImport
             return false;
         }
 
-        $phone2 = $this->resolve( 'Phone2', $row );
-
         $data = [
 
             [ 'firstname'    , $this->resolve('First Name', $row) ],
             [ 'lastname'     , $this->resolve('Last Name', $row) ],
-            // [ 'ssn'          , Crypt::encrypt( $this->resolve('SSN', $row) ) ],
-            [ 'date_of_birth', $this->resolve('Date of Birth', $row) ],
-            [ 'email'        , $this->resolve('Email', $row) ]
+            [ 'email'        , $this->resolve('Email', $row) ],
         ];
 
-        dd( $data );
-
         // Find user
-        $user = User::with( 'caregiver' )->where( $data )->get();
+        $user = User::where( $data )->get();
 
-        dd( $user );
+        if( count( $user ) == 1 ){
+
+            $user = $user->first();
+
+            $phone2 = $this->resolve( 'Phone2', $row );
+            $number = preg_replace('/[^\d\-]/', '', $phone2 );
+            $phone = PhoneNumber::fromInput( 'primary', $number );
+            $phone->number(); // This should throw an exception if invalid format
+            $user->role->phoneNumbers()->save($phone);
+
+            return true;
+        }
+
+        $this->output->writeln( 'Failed to update row ' . $row );
 
         return false;
     }
