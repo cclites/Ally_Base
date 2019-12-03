@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-btn variant="info" @click="createUser()">Create User</b-btn>
+        <b-btn variant="info" @click="createUser()" class="mb-4">Create User</b-btn>
         <table class="table table-bordered">
             <thead>
             <th>Username</th>

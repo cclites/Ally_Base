@@ -100,7 +100,7 @@
                     'password': '',
                     'password_confirmation': '',
                     'businesses': (this.selectedItem && this.selectedItem.businesses ) ? this.selectedItem.businesses : [],
-                    'views_reports': this.selectedItem.views_reports,
+                    'views_reports': (this.selectedItem) ? this.selectedItem.views_reports : '',
                 });
             },
             title() {
