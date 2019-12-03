@@ -2,26 +2,25 @@
 
 namespace App\Console\Commands;
 
-use App\Caregiver;
 use App\BusinessChain;
 use App\User;
 use App\PhoneNumber;
 
-class ImportCaregiversAdjustment extends BaseImport
+class OnceImportCaregiversAdjustment extends BaseImport
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'import:caretime-adjustment {file} {chain_id}';
+    protected $signature = 'once:import-caretime-adjustment {chain_id} {file}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'One=-off command to adjust an import for a CareTime caregiver list.';
+    protected $description = 'One-off command to adjust an import for a CareTime caregiver list.';
 
     /**
      * @var \App\BusinessChain
@@ -64,33 +63,30 @@ class ImportCaregiversAdjustment extends BaseImport
         $chain = $this->businessChain();
 
         $data = [
-
-            [ 'firstname'    , $this->resolve('First Name', $row) ],
-            [ 'lastname'     , $this->resolve('Last Name', $row) ],
-            [ 'email'        , $this->resolve('Email', $row) ],
+            ['firstname', $this->resolve('First Name', $row)],
+            ['lastname', $this->resolve('Last Name', $row)],
+            ['email', $this->resolve('Email', $row)],
         ];
 
         // Find user
-        $user = User::where( $data )->whereHas( 'caregiver', function( $q ) use( $chain ){
-
-            $q->forChains([ $chain->id ]);
+        $user = User::where($data)->whereHas('caregiver', function ($q) use ($chain) {
+            $q->forChains([$chain->id]);
         })->get();
 
-        if( count( $user ) == 1 ){
-
+        if (count($user) == 1) {
             $user = $user->first();
 
-            $phone2 = $this->resolve( 'Phone2', $row );
-            $number = preg_replace('/[^\d\-]/', '', $phone2 );
-            $phone = PhoneNumber::fromInput( 'mobile', $number );
+            $phone2 = $this->resolve('Phone2', $row);
+            $number = preg_replace('/[^\d\-]/', '', $phone2);
+            $phone = PhoneNumber::fromInput('mobile', $number);
             $phone->number(); // This should throw an exception if invalid format
             $phone->receives_sms = 1;
-            $user->role->phoneNumbers()->save( $phone );
+            $user->role->phoneNumbers()->save($phone);
 
             return true;
         }
 
-        $this->output->writeln( 'Failed to update row ' . $row );
+        $this->output->writeln('Failed to update row ' . $row);
 
         return false;
     }
@@ -103,7 +99,7 @@ class ImportCaregiversAdjustment extends BaseImport
      */
     protected function emptyRow(int $row)
     {
-        return !$this->resolve('Last Name', $row);
+        return ! $this->resolve('Last Name', $row);
     }
 
     /**
@@ -133,7 +129,6 @@ class ImportCaregiversAdjustment extends BaseImport
         return false;
     }
 
-
     /**
      * Return the current business model for who the data should be imported in to
      * NOTE: Business Chain should be used for caregivers.  This is only for compatibility with business-only resources.
@@ -144,7 +139,6 @@ class ImportCaregiversAdjustment extends BaseImport
     {
         return $this->businessChain()->businesses->first();
     }
-
 
     /**
      * The message to show before executing the import
