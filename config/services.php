@@ -77,6 +77,7 @@ return [
         'sftp_host' => env('TELLUS_SFTP_HOST', ''),
         'sftp_port' => env('TELLUS_SFTP_PORT', 22),
         'sftp_directory' => env('TELLUS_SFTP_DIRECTORY', '/'),
+        'pem_path' => env('TELLUS_SFTP_PEM', ''),
     ],
 
     'fullcalendar' => [

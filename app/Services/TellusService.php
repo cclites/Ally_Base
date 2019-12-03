@@ -63,7 +63,10 @@ class TellusService
      */
     public function login() : bool
     {
-        if (! $this->sftp->login($this->username, $this->password)) {
+        $key = new \phpseclib\Crypt\RSA();
+        $key->loadKey( file_get_contents( config( 'services.tellus.pem_path' ) ) );
+
+        if (! $this->sftp->login($this->username, $key )) {
             return false;
         }
 
@@ -265,12 +268,13 @@ class TellusService
             throw new \Exception('Your Tellus username and password was not accepted.  Please contact Tellus and let them know you are unable to login to their SFTP server.');
         }
 
-        dd( $this->sftp->pwd() );
-        dd( $this->sftp->nlist( config( 'services.tellus.sftp_directory' ) ) );
+        // dd( $this->sftp->nlist( config( 'services.tellus.sftp_directory' ) ) );
         $accepted = $this->sftp->get(
             config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
             false
         );
+
+        // dd( $accepted );
 
         $rejected = $this->sftp->get(
             config('services.tellus.sftp_directory') . "/$filename" . "_REJECTED.XML",
