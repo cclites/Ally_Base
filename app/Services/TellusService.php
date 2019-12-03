@@ -268,20 +268,19 @@ class TellusService
             throw new \Exception('Your Tellus username and password was not accepted.  Please contact Tellus and let them know you are unable to login to their SFTP server.');
         }
 
-        // dd( $this->sftp->nlist( config( 'services.tellus.sftp_directory' ) ) );
+        $accepted = $this->sftp->get(
+            config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
+            false );
 
-        for( $i = 0; $i < count( $list ); $i++ ){
+        if( $accepted ) return 'accepted';
 
-            $accepted = $this->sftp->get(
-                config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
-                false
-            );
-        }
         $rejected = $this->sftp->get(
             config('services.tellus.sftp_directory') . "/$filename" . "_REJECTED.XML",
-            false
-        );
+            false );
 
+        if( $rejected ) return $rejected;
+
+        return false;
     }
 
     /**

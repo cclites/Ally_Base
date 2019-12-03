@@ -8,6 +8,7 @@ use App\TellusFileResult;
 use App\Services\TellusService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use SimpleXMLElement;
 
 class CronTellusCheckStatus extends Command
 {
@@ -85,17 +86,22 @@ class CronTellusCheckStatus extends Command
 
             \DB::beginTransaction();
             try {
-                $this->status('Parsing response file...');
-                $this->parseResponse($result, $tellusFile);
-                // if ($this->parseResponse($result, $tellusFile)) {
-                //     $this->status('Claim accepted.');
-                //     $tellusFile->update(['status' => TellusFile::STATUS_ACCEPTED]);
-                //     $tellusFile->claim->update(['status' => ClaimStatus::ACCEPTED()]);
-                //  } else {
-                //     $this->status('Claim rejected.');
-                //     $tellusFile->update(['status' => TellusFile::STATUS_REJECTED]);
-                //     $tellusFile->claim->update(['status' => ClaimStatus::REJECTED()]);
-                // }
+
+                if( $result === 'accepted' ){
+
+                    $this->status( 'Claim accepted.' );
+                    $tellusFile->update([ 'status' => TellusFile::STATUS_ACCEPTED ]);
+                    $tellusFile->claim->update([ 'status' => ClaimStatus::ACCEPTED() ]);
+                } else {
+
+                    $this->status( 'Claim rejected.' );
+                    $this->status( 'Parsing response file...' );
+
+                    $tellusFile->update(['status' => TellusFile::STATUS_REJECTED]);
+                    $tellusFile->claim->update(['status' => ClaimStatus::REJECTED()]);
+
+                    $this->parseResponse( $result, $tellusFile );
+                }
 
                 \DB::commit();
 
@@ -120,10 +126,8 @@ class CronTellusCheckStatus extends Command
         $header = null;
         $hasFailure = false;
 
-        dd( $tellusFile );
-
-
-
+        $xml = new SimpleXMLElement( $tellusFile );
+        dd( $xml );
 
         foreach (explode("\r\n", $response) as $line) {
             if (empty($line)) {
