@@ -42,6 +42,12 @@
                 <template slot="effective_end" scope="row">
                     <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
+                <template slot="program_number" scope="row">
+                    <b-form-input v-model="row.item.program_number" type="text" class="date-input form-control-sm" />
+                </template>
+                <template slot="cirts_number" scope="row">
+                    <b-form-input v-model="row.item.cirts_number" type="text" class="date-input form-control-sm" />
+                </template>
                 <template slot="notes" scope="row">
                     <b-form-input v-model="row.item.notes" type="text" class="date-input form-control-sm" />
                 </template>
@@ -137,6 +143,14 @@
                         label: 'Effective End',
                     },
                     {
+                        key: 'program_number',
+                        label: 'Program ID',
+                    },
+                    {
+                        key: 'cirts_number',
+                        label: 'CIRTS ID',
+                    },
+                    {
                         key: 'notes',
                         label: 'Print on Client Invoice',
                     },
@@ -198,6 +212,8 @@
                     split_percentage: '0',
                     client_id: this.client.id,
                     notes: '',
+                    cirts_number: '',
+                    program_number: '',
                     // payer: {},
                 });
                 this.resetPriorities();

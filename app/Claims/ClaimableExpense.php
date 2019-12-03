@@ -2,8 +2,10 @@
 
 namespace App\Claims;
 
+use App\Caregiver;
 use App\Claims\Contracts\ClaimableInterface;
 use App\AuditableModel;
+use App\Client;
 use App\Shift;
 use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
@@ -57,9 +59,34 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // RELATIONSHIPS
     // **********************************************************
 
+    /**
+     * Get the related Client.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function shift()
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    /**
+     * Get the related Caregiver.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function caregiver()
+    {
+        return $this->belongsTo(Caregiver::class);
     }
 
     // **********************************************************

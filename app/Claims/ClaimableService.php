@@ -6,6 +6,7 @@ use App\Claims\Contracts\ClaimableInterface;
 use App\Billing\Service;
 use App\AuditableModel;
 use App\Caregiver;
+use App\Client;
 use App\Shift;
 use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
@@ -124,6 +125,16 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class);
+    }
+
+    /**
+     * Get the related Client.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     /**

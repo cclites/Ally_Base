@@ -52,6 +52,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'medicaid_id' => 'nullable',
             'medicaid_npi_number' => 'nullable|digits:10',
             'medicaid_npi_taxonomy' => 'nullable',
+            'medicaid_license_number' => 'nullable|max:32',
             'allow_client_confirmations' => 'required|bool',
             'auto_confirm_modified' => 'required|bool',
             'shift_confirmation_email' => 'required|bool',

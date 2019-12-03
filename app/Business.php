@@ -71,6 +71,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $medicaid_id
  * @property string|null $medicaid_npi_number
  * @property string|null $medicaid_npi_taxonomy
+ * @property string|null $medicaid_license_number
  * @property string|null $outgoing_sms_number
  * @property string $shift_rounding_method
  * @property string|null $pay_cycle
@@ -1011,6 +1012,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
             'medicaid_id' => $faker->randomNumber(9, true),
             'medicaid_npi_number' => $faker->randomNumber(9, true),
             'medicaid_npi_taxonomy' => $faker->randomNumber(9, true),
+            'medicaid_license_number' => $faker->randomNumber(9, true),
         ];
     }
 }

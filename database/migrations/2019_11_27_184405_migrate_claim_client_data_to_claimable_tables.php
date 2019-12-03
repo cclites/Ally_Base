@@ -16,6 +16,11 @@ class MigrateClaimClientDataToClaimableTables extends Migration
     public function up()
     {
         \DB::beginTransaction();
+
+        // First clean up any left over claimable data that is no longer attached to a parent claim item
+        ClaimableService::whereNotIn('id', \DB::table('claim_invoice_items')->select('claimable_id')->get()->pluck('claimable_id'))->delete();
+        \App\Claims\ClaimableExpense::whereNotIn('id', \DB::table('claim_invoice_items')->select('claimable_id')->get()->pluck('claimable_id'))->delete();
+
         ClaimInvoiceItem::with(['claimable', 'claim'])->chunk(400, function (Collection $items) {
             $items->each(function (ClaimInvoiceItem $item) {
                 if (
