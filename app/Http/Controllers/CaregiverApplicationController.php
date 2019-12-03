@@ -233,8 +233,7 @@ class CaregiverApplicationController extends BusinessBaseController
             return new ErrorResponse( 500, 'An unexpected error occurred converting this application.' );
 
         } catch( NumberParseException $e ){
-
-            return new ErrorResponse( $e->getCode(), $e->getMessage() );
+            return new ErrorResponse( 500, 'There was an issue with an invalid phone number on the application.  Please update the application and try again.' );
         }
     }
 }

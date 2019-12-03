@@ -287,7 +287,6 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
                 'type' => 'home',
             ]);
             $caregiver->addresses()->save($address);
-            // (484) 301-8486
 
             if( !empty( $this->cell_phone ) ){
 
