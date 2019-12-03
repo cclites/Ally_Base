@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Caregiver;
+use App\BusinessChain;
 use App\User;
 use App\PhoneNumber;
 
@@ -13,7 +14,7 @@ class ImportCaregiversAdjustment extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:caretime-adjustment {file}';
+    protected $signature = 'import:caretime-adjustment {file} {chain_id}';
 
     /**
      * The console command description.
@@ -23,10 +24,28 @@ class ImportCaregiversAdjustment extends BaseImport
     protected $description = 'One=-off command to adjust an import for a CareTime caregiver list.';
 
     /**
+     * @var \App\BusinessChain
+     */
+    protected $businessChain;
+
+    /**
      * A store for duplicate row checks
      * @var array
      */
     protected $processedHashes = [];
+
+    /**
+     * Return the current business model for who the data should be imported in to
+     *
+     * @return \App\BusinessChain
+     */
+    protected function businessChain()
+    {
+        if ($this->businessChain) {
+            return $this->businessChain;
+        }
+        return $this->businessChain = BusinessChain::findOrFail($this->argument('chain_id'));
+    }
 
     /**
      * Import the specified row of data from the sheet and return the related model
@@ -42,6 +61,8 @@ class ImportCaregiversAdjustment extends BaseImport
             return false;
         }
 
+        $chain = $this->businessChain();
+
         $data = [
 
             [ 'firstname'    , $this->resolve('First Name', $row) ],
@@ -50,7 +71,10 @@ class ImportCaregiversAdjustment extends BaseImport
         ];
 
         // Find user
-        $user = User::where( $data )->get();
+        $user = User::where( $data )->whereHas( 'caregiver', function( $q ) use( $chain ){
+
+            $q->forChains([ $chain->id ]);
+        })->get();
 
         if( count( $user ) == 1 ){
 
@@ -109,9 +133,6 @@ class ImportCaregiversAdjustment extends BaseImport
     }
 
 
-
-
-
     /**
      * Return the current business model for who the data should be imported in to
      * NOTE: Business Chain should be used for caregivers.  This is only for compatibility with business-only resources.
@@ -120,7 +141,7 @@ class ImportCaregiversAdjustment extends BaseImport
      */
     protected function business()
     {
-        return true;
+        return $this->businessChain()->businesses->first();
     }
 
 
