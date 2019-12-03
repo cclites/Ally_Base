@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Contracts\SFTPReaderWriterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\TellusFile;
 use DOMDocument;
 use SimpleXMLElement;
 
@@ -268,17 +269,18 @@ class TellusService
             throw new \Exception('Your Tellus username and password was not accepted.  Please contact Tellus and let them know you are unable to login to their SFTP server.');
         }
 
-        $accepted = $this->sftp->get(
-            config('services.tellus.sftp_directory') . "/$filename" . "_ACCEPTED.XML",
-            false );
+        $statuses = [ TellusFile::STATUS_ACCEPTED, TellusFile::STATUS_REJECTED ];
 
-        if( $accepted ) return 'accepted';
+        for( $i = 0; $i < count( $statuses ); $i++ ){
 
-        $rejected = $this->sftp->get(
-            config('services.tellus.sftp_directory') . "/$filename" . "_REJECTED.XML",
-            false );
+            $status = strtoupper( $statuses[ $i ] );
 
-        if( $rejected ) return $rejected;
+            $file = $this->sftp->get(
+                config( 'services.tellus.sftp_directory' ) . "/$filename" . "_$status.XML",
+                false );
+
+            if( $file ) return [ $file, strtolower( $status ) ];
+        }
 
         return false;
     }

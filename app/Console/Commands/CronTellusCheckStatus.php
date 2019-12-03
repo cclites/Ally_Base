@@ -77,7 +77,8 @@ class CronTellusCheckStatus extends Command
                 continue;
             }
 
-            $result = $tellus->downloadResponse($tellusFile->filename);
+            list( $result, $status ) = $tellus->downloadResponse( $tellusFile->filename );
+
             if (! $result) {
                 // No response file found, so we can skip
                 $this->status('No response file yet.');
@@ -87,21 +88,19 @@ class CronTellusCheckStatus extends Command
             \DB::beginTransaction();
             try {
 
-                if( $result === 'accepted' ){
+                $this->status( "Claim $status." );
+                $tellusFile->update([ 'status' => $status ]);
 
-                    $this->status( 'Claim accepted.' );
-                    $tellusFile->update([ 'status' => TellusFile::STATUS_ACCEPTED ]);
+                if( $status === TellusFile::STATUS_ACCEPTED ){
+
                     $tellusFile->claim->update([ 'status' => ClaimStatus::ACCEPTED() ]);
                 } else {
 
-                    $this->status( 'Claim rejected.' );
-                    $this->status( 'Parsing response file...' );
-
-                    $tellusFile->update(['status' => TellusFile::STATUS_REJECTED]);
                     $tellusFile->claim->update(['status' => ClaimStatus::REJECTED()]);
-
-                    $this->parseResponse( $result, $tellusFile );
                 }
+
+                $this->status( 'Parsing response file...' );
+                $this->parseResponse( $result, $tellusFile, $status );
 
                 \DB::commit();
 
@@ -119,46 +118,45 @@ class CronTellusCheckStatus extends Command
      *
      * @param string $response
      * @param TellusFile $tellusFile
-     * @return bool
+     * @return void
      */
-    protected function parseResponse(string $response, TellusFile $tellusFile) : bool
+    protected function parseResponse(string $response, TellusFile $tellusFile, string $status) : void
     {
-        $header = null;
         $hasFailure = false;
 
         $xml = new SimpleXMLElement( $response );
-        dd( $xml );
 
-        foreach (explode("\r\n", $response) as $line) {
-            if (empty($line)) {
-                continue;
-            }
+        foreach( $xml->RenderedService as $service ) {
 
-            $csv = str_getcsv($line);
-            if (! $header) {
-                $header = $csv;
-                continue;
-            }
+            if( count( $service->Errors ) === 0 ){
+                // success only has 1 field
 
-            if (count($csv) != 45) {
-                throw new \InvalidArgumentException("Invalid response file line: $line");
-            }
+                $result = TellusFileResult::create([
 
-            $result = TellusFileResult::create([
-                'tellus_file_id' => $tellusFile->id,
-                'reference_id' => $csv[9],
-                'service_code' => $csv[10],
-                'status_code' => $csv[43],
-                'import_status' => $csv[44],
-                'service_date' => Carbon::parse($csv[11]),
-            ]);
+                    'tellus_file_id' => $tellusFile->id,
+                    'reference_id'   => $service->VisitId ?? null, // the shift id, it has an optional() wrapping
+                    'service_code'   => $service->ServiceCode,
+                    'status_code'    => 200,
+                    'import_status'  => $status,
+                    'service_date'   => Carbon::parse( $service->ActualStartDateTime ),
+                ]);
+            } else {
+                // errors have multiple fields associated to one rendered service
 
-            if ($result->status_code != '200') {
-                $hasFailure = true;
+                foreach( $service->Errors->Error as $error ){
+
+                    $result = TellusFileResult::create([
+
+                        'tellus_file_id' => $tellusFile->id,
+                        'reference_id'   => $service->VisitId ?? null, // the shift id, it has an optional() wrapping
+                        'service_code'   => $service->ServiceCode,
+                        'status_code'    => $error->ErrorCode,
+                        'import_status'  => $error->ErrorDescription,
+                        'service_date'   => Carbon::parse( $service->ActualStartDateTime ),
+                    ]);
+                }
             }
         }
-
-        return !$hasFailure;
     }
 
     /**

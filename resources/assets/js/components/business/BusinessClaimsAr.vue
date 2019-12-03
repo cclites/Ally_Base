@@ -101,6 +101,9 @@
                         <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item.claim)"></i>
 <!--                        <b-btn size="xl" @click="hhaResultsModal = true">More</b-btn>-->
                     </span>
+                    <span v-else-if="row.item.claim_service == 'TELLUS' && row.item.claim_status == 'REJECTED'">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showTellusResults(row.item.claim)"></i>
+                    </span>
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn v-if="!row.item.claim || row.item.claim.status == 'CREATED'" variant="primary" class="mr-2" @click="transmitClaim(row.item)" :disabled="busy">
