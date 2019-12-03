@@ -82,9 +82,10 @@ class ImportCaregiversAdjustment extends BaseImport
 
             $phone2 = $this->resolve( 'Phone2', $row );
             $number = preg_replace('/[^\d\-]/', '', $phone2 );
-            $phone = PhoneNumber::fromInput( 'primary', $number );
+            $phone = PhoneNumber::fromInput( 'mobile', $number );
             $phone->number(); // This should throw an exception if invalid format
-            $user->role->phoneNumbers()->save($phone);
+            $phone->receives_sms = 1;
+            $user->role->phoneNumbers()->save( $phone );
 
             return true;
         }
