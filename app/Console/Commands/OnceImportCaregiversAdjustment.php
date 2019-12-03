@@ -74,16 +74,25 @@ class OnceImportCaregiversAdjustment extends BaseImport
         })->get();
 
         if (count($user) == 1) {
-            $user = $user->first();
+            try {
+                $user = $user->first();
 
-            $phone2 = $this->resolve('Phone2', $row);
-            $number = preg_replace('/[^\d\-]/', '', $phone2);
-            $phone = PhoneNumber::fromInput('mobile', $number);
-            $phone->number(); // This should throw an exception if invalid format
-            $phone->receives_sms = 1;
-            $user->role->phoneNumbers()->save($phone);
+                $phone2 = $this->resolve('Phone2', $row);
+                $number = preg_replace('/[^\d\-]/', '', $phone2);
+                if (empty($number)) {
+                    return true;
+                }
+                
+                $phone = PhoneNumber::fromInput('mobile', $number);
+                $phone->number(); // This should throw an exception if invalid format
+                $phone->receives_sms = 1;
+                $user->role->phoneNumbers()->save($phone);
 
-            return true;
+                return true;
+            } catch (\Exception $ex) {
+                $this->output->writeln('Failed to update row ' . $row . ' with exception ' . $ex->getMessage());
+                return false;
+            }
         }
 
         $this->output->writeln('Failed to update row ' . $row);
