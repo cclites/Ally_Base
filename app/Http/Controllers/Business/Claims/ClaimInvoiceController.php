@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
+use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
@@ -79,7 +80,7 @@ class ClaimInvoiceController extends BaseController
                 $message .= "$item\r\n";
             }
         }
-        return new SuccessResponse($message, new ClaimsQueueResource($claim->clientInvoice->fresh()));
+        return new SuccessResponse($message, new ClaimCreatorResource($clientInvoice->fresh()));
     }
 
     /**

@@ -23,7 +23,7 @@ class ClaimCreatorResource extends Resource
     public function toArray($request)
     {
         /** @var \App\Claims\ClaimInvoice $claim */
-        $claim = $this->resource->claimInvoice;
+        $claim = $this->resource->claimInvoices->first();
 
         return [
             'selected' => false,
@@ -36,8 +36,8 @@ class ClaimCreatorResource extends Resource
             'payer_id' => $this->resource->clientPayer ? $this->resource->clientPayer->payer->id : '-',
             'payer_name' => $this->resource->clientPayer ? $this->resource->clientPayer->payer->name : '-',
             'is_paid' => $this->resource->is_paid ? 'Yes' : 'No',
-            'claim_id' => empty($claim) ? '-' : $claim->id,
-            'claim_name' => empty($claim) ? '-' : $claim->getName(),
+            'claim_id' => empty($claim) ? null : $claim->id,
+            'claim_name' => empty($claim) ? null : $claim->getName(),
             'claim_date' => empty($claim) ? null : Carbon::parse($claim->created_at)->format('m/d/Y h:i A'),
         ];
     }

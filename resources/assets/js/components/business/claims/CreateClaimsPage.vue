@@ -102,13 +102,13 @@
                 </template>
                 <template slot="claim_name" scope="row">
                     <div class="text-nowrap">
-                        <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim_id}/print`" target="_blank">{{ row.item.claim_name }}</a>
+                        <a v-if="row.item.claim_id" :href="`/business/claims/${row.item.claim_id}/print`" target="_blank">{{ row.item.claim_name }}</a>
                         <span v-else> - </span>
                     </div>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
                     <!-- CREATE BUTTON -->
-                    <div v-if="! row.item.claim">
+                    <div v-if="! row.item.claim_id">
                         <b-btn variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="filters.busy || creatingIds.length > 0" size="sm">
                             <i v-if="creatingIds.includes(row.item.id)" class="fa fa-spin fa-spinner" />&nbsp;Create Claim
                         </b-btn>
@@ -200,6 +200,12 @@
                 form.post(`/business/grouped-claims`)
                     .then( ({ data }) => {
                         console.log('response:', data);
+                        data.data.forEach(invoice => {
+                            let index = this.items.findIndex(x => x.id == invoice.id);
+                            if (index >= 0) {
+                                this.items.splice(index, 1, invoice);
+                            }
+                        });
                     })
                     .catch(() => {})
                     .finally(() => {

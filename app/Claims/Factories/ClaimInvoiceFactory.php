@@ -2,24 +2,25 @@
 
 namespace App\Claims\Factories;
 
-use App\Billing\ClientPayer;
-use App\Claims\ClaimInvoiceType;
+use App\Billing\Payer;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ClientInvoiceItem;
-use App\Client;
 use Illuminate\Support\Collection;
 use App\Billing\InvoiceableType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
+use App\Claims\ClaimInvoiceType;
 use App\Billing\ClientInvoice;
+use App\Billing\ClientPayer;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\Billing\Service;
 use App\Caregiver;
 use App\Address;
+use App\Client;
 use App\Shift;
 
 class ClaimInvoiceFactory
@@ -34,10 +35,13 @@ class ClaimInvoiceFactory
      *
      * @param \Illuminate\Database\Eloquent\Collection $invoices
      * @return array
+     * @throws \InvalidArgumentException
      * @throws \Exception
      */
     public function createFromClientInvoices(\Illuminate\Database\Eloquent\Collection $invoices) : array
     {
+        $this->warnings = collect();
+
         $invoices->load([
             'items',
             'items.shift',
@@ -71,6 +75,7 @@ class ClaimInvoiceFactory
         \DB::beginTransaction();
         /** @var ClaimInvoice $claim */
         $claim = ClaimInvoice::create([
+            'claim_invoice_type' => $type,
             'business_id' => $business->id,
             'client_id' => optional($client)->id,
             'payer_id' => $payer->id,
@@ -147,6 +152,20 @@ class ClaimInvoiceFactory
             if (empty($invoice->clientPayer)) {
                 throw new \InvalidArgumentException('Invoice has no payer and cannot be used for a claim.');
             }
+
+            // Cannot use invoices that have already been converted to claims
+            if ($invoice->claimInvoices->count() > 0) {
+                throw new \InvalidArgumentException("Invoice #{$invoice->name} is already attached to a claim.");
+            }
+        }
+
+        // Fail if invoices belong to separate business locations
+        $totalBusinesses = $invoices->unique(function ($invoice) {
+            return $invoice->client->business_id;
+        })->values()->count();
+
+        if ($totalBusinesses > 1) {
+            throw new \InvalidArgumentException('You can only group invoices for the same office location.');
         }
 
         // Fail if payers are not all the same
@@ -158,7 +177,12 @@ class ClaimInvoiceFactory
             throw new \InvalidArgumentException('You can only group invoices for the same payer.');
         }
 
-        // TODO: Do not allow unique payer to be 'private pay' and have multiple client ids
+        // Fail if payers are all 'private pay' but there are different clients
+        // (This is technically
+        $totalClients = $invoices->unique('client_id')->values()->count();
+        if ($totalClients > 1 & $invoices->first()->clientPayer->payer_id === Payer::PRIVATE_PAY_ID) {
+            throw new \InvalidArgumentException('You can only group invoices for the same payer.');
+        }
     }
 
     /**

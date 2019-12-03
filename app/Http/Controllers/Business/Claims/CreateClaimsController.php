@@ -3,17 +3,23 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Billing\Queries\ClientInvoiceQuery;
-use App\Claims\Requests\GetClientInvoicesRequest;
 use App\Claims\Resources\ClaimCreatorResource;
-use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
+use App\Claims\Requests\GetClientInvoicesRequest;
 
 class CreateClaimsController extends BaseController
 {
+    /**
+     * Get list of client invoices that can be created into claims.
+     *
+     * @param GetClientInvoicesRequest $request
+     * @param ClientInvoiceQuery $invoiceQuery
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\View\View
+     */
     public function index(GetClientInvoicesRequest $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->wantsReportData()) {
-            $invoiceQuery->with(['client', 'clientPayer.payer', 'claimInvoice'])
+            $invoiceQuery->with(['client', 'clientPayer.payer', 'claimInvoices'])
                 ->forRequestedBusinesses()
                 ->whereNotNull('client_payer_id') // hides adjustment invoices
                 ->forDateRange($request->filterDateRange())

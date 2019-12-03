@@ -591,6 +591,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
     }
 
+    /**
+     * Get the ClaimInvoiceType.
+     *
+     * @return ClaimInvoiceType
+     */
+    public function getType() : ClaimInvoiceType
+    {
+        return ClaimInvoiceType::fromValue($this->claim_invoice_type);
+    }
+
     // **********************************************************
     // STATIC METHODS
     // **********************************************************

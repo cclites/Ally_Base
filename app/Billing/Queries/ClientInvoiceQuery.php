@@ -140,7 +140,7 @@ class ClientInvoiceQuery extends BaseQuery
     }
 
     /**
-     * Filter by invoices that have a Claim attached.
+     * Filter by invoices that are attached to a Claim.
      *
      * @param bool $transmittedOnly
      * @return $this
@@ -148,11 +148,11 @@ class ClientInvoiceQuery extends BaseQuery
     public function hasClaim(bool $transmittedOnly = false) : self
     {
         if ($transmittedOnly) {
-            $this->whereHas('claimInvoice', function ($q) {
+            $this->whereHas('claimInvoices', function ($q) {
                 $q->whereIn('status', ClaimStatus::transmittedStatuses());
             });
         } else {
-            $this->whereHas('claimInvoice');
+            $this->whereHas('claimInvoices');
         }
 
         return $this;
@@ -165,7 +165,7 @@ class ClientInvoiceQuery extends BaseQuery
      */
     public function doesNotHaveClaim() : self
     {
-        $this->whereDoesntHave('claimInvoice');
+        $this->whereDoesntHave('claimInvoices');
 
         return $this;
     }
