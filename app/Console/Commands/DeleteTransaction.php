@@ -127,6 +127,7 @@ class DeleteTransaction extends Command
             $invoice->deposits()->detach($deposit->id);
         }
         $transaction->history()->delete();
+        \DB::table('invoice_deposits')->where('deposit_id', $deposit->id)->delete();
         $transaction->delete();
         DepositLog::where('deposit_id', $deposit->id)->delete();
         $deposit->delete();
@@ -172,6 +173,7 @@ class DeleteTransaction extends Command
             $invoice->payments()->detach($payment->id);
         }
         $transaction->history()->delete();
+        \DB::table('invoice_payments')->where('payment_id', $payment->id)->delete();
         $transaction->delete();
         PaymentLog::where('payment_id', $payment->id)->delete();
         $payment->delete();

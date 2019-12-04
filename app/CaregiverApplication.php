@@ -288,11 +288,14 @@ class CaregiverApplication extends AuditableModel implements BelongsToChainsInte
             ]);
             $caregiver->addresses()->save($address);
 
-            $cellPhone = new PhoneNumber(['type' => 'primary']);
-            $cellPhone->input($this->cell_phone);
-            $caregiver->phoneNumbers()->save($cellPhone);
+            if( !empty( $this->cell_phone ) ){
 
-            if ($this->home_phone) {
+                $cellPhone = new PhoneNumber(['type' => 'primary']);
+                $cellPhone->input($this->cell_phone);
+                $caregiver->phoneNumbers()->save($cellPhone);
+            }
+
+            if ( !empty( $this->home_phone ) ){
                 $homePhone = new PhoneNumber(['type' => 'home']);
                 $homePhone->input($this->home_phone);
                 $caregiver->phoneNumbers()->save($homePhone);

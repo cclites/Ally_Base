@@ -223,8 +223,17 @@ class CaregiverApplicationController extends BusinessBaseController
             return new ErrorResponse(409, 'This application has already been converted.');
         }
 
-        if ($caregiver = $application->convertToCaregiver()) {
-            return new CreatedResponse('The application has been converted into an active caregiver.', null, route('business.caregivers.show', [$caregiver]));
+        try {
+
+            if ( $caregiver = $application->convertToCaregiver() ) {
+
+                return new CreatedResponse('The application has been converted into an active caregiver.', null, route('business.caregivers.show', [$caregiver]));
+            }
+
+            return new ErrorResponse( 500, 'An unexpected error occurred converting this application.' );
+
+        } catch( NumberParseException $e ){
+            return new ErrorResponse( 500, 'There was an issue with an invalid phone number on the application.  Please update the application and try again.' );
         }
     }
 }
