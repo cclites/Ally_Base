@@ -60,7 +60,7 @@ class ClaimTransmissionController extends BaseController
 
             \DB::commit();
 
-            $data = ['invoice' => new ClaimsQueueResource($claim->clientInvoice->fresh())];
+            $data = ['invoice' => new ClaimsQueueResource($claim->fresh())];
             if (isset($testFile)) {
                 $data['test_result'] = $testFile;
             }

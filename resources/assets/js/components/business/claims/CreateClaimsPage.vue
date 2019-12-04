@@ -54,7 +54,7 @@
                 class="mr-1 mt-1"
             />
 
-            <b-button type="submit" variant="info" class="mt-1" :disabled="filters.busy">Generate Report</b-button>
+            <b-button type="submit" variant="info" class="mt-1" :disabled="filters.busy">Generate</b-button>
         </b-form>
 
         <loading-card v-if="filters.busy"></loading-card>
@@ -62,7 +62,7 @@
         <b-row v-if="!filters.hasBeenSubmitted">
             <b-col lg="12">
                 <b-card class="text-center text-muted">
-                    Select filters and press Generate Report
+                    Select filters and press Generate
                 </b-card>
             </b-col>
         </b-row>

@@ -1,83 +1,86 @@
 <template>
-    <b-card>
-        <b-row>
-            <b-col lg="12">
-                <b-card header="Filter Claims"
-                        header-text-variant="white"
-                        header-bg-variant="info"
+    <b-card header="Search Claims"
+        header-text-variant="white"
+        header-bg-variant="info"
+    >
+        <div class="filters mb-4">
+            <div>
+                <b-form-radio-group v-model="filters.date_type">
+                    <b-radio value="service">Search by Date of Service</b-radio>
+                    <b-radio value="invoice">Search by Invoice Dates</b-radio>
+                </b-form-radio-group>
+            </div>
+
+            <b-form inline @submit.prevent="fetch()">
+                <business-location-form-group
+                    v-model="filters.businesses"
+                    :label="null"
+                    class="mr-1 mt-1"
+                    :allow-all="true"
+                />
+                <date-picker
+                    v-model="filters.start_date"
+                    placeholder="Start Date"
+                    class="mt-1"
                 >
-                    <b-form inline @submit.prevent="fetch()">
-                        <business-location-form-group
-                            v-model="filters.businesses"
-                            :label="null"
-                            class="mr-1 mt-1"
-                            :allow-all="true"
-                        />
-                        <date-picker
-                            v-model="filters.start_date"
-                            placeholder="Start Date"
-                            class="mt-1"
-                        >
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                            v-model="filters.end_date"
-                            placeholder="End Date"
-                            class="mr-1 mt-1"
-                        >
-                        </date-picker>
+                </date-picker> &nbsp;to&nbsp;
+                <date-picker
+                    v-model="filters.end_date"
+                    placeholder="End Date"
+                    class="mr-1 mt-1"
+                >
+                </date-picker>
 
-                        <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
+                <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
 
-                        <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
+                <client-type-dropdown v-model="filters.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
-                        <b-form-select
-                            id="invoice_type"
-                            name="invoice_type"
-                            v-model="filters.invoice_type"
-                            class="mr-1 mt-1"
-                        >
-                            <option value="">-- Invoice Status --</option>
-                            <option value="unpaid">Unpaid Invoices</option>
-                            <option value="paid">Paid Invoices</option>
-                            <option value="has_claim">Has Claim</option>
-                            <option value="no_claim">Does Not Have Claim</option>
-                            <option value="has_balance">Has Claim Balance</option>
-                            <option value="no_balance">Does Not Have Claim Balance</option>
-                        </b-form-select>
+                <b-form-select
+                    v-model="filters.balance"
+                    class="mr-1 mt-1"
+                >
+                    <option value="">-- Balance --</option>
+                    <option value="has_balance">Has Balance</option>
+                    <option value="no_balance">No Balance</option>
+                </b-form-select>
 
-                        <b-form-select
-                            id="claim_status"
-                            name="claim_status"
-                            v-model="filters.claim_status"
-                            class="mr-1 mt-1"
-                        >
-                            <option value="">-- Claim Status --</option>
-                            <option value="CREATED">Created</option>
-                            <option value="TRANSMITTED">Transmitted</option>
-                        </b-form-select>
+                <b-form-select v-model="filters.claim_type" class="mr-1 mt-1" :options="claimInvoiceTypeOptions">
+                    <template slot="first">
+                        <option value="">-- Claim Type --</option>
+                    </template>
+                </b-form-select>
 
-                        <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
-                            <option v-if="loadingClients" selected value="">Loading Clients...</option>
-                            <option v-else value="">-- All Clients --</option>
-                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
-                            </option>
-                        </b-form-select>
+                <b-form-select
+                    id="claim_status"
+                    name="claim_status"
+                    v-model="filters.claim_status"
+                    class="mr-1 mt-1"
+                >
+                    <option value="">-- Claim Status --</option>
+                    <option value="CREATED">Created</option>
+                    <option value="TRANSMITTED">Transmitted</option>
+                </b-form-select>
 
-                        <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
-                            Show Inactive Clients
-                        </b-form-checkbox>
+                <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
+                    <option v-if="loadingClients" selected value="">Loading Clients...</option>
+                    <option v-else value="">-- All Clients --</option>
+                    <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
+                    </option>
+                </b-form-select>
 
-                        <b-input
-                            v-model="filters.invoice_id"
-                            placeholder="Invoice #"
-                            class="mr-1 mt-1"
-                        />
+                <b-form-checkbox v-model="filters.inactive" :value="1" :unchecked-value="0" class="mr-1 mt-1">
+                    Show Inactive Clients
+                </b-form-checkbox>
 
-                        <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate Report</b-button>
-                    </b-form>
-                </b-card>
-            </b-col>
-        </b-row>
+                <b-input
+                    v-model="filters.invoice_id"
+                    placeholder="Invoice #"
+                    class="mr-1 mt-1"
+                />
+
+                <b-button type="submit" variant="info" class="mt-1" :disabled="loaded === 0">Generate</b-button>
+            </b-form>
+        </div>
 
         <b-row>
             <b-col>
@@ -101,7 +104,7 @@
         <b-row v-if=" loaded < 0 ">
             <b-col lg="12">
                 <b-card class="text-center text-muted">
-                    Select filters and press Generate Report
+                    Select filters and press Generate
                 </b-card>
             </b-col>
         </b-row>
@@ -113,17 +116,28 @@
                 :sort-desc.sync="sortDesc"
                 :filter="filter"
             >
-                <template slot="name" scope="row">
-                    <a :href="`/business/client/invoices/${row.item.id}/`" target="_blank">{{ row.value }}</a>
+                <template slot="expand" scope="row">
+                    <b-btn v-if="row.item.invoice_id == '-'" variant="secondary" size="sm" @click.stop="row.toggleDetails">
+                        <i v-if="row.detailsShowing" class="fa fa-caret-down" />
+                        <i v-else class="fa fa-caret-right" />
+                    </b-btn>
+                </template>
+                <template slot="invoice_name" scope="row">
+                    <span v-if="row.item.invoice_id == '-'">
+                        {{ row.item.invoice_name }}
+                    </span>
+                    <a v-else :href="`/business/client/invoices/${row.item.invoice_id}/`" target="_blank">{{ row.item.invoice_name }}</a>
                 </template>
                 <template slot="client_name" scope="row">
-                    <a :href="`/business/clients/${row.item.client.id}`" target="_blank">{{ row.item.client_name }}</a>
+                    <span v-if="row.item.type == CLAIM_INVOICE_TYPES.PAYER">
+                        (Grouped)
+                    </span>
+                    <a v-else :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
                 </template>
-                <template slot="claim" scope="row">
+                <template slot="name" scope="row">
                     <div class="text-nowrap">
-                        <a v-if="row.item.claim" :href="`/business/claims/${row.item.claim.id}/print`" target="_blank">{{ row.item.claim.name }}</a>
-                        <span v-else> - </span>
-                        <span v-if="row.item.claim && row.item.claim.modified_at">
+                        <a :href="`/business/claims/${row.item.id}/print`" target="_blank">{{ row.item.name }}</a>
+                        <span v-if="row.item.modified_at">
                             <i class="fa fa-code-fork text-danger" :id="`modified_icon_${row.item.id}`" />
                             <b-tooltip :target="`modified_icon_${row.item.id}`" triggers="hover">
                                 Claim has been modified.
@@ -131,17 +145,12 @@
                         </span>
                     </div>
                 </template>
-                <template slot="payer" scope="row">
-                    <span v-if="row.item.claim">
-                        {{ row.item.claim.payer_name }}
-                    </span>
-                    <span v-else>
-                        {{ row.item.payer ? row.item.payer.name : 'N/A' }}
-                    </span>
+                <template slot="payer_name" scope="row">
+                    {{ row.item.payer_name }}
                 </template>
-                <template slot="claim_total" scope="row">
+                <template slot="amount" scope="row">
                     <div class="text-nowrap">
-                        <span>{{ moneyFormat(row.item.claim_total, '$', true) }}</span>
+                        <span>{{ moneyFormat(row.item.amount, '$', true) }}</span>
                         <span v-if="row.item.amount_mismatch">
                             <i class="fa fa-warning ml-1 text-danger" :id="`mismatch_icon_${row.item.id}`" />
                             <b-tooltip :target="`mismatch_icon_${row.item.id}`" triggers="hover">
@@ -150,43 +159,37 @@
                         </span>
                     </div>
                 </template>
-                <template slot="claim_status" scope="row">
-                    {{ resolveOption(row.item.claim_status, claimStatusOptions) }}
-                    <span v-if="row.item.claim && row.item.claim.transmission_method == 'HHA' && row.item.claim_status == CLAIM_STATUSES.REJECTED">
-                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item.claim)"></i>
+                <template slot="status" scope="row">
+                    {{ resolveOption(row.item.status, claimStatusOptions) }}
+                    <span v-if="row.item.transmission_method == 'HHA' && row.item.status == CLAIM_STATUSES.REJECTED">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item)"></i>
                     </span>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
-                    <!-- CREATE BUTTON -->
-                    <div v-if="! row.item.claim">
-                        <b-btn variant="success" class="mr-1" @click="createClaim(row.item)" :disabled="busy || creatingId != null" size="sm">
-                            <i v-if="row.item.id === creatingId" class="fa fa-spin fa-spinner" />&nbsp;Create Claim
-                        </b-btn>
-                    </div>
-                    <div class="text-nowrap" v-else>
+                    <div class="text-nowrap">
                         <!-- EDIT BUTTON -->
                         <b-btn
                                variant="info"
                                class="mr-1"
-                               :href="`/business/claims/${row.item.claim.id}/edit`"
+                               :href="`/business/claims/${row.item.id}/edit`"
                                size="sm"
                         >
                             <i class="fa fa-edit" />
                         </b-btn>
                         <b-dropdown right size="sm" text="..." class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
-                            <b-dropdown-item :href="`/business/claims/${row.item.claim.id}/print?download=1`">
+                            <b-dropdown-item :href="`/business/claims/${row.item.id}/print?download=1`">
                                 <i class="fa fa-download mr-1" />Download PDF
                             </b-dropdown-item>
-                            <b-dropdown-item v-if="row.item.claim.status == 'CREATED'" @click="transmit(row.item)">
+                            <b-dropdown-item v-if="row.item.status == 'CREATED'" @click="transmit(row.item)">
                                 <i class="fa fa-send-o mr-1" />Transmit Claim
                             </b-dropdown-item>
-                            <b-dropdown-item v-if="row.item.claim.status != 'CREATED'" @click="transmit(row.item)">
+                            <b-dropdown-item v-if="row.item.status != 'CREATED'" @click="transmit(row.item)">
                                 <i class="fa fa-send-o mr-1" />Re-transmit Claim
                             </b-dropdown-item>
                             <b-dropdown-item @click="adjust(row.item)">
                                 <i class="fa fa-usd mr-1" />Adjust Claim
                             </b-dropdown-item>
-                            <b-dropdown-item :href="`/business/claim-adjustments/${row.item.claim.id}`">
+                            <b-dropdown-item :href="`/business/claim-adjustments/${row.item.id}`">
                                 <i class="fa fa-history mr-1" />Adjustment History
                             </b-dropdown-item>
                             <b-dropdown-divider />
@@ -195,6 +198,23 @@
                             </b-dropdown-item>
                         </b-dropdown>
                     </div>
+                </template>
+                <template slot="row-details" scope="row">
+                    <b-card>
+                        <!---------- SUB TABLE --------------->
+                        <b-table bordered striped show-empty
+                            :items="row.item.invoices"
+                            :fields="subFields"
+                        >
+                            <template slot="name" scope="row">
+                                <a :href="`/business/client/invoices/${row.item.id}/`" target="_blank">{{ row.item.name }}</a>
+                            </template>
+                            <template slot="client_name" scope="row">
+                                <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                            </template>
+                        </b-table>
+                        <!---------- /END SUB TABLE --------------->
+                    </b-card>
                 </template>
             </b-table>
         </div>
@@ -298,13 +318,15 @@
                     businesses: '',
                     start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
-                    invoice_type: '',
+                    balance: '',
                     claim_status: '',
                     client_id: '',
                     payer_id: '',
                     client_type: '',
                     invoice_id: '',
                     inactive: 0,
+                    date_type: 'service',
+                    claim_type: '',
                     json: 1,
                 }),
                 sortBy: 'shift_time',
@@ -312,71 +334,27 @@
                 filter: null,
                 loaded: -1,
                 items: [],
-                fields: [
-                    {
-                        key: 'created_at',
-                        label: 'Inv Date',
-                        formatter: (val) => this.formatDateFromUTC(val),
-                        sortable: true,
-                    },
-                    {
-                        key: 'name',
-                        label: 'Invoice #',
-                        sortable: true,
-                    },
-                    {
-                        key: 'client_name',
-                        sortable: true,
-                    },
-                    {
-                        key: 'payer',
-                        sortable: true,
-                    },
-                    {
-                        key: 'amount',
-                        label: 'Invoiced Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim',
-                        label: 'Claim',
-                        sortable: false
-                    },
-                    {
-                        key: 'claim_date',
-                        formatter: (val) => this.formatDateFromUTC(val, 'MM/DD/YYYY h:mm a', null, true),
-                        label: 'Claim Date',
-                        sortable: true
-                    },
-                    {
-                        key: 'claim_total',
-                        label: 'Claim Amt',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
-                        sortable: true
-                    },
-                    {
-                        key: 'claim_paid',
-                        label: 'Amt Paid',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
-                        sortable: true
-                    },
-                    {
-                        key: 'claim_balance',
-                        label: 'Claim Balance',
-                        formatter: (val) => this.moneyFormat(val, '$', true),
-                        sortable: true,
-                    },
-                    {
-                        key: 'claim_status',
-                        sortable: true,
-                    },
-                    {
-                        key: 'actions',
-                        tdClass: 'actions-column',
-                        sortable: false,
-                    },
-                ],
+                fields: {
+                    expand: { label: ' ', sortable: false, },
+                    name: {label: 'Claim #', sortable: true },
+                    // type: { sortable: true, formatter: x => this.resolveOption(x, this.claimInvoiceTypeOptions) },
+                    created_at: { label: 'Date', formatter: (val) => this.formatDateFromUTC(val), sortable: true, },
+                    client_name: { sortable: true, },
+                    payer_name: { label: 'Payer', sortable: true,},
+                    invoice_name: { label: 'Invoice #',sortable: true,},
+                    invoice_amount: { label: 'Total Invoiced', formatter: (val) => this.moneyFormat(val, '$', true), sortable: true, },
+                    amount: { label: 'Claim Amt', formatter: (val) => this.moneyFormat(val, '$', true), sortable: true },
+                    paid: { label: 'Amt Paid', formatter: (val) => this.moneyFormat(val, '$', true), sortable: true },
+                    balance: { label: 'Balance', formatter: (val) => this.moneyFormat(val, '$', true), sortable: true, },
+                    status: { sortable: true, },
+                    actions: { tdClass: 'actions-column', sortable: false, },
+                },
+                subFields: {
+                    name: {label: 'Invoice #', sortable: true },
+                    created_at: { label: 'Date', formatter: (val) => this.formatDateFromUTC(val), sortable: true, },
+                    client_name: { label: 'Client', sortable: true, },
+                    amount: { label: 'Invoiced Amt', formatter: (val) => this.moneyFormat(val, '$', true), sortable: true },
+                },
                 loadingClients: false,
                 clients: [],
                 busy: false,
@@ -404,10 +382,10 @@
         methods: {
             /**
              * Show the Claim adjustment modal.
-             * @param {Object} invoice
+             * @param {Object} claim
              */
-            adjust(invoice) {
-                axios.get(`/business/claims/${invoice.claim.id}`)
+            adjust(claim) {
+                axios.get(`/business/claims/${claim.id}`)
                     .then( ({ data }) => {
                         this.$store.commit('claims/setClaim', data);
                         this.showAdjustmentModal = true;
@@ -427,48 +405,24 @@
              * Handle updating the table item after it is successfully adjusted.
              * @param {Object} invoice
              */
-            updateRecord(invoice) {
-                let index = this.items.findIndex(x => x.id == invoice.id);
+            updateRecord(claim) {
+                let index = this.items.findIndex(x => x.id == claim.id);
                 if (index >= 0) {
-                    this.items.splice(index, 1, invoice);
+                    this.items.splice(index, 1, claim);
                 }
-            },
-
-            /**
-             * Handle creation of the Claim invoice and update the record.
-             * @param {Object} invoice
-             */
-            createClaim(invoice) {
-                this.creatingId = invoice.id;
-                let form = new Form({client_invoice_id: invoice.id});
-                form.post(`/business/claims`)
-                    .then( ({ data }) => {
-                        let index = this.items.findIndex(x => x.id == data.data.id);
-                        if (index >= 0) {
-                            this.items.splice(index, 1, data.data);
-                        }
-                    })
-                    .catch(() => {})
-                    .finally(() => {
-                        this.creatingId = null;
-                    })
             },
 
             /**
              * Handle deleting the Claim Invoice and update the record.
-             * @param {Object} invoice
+             * @param {Object} claim
              */
-            deleteClaim(invoice) {
-                if (! invoice.claim) {
-                    return;
-                }
-
+            deleteClaim(claim) {
                 this.$refs.confirmDeleteClaim.confirm(() => {
-                    this.deletingId = invoice.id;
+                    this.deletingId = claim.id;
                     let form = new Form({});
-                    form.submit('delete', `/business/claims/${invoice.claim.id}`)
+                    form.submit('delete', `/business/claims/${claim.id}`)
                         .then( ({ data }) => {
-                            let index = this.items.findIndex(x => x.id == invoice.id);
+                            let index = this.items.findIndex(x => x.id == claim.id);
                             if (index >= 0) {
                                 this.items.splice(index, 1, data.data);
                             }
@@ -482,15 +436,15 @@
 
             /**
              * Transmit a Claim.
-             * @param {Object} invoice
+             * @param {Object} claim
              * @param {Boolean} skipAlert
              */
-            transmit(invoice, skipAlert = false) {
+            transmit(claim, skipAlert = false) {
                 if (! skipAlert) {
-                    if (! invoice.claim.transmission_method) {
+                    if (! claim.transmission_method) {
                         this.selectedTransmissionMethod = '';
                         this.$refs.confirmTransmissionMethod.confirm(() => {
-                            this.transmit(invoice, true);
+                            this.transmit(claim, true);
                         });
                         return;
                     }
@@ -501,21 +455,21 @@
                         this.CLAIM_SERVICE.DIRECT_MAIL
                     ];
 
-                    if (offlineMethods.includes(invoice.claim.transmission_method)) {
+                    if (offlineMethods.includes(claim.transmission_method)) {
                         this.$refs.confirmManualTransmission.confirm(() => {
-                            this.transmit(invoice, true);
+                            this.transmit(claim, true);
                         });
                         return;
                     }
                 }
 
                 this.busy = true;
-                this.transmittingId = invoice.claim.id;
+                this.transmittingId = claim.id;
                 let form = new Form({
                     method: this.selectedTransmissionMethod,
                 });
 
-                form.post(`/business/claims/${invoice.claim.id}/transmit`)
+                form.post(`/business/claims/${claim.id}/transmit`)
                     .then( ({ data }) => {
                         // success
                         if (data.data.test_result) {
@@ -523,17 +477,19 @@
                             this.$refs.open_test_link.href = data.data.test_result;
                             this.$refs.open_test_link.click();
                         }
-                        let index = this.items.findIndex(x => x.id == invoice.id);
+                        let index = this.items.findIndex(x => x.id == claim.id);
                         if (index >= 0) {
-                            this.items.splice(index, 1, data.data.invoice);
+                            this.items.splice(index, 1, data.data.claim);
                         }
                     })
                     .catch(e => {
                         if (e.response.status == 412) {
                             // Required fields are missing.
-                            this.showMissingFieldsModal(e.response.data.data, invoice);
+                            console.log('wtf');
+                            this.showMissingFieldsModal(e.response.data.data, claim);
                         } else if (e.response.status == 420) {
                             // Tellus Validation Errors
+                            console.log('tellus');
                             this.tellusErrors = e.response.data.data.tellus_errors;
                             this.tellusErrorsModal = true;
                         }
@@ -547,9 +503,9 @@
             /**
              * Show the missing fields modal with the given errors
              * @param {array} errors
-             * @param {Object} invoice
+             * @param {Object} claim
              */
-            showMissingFieldsModal(errors, invoice) {
+            showMissingFieldsModal(errors, claim) {
                 this.missingFieldErrors = errors;
                 this.missingFieldsModal = true;
             },

@@ -285,7 +285,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasAmountMismatch(): bool
     {
-        return $this->amount != $this->clientInvoice->amount;
+        return $this->amount != floatval($this->clientInvoices->sum('amount'));
     }
 
     /**
@@ -381,127 +381,127 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     // QUERY SCOPES
     // **********************************************************
 
-    /**
-     * Filter by payer_id (optional).
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param null|int|string $payerId
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForPayer($query, $payerId = null)
-    {
-        if (is_null($payerId)) {
-            return $query;
-        }
-
-        return $query->where('payer_id', $payerId);
-    }
-
-    /**
-     * Filter by client_id (optional).
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param null|int|string $clientId
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForClient($query, $clientId = null)
-    {
-        if (empty($clientId)) {
-            return $query;
-        }
-
-        return $query->where('client_id', $clientId);
-    }
-
-    /**
-     * Filter by client invoiced at between the given date range.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param \Carbon\Carbon $start
-     * @param \Carbon\Carbon $end
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeWhereInvoicedBetween($query, $start, $end)
-    {
-        return $query->whereHas('clientInvoice', function ($q) use ($start, $end) {
-            return $q->whereBetween('created_at', [$start, $end]);
-        });
-    }
-
-    /**
-     * Filter by dates of service between the given date range.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param \Carbon\Carbon $start
-     * @param \Carbon\Carbon $end
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeWhereDatesOfServiceBetween($query, $start, $end)
-    {
-        return $query->whereHas('items', function ($q) use ($start, $end) {
-            return $q->whereBetween('date', [$start, $end]);
-        });
-    }
-
-    /**
-     * Filter to only Claims that have a balance.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeHasBalance($query)
-    {
-        return $query->where('amount_due', '<>', '0');
-    }
-
-    /**
-     * Filter claims by client type.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForClientType($query, $clientType)
-    {
-        if (empty($clientType)) {
-            return $query;
-        }
-
-        return $query->whereHas('client', function ($q) use ($clientType) {
-            $q->where('client_type', $clientType);
-        });
-    }
-
-    /**
-     * Filter claims by active users.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForActiveClientsOnly($query)
-    {
-        return $query->whereHas('client', function ($q) {
-            $q->active();
-        });
-    }
-
-    /**
-     * Search claims for the matching client invoice ID or Name.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param $invoiceIdOrName
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeSearchForInvoiceId($query, $invoiceIdOrName)
-    {
-        if (empty($invoiceIdOrName)) {
-            return $query;
-        }
-
-        return $query->whereHas('clientInvoice', function ($q) use ($invoiceIdOrName) {
-            $q->where('id', $invoiceIdOrName)
-                ->orWhere('name', $invoiceIdOrName);
-        });
-    }
+//    /**
+//     * Filter by payer_id (optional).
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @param null|int|string $payerId
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeForPayer($query, $payerId = null)
+//    {
+//        if (is_null($payerId)) {
+//            return $query;
+//        }
+//
+//        return $query->where('payer_id', $payerId);
+//    }
+//
+//    /**
+//     * Filter by client_id (optional).
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @param null|int|string $clientId
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeForClient($query, $clientId = null)
+//    {
+//        if (empty($clientId)) {
+//            return $query;
+//        }
+//
+//        return $query->where('client_id', $clientId);
+//    }
+//
+//    /**
+//     * Filter by client invoiced at between the given date range.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @param \Carbon\Carbon $start
+//     * @param \Carbon\Carbon $end
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeWhereInvoicedBetween($query, $start, $end)
+//    {
+//        return $query->whereHas('clientInvoice', function ($q) use ($start, $end) {
+//            return $q->whereBetween('created_at', [$start, $end]);
+//        });
+//    }
+//
+//    /**
+//     * Filter by dates of service between the given date range.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @param \Carbon\Carbon $start
+//     * @param \Carbon\Carbon $end
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeWhereDatesOfServiceBetween($query, $start, $end)
+//    {
+//        return $query->whereHas('items', function ($q) use ($start, $end) {
+//            return $q->whereBetween('date', [$start, $end]);
+//        });
+//    }
+//
+//    /**
+//     * Filter to only Claims that have a balance.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeHasBalance($query)
+//    {
+//        return $query->where('amount_due', '<>', '0');
+//    }
+//
+//    /**
+//     * Filter claims by client type.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeForClientType($query, $clientType)
+//    {
+//        if (empty($clientType)) {
+//            return $query;
+//        }
+//
+//        return $query->whereHas('client', function ($q) use ($clientType) {
+//            $q->where('client_type', $clientType);
+//        });
+//    }
+//
+//    /**
+//     * Filter claims by active users.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeForActiveClientsOnly($query)
+//    {
+//        return $query->whereHas('client', function ($q) {
+//            $q->active();
+//        });
+//    }
+//
+//    /**
+//     * Search claims for the matching client invoice ID or Name.
+//     *
+//     * @param \Illuminate\Database\Query\Builder $query
+//     * @param $invoiceIdOrName
+//     * @return \Illuminate\Database\Query\Builder
+//     */
+//    public function scopeSearchForInvoiceId($query, $invoiceIdOrName)
+//    {
+//        if (empty($invoiceIdOrName)) {
+//            return $query;
+//        }
+//
+//        return $query->whereHas('clientInvoice', function ($q) use ($invoiceIdOrName) {
+//            $q->where('id', $invoiceIdOrName)
+//                ->orWhere('name', $invoiceIdOrName);
+//        });
+//    }
 
     // **********************************************************
     // OTHER FUNCTIONS

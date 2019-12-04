@@ -62,6 +62,6 @@ class ClaimAdjustmentController extends BaseController
 
         \DB::commit();
 
-        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ClaimsQueueResource($claim->clientInvoice->fresh()));
+        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ClaimsQueueResource($claim->fresh()));
     }
 }

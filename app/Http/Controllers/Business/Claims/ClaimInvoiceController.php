@@ -156,11 +156,11 @@ class ClaimInvoiceController extends BaseController
             return new ErrorResponse(500, 'Cannot delete Claims that have been transmitted.');
         }
 
-        $clientInvoice = $claim->clientInvoice;
+        $clientInvoices = $claim->clientInvoices;
 
         try {
             $factory->deleteClaimInvoice($claim);
-            return new SuccessResponse('Claim has been deleted.', new ClaimsQueueResource($clientInvoice->fresh()));
+            return new SuccessResponse('Claim has been deleted.', ClaimInvoiceResource::collection($clientInvoices));
         } catch (CannotDeleteClaimInvoiceException $ex) {
             return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
         }

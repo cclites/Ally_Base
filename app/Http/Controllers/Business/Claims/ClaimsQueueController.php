@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\ClaimStatus;
-use App\Claims\Requests\ClaimQueueRequest;
-use App\ClientType;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ClaimsQueueResource;
-use App\Billing\Queries\ClientInvoiceQuery;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Claims\Requests\ClaimQueueRequest;
+use App\Claims\Queries\ClaimInvoiceQuery;
 
 class ClaimsQueueController extends BaseController
 {
@@ -18,100 +13,56 @@ class ClaimsQueueController extends BaseController
      * Get claims listing.
      *
      * @param ClaimQueueRequest $request
-     * @param ClientInvoiceQuery $invoiceQuery
+     * @param ClaimInvoiceQuery $claimQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(ClaimQueueRequest $request, ClientInvoiceQuery $invoiceQuery)
+    public function index(ClaimQueueRequest $request, ClaimInvoiceQuery $claimQuery)
     {
         if ($request->forJson()) {
-            if ($request->filled('invoice_type')) {
-                switch ($request->invoice_type) {
-                    case 'paid':
-                        $invoiceQuery->where(function ($q) {
-                            $q->where(function ($q) {
-                                $q->where('offline', 0)
-                                    ->whereColumn('amount_paid', '=', 'amount');
-                            })
-                                ->orWhere(function ($q) {
-                                    $q->where('offline', 1)
-                                        ->whereColumn('offline_amount_paid', '=', 'amount');
-                                });
-                        });
-                        break;
-                    case 'unpaid':
-                        $invoiceQuery->where(function ($q) {
-                            $q->where(function ($q) {
-                                $q->where('offline', 0)
-                                    ->whereColumn('amount_paid', '!=', 'amount');
-                            })
-                                ->orWhere(function ($q) {
-                                    $q->where('offline', 1)
-                                        ->whereColumn('offline_amount_paid', '<', 'amount');
-                                });
-                        });
-                        break;
-                    case 'has_claim':
-                        $invoiceQuery->whereHas('claimInvoice');
-                        break;
-                    case 'no_claim':
-                        $invoiceQuery->whereDoesntHave('claimInvoice');
-                        break;
-                    case 'has_balance':
-                        $invoiceQuery->whereHas('claimInvoice', function (Builder $q) {
-                            $q->where('amount_due', '<>', '0');
-                        });
-                        break;
-                    case 'no_balance':
-                        $invoiceQuery->whereHas('claimInvoice', function (Builder $q) {
-                            $q->where('amount_due', '=', 0);
-                        });
-                        break;
-                }
-            }
+            $filters = $request->filtered();
 
-            if ($request->filled('claim_status')) {
-                $status = ClaimStatus::fromValue($request->claim_status);
-                $invoiceQuery->whereHas('claimInvoice', function ($q) use ($status) {
-                    $q->where('status', $status);
+            $claimQuery->with('clientInvoices.client')
+                ->forRequestedBusinesses()
+                ->when($filters['balance'] == 'has_balance', function (ClaimInvoiceQuery $q) {
+                    $q->notPaidInFull();
+                })
+                ->when($filters['balance'] == 'no_balance', function (ClaimInvoiceQuery $q) {
+                    $q->paidInFull();
+                })
+                ->when(! $filters['inactive'], function (ClaimInvoiceQuery $q) {
+                    $q->forActiveClientsOnly();
+                })
+                ->when($filters['claim_type'], function (ClaimInvoiceQuery $q, $var) {
+                    $q->withType($var);
+                })
+                ->when($filters['claim_status'], function (ClaimInvoiceQuery $q, $var) {
+                    $q->withStatus($var);
+                })
+                ->when($filters['client_id'], function (ClaimInvoiceQuery $q, $var) {
+                    $q->forClient($var);
+                })
+                ->when(filled($filters['payer_id']), function (ClaimInvoiceQuery $q) use ($filters) {
+                    $q->forPayer($filters['payer_id']);
+                })
+                ->when($filters['client_type'], function (ClaimInvoiceQuery $q, $var) {
+                    $q->forClientType($var);
+                })
+                ->when($filters['invoice_id'], function (ClaimInvoiceQuery $q, $var) {
+                    $q->searchForInvoiceId($var);
                 });
+
+            if ($request->getDateSearchType() == 'invoice') {
+                $claimQuery->whereInvoicedBetween($request->filterDateRange());
+            } else {
+                $claimQuery->whereDatesOfServiceBetween($request->filterDateRange());
             }
 
-            $invoiceQuery->forRequestedBusinesses();
-
-            // Only return invoices that have a payer (adjustment invoices should not show)
-            $invoiceQuery->whereNotNull('client_payer_id');
-
-            $invoiceQuery->whereBetween('created_at', $request->filterDateRange());
-
-            if ($request->filled('client_id')) {
-                $invoiceQuery->forClient($request->client_id, false);
-            }
-
-            if ($request->filled('payer_id')) {
-                $invoiceQuery->forPayer($request->payer_id);
-            }
-
-            if (in_array($request->client_type, ClientType::all())) {
-                $invoiceQuery->forClientType($request->client_type);
-            }
-
-            if ($request->inactive != 1) {
-                $invoiceQuery->whereHas('client', function ($q) {
-                    $q->active();
-                });
-            }
-
-            if (filled($request->invoice_id)) {
-                $invoiceQuery->searchForId($request->invoice_id);
-            }
-
-            $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments', 'claimInvoice'])->get();
-
-            $coll = ClaimsQueueResource::collection($invoices);
-
-            return $coll;
+            return ClaimsQueueResource::collection($claimQuery->get());
         }
 
-        return view_component('business-claims-queue', 'Claims Queue');
+        return view_component('business-claims-queue', 'Manage Claims', [], [
+            'Home' => '/',
+            'Claims' => '#',
+        ]);
     }
 }
