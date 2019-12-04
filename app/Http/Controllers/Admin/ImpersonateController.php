@@ -25,7 +25,7 @@ class ImpersonateController extends Controller
 
     public function business(Business $business)
     {
-        $user = $business->users()->orderBy('id')->first();
+        $user = $business->users()->active()->orderBy('id')->first();
         if (auth()->user()->impersonator()) {
             auth()->user()->stopImpersonating();
         }
