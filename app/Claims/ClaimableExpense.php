@@ -116,6 +116,20 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     }
 
     /**
+     * Get the Client's name.
+     *
+     * @return string
+     */
+    public function getClientName(): string
+    {
+        if (empty($this->client_first_name) && empty($this->client_last_name)) {
+            return '';
+        }
+
+        return $this->client_last_name . ', ' . $this->client_first_name;
+    }
+
+    /**
      * Get the Caregiver's name that performed the service.
      *
      * @return string

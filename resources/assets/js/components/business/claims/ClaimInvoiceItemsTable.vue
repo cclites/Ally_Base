@@ -83,6 +83,7 @@
                     summary: { sortable: true },
                     date: { sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     start_time: { label: 'Time', sortable: true },
+                    client_name: { label: 'Client', sortable: true },
                     caregiver_name: { label: 'Caregiver', sortable: true },
                     related_shift_id: { sortable: true, label: 'Related Shift' },
                     rate: { sortable: true, formatter: x => this.moneyFormat(x) },

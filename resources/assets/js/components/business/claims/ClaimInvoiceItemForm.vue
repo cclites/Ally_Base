@@ -32,7 +32,7 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Caregiver" label-for="caregiver_id">
-                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id" @change="onChangeCaregiver">
+                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id" @change="onChangeCaregiver()">
                             <option value="">-- Select a Caregiver --</option>
                             <option v-for="item in caregivers" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-select>
@@ -65,6 +65,46 @@
                             :disabled="form.busy || form.caregiver_reload"
                         />
                         <input-help :form="form" field="caregiver_last_name" text="" />
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Client" label-for="client_id">
+                        <b-select name="client_id" id="client_id" v-model="form.client_id" @change="onChangeClient()">
+                            <option value="">-- Select a Client --</option>
+                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.name }}</option>
+                        </b-select>
+                        <input-help :form="form" field="client_id" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name" label-for="client_first_name" label-class="required">
+                        <b-form-input
+                            v-model="form.client_first_name"
+                            id="client_first_name"
+                            name="client_first_name"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_first_name" text="" />
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name" label-for="client_last_name" label-class="required">
+                        <b-form-input
+                            v-model="form.client_last_name"
+                            id="client_last_name"
+                            name="client_last_name"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_last_name" text="" />
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -313,11 +353,155 @@
                 </b-col>
             </b-row>
 
+            <h5><strong>Client Information</strong></h5>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Client" label-for="client_id">
+                        <b-select name="client_id" id="client_id" v-model="form.client_id" @change="onChangeClient()">
+                            <option value="">-- Select a Client --</option>
+                            <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.name }}</option>
+                        </b-select>
+                        <input-help :form="form" field="client_id" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                </b-col>
+            </b-row>
+            <b-row v-if="form.client_reload">
+                <b-col>
+                    <b-alert show variant="info">This data will be updated with the databased Client values on save.</b-alert>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name" label-for="client_first_name" label-class="required">
+                        <b-form-input
+                            v-model="form.client_first_name"
+                            id="client_first_name"
+                            name="client_first_name"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_first_name" text="" />
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name" label-for="client_last_name" label-class="required">
+                        <b-form-input
+                            v-model="form.client_last_name"
+                            id="client_last_name"
+                            name="client_last_name"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_last_name" text="" />
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Date of Birth" label-for="client_dob">
+                        <mask-input v-model="form.client_dob" id="client_dob" type="date" :disabled="form.busy || form.client_reload"></mask-input>
+                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Case Manager" label-for="client_case_manager">
+                        <b-form-input
+                            v-model="form.client_case_manager"
+                            id="client_case_manager"
+                            name="client_case_manager"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_case_manager" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Medicaid ID" label-for="client_medicaid_id">
+                        <b-form-input
+                            v-model="form.client_medicaid_id"
+                            id="client_medicaid_id"
+                            name="client_medicaid_id"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        ></b-form-input>
+                        <input-help :form="form" field="client_medicaid_id" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Medicaid Diagnosis Codes" label-for="client_medicaid_diagnosis_codes">
+                        <b-form-input
+                            v-model="form.client_medicaid_diagnosis_codes"
+                            id="client_medicaid_diagnosis_codes"
+                            name="client_medicaid_diagnosis_codes"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        ></b-form-input>
+                        <input-help :form="form" field="client_medicaid_diagnosis_codes" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Policy #" label-for="client_ltci_policy_number">
+                        <b-form-input
+                            v-model="form.client_ltci_policy_number"
+                            id="client_ltci_policy_number"
+                            name="client_ltci_policy_number"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_ltci_policy_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Claim #" label-for="client_ltci_claim_number">
+                        <b-form-input
+                            v-model="form.client_ltci_claim_number"
+                            id="client_ltci_claim_number"
+                            name="client_ltci_claim_number"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_ltci_claim_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Payer Program ID" label-for="client_program_number">
+                        <b-form-input
+                            v-model="form.client_program_number"
+                            id="client_program_number"
+                            name="client_program_number"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_program_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Payer CIRTS ID" label-for="client_cirts_number">
+                        <b-form-input
+                            v-model="form.client_cirts_number"
+                            id="client_cirts_number"
+                            name="client_cirts_number"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_cirts_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
             <h5><strong>Caregiver Information</strong></h5>
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Caregiver" label-for="caregiver_id">
-                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id" @change="onChangeCaregiver">
+                        <b-select name="caregiver_id" id="caregiver_id" v-model="form.caregiver_id" @change="onChangeCaregiver()">
                             <option value="">-- Select a Caregiver --</option>
                             <option v-for="item in caregivers" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-select>
@@ -654,6 +838,10 @@
                     rate: 0.00,
                     units: 1,
                     amount: 0.00,
+                    client_reload: false,
+                    client_id: '',
+                    client_first_name: '',
+                    client_last_name: '',
 
                     // expense data
                     name: '',
@@ -705,6 +893,19 @@
                     shift_end_time: '13:00',
                     service_start_date: moment().format('MM/DD/YYYY'),
                     service_start_time: '12:00',
+
+                    client_dob: '',
+                    client_medicaid_id: '',
+                    client_medicaid_diagnosis_codes: '',
+                    client_program_number: '',
+                    client_cirts_number: '',
+                    client_ltci_policy_number: '',
+                    client_ltci_claim_number: '',
+                    client_case_manager: '',
+
+                    client_signature: '',
+                    caregiver_signature: '',
+                    is_overtime: false,
                 }),
             };
         },
@@ -713,11 +914,17 @@
             ...mapGetters({
                 claim: 'claims/claim',
                 caregivers: 'claims/caregiverList',
+                clients: 'filters/clientList',
                 services: 'claims/serviceList',
             }),
             saveButtonTitle() {
                 return this.item.id ? 'Save Changes' : 'Create Item';
             }
+        },
+
+        async mounted() {
+            this.$store.commit('filters/setBusiness', this.claim.business_id);
+            await this.$store.dispatch('filters/fetchResources', ['clients']);
         },
 
         methods: {
@@ -763,7 +970,7 @@
                 this.form.rate = amount.dividedBy(units).toFixed(2);
             },
 
-            onChangeCaregiver(id) {
+            onChangeCaregiver() {
                 this.form.caregiver_reload = true;
                 this.form.caregiver_first_name = '';
                 this.form.caregiver_last_name = '';
@@ -771,6 +978,20 @@
                 this.form.caregiver_dob = '';
                 this.form.caregiver_gender = '';
                 this.form.caregiver_ssn = '';
+            },
+
+            onChangeClient() {
+                this.form.client_reload = true;
+                this.form.client_first_name = '';
+                this.form.client_last_name = '';
+                this.form.client_dob = '';
+                this.form.client_medicaid_id = '';
+                this.form.client_medicaid_diagnosis_codes = '';
+                this.form.client_program_number = '';
+                this.form.client_cirts_number = '';
+                this.form.client_ltci_policy_number = '';
+                this.form.client_ltci_claim_number = '';
+                this.form.client_case_manager = '';
             },
 
             onChangeService(id) {
@@ -785,7 +1006,14 @@
         },
 
         watch: {
+            claim(newVal, oldVal) {
+                if (newVal.business_id != oldVal.business_id) {
+                    this.$store.commit('filters/setBusiness', newVal.business_id);
+                    this.$store.dispatch('filters/fetchResources', ['clients']);
+                }
+            },
             item(val) {
+                this.form.reset(true);
                 if (val.id) {
                     this.form.fill({
                         ...val,
@@ -793,7 +1021,6 @@
                         date: this.formatDate(val.claimable.date),
                     });
                 } else {
-                    this.form.reset(true);
                     this.form.id = null;
                     this.form.claimable_type = this.CLAIMABLE_TYPES.SERVICE;
                 }

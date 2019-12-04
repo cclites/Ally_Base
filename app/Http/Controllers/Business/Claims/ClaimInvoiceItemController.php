@@ -86,6 +86,7 @@ class ClaimInvoiceItemController extends BaseController
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
+            \Log::info($ex);
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }

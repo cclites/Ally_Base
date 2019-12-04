@@ -285,7 +285,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasAmountMismatch(): bool
     {
-        return $this->amount != floatval($this->clientInvoices->sum('amount'));
+        return $this->amount != $this->getTotalInvoicedAmount();
     }
 
     /**
@@ -371,6 +371,41 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return optional(optional($ordered->first())->date)->format('m/d/Y')
             . ' - ' .
             optional(optional($ordered->last())->date)->format('m/d/Y');
+    }
+
+    /**
+     * Get the related client model for the claim invoice
+     * if the claim does not represent multiple Clients.
+     *
+     * @return Client|null
+     */
+    public function getSingleClient() : ?Client
+    {
+        if ($this->clientInvoices->unique('client_id')->values()->count() == 1) {
+            return optional($this->clientInvoices[0])->client;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the total amount of all the attached client invoices.
+     *
+     * @return float
+     */
+    public function getTotalInvoicedAmount() : float
+    {
+        return floatval($this->clientInvoices->sum('amount'));
+    }
+
+    /**
+     * Check whether or not the claim has multiple client invoices attached.
+     *
+     * @return bool
+     */
+    public function hasMultipleInvoices() : bool
+    {
+        return $this->clientInvoices->count() > 1;
     }
 
     // **********************************************************

@@ -69,6 +69,23 @@ class ClaimableServiceResource extends Resource
             'shift_end_time' => $this->resource->scheduled_end_time->setTimezone($timezone)->format('H:i'),
             'service_start_date' => $this->resource->visit_start_time->setTimezone($timezone)->format('m/d/Y'),
             'service_start_time' => $this->resource->visit_start_time->setTimezone($timezone)->format('H:i'),
+
+            // New service items added 12/2019:
+            'client_id' => $this->resource->client_id,
+            'client_first_name' => $this->resource->client_first_name,
+            'client_last_name' => $this->resource->client_last_name,
+            'client_dob' => Carbon::parse($this->resource->client_dob)->format('m/d/Y'),
+            'client_medicaid_id' => $this->resource->client_medicaid_id,
+            'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,
+            'client_program_number' => $this->resource->client_program_number,
+            'client_cirts_number' => $this->resource->client_cirts_number,
+            'client_ltci_policy_number' => $this->resource->client_ltci_policy_number,
+            'client_ltci_claim_number' => $this->resource->client_ltci_claim_number,
+            'client_case_manager' => $this->resource->client_case_manager,
+            // TODO: how to interpret signatures?
+            'client_signature_id' => $this->resource->client_signature_id,
+            'caregiver_signature_id' => $this->resource->caregiver_signature_id,
+            'is_overtime' => $this->resource->is_overtime,
         ];
     }
 }
