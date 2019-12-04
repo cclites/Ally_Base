@@ -18,7 +18,7 @@
                                 <tr>
                                     <th>Client</th>
                                     <th>Hours</th>
-                                    <th v-if="admin">Pre-Ally</th>
+                                    <th v-if="admin">Reg Total</th>
                                     <th>Total</th>
                                     <!--<th>Caregiver</th>-->
                                     <!--<th>Registry</th>-->
@@ -95,7 +95,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if=" admin ">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
