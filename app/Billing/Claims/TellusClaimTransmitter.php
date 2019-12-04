@@ -264,8 +264,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime'    => $shift->checked_in_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
+            'ActualEndDateTime'      => $shift->checked_out_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
@@ -277,7 +277,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             // 'ReasonCode2' => '', // OPTIONAL && TODO
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
-            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
+            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone( $business ) ),
              'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
              'EndAddress1'            => $address->address1, // OPTIONAL
              'EndAddress2'            => $address->address2, // OPTIONAL
