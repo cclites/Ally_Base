@@ -99,7 +99,7 @@ class ClaimInvoiceController extends BaseController
             'claim-editor',
             'Edit Claim #' . $claim->name,
             ['original-claim' => new ClaimInvoiceResource($claim)],
-            ['Home' => '/', 'Claims Queue' => route('business.claims-queue')]
+            ['Home' => '/', 'Manage Claims' => route('business.claims-manager')]
         );
     }
 

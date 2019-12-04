@@ -511,12 +511,12 @@
             },
 
             /**
-             * Fetch Client Invoice and Claim records for the Queue.
+             * Fetch Client Invoice and Claim records
              * @returns {Promise<void>}
              */
             async fetch() {
                 this.loaded = 0;
-                this.filters.get(`/business/claims-queue`)
+                this.filters.get(`/business/claims-manager`)
                     .then(({data}) => {
                         this.items = data.data;
                     })

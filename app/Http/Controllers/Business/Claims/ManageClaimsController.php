@@ -7,7 +7,7 @@ use App\Claims\Resources\ClaimsQueueResource;
 use App\Claims\Requests\ClaimQueueRequest;
 use App\Claims\Queries\ClaimInvoiceQuery;
 
-class ClaimsQueueController extends BaseController
+class ManageClaimsController extends BaseController
 {
     /**
      * Get claims listing.
@@ -60,7 +60,7 @@ class ClaimsQueueController extends BaseController
             return ClaimsQueueResource::collection($claimQuery->get());
         }
 
-        return view_component('business-claims-queue', 'Manage Claims', [], [
+        return view_component('business-manage-claims-page', 'Manage Claims', [], [
             'Home' => '/',
             'Claims' => '#',
         ]);

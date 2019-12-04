@@ -32,7 +32,7 @@ class ClaimAdjustmentController extends BaseController
 
         return view_component('claim-adjustment-history', 'Claim Adjustment History', compact('init'), [
             'Home' => '/',
-            'Claims Queue' => route('business.claims-queue'),
+            'Manage Claims' => route('business.claims-manager'),
         ]);
     }
 

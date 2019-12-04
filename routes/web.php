@@ -506,7 +506,7 @@ Route::group([
     Route::post('grouped-claims', 'Business\Claims\GroupedClaimsController@store')->name('claims-create-grouped');
     Route::get('claims-create', 'Business\Claims\CreateClaimsController@index')->name('claims-create');
 //    Route::get('claims-manage', 'Business\Claims\ManageClaimsController@index')->name('claims-manage');
-    Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');
+    Route::get('claims-manager', 'Business\Claims\ManageClaimsController@index')->name('claims-manager');
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
     Route::get('claims/{claim}/print', 'Business\Claims\ClaimInvoiceController@print');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
