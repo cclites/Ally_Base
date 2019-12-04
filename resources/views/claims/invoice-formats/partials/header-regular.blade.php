@@ -3,34 +3,12 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var \App\Client $client The related Client
+ * @var \App\Claims\Contracts\ClaimableInterface $firstClaimable The first claimable item (use for Client info)
  */
 ?>
 <div class="row print-header">
     <div class="header-left">
-        @include('layouts.partials.print_logo')
-        @if($sender->name())
-            <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
-            <br>
-            <div class="sender-address">
-                @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
-            </div>
-        @endif
-
-        <table class="header-left-table">
-            @if($sender->getEinNumber())
-            <tr>
-                <td><strong>Business EIN:</strong></td>
-                <td>{{ $sender->getEinNumber() }}</td>
-            </tr>
-            @endif
-                @if($sender->getNpiNumber())
-                <tr>
-                    <td><strong>NPI Number:</strong></td>
-                    <td>{{ $sender->getNpiNumber() }}</td>
-                </tr>
-                @endif
-        </table>
+        @include('claims.invoice-formats.partials.business-info')
     </div>
     <div class="text-right header-right">
         <div class="h1">C-Invoice #{{ $claim->getName() }}</div>
@@ -46,19 +24,36 @@
                     {{ snake_to_title_case($claim->getStatus()) }}
                 </td>
             </tr>
-            @if($client->getPolicyNumber())
+
+            @if(isset($client_ltci_policy_number))
             <tr>
                 <td><strong>Policy #: </strong></td>
                 <td>
-                    {{ $client->getPolicyNumber() }}
+                    {{ $client_ltci_policy_number }}
                 </td>
             </tr>
             @endif
-            @if($client->getPolicyNumber())
+            @if(isset($client_ltci_claim_number))
             <tr>
                 <td><strong>Claim #: </strong></td>
                 <td>
-                    {{ $client->getClaimNumber() }}
+                    {{ $client_ltci_claim_number }}
+                </td>
+            </tr>
+            @endif
+            @if(isset($client_program_number))
+            <tr>
+                <td><strong>Program ID: </strong></td>
+                <td>
+                    {{ $client_program_number }}
+                </td>
+            </tr>
+            @endif
+            @if(isset($client_cirts_number))
+            <tr>
+                <td><strong>CIRTS ID: </strong></td>
+                <td>
+                    {{ $client_cirts_number }}
                 </td>
             </tr>
             @endif
@@ -87,6 +82,7 @@
         </table>
     </div>
     <div style="width: 50%; float:right">
+        @if(filled($client))
         <table class="" style="margin-right: 3rem; margin: auto">
             <tr>
                 <td colspan="2">
@@ -104,5 +100,6 @@
                 </td>
             </tr>
         </table>
+        @endif
     </div>
 </div>

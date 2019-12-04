@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimableService;
+use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimCreatorResource;
-use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
@@ -180,7 +181,6 @@ class ClaimInvoiceController extends BaseController
         $this->authorize('read', $claim);
 
         $groups = $claim->items->groupBy('type');
-
         if (!isset($groups['Expense'])) {
             $groups['Expense'] = [];
         }
@@ -188,15 +188,28 @@ class ClaimInvoiceController extends BaseController
             $groups['Service'] = [];
         }
 
-        $view = view('claims.claim_invoice', [
+        $clientData = [];
+        $client = null;
+        if ($claim->getType() != ClaimInvoiceType::PAYER()) {
+            /** @var ClaimableService $service */
+            $service = $claim->items->where('claimable_type', ClaimableService::class)->first()->claimable;
+            $client = $claim->client ? $claim->client : $service->client;
+            $clientData = [
+                'client_ltci_claim_number' => optional($service)->client_ltci_claim_number,
+                'client_ltci_policy_number' => optional($service)->client_ltci_policy_number,
+                'client_cirts_number' => optional($service)->client_cirts_number,
+                'client_program_number' => optional($service)->client_program_number,
+            ];
+        }
+
+        $view = view('claims.claim_invoice', array_merge($clientData, [
             'claim' => $claim,
             'sender' => $claim->business,
             'recipient' => $claim->payer,
-            'client' => $claim->client,
+            'client' => $client,
             'itemGroups' => $groups,
-            'clientPayer' => $claim->getClientPayer(),
             'render' => 'html',
-        ]);
+        ]));
 
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');

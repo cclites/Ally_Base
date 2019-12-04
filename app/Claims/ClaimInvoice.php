@@ -302,23 +302,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Get the ClientPayer record from the current
-     * client/payer combo.
-     *
-     * WARNING: This has the potential to return null if the
-     * Client's payer list has been modified to remove this payer.
-     *
-     * @return ClientPayer
-     */
-    public function getClientPayer() : ?ClientPayer
-    {
-        return $this->client->payers()
-            ->where('payer_id', $this->payer_id)
-            ->first();
-    }
-
-
-    /**
      * Get the total number of hours on the client invoice by
      * adding all the 'units' for shift related items.
      *

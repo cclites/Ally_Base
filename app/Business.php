@@ -808,6 +808,16 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     }
 
     /**
+     * Get the business's License Number.
+     *
+     * @return null|string
+     */
+    public function getMedicaidLicenseNumber(): ?string
+    {
+        return $this->medicaid_license_number;
+    }
+
+    /**
      * @return string|null
      */
     public function getStreetAddressAttribute()

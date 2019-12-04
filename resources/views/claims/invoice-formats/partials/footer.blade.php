@@ -2,14 +2,13 @@
 /**
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
- * @var \App\Billing\ClientPayer|null $clientPayer The related Client Payer
  */
 ?>
 <div class="row">
     <div class="footer-left" style="margin-top: 2rem">
-        @if($clientPayer && $clientPayer->notes)
-            <div>{{ $clientPayer->notes }}</div>
-        @endif
+{{--        @if($clientPayer && $clientPayer->notes)--}}
+{{--            <div>{{ $clientPayer->notes }}</div>--}}
+{{--        @endif--}}
     </div>
     <div class="footer-right" style="padding-right: 15px;">
         <table class="table">
