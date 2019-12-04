@@ -141,5 +141,10 @@ class AuthServiceProvider extends ServiceProvider
                     && $user->role->views_reports
                 );
         });
+
+        Gate::define( 'user_navigation', function ( User $user ) {
+
+            return ( !empty( $user->role ) && $user->active );
+        });
     }
 }
