@@ -17,6 +17,9 @@
                         <th>Item</th>
                         <th>Date</th>
                         <th>Time</th>
+                        @if($claim->getType() == \App\Claims\ClaimInvoiceType::PAYER())
+                        <th>Client</th>
+                        @endif
                         <th>Caregiver</th>
                         <th>Units</th>
                         <th>Rate</th>
@@ -45,6 +48,9 @@
                             -
                             {{ local_date($claimable->getEndTime(), 'h:i A', auth()->user()->getTimezone()) }}
                         </td>
+                        @if($claim->getType() == \App\Claims\ClaimInvoiceType::PAYER())
+                            <td class="text-nowrap">{{ $claimable->getClientName() }}</td>
+                        @endif
                         <td class="text-nowrap">{{ $claimable->getCaregiverName() }}</td>
                         <td class="text-nowrap">{{ $item->units }}</td>
                         <td class="text-nowrap">{{ rate_format($item->rate) }}</td>
@@ -68,6 +74,9 @@
                         <td>{{ $claimable->getName() }}</td>
                         <td class="text-nowrap">{{ local_date($item->date, 'm/d/Y', auth()->user()->getTimezone()) }}</td>
                         <td class="text-nowrap">{{ local_date($item->date, 'H:i A', auth()->user()->getTimezone()) }}</td>
+                        @if($claim->getType() == \App\Claims\ClaimInvoiceType::PAYER())
+                            <td class="text-nowrap">{{ $claimable->getClientName() }}</td>
+                        @endif
                         <td class="text-nowrap">{{ $claimable->getCaregiverName() }}</td>
                         <td class="text-nowrap">{{ $item->units }}</td>
                         <td class="text-nowrap">{{ rate_format($item->rate) }}</td>
