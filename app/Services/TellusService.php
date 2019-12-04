@@ -91,8 +91,6 @@ class TellusService
             throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
         }
 
-        dd( $xml );
-
         list($httpCode, $response) = $this->sendXml($xml);
 
         $xml = new SimpleXMLElement($response);
