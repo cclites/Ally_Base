@@ -119,7 +119,9 @@ class ClaimInvoiceQuery extends BaseQuery
      */
     public function forClient($clientId) : self
     {
-        $this->where('client_id', $clientId);
+        $this->whereHas('clientInvoices', function ($q) use ($clientId) {
+            $q->where('client_id', $clientId);
+        });
 
         return $this;
     }
@@ -158,6 +160,23 @@ class ClaimInvoiceQuery extends BaseQuery
         $this->whereHas('items', function ($q) use ($range) {
             $q->whereBetween('date', $range);
         });
+
+        return $this;
+    }
+
+    /**
+     * Filter claims that were transmitted between the given date range.
+     *
+     * @param array $range
+     * @return $this
+     */
+    public function whereTransmittedBetween(array $range) : self
+    {
+        if (count($range) != 2) {
+            return $this;
+        }
+
+        $this->whereBetween('transmitted_at', $range);
 
         return $this;
     }

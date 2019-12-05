@@ -44,7 +44,7 @@ class ClaimInvoiceAgingReport extends BaseReport
     protected $showInactive = false;
 
     /**
-     * BusinessOfflineArAgingReport constructor.
+     * ClaimInvoiceAgingReport constructor.
      */
     public function __construct()
     {
@@ -122,7 +122,7 @@ class ClaimInvoiceAgingReport extends BaseReport
     /**
      * Return the instance of the query builder for additional manipulation
      *
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     * @return ClaimInvoiceQuery
      */
     public function query()
     {
