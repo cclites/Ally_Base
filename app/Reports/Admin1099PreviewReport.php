@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Admin1099PreviewReport extends BaseReport
 {
-
     protected $report;
     protected $year;
     protected $business_id;
@@ -23,13 +22,6 @@ class Admin1099PreviewReport extends BaseReport
 
     public function __construct(int $year, int $business_id, ?int $client_id, ?int  $caregiver_id, ?string $caregiver_1099, ?int $created, ?int $transmitted, ?int $caregiver_1099_id)
     {
-        /*
-        \Log::info("_construct parameters");
-        \Log::info(json_encode($this));
-        \Log::info("*************************************************\n");
-        */
-
-
         $this->year = $year;
         $this->business_id = $business_id;
         $this->client_id = $client_id;
@@ -146,7 +138,11 @@ class Admin1099PreviewReport extends BaseReport
     {
     }
 
-    public function report(){
+    /**
+     * @return mixed
+     */
+    public function report(): array
+    {
         return $this->report;
     }
 }

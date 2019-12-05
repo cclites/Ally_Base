@@ -117,8 +117,17 @@ class Caregiver1099Controller extends Controller
         $caregiver1099 = Caregiver1099::find($id);
         $caregiver1099->fill($request->all());
 
-        $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
-        $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
+        if( strpos($caregiver1099->client_ssn, "#") !== false ){
+            $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
+        }else{
+            unset($caregiver1099->client_ssn);
+        }
+
+        if( strpos($caregiver1099->caregiver_ssn, "#") !== false ){
+            $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
+        }else{
+            unset($caregiver1099->caregiver_ssn);
+        }
 
         if($caregiver1099->save()){
             return new SuccessResponse("Caregiver 1099 has been updated");
@@ -162,18 +171,8 @@ class Caregiver1099Controller extends Controller
                 continue;
             }
 
-            //decrypt ssns
-            $decodedClientSsn = decrypt($caregiver1099->client_ssn);
-            $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
-
-            // Mask SSNs for admins in UI
-            if(env('APP_ENV') === 'testing'){
-                $caregiver1099->client_ssn = "***-**-" . substr($decodedClientSsn, -4);
-                $caregiver1099->caregiver_ssn = "***-**-" . substr($decodedCaregiverSsn, -4);
-            }else{
-                $caregiver1099->client_ssn = $decodedClientSsn;
-                $caregiver1099->caregiver_ssn = $decodedCaregiverSsn;
-            }
+            $caregiver1099->client_ssn = decrypt($caregiver1099->client_ssn);
+            $caregiver1099->caregiver_ssn = decrypt($caregiver1099->caregiver_ssn);
 
             $caregiver1099s->push($caregiver1099);
         }
@@ -188,6 +187,8 @@ class Caregiver1099Controller extends Controller
     }
 
     /**
+     * Convert 1099 data to CSV
+     *
      * @param $data
      * @return string
      */
@@ -211,18 +212,21 @@ class Caregiver1099Controller extends Controller
         // build rows
         foreach ($rows as $row) {
 
-
-
             $data = collect($row)->toArray();
-
-            \Log::info(json_encode($data));
-
             $csv[] = '"' . implode('","', $data) . '"';
         }
 
-        return implode("\r\n", $csv);
+        $imploded =  implode("\r\n", $csv);
+
+        //remove comment character from data and return
+        return str_replace("#", "", $imploded);
     }
 
+    /**
+     * Generate PDF on the fly and download it.
+     *
+     * @param $id
+     */
     public function downloadPdf($id)
     {
         $pdf = new Pdf('../resources/pdfs/2019/CopyB_1099msc.pdf');
@@ -245,6 +249,5 @@ class Caregiver1099Controller extends Controller
 
         $fileName = $clientName . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
         $pdf->send($fileName);
-
     }
 }
