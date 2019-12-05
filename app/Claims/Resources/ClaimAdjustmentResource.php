@@ -37,9 +37,15 @@ class ClaimAdjustmentResource extends Resource
             'claim_invoice_date' => null,
             'claim_invoice_name' => null,
 
+            'client_invoice_id' => null,
+            'client_invoice_name' => null,
+
             'claim_invoice_item_id' => $this->resource->claim_invoice_item_id,
             'item' => $item,
             'item_total' => null,
+
+            'client_id' => null,
+            'client_name' => null,
 
             'amount_applied' => $this->resource->amount_applied,
             'adjustment_type' => $this->resource->adjustment_type,
@@ -48,15 +54,18 @@ class ClaimAdjustmentResource extends Resource
             'created_at' => $this->resource->created_at->toDateTimeString(),
         ];
 
-//        $client = $this->resource->getSingleClient();
-
         if (! $this->resource->is_interest && filled($this->resource->claim_invoice_id)) {
             $data = array_merge($data, [
-                'claim_invoice' => new ClaimInvoiceResource($this->resource->claimInvoice),
+//                'claim_invoice' => new ClaimInvoiceResource($this->resource->claimInvoice),
                 'claim_invoice_date' => $this->resource->claimInvoice->getDate()->toDateTimeString(),
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),
+                'client_invoice_id' => optional($this->resource->claimInvoiceItem->clientInvoice)->id,
+                'client_invoice_name' => optional($this->resource->claimInvoiceItem->clientInvoice)->name,
+                'client_invoice_date' => optional($this->resource->claimInvoiceItem->clientInvoice)->created_at->toDateTimeString(),
                 'item' => $this->resource->claimInvoiceItem->getItemSummary(),
                 'item_total' => $this->resource->claimInvoiceItem->amount,
+                'client_id' => optional($this->resource->claimInvoiceItem)->claimable->client_id,
+                'client_name' => optional($this->resource->claimInvoiceItem)->claimable->getClientName(),
             ]);
         }
 

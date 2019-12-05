@@ -101,13 +101,23 @@ class ClaimRemitController extends BaseController
         $this->authorize('view', $claimRemit);
 
         $adjustments = $claimRemit->adjustments()
-            ->with('claimInvoice.clientInvoice')
+            ->with([
+                'claimInvoice',
+                'claimInvoice.clientInvoices.client',
+                'claimInvoice.items.clientInvoice',
+                'claimInvoice.client',
+                'claimInvoice.payer',
+                'claimInvoiceItem',
+                'claimInvoiceItem.clientInvoice',
+                'claimInvoiceItem.claim.business',
+            ])
             ->orderBy('created_at')
             ->get();
 
         $applications = $adjustments->where('is_interest', false)
             ->where('claim_invoice_id', '<>', null)
             ->groupBy('claim_invoice_id');
+
 
         $fixed = [];
         foreach ($applications as $key => $items) {

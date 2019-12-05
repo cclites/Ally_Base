@@ -53,14 +53,16 @@
                         <i v-else class="fa fa-caret-right" />
                     </b-btn>
                 </template>
-                <template slot="client_name" scope="row">
-                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
-                </template>
-                <template slot="client_invoice_name" scope="row">
-                    <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
-                </template>
                 <template slot="name" scope="row">
                     <a :href="`/business/claims/${row.item.id}/print`" target="_blank">{{ row.item.name }}</a>
+                </template>
+                <template slot="client_name" scope="row">
+                    <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                    <span v-else>(Grouped)</span>
+                </template>
+                <template slot="client_invoice_id" scope="row">
+                    <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                    <span v-else>-</span>
                 </template>
                 <template slot="row-details" scope="row">
                 <b-card>
@@ -71,7 +73,13 @@
                         sort-by="created_at"
                         :sort-desc="true"
                     >
-                  </b-table>
+                        <template slot="client_name" scope="row">
+                            <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                        </template>
+                        <template slot="client_invoice_id" scope="row">
+                            <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                        </template>
+                    </b-table>
                   <!---------- /END SUB TABLE --------------->
                 </b-card>
                 </template>
@@ -140,16 +148,20 @@
                 sortDesc: false,
                 fields: {
                     expand: { label: ' ', sortable: false, },
-                    client_invoice_name: { label: 'Invoice #', sortable: true },
                     name: { label: 'Claim #', sortable: true },
-                    client_invoice_date: { label: 'Invoice Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    created_at: { label: 'Claim Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     client_name: { label: 'Client', sortable: true },
                     payer: { sortable: true, formatter: x => x ? x.name : '-' },
                     amount: { label: 'Claim Total', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 subFields: {
+                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     item: { label: 'Item', sortable: true },
+                    client_name: { label: 'Client', sortable: true },
                     item_total: { label: 'Total Cost', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_applied: { label: 'Amount Applied', sortable: true, formatter: x => this.moneyFormat(x) },
                     adjustment_type: { label: 'Type', sortable: true, formatter: x => this.resolveOption(x, this.claimAdjustmentTypeOptions) },
@@ -184,3 +196,9 @@
         },
     }
 </script>
+
+<style>
+    table:not(.form-check) {
+        font-size: 14px;
+    }
+</style>
