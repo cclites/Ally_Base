@@ -77,7 +77,7 @@
                             <option value="group">Create a Grouped Claim</option>
 <!--                            <option value="single">Create Claim For Each</option>-->
                         </b-form-select>
-                        <b-btn variant="primary" class="mr-1" @click="processSelected()" :disabled="withSelected != 'group'">Process</b-btn>
+                        <b-btn variant="primary" class="mr-1" @click="processSelected()" :disabled="withSelected != 'group'">Create</b-btn>
                     </div>
                 </b-col>
             </b-row>
@@ -89,7 +89,8 @@
                 :sort-desc.sync="sortDesc"
             >
                 <template slot="selector" scope="row">
-                    <label class="custom-control custom-checkbox" style="padding-right: 25px">
+                    <span v-if="row.item.claim_id">-</span>
+                    <label v-else class="custom-control custom-checkbox" style="padding-right: 25px">
                         <input type="checkbox" class="custom-control-input" v-model="row.item.selected" :value="true">
                         <span class="custom-control-indicator"></span>
                         <span class="custom-control-description"></span>
@@ -194,6 +195,11 @@
                 let selected_ids = this.items.map(item => {
                     return item.selected ? item.id : null; 
                 }).filter(x => x != null);
+
+                if (selected_ids.length === 0) {
+                    alert('You must select at least one client invoice.');
+                    return;
+                }
 
                 this.creatingIds = selected_ids;
 
@@ -300,7 +306,7 @@
             selectAll(newVal) {
                 if (newVal) {
                     this.items = this.items.map(item => {
-                        item.selected = true;
+                        item.selected = !item.claim_id;
                         return item;
                     });
                 } else {
