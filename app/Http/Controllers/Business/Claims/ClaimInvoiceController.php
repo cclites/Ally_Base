@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Business\Claims;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimCreatorResource;
+use App\Claims\Resources\ManageClaimsResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
@@ -24,38 +26,50 @@ class ClaimInvoiceController extends BaseController
      * Get a list of Claim Invoices.
      *
      * @param GetClaimInvoicesRequest $request
+     * @param ClaimInvoiceQuery $claimQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(GetClaimInvoicesRequest $request)
+    public function index(GetClaimInvoicesRequest $request, ClaimInvoiceQuery $claimQuery)
     {
         $filters = $request->filtered();
 
-        $query = ClaimInvoice::with(['items' => function ($q) {
-            $q->orderByRaw('claimable_type desc, date asc');
-        }])->forRequestedBusinesses()
-            ->forPayer($filters['payer_id'])
-            ->forClient($filters['client_id'])
-            ->forClientType($filters['client_type'])
-            ->searchForInvoiceId($filters['invoice_id'])
-            ->whereIn('status', ClaimStatus::transmittedStatuses());
+        $claimQuery->with([
+                'clientInvoices.client',
+                'items' => function ($q) {
+                    $q->orderByRaw('claimable_type desc, date asc');
+                },
+                'items.clientInvoice',
+            ])->forRequestedBusinesses()
+            ->withStatus(ClaimStatus::transmittedStatuses())
+            ->when($filters['client_id'], function (ClaimInvoiceQuery $q, $var) {
+                $q->forClient($var);
+            })
+            ->when(filled($filters['payer_id']), function (ClaimInvoiceQuery $q) use ($filters) {
+                $q->forPayer($filters['payer_id']);
+            })
+            ->when($filters['client_type'], function (ClaimInvoiceQuery $q, $var) {
+                $q->forClientType($var);
+            })
+            ->when($filters['invoice_id'], function (ClaimInvoiceQuery $q, $var) {
+                $q->searchForInvoiceId($var);
+            })
+            ->when(! $filters['inactive'], function (ClaimInvoiceQuery $q) {
+                $q->forActiveClientsOnly();
+            })
+            ->when($filters['claim_status'] == 'unpaid', function (ClaimInvoiceQuery $q) {
+                $q->notPaidInFull();
+            })
+            ->when($filters['claim_type'], function (ClaimInvoiceQuery $q, $var) {
+                $q->withType($var);
+            });
 
         if ($request->getDateSearchType() == 'invoice') {
-            $query->whereInvoicedBetween($filters['start_date'], $filters['end_date']);
+            $claimQuery->whereInvoicedBetween($request->filterDateRange());
         } else {
-            $query->whereDatesOfServiceBetween($filters['start_date'], $filters['end_date']);
+            $claimQuery->whereDatesOfServiceBetween($request->filterDateRange());
         }
 
-        if (! $filters['inactive']) {
-            $query->forActiveClientsOnly();
-        }
-
-        if ($request->claim_status == 'unpaid') {
-            $query = $query->hasBalance();
-        }
-
-        $results = $query->get();
-
-        return ClaimInvoiceResource::collection($results);
+        return ClaimInvoiceResource::collection($claimQuery->get());
     }
 
     /**

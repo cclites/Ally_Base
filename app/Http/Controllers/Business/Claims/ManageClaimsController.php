@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
-use App\Claims\Requests\ClaimQueueRequest;
+use App\Claims\Resources\ManageClaimsResource;
+use App\Claims\Requests\ManageClaimsRequest;
 use App\Claims\Queries\ClaimInvoiceQuery;
 
 class ManageClaimsController extends BaseController
@@ -12,11 +12,11 @@ class ManageClaimsController extends BaseController
     /**
      * Get claims listing.
      *
-     * @param ClaimQueueRequest $request
+     * @param ManageClaimsRequest $request
      * @param ClaimInvoiceQuery $claimQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(ClaimQueueRequest $request, ClaimInvoiceQuery $claimQuery)
+    public function index(ManageClaimsRequest $request, ClaimInvoiceQuery $claimQuery)
     {
         if ($request->forJson()) {
             $filters = $request->filtered();
@@ -57,7 +57,7 @@ class ManageClaimsController extends BaseController
                 $claimQuery->whereDatesOfServiceBetween($request->filterDateRange());
             }
 
-            return ClaimsQueueResource::collection($claimQuery->get());
+            return ManageClaimsResource::collection($claimQuery->get());
         }
 
         return view_component('business-manage-claims-page', 'Manage Claims', [], [

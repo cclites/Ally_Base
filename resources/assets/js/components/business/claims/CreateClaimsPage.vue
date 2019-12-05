@@ -312,3 +312,7 @@
         },
     }
 </script>
+
+<style>
+    table:not(.form-check) { font-size: 14px; }
+</style>

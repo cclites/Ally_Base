@@ -11,7 +11,7 @@ use App\Rules\ValidEnum;
  * Class ClaimQueueRequest
  * @package App\Claims\Requests
  */
-class ClaimQueueRequest extends FilteredResourceRequest
+class ManageClaimsRequest extends FilteredResourceRequest
 {
     /**
      * Get the validation rules that apply to the request.

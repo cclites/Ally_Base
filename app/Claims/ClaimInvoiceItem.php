@@ -3,6 +3,7 @@
 namespace App\Claims;
 
 use App\AuditableModel;
+use App\Billing\ClientInvoice;
 
 /**
  * App\Claims\ClaimInvoiceItem
@@ -100,6 +101,16 @@ class ClaimInvoiceItem extends AuditableModel
     public function adjustments()
     {
         return $this->hasMany(ClaimAdjustment::class);
+    }
+
+    /**
+     * Get the ClientInvoice relationship to the item.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function clientInvoice()
+    {
+        return $this->belongsTo(ClientInvoice::class);
     }
 
     // **********************************************************

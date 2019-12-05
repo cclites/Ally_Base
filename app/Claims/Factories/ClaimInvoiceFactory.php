@@ -227,6 +227,7 @@ class ClaimInvoiceFactory
         $claimableService = $this->createClaimableService($item, $shift, $service, $client, $caregiver, $evvAddress, $clientPayer);
 
         return ClaimInvoiceItem::make([
+            'client_invoice_id' => $item->invoice_id,
             'invoiceable_id' => $shift->id,
             'invoiceable_type' => Shift::class,
             'claimable_id' => $claimableService->id,
@@ -243,6 +244,7 @@ class ClaimInvoiceFactory
      * Create a ClaimInvoiceItem from a ShiftService-based ClientInvoiceItem.
      *
      * @param ClientInvoiceItem $item
+     * @param ClientPayer $clientPayer
      * @return null|ClaimInvoiceItem
      */
     protected function convertService(ClientInvoiceItem $item, ClientPayer $clientPayer): ?ClaimInvoiceItem
@@ -268,6 +270,7 @@ class ClaimInvoiceFactory
         $claimableService = $this->createClaimableService($item, $shift, $service, $client, $caregiver, $evvAddress, $clientPayer);
 
         $claimItem = ClaimInvoiceItem::make([
+            'client_invoice_id' => $item->invoice_id,
             'invoiceable_id' => $shiftService->id,
             'invoiceable_type' => ShiftService::class,
             'claimable_id' => $claimableService->id,
@@ -314,6 +317,7 @@ class ClaimInvoiceFactory
         ]);
 
         return ClaimInvoiceItem::make([
+            'client_invoice_id' => $item->invoice_id,
             'invoiceable_id' => $shiftExpense->id,
             'invoiceable_type' => ShiftExpense::class,
             'claimable_id' => $claimableExpense->id,

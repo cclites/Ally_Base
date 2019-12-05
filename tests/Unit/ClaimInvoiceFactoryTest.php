@@ -2,26 +2,25 @@
 
 namespace Tests\Feature;
 
-use App\Billing\Payer;
-use App\Business;
-use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Client;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\Exceptions\InvalidClientPayers;
-use Tests\CreatesClientInvoiceResources;
 use App\Claims\Factories\ClaimInvoiceFactory;
+use Tests\CreatesClientInvoiceResources;
+use App\Claims\ClaimableExpense;
+use App\Claims\ClaimableService;
+use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use App\Billing\ClaimStatus;
 use Tests\CreatesBusinesses;
-use App\Claims\ClaimableExpense;
-use App\Claims\ClaimableService;
+use App\Billing\Payer;
+use App\Business;
 use Tests\TestCase;
+use App\Client;
 
 class ClaimInvoiceFactoryTest extends TestCase
 {
@@ -215,6 +214,26 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoices(ClientInvoice::all());
         $this->assertNull($claim);
+    }
+
+    /** @test */
+    function creating_a_claim_from_multiple_invoices_should_attach_the_invoice_id_to_each_item()
+    {
+        $this->createService(20.00);
+        $this->createShiftWithMileage(30.00, 15);
+        $invoice = $this->createClientInvoice();
+
+        $this->createService(20.00);
+        $this->createShiftWithMileage(30.00, 15);
+        $otherInvoice = $this->createClientInvoice();
+
+        $this->assertCount(3, $invoice->items);
+        $this->assertCount(3, $otherInvoice->items);
+
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoices(ClientInvoice::all());
+
+        $this->assertCount(3, $claim->items->where('client_invoice_id', $invoice->id));
+        $this->assertCount(3, $claim->items->where('client_invoice_id', $otherInvoice->id));
     }
 
     /** @test */

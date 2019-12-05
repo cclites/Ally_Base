@@ -48,8 +48,7 @@ class ClaimInvoiceResource extends Resource
             'amount_paid' => $this->resource->getAmountPaid(),
             'business_id' => $this->resource->business_id,
             'type' => $this->resource->claim_invoice_type,
-
-            'created_at' => $this->resource->created_at,
+            'created_at' => optional($this->resource->created_at)->toDateTimeString(),
             'id' => $this->resource->id,
             'items' => ClaimInvoiceItemResource::collection($this->items),
             'name' => $this->resource->name,
@@ -64,16 +63,8 @@ class ClaimInvoiceResource extends Resource
             'transmission_method' => $this->resource->transmission_method,
             'modified_at' => $this->resource->modified_at,
             'has_expenses' => $this->resource->getHasExpenses(),
-
-//            'client' => [
-//                'name' => $this->resource->client->nameLastFirst,
-//            ],
             'client_id' => $this->resource->client_id,
             'client_name' => $client ? $client->name : '',
-//            'client_invoice' => [
-//                'name' => $this->resource->clientInvoice->name,
-//                'date' => $this->resource->clientInvoice->created_at->toDateTimeString(),
-//            ],
             'client_invoice_id' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->id,
             'client_invoice_name' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->name,
             'client_invoice_date' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0]->created_at)->toDateTimeString(),

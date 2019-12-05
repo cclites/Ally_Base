@@ -67,6 +67,12 @@
                 class="mr-1 mt-1"
             />
 
+            <b-form-select v-model="filters.claim_type" class="mr-1 mt-1" :options="claimInvoiceTypeOptions">
+                <template slot="first">
+                    <option value="">-- Claim Type --</option>
+                </template>
+            </b-form-select>
+
             <b-form-select v-model="filters.claim_status" class="mr-1 mt-1">
                 <option value="">-- All Claims --</option>
                 <option value="unpaid">Unpaid Claims</option>
@@ -153,8 +159,16 @@
                     <template slot="id" scope="row">
                         <a :href="`/business/claims/${row.item.id}/edit`" target="_blank">{{ row.item.name }}</a>
                     </template>
+                    <template slot="payer_name" scope="row">
+                        {{ row.item.payer_name }}
+                    </template>
+                    <template slot="client_name" scope="row">
+                        <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                        <span v-else>(Grouped)</span>
+                    </template>
                     <template slot="client_invoice_id" scope="row">
-                        <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice.name }}</a>
+                        <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                        <span v-else>-</span>
                     </template>
                     <template slot="amount_due" scope="row">
                         ${{ getMasterAmountDue(row.item) }}
@@ -190,6 +204,9 @@
                             <b-form-checkbox v-model="row.item.selected"
                                 :disabled="row.item.disabled"
                                 @change="selectSub(row.item)"/>
+                        </template>
+                        <template slot="client_invoice_id" scope="row">
+                            <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
                         </template>
                         <template slot="start_time" scope="row">
                             <span v-if="row.item.start_time">
@@ -347,6 +364,7 @@
                     client_type: '',
                     invoice_id: '',
                     inactive: 0,
+                    claim_type: '',
                     json: 1,
                 }),
                 clients: [],
@@ -361,22 +379,25 @@
                 // Table data
                 claims: [],
                 filter: '',
-                sortBy: 'client_invoice_date',
+                sortBy: 'created_at',
                 sortDesc: false,
                 fields: {
                     expand: { label: ' ', sortable: false, },
                     selected: { label: ' ', sortable: false, },
-                    client_invoice_id: { label: 'Invoice #', sortable: true },
                     id: { label: 'Claim #', sortable: true },
-                    client_invoice_date: { label: 'Invoice Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
-                    client: { sortable: true, formatter: x => x.name },
-                    payer: { sortable: true, formatter: x => x ? x.name : '-' },
+                    created_at: { label: 'Claim Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
+                    client_name: { label: 'Client', sortable: true },
+                    payer_name: { label: 'Payer', sortable: true },
                     amount: { label: 'Claim Total', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_applied: { label: 'Amount to Apply', sortable: false },
                 },
                 subFields: {
                     selected: { label: ' ', sortable: false, },
+                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     type: { label: 'Type', sortable: true },
                     summary: { label: 'Summary', sortable: true },
                     date: { label: 'Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
@@ -737,6 +758,9 @@
 </script>
 
 <style>
+    table:not(.form-check) {
+        font-size: 14px;
+    }
     .claims-table input.form-control { max-width: 135px; }
     #floating-amount {
         position: fixed;

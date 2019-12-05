@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Resources\ClaimCreatorResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
+use App\Claims\Resources\ManageClaimsResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Responses\ErrorResponse;

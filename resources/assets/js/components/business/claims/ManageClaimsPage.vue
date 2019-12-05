@@ -329,7 +329,7 @@
                     claim_type: '',
                     json: 1,
                 }),
-                sortBy: 'shift_time',
+                sortBy: 'created_at',
                 sortDesc: false,
                 filter: null,
                 loaded: -1,
@@ -479,7 +479,7 @@
                         }
                         let index = this.items.findIndex(x => x.id == claim.id);
                         if (index >= 0) {
-                            this.items.splice(index, 1, data.data.claim);
+                            this.items.splice(index, 1, data.data.invoice);
                         }
                     })
                     .catch(e => {

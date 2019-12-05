@@ -22,6 +22,10 @@ class ClaimInvoiceItemResource extends Resource
      */
     public function toArray($request)
     {
+        if (! $this->resource->relationLoaded('clientInvoice')) {
+            $this->resource->load('clientInvoice');
+        }
+
         return [
             'amount' => $this->resource->amount,
             'amount_due' => $this->resource->amount_due,
@@ -44,6 +48,10 @@ class ClaimInvoiceItemResource extends Resource
             'end_time' => optional($this->resource->claimable->getEndTime())->toDateTimeString(),
             'caregiver_name' => optional($this->resource->claimable)->getCaregiverName(),
             'client_name' => optional($this->resource->claimable)->getClientName(),
+
+            'client_invoice_id' => optional($this->resource->clientInvoice)->id,
+            'client_invoice_name' => optional($this->resource->clientInvoice)->name,
+            'client_invoice_date' => optional($this->resource->clientInvoice)->created_at->toDateTimeString(),
         ];
     }
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
+use App\Claims\Resources\ManageClaimsResource;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClaimService;
@@ -60,7 +60,7 @@ class ClaimTransmissionController extends BaseController
 
             \DB::commit();
 
-            $data = ['invoice' => new ClaimsQueueResource($claim->fresh())];
+            $data = ['invoice' => new ManageClaimsResource($claim->fresh())];
             if (isset($testFile)) {
                 $data['test_result'] = $testFile;
             }

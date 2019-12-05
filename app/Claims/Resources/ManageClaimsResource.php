@@ -2,11 +2,10 @@
 
 namespace App\Claims\Resources;
 
-use App\Billing\ClientInvoice;
 use Illuminate\Http\Resources\Json\Resource;
-use Carbon\Carbon;
+use App\Billing\ClientInvoice;
 
-class ClaimsQueueResource extends Resource
+class ManageClaimsResource extends Resource
 {
     /**
      * The resource instance.

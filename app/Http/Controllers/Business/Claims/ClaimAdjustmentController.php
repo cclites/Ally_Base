@@ -6,7 +6,7 @@ use App\Claims\Requests\CreateClaimAdjustmentRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
+use App\Claims\Resources\ManageClaimsResource;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Claims\ClaimAdjustment;
@@ -62,6 +62,6 @@ class ClaimAdjustmentController extends BaseController
 
         \DB::commit();
 
-        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ClaimsQueueResource($claim->fresh()));
+        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ManageClaimsResource($claim->fresh()));
     }
 }

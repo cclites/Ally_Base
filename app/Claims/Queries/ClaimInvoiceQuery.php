@@ -33,14 +33,18 @@ class ClaimInvoiceQuery extends BaseQuery
     }
 
     /**
-     * Filter claims that have a specific status.
+     * Filter claims that have any of the specified statuses.
      *
-     * @param ClaimStatus $status
+     * @param ClaimStatus|array $statuses
      * @return $this
      */
-    public function withStatus(ClaimStatus $status) : self
+    public function withStatus($statuses) : self
     {
-        $this->where('status', '=', $status);
+        if (! is_array($statuses)) {
+            $statuses = [$statuses];
+        }
+
+        $this->whereIn('status', $statuses);
 
         return $this;
     }
