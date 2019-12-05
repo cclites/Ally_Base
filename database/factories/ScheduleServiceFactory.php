@@ -3,6 +3,11 @@
 use Faker\Generator as Faker;
 
 $factory->define(\App\Billing\ScheduleService::class, function (Faker $faker) {
+    // Always make sure client rate is 25-50% more than the caregiver rate,
+    // ensuring that there is room for ally fee and a POSITIVE registry fee.
+    $cgRate = $faker->randomFloat(2, 20, 25);
+    $clientRate = $cgRate + round($cgRate * $faker->randomFloat(2, 0.25, 0.5), 2);
+
     return [
         'schedule_id' => function() {
             $schedule = \App\Schedule::inRandomOrder()->first() ?? factory(\App\Schedule::class)->create();
@@ -15,7 +20,7 @@ $factory->define(\App\Billing\ScheduleService::class, function (Faker $faker) {
         'payer_id' => null,
         'hours_type' => 'default',
         'duration' => mt_rand(1,5),
-        'client_rate' => $faker->randomFloat(2, 20, 25),
-        'caregiver_rate' => $faker->randomFloat(2, 15, 20),
+        'client_rate' => $clientRate,
+        'caregiver_rate' => $cgRate,
     ];
 });

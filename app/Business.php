@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\BillingCalculator;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
@@ -635,7 +636,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      */
     public function getAllyPercentage()
     {
-        return (float) config('ally.bank_account_fee');
+        return BillingCalculator::getBankAccountRate();
     }
 
     /**

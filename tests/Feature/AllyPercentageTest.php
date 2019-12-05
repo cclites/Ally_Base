@@ -2,6 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Billing\BillingCalculator;
+use App\Billing\FeeOverrideRule;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payments\PaymentMethodType;
 use App\Client;
 use Tests\CreatesClientInvoiceResources;
 use Tests\TestCase;
@@ -11,6 +15,9 @@ class AllyPercentageTest extends TestCase
 {
     use RefreshDatabase;
     use CreatesClientInvoiceResources;
+
+    /** @var \App\Client */
+    private $client;
 
     /**
      *
@@ -30,7 +37,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->client->business);
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
     }
 
 
@@ -42,7 +49,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->createCreditCard('visa'));
 
-        $this->assertEquals(config('ally.credit_card_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getCreditCardRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -53,7 +60,7 @@ class AllyPercentageTest extends TestCase
         $this->createPrivateBalancePayer();
         $this->client->setPaymentMethod($this->createCreditCard('amex'));
 
-        $this->assertEquals(config('ally.amex_card_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getAmexRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -64,7 +71,7 @@ class AllyPercentageTest extends TestCase
         $clientPayer = $this->createBalancePayer();
         $clientPayer->payer->setProviderPay();
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
     }
 
     /**
@@ -77,6 +84,36 @@ class AllyPercentageTest extends TestCase
         $clientPayer2 = $this->createSplitPayer(0.50);
         $clientPayer2->payer->setProviderPay();
 
-        $this->assertEquals(config('ally.bank_account_fee'), $this->client->getAllyPercentage());
+        $this->assertEquals(BillingCalculator::getBankAccountRate(), $this->client->getAllyPercentage());
+    }
+
+    /** @test */
+    function getting_the_ally_percent_directly_from_the_client_should_respect_overrides()
+    {
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->client->business_id,
+            'rate' => 0.02,
+            'payment_method_type' => PaymentMethodType::CC(),
+        ]);
+
+        $this->createPrivateBalancePayer();
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->assertEquals(PaymentMethodType::CC(), $this->client->getPaymentType());
+        $this->assertEquals($override->getRate(), $this->client->getAllyPercentage());
+    }
+
+    /** @test */
+    function getting_the_ally_percent_directly_from_the_client_should_respect_override_types()
+    {
+        $override = FeeOverrideRule::create([
+            'business_id' => $this->client->business_id,
+            'rate' => 0.08,
+            'payment_method_type' => PaymentMethodType::AMEX(),
+        ]);
+
+        $this->createPrivateBalancePayer();
+        $this->client->setPaymentMethod(factory(CreditCard::class)->states('amex')->create());
+        $this->assertEquals(PaymentMethodType::AMEX(), $this->client->getPaymentType());
+        $this->assertEquals($override->getRate(), $this->client->getAllyPercentage());
     }
 }

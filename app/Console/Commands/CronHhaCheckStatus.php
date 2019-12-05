@@ -55,7 +55,7 @@ class CronHhaCheckStatus extends Command
         $pendingFiles = HhaFile::where('status', HhaFile::STATUS_PENDING)->get();
 
         if ($pendingFiles->count() === 0) {
-            $this->log->push('There are no pending files.');
+            $this->status('There are no pending files.');
             return;
         }
 
@@ -63,7 +63,7 @@ class CronHhaCheckStatus extends Command
         foreach ($pendingFiles as $hhaFile) {
             /** @var \App\Business $business */
             $business = $hhaFile->claim->invoice->client->business;
-            $this->log->push('Business ID ' . $business->id . ' - Checking for file: ' . $hhaFile->filename . '...');
+            $this->status('Business ID ' . $business->id . ' - Checking for file: ' . $hhaFile->filename . '...');
 
             try {
                 $hha = new HhaExchangeService(
@@ -72,26 +72,26 @@ class CronHhaCheckStatus extends Command
                     $business->ein
                 );
             } catch (\Exception $ex) {
-                $this->log->push('Could not connect to HHA.');
+                $this->status('Could not connect to HHA.');
                 continue;
             }
 
             $result = $hha->downloadResponse($hhaFile->filename . '_Log.csv');
             if (! $result) {
                 // No response file found, so we can skip
-                $this->log->push('No response file yet.');
+                $this->status('No response file yet.');
                 continue;
             }
 
             \DB::beginTransaction();
             try {
-                $this->log->push('Parsing response file...');
+                $this->status('Parsing response file...');
                 if ($this->parseResponse($result, $hhaFile)) {
-                    $this->log->push('Claim accepted.');
+                    $this->status('Claim accepted.');
                     $hhaFile->update(['status' => HhaFile::STATUS_ACCEPTED]);
                     $hhaFile->claim->update(['status' => ClaimStatus::ACCEPTED()]);
                  } else {
-                    $this->log->push('Claim rejected.');
+                    $this->status('Claim rejected.');
                     $hhaFile->update(['status' => HhaFile::STATUS_REJECTED]);
                     $hhaFile->claim->update(['status' => ClaimStatus::REJECTED()]);
                 }
@@ -100,7 +100,7 @@ class CronHhaCheckStatus extends Command
 
             } catch (\InvalidArgumentException $ex) {
                 app('sentry')->captureException($ex);
-                $this->log->push($ex->getMessage());
+                $this->status($ex->getMessage());
                 \DB::rollBack();
             }
         }
@@ -148,5 +148,16 @@ class CronHhaCheckStatus extends Command
         }
 
         return !$hasFailure;
+    }
+
+    /**
+     * Log and output the status.
+     *
+     * @param string $message
+     */
+    public function status(string $message)
+    {
+        $this->info($message);
+        $this->log->push($message);
     }
 }

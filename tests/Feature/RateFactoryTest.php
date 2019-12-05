@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Billing\BillingCalculator;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Businesses\SettingsRepository;
@@ -259,7 +260,7 @@ class RateFactoryTest extends TestCase
 
         $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver, false);
 
-        $expectedRate = $cgRate + ($cgRate * config('ally.credit_card_fee'));
+        $expectedRate = $cgRate + ($cgRate * BillingCalculator::getCreditCardRate());
         $this->assertEquals($expectedRate, $rates->client_rate);
         $this->assertEquals($expectedRate, $rates->total_rate);
     }
@@ -281,7 +282,7 @@ class RateFactoryTest extends TestCase
 
         $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver, false);
 
-        $expectedRate = $clientRate + ($clientRate * config('ally.credit_card_fee'));
+        $expectedRate = $clientRate + ($clientRate * BillingCalculator::getCreditCardRate());
         $this->assertEquals($expectedRate, $rates->client_rate);
         $this->assertEquals($expectedRate, $rates->total_rate);
     }

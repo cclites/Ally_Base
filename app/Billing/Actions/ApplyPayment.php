@@ -26,6 +26,8 @@ class ApplyPayment
         $allyFee = multiply(divide($amount, $payment->amount, 6), $payment->getAllyFee());
         foreach($invoice->items as $item) {
             if ($item->invoiceable) {
+                // TODO: refactor this so we are not calculating the percentage allotted from what
+                // was charged, but instead already know that value and can pro-rate the fee here?
                 $allocatedPct = divide($item->amount_due, $invoice->amount, 6);
                 $allocatedAmount = multiply($allocatedPct, $amount);
                 $allocatedFee = multiply($allocatedPct, $allyFee);

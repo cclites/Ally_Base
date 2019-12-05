@@ -79,7 +79,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      *
      * @var array
      */
-    protected $fillable = ['chain_id', 'default_business_id', 'timezone'];
+    protected $fillable = ['chain_id', 'default_business_id', 'timezone', 'views_reports'];
 
     /**
      * The notification classes related to this user role.

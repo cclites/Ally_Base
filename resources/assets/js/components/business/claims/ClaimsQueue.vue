@@ -150,6 +150,12 @@
                         </span>
                     </div>
                 </template>
+                <template slot="claim_status" scope="row">
+                    {{ resolveOption(row.item.claim_status, claimStatusOptions) }}
+                    <span v-if="row.item.claim && row.item.claim.transmission_method == 'HHA' && row.item.claim_status == CLAIM_STATUSES.REJECTED">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item.claim)"></i>
+                    </span>
+                </template>
                 <template slot="actions" scope="row" class="text-nowrap">
                     <!-- CREATE BUTTON -->
                     <div v-if="! row.item.claim">
@@ -254,6 +260,21 @@
             </div>
         </b-modal>
 
+        <b-modal id="hhaResultsModal"
+             size="lg"
+             :title="`HHA Results for Claim #${selectedClaim.name}`"
+             v-model="hhaResultsModal"
+        >
+            <b-row>
+                <b-table bordered striped hover show-empty
+                         :items="hhaResults"
+                         :fields="hhaFields"
+                         sort-by="service_date"
+                >
+                </b-table>
+            </b-row>
+        </b-modal>
+
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
     </b-card>
 </template>
@@ -348,7 +369,6 @@
                     },
                     {
                         key: 'claim_status',
-                        formatter: (x) => this.resolveOption(x, this.claimStatusOptions),
                         sortable: true,
                     },
                     {
@@ -369,6 +389,15 @@
                 missingFieldsModal: false,
                 tellusErrorsModal: false,
                 tellusErrors: [],
+                hhaResultsModal: false,
+                hhaResults: [],
+                hhaFields: {
+                    service_date: { sortable: true, label: 'Date', formatter: x => this.formatDateTime(x) },
+                    service_code: { sortable: true, label: 'Service Code' },
+                    status_code: { sortable: true, label: 'Status Code' },
+                    import_status: { sortable: true, label: 'Import Status' },
+                },
+                selectedClaim: {},
             }
         },
 
@@ -560,6 +589,24 @@
                     .finally(() => {
                         this.loadingClients = false;
                     });
+            },
+
+            /**
+             * Fetch and show the HHA file results from the transmission.
+             * @param claim
+             */
+            showHhaResults(claim) {
+                this.selectedClaim = claim;
+
+                axios.get(`/business/claims/${claim.id}/results`)
+                    .then( ({ data }) => {
+                        this.hhaResults = data;
+                    })
+                    .catch(() => {
+
+                    });
+                // claims-ar/hha-results
+                this.hhaResultsModal = true;
             },
         },
 

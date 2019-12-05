@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\User;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class PaginatedCaregiverController extends BaseController
 {

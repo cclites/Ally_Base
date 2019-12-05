@@ -1,27 +1,13 @@
 <?php
 namespace App\Shifts;
 
+use App\Billing\BillingCalculator;
 use App\Billing\Invoiceable\ShiftService;
 use App\Payments\MileageExpenseCalculator;
 use App\ShiftCostHistory;
 
-class CostCalculator
+class ShiftCostCalculator
 {
-    /**
-     * Number of decimals to use in bcmath calculations
-     */
-    const DEFAULT_SCALE = 4;
-
-    /**
-     * Number of decimals to use in rounding
-     */
-    const DECIMAL_PLACES = 2;
-
-    /**
-     * Rounding methodology
-     */
-    const ROUNDING_METHOD = PHP_ROUND_HALF_UP;
-
     /**
      * @var \App\Billing\Payments\Methods\BankAccount|\App\Billing\Payments\Methods\CreditCard
      */
@@ -101,7 +87,7 @@ class CostCalculator
             }
             else {
                 $hours = $this->shift->duration();
-                $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
+                $shiftFee = bcmul($hours, $hourlyRate, BillingCalculator::DEFAULT_SCALE);
             }
         }
 
@@ -140,9 +126,9 @@ class CostCalculator
         }
 
         return round(
-            bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE),
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
+            bcmul($this->shift->duration(), $this->shift->provider_fee, BillingCalculator::DEFAULT_SCALE),
+            BillingCalculator::DECIMAL_PLACES,
+            BillingCalculator::ROUNDING_METHOD
         );
     }
 
@@ -176,9 +162,9 @@ class CostCalculator
         }
 
         return round(
-            bcadd($shift, $expenses, self::DEFAULT_SCALE),
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
+            bcadd($shift, $expenses, BillingCalculator::DEFAULT_SCALE),
+            BillingCalculator::DECIMAL_PLACES,
+            BillingCalculator::ROUNDING_METHOD
         );
     }
 
@@ -188,15 +174,15 @@ class CostCalculator
     public function getCaregiverExpenses()
     {
         if ($this->hasPersistedCosts()) {
-            return bcadd($this->getPersistedCosts()->caregiver_expenses, $this->getPersistedCosts()->caregiver_mileage, self::DECIMAL_PLACES);
+            return bcadd($this->getPersistedCosts()->caregiver_expenses, $this->getPersistedCosts()->caregiver_mileage, BillingCalculator::DECIMAL_PLACES);
         }
 
         $mileage = $this->mileageCalculator()->getCaregiverReimbursement();
-        $expenses = bcadd($this->shift->other_expenses, $mileage, self::DEFAULT_SCALE);
+        $expenses = bcadd($this->shift->other_expenses, $mileage, BillingCalculator::DEFAULT_SCALE);
         return round(
             $expenses,
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
+            BillingCalculator::DECIMAL_PLACES,
+            BillingCalculator::ROUNDING_METHOD
         );
     }
 
@@ -216,9 +202,9 @@ class CostCalculator
         }
 
         return round(
-            bcadd($expenses, $fee, self::DEFAULT_SCALE),
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
+            bcadd($expenses, $fee, BillingCalculator::DEFAULT_SCALE),
+            BillingCalculator::DECIMAL_PLACES,
+            BillingCalculator::ROUNDING_METHOD
         );
     }
 
@@ -233,8 +219,8 @@ class CostCalculator
             if ($allyFeeIncluded) {
                 return bcadd(
                     $this->getPersistedCosts()->caregiver_mileage,
-                    bcmul($this->getPersistedCosts()->caregiver_mileage, $this->getPersistedCosts()->ally_pct, self::DECIMAL_PLACES),
-                    self::DECIMAL_PLACES
+                    bcmul($this->getPersistedCosts()->caregiver_mileage, $this->getPersistedCosts()->ally_pct, BillingCalculator::DECIMAL_PLACES),
+                    BillingCalculator::DECIMAL_PLACES
                 );
             }
             return $this->getPersistedCosts()->caregiver_mileage;
@@ -282,12 +268,12 @@ class CostCalculator
         // Old (Pre-February 2019)
         return round(
             bcadd(
-                bcadd($this->getProviderFee(), $this->getCaregiverCost($expensesIncluded), self::DEFAULT_SCALE),
+                bcadd($this->getProviderFee(), $this->getCaregiverCost($expensesIncluded), BillingCalculator::DEFAULT_SCALE),
                 $this->getAllyFee(),
-                self::DEFAULT_SCALE
+                BillingCalculator::DEFAULT_SCALE
             ),
-            self::DECIMAL_PLACES,
-            self::ROUNDING_METHOD
+            BillingCalculator::DECIMAL_PLACES,
+            BillingCalculator::ROUNDING_METHOD
         );
     }
 

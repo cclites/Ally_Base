@@ -2,6 +2,7 @@
 namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
+use App\Billing\BillingCalculator;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\PaymentMethodType;
@@ -172,7 +173,6 @@ class Trust extends AuditableModel implements ChargeableInterface
      */
     public function getAllyPercentage()
     {
-        return 0.07;
+        return BillingCalculator::getTrustRate();
     }
-
 }

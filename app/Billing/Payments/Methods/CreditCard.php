@@ -3,6 +3,7 @@
 namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
+use App\Billing\BillingCalculator;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
 use App\Billing\Gateway\CreditCardPaymentInterface;
@@ -215,12 +216,11 @@ class CreditCard extends AuditableModel implements ChargeableInterface
      */
     public function getAllyPercentage()
     {
-        $fee = config('ally.credit_card_fee');
         if (strtolower($this->type) === 'amex') {
-            $fee = config('ally.amex_card_fee');
+            return BillingCalculator::getAmexRate();
         }
 
-        return (float) $fee;
+        return BillingCalculator::getCreditCardRate();
     }
 
     /**
