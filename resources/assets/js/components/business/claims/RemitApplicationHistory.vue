@@ -60,8 +60,8 @@
                     <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
                     <span v-else>(Grouped)</span>
                 </template>
-                <template slot="client_invoice_id" scope="row">
-                    <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                <template slot="client_invoice_name" scope="row">
+                    <a v-if="row.item.client_invoice_name" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
                     <span v-else>-</span>
                 </template>
                 <template slot="row-details" scope="row">
@@ -76,8 +76,9 @@
                         <template slot="client_name" scope="row">
                             <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
                         </template>
-                        <template slot="client_invoice_id" scope="row">
-                            <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                        <template slot="client_invoice_name" scope="row">
+                            <a v-if="row.item.client_invoice_name" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                            <span v-else>-</span>
                         </template>
                     </b-table>
                   <!---------- /END SUB TABLE --------------->
@@ -150,7 +151,7 @@
                     expand: { label: ' ', sortable: false, },
                     name: { label: 'Claim #', sortable: true },
                     created_at: { label: 'Claim Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
-                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_name: { label: 'Inv #', sortable: true },
                     client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     client_name: { label: 'Client', sortable: true },
                     payer: { sortable: true, formatter: x => x ? x.name : '-' },
@@ -158,7 +159,7 @@
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 subFields: {
-                    client_invoice_id: { label: 'Inv #', sortable: true },
+                    client_invoice_name: { label: 'Inv #', sortable: true },
                     client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     item: { label: 'Item', sortable: true },
                     client_name: { label: 'Client', sortable: true },

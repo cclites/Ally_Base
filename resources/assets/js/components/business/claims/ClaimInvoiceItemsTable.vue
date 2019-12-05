@@ -9,6 +9,10 @@
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
         >
+            <template slot="client_invoice_name" scope="row">
+                <a v-if="row.item.client_invoice_name" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                <span v-else>-</span>
+            </template>
             <template slot="start_time" scope="row">
                 <span v-if="row.item.start_time">
                     {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
@@ -85,6 +89,7 @@
                     start_time: { label: 'Time', sortable: true },
                     client_name: { label: 'Client', sortable: true },
                     caregiver_name: { label: 'Caregiver', sortable: true },
+                    client_invoice_name: { label: 'Invoice #', sortable: true },
                     related_shift_id: { sortable: true, label: 'Related Shift' },
                     rate: { sortable: true, formatter: x => this.moneyFormat(x) },
                     units: { sortable: true },

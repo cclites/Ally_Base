@@ -51,7 +51,7 @@ class ClaimInvoiceItemResource extends Resource
 
             'client_invoice_id' => optional($this->resource->clientInvoice)->id,
             'client_invoice_name' => optional($this->resource->clientInvoice)->name,
-            'client_invoice_date' => optional($this->resource->clientInvoice)->created_at->toDateTimeString(),
+            'client_invoice_date' => optional(optional($this->resource->clientInvoice)->created_at)->toDateTimeString(),
         ];
     }
 
