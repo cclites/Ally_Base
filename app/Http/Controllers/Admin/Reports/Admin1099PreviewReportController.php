@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Reports;
 
 use App\Caregiver1099;
 use App\Admin\Queries\Caregiver1099Query;
+use App\Reports\Admin1099PreviewReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -18,26 +19,35 @@ class Admin1099PreviewReportController extends Controller
                 'business_id' => 'required',
             ]);
 
-            $query = new Caregiver1099Query;
-            $records = $query->_query($request->all());
+            $data = new Admin1099PreviewReport(
+                $request->year,
+                $request->business_id,
+                $request->client_id,
+                $request->caregiver_id,
+                $request->caregiver_1099,
+                $request->status,
+                $request->transmission,
+                $request->caregiver_1099_id
+            );
 
+            $reports = $data->report();
 
-            $records = collect($records)->map(function($record){
+            $records = collect($reports)->map(function($report){
 
                 return[
-                    'client_fname' => $record->client_fname,
-                    'client_lname' => $record->client_lname,
-                    'caregiver_fname' => $record->caregiver_fname,
-                    'caregiver_lname' => $record->caregiver_lname,
-                    'business_name' => $record->business_name,
-                    'payment_total' => $record->payment_total,
-                    'caregiver_1099_amount' =>$record->caregiver_1099_amount,
-                    'caregiver_1099' => $record->caregiver_1099,
-                    'caregiver_1099_id' => $record->caregiver_1099_id,
-                    'caregiver_id' => $record->caregiver_id,
-                    'client_id' => $record->client_id,
-                    'transmitted' => $record->transmitted_at,
-                    'id' => $record->caregiver_1099_id,
+                    'client_fname' => $report->client_fname,
+                    'client_lname' => $report->client_lname,
+                    'caregiver_fname' => $report->caregiver_fname,
+                    'caregiver_lname' => $report->caregiver_lname,
+                    'business_name' => $report->business_name,
+                    'payment_total' => $report->caregiver_1099_amount ? $report->caregiver_1099_amount : $report->payment_total,
+                    'caregiver_1099_amount' => $report->caregiver_1099_amount,
+                    'caregiver_1099' => $report->caregiver_1099,
+                    'caregiver_1099_id' => $report->caregiver_1099_id,
+                    'caregiver_id' => $report->caregiver_id,
+                    'client_id' => $report->client_id,
+                    'transmitted' => $report->transmitted_at,
+                    'id' => $report->caregiver_1099_id,
                 ];
 
             });

@@ -619,6 +619,7 @@ Route::group([
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
     Route::get('business-1099/{id}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
+    Route::get('business-1099/download/{id}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-edit');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
     Route::patch('business-1099/{id}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 

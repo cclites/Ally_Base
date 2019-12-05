@@ -13,6 +13,8 @@ use App\Http\Requests\StoreCaregiver1099Request;
 use App\Http\Requests\UpdateCaregiver1099Request;
 use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
+use mikehaertl\pdftk\Pdf;
+use mikehaertl\tmp\File;
 
 class Caregiver1099Controller extends Controller
 {
@@ -47,11 +49,9 @@ class Caregiver1099Controller extends Controller
     {
         $query = new Caregiver1099Query; // ->$records;
         $records = $query->_query($request->all());
-        $recordBucket = [];
 
         foreach($records as $record)
         {
-            $originalRecord = clone $record;
             $record = (array)$record;
 
             $record['year'] = $request->year;
@@ -62,11 +62,12 @@ class Caregiver1099Controller extends Controller
             // actually part of a the caregiver_1099 model
             unset($record['caregiver_1099']);
             unset($record['caregiver_1099_id']);
+            unset($record['caregiver_1099_amount']);
+            unset($record['caregiver_1099_location']);
             unset($record['client_type']);
             unset($record['business_name']);
 
             $caregiver1099 = new Caregiver1099($record);
-
             $caregiver1099->save();
         }
 
@@ -144,7 +145,7 @@ class Caregiver1099Controller extends Controller
      * @param Transmit1099Request $request
      * @return \Illuminate\Http\Response
      */
-    public function transmit(Transmit1099Request $request): Response
+    public function transmit(Transmit1099Request $request)
     {
         $transmitIds = explode(",", $request->transmitSelected);
         $caregiver1099s = collect();
@@ -192,11 +193,9 @@ class Caregiver1099Controller extends Controller
      */
     private function toCsv($rows){
 
-        if (empty($rows)) {
+        if (count($rows) > 1) {
             return '';
         }
-
-        \Log::info($rows);
 
         // Build header
         $headerRow = collect($rows[0])
@@ -212,12 +211,40 @@ class Caregiver1099Controller extends Controller
         // build rows
         foreach ($rows as $row) {
 
-            $data = collect($row)
-                    ->toArray();
+
+
+            $data = collect($row)->toArray();
+
+            \Log::info(json_encode($data));
 
             $csv[] = '"' . implode('","', $data) . '"';
         }
 
         return implode("\r\n", $csv);
+    }
+
+    public function downloadPdf($id)
+    {
+        $pdf = new Pdf('../resources/pdfs/2019/CopyB_1099msc.pdf');
+        $caregiver1099 = Caregiver1099::find($id);
+
+        $decodedClientSsn = decrypt($caregiver1099->client_ssn);
+        $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
+        $clientName = $caregiver1099->client_fname . " " . $caregiver1099->client_lname;
+        $payerAddress = $clientName . "\n" . $caregiver1099->client_address1 . "\n" . $caregiver1099->client_address2 . "\n" . $caregiver1099->client_address3;
+
+        $pdf->fillForm([
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $decodedClientSsn, //payers tin
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $decodedCaregiverSsn, //recipients tin
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . "\n" . $caregiver1099->caregiver_address2, //recipient street address
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3, //recipient city, state, zip
+            'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+        ])->execute();
+
+        $fileName = $clientName . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
+        $pdf->send($fileName);
+
     }
 }

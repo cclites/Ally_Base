@@ -109,7 +109,15 @@
                                    class="btn btn-secondary"
                                    title="Edit 1099"
                             >
-                                <i class="fa fa-edit mr-2"></i></b-btn>
+                                <i class="fa fa-edit mr-2"></i>
+                            </b-btn>
+                            <b-btn v-if="row.item.id"
+                                   @click="downloadPdf(row.item.id)"
+                                   class="btn btn-secondary"
+                                   title="Download PDF"
+                            >
+                                <i class="fa fa-print mr-2"></i>
+                            </b-btn>
                         </template>
 
                         <template slot="transmit" scope="row">
@@ -150,10 +158,6 @@
         </b-modal>
     </b-card>
 </template>b
-
-
-
-
 
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
@@ -217,7 +221,7 @@
                 this.form.get('/admin/preview-1099-report')
                     .then( ({ data }) => {
                         this.items = data;
-                        this.totalRows = this.data.length;
+                        this.totalRows = this.items.length;
                     })
                     .catch(e => {})
                     .finally(() => {
@@ -270,10 +274,14 @@
                         hiddenElement.download = 'Transmission_Report.csv';
                         hiddenElement.click();
 
+                        this.transmitSelected = [];
+                        this.generate();
+
                     })
                     .catch( e => {})
                     .finally(() => {
-                        this.generate();
+
+
                     });
 
             },
@@ -289,6 +297,10 @@
                     this.caregiver1099Edit = false;
                 });
             },
+
+            downloadPdf(id){
+                window.location = '/admin/business-1099/download/' + id;
+            }
         },
         watch: {
             'form.business_id'(newVal, oldVal){
@@ -313,7 +325,7 @@
             },
 
             disableGenerate(){
-                if(this.businesses.length){
+                if(this.caregivers.length){
                     return false;
                 }
                 return true;
@@ -327,6 +339,7 @@
 
 <style scoped>
     i.fa.fa-edit,
+    i.fa.fa-print,
     i.fa.fa-plus{
         position: relative;
         left: 4px;
