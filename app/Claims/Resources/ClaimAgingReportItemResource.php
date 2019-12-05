@@ -2,6 +2,7 @@
 
 namespace App\Claims\Resources;
 
+use App\Billing\ClientInvoice;
 use Illuminate\Http\Resources\Json\Resource;
 use App\Claims\ClaimInvoice;
 use Carbon\Carbon;
@@ -55,17 +56,33 @@ class ClaimAgingReportItemResource extends Resource
         return [
             'claim_id' => $this->resource->id,
             'claim_name' => $this->resource->name,
-            'invoice_id' => $this->resource->clientInvoice->id,
-            'invoice_name' => $this->resource->clientInvoice->name,
-            'client_id' => $this->resource->client->id,
-            'client_name' => $this->resource->client->nameLastFirst,
-            'payer' => $this->resource->payer->name(),
+
+//            'invoice_id' => $this->resource->clientInvoice->id,
+//            'invoice_name' => $this->resource->clientInvoice->name,
+            'client_id' => optional($this->resource->client)->id,
+            'client_name' => optional($this->resource->client)->nameLastFirst,
+            'payer_id' => $this->resource->payer_id,
+            'payer_name' => $this->resource->payer_name,
             'current' => $this->inDateRange($this->period_current) ? $this->resource->getAmountDue() : 0.00,
             'period_30_45' => $this->inDateRange($this->period_30_45) ? $this->resource->getAmountDue() : 0.00,
             'period_46_60' => $this->inDateRange($this->period_46_60) ? $this->resource->getAmountDue() : 0.00,
             'period_61_75' => $this->inDateRange($this->period_61_75) ? $this->resource->getAmountDue() : 0.00,
             'period_75_plus' => $this->inDateRange($this->period_75_plus) ? $this->resource->getAmountDue() : 0.00,
             'has_notes' => $this->resource->adjustments->where('note', '!=', null)->count() > 0,
+
+            'client_invoice_id' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->id,
+            'client_invoice_name' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->name,
+            'client_invoice_date' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0]->created_at)->toDateTimeString(),
+            'invoices' => $this->resource->clientInvoices->map(function (ClientInvoice $invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'name' => $invoice->getName(),
+                    'amount' => $invoice->getAmount(),
+                    'client_id' => $invoice->client_id,
+                    'client_name' => $invoice->client->name_last_first,
+                    'created_at' => optional($invoice->created_at)->toDateTimeString(),
+                ];
+            }),
         ];
     }
 

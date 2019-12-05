@@ -2,6 +2,7 @@
 
 namespace App\Claims\Reports;
 
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Claims\Resources\ClaimAgingReportItemResource;
 use App\Claims\ClaimInvoice;
 use App\Billing\ClaimStatus;
@@ -47,10 +48,10 @@ class ClaimInvoiceAgingReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = ClaimInvoice::query()
-            ->with('client', 'payer', 'business', 'clientInvoice', 'adjustments')
-            ->where('amount_due', '<>', '0')
-            ->whereIn('status', ClaimStatus::transmittedStatuses());
+        $this->query = (new ClaimInvoiceQuery)
+            ->with(['client', 'payer', 'business', 'clientInvoices', 'adjustments'])
+            ->notPaidInFull()
+            ->withStatus(ClaimStatus::transmittedStatuses());
     }
 
     /**
@@ -137,29 +138,21 @@ class ClaimInvoiceAgingReport extends BaseReport
     {
         $query = clone $this->query;
 
-        if (filled($this->clientId)) {
-            $query->where('client_id', $this->clientId);
-        }
-
-        if (filled($this->payerId)) {
-            $query->where('payer_id', $this->payerId);
-        }
-
-        if (filled($this->clientType) || ! $this->showInactive) {
-            $query->whereHas('client', function ($q) {
-                if (filled($this->clientType)) {
-                    $q->where('client_type', $this->clientType);
-                }
-
-                if (! $this->showInactive) {
-                    $q->active();
-                }
+        $query->when($this->clientId, function (ClaimInvoiceQuery $q) {
+                $q->forClient($this->clientId);
+            })
+            ->when(filled($this->payerId), function (ClaimInvoiceQuery $q) {
+                $q->forPayer($this->payerId);
+            })
+            ->when($this->clientType, function (ClaimInvoiceQuery $q) {
+                $q->forClientType($this->clientType);
+            })
+            ->when(! $this->showInactive, function (ClaimInvoiceQuery $q) {
+                $q->forActiveClientsOnly();
+            })
+            ->when($this->clientInvoiceId, function (ClaimInvoiceQuery $q) {
+                $q->searchForInvoiceId($this->clientInvoiceId);
             });
-        }
-
-        if (filled($this->clientInvoiceId)) {
-            $query->searchForInvoiceId($this->clientInvoiceId);
-        }
 
         return $query->get()->map(function (ClaimInvoice $claim) {
             return (new ClaimAgingReportItemResource($claim))->toArray(request());

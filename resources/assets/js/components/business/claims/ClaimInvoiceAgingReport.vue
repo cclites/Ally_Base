@@ -67,11 +67,13 @@
                                         <a :href="`/business/claim-adjustments/${row.item.claim_id}`" target="_blank"><i class="fa fa-comment text-warning ml-1" /></a>
                                     </span>
                                 </template>
-                                <template slot="invoice_name" scope="row">
-                                    <a :href="`/business/client/invoices/${row.item.invoice_id}`" target="_blank">{{ row.item.invoice_name }}</a>
+                                <template slot="client_invoice_name" scope="row">
+                                    <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                                    <span v-else>(Multiple)</span>
                                 </template>
                                 <template slot="client_name" scope="row">
-                                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                                    <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                                    <span v-else>(Grouped)</span>
                                 </template>
 
                                 <template slot="FOOT_claim_name" scope="row">
@@ -159,9 +161,9 @@
                 sortDesc: false,
                 fields: {
                     claim_name: { sortable: true, label: "Claim", class: 'text-nowrap' },
-                    invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
+                    client_invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
                     client_name: { sortable: true, label: "Client", class: 'text-nowrap' },
-                    payer: {sortable: true, label: "Payers"},
+                    payer_name: {sortable: true, label: "Payers"},
                     current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
                     period_30_45: { sortable: true, label: '30-45', formatter: x => this.moneyFormat(x) },
                     period_46_60: { sortable: true, label: '46-60', formatter: x => this.moneyFormat(x) },
