@@ -5,45 +5,45 @@
 @push('head')
     <style>
 
-        html, body, div, table, tbody, tfoot, thead, tr, th, td {
+        html, body {
+
             margin: 0;
             padding: 0;
             border: 0;
             font-size: 100%;
             font: inherit;
         }
-        body {
-            height: 100%;
+
+        .full-page-table {
+
+            display: block;
+            position: relative;
+
+            page-break-after: always;
+        }
+
+        .table-row {
+
+            display: block;
+            position: relative;
+
+            height: 125px;
             width: 100%;
         }
-        table {
-            border-collapse: collapse;
-            border-spacing: 0;
-            width: 100%!important;
-        }
 
-        table td {
-            width: 33.3%;
-            /* background-color: red; */
-            /* border: 3px solid black; */
+        .table-column {
+
+            position: relative;
+            display: inline-block;
+            width: 33%;
+            height: 100%;
+
             padding: 5px 5px 15px;
             font-family: Arial, Helvetica;
-            line-height: 1.25em;
             font-size: 14px;
-            height: 104px;
+
             text-align: center;
-            vertical-align: middle;
-        }
-
-        table tr td:first-child {
-
-            padding-right: 55px;
-        }
-
-        table tr td:last-child {
-
-            padding-left: 55px;
-            padding-right: 0px;
+            padding-top: 20px;
         }
 
         .error-field {
@@ -55,58 +55,56 @@
 
 @section('content')
 
-    <table cellspacing="0" cellpadding="0" border="1" style="margin-left: {{ $leftmargin . 'px' }}">
+    @foreach( $pages as $page )
 
-        @foreach( $users as $row => $cols )
+        <div class="full-page-table" style="left: {{ $leftmargin . 'px' }}; top: {{ $topmargin . 'px' }}">
 
-            <tr>
+            @foreach( $page as $row => $cols )
 
-                @for( $col = 0; $col < count( $cols ); $col++ )
+                <div class="table-row">
 
-                    <td
-                        @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif
-                        @if( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ) class="error-field" @endif
-                        @if( strlen( $cols[ $col ][ 'address' ][ 'city' ] ) > 30 ) class="error-field" @endif
+                    @foreach( $cols as $col => $user )
 
-                        @if( $row % 10 == 0 ) style="padding-top: {{ $topmargin . 'px' }}" @endif
-                        @if( $row % 10 >= 3 && $row % 10 < 6 ) style="padding-top: 0px;padding-bottom: 20px;" @endif
-                        @if( $row % 10 >= 6 && $row % 10 <= 9 ) style="padding-top: 0px;padding-bottom: 15px;" @endif
+                        <div class="table-column"
+                            @if( strlen( $user[ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif
+                            @if( strlen( $user[ 'address' ][ 'address2' ] ) > 30 ) class="error-field" @endif
+                            @if( strlen( $user[ 'address' ][ 'city' ] ) > 30 ) class="error-field" @endif
+                        >
 
-                    >
+                            {{ $user[ 'name' ] }}
 
-                        {{ $cols[ $col ][ 'name' ] . $col }}
+                            @if( $user[ 'address' ][ 'address1' ] )
 
-                        @if( $cols[ $col ][ 'address' ][ 'address1' ] )
+                                <div>{{ substr( $user[ 'address' ][ 'address1' ], 0, 30 ) . ( strlen( $user[ 'address' ][ 'address1' ] ) > 30 ? '*' : '' ) }}</div>
+                            @else
 
-                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address1' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ? '*' : '' ) }}</div>
-                        @else
+                                <br />
+                            @endif
 
-                            <br />
-                        @endif
+                            @if( $user[ 'address' ][ 'address2' ] )
 
-                        @if( $cols[ $col ][ 'address' ][ 'address2' ] )
+                                <div>{{ substr( $user[ 'address' ][ 'address2' ], 0, 30 ) . ( strlen( $user[ 'address' ][ 'address2' ] ) > 30 ? '*' : '' ) }}</div>
+                            @else
 
-                            <div>{{ substr( $cols[ $col ][ 'address' ][ 'address2' ], 0, 30 ) . ( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ? '*' : '' ) }}</div>
-                        @else
+                                <br />
+                            @endif
 
-                            <br />
-                        @endif
+                            @if( $user[ 'address' ][ 'city' ] && $user[ 'address' ][ 'state' ] )
 
-                        @if( $cols[ $col ][ 'address' ][ 'city' ] && $cols[ $col ][ 'address' ][ 'state' ] )
+                                <span>{{ $user[ 'address' ][ 'city' ] }}</span>,
+                                <span>{{ $user[ 'address' ][ 'state' ] }}</span>
+                            @elseif($user[ 'address' ][ 'city' ])
 
-                            <span>{{ $cols[ $col ][ 'address' ][ 'city' ] }}</span>,
-                            <span>{{ $cols[ $col ][ 'address' ][ 'state' ] }}</span>
-                        @elseif($cols[ $col ][ 'address' ][ 'city' ])
+                                {{ $user[ 'address' ][ 'city' ] }}
+                            @elseif( $user[ 'address' ][ 'state' ])
 
-                            {{ $cols[ $col ][ 'address' ][ 'city' ] }}
-                        @elseif( $cols[ $col ][ 'address' ][ 'state' ])
-
-                            {{ $cols[ $col ][ 'address' ][ 'state' ] }}
-                        @endif
-                        <span>{{ $cols[ $col ][ 'address' ][ 'zip' ] }}</span>
-                    </td>
-                @endfor
-            </tr>
-        @endforeach
-    </table>
+                                {{ $user[ 'address' ][ 'state' ] }}
+                            @endif
+                            <span>{{ $user[ 'address' ][ 'zip' ] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
+        </div>
+    @endforeach
 @endsection

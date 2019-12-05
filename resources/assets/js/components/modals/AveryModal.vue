@@ -19,7 +19,7 @@
             </div>
             <div class="f-1 px-3">
 
-                <b-form-group label="Top Margin" label-for="topmargin" description="Default is 55px" >
+                <b-form-group label="Top Margin" label-for="topmargin" description="Default is 55px, negative values allowed, too much will push labels onto next page" >
                     <b-form-input
                         id="topmargin"
                         type="number"
@@ -27,7 +27,7 @@
                     >
                     </b-form-input>
                 </b-form-group>
-                <b-form-group label="Left Margin" label-for="leftmargn" description="Default is 0px" >
+                <b-form-group label="Left Margin" label-for="leftmargn" description="Default is 0px, negative values allowed, too much will distort alignment" >
                     <b-form-input
                         id="leftmargn"
                         type="number"

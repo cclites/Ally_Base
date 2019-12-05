@@ -63,16 +63,16 @@ class AveryLabelController extends BaseController
             $query->where( 'status_alias_id', $status );
         }
 
-        $users = array_chunk( $query->get()->map( function( $u ) use ( $entity ){
+        $pages = array_chunk( array_chunk( $query->get()->map( function( $u ) use ( $entity ){
 
             return [
 
                 'name'    => $u->name,
                 'address' => $u->$entity->address
             ];
-        })->toArray(), 3 );
+        })->toArray(), 3 ), 10 );
 
-        $pdf = PDF::loadView( 'avery-labels', [ 'users' => $users, 'leftmargin' => $request->input( 'leftmargin' ), 'topmargin' => $request->input( 'topmargin' ) ] );
-        return $pdf->download( 'avery-labels.pdf' );
+        $pdf = PDF::loadView( 'avery-labels', [ 'pages' => $pages, 'leftmargin' => $request->input( 'leftmargin' ), 'topmargin' => $request->input( 'topmargin' ) ] );
+        return $pdf->stream( 'avery-labels.pdf' );
     }
 }

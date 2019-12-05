@@ -225,9 +225,9 @@
         methods: {
 
 
-            averyLabels(){
+            averyLabels( data ){
 
-                window.open( this.averyEndpoint + this.listFilters );
+                window.open( this.averyEndpoint + this.listFilters + '&leftmargin=' + data.leftmargin + '&topmargin=' + data.topmargin );
             },
             async loadClients() {
 
