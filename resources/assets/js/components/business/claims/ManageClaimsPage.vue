@@ -424,7 +424,7 @@
                         .then( ({ data }) => {
                             let index = this.items.findIndex(x => x.id == claim.id);
                             if (index >= 0) {
-                                this.items.splice(index, 1, data.data);
+                                this.items.splice(index, 1);
                             }
                         })
                         .catch(() => {})

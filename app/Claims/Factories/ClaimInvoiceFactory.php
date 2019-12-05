@@ -7,6 +7,7 @@ use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\ClientInvoiceItem;
+use App\Responses\ErrorResponse;
 use Illuminate\Support\Collection;
 use App\Billing\InvoiceableType;
 use App\Claims\ClaimInvoiceItem;
@@ -469,6 +470,10 @@ class ClaimInvoiceFactory
      */
     public function deleteClaimInvoice(ClaimInvoice $claim): void
     {
+        if ($claim->adjustments()->count() > 0) {
+            throw new CannotDeleteClaimInvoiceException('This claim has had adjustments applied.');
+        }
+
         if ($claim->hasBeenTransmitted()) {
             throw new CannotDeleteClaimInvoiceException('This claim has already been transmitted.');
         }
@@ -480,6 +485,9 @@ class ClaimInvoiceFactory
                 $item->claimable->delete();
                 $item->delete();
             }
+
+            // Remove pivot table entry
+            \DB::table('claim_invoice_client_invoice')->where('claim_invoice_id', $claim->id)->delete();
 
             $claim->delete();
 

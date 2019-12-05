@@ -149,19 +149,9 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('delete', $claim);
 
-        if ($claim->adjustments()->count() > 0) {
-            return new ErrorResponse(500, 'Cannot delete Claims that have adjustments applied.');
-        }
-
-        if ($claim->hasBeenTransmitted()) {
-            return new ErrorResponse(500, 'Cannot delete Claims that have been transmitted.');
-        }
-
-        $clientInvoices = $claim->clientInvoices;
-
         try {
             $factory->deleteClaimInvoice($claim);
-            return new SuccessResponse('Claim has been deleted.', ClaimInvoiceResource::collection($clientInvoices));
+            return new SuccessResponse('Claim has been deleted.');
         } catch (CannotDeleteClaimInvoiceException $ex) {
             return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
         }

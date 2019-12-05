@@ -236,6 +236,7 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->assertCount(0, ClaimInvoiceItem::all());
         $this->assertCount(0, ClaimableService::all());
         $this->assertCount(0, ClaimableExpense::all());
+        $this->assertCount(0, \DB::table('claim_invoice_client_invoice')->get());
     }
 
     /** @test */
@@ -251,4 +252,5 @@ class ClaimInvoiceFactoryTest extends TestCase
 
         $this->assertNotNull(ClaimInvoice::find($claim->id));
     }
+    // TODO: it_cannot_delete_a_claim_that_has_had_adjustments_made
 }
