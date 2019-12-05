@@ -19,13 +19,23 @@ use mikehaertl\tmp\File;
 class Caregiver1099Controller extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource for a single caregiver
      *
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function index()
+    public function index(Caregiver $caregiver)
     {
-        //
+        $caregiver_1099s = $caregiver->caregiver1099s->map(function($caregiver_1099){
+            return [
+                'year'=> $caregiver_1099->year,
+                'name' => $caregiver_1099->client_fname . " " . $caregiver_1099->client_lname,
+                'id' => $caregiver_1099->id
+            ];
+        })
+        ->groupBy('year');
+
+        return response()->json($caregiver_1099s);
     }
 
     /**
@@ -118,12 +128,14 @@ class Caregiver1099Controller extends Controller
         $caregiver1099->fill($request->all());
 
         if( strpos($caregiver1099->client_ssn, "#") !== false ){
+            //TODO:: validate SSN
             $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
         }else{
             unset($caregiver1099->client_ssn);
         }
 
         if( strpos($caregiver1099->caregiver_ssn, "#") !== false ){
+            //TODO:: validate SSN
             $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
         }else{
             unset($caregiver1099->caregiver_ssn);

@@ -152,7 +152,9 @@ Vue.component('charges-vs-deposits-report', require('./components/admin/reports/
 Vue.component('admin-registry-emails', require('./components/admin/AdminRegistryEmails.vue'));
 Vue.component('admin-1099-preview', require('./components/admin/taxes/Admin1099PreviewReport'));
 Vue.component('caregiver-1099-edit-modal', require('./components/admin/taxes/Caregiver1099Edit'));
+//TODO:: rename the component
 Vue.component('admin-ten-ninety-nine', require('./components/admin/taxes/Admin1099.vue'));
+Vue.component('caregiver-1099s-tab', require('./components/business/caregivers/Caregiver1099sTab'));
 
 
 // Office User

@@ -6,7 +6,7 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
-use App\Business\Caregiver1099;
+use App\Caregiver1099;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;

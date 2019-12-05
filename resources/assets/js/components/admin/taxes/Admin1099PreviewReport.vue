@@ -251,7 +251,7 @@
             },
 
             edit(id){
-                axios.get('/admin/business-1099/' + id)
+                axios.get('/admin/business-1099/edit/' + id)
                 .then(response => {
                     this.caregiver1099 = response.data;
                     this.caregiver1099Edit = true;
