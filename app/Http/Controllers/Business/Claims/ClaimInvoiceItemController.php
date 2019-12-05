@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimInvoiceType;
 use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Validation\ValidationException;
@@ -74,6 +75,10 @@ class ClaimInvoiceItemController extends BaseController
 
         try {
             \DB::beginTransaction();
+
+            if ($claim->getType() != ClaimInvoiceType::PAYER() && $item->client_id != $request->client_id) {
+                return new ErrorResponse(412, 'You cannot change the linked client record for a client claim.');
+            }
 
             $item->claimable->update($request->getClaimableData());
             $item->update($request->getClaimItemData());
