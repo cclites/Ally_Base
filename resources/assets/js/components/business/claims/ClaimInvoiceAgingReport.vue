@@ -69,7 +69,13 @@
                                 </template>
                                 <template slot="client_invoice_name" scope="row">
                                     <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
-                                    <span v-else>(Multiple)</span>
+                                    <span v-else>
+                                        <div v-for="invoice in row.item.invoices" key="invoice.id">
+                                            <a :href="`/business/client/invoices/${invoice.id}`" target="_blank">
+                                                #{{ invoice.name }}
+                                            </a>
+                                        </div>
+                                    </span>
                                 </template>
                                 <template slot="client_name" scope="row">
                                     <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
@@ -161,7 +167,7 @@
                 sortDesc: false,
                 fields: {
                     claim_name: { sortable: true, label: "Claim", class: 'text-nowrap' },
-                    client_invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
+                    client_invoice_name: { sortable: true, label: "Invoice(s)", class: 'text-nowrap' },
                     client_name: { sortable: true, label: "Client", class: 'text-nowrap' },
                     payer_name: {sortable: true, label: "Payers"},
                     current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
