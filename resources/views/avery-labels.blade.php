@@ -38,7 +38,6 @@
         table tr td:first-child {
 
             padding-right: 55px;
-            padding-left: 0px;
         }
 
         table tr td:last-child {
@@ -56,7 +55,7 @@
 
 @section('content')
 
-    <table cellspacing="0" cellpadding="0" border="1">
+    <table cellspacing="0" cellpadding="0" border="1" style="margin-left: {{ $leftmargin . 'px' }}">
 
         @foreach( $users as $row => $cols )
 
@@ -65,15 +64,17 @@
                 @for( $col = 0; $col < count( $cols ); $col++ )
 
                     <td
-                        @if( $row % 10 == 0 ) style="padding-top: 55px" @endif
-                        @if( $row % 10 >= 3 && $row % 10 < 6 ) style="padding-top: 0px;padding-bottom: 20px;" @endif
-                        @if( $row % 10 >= 6 && $row % 10 <= 9 ) style="padding-top: 0px;padding-bottom: 15px;" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'address1' ] ) > 30 ) class="error-field" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'address2' ] ) > 30 ) class="error-field" @endif
                         @if( strlen( $cols[ $col ][ 'address' ][ 'city' ] ) > 30 ) class="error-field" @endif
+
+                        @if( $row % 10 == 0 ) style="padding-top: {{ $topmargin . 'px' }}" @endif
+                        @if( $row % 10 >= 3 && $row % 10 < 6 ) style="padding-top: 0px;padding-bottom: 20px;" @endif
+                        @if( $row % 10 >= 6 && $row % 10 <= 9 ) style="padding-top: 0px;padding-bottom: 15px;" @endif
+
                     >
 
-                        {{ $cols[ $col ][ 'name' ] }}
+                        {{ $cols[ $col ][ 'name' ] . $col }}
 
                         @if( $cols[ $col ][ 'address' ][ 'address1' ] )
 

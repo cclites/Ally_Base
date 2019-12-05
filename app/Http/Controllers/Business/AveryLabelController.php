@@ -72,7 +72,7 @@ class AveryLabelController extends BaseController
             ];
         })->toArray(), 3 );
 
-        $pdf = PDF::loadView( 'avery-labels', compact( 'users' ) );
+        $pdf = PDF::loadView( 'avery-labels', [ 'users' => $users, 'leftmargin' => $request->input( 'leftmargin' ), 'topmargin' => $request->input( 'topmargin' ) ] );
         return $pdf->download( 'avery-labels.pdf' );
     }
 }
