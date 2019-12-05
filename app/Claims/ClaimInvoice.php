@@ -305,12 +305,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the total number of hours on the client invoice by
      * adding all the 'units' for shift related items.
      *
+     * @param int|null $clientInvoiceId
      * @return float
      */
-    public function getTotalHours() : float
+    public function getTotalHours(?int $clientInvoiceId = null) : float
     {
-        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
-            if ($item->claimable_type == ClaimableService::class) {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId && $item->claimable_type == ClaimableService::class) {
                 return add($carry, floatval($item->units));
             }
 
@@ -323,12 +324,31 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the total number of 'hourly' charges on the invoice by
      * adding the amounts for shift related items.
      *
+     * @param int|null $clientInvoiceId
      * @return float
      */
-    public function getTotalHourlyCharges() : float
+    public function getTotalHourlyCharges(?int $clientInvoiceId = null) : float
     {
-        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
-            if ($item->claimable_type == ClaimableService::class) {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId && $item->claimable_type == ClaimableService::class) {
+                return add($carry, floatval($item->amount));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the total amount of the claim.
+     *
+     * @param int $clientInvoiceId
+     * @return float
+     */
+    public function getAmountForInvoice(int $clientInvoiceId): float
+    {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId) {
                 return add($carry, floatval($item->amount));
             }
 

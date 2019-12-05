@@ -49,7 +49,7 @@ class InvoiceSummaryByClientReport extends BaseReport
      */
     public function __construct(OnlineClientInvoiceQuery $query)
     {
-        $this->query = $query->with('client', 'clientPayer.payer', 'items', 'claimInvoice.items');
+        $this->query = $query->with('client', 'clientPayer.payer', 'items', 'claimInvoices.items');
     }
 
     /**
@@ -96,7 +96,7 @@ class InvoiceSummaryByClientReport extends BaseReport
         }
 
         if (filled($this->clientId)) {
-            $query->forClient($this->clientId);
+            $query->forClient($this->clientId, false);
         }
 
         if (filled($this->clientType)) {
@@ -109,21 +109,22 @@ class InvoiceSummaryByClientReport extends BaseReport
 
         return $query->get()
             ->map(function (ClientInvoice $invoice) {
-                $totalsObj = $this->mode == 'claim' ? $invoice->claimInvoice : $invoice;
+                $claimInvoice = $invoice->claimInvoices->first();
+                $totalsObj = $this->mode == 'claim' ? $claimInvoice : $invoice;
 
                 return [
                     'invoice_id' => $invoice->id,
                     'invoice_name' => $invoice->name,
                     'invoice_date' => $invoice->getDate(),
-                    'claim_id' => optional($invoice->claimInvoice)->id,
-                    'claim_name' => optional($invoice->claimInvoice)->name,
+                    'claim_id' => optional($claimInvoice)->id,
+                    'claim_name' => optional($claimInvoice)->name,
                     'client_type' => $invoice->client->client_type,
                     'client_id' => $invoice->client_id,
                     'client_name' => $invoice->client->nameLastFirst,
                     'payer_name' => optional(optional($invoice->clientPayer)->payer)->name,
-                    'hours' => $totalsObj->getTotalHours(),
-                    'hourly_charges' => $totalsObj->getTotalHourlyCharges(),
-                    'total_charges' => $totalsObj->getAmount(),
+                    'hours' => $totalsObj->getTotalHours($invoice->id),
+                    'hourly_charges' => $totalsObj->getTotalHourlyCharges($invoice->id),
+                    'total_charges' => ($this->mode == 'claim')?  $claimInvoice->getAmountForInvoice($invoice->id) : $totalsObj->getAmount(),
                     'date_range' => $totalsObj->getDateSpan(),
                 ];
             })
