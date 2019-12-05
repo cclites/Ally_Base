@@ -1,7 +1,9 @@
 <?php
 namespace App\Services;
 
+use App\Contracts\SFTPReaderWriterInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
+use App\TellusFile;
 use DOMDocument;
 use SimpleXMLElement;
 
@@ -30,6 +32,11 @@ class TellusService
      */
     protected $endpoint;
 
+    /**
+     * @var \phpseclib\Net\SFTP
+     */
+    protected $sftp;
+
     public const TYPECODE_DICTIONARY_FILENAME = 'tellus/typecode-dictionary.xlsx';
     public const XML_SCHEMA_FILENAME = 'tellus/xml-schema.xsd';
 
@@ -46,6 +53,25 @@ class TellusService
         $this->password = $password;
         // Automatically handle replacing the username variable in the endpoint.
         $this->endpoint = str_replace("{username}", strtoupper($username), $endpoint);
+
+        $this->sftp = app(SFTPReaderWriterInterface::class, ['host' => config('services.tellus.sftp_host'), 'port' => config('services.tellus.sftp_port')]);
+    }
+
+    /**
+     * Log in to the SFTP server.
+     *
+     * @return bool
+     */
+    public function login() : bool
+    {
+        $key = new \phpseclib\Crypt\RSA();
+        $key->loadKey( file_get_contents( config( 'services.tellus.pem_path' ) ) );
+
+        if (! $this->sftp->login($this->username, $key )) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -53,17 +79,17 @@ class TellusService
      * Tellus API service using an XML file.
      *
      * @param array $records
-     * @return bool
+     * @return string
      * @throws TellusApiException
      * @throws TellusValidationException
      */
-    public function submitClaim(array $records) : bool
+    public function submitClaim(array $records) : string
     {
         $xml = $this->convertArrayToXML($records);
 
-        if ($errors = $this->getValidationErrors($xml)) {
-            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
-        }
+        // if ($errors = $this->getValidationErrors($xml)) {
+        //     throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        // }
 
         list($httpCode, $response) = $this->sendXml($xml);
 
@@ -86,7 +112,8 @@ class TellusService
             throw new TellusApiException("Unexpected response from Tellus.  Please try again.");
         }
 
-        return true;
+        // any extra error checking? I think the above exception serves as a catch-all and guarantees that this field is populated
+        return $xml->batchId;
     }
 
     /**
@@ -227,6 +254,35 @@ class TellusService
         }
 
         return $service;
+    }
+
+
+    /**
+     * Get the string results from a response xml file.
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    public function downloadResponse(string $filename)
+    {
+        if (! $this->login()) {
+            throw new \Exception('Your Tellus username and password was not accepted.  Please contact Tellus and let them know you are unable to login to their SFTP server.');
+        }
+
+        $statuses = [ TellusFile::STATUS_ACCEPTED, TellusFile::STATUS_REJECTED ];
+
+        for( $i = 0; $i < count( $statuses ); $i++ ){
+
+            $status = strtoupper( $statuses[ $i ] );
+
+            $file = $this->sftp->get(
+                config( 'services.tellus.sftp_directory' ) . "/$filename" . "_$status.XML",
+                false );
+
+            if( $file ) return [ $file, strtolower( $status ) ];
+        }
+
+        return false;
     }
 
     /**

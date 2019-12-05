@@ -10,6 +10,7 @@ use App\Billing\Contracts\ClaimTransmitterInterface;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\HhaFile;
+use App\TellusFile;
 use Illuminate\Support\Collection;
 
 /**
@@ -95,6 +96,16 @@ class Claim extends AuditableModel implements InvoiceInterface
     public function hhaFiles()
     {
         return $this->hasMany(HhaFile::class);
+    }
+
+    /**
+     * Get the TellusFiles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function tellusFiles()
+    {
+        return $this->hasMany( TellusFile::class );
     }
 
     // **********************************************************
