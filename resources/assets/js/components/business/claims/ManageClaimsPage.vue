@@ -110,6 +110,7 @@
         </b-row>
         <div class="table-responsive" v-if="loaded > 0" style="min-height: 250px">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="items"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -610,9 +611,6 @@
 </script>
 
 <style>
-    table:not(.form-check) {
-        font-size: 14px;
-    }
     .claim-dropdown button {
         font-weight: 700;
         letter-spacing: 3px;

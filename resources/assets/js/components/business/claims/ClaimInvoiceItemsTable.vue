@@ -4,6 +4,7 @@
             <b-btn class="ml-auto" variant="info" @click="edit({})"><i class="fa fa-plus" /> Add Item</b-btn>
         </div>
         <b-table bordered striped hover show-empty
+            class="fit-more"
             :items="items"
             :fields="fields"
             :sort-by.sync="sortBy"

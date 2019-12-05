@@ -82,6 +82,7 @@
                 </b-col>
             </b-row>
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="items"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -312,7 +313,3 @@
         },
     }
 </script>
-
-<style>
-    table:not(.form-check) { font-size: 14px; }
-</style>

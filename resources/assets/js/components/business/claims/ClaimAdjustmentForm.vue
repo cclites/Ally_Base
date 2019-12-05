@@ -3,6 +3,7 @@
         <h2>Claim #{{ claim.name }}</h2>
         <div class="table-responsive claims-table">
             <b-table bordered striped show-empty
+                class="fit-more"
                 :items="items"
                 :fields="fields"
                 empty-text="This claim has no items."

@@ -46,6 +46,7 @@
 
         <div class="table-responsive claims-table">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="adjustments"
                 :fields="fields"
                 :sort-by.sync="sortBy"

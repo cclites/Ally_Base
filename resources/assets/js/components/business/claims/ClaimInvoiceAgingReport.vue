@@ -50,6 +50,7 @@
 
                         <div v-else class="table-responsive">
                             <b-table bordered striped hover show-empty
+                                class="fit-more"
                                 :busy="busy"
                                 :items="items"
                                 :fields="fields"

@@ -140,6 +140,7 @@
 
             <div class="table-responsive claims-table">
                 <b-table bordered striped hover show-empty
+                    class="fit-more"
                     :items="claims"
                     :fields="fields"
                     :sort-by.sync="sortBy"
@@ -759,9 +760,6 @@
 </script>
 
 <style>
-    table:not(.form-check) {
-        font-size: 14px;
-    }
     .claims-table input.form-control { max-width: 135px; }
     #floating-amount {
         position: fixed;

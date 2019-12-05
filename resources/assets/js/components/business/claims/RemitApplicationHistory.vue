@@ -42,6 +42,7 @@
         <div class="table-responsive mb-4">
             <h3>Claim Applications</h3>
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="adjustments['applications']"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -197,9 +198,3 @@
         },
     }
 </script>
-
-<style>
-    table:not(.form-check) {
-        font-size: 14px;
-    }
-</style>

@@ -77,6 +77,7 @@
         <loading-card v-if="filters.busy" />
         <div v-else class="table-responsive">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="remits"
                 :fields="fields"
                 :sort-by.sync="sortBy"
