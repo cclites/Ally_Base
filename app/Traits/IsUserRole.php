@@ -285,11 +285,11 @@ trait IsUserRole
             $data = collect([]);
 
             if (filled($this->date_of_birth)) {
-                $data->push(Carbon::parse($this->date_of_birth)->format('m/d/Y'));
+                $data->push('DOB: '.Carbon::parse($this->date_of_birth)->format('m/d/Y'));
             }
 
             if (filled($this->hic)) {
-                $data->push($this->hic);
+                $data->push('HIC: '.$this->hic);
             }
 
             return $data->toArray();

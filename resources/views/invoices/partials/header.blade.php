@@ -42,18 +42,6 @@
                         @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                     </td>
                 </tr>
-                @foreach($recipient->getExtraInvoiceData() as $data)
-                    <tr>
-                        <td colspan="2">{{ $data }}</td>
-                    </tr>
-                @endforeach
-                @if(filled($invoice->getClientPayer()))
-                    @foreach($invoice->getClientPayer()->getExtraInvoiceData() as $data)
-                        <tr>
-                            <td colspan="2">{{ $data }}</td>
-                        </tr>
-                    @endforeach
-                @endif
             @endif
         </table>
     </div>
@@ -97,18 +85,6 @@
                         @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
                     </td>
                 </tr>
-                @foreach($subject->getExtraInvoiceData() as $data)
-                    <tr>
-                        <td colspan="2">{{ $data }}</td>
-                    </tr>
-                @endforeach
-                @if(filled($invoice->getClientPayer()))
-                    @foreach($invoice->getClientPayer()->getExtraInvoiceData() as $data)
-                        <tr>
-                            <td colspan="2">{{ $data }}</td>
-                        </tr>
-                    @endforeach
-                @endif
             </table>
         </div>
     </div>
