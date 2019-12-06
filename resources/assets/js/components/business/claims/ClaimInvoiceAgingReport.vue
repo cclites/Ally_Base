@@ -13,7 +13,7 @@
                         :allow-all="true"
                     />
 
-                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
+                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" :show-offline="true" />
 
                     <client-type-dropdown v-model="form.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 

@@ -178,10 +178,10 @@ class ClaimInvoiceFactory
             throw new \InvalidArgumentException('You can only group invoices for the same payer.');
         }
 
-        // Fail if payers are all 'private pay' but there are different clients
-        // (This is technically
+        // Fail if payers are all 'private pay' or 'offline' but there are different clients
+        // (This is technically a different payer)
         $totalClients = $invoices->unique('client_id')->values()->count();
-        if ($totalClients > 1 & $invoices->first()->clientPayer->payer_id === Payer::PRIVATE_PAY_ID) {
+        if ($totalClients > 1 & in_array($invoices->first()->clientPayer->payer_id, [Payer::PRIVATE_PAY_ID, Payer::OFFLINE_PAY_ID])) {
             throw new \InvalidArgumentException('You can only group invoices for the same payer.');
         }
     }

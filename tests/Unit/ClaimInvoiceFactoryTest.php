@@ -190,8 +190,29 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->createService(20.00, '2019-01-15', null, $otherClient);
         $otherInvoice = $this->createClientInvoice($otherClient);
 
-        $this->assertEquals(0, $invoice->clientPayer->payer_id);
-        $this->assertEquals(0, $otherInvoice->clientPayer->payer_id);
+        $this->assertEquals(Payer::PRIVATE_PAY_ID, $invoice->clientPayer->payer_id);
+        $this->assertEquals(Payer::PRIVATE_PAY_ID, $otherInvoice->clientPayer->payer_id);
+
+        $this->expectException(\InvalidArgumentException::class);
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoices(ClientInvoice::all());
+        $this->assertNull($claim);
+    }
+
+    /** @test */
+    public function it_cannot_create_a_claim_from_offline_invoices_with_different_clients()
+    {
+        $this->createService(20.00);
+        $this->clientPayer->delete();
+        $this->clientPayer = $this->createBalancePayer('2019-01-01', '2099-01-01', Payer::OFFLINE_PAY_ID);
+        $invoice = $this->createClientInvoice();
+
+        $otherClient = factory('App\Client')->create();
+        $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', Payer::OFFLINE_PAY_ID, $otherClient);
+        $this->createService(20.00, '2019-01-15', null, $otherClient);
+        $otherInvoice = $this->createClientInvoice($otherClient);
+
+        $this->assertEquals(Payer::OFFLINE_PAY_ID, $invoice->clientPayer->payer_id);
+        $this->assertEquals(Payer::OFFLINE_PAY_ID, $otherInvoice->clientPayer->payer_id);
 
         $this->expectException(\InvalidArgumentException::class);
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoices(ClientInvoice::all());
