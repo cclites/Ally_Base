@@ -738,9 +738,6 @@
             }
         },
 
-        created() {
-
-        },
 
         methods: {
             saveApp() {
@@ -750,6 +747,14 @@
 
         computed: {
 
+        },
+
+        created() {
+
+            $( window ).on( "beforeunload", function() {
+
+                return "Are you sure? This will lose all form progress.";
+            });
         }
     }
 </script>
