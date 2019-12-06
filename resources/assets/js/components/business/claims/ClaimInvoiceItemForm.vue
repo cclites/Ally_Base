@@ -1,6 +1,5 @@
 <template>
     <div>
-        <!-- Expenses -->
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Claimable Type" label-for="type" class="bold">
@@ -28,6 +27,8 @@
                 </b-form-group>
             </b-col>
         </b-row>
+
+        <!-- =========== CLAIMABLE EXPENSES =========== -->
         <div v-if="form.claimable_type == CLAIMABLE_TYPES.EXPENSE">
             <b-row>
                 <b-col lg="6">
@@ -192,8 +193,9 @@
                 </b-col>
             </b-row>
         </div>
+        <!-- =========== /END CLAIMABLE EXPENSES =========== -->
 
-        <!-- Services -->
+        <!-- =========== CLAIMABLE SERVICES =========== -->
         <div v-else>
             <h5><strong>Shift Dates</strong></h5>
             <b-row>
@@ -350,6 +352,20 @@
                         />
                         <input-help :form="form" field="caregiver_comments" text="The comments by the Caregiver during clock out." />
                     </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="mb-3">
+                <b-col md="4">
+                    <label>Is Overtime/HOL</label>
+                    <div>{{ form.is_overtime ? 'Yes' : 'No' }}</div>
+                </b-col>
+                <b-col md="4">
+                    <label>Has Client Signature</label>
+                    <div>{{ form.client_signature_id ? 'Yes' : 'No' }}</div>
+                </b-col>
+                <b-col md="4">
+                    <label>Has Caregiver Signature</label>
+                    <div>{{ form.caregiver_signature_id ? 'Yes' : 'No' }}</div>
                 </b-col>
             </b-row>
 
@@ -800,6 +816,7 @@
                 </b-col>
             </b-row>
         </div>
+        <!-- =========== /END CLAIMABLE SERVICES =========== -->
 
         <hr />
         <div class="d-flex">
@@ -903,8 +920,8 @@
                     client_ltci_claim_number: '',
                     client_case_manager: '',
 
-                    client_signature: '',
-                    caregiver_signature: '',
+                    client_signature_id: '',
+                    caregiver_signature_id: '',
                     is_overtime: false,
                 }),
             };
