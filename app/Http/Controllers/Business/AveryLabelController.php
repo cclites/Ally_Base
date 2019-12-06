@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
@@ -61,6 +62,19 @@ class AveryLabelController extends BaseController
         if( $status = $request->input( 'status' ) ) {
 
             $query->where( 'status_alias_id', $status );
+        }
+
+        $daysSinceShift = $request->input( 'daysPassed', null );
+
+        if ( $daysSinceShift !== null || $daysSinceShift !== 0 ) {
+
+            $now = Carbon::now();
+            $daysAgo = Carbon::now()->subdays( $daysSinceShift );
+
+            $query->whereHas( "$entity.shifts", function( $q ) use( $now, $daysAgo ){
+
+                $q->whereBetween( 'checked_in_time', [ $daysAgo, $now ] );
+            });
         }
 
         $pages = array_chunk( array_chunk( $query->get()->map( function( $u ) use ( $entity ){
