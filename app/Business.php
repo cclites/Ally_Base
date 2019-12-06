@@ -976,14 +976,18 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         $builder->whereIn('id', $businessIds);
     }
 
-    function getHic(): ?string
+    /**
+     * Get the extra data that should be printed on invoices.
+     *
+     * @return array
+     */
+    function getExtraInvoiceData(): array
     {
-        return null;
-    }
+        if (filled($this->medicaid_license_number)) {
+            return ['License #:' . $this->medicaid_license_number];
+        }
 
-    function getBirthdate(): ?string
-    {
-        return null;
+        return [];
     }
 
     /**
