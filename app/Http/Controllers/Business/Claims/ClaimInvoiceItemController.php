@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\ClaimInvoiceType;
+use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Validation\ValidationException;
@@ -104,10 +105,11 @@ class ClaimInvoiceItemController extends BaseController
      *
      * @param ClaimInvoice $claim
      * @param ClaimInvoiceItem $item
+     * @param ClaimInvoiceFactory $factory
      * @return SuccessResponse|string
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item)
+    public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item, ClaimInvoiceFactory $factory)
     {
         $this->authorize('update', $claim);
 

@@ -502,4 +502,30 @@ class ClaimInvoiceFactory
             throw new CannotDeleteClaimInvoiceException('An unexpected error occurred.');
         }
     }
+
+    /**
+     * Remove a claim invoice item and related data from the system.
+     *
+     * @param ClaimInvoiceItem $item
+     * @throws CannotDeleteClaimInvoiceException
+     */
+    public function deleteClaimInvoiceItem(ClaimInvoiceItem $item) : void
+    {
+        $claim = $item->claim;
+        if ($claim->adjustments()->count() > 0) {
+            throw new CannotDeleteClaimInvoiceException('This claim has had adjustments applied.');
+        }
+
+        try {
+            \DB::transaction(function() use ($item, $claim) {
+                $item->claimable->delete();
+                $item->delete();
+
+                $claim->updateBalance();
+                $claim->markAsModified();
+            });
+        } catch (\Throwable $ex) {
+            app('sentry')->captureException($ex);
+        }
+    }
 }

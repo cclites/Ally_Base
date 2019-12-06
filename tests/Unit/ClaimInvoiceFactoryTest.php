@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Claims\ClaimAdjustment;
+use App\Claims\ClaimAdjustmentType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
@@ -75,7 +77,7 @@ class ClaimInvoiceFactoryTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function it_can_create_a_single_claim_invoice_from_a_single_client_invoice()
+    public function it_can_create_a_single_claim_invoice_from_a_single_client_invoice()
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
@@ -93,7 +95,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_can_create_a_client_claim_from_multiple_invoices()
+    public function it_can_create_a_client_claim_from_multiple_invoices()
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
@@ -116,7 +118,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_can_create_a_payer_claim_from_multiple_invoices()
+    public function it_can_create_a_payer_claim_from_multiple_invoices()
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
@@ -143,7 +145,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_can_only_create_one_claim_per_client_invoice()
+    public function it_can_only_create_one_claim_per_client_invoice()
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
@@ -156,7 +158,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_cannot_create_a_claim_from_invoices_with_different_payers()
+    public function it_cannot_create_a_claim_from_invoices_with_different_payers()
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
@@ -176,7 +178,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_cannot_create_a_claim_from_private_pay_invoices_with_different_clients()
+    public function it_cannot_create_a_claim_from_private_pay_invoices_with_different_clients()
     {
         $this->createService(20.00);
         $this->clientPayer->delete();
@@ -197,7 +199,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_cannot_create_a_claim_from_invoices_with_different_business_ids()
+    public function it_cannot_create_a_claim_from_invoices_with_different_business_ids()
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
@@ -217,7 +219,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function creating_a_claim_from_multiple_invoices_should_attach_the_invoice_id_to_each_item()
+    public function creating_a_claim_from_multiple_invoices_should_attach_the_invoice_id_to_each_item()
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
@@ -237,7 +239,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_can_delete_a_claim_invoice()
+    public function it_can_delete_a_claim_invoice()
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
@@ -259,7 +261,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_cannot_delete_a_claim_that_has_already_been_transmitted()
+    public function it_cannot_delete_a_claim_that_has_already_been_transmitted()
     {
         $this->createService(20.00);
         $invoice = $this->createClientInvoice();
@@ -271,5 +273,84 @@ class ClaimInvoiceFactoryTest extends TestCase
 
         $this->assertNotNull(ClaimInvoice::find($claim->id));
     }
-    // TODO: it_cannot_delete_a_claim_that_has_had_adjustments_made
+
+    /** @test */
+    function it_cannot_delete_a_claim_that_has_had_adjustments_made()
+    {
+        $this->createService(20.00);
+        $invoice = $this->createClientInvoice();
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
+
+        ClaimAdjustment::create([
+            'claim_invoice_id' => $claim->id,
+            'claim_invoice_item_id' => $claim->items->first()->id,
+            'adjustment_type' => ClaimAdjustmentType::PAYMENT(),
+            'amount_applied' => $claim->items->first()->amount,
+        ]);
+
+        $this->expectException(CannotDeleteClaimInvoiceException::class);
+
+        $this->claimGenerator->deleteClaimInvoice($claim);
+
+        $this->assertNotNull(ClaimInvoice::find($claim->id));
+    }
+
+    /** @test */
+    function if_cannot_delete_a_claim_item_that_has_had_adjuistments_made()
+    {
+        $this->createService(20.00);
+        $invoice = $this->createClientInvoice();
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
+
+        ClaimAdjustment::create([
+            'claim_invoice_id' => $claim->id,
+            'claim_invoice_item_id' => $claim->items->first()->id,
+            'adjustment_type' => ClaimAdjustmentType::PAYMENT(),
+            'amount_applied' => $claim->items->first()->amount,
+        ]);
+
+        $this->expectException(CannotDeleteClaimInvoiceException::class);
+
+        $this->claimGenerator->deleteClaimInvoiceItem($claim->items->first());
+        $this->assertCount(1, $claim->fresh()->items);
+    }
+
+    /** @test */
+    public function it_should_remove_all_related_claimable_data_when_deleting_a_claim_invoice_item()
+    {
+        $this->createService(20.00);
+        $this->createShiftWithMileage(30.00, 15);
+        $invoice = $this->createClientInvoice();
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
+
+        $this->assertCount(2, ClaimableService::all());
+        $this->assertCount(1, ClaimableExpense::all());
+
+        $item = ClaimInvoiceItem::where('claimable_type', ClaimableExpense::class)->first();
+        $this->claimGenerator->deleteClaimInvoiceItem($item);
+        $this->assertCount(0, ClaimableExpense::all());
+        $this->assertCount(2, ClaimInvoiceItem::all());
+
+        $item = ClaimInvoiceItem::where('claimable_type', ClaimableService::class)->first();
+        $this->claimGenerator->deleteClaimInvoiceItem($item);
+        $this->assertCount(1, ClaimableService::all());
+        $this->assertCount(1, ClaimInvoiceItem::all());
+    }
+
+    /** @test */
+    public function it_should_update_the_claim_balance_when_deleting_a_claim_invoice_item_()
+    {
+        $this->createService(20.00);
+        $this->createService(20.00);
+        $invoice = $this->createClientInvoice();
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
+
+        $this->assertEquals(40.00, $claim->amount);
+        $this->assertNull($claim->modified_at);
+
+        $this->claimGenerator->deleteClaimInvoiceItem($claim->items->first());
+
+        $this->assertEquals(20.00, $claim->fresh()->amount);
+        $this->assertNotNull($claim->fresh()->modified_at);
+    }
 }
