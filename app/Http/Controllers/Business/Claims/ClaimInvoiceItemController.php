@@ -77,7 +77,7 @@ class ClaimInvoiceItemController extends BaseController
         try {
             \DB::beginTransaction();
 
-            if ($claim->getType() != ClaimInvoiceType::PAYER() && $item->client_id != $request->client_id) {
+            if ($claim->getType() != ClaimInvoiceType::PAYER() && $item->claimable->client_id != $request->client_id) {
                 return new ErrorResponse(412, 'You cannot change the linked client record for a client claim.');
             }
 
