@@ -17,7 +17,7 @@ class PaginatedCaregiverController extends BaseController
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('perpage', 20);
+        $perPage = $request->input('perPage', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort', 'lastname');
         $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
