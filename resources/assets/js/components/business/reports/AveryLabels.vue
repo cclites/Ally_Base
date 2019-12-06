@@ -14,42 +14,50 @@
 
             <b-col lg="12">
 
-                <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
+                <div class="d-flex flex-column justify-content-center">
 
-                    <business-location-select v-model="filters.business" :allow-all="true" :hideable="false" class="f-1 mr-2"></business-location-select>
+                    <div class="d-flex my-1">
 
-                    <b-form-select v-model="filters.userType" class="f-1 mr-2">
+                        <business-location-select v-model="filters.business" :allow-all="true" :hideable="false" class="f-1 mx-1"></business-location-select>
 
-                        <option value="client">Clients</option>
-                        <option value="caregiver">Caregivers</option>
-                    </b-form-select>
+                        <b-form-select v-model="filters.userType" class="f-1 mx-1">
 
-                    <b-form-select v-model="filters.status" class="f-1 mr-2">
+                            <option value="client">Clients</option>
+                            <option value="caregiver">Caregivers</option>
+                        </b-form-select>
 
-                        <option value="">All {{ capitalize( filters.userType ) }}s</option>
-                        <option value="active">Active {{ capitalize( filters.userType ) }}s</option>
-                        <option value="inactive">Inactive {{ capitalize( filters.userType ) }}s</option>
-                        <option v-for=" status in statusEntity " :key="status.id" :value="status.id">
+                        <b-form-select v-model="filters.status" class="f-1 mx-1">
 
-                            {{ status.name }}
-                        </option>
-                    </b-form-select>
+                            <option value="">All {{ capitalize( filters.userType ) }}s</option>
+                            <option value="active">Active {{ capitalize( filters.userType ) }}s</option>
+                            <option value="inactive">Inactive {{ capitalize( filters.userType ) }}s</option>
+                            <option v-for=" status in statusEntity " :key="status.id" :value="status.id">
 
-                    <client-type-dropdown
-                        :disabled=" filters.userType === 'caregiver' "
-                        v-model="filters.client_type"
-                        class="f-1 mr-2"
-                    />
+                                {{ status.name }}
+                            </option>
+                        </b-form-select>
+                    </div>
 
-                    <b-form-select v-model="filters.caseManager" class="f-1 mr-2" :disabled=" filters.userType === 'caregiver' ">
-                        <template slot="first">
-                            <!-- this slot appears above the options from 'options' prop -->
-                        <option value="">All Service Coordinators</option>
-                        </template>
-                        <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
-                    </b-form-select>
+                    <div class="d-flex my-1">
 
-                    <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1" />
+                        <client-type-dropdown
+                            :disabled=" filters.userType === 'caregiver' "
+                            v-model="filters.client_type"
+                            class="f-1 mx-1"
+                        />
+
+                        <b-form-select v-model="filters.caseManager" class="f-1 mx-1" :disabled=" filters.userType === 'caregiver' ">
+                            <template slot="first">
+                                <!-- this slot appears above the options from 'options' prop -->
+                            <option value="">All Service Coordinators</option>
+                            </template>
+                            <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
+                        </b-form-select>
+
+                        <b-form-input v-model="filters.daysPassed" placeholder="Has had a shift in the last x days" class="f-1 mx-1" type="number"/>
+                    </div>
+
+                    <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1 mx-1 w-50" />
                 </div>
             </b-col>
         </b-row>
@@ -143,7 +151,8 @@
                     search: '',
                     client_type: '',
                     caseManager: '',
-                    userType: 'caregiver'
+                    userType: 'caregiver',
+                    daysPassed : 0
                 }),
                 averyModal : false,
             }
@@ -301,7 +310,7 @@
                     }
                 }
 
-                let query = `&search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}`;
+                let query = `&search=${this.filters.search}&active=${active}&status=${aliasId}&businesses=${this.filters.business}&daysPassed=${this.filters.daysPassed}`;
 
                 if( this.filters.userType == 'client' ){
 
@@ -453,19 +462,23 @@
                     this.loadUsers();
                 }
             },
-            // listFilters( oldVal, newVal ) {
+            'filters.daysPassed'( newVal, oldVal ) {
 
-            //     console.log( 'changing filters: ', oldVal, newVal );
-            //     if( newVal != oldVal ){
+                if( newVal < 0 || newVal > 999 ){
 
-            //         this.updateSavedFormFilters();
-            //         this.loadUsers();
-            //     }
-            // },
+                    alert( 'value must be within 0 and 999 days' );
+                } else {
 
+                    // debounce the reloading of the table to prevent
+                    // unnecessary calls.
+                    _.debounce(() => {
+                        this.updateSavedFormFilters();
+                        this.loadUsers();
+                    }, 350)();
+                }
+            },
             'filters.caseManager'( newVal, oldVal ) {
 
-                console.log( 'changing user type: ', oldVal, newVal );
                 if ( newVal != oldVal ) {
 
                     this.updateSavedFormFilters();
@@ -474,7 +487,6 @@
             },
             'filters.userType'( newVal, oldVal ) {
 
-                console.log( 'changing user type: ', oldVal, newVal );
                 if ( newVal != oldVal ) {
 
                     this.updateSavedFormFilters();
@@ -484,7 +496,6 @@
 
             'filters.client_type'( newVal, oldVal ) {
 
-                console.log( 'changing user type: ', oldVal, newVal );
                 if ( newVal != oldVal ) {
 
                     this.updateSavedFormFilters();
