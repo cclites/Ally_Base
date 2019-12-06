@@ -286,6 +286,16 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
+            'client_last_name' => $faker->lastName,
+            'client_dob' => $faker->date('Y-m-d', '-30 years'),
+            'client_medicaid_id' => $faker->randomNumber(8),
+
+            'client_program_number' => $faker->randomNumber(8),
+            'client_cirts_number' => $faker->randomNumber(8),
+            'client_ltci_policy_number' => $faker->randomNumber(8),
+            'client_ltci_claim_number' => $faker->randomNumber(8),
+            'client_case_manager' => $faker->name(),
+
             'caregiver_last_name' => $faker->lastName,
             'caregiver_dob' => $faker->date('Y-m-d', '-30 years'),
             'caregiver_medicaid_id' => $faker->randomNumber(8),

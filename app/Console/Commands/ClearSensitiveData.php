@@ -164,7 +164,6 @@ class ClearSensitiveData extends Command
             $this->scrubModel(SmsThread::class);
             $this->scrubModel(SmsThreadReply::class);
             $this->scrubModel(SmsThreadRecipient::class);
-            $this->scrubModel(ClaimInvoice::class);
             $this->scrubModel(ClaimableService::class);
             $this->scrubModel(ClaimableExpense::class);
             $this->scrubModel(ClaimRemit::class);

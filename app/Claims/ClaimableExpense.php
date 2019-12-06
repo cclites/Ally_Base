@@ -179,6 +179,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
+            'client_last_name' => $faker->lastName,
             'caregiver_last_name' => $faker->lastName,
             'notes' => $faker->sentence,
         ];
