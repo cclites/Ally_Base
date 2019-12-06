@@ -105,7 +105,7 @@ class Admin1099PreviewReport extends BaseReport
         }
 
         if($this->caregiver_1099 && $this->caregiver_1099 !== 'no'){
-            $query .= " AND c.caregiver_1099 = '" . (string)$this->caregiver_1099;
+            $query .= " AND c.caregiver_1099 = '" . (string)$this->caregiver_1099 . "' ";
         }elseif($this->caregiver_1099 && $this->caregiver_1099 === 'no'){
             $query .= " AND c.caregiver_1099 is null ";
         }
@@ -122,8 +122,7 @@ class Admin1099PreviewReport extends BaseReport
             $query .= " AND ct.id is null ";
         }
 
-        $query .= " GROUP BY s.client_id, s.caregiver_id
-                              HAVING payment_total > ?";
+        $query .= " GROUP BY s.client_id, s.caregiver_id HAVING payment_total > ?";
 
         $this->report = \DB::select($query, [$this->threshold]) ;
 

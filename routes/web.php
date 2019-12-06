@@ -528,6 +528,7 @@ Route::group([
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
+    /* Caregiver 1099s */
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{id}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
 });
@@ -620,15 +621,18 @@ Route::group([
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
-    // 1099 related
+    /* Caregiver 1099 preview related */
     Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
     Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list'); //preview-1099-report
     Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
+
+    /* Caregiver 1099s */
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
-    Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
     Route::get('business-1099/edit/{id}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
     Route::get('business-1099/download/{id}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
+
+    Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
 
 
 

@@ -37,7 +37,7 @@ class Caregiver1099Controller extends Controller
      */
     public function downloadPdf($id)
     {
-        $pdf = new Pdf('../resources/pdfs/2019/CopyB_1099msc.pdf');
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/2019/CopyB_1099msc.pdf');
         $caregiver1099 = Caregiver1099::find($id);
 
         $decodedClientSsn = decrypt($caregiver1099->client_ssn);

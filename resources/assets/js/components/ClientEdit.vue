@@ -481,7 +481,7 @@
                     case_manager_id: this.client.case_manager_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
-                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
+                    caregiver_1099: this.client.caregiver_1099,
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
