@@ -5,6 +5,7 @@ namespace App\Claims\Transmitters;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\HhaExchangeService;
+use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
@@ -18,6 +19,22 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @var string
      */
     protected $timeFormat = 'Y-m-d H:i';
+
+    /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string
+    {
+        if ($claim->getType() == ClaimInvoiceType::PAYER()) {
+            return 'Transmitting Payer invoices with more than one client to HHA is not currently supported.';
+        }
+
+        return null;
+    }
 
     /**
      * Validate a ClaimInvoice has all the required parameters to

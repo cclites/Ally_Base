@@ -68,6 +68,11 @@
         </b-row>
 
         <div class="table-responsive" v-if="!filters.busy && filters.hasBeenSubmitted" style="min-height: 250px">
+            <b-row>
+                <b-col>
+                    <b-alert show variant="info"><strong>Note:</strong> if you create a group claim with multiple clients you will not be able to transmit it to HHA or Tellus.</b-alert>
+                </b-col>
+            </b-row>
             <b-row class="mb-2">
                 <b-col md="12">
                     <div class="form-inline">

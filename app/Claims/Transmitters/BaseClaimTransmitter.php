@@ -11,6 +11,18 @@ use App\Claims\ClaimInvoice;
 abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
 {
     /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string
+    {
+        return null;
+    }
+
+    /**
      * Validate a ClaimInvoice has all the required parameters to
      * be transmitted to the service.
      *

@@ -2,18 +2,19 @@
 
 namespace App\Claims\Transmitters;
 
-use App\Business;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\TellusValidationException;
+use Illuminate\Support\Collection;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
+use App\Claims\ClaimInvoiceType;
 use App\Services\TellusService;
 use App\Claims\ClaimInvoice;
-use App\Shift;
 use App\TellusTypecode;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use App\Business;
+use App\Shift;
 
 class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -23,6 +24,22 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @var string
      */
     protected $timeFormat = 'm/d/Y H:i:s';
+
+    /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string
+    {
+        if ($claim->getType() == ClaimInvoiceType::PAYER()) {
+            return 'Transmitting Payer invoices with more than one client to Tellus is not currently supported.';
+        }
+
+        return null;
+    }
 
     /**
      * Validate a ClaimInvoice has all the required parameters to

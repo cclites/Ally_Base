@@ -44,6 +44,11 @@ class ClaimTransmissionController extends BaseController
             \DB::beginTransaction();
 
             $transmitter = $claim->getTransmitter($service);
+
+            if ($reason = $transmitter->prevent($claim)) {
+                return new ErrorResponse(400, "Could not transmit claim: $reason");
+            }
+
             if ($errors = $transmitter->validateClaim($claim)) {
                 return new ErrorResponse(412, 'Required data missing for transmitting claim.', $errors);
             }
