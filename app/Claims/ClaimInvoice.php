@@ -410,6 +410,22 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         return $this->clientInvoices->count() > 1;
     }
 
+    /**
+     * Attempt to get a single value for the client medicaid id
+     * from the first service on the claim has that one filled out.
+     *
+     * @return string|null
+     */
+    public function getClientMedicaidId() : ?string
+    {
+        return $this->items->where('claimable_type', ClaimableService::class)
+            ->map(function ($item) {
+                return $item->claimable->client_medicaid_id;
+            })
+            ->filter()
+            ->first();
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************

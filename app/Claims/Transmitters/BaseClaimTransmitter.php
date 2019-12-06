@@ -31,7 +31,7 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
             $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings').'#medicaid']);
         }
 
-        if (empty($claim->client_medicaid_id)) {
+        if (empty($claim->getClientMedicaidId())) {
             $errors->push(['message' => 'Client Medicaid ID is required.', 'url' => $editClaimUrl]);
         }
 

@@ -9,7 +9,6 @@ use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\HhaFile;
-use Illuminate\Support\Collection;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -108,7 +107,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         return [
             $claim->business->ein ? str_replace('-', '', $claim->business->ein) : '', //    "Agency Tax ID", (required)
             $claim->payer_code, //    "Payer ID", (required)
-            $claim->client_medicaid_id, //    "Medicaid Number", (required)
+            $service->client_medicaid_id ?? $claim->getClientMedicaidId(), //    "Medicaid Number", (required)
             $service->caregiver_id, //    "Caregiver Code", (required)
             $service->caregiver_first_name, //    "Caregiver First Name",
             $service->caregiver_last_name, //    "Caregiver Last Name",
@@ -137,7 +136,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // TODO: implement reason codes:
             $service->getHasEvv() ? '' : '910', //    "Visit Edit Reason Code",
             $service->getHasEvv() ? '' : '14', //    "Visit Edit Action Taken",
-            '', //    "Notes",
+            $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",
             'N', //    "Missed Visit",
@@ -157,10 +156,10 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     /**
      * Map claimable service activities to their corresponding duties codes.
      *
-     * @param string $activities
+     * @param null|string $activities
      * @return string
      */
-    public function mapActivities(string $activities): string
+    public function mapActivities(?string $activities): string
     {
         // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if (empty($activities)) {
