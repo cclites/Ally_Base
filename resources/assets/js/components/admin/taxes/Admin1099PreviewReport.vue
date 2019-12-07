@@ -119,16 +119,11 @@
                                 <i class="fa fa-print mr-2"></i>
                             </b-btn>
                         </template>
-                        <!--template slot="transmit" scope="row">
-                            <b-form-checkbox v-if="row.item.id && ! row.item.transmitted"
-                                             v-model="transmitSelected"
-                                             :value="row.item.id"
-                            >
-                            </b-form-checkbox>
-                            <div v-else-if="row.item.transmitted">
+                        <template slot="transmit" scope="row">
+                            <div v-if="row.item.transmitted">
                                 {{ formatDateTimeFromUTC(row.item.transmitted) }}
                             </div>
-                        </template -->
+                        </template>
                     </b-table>
                 </b-col>
             </b-row>
@@ -206,7 +201,7 @@
                     {key: 'business_name', label: 'Location', sortable: true,},
                     {key: 'payment_total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     'actions',
-                    //'transmit'
+                    'transmit'
                 ],
             }
         },

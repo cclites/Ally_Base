@@ -28,7 +28,7 @@ class Transmit1099Request extends FormRequest
     public function rules()
     {
         return [
-            'transmitSelected' => 'required|string',
+            'year' => 'required|string:max:4',
         ];
     }
 }

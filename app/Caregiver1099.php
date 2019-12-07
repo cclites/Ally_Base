@@ -15,18 +15,24 @@ class Caregiver1099 extends BaseModel
 
     // Relations
     public function caregiver(){
-        return $this->hasOne(Caregiver::class);
+        return $this->belongsTo(Caregiver::class);
     }
 
     public function client(){
-        return $this->hasOne(Client::class);
+        return $this->hasOne(Client::class, 'id', 'client_id');
     }
 
     public function business(){
-        return $this->hasOne(Business::class);
+        return $this->hasOne(Business::class, 'id', 'business_id');
     }
 
-    //query scopes
+    public function client_address3(){
+        $c = $this->client;
+        return $c->city . ", " . $c->state . " " . $c->zip;
+    }
 
-
+    public function caregiver_address3(){
+        $c = $this->caregiver;
+        return $c->city . ", " . $c->state . " " . $c->zip;
+    }
 }

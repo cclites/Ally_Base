@@ -632,8 +632,8 @@ Route::group([
     Route::get('business-1099/download/{id}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
 
-    Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
-
+    //Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('transmit-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
 
 
     // notes import
