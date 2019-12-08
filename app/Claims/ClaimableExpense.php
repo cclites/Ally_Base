@@ -9,6 +9,7 @@ use App\Client;
 use App\Shift;
 use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -60,16 +61,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
 
     /**
-     * Get the related Client.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function client()
-    {
-        return $this->belongsTo(Client::class);
-    }
-
-    /**
      * Get the related Shift.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -77,16 +68,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public function shift()
     {
         return $this->belongsTo(Shift::class);
-    }
-
-    /**
-     * Get the related Caregiver.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function caregiver()
-    {
-        return $this->belongsTo(Caregiver::class);
     }
 
     // **********************************************************
@@ -116,34 +97,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     }
 
     /**
-     * Get the Client's name.
-     *
-     * @return string
-     */
-    public function getClientName(): string
-    {
-        if (empty($this->client_first_name) && empty($this->client_last_name)) {
-            return '';
-        }
-
-        return $this->client_last_name . ', ' . $this->client_first_name;
-    }
-
-    /**
-     * Get the Caregiver's name that performed the service.
-     *
-     * @return string
-     */
-    public function getCaregiverName(): string
-    {
-        if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
-            return '';
-        }
-
-        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
-    }
-
-    /**
      * Get the start time of the Claimable item.
      *
      * @return null|Carbon
@@ -166,7 +119,17 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-    use ScrubsForSeeding;
+    use \App\Traits\ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery() : \Illuminate\Database\Eloquent\Builder
+    {
+        return static::parentGetScrubQuery()->whereNotNull('notes');
+    }
 
     /**
      * Get an array of scrubbed data to replace the original.
@@ -179,8 +142,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
-            'client_last_name' => $faker->lastName,
-            'caregiver_last_name' => $faker->lastName,
             'notes' => $faker->sentence,
         ];
     }

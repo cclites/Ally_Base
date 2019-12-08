@@ -61,11 +61,11 @@ class ClaimAdjustmentResource extends Resource
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),
                 'client_invoice_id' => optional($this->resource->claimInvoiceItem->clientInvoice)->id,
                 'client_invoice_name' => optional($this->resource->claimInvoiceItem->clientInvoice)->name,
-                'client_invoice_date' => optional($this->resource->claimInvoiceItem->clientInvoice)->created_at->toDateTimeString(),
+                'client_invoice_date' => optional(optional($this->resource->claimInvoiceItem->clientInvoice)->created_at)->toDateTimeString(),
                 'item' => $this->resource->claimInvoiceItem->getItemSummary(),
                 'item_total' => $this->resource->claimInvoiceItem->amount,
-                'client_id' => optional($this->resource->claimInvoiceItem)->claimable->client_id,
-                'client_name' => optional($this->resource->claimInvoiceItem)->claimable->getClientName(),
+                'client_id' => optional($this->resource->claimInvoiceItem)->client_id,
+                'client_name' => optional($this->resource->claimInvoiceItem)->getClientName(),
             ]);
         }
 

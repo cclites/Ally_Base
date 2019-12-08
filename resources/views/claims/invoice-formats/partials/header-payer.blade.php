@@ -3,7 +3,6 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var \App\Claims\Contracts\ClaimableInterface $firstClaimable The first claimable item (use for Client info)
  */
 ?>
 <div class="row print-header">

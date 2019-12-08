@@ -162,7 +162,7 @@
                 fields: {
                     id: { sortable: true, label: 'ID' },
                     office_location: { sortable: true },
-                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDateFromUTC(x) },
+                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDate(x) },
                     payment_type: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitTypeOptions) },
                     payer_name: { label: 'Payer', sortable: true, formatter: x => x ? x : '-' },
                     reference: { sortable: true, label: 'Reference #' },

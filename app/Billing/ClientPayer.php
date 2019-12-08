@@ -403,6 +403,10 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     {
         $data = collect([]);
 
+        if (filled($this->notes)) {
+            $data->push($this->notes);
+        }
+
         if (filled($this->cirts_number)) {
             $data->push('CIRTS ID: ' . $this->cirts_number);
         }

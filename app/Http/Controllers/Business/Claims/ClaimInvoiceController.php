@@ -192,28 +192,21 @@ class ClaimInvoiceController extends BaseController
             $groups['Service'] = [];
         }
 
-        $clientData = [];
         $client = null;
         if ($claim->getType() != ClaimInvoiceType::PAYER()) {
-            /** @var ClaimableService $service */
-            $service = $claim->items->where('claimable_type', ClaimableService::class)->first()->claimable;
             $client = $claim->client ? $claim->client : $service->client;
-            $clientData = [
-                'client_ltci_claim_number' => optional($service)->client_ltci_claim_number,
-                'client_ltci_policy_number' => optional($service)->client_ltci_policy_number,
-                'client_cirts_number' => optional($service)->client_cirts_number,
-                'client_program_number' => optional($service)->client_program_number,
-            ];
         }
 
-        $view = view('claims.claim_invoice', array_merge($clientData, [
+        $view = view('claims.claim_invoice', [
             'claim' => $claim,
             'sender' => $claim->business,
             'recipient' => $claim->payer,
             'client' => $client,
             'itemGroups' => $groups,
             'render' => 'html',
-        ]));
+            'notes' => $claim->getInvoiceNotesData(),
+            'clientData' => $claim->getInvoiceClientData(),
+        ]);
 
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');

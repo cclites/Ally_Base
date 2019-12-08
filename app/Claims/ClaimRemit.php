@@ -159,8 +159,13 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function scopeForPayer($query, $payerId = null)
     {
-        if (empty($payerId)) {
-            return $query;
+        if ((string)$payerId === (string)Payer::PRIVATE_PAY_ID) {
+            // Detecting private pay is difficult because it's value is 0
+            // which results as true when you check empty()
+        } else {
+            if (empty($payerId)) {
+                return $query;
+            }
         }
 
         return $query->where('payer_id', $payerId);

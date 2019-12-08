@@ -18,20 +18,6 @@ interface ClaimableInterface
     public function getName(): string;
 
     /**
-     * Get the Caregiver's name that performed the service.
-     *
-     * @return string
-     */
-    public function getCaregiverName(): string;
-
-    /**
-     * Get the Client's name.
-     *
-     * @return string
-     */
-    public function getClientName(): string;
-
-    /**
      * Get the start time of the Claimable item.
      *
      * @return null|Carbon

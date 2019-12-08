@@ -29,13 +29,6 @@ class ClaimableServiceResource extends Resource
 
         return [
             'shift_id' => $this->resource->shift_id,
-            'caregiver_id' => $this->resource->caregiver_id,
-            'caregiver_first_name' => $this->resource->caregiver_first_name,
-            'caregiver_last_name' => $this->resource->caregiver_last_name,
-            'caregiver_gender' => $this->resource->caregiver_gender,
-            'caregiver_dob' => Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y'),
-            'caregiver_ssn' => filled($this->resource->caregiver_ssn) ? '***-**-****' : '',
-            'caregiver_medicaid_id' => $this->resource->caregiver_medicaid_id,
 
             'address1' => $this->resource->address1,
             'address2' => $this->resource->address2,
@@ -71,18 +64,6 @@ class ClaimableServiceResource extends Resource
             'service_start_time' => $this->resource->visit_start_time->setTimezone($timezone)->format('H:i'),
 
             // New service items added 12/2019:
-            'client_id' => $this->resource->client_id,
-            'client_first_name' => $this->resource->client_first_name,
-            'client_last_name' => $this->resource->client_last_name,
-            'client_dob' => Carbon::parse($this->resource->client_dob)->format('m/d/Y'),
-            'client_medicaid_id' => $this->resource->client_medicaid_id,
-            'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,
-            'client_program_number' => $this->resource->client_program_number,
-            'client_cirts_number' => $this->resource->client_cirts_number,
-            'client_ltci_policy_number' => $this->resource->client_ltci_policy_number,
-            'client_ltci_claim_number' => $this->resource->client_ltci_claim_number,
-            'client_case_manager' => $this->resource->client_case_manager,
-            // TODO: how to interpret signatures?
             'client_signature_id' => $this->resource->client_signature_id,
             'caregiver_signature_id' => $this->resource->caregiver_signature_id,
             'is_overtime' => $this->resource->is_overtime,

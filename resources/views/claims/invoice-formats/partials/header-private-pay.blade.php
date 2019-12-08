@@ -3,7 +3,7 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var \App\Claims\Contracts\ClaimableInterface $firstClaimable The first claimable item (use for Client info)
+ * @var array $clientDate Client print on invoice data
  */
 ?>
 <div class="row print-header">
@@ -35,38 +35,13 @@
                     @include('invoices.partials.address', ['address' => $client->getAddress(), 'phone' => $client->getPhoneNumber()])
                 </td>
             </tr>
-            @if(isset($client_ltci_policy_number))
+            @foreach($clientData as $data)
             <tr>
-                <td><strong>Policy #: </strong></td>
-                <td>
-                    {{ $client_ltci_policy_number }}
+                <td colspan="2">
+                    {{ $data }}
                 </td>
             </tr>
-            @endif
-            @if(isset($client_ltci_claim_number))
-            <tr>
-                <td><strong>Claim #: </strong></td>
-                <td>
-                    {{ $client_ltci_claim_number }}
-                </td>
-            </tr>
-            @endif
-            @if(isset($client_program_number))
-            <tr>
-                <td><strong>Program ID: </strong></td>
-                <td>
-                    {{ $client_program_number }}
-                </td>
-            </tr>
-            @endif
-            @if(isset($client_cirts_number))
-            <tr>
-                <td><strong>CIRTS ID: </strong></td>
-                <td>
-                    {{ $client_cirts_number }}
-                </td>
-            </tr>
-            @endif
+            @endforeach
         </table>
     </div>
 </div>

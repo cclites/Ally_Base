@@ -418,12 +418,86 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function getClientMedicaidId() : ?string
     {
-        return $this->items->where('claimable_type', ClaimableService::class)
-            ->map(function ($item) {
-                return $item->claimable->client_medicaid_id;
+        return $this->items->map(function ($item) {
+                return $item->client_medicaid_id;
             })
             ->filter()
             ->first();
+    }
+
+    /**
+     * Get first instance of a the given field from the items.
+     *
+     * @param string $field
+     * @return string|null
+     */
+    public function getFirstItemData(string $field) : ?string
+    {
+        return $this->items->map(function ($item) use ($field) {
+                return $item->$field;
+            })
+            ->filter()
+            ->first();
+    }
+
+    /**
+     * Get the extra data that should be printed on claim invoices.
+     *
+     * @return array
+     */
+    public function getInvoiceClientData(): array
+    {
+        if ($this->claim_invoice_type == ClaimInvoiceType::PAYER()) {
+            return [];
+        }
+
+        $data = collect([]);
+
+        if ($value = $this->getFirstItemData('client_dob')) {
+            $data->push('DOB: '.Carbon::parse($value)->format('m/d/Y'));
+        }
+
+        if ($value = $this->getFirstItemData('client_ltci_claim_number')) {
+            $data->push("Claim #: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_ltci_policy_number')) {
+            $data->push("Policy Number #: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_hic')) {
+            $data->push("HIC: $value");
+        }
+
+        return $data->toArray();
+    }
+
+    /**
+     * Get the extra data that should be printed on claim invoices.
+     *
+     * @return array
+     */
+    public function getInvoiceNotesData(): array
+    {
+        if ($this->claim_invoice_type == ClaimInvoiceType::PAYER()) {
+            return [];
+        }
+
+        $data = collect([]);
+
+        if ($value = $this->getFirstItemData('client_invoice_notes')) {
+            $data->push($value);
+        }
+
+        if ($value = $this->getFirstItemData('client_cirts_number')) {
+            $data->push("CIRTS ID:: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_program_number')) {
+            $data->push("Program ID: $value");
+        }
+
+        return $data->toArray();
     }
 
     // **********************************************************

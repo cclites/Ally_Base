@@ -124,13 +124,13 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         return [
             $claim->business->ein ? str_replace('-', '', $claim->business->ein) : '', //    "Agency Tax ID", (required)
             $claim->payer_code, //    "Payer ID", (required)
-            $service->client_medicaid_id ?? $claim->getClientMedicaidId(), //    "Medicaid Number", (required)
-            $service->caregiver_id, //    "Caregiver Code", (required)
-            $service->caregiver_first_name, //    "Caregiver First Name",
-            $service->caregiver_last_name, //    "Caregiver Last Name",
-            $service->caregiver_gender ? strtoupper($service->caregiver_gender) : '', //    "Caregiver Gender",
-            $service->caregiver_dob ?? '', //    "Caregiver Date of Birth",
-            $this->cleanSsn($service->caregiver_ssn), //    "Caregiver SSN",
+            $item->client_medicaid_id ?? $claim->getClientMedicaidId(), //    "Medicaid Number", (required)
+            $item->caregiver_id, //    "Caregiver Code", (required)
+            $item->caregiver_first_name, //    "Caregiver First Name",
+            $item->caregiver_last_name, //    "Caregiver Last Name",
+            $item->caregiver_gender ? strtoupper($item->caregiver_gender) : '', //    "Caregiver Gender",
+            $item->caregiver_dob ?? '', //    "Caregiver Date of Birth",
+            $this->cleanSsn($item->caregiver_ssn), //    "Caregiver SSN",
             $claim->id, //    "Schedule ID", (required)
             $service->service_code, //    "Procedure Code", (required)
             $service->scheduled_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule Start Time", (required)
@@ -162,9 +162,9 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "Missed Visit Action Taken Code",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Required",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Approved",
-            '', //    "User Field 1",
-            '', //    "User Field 2",
-            '', //    "User Field 3",
+            $service->shift_id, //    "User Field 1",
+            $item->client_id, //    "User Field 2",
+            $item->caregiver_id, //    "User Field 3",
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];

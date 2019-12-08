@@ -488,6 +488,32 @@
             </b-row>
             <b-row>
                 <b-col lg="6">
+                    <b-form-group label="HIC" label-for="client_hic">
+                        <b-form-input
+                            v-model="form.client_hic"
+                            id="client_hic"
+                            name="client_hic"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_hic" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Print On Claim Invoice" label-for="client_invoice_notes">
+                        <b-form-input
+                            v-model="form.client_invoice_notes"
+                            id="client_invoice_notes"
+                            name="client_invoice_notes"
+                            type="text"
+                            :disabled="form.busy || form.client_reload"
+                        />
+                        <input-help :form="form" field="client_invoice_notes" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
                     <b-form-group label="Payer Program ID" label-for="client_program_number">
                         <b-form-input
                             v-model="form.client_program_number"
@@ -919,6 +945,8 @@
                     client_ltci_policy_number: '',
                     client_ltci_claim_number: '',
                     client_case_manager: '',
+                    client_hic: '',
+                    client_invoice_notes: '',
 
                     client_signature_id: '',
                     caregiver_signature_id: '',

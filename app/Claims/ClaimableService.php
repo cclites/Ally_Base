@@ -118,26 +118,6 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     }
 
     /**
-     * Get the related Caregiver.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function caregiver()
-    {
-        return $this->belongsTo(Caregiver::class);
-    }
-
-    /**
-     * Get the related Client.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function client()
-    {
-        return $this->belongsTo(Client::class);
-    }
-
-    /**
      * Get the related Service.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -150,26 +130,6 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     // **********************************************************
     // ACCESSORS
     // **********************************************************
-
-    /**
-     * Encrypt Caregiver SSN on entry.
-     *
-     * @param $value
-     */
-    public function setCaregiverSsnAttribute($value)
-    {
-        $this->attributes['caregiver_ssn'] = $value ? \Crypt::encrypt($value) : null;
-    }
-
-    /**
-     * Decrypt Caregiver SSN on retrieval.
-     *
-     * @return null|string
-     */
-    public function getCaregiverSsnAttribute()
-    {
-        return empty($this->attributes['caregiver_ssn']) ? null : \Crypt::decrypt($this->attributes['caregiver_ssn']);
-    }
 
     // **********************************************************
     // MUTATORS
@@ -195,34 +155,6 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function getName(): string
     {
         return $this->service_name . ' ' . $this->service_code;
-    }
-
-    /**
-     * Get the Client's name.
-     *
-     * @return string
-     */
-    public function getClientName(): string
-    {
-        if (empty($this->client_first_name) && empty($this->client_last_name)) {
-            return '';
-        }
-
-        return $this->client_last_name . ', ' . $this->client_first_name;
-    }
-
-    /**
-     * Get the Caregiver's name that performed the service.
-     *
-     * @return string
-     */
-    public function getCaregiverName(): string
-    {
-        if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
-            return '';
-        }
-
-        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
     }
 
     /**
@@ -286,19 +218,6 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
-            'client_last_name' => $faker->lastName,
-            'client_dob' => $faker->date('Y-m-d', '-30 years'),
-            'client_medicaid_id' => $faker->randomNumber(8),
-
-            'client_program_number' => $faker->randomNumber(8),
-            'client_cirts_number' => $faker->randomNumber(8),
-            'client_ltci_policy_number' => $faker->randomNumber(8),
-            'client_ltci_claim_number' => $faker->randomNumber(8),
-            'client_case_manager' => $faker->name(),
-
-            'caregiver_last_name' => $faker->lastName,
-            'caregiver_dob' => $faker->date('Y-m-d', '-30 years'),
-            'caregiver_medicaid_id' => $faker->randomNumber(8),
             'address1' => $faker->streetAddress,
             'latitude' => $faker->latitude,
             'longitude' => $faker->longitude,

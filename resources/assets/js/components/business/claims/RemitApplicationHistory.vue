@@ -21,7 +21,7 @@
                         <td colspan="3">{{ remit.notes }}</td>
                     </tr><tr>
                         <td><strong>Date</strong></td>
-                        <td>{{ formatDateFromUTC(remit.date) }}</td>
+                        <td>{{ formatDate(remit.date) }}</td>
                         <td><strong>Reference #</strong></td>
                         <td>{{ remit.reference }}</td>
                     </tr><tr>

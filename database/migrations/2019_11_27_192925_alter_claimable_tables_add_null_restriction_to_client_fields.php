@@ -13,16 +13,14 @@ class AlterClaimableTablesAddNullRestrictionToClientFields extends Migration
      */
     public function up()
     {
-        Schema::table('claimable_expenses', function (Blueprint $table) {
+        Schema::table('claim_invoice_items', function (Blueprint $table) {
             $table->unsignedInteger('client_id')->nullable(false)->change();
             $table->string('client_first_name', 45)->nullable(false)->change();
             $table->string('client_last_name', 45)->nullable(false)->change();
-        });
 
-        Schema::table('claimable_services', function (Blueprint $table) {
-            $table->unsignedInteger('client_id')->nullable(false)->change();
-            $table->string('client_first_name', 45)->nullable(false)->change();
-            $table->string('client_last_name', 45)->nullable(false)->change();
+            $table->unsignedInteger('caregiver_id')->nullable(false)->change();
+            $table->string('caregiver_first_name', 45)->nullable(false)->change();
+            $table->string('caregiver_last_name', 45)->nullable(false)->change();
         });
     }
 
@@ -33,16 +31,14 @@ class AlterClaimableTablesAddNullRestrictionToClientFields extends Migration
      */
     public function down()
     {
-        Schema::table('claimable_expenses', function (Blueprint $table) {
+        Schema::table('claim_invoice_items', function (Blueprint $table) {
             $table->unsignedInteger('client_id')->nullable(true)->change();
             $table->string('client_first_name', 45)->nullable(true)->change();
             $table->string('client_last_name', 45)->nullable(true)->change();
-        });
 
-        Schema::table('claimable_services', function (Blueprint $table) {
-            $table->unsignedInteger('client_id')->nullable(true)->change();
-            $table->string('client_first_name', 45)->nullable(true)->change();
-            $table->string('client_last_name', 45)->nullable(true)->change();
+            $table->unsignedInteger('caregiver_id')->nullable(true)->change();
+            $table->string('caregiver_first_name', 45)->nullable(true)->change();
+            $table->string('caregiver_last_name', 45)->nullable(true)->change();
         });
     }
 }

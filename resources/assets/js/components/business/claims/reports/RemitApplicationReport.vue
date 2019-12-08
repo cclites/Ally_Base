@@ -112,7 +112,7 @@
                 subFields: {
                     id: { sortable: true, label: 'ID' },
                     payment_type: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitTypeOptions) },
-                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDateFromUTC(x) },
+                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDate(x) },
                     reference: { sortable: true, label: 'Reference #' },
                     status: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitStatusOptions) },
                     amount_applied: { sortable: true, formatter: x => this.moneyFormat(x) },

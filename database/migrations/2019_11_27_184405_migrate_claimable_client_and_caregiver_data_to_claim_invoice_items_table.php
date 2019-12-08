@@ -1,11 +1,10 @@
 <?php
 
-use App\Claims\ClaimableService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Collection;
 use App\Claims\ClaimInvoiceItem;
 
-class MigrateClaimClientDataToClaimableTables extends Migration
+class MigrateClaimableClientAndCaregiverDataToClaimInvoiceItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,10 +16,6 @@ class MigrateClaimClientDataToClaimableTables extends Migration
     {
         \DB::beginTransaction();
 
-        // First clean up any left over claimable data that is no longer attached to a parent claim item
-        ClaimableService::whereNotIn('id', \DB::table('claim_invoice_items')->select('claimable_id')->get()->pluck('claimable_id'))->delete();
-        \App\Claims\ClaimableExpense::whereNotIn('id', \DB::table('claim_invoice_items')->select('claimable_id')->get()->pluck('claimable_id'))->delete();
-
         ClaimInvoiceItem::with(['claimable', 'claim'])->chunk(400, function (Collection $items) {
             $items->each(function (ClaimInvoiceItem $item) {
                 if (
@@ -30,20 +25,35 @@ class MigrateClaimClientDataToClaimableTables extends Migration
                 ) {
                     throw new InvalidArgumentException("Cannot convert Claim #{$item->claim->id} because of blank client info.");
                 }
+
+                if (
+                    empty($item->claimable->caregiver_id) ||
+                    empty($item->claimable->caregiver_first_name) ||
+                    empty($item->claimable->caregiver_last_name)
+                ) {
+                    throw new InvalidArgumentException("Cannot convert Claim #{$item->claim->id} because of blank caregiver info.");
+                }
+
                 $data = [
+                    // Move client data off the claim invoice
                     'client_id' => $item->claim->client_id,
                     'client_first_name' => $item->claim->client_first_name,
                     'client_last_name' => $item->claim->client_last_name,
                     'client_dob' => $item->claim->client_dob,
                     'client_medicaid_id' => $item->claim->client_medicaid_id,
                     'client_medicaid_diagnosis_codes' => $item->claim->client_medicaid_diagnosis_codes,
+
+                    // Move caregiver data from the claimable item (if it exists)
+                    'caregiver_id' => $item->claimable->caregiver_id,
+                    'caregiver_first_name' => $item->claimable->caregiver_first_name,
+                    'caregiver_last_name' => $item->claimable->caregiver_last_name,
+                    'caregiver_gender' => $item->claimable->caregiver_gender,
+                    'caregiver_dob' => $item->claimable->caregiver_dob,
+                    'caregiver_ssn' => $item->claimable->caregiver_ssn,
+                    'caregiver_medicaid_id' => $item->claimable->caregiver_medicaid_id,
                 ];
 
-                if ($item->claimable_type != ClaimableService::class) {
-                    $data = array_only($data, ['client_id', 'client_first_name', 'client_last_name']);
-                }
-
-                $item->claimable->update($data);
+                $item->update($data);
             });
         });
         \DB::commit();
