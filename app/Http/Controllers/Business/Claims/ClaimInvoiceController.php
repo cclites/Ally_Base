@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimableService;
-use App\Claims\ClaimInvoiceType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Claims\Resources\ClaimCreatorResource;
-use App\Claims\Resources\ManageClaimsResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Claims\ClaimInvoiceType;
 use App\Billing\ClientInvoice;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
@@ -34,12 +32,12 @@ class ClaimInvoiceController extends BaseController
         $filters = $request->filtered();
 
         $claimQuery->with([
-                'clientInvoices.client',
-                'items' => function ($q) {
-                    $q->orderByRaw('claimable_type desc, date asc');
-                },
-                'items.clientInvoice',
-            ])->forRequestedBusinesses()
+            'clientInvoices.client',
+            'items' => function ($q) {
+                $q->orderByRaw('claimable_type desc, date asc');
+            },
+            'items.clientInvoice',
+        ])->forRequestedBusinesses()
             ->withStatus(ClaimStatus::transmittedStatuses())
             ->when($filters['client_id'], function (ClaimInvoiceQuery $q, $var) {
                 $q->forClient($var);
@@ -53,7 +51,7 @@ class ClaimInvoiceController extends BaseController
             ->when($filters['invoice_id'], function (ClaimInvoiceQuery $q, $var) {
                 $q->searchForInvoiceId($var);
             })
-            ->when(! $filters['inactive'], function (ClaimInvoiceQuery $q) {
+            ->when(!$filters['inactive'], function (ClaimInvoiceQuery $q) {
                 $q->forActiveClientsOnly();
             })
             ->when($filters['claim_status'] == 'unpaid', function (ClaimInvoiceQuery $q) {

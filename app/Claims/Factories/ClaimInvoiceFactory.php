@@ -18,9 +18,7 @@ use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\Billing\Service;
 use App\Billing\Payer;
-use App\Caregiver;
 use App\Address;
-use App\Client;
 use App\Shift;
 
 class ClaimInvoiceFactory

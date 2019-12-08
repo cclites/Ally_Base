@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Business\Claims;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ManageClaimsResource;
+use App\Services\TellusValidationException;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
-use App\Services\TellusValidationException;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ClaimTransmissionController extends BaseController
 {
@@ -32,7 +32,6 @@ class ClaimTransmissionController extends BaseController
         if (!$service = $claim->getTransmissionMethod()) {
             if ($method = $request->input('method', null)) {
                 $service = ClaimService::$method();
-//                $claim->transmission_method = $method;
             }
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Claims\Reports;
 
-use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Claims\Resources\ClaimAgingReportItemResource;
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Claims\ClaimInvoice;
 use App\Billing\ClaimStatus;
 use App\Reports\BaseReport;

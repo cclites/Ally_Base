@@ -2,8 +2,8 @@
 
 namespace App\Claims;
 
-use App\AuditableModel;
 use App\Billing\ClientInvoice;
+use App\AuditableModel;
 use App\Caregiver;
 use App\Client;
 
@@ -109,7 +109,7 @@ class ClaimInvoiceItem extends AuditableModel
      * Get the ClientInvoice relationship to the item.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function clientInvoice()
     {
         return $this->belongsTo(ClientInvoice::class);
@@ -307,7 +307,7 @@ class ClaimInvoiceItem extends AuditableModel
      * @param null|\Illuminate\Database\Eloquent\Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'client_last_name' => $faker->lastName,

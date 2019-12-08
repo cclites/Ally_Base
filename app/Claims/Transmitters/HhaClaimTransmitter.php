@@ -60,7 +60,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         $errors = collect(parent::validateClaim($claim));
 
         if (empty($claim->business->hha_username) || empty($claim->business->getHhaPassword())) {
-            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings').'#claims']);
+            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings') . '#claims']);
         }
 
         return $errors->isEmpty() ? null : $errors->toArray();
@@ -93,7 +93,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
 
             // create new HhaFile for the Claim
             $claim->hhaFiles()->create([
-                'filename' => substr($filename, 0,  strlen($filename) - 4),
+                'filename' => substr($filename, 0, strlen($filename) - 4),
                 'status' => HhaFile::STATUS_PENDING,
             ]);
 
@@ -235,7 +235,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param string|null $ssn
      * @return string
      */
-    private function cleanSsn(?string $ssn) : string
+    private function cleanSsn(?string $ssn): string
     {
         if (empty($ssn)) {
             return '';
@@ -249,7 +249,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $ssn = str_replace('*', '0', $ssn);
         }
 
-        return $ssn[0].$ssn[1].$ssn[2].'-'.$ssn[3].$ssn[4].'-'.$ssn[5].$ssn[6].$ssn[7].$ssn[8];
+        return $ssn[0] . $ssn[1] . $ssn[2] . '-' . $ssn[3] . $ssn[4] . '-' . $ssn[5] . $ssn[6] . $ssn[7] . $ssn[8];
     }
 
     /**
@@ -258,7 +258,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param ClaimInvoice $claim
      * @return bool
      */
-    public function isTestMode(ClaimInvoice $claim) : bool
+    public function isTestMode(ClaimInvoice $claim): bool
     {
         return $claim->business->hha_username == "test";
     }
@@ -270,7 +270,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return null|string
      * @throws \Exception
      */
-    public function test(ClaimInvoice $claim) : ?string
+    public function test(ClaimInvoice $claim): ?string
     {
         $hha = new HhaExchangeService(
             $claim->business->hha_username,

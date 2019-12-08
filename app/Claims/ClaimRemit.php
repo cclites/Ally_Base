@@ -3,13 +3,13 @@
 namespace App\Claims;
 
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Daxtabase\Eloquent\Model;
 use App\Traits\BelongsToOneBusiness;
-use App\AuditableModel;
+use App\Traits\ScrubsForSeeding;
 use App\Billing\Payer;
+use App\AuditableModel;
 use App\Business;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Claims\ClaimRemit
@@ -256,10 +256,10 @@ class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @param \Faker\Generator $faker
      * @param bool $fast
-     * @param null|Model $item
+     * @param \Illuminate\Database\Eloquent\Model|null $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'reference' => $faker->randomNumber(9),

@@ -142,12 +142,12 @@
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
+    import ClaimRemitAdjustmentForm from "./ClaimRemitAdjustmentForm";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from '../../../mixins/Constants';
     import ClaimRemitForm from "./ClaimRemitForm";
-    import ClaimRemitAdjustmentForm from "./ClaimRemitAdjustmentForm";
     import { mapGetters } from 'vuex';
 
     export default {

@@ -2,9 +2,9 @@
 
 namespace App\Claims\Reports;
 
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
-use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Reports\BaseReport;
 
 class ClaimTransmissionsReport extends BaseReport
@@ -22,9 +22,6 @@ class ClaimTransmissionsReport extends BaseReport
      * @var array
      */
     protected $range = [];
-
-    protected $totalAmount = 0.00;
-    protected $totalDue = 0.00;
 
     /**
      * ClientType filter

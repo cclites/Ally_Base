@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimInvoice;
 use App\Http\Controllers\Business\BaseController;
+use App\Claims\ClaimInvoice;
 
 class ClaimResultsController extends BaseController
 {

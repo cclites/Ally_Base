@@ -404,7 +404,7 @@
 
             /**
              * Handle updating the table item after it is successfully adjusted.
-             * @param {Object} invoice
+             * @param {Object} claim
              */
             updateRecord(claim) {
                 let index = this.items.findIndex(x => x.id == claim.id);

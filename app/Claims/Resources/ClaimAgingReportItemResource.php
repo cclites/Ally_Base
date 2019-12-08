@@ -2,8 +2,8 @@
 
 namespace App\Claims\Resources;
 
-use App\Billing\ClientInvoice;
 use Illuminate\Http\Resources\Json\Resource;
+use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use Carbon\Carbon;
 

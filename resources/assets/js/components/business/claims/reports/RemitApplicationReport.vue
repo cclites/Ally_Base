@@ -117,7 +117,6 @@
                     status: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitStatusOptions) },
                     amount_applied: { sortable: true, formatter: x => this.moneyFormat(x) },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    // amount_available: { sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 filters: new Form({
                     type: '',

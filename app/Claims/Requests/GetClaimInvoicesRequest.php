@@ -2,8 +2,8 @@
 
 namespace App\Claims\Requests;
 
-use App\Claims\ClaimInvoiceType;
 use App\Http\Requests\FilteredResourceRequest;
+use App\Claims\ClaimInvoiceType;
 use App\Rules\ValidEnum;
 
 class GetClaimInvoicesRequest extends FilteredResourceRequest

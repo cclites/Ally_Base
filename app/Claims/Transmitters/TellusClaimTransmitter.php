@@ -143,47 +143,47 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         $diagnosisCodes = $this->getDiagnosisCodes($claim);
 
         $data = [
-            'SourceSystem'           => $this->tcLookup('SourceSystem', 'ALLY'),
-            'Jurisdiction'           => $this->tcLookup('Jurisdiction', $service->state ),
-            'Payer'                  => $this->tcLookup('Payer', $claim->payer_code ),
-            'Plan'                   => $this->tcLookup('Plan', $claim->plan_code ), // FMSP is only Acceptable Value
+            'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
+            'Jurisdiction' => $this->tcLookup('Jurisdiction', $service->state),
+            'Payer' => $this->tcLookup('Payer', $claim->payer_code),
+            'Plan' => $this->tcLookup('Plan', $claim->plan_code), // FMSP is only Acceptable Value
             // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL, PACE is only Acceptable Value
-            'DeliverySystem'         => $this->tcLookup( 'DeliverySystem', 'MCOR' ), // FFFS or MCOR.. no way to derive this from our system yet.
-            'ProviderName'           => $business->name,
-            'ProviderMedicaidId'     => $business->medicaid_id,
-            'ProviderNPI'            => $business->medicaid_npi_number, // OPTIONAL
-            'ProviderNPITaxonomy'    => $business->medicaid_npi_taxonomy, // OPTIONAL
-            'ProviderNPIZipCode'     => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
-            'ProviderEin'            => str_replace('-', '', $business->ein), // REQUIRED
-            'CaregiverFirstName'     => $service->caregiver_first_name,
-            'CaregiverLastName'      => $service->caregiver_last_name,
+            'DeliverySystem' => $this->tcLookup('DeliverySystem', 'MCOR'), // FFFS or MCOR.. no way to derive this from our system yet.
+            'ProviderName' => $business->name,
+            'ProviderMedicaidId' => $business->medicaid_id,
+            'ProviderNPI' => $business->medicaid_npi_number, // OPTIONAL
+            'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy, // OPTIONAL
+            'ProviderNPIZipCode' => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
+            'ProviderEin' => str_replace('-', '', $business->ein), // REQUIRED
+            'CaregiverFirstName' => $service->caregiver_first_name,
+            'CaregiverLastName' => $service->caregiver_last_name,
             'CaregiverLicenseNumber' => $service->caregiver_medicaid_id, // OPTIONAL
-            'RecipientMedicaidId'    => $claim->client_medicaid_id,
-            'RecipientMemberId'      => '', // OPTIONAL
-            'RecipientFirstName'     => $claim->client_first_name,
-            'RecipientLastName'      => $claim->client_last_name,
-            'RecipientDob'           => Carbon::parse( $claim->client_dob )->format('m/d/Y'),
-            'ServiceAddress1'        => $service->address1,
-            'ServiceAddress2'        => $service->address2, // OPTIONAL
-            'ServiceCity'            => $service->city,
-            'ServiceState'           => $service->state,
-            'ServiceZip'             => $service->zip,
-            'VisitId'                => $service->id,
-            'ServiceCode'            => $service->service_code,
-            'ServiceCodeMod1'        => '', // OPTIONAL
-            'ServiceCodeMod2'        => '', // OPTIONAL
-            'DiagnosisCode1'         => $diagnosisCodes[ 0 ],
-            'DiagnosisCode2'         => $diagnosisCodes[ 1 ], // OPTIONAL && TODO
-            'DiagnosisCode3'         => $diagnosisCodes[ 2 ], // OPTIONAL && TODO
-            'DiagnosisCode4'         => $diagnosisCodes[ 3 ], // OPTIONAL && TODO
-            'StartVerificationType'  => $this->tcLookup( 'StartVerificationType', $this->getVerificationType($service->evv_method_in) ), // OPTIONAL
-            'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($service->evv_method_out) ), // OPTIONAL
+            'RecipientMedicaidId' => $claim->client_medicaid_id,
+            'RecipientMemberId' => '', // OPTIONAL
+            'RecipientFirstName' => $claim->client_first_name,
+            'RecipientLastName' => $claim->client_last_name,
+            'RecipientDob' => Carbon::parse($claim->client_dob)->format('m/d/Y'),
+            'ServiceAddress1' => $service->address1,
+            'ServiceAddress2' => $service->address2, // OPTIONAL
+            'ServiceCity' => $service->city,
+            'ServiceState' => $service->state,
+            'ServiceZip' => $service->zip,
+            'VisitId' => $service->id,
+            'ServiceCode' => $service->service_code,
+            'ServiceCodeMod1' => '', // OPTIONAL
+            'ServiceCodeMod2' => '', // OPTIONAL
+            'DiagnosisCode1' => $diagnosisCodes[0],
+            'DiagnosisCode2' => $diagnosisCodes[1], // OPTIONAL && TODO
+            'DiagnosisCode3' => $diagnosisCodes[2], // OPTIONAL && TODO
+            'DiagnosisCode4' => $diagnosisCodes[3], // OPTIONAL && TODO
+            'StartVerificationType' => $this->tcLookup('StartVerificationType', $this->getVerificationType($service->evv_method_in)), // OPTIONAL
+            'EndVerificationType' => $this->tcLookup('EndVerificationType', $this->getVerificationType($service->evv_method_out)), // OPTIONAL
             'ScheduledStartDateTime' => $service->scheduled_start_time->format($this->timeFormat), // OPTIONAL
-            'ScheduledEndDateTime'   => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledEndDateTime' => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime'    => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime'      => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime' => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime' => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
@@ -195,14 +195,14 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             // 'ReasonCode2' => '', // OPTIONAL && TODO
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
-            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
-            'VisitNote'              => $service->caregiver_comments ?? '', // OPTIONAL
-            'EndAddress1'            => $service->address1, // OPTIONAL
-            'EndAddress2'            => $service->address2, // OPTIONAL
-            'EndCity'                => $service->city, // OPTIONAL
-            'EndState'               => $service->state, // OPTIONAL
-            'EndZip'                 => $service->zip, // OPTIONAL
-            'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
+            'TimeZone' => $this->tcLookup('TimeZone', $this->getBusinessTimezone($business)),
+            'VisitNote' => $service->caregiver_comments ?? '', // OPTIONAL
+            'EndAddress1' => $service->address1, // OPTIONAL
+            'EndAddress2' => $service->address2, // OPTIONAL
+            'EndCity' => $service->city, // OPTIONAL
+            'EndState' => $service->state, // OPTIONAL
+            'EndZip' => $service->zip, // OPTIONAL
+            'VisitStatus' => $this->tcLookup('VisitStatus', 'COMP'), // OPTIONAL, Hardcoded to 'Completed' on purpose
             // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
             // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
             // 'InvoiceUnits'           => '', // OPTIONAL && TODO
@@ -210,8 +210,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ScheduledEndLatitude' => '',
             'ScheduledEndLongitude' => '',
             // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
-            'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL
-            'Tasks'                  => '', // a wrapper element for the tasks
+            'CareDirectionType' => $this->tcLookup('CareDirectionType', 'PROV'), // OPTIONAL
+            'Tasks' => '', // a wrapper element for the tasks
             // 'Task'                   => $this->tcLookup( 'Task', 'MBED' ),
         ];
 
@@ -225,10 +225,10 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
 
         // Set end EVV data (if exists)
         if ($service->evv_method_out == Shift::METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
-            $data['ActualEndLatitude']      = $service->checked_out_latitude; // OPTIONAL
-            $data['ActualEndLongitude']     = $service->checked_out_longitude; //OPTIONAL
-            $data['ScheduledEndLatitude']   = $service->latitude ?? ''; // OPTIONAL
-            $data['ScheduledEndLongitude']  = $service->longitude ?? ''; // OPTIONAL
+            $data['ActualEndLatitude'] = $service->checked_out_latitude; // OPTIONAL
+            $data['ActualEndLongitude'] = $service->checked_out_longitude; //OPTIONAL
+            $data['ScheduledEndLatitude'] = $service->latitude ?? ''; // OPTIONAL
+            $data['ScheduledEndLongitude'] = $service->longitude ?? ''; // OPTIONAL
         }
 
         // clean empty values and return
@@ -241,7 +241,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param \Illuminate\Support\Collection $activities
      * @return string
      */
-    public function mapActivities(Collection $activities) : string
+    public function mapActivities(Collection $activities): string
     {
         // TODO: re-work this to read from hcpcs_procedure_code field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if ($activities->isEmpty()) {
@@ -249,7 +249,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         $activities = $activities->map(function ($activity) {
-            if (! empty($activity->business_id)) {
+            if (!empty($activity->business_id)) {
                 // return a default code for any custom activity
                 return 'S9122';
             }
@@ -315,7 +315,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @return array
      * @throws ClaimTransmissionException
      */
-    public function tcLookup(string $category, string $textCode) : array
+    public function tcLookup(string $category, string $textCode): array
     {
         $typeCode = TellusTypecode::where('category', $category)
             ->where('text_code', 'LIKE', $textCode)
@@ -353,7 +353,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param Business $business
      * @return string
      */
-    protected function getBusinessTimezone(Business $business) : string
+    protected function getBusinessTimezone(Business $business): string
     {
         switch ($business->timezone) {
             case 'America/Chicago':
@@ -376,7 +376,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      * @param ClaimInvoice $claim
      * @return array
      */
-    protected function getDiagnosisCodes(ClaimInvoice $claim) : array
+    protected function getDiagnosisCodes(ClaimInvoice $claim): array
     {
         return array_pad(
             array_map('trim', explode(',', $claim->client_medicaid_diagnosis_codes)),

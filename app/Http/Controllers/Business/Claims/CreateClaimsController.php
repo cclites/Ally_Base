@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Billing\Queries\ClientInvoiceQuery;
-use App\Claims\Resources\ClaimCreatorResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\GetClientInvoicesRequest;
+use App\Claims\Resources\ClaimCreatorResource;
+use App\Billing\Queries\ClientInvoiceQuery;
 
 class CreateClaimsController extends BaseController
 {

@@ -2,7 +2,6 @@
 
 namespace App\Claims\Resources;
 
-use App\Billing\ClientInvoice;
 use Illuminate\Http\Resources\Json\Resource;
 
 class ClaimAdjustmentResource extends Resource
@@ -56,7 +55,6 @@ class ClaimAdjustmentResource extends Resource
 
         if (! $this->resource->is_interest && filled($this->resource->claim_invoice_id)) {
             $data = array_merge($data, [
-//                'claim_invoice' => new ClaimInvoiceResource($this->resource->claimInvoice),
                 'claim_invoice_date' => $this->resource->claimInvoice->getDate()->toDateTimeString(),
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),
                 'client_invoice_id' => optional($this->resource->claimInvoiceItem->clientInvoice)->id,

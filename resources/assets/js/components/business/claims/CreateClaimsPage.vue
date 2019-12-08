@@ -182,7 +182,7 @@
                     if (this.filters.client_type) {
                         if (x.client_type != this.filters.client_type) {
                             return false;
-                        };
+                        }
                     }
 
                     if (! this.filters.inactive) {

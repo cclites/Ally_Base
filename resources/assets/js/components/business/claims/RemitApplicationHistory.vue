@@ -182,19 +182,6 @@
         created() {
             this.$store.commit('claims/setRemit', this.init.remit);
             this.adjustments = this.init.adjustments;
-
-            // this.invoices = _.groupBy(this.adjustments, x => {
-            //     if (! x.claim_invoice_name && x.is_interest) {
-            //         return 'Interest';
-            //     } else if (! x.claim_invoice_id) {
-            //         return 'Adjustments';
-            //     }
-            //     return x.claim_invoice_name;
-            // });
-            //
-            // this.invoices = invoices..map((index, items) => {
-            //     console.log('index: ', index, 'items:', items);
-            // });
         },
     }
 </script>

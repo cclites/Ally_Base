@@ -3,14 +3,12 @@
 namespace App\Claims;
 
 use App\Claims\Contracts\ClaimableInterface;
+use Illuminate\Database\Eloquent\Model;
+use App\Traits\ScrubsForSeeding;
 use App\Billing\Service;
 use App\AuditableModel;
-use App\Caregiver;
-use App\Client;
-use App\Shift;
-use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use App\Shift;
 
 /**
  * App\Claims\ClaimableService
@@ -215,7 +213,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'address1' => $faker->streetAddress,

@@ -123,8 +123,8 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import { mapGetters } from 'vuex';
     import Constants from "../../../mixins/Constants";
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {ClaimInvoiceItemsTable, TransmissionMethodDropdown},
@@ -163,12 +163,7 @@
 
             initForm(data) {
                 this.form = new Form({
-                    // client_first_name: data.client_first_name || '',
-                    // client_last_name: data.client_last_name || '',
                     payer_code: data.payer_code || '',
-                    // client_medicaid_id: data.client_medicaid_id || '',
-                    // client_dob: (data.client_dob) ? this.formatDate(data.client_dob) : null,
-                    // client_medicaid_diagnosis_codes: data.client_medicaid_diagnosis_codes || '',
                     plan_code: data.plan_code || '',
                     transmission_method: data.transmission_method || '',
                 });

@@ -2,9 +2,9 @@
 
 namespace App\Claims\Transmitters;
 
-use App\Claims\ClaimableService;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
+use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
@@ -40,7 +40,7 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
         }
 
         if (empty($claim->business->ein)) {
-            $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings').'#medicaid']);
+            $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings') . '#medicaid']);
         }
 
         if (empty($claim->getClientMedicaidId())) {

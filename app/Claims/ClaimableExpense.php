@@ -2,15 +2,11 @@
 
 namespace App\Claims;
 
-use App\Caregiver;
 use App\Claims\Contracts\ClaimableInterface;
-use App\AuditableModel;
-use App\Client;
-use App\Shift;
-use App\Traits\ScrubsForSeeding;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\AuditableModel;
+use Carbon\Carbon;
+use App\Shift;
 
 /**
  * App\Claims\ClaimableExpense
@@ -119,14 +115,16 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-    use \App\Traits\ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
+    use \App\Traits\ScrubsForSeeding {
+        getScrubQuery as parentGetScrubQuery;
+    }
 
     /**
      * Get the query used to identify records that will be scrubbed.
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function getScrubQuery() : \Illuminate\Database\Eloquent\Builder
+    public static function getScrubQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return static::parentGetScrubQuery()->whereNotNull('notes');
     }
@@ -139,7 +137,7 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'notes' => $faker->sentence,

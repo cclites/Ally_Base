@@ -40,9 +40,7 @@ class UpdateClaimInvoiceRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
-//        if ($data['client_dob']) {
-//            $data['client_dob'] = filter_date($data['client_dob']);
-//        }
+
         return $data;
     }
 }

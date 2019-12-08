@@ -8,7 +8,6 @@ use App\Claims\Resources\ClaimInvoiceResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Resources\ManageClaimsResource;
 use App\Responses\SuccessResponse;
-use App\Responses\ErrorResponse;
 use App\Claims\ClaimAdjustment;
 use App\Claims\ClaimInvoice;
 

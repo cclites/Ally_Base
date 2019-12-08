@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\Resources\ClaimCreatorResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ManageClaimsResource;
+use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Billing\Queries\ClientInvoiceQuery;
-use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Responses\ErrorResponse;
 use Illuminate\Http\Request;
 
 class GroupedClaimsController extends BaseController

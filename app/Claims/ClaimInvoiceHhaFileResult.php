@@ -21,10 +21,10 @@ class ClaimInvoiceHhaFileResult extends BaseModel
      * Get the HhaFile Relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function hhaFile()
     {
-        return $this->belongsTo(ClaimInvoiceHhaFile::class, 'hha_file_id','id');
+        return $this->belongsTo(ClaimInvoiceHhaFile::class, 'hha_file_id', 'id');
     }
 
     // **********************************************************
