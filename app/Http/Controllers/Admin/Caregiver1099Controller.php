@@ -8,11 +8,13 @@ use App\Caregiver;
 use App\Client;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidSSN;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCaregiver1099Request;
 use App\Http\Requests\UpdateCaregiver1099Request;
 use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use mikehaertl\pdftk\Pdf;
 use mikehaertl\tmp\File;
 
@@ -62,7 +64,7 @@ class Caregiver1099Controller extends Controller
     /**
      * Display a listing of the resource for a single caregiver
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Caregiver $caregiver)
@@ -82,7 +84,7 @@ class Caregiver1099Controller extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -93,7 +95,7 @@ class Caregiver1099Controller extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
 
     public function store(StoreCaregiver1099Request $request)
@@ -103,8 +105,6 @@ class Caregiver1099Controller extends Controller
 
         foreach($records as $record)
         {
-            \Log::info(json_encode($record));
-
             $record = (array)$record;
             $record['year'] = $request->year;
             $record['created_by'] = auth()->user()->nameLastFirst();
@@ -131,7 +131,7 @@ class Caregiver1099Controller extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
@@ -141,13 +141,11 @@ class Caregiver1099Controller extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Caregiver1099 $caregiver1099
+     * @return Response
      */
-    public function edit($id)
+    public function edit(Caregiver1099 $caregiver1099)
     {
-        $caregiver1099 = Caregiver1099::find($id);
-
         //decode the ssns
         $decodedClientSsn = decrypt($caregiver1099->client_ssn);
         $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
@@ -163,22 +161,25 @@ class Caregiver1099Controller extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(UpdateCaregiver1099Request $request, $id)
+    public function update(UpdateCaregiver1099Request $request, Caregiver1099 $caregiver1099)
     {
-        $caregiver1099 = Caregiver1099::find($id);
         $caregiver1099->fill($request->all());
 
         if( strpos($caregiver1099->client_ssn, "#") !== false ){
-            //TODO:: validate SSN
+            $this->validate($request, [
+                'client_ssn' => ['required', new ValidSSN()],
+            ]);
             $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
         }else{
             unset($caregiver1099->client_ssn);
         }
 
         if( strpos($caregiver1099->caregiver_ssn, "#") !== false ){
-            //TODO:: validate SSN
+            $this->validate($request, [
+                'caregiver_ssn' => ['required', new ValidSSN()],
+            ]);
             $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
         }else{
             unset($caregiver1099->caregiver_ssn);
@@ -195,7 +196,7 @@ class Caregiver1099Controller extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
@@ -207,30 +208,29 @@ class Caregiver1099Controller extends Controller
      * TODO: Convert to IRS format for direct transmission
      *
      * @param Transmit1099Request $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function transmit(Caregiver1099 $caregiver1099, Transmit1099Request $request)
+    public function transmit(Caregiver1099 $caregiver1099, $year)
     {
         $systemSettings = \DB::table('system_settings')->first();
 
         $caregiver1099s = $caregiver1099
-                            ->where('year', $request->year)
-                            ->whereIsNull('transmitted_at')
+                            ->where('year', $year)
+                            ->whereNull('transmitted_at')
                             ->with('client')
-                            ->take(1)
                             ->get()
                             ->map(function($cg1099) use($systemSettings){
 
-                                $cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
+                                //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
 
                                 $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
                                 $recipientTin = decrypt($cg1099->caregiver_ssn);
-                                $payerName = $cg1099->client->name();
+                                $payerName = $cg1099->client_fname . " " . $cg1099->client_lname;
                                 $payerAddress = $cg1099->client_address1 . "\n" . filled($cg1099->client_address2);
-                                $payerCity = $cg1099->payer_city;
-                                $payerState = $cg1099->payer_state;
-                                $payerZip = $cg1099->payer_zip;
-                                $payerPhone = $cg1099->payer_phone;
+                                $payerCity = $cg1099->client_city;
+                                $payerState = $cg1099->client_state;
+                                $payerZip = $cg1099->client_zip;
+                                $payerPhone = $cg1099->client_phone;
 
                                 if($cg1099->client->caregiver_1099 === 'ally'){
                                     $payerName = $systemSettings->company_name;
@@ -251,17 +251,18 @@ class Caregiver1099Controller extends Controller
                                     'payer_phone' => $payerPhone,
                                     'payer_tin' => $payerTin,
                                     'recipient_tin' => $recipientTin,
-                                    'recipient_name' => $cg1099->caregiver_name,
+                                    'recipient_name' => $cg1099->caregiver_fname . " " . $cg1099->caregiver_lname,
                                     'recipient_address' => $cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2),
                                     'recipient_city' => $cg1099->caregiver_city,
                                     'recipient_state' => $cg1099->caregiver_state,
                                     'recipient_zip' => $cg1099->caregiver_zip
                                 ];
-
-
-                            });
+                            })
+                            ->toString();
 
         $csv = $this->toCsv($caregiver1099s);
+
+        //\Log::info(json_encode($csv));
 
         return \Response::make(json_encode($csv), 200, [
             'Content-type' => 'application/csv',
@@ -278,7 +279,7 @@ class Caregiver1099Controller extends Controller
      */
     private function toCsv($rows){
 
-        if (count($rows) > 1) {
+        if (count($rows) < 1) {
             return '';
         }
 
@@ -288,22 +289,24 @@ class Caregiver1099Controller extends Controller
         // build rows
         foreach ($rows as $row) {
 
+            \Log::info($row);
+
             $data = [
                 0,
                 0,
-                $row->payer_name,
-                $row->payer_address,
-                $row->payer_city,
-                $row->payer_state,
-                $row->payer_zip,
-                $row->payer_phone,
-                $row->payer_tin,
-                $row->recipient_tin,
-                $row->recipient_name,
-                $row->recipient_address,
-                $row->recipient_city,
-                $row->recipient_state,
-                $row->recipient_zip,
+                $row['payer_name'],
+                $row['payer_address'],
+                $row['payer_city'],
+                $row['payer_state'],
+                $row['payer_zip'],
+                $row['payer_phone'],
+                $row['payer_tin'],
+                $row['recipient_tin'],
+                $row['recipient_name'],
+                $row['recipient_address'],
+                $row['recipient_city'],
+                $row['recipient_state'],
+                $row['recipient_zip'],
                 null,
                 null,
                 null,
@@ -340,37 +343,57 @@ class Caregiver1099Controller extends Controller
     /**
      * Generate PDF on the fly and download it.
      *
-     * @param $id
+     * @param Caregiver1099 $caregiver1099
      */
-    public function downloadPdf($id)
+    public function downloadPdf(Caregiver1099 $caregiver1099)
     {
+        $caregiver1099->load("client");
+
         $systemSettings = \DB::table('system_settings')->first();
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/2019/CopyB_1099msc.pdf');
-        $caregiver1099 = Caregiver1099::find($id)->load("client");
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/CopyB_1099msc.pdf');
 
         $payerTin = $caregiver1099->client_ssn ? decrypt($caregiver1099->client_ssn) : '';
-        $decodedCaregiverSsn = decrypt($caregiver1099->caregiver_ssn);
         $payerName = $clientName = $caregiver1099->client_fname . " " . $caregiver1099->client_lname;
-        $payerAddress = $payerName . "\n" . $caregiver1099->client_address1 . "\n" . filled($caregiver1099->client_address2 . "\n") . $caregiver1099->client_address3();
+        $clAddress2 = $caregiver1099->client_address2 ? $caregiver1099->client_address2 . "\n" : '';
+        $caAddress2 = $caregiver1099->caregiver_address2 ? ", " . $caregiver1099->caregiver_address2 : '';
+        $payerAddress = $payerName . "\n" . $caregiver1099->client_address1 . "\n" . $clAddress2 . $caregiver1099->client_address3();
 
         if($caregiver1099->client->caregiver_1099 === 'ally'){
             $payerName = $systemSettings->company_name;
             $payerTin = $systemSettings->company_ein;
             $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;
-            $payerAddress = $payerName . "\n" . $systemSettings->company_address1 . "\n" . filled($systemSettings->company_address2 . "\n") . $payerAddress3;
+            $clAddress2 = $systemSettings->company_address2 ? $systemSettings->company_address2 . "\n" : '';
+            $payerAddress = $payerName . "\n" . $systemSettings->company_address1 . "\n" . $clAddress2 . $payerAddress3;
         }
 
         $pdf->fillForm([
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $decodedCaregiverSsn, //recipient tin
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . "\n" . $caregiver1099->caregiver_address2, //recipient street address
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3, //recipient city, state, zip
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
         ])->execute();
 
         $fileName = $clientName . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
         $pdf->send($fileName);
+    }
+
+    public function admin(){
+
+        $years = \DB::table('caregiver_1099s')->distinct()->pluck('year');
+
+        return view_component(
+            'caregiver-1099-admin',
+            'Admin 1099',
+            [
+                'years'=>$years
+            ],
+            [
+                'Home' => route('home'),
+                'Reports' => route('admin.admin-1099')
+            ]
+        );
     }
 }

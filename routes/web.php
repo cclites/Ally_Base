@@ -622,18 +622,24 @@ Route::group([
     Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
 
     /* Caregiver 1099 preview related */
-    Route::get('admin-1099', 'Admin\Admin1099Controller@index')->name('admin-1099');
+    Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');
+
+
     Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list'); //preview-1099-report
     Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
 
     /* Caregiver 1099s */
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
-    Route::get('business-1099/edit/{id}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
-    Route::get('business-1099/download/{id}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
+    Route::get('business-1099/edit/{caregiver1099}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
+    Route::get('business-1099/download/{caregiver1099}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
+    Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 
-    //Route::get('business-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
-    Route::get('transmit-1099/transmit', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('/business-1099/userEmails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
+    Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
+
+
 
 
     // notes import

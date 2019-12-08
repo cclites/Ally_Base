@@ -27,12 +27,10 @@ class Caregiver1099 extends BaseModel
     }
 
     public function client_address3(){
-        $c = $this->client;
-        return $c->city . ", " . $c->state . " " . $c->zip;
+        return $this->client_city . ", " . $this->client_state . " " . $this->client_zip;
     }
 
     public function caregiver_address3(){
-        $c = $this->caregiver;
-        return $c->city . ", " . $c->state . " " . $c->zip;
+        return $this->caregiver_city . ", " . $this->caregiver_state . " " . $this->caregiver_zip;
     }
 }

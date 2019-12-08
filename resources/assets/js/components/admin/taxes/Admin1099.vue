@@ -33,20 +33,26 @@
                     {
                         key: 'name',
                         label: 'Name',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'description',
                         label: 'What this does',
-                        sortable: true,
+                        sortable: false,
                     },
                 ],
                 items: [
                     {
+                        name: 'Ally Contact Info',
+                        description: 'Edit Ally contact information',
+                        url: 'admin-1099',
+                        disabled: true,
+                    },
+                    {
                         name: 'Ally 1099 Payer Info',
                         description: 'Download Transmission Report and Client/CG Emails',
-                        url: 'transmit-1099',
-                        disabled: true,
+                        url: 'admin-1099',
+                        disabled: false,
                     },
                     {
                         name: 'Registry Email List',
@@ -76,12 +82,6 @@
                         name: '1099 Preview Report',
                         description: 'Review 1099s',
                         url: 'preview-1099-report',
-                        disabled: false,
-                    },
-                    {
-                        name: '1099 Transmission Report',
-                        description: 'Download Transmission Report and Client/CG Emails',
-                        url: 'transmit-1099',
                         disabled: false,
                     },
                     {

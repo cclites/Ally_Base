@@ -165,7 +165,7 @@
         props: {},
         data() {
             return {
-                start_date: 2017, //arbitrary start year
+                start_date: 2019, //arbitrary start year
                 end_date: moment().year(),
                 form: new Form({
                         business_id: '',

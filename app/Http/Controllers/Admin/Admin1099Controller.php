@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\Caregiver1099;
 use App\Reports\Admin1099PreviewReport;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class Admin1099Controller extends BaseController
      */
     public function index()
     {
-        return view_component('admin-ten-ninety-nine', '1099');
+        return view_component('admin-1099-actions', '1099');
     }
 
     /**
@@ -97,6 +98,23 @@ class Admin1099Controller extends BaseController
         $emailString = implode(",", $emails);
 
         return view_component('admin-registry-emails', 'Registry Emails', ['emails' => $emailString]);
+    }
+
+    public function UserEmailsList(Caregiver1099 $caregiver1099s, $year, $role){
+
+        $data = $caregiver1099s->where('year', $year)->with(['client', 'caregiver'])
+                ->get()
+                ->map(function($caregiver1099) use($role){
+                    if($role = 'client'){
+                        return $caregiver1099->client->email;
+                    }
+
+                    return $caregiver1099->caregiver->email;
+                })
+                ->implode(", ");
+
+        return response()->json($data);
+
     }
 
 }

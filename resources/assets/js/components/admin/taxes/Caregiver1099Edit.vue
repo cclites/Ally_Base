@@ -68,21 +68,53 @@
             <b-form-input
                     id="client_address2"
                     v-model="caregiver1099.client_address2"
-                    required
                     placeholder="Address2"
             ></b-form-input>
         </b-form-group>
-        <b-form-group
-                label="Client City, State, Zip"
-                label-for="client_address3"
-        >
-            <b-form-input
-                    id="client_address3"
-                    v-model="caregiver1099.client_address3"
-                    required
-                    placeholder="Address2"
-            ></b-form-input>
-        </b-form-group>
+
+        <b-row>
+            <b-col>
+                <b-form-group
+                        label="Client City"
+                        label-for="client_city"
+                >
+                    <b-form-input
+                            id="client_city"
+                            v-model="caregiver1099.client_city"
+                            required
+                            placeholder="Client City"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+            <b-col>
+                <b-form-group
+                        label="Client state"
+                        label-for="client_state"
+                >
+                    <b-form-input
+                            id="client_state"
+                            v-model="caregiver1099.client_state"
+                            required
+                            placeholder="Client State"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+            <b-col>
+                <b-form-group
+                        label="Client Zip"
+                        label-for="client_zip"
+                >
+                    <b-form-input
+                            id="client_zip"
+                            v-model="caregiver1099.client_zip"
+                            required
+                            placeholder="Client Zip"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+        </b-row>
+
+        <hr>
 
         <!--
           CAREGIVER INPUTS
@@ -150,21 +182,51 @@
             <b-form-input
                     id="caregiver_address2"
                     v-model="caregiver1099.caregiver_address2"
-                    required
                     placeholder="Address2"
             ></b-form-input>
         </b-form-group>
-        <b-form-group
-                label="Caregiver City, State, Zip"
-                label-for="caregiver_address3"
-        >
-            <b-form-input
-                    id="caregiver_address3"
-                    v-model="caregiver1099.caregiver_address3"
-                    required
-                    placeholder="Address2"
-            ></b-form-input>
-        </b-form-group>
+
+        <b-row>
+            <b-col>
+                <b-form-group
+                        label="Caregiver City"
+                        label-for="caregiver_city"
+                >
+                    <b-form-input
+                            id="caregiver_city"
+                            v-model="caregiver1099.caregiver_city"
+                            required
+                            placeholder="Caregiver City"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+            <b-col>
+                <b-form-group
+                        label="Caregiver State"
+                        label-for="caregiver_state"
+                >
+                    <b-form-input
+                            id="caregiver_state"
+                            v-model="caregiver1099.caregiver_state"
+                            required
+                            placeholder="Caregiver State"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+            <b-col>
+                <b-form-group
+                        label="Caregiver Zip"
+                        label-for="caregiver_zip"
+                >
+                    <b-form-input
+                            id="caregiver_zip"
+                            v-model="caregiver1099.caregiver_zip"
+                            required
+                            placeholder="Caregiver Zip"
+                    ></b-form-input>
+                </b-form-group>
+            </b-col>
+        </b-row>
 
         <br>
         <hr>

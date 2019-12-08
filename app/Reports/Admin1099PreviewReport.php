@@ -20,7 +20,7 @@ class Admin1099PreviewReport extends BaseReport
     protected $threshold = 600;
 
 
-    public function __construct(int $year, int $business_id, ?int $client_id, ?int  $caregiver_id, ?string $caregiver_1099, ?int $created, ?int $transmitted, ?int $caregiver_1099_id)
+    public function __construct(string $year, int $business_id, ?int $client_id, ?int  $caregiver_id, ?string $caregiver_1099, ?int $created, ?int $transmitted, ?int $caregiver_1099_id)
     {
         $this->year = $year;
         $this->business_id = $business_id;
@@ -55,6 +55,10 @@ class Admin1099PreviewReport extends BaseReport
      */
     public function applyFilters()
     {
+
+        \Log::info("YEAR IS:");
+        \Log::info($this->year);
+
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
 
         // IMPORTANT NOTE
