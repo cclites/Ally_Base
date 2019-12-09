@@ -57,8 +57,10 @@
                     class="mr-1 mt-1"
                 >
                     <option value="">-- Claim Status --</option>
-                    <option value="CREATED">Created</option>
-                    <option value="TRANSMITTED">Transmitted</option>
+                    <option :value="CLAIM_STATUSES.CREATED">Created</option>
+                    <option :value="CLAIM_STATUSES.TRANSMITTED">Transmitted</option>
+                    <option :value="CLAIM_STATUSES.ACCEPTED">Accepted</option>
+                    <option :value="CLAIM_STATUSES.REJECTED">Rejected</option>
                 </b-form-select>
 
                 <b-form-select v-model="filters.client_id" class="mr-1 mt-1" :disabled="loadingClients">
@@ -163,7 +165,7 @@
                 <template slot="status" scope="row">
                     {{ resolveOption(row.item.status, claimStatusOptions) }}
                     <span v-if="row.item.transmission_method == 'HHA' && row.item.status == CLAIM_STATUSES.REJECTED">
-                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item)"></i>
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item)" style="cursor:pointer"></i>
                     </span>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
