@@ -144,6 +144,8 @@ class ClaimsController extends BaseController
                 $testFile = $transmitter->test($claim);
             } else {
                 $transmitter->send($claim);
+
+                // dd( $claim );
                 $claim->updateStatus(ClaimStatus::TRANSMITTED(), [
                     'service' => $service,
                 ]);
@@ -250,14 +252,16 @@ class ClaimsController extends BaseController
      * @param Claim $claim
      * @return \Illuminate\Http\JsonResponse
      */
-    public function hhaResults(Claim $claim)
+    public function claimResults(Claim $claim, string $service )
     {
-        $hhaFile = $claim->hhaFiles()->with('results')->latest()->first();
+        $method = $service . "Files";
 
-        if (empty($hhaFile)) {
+        $file = $claim->$method()->with( 'results' )->latest()->first();
+
+        if (empty($file)) {
             return response()->json([]);
         }
 
-        return response()->json($hhaFile->results);
+        return response()->json($file->results);
     }
 }

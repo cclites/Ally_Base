@@ -172,7 +172,7 @@
     }
     .actions {
         position: relative;
-        bottom: 0px;
+        bottom: 35px;
     }
     @media screen and (max-width: 600px) {    
         .landscape-warning {

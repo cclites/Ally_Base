@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-btn variant="info" @click="createUser()">Create User</b-btn>
+        <b-btn variant="info" @click="createUser()" class="mb-4">Create User</b-btn>
         <table class="table table-bordered">
             <thead>
             <th>Username</th>
@@ -65,14 +65,18 @@
             },
 
             deleteUser(user) {
-                if (confirm('Are you sure you wish to delete ' + user.username + '?')) {
-                    let form = new Form();
-                    form.submit('delete', '/admin/chains/' + this.chain.id + '/users/' + user.id)
-                        .then(response => {
-                            this.loadUsers();
-                        })
-                        .catch(() => {})
-                }
+
+                if( this.users.length > 1 ){
+
+                    if (confirm('Are you sure you wish to delete ' + user.username + '?')) {
+                        let form = new Form();
+                        form.submit('delete', '/admin/chains/' + this.chain.id + '/users/' + user.id)
+                            .then(response => {
+                                this.loadUsers();
+                            })
+                            .catch(() => {})
+                    }
+                } else alert( 'you must have at least one office user for a business!' );
             }
 
         },
