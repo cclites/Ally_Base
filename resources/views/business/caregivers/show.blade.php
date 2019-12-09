@@ -197,7 +197,7 @@
             <business-caregiver-restrictions-tab :caregiver="{{ $caregiver }}"></business-caregiver-restrictions-tab>
         </div>
         <div class="tab-pane" id="tax_documents" role="tabpanel">
-            <caregiver-1099s-tab :caregiver="{{ $caregiver->id }}"></caregiver-1099s-tab>
+            <business-1099s-tab :caregiver="{{ $caregiver->id }}"></business-1099s-tab>
         </div>
     </div>
 @endsection

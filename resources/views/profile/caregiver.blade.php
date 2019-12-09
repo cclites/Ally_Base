@@ -31,6 +31,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
     </ul>
 
     <!-- Mobile nav tabs (drop down) -->
@@ -45,6 +48,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
                 <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
             </div>
         </li>
     </ul>
@@ -99,6 +103,9 @@
                     <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
                 </div>
             </div>
+        </div>
+        <div class="tab-pane" id="tax_documents" role="tabpanel">
+            <caregiver-1099s-tab :caregiver="{{ $user->id }}"></caregiver-1099s-tab>
         </div>
     </div>
 @endsection

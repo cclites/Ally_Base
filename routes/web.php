@@ -143,7 +143,8 @@ Route::group([
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
 
-
+    Route::get('caregiver/caregiver-1099/{caregiver}', 'Caregivers\Caregiver1099Controller@index')->name('business-1099');
+    Route::get('caregiver/caregiver-1099/download/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf')->name('caregivers-1099-download');
 });
 
 Route::group([
@@ -530,7 +531,7 @@ Route::group([
 
     /* Caregiver 1099s */
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
-    Route::get('business-1099/download/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
+    Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {

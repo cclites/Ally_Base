@@ -11,7 +11,7 @@
                             {{ item.name }}
                         </b-col>
                         <b-col md="1">
-                            <a :href=" '/business/business-1099/download/' + item.id ">Download 1099</a>
+                            <a :href=" '/caregiver/caregiver-1099/download/' + item.id ">Download 1099</a>
                         </b-col>
 
                     </b-row>
@@ -45,7 +45,7 @@
 
         methods:{
             load1099s(){
-                axios.get('/business/caregiver-1099/' + this.caregiver)
+                axios.get('/caregiver/caregiver-1099/' + this.caregiver)
                     .then(response => {
                         this.items = response.data;
                         this.fields = Object.keys(this.items);
