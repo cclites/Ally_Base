@@ -100,6 +100,12 @@ class Admin1099Controller extends BaseController
         return view_component('admin-registry-emails', 'Registry Emails', ['emails' => $emailString]);
     }
 
+    /**
+     * @param Caregiver1099 $caregiver1099s
+     * @param $year
+     * @param $role
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function UserEmailsList(Caregiver1099 $caregiver1099s, $year, $role){
 
         $data = $caregiver1099s->where('year', $year)->with(['client', 'caregiver'])

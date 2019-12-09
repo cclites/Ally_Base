@@ -1,0 +1,900 @@
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyA[0].CopyAHeader[0].c1_1[0]
+FieldFlags: 1
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 1
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyA[0].CopyAHeader[0].c1_1[1]
+FieldFlags: 1
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 2
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_1[0]
+FieldFlags: 8392705
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_2[0]
+FieldFlags: 1
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_3[0]
+FieldFlags: 1
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_4[0]
+FieldFlags: 8388609
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_5[0]
+FieldFlags: 8388609
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_6[0]
+FieldFlags: 8388609
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].f1_7[0]
+FieldFlags: 8388609
+FieldJustification: Center
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].c1_2[0]
+FieldFlags: 1
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyA[0].LeftColumn[0].c1_3[0]
+FieldFlags: 1
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_8[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_9[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_10[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_11[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_12[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_13[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_14[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_15[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].c1_4[0]
+FieldFlags: 1
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_16[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_17[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_18[0]
+FieldFlags: 8388609
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_19[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].RightColumn[0].f1_20[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_21[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_22[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_23[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_24[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_25[0]
+FieldFlags: 8388609
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_26[0]
+FieldFlags: 8388609
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_27[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyA[0].Boxes15-18[0].f1_28[0]
+FieldFlags: 8388609
+FieldJustification: Right
+---
+FieldType: 
+FieldName: topmostSubform[0].CopyA[0]
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 1
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[1]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 2
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]
+FieldFlags: 8392704
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].f2_7[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy1[0].LeftColumn[0].c2_2[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_8[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_9[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_10[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_11[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_12[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_13[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_15[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].c2_4[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_16[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_17[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_18[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_19[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].RightCol[0].f2_20[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_21[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_22[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_23[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_24[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_25[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_26[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_27[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy1[0].Boxes15a-18[0].f2_28[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: 
+FieldName: topmostSubform[0].Copy1[0]
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyB[0].CopyBHeader[0].c2_1[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 2
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]
+FieldFlags: 8392704
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].f2_7[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyB[0].LeftColumn[0].c2_2[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_8[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_9[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_10[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_11[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_12[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_13[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_15[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].c2_4[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_16[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_17[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_18[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_19[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].RightCol[0].f2_20[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_21[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_22[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_23[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_24[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_25[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_26[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_27[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyB[0].Boxes15a-18[0].f2_28[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: 
+FieldName: topmostSubform[0].CopyB[0]
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy2[0].Copy2Header[0].c2_1[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 2
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]
+FieldFlags: 8392704
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].f2_7[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy2[0].LeftColumn[0].c2_2[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_8[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_9[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_10[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_11[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_12[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_13[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_15[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Button
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].c2_4[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_16[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_17[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_18[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_19[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].RightColumn[0].f2_20[0]
+FieldFlags: 0
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_21[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_22[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_23[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_24[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_25[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_26[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_27[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].Copy2[0].Boxes15a-18[0].f2_28[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: 
+FieldName: topmostSubform[0].Copy2[0]
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyC[0].CopyCHeader[0].c2_1[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 1
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyC[0].CopyCHeader[0].c2_1[1]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: 2
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_1[0]
+FieldFlags: 8392704
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_2[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_3[0]
+FieldFlags: 0
+FieldJustification: Center
+FieldMaxLength: 11
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_4[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_5[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_6[0]
+FieldFlags: 8388608
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].f2_7[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].c2_2[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyC[0].LeftColumn[0].c2_3[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_8[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_9[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_10[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_11[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_12[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_13[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_14[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_15[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Button
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].c2_4[0]
+FieldFlags: 0
+FieldValue: Off
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_16[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_17[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_18[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_19[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].RightColumn[0].f2_20[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_21[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_22[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_23[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_24[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_25[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_26[0]
+FieldFlags: 8388608
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_27[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: Text
+FieldName: topmostSubform[0].CopyC[0].Boxes15a-18[0].f2_28[0]
+FieldFlags: 8388608
+FieldJustification: Right
+---
+FieldType: 
+FieldName: topmostSubform[0].CopyC[0]
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: 
+FieldName: topmostSubform[0]
+FieldFlags: 0
+FieldJustification: Left

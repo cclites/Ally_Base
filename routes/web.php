@@ -530,7 +530,7 @@ Route::group([
 
     /* Caregiver 1099s */
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
-    Route::get('business-1099/download/{id}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
+    Route::get('business-1099/download/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
