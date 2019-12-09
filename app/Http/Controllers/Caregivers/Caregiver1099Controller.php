@@ -78,7 +78,7 @@ class Caregiver1099Controller extends Controller
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy2[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+            'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $caregiver1099->payment_total,
 
         ])->execute();
 

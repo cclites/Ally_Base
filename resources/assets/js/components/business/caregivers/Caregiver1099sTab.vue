@@ -7,10 +7,10 @@
                 <div v-for="field in fields" :key="field" class="mb-3">
                     <h4 class="chat-text">{{ field }}</h4>
                     <b-row v-for="item in items[field]" :key="item.id">
-                        <b-col md="2">
+                        <b-col md="4">
                             {{ item.name }}
                         </b-col>
-                        <b-col md="1">
+                        <b-col md="4">
                             <a :href=" '/business/business-1099/download/' + item.id ">Download 1099</a>
                         </b-col>
 
@@ -20,6 +20,10 @@
             <div v-else>
                 There are no records to display.
             </div>
+
+            <hr>
+
+            2018 and prior years would have been mailed to you and are not available electronically.
 
         </b-card>
 </template>

@@ -350,7 +350,7 @@ class Caregiver1099Controller extends Controller
         $caregiver1099->load("client");
 
         $systemSettings = \DB::table('system_settings')->first();
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/CopyB_1099msc.pdf');
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/B_1_2_1099msc.pdf');
 
         $payerTin = $caregiver1099->client_ssn ? decrypt($caregiver1099->client_ssn) : '';
         $payerName = $clientName = $caregiver1099->client_fname . " " . $caregiver1099->client_lname;
@@ -367,6 +367,7 @@ class Caregiver1099Controller extends Controller
         }
 
         $pdf->fillForm([
+            /** COPY B **/
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
@@ -374,6 +375,24 @@ class Caregiver1099Controller extends Controller
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+
+            /** COPY 1 **/
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
+            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+
+            /** COPY 2 **/
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
+            'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $caregiver1099->payment_total,
         ])->execute();
 
         $fileName = $clientName . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
