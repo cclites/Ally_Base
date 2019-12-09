@@ -213,16 +213,32 @@
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
                     </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
 
-                    <b-form-group label="Send 1099">
-                        <b-form-select v-model="form.caregiver_1099" :disabled="authRole != 'admin' && form.caregiver_1099 == 'ally'">
-                            <option value="">No</option>
-                            <option value="client">On Client's Behalf</option>
-                            <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
+                <b-col lg="3">
+                    <b-form-group label="Caregiver 1099">
+                        <b-form-select v-model="send1099">
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
                         </b-form-select>
-                        <input-help :form="form" field="caregiver_1099"></input-help>
                     </b-form-group>
                 </b-col>
+                <b-col lg="3">
+                    <b-form-group label="Payer">
+                        <b-radio-group v-model="form.caregiver_1099" stacked v-if="authRole == 'admin'">
+                            <b-radio value="client">Send on Client's Behalf</b-radio>
+                            <b-radio value="ally">Send on Ally's Behalf</b-radio>
+                        </b-radio-group>
+
+                        <div v-else>
+                            Send on Client's Behalf
+                        </div>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
@@ -505,6 +521,7 @@
                 loading: false,
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
+                send1099: 0,
             }
         },
 
@@ -515,6 +532,14 @@
             this.checkForNoUsername();
             await this.loadOfficeUsers();
             await this.fetchStatusAliases();
+
+            if(this.client.caregiver_1099){
+                this.send1099 = '1';
+                this.caregiver_1099 = this.client.caregiver_1099;
+            }else{
+                this.send1099 = '0';
+            }
+
             this.loading = false;
         },
 
@@ -678,6 +703,7 @@
                     this.form.username = this.form.email;
                 }
             },
+
         },
 
         computed: {
@@ -729,6 +755,19 @@
                 return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
         },
+        watch: {
+            send1099(val){
+                if(val === '1'){
+                    if(this.authRole == 'admin'){
+                        this.form.caregiver_1099 = 'ally';
+                    }else {
+                        this.form.caregiver_1099 = 'client';
+                    }
+                }else{
+                    this.form.caregiver_1099 = null;
+                }
+            },
+        }
     }
 </script>
 

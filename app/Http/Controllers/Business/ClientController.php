@@ -273,6 +273,8 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
         $data = $request->filtered();
 
+        \Log::info(json_encode($data));
+
         $addOnboardRecord = false;
         if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
