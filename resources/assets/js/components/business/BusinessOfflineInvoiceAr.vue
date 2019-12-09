@@ -32,13 +32,6 @@
                             <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                             </option>
                         </b-form-select>
-                        <b-form-select v-model="payerFilter" class="mr-1 mt-1">
-                            <option v-if="loadingPayers" selected>Loading...</option>
-                            <option v-else value="">-- Select a Payer --</option>
-                            <option value="0">(Client)</option>
-                            <option v-for="item in payers" :key="item.id" :value="item.id">{{ item.name }}
-                            </option>
-                        </b-form-select>
                         <b-form-select
                             id="invoiceType"
                             name="invoiceType"
@@ -213,11 +206,6 @@
                         sortable: true,
                     },
                     {
-                        key: 'payer',
-                        formatter: (val) => val ? val.name : 'None',
-                        sortable: true,
-                    },
-                    {
                         key: 'amount',
                         label: 'Inv Total',
                         formatter: (val) => this.moneyFormat(val),
@@ -236,9 +224,6 @@
                 loadingClients: false,
                 clients: [],
                 clientFilter: '',
-                payers: [],
-                payerFilter: '',
-                loadingPayers: false,
                 paymentModal: false,
                 businesses: '',
                 form: new Form({
@@ -259,7 +244,6 @@
 
         mounted() {
             this.loadClients();
-            this.fetchPayers();
         },
 
         computed: {
@@ -271,18 +255,6 @@
         },
 
         methods: {
-            async fetchPayers() {
-                this.payers = [];
-                this.loadingPayers = true;
-                let response = await axios.get('/business/payers?json=1');
-                if (Array.isArray(response.data)) {
-                    this.payers = response.data;
-                } else {
-                    this.payers = [];
-                }
-                this.loadingPayers = false;
-            },
-
             async loadClients() {
                 this.clients = [];
                 this.loadingClients = true;
@@ -326,7 +298,7 @@
 
             async loadItems() {
                 this.loaded = 0;
-                let url = `/business/offline-invoice-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}&payer_id=${this.payerFilter}`;
+                let url = `/business/offline-invoice-ar?json=1&businesses=${this.businesses}&start_date=${this.start_date}&end_date=${this.end_date}&invoiceType=${this.invoiceType}&client_id=${this.clientFilter}`;
                 axios.get(url)
                     .then( ({ data }) => {
                         this.items = data.data;

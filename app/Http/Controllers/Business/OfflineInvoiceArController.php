@@ -56,12 +56,6 @@ class OfflineInvoiceArController extends BaseController
                 $invoiceQuery->where('client_id', $request->client_id);
             }
 
-            if ($request->filled('payer_id')) {
-                $invoiceQuery->whereHas('clientPayer', function ($query) use($request) {
-                    $query->where('payer_id', $request->payer_id);
-                });
-            }
-
             $invoices = $invoiceQuery->with(['client', 'clientPayer.payer', 'payments'])->get();
 
             return OfflineInvoiceArResource::collection($invoices);
