@@ -29,6 +29,7 @@
                         step="0.01"
                         :disabled="form.busy || !row.item.selected"
                         @change="x => itemAmountChanged(row.item, x)"
+                        placeholder="Amount"
                     />
                     <b-select name="adjustment_type"
                         class="mr-1"
@@ -48,6 +49,7 @@
                         :disabled="form.busy || !row.item.selected"
                         maxlength="255"
                         style="max-width: none!important;"
+                        placeholder="Notes..."
                     />
                 </div>
             </template>
