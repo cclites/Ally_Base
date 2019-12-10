@@ -45,7 +45,7 @@
                     {
                         name: 'Ally Contact Info',
                         description: 'Edit Ally contact information',
-                        url: 'admin-1099',
+                        url: 'admin-contact-info',
                         disabled: true,
                     },
                     {

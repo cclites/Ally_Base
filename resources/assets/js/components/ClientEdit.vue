@@ -215,8 +215,8 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row>
-
+            <!------------------------------------->
+            <b-row v-if="authRole == 'admin'">
                 <b-col lg="3">
                     <b-form-group label="Caregiver 1099">
                         <b-form-select v-model="send1099">
@@ -227,17 +227,40 @@
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Payer">
-                        <b-radio-group v-model="form.caregiver_1099" stacked v-if="authRole == 'admin'">
+                        <b-radio-group v-model="form.caregiver_1099" stacked>
                             <b-radio value="client">Send on Client's Behalf</b-radio>
                             <b-radio value="ally">Send on Ally's Behalf</b-radio>
                         </b-radio-group>
-
-                        <div v-else>
-                            Send on Client's Behalf
-                        </div>
                     </b-form-group>
                 </b-col>
             </b-row>
+            <b-row v-else-if="authRole != 'admin' && client.caregiver_1099 == 'ally'">
+                <b-col lg="6">
+                    <b-form-group label="Caregiver 1099">
+                        <label>
+                            1099s are being sent on behalf of Ally. Contact Ally if you wish to change this.
+                        </label>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row v-else>
+                <b-col lg="3">
+                    <b-form-group label="Caregiver 1099">
+                        <b-form-select v-model="send1099">
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </b-form-select>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-group label="Payer">
+                        <label>
+                            Send on Client's Behalf
+                        </label>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <!------------------------------------->
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
@@ -535,7 +558,6 @@
 
             if(this.client.caregiver_1099){
                 this.send1099 = '1';
-                this.caregiver_1099 = this.client.caregiver_1099;
             }else{
                 this.send1099 = '0';
             }
@@ -757,14 +779,10 @@
         },
         watch: {
             send1099(val){
-                if(val === '1'){
-                    if(this.authRole == 'admin'){
-                        this.form.caregiver_1099 = 'ally';
-                    }else {
-                        this.form.caregiver_1099 = 'client';
-                    }
-                }else{
+                if(val === '0'){
                     this.form.caregiver_1099 = null;
+                }else{
+                    this.form.caregiver_1099 = this.client.caregiver_1099 ? this.client.caregiver_1099 : 'client';
                 }
             },
         }
