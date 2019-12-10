@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Caregiver;
 use App\Client;
+use App\Shift;
 use Illuminate\Console\Command;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Carbon\Carbon;
@@ -54,10 +55,16 @@ class RetroactiveDecommissionLetters extends Command
         foreach( $caregivers as $c ){
 
             $c->load( 'deactivationReason' );
-            $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'caregiver' => $c, 'deactivatedBy' => 'System Admin' ]);
+
+            $shifts = collect( Shift::where( 'caregiver_id', $c->id )->pluck( 'hours' )->all() );
+            $totalLifetimeHours = $shifts->sum();
+            $totalLifetimeShifts = $shifts->count();
+
+            $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'caregiver' => $c, 'deactivatedBy' => 'System Admin', 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
 
             $filePath = $this->generateUniqueDeactivationPdfFilename( $c->id );
             $this->info( "Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
+
             try {
                 if ( $pdf->save( $filePath ) ) {
 
@@ -96,7 +103,12 @@ class RetroactiveDecommissionLetters extends Command
         foreach( $clients as $c ){
 
             $c->load( 'deactivationReason' );
-            $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $c, 'deactivatedBy' => 'System Admin' ]);
+
+            $shifts = collect( Shift::where( 'client_id', $c->id )->pluck( 'hours' )->all() );
+            $totalLifetimeHours = $shifts->sum();
+            $totalLifetimeShifts = $shifts->count();
+
+            $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $c, 'deactivatedBy' => 'System Admin', 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
 
             $filePath = $this->generateUniqueDeactivationPdfFilename( $c->id );
             $this->info( "Creating File $filePath for Client $c->name ( ID: $c->id )" );

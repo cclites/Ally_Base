@@ -30,6 +30,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
+use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Facades\File;
 
@@ -549,7 +550,12 @@ class ClientController extends BaseController
     private function generateDeactivationPdf( Client $client ) : bool
     {
         $client->load( 'deactivationReason' );
-        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name ] );
+
+        $shifts = collect( Shift::where( 'client_id', $client->id )->pluck( 'hours' )->all() );
+        $totalLifetimeHours = $shifts->sum();
+        $totalLifetimeShifts = $shifts->count();
+
+        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name, 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ] );
 
         $filePath = $this->generateUniqueDeactivationPdfFilename( $client );
         try {

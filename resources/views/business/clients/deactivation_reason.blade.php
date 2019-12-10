@@ -36,6 +36,10 @@
                 <br>
             <strong>By:</strong> {{ $deactivatedBy }}
                 <br>
+            <strong>Total Lifetime Hours:</strong> {{ $totalLifetimeHours }}
+                <br>
+            <strong>Total Lifetime Shifts:</strong> {{ $totalLifetimeShifts }}
+                <br>
         </div>
 
         <div class="row">

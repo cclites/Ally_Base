@@ -31,6 +31,7 @@ use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Actions\CreateCaregiver;
 use App\Notifications\TrainingEmail;
 use App\Notifications\CaregiverWelcomeEmail;
+use App\Shift;
 use File;
 use DB;
 
@@ -523,7 +524,12 @@ class CaregiverController extends BaseController
     private function generateDeactivationPdf(Caregiver $caregiver) : bool
     {
         $caregiver->load('deactivationReason');
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['caregiver' => $caregiver, 'deactivatedBy' => \Auth::user()->name]);
+
+        $shifts = collect( Shift::where( 'caregiver_id', $caregiver->id )->pluck( 'hours' )->all() );
+        $totalLifetimeHours = $shifts->sum();
+        $totalLifetimeShifts = $shifts->count();
+
+        $pdf = PDF::loadView('business.caregivers.deactivation_reason', [ 'caregiver' => $caregiver, 'deactivatedBy' => \Auth::user()->name, 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
 
         $filePath = $this->generateUniqueDeactivationPdfFilename($caregiver);
         try {
