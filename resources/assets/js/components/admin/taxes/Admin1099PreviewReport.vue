@@ -103,16 +103,32 @@
                             ref="table"
                     >
                         <template slot="actions" scope="row">
-                            <b-btn @click="create(row)" class="btn btn-secondary" title="Create 1099"  v-if="!row.item.id"><i class="fa fa-plus mr-2"></i></b-btn>
-                            <b-btn v-if="row.item.id"
-                                   @click="edit(row.item.id)"
+
+                            <b-btn @click="create(row)"
+                                   class="btn btn-secondary"
+                                   title="Create 1099"
+                                   v-if="! row.item.caregiver_1099_id && ! row.item.errors.length"
+                            >
+                                <i class="fa fa-plus mr-2"></i>
+                            </b-btn>
+
+                            <b-btn @click="showErrors(row)"
+                                   class="btn btn-danger"
+                                   title="Show Errors"
+                                   v-if="row.item.errors.length"
+                            >
+                                <i class="fa fa-exclamation-triangle mr-2"></i>
+                            </b-btn>
+
+                            <b-btn v-if="row.item.caregiver_1099_id"
+                                   @click="edit(row.item.caregiver_1099_id)"
                                    class="btn btn-secondary"
                                    title="Edit 1099"
                             >
                                 <i class="fa fa-edit mr-2"></i>
                             </b-btn>
-                            <b-btn v-if="row.item.id"
-                                   @click="downloadPdf(row.item.id)"
+                            <b-btn v-if="row.item.caregiver_1099_id"
+                                   @click="downloadPdf(row.item.caregiver_1099_id)"
                                    class="btn btn-secondary"
                                    title="Download PDF"
                             >
@@ -144,12 +160,34 @@
         <b-modal
                 v-model="caregiver1099Edit"
                 @ok.prevent="save()"
-                @cancel="hideModal()"
+                @cancel="hideEditModal()"
                 ok-variant="info"
                 size="lg"
         >
             <caregiver-1099-edit-modal :caregiver1099="caregiver1099"></caregiver-1099-edit-modal>
         </b-modal>
+
+        <b-modal
+                v-model="showErrorModal"
+                @cancel="hideEditModal()"
+                ok-variant="info"
+                size="md"
+                title="Caregiver 1099 Errors"
+        >
+            <label class="mb-2">Caregiver 1099 is missing:</label>
+
+            <b-row v-for="item in errorItems" :key="item" class="mb-3 pl-4">
+                {{ item }}
+            </b-row>
+
+            <hr>
+
+            <a :href="'/business/clients/' + selected.client_id">Edit Client</a>
+            <br>
+            <a :href="'/business/caregivers/' + selected.caregiver_id">Edit Caregiver</a>
+        </b-modal>
+
+
     </b-card>
 </template>b
 
@@ -184,7 +222,8 @@
                 items: [],
                 caregiver1099: [],
                 caregiver1099Edit: false,
-                showCaregiver1099editModal: false,
+                showErrorModal: false,
+                errorItems: [],
                 busy: false,
                 totalRows: 0,
                 perPage: 100,
@@ -192,6 +231,7 @@
                 sortBy: 'client_lname',
                 sortDesc: false,
                 emptyText: "No records to display",
+                selected: '',
                 fields: [
                     {key: 'client_fname', label: 'Client First Name', sortable: true,},
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
@@ -203,6 +243,7 @@
                     'actions',
                     'transmit'
                 ],
+
             }
         },
         methods: {
@@ -294,6 +335,17 @@
 
             downloadPdf(id){
                 window.location = '/admin/business-1099/download/' + id;
+            },
+
+            showErrors(row){
+                this.selected = row.item;
+                this.errorItems = row.item.errors;
+                this.showErrorModal = true;
+            },
+
+            hideEditModal(){
+                this.errorItems = [];
+                this.showErrorModal = false;
             }
         },
         watch: {
@@ -334,9 +386,14 @@
 <style scoped>
     i.fa.fa-edit,
     i.fa.fa-print,
-    i.fa.fa-plus{
+    i.fa.fa-plus,
+    i.fa.fa-exclamation-triangle{
         position: relative;
         left: 4px;
+    }
+
+    i.fa.fa-exclamation-triangle{
+        color: #ffffff;
     }
 
     button.btn.btn-secondary{
