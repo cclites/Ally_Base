@@ -32,8 +32,6 @@
                 <br>
             <strong>Discharge Disposition:</strong> {{ $client->discharge_disposition ?? 'n/a' }}
                 <br>
-            <strong>Discharge Note:</strong> {{ $client->deactivation_note ?? 'n/a' }}
-                <br>
             <strong>Date: </strong> {{ \Carbon\Carbon::parse( $client->in_active_at )->format( 'm-d-Y' ) }}
                 <br>
             <strong>By:</strong> {{ $deactivatedBy }}
