@@ -157,6 +157,7 @@ Vue.component('admin-1099-actions', require('./components/admin/taxes/Admin1099.
 Vue.component('caregiver-1099-admin', require('./components/admin/taxes/Caregiver1099Admin.vue'));
 Vue.component('caregiver-1099s-tab', require('./components/caregivers/Caregiver1099sTab'));
 Vue.component('business-1099s-tab', require('./components/business/caregivers/Caregiver1099sTab'));
+Vue.component('admin-system-settings', require('./components/admin/AdminSystemSettings'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));

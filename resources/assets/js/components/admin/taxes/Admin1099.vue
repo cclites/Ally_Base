@@ -46,7 +46,7 @@
                         name: 'Ally Contact Info',
                         description: 'Edit Ally contact information',
                         url: 'admin-contact-info',
-                        disabled: true,
+                        disabled: false,
                     },
                     {
                         name: 'Ally 1099 Payer Info',

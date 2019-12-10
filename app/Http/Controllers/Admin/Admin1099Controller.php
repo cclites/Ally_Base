@@ -114,7 +114,6 @@ class Admin1099Controller extends BaseController
                     if($role = 'client'){
                         return $caregiver1099->client->email;
                     }
-
                     return $caregiver1099->caregiver->email;
                 })
                 ->implode(", ");
