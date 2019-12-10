@@ -64,7 +64,7 @@
                     <div id="table" class="table-responsive">
                         <b-table
                             bordered striped hover show-empty
-                            :items="itemProvider"
+                            :items=" items "
                             :fields="fields"
                             :current-page.sync="currentPage"
                             :per-page="perPage"
@@ -116,6 +116,7 @@
             return {
                 loading: false,
                 busy: false,
+                items : [],
                 statusAliases: [],
                 directoryType: 'client',
                 filters: new Form({
@@ -190,19 +191,21 @@
 
         methods: {
             loadTable() {
-                this.$refs.table.refresh();
+
+                this.itemProvider();
             },
 
-            itemProvider(ctx) {
+            itemProvider() {
+
                 this.loading = true;
-                let sort = ctx.sortBy == null ? 'lastname' : ctx.sortBy;
-                return this.filters.get(`/business/reports/client-directory?&page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                let sort = this.sortBy == null ? 'lastname' : this.sortBy;
+                return this.filters.get(`/business/reports/client-directory?&page=${this.currentPage}&perpage=${this.perPage}&sort=${sort}&desc=${this.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
-                        return data.rows || [];
+                        this.items = data.rows || [];
                     })
                     .catch(() => {
-                        return [];
+                        this.items = [];
                     })
                     .finally(() => {
                         this.loading = false;
