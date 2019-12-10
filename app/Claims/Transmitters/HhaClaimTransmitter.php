@@ -131,7 +131,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $item->caregiver_gender ? strtoupper($item->caregiver_gender) : '', //    "Caregiver Gender",
             $item->caregiver_dob ?? '', //    "Caregiver Date of Birth",
             $this->cleanSsn($item->caregiver_ssn), //    "Caregiver SSN",
-            $claim->id, //    "Schedule ID", (required)
+            $item->id, //    "Schedule ID", (required)
             $service->service_code, //    "Procedure Code", (required)
             $service->scheduled_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule Start Time", (required)
             $service->scheduled_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule End Time", (required)
