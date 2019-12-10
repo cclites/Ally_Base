@@ -56,9 +56,9 @@ class RetroactiveDecommissionLetters extends Command
 
             $c->load( 'deactivationReason' );
 
-            $shifts = collect( Shift::where( 'caregiver_id', $c->id )->pluck( 'hours' )->all() );
-            $totalLifetimeHours = $shifts->sum();
-            $totalLifetimeShifts = $shifts->count();
+            $query = \DB::table('shifts')->where('caregiver_id', $c->id);
+            $totalLifetimeShifts = $query->count();
+            $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
             $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'caregiver' => $c, 'deactivatedBy' => 'System Admin', 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
 
@@ -100,9 +100,9 @@ class RetroactiveDecommissionLetters extends Command
 
             $c->load( 'deactivationReason' );
 
-            $shifts = collect( Shift::where( 'client_id', $c->id )->pluck( 'hours' )->all() );
-            $totalLifetimeHours = $shifts->sum();
-            $totalLifetimeShifts = $shifts->count();
+            $query = \DB::table('shifts')->where('client_id', $c->id);
+            $totalLifetimeShifts = $query->count();
+            $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
             $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $c, 'deactivatedBy' => 'System Admin', 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
 
