@@ -1,6 +1,6 @@
 @extends('layouts.print')
 
-@section('title', 'Payment Details - Print')
+@section('title', 'Deactivation Summary')
 
 @push('head')
     <style>

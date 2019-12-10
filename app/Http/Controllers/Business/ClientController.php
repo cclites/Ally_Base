@@ -30,6 +30,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Facades\File;
 
 class ClientController extends BaseController
 {
@@ -331,9 +333,19 @@ class ClientController extends BaseController
             $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
         }
 
-        $data['status_alias_id'] = null;
-        if ($client->update($data)) {
+        \DB::beginTransaction();
+
+        $data[ 'status_alias_id' ] = null;
+        if ( $client->update( $data ) ) {
+
             $client->clearFutureSchedules();
+
+            if ( !$this->generateDeactivationPdf( $client ) ) {
+
+                return new ErrorResponse( 500, 'Error archiving this client: Generating the deactivation document failed. Please try again.' );
+            }
+
+            \DB::commit();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
         return new ErrorResponse(500, 'Could not archive the selected client.');
@@ -525,5 +537,71 @@ class ClientController extends BaseController
         $client->user->syncNotificationPreferences($request->validated());
 
         return new SuccessResponse('Client\'s notification preferences have been saved.');
+    }
+
+
+    /**
+     * Generate a Client doc with deactivation information.
+     *
+     * @param Client $client
+     * @return bool
+     */
+    private function generateDeactivationPdf( Client $client ) : bool
+    {
+        $client->load( 'deactivationReason' );
+        $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name ] );
+
+        $filePath = $this->generateUniqueDeactivationPdfFilename( $client );
+        try {
+            if ($pdf->save($filePath)) {
+                $caregiver->documents()->create([
+                    'filename' => File::basename($filePath),
+                    'original_filename' => File::basename($filePath),
+                    'description' => 'Caregiver Deactivation Document',
+                    'user_id' => $caregiver->id
+                ]);
+
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            return false;
+        }
+    }
+
+    /**
+     * Generate deactivation PDF file name.
+     *
+     * @param Client $client
+     * @return string
+     */
+    private function generateUniqueDeactivationPdfFilename( Client $client ) : string
+    {
+        $dir = storage_path( 'app/documents/' );
+        if ( !File::exists( $dir ) ) {
+
+            File::makeDirectory( $dir, 493, true );
+        }
+
+        for ( $i = 1; $i < 500; $i ++ ) {
+
+            $filename = str_slug( $client->id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' ) );
+
+            if ( $i > 1 ) {
+
+                $filename .= "_$i";
+            }
+
+            $filename .= '.pdf';
+
+            if ( !File::exists( $dir . $filename ) ) {
+
+                break;
+            }
+        }
+
+        return $dir . $filename;
     }
 }

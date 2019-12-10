@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Caregiver;
+use App\Client;
 use Illuminate\Console\Command;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Carbon\Carbon;
@@ -55,7 +56,7 @@ class RetroactiveDecommissionLetters extends Command
             $c->load( 'deactivationReason' );
             $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'caregiver' => $c, 'deactivatedBy' => 'System Admin' ]);
 
-            $filePath = $this->generateUniqueDeactivationPdfFilename( $c );
+            $filePath = $this->generateUniqueDeactivationPdfFilename( $c->id );
             $this->info( "Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
             try {
                 if ( $pdf->save( $filePath ) ) {
@@ -85,9 +86,51 @@ class RetroactiveDecommissionLetters extends Command
         }
 
         $this->info( "Successfully finished generating caregiver files.." );
+
+        $clients = Client::whereHas( 'documents', function( $q ){
+
+            $q->where( 'description', '!=', 'Client Deactivation Document' );
+        })->orWhereDoesntHave( 'documents' )->inactive()->get();
+
+        DB::beginTransaction();
+        foreach( $clients as $c ){
+
+            $c->load( 'deactivationReason' );
+            $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $c, 'deactivatedBy' => 'System Admin' ]);
+
+            $filePath = $this->generateUniqueDeactivationPdfFilename( $c->id );
+            $this->info( "Creating File $filePath for Client $c->name ( ID: $c->id )" );
+            try {
+                if ( $pdf->save( $filePath ) ) {
+
+                    $c->documents()->create([
+
+                        'filename'          => File::basename( $filePath ),
+                        'original_filename' => File::basename( $filePath ),
+                        'description'       => 'Client Deactivation Document',
+                        'user_id'           => $c->id
+                    ]);
+
+                    $this->info( "SUCCESS Creating File $filePath for Client $c->name ( ID: $c->id )" );
+                    DB::commit();
+                    return true;
+                } else {
+
+                    $this->error( "ERROR Creating File $filePath for Client $c->name ( ID: $c->id )" );
+                    return false;
+                }
+            } catch ( \Exception $ex ) {
+
+                $this->info( "ERROR Creating File $filePath for Client $c->name ( ID: $c->id )" );
+                DB::rollback();
+                return false;
+            }
+        }
+
+        $this->info( "Successfully finished generating client files.." );
     }
 
-    private function generateUniqueDeactivationPdfFilename(Caregiver $caregiver) : string
+    private function generateUniqueDeactivationPdfFilename( $id ) : string
     {
         $dir = storage_path('app/documents/');
         if (! File::exists($dir)) {
@@ -95,7 +138,7 @@ class RetroactiveDecommissionLetters extends Command
         }
 
         for ($i = 1; $i < 500; $i ++) {
-            $filename = str_slug($caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y'));
+            $filename = str_slug( $id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' ) );
 
             if ($i > 1) {
                 $filename .= "_$i";
@@ -103,7 +146,7 @@ class RetroactiveDecommissionLetters extends Command
 
             $filename .= '.pdf';
 
-            if (! File::exists($dir . $filename)) {
+            if (! File::exists( $dir . $filename ) ) {
                 break;
             }
         }
