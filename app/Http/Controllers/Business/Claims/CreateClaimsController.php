@@ -41,7 +41,7 @@ class CreateClaimsController extends BaseController
 
             switch ($request->invoice_type) {
                 case 'paid':
-                    $invoiceQuery->wherePaidInFull();
+                    $invoiceQuery->paidInFull();
                     break;
                 case 'unpaid':
                     $invoiceQuery->notPaidInFull();
