@@ -44,7 +44,7 @@ class RetroactiveDecommissionLetters extends Command
      */
     public function handle()
     {
-        $this->info( 'Starting the decommission letter generation..' );
+        $this->info( 'Starting the decommission letter generation for caregivers..' );
 
         $caregivers = Caregiver::whereHas( 'documents', function( $q ){
 
@@ -66,24 +66,19 @@ class RetroactiveDecommissionLetters extends Command
             $this->info( "Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
 
             try {
-                if ( $pdf->save( $filePath ) ) {
 
-                    $c->documents()->create([
+                $pdf->save( $filePath );
 
-                        'filename'          => File::basename( $filePath ),
-                        'original_filename' => File::basename( $filePath ),
-                        'description'       => 'Caregiver Deactivation Document',
-                        'user_id'           => $c->id
-                    ]);
+                $c->documents()->create([
 
-                    $this->info( "SUCCESS Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
-                    DB::commit();
-                    return true;
-                } else {
+                    'filename'          => File::basename( $filePath ),
+                    'original_filename' => File::basename( $filePath ),
+                    'description'       => 'Caregiver Deactivation Document',
+                    'user_id'           => $c->id
+                ]);
 
-                    $this->error( "ERROR Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
-                    return false;
-                }
+                $this->info( "SUCCESS Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
+                DB::commit();
             } catch ( \Exception $ex ) {
 
                 $this->info( "ERROR Creating File $filePath for Caregiver $c->name ( ID: $c->id )" );
@@ -93,6 +88,7 @@ class RetroactiveDecommissionLetters extends Command
         }
 
         $this->info( "Successfully finished generating caregiver files.." );
+        $this->info( 'Starting the decommission letter generation for clients..' );
 
         $clients = Client::whereHas( 'documents', function( $q ){
 
@@ -113,24 +109,19 @@ class RetroactiveDecommissionLetters extends Command
             $filePath = $this->generateUniqueDeactivationPdfFilename( $c->id );
             $this->info( "Creating File $filePath for Client $c->name ( ID: $c->id )" );
             try {
-                if ( $pdf->save( $filePath ) ) {
 
-                    $c->documents()->create([
+                $pdf->save( $filePath );
 
-                        'filename'          => File::basename( $filePath ),
-                        'original_filename' => File::basename( $filePath ),
-                        'description'       => 'Client Deactivation Document',
-                        'user_id'           => $c->id
-                    ]);
+                $c->documents()->create([
 
-                    $this->info( "SUCCESS Creating File $filePath for Client $c->name ( ID: $c->id )" );
-                    DB::commit();
-                    return true;
-                } else {
+                    'filename'          => File::basename( $filePath ),
+                    'original_filename' => File::basename( $filePath ),
+                    'description'       => 'Client Deactivation Document',
+                    'user_id'           => $c->id
+                ]);
 
-                    $this->error( "ERROR Creating File $filePath for Client $c->name ( ID: $c->id )" );
-                    return false;
-                }
+                $this->info( "SUCCESS Creating File $filePath for Client $c->name ( ID: $c->id )" );
+                DB::commit();
             } catch ( \Exception $ex ) {
 
                 $this->info( "ERROR Creating File $filePath for Client $c->name ( ID: $c->id )" );
