@@ -525,11 +525,16 @@ class CaregiverController extends BaseController
     {
         $caregiver->load('deactivationReason');
 
-        $shifts = collect( Shift::where( 'caregiver_id', $caregiver->id )->pluck( 'hours' )->all() );
-        $totalLifetimeHours = $shifts->sum();
-        $totalLifetimeShifts = $shifts->count();
+        $query = \DB::table('shifts')->where('caregiver_id', $caregiver->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', [ 'caregiver' => $caregiver, 'deactivatedBy' => \Auth::user()->name, 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ]);
+        $pdf = PDF::loadView('business.caregivers.deactivation_reason', [
+            'caregiver' => $caregiver,
+            'deactivatedBy' => \Auth::user()->name,
+            'totalLifetimeHours' => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
 
         $filePath = $this->generateUniqueDeactivationPdfFilename($caregiver);
         try {

@@ -551,11 +551,16 @@ class ClientController extends BaseController
     {
         $client->load( 'deactivationReason' );
 
-        $shifts = collect( Shift::where( 'client_id', $client->id )->pluck( 'hours' )->all() );
-        $totalLifetimeHours = $shifts->sum();
-        $totalLifetimeShifts = $shifts->count();
+        $query = \DB::table('shifts')->where('client_id', $client->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
-        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name, 'totalLifetimeHours' => $totalLifetimeHours, 'totalLifetimeShifts' => $totalLifetimeShifts ] );
+        $pdf = PDF::loadView('business.clients.deactivation_reason', [
+            'client' => $client,
+            'deactivatedBy' => \Auth::user()->name,
+            'totalLifetimeHours' => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
 
         $filePath = $this->generateUniqueDeactivationPdfFilename( $client );
         try {
