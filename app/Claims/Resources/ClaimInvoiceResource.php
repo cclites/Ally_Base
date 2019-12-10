@@ -61,7 +61,7 @@ class ClaimInvoiceResource extends Resource
             'plan_code' => $this->resource->plan_code,
             'status' => $this->resource->status,
             'transmission_method' => $this->resource->transmission_method,
-            'modified_at' => $this->resource->modified_at,
+            'modified_at' => optional($this->resource->modified_at)->toDateTimeString(),
             'has_expenses' => $this->resource->getHasExpenses(),
             'client_id' => $this->resource->client_id,
             'client_name' => $client ? $client->name : '',

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Claims;
+namespace App;
 
-use App\BaseModel;
 use App\Claims\Contracts\TransmissionFileResultInterface;
 use Carbon\Carbon;
 
-class ClaimInvoiceHhaFileResult extends BaseModel implements TransmissionFileResultInterface
+class ClaimInvoiceTellusFileResult extends AuditableModel implements TransmissionFileResultInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -20,15 +19,14 @@ class ClaimInvoiceHhaFileResult extends BaseModel implements TransmissionFileRes
     // **********************************************************
 
     /**
-     * Get the HhaFile Relationship.
+     * Get the TellusFile Relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function hhaFile()
+    public function tellusFile()
     {
-        return $this->belongsTo(ClaimInvoiceHhaFile::class, 'hha_file_id', 'id');
+        return $this->belongsTo(ClaimInvoiceTellusFile::class, 'tellus_file_id', 'id');
     }
-
     // **********************************************************
     // ACCESSORS
     // **********************************************************

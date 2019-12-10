@@ -62,10 +62,10 @@ class ImportTellusTypecodeData extends BaseImport
             }
         }
 
-        $this->info("Importing new list of Tellus Enumerations...");
-        \DB::table('tellus_enumerations')->truncate();
-        $enumerations = $this->importEnumerationsFromSchema($this->schemaFile);
-        $this->info("Imported {$enumerations} Tellus Enumerations.");
+//        $this->info("Importing new list of Tellus Enumerations...");
+//        \DB::table('tellus_enumerations')->truncate();
+//        $enumerations = $this->importEnumerationsFromSchema($this->schemaFile);
+//        $this->info("Imported {$enumerations} Tellus Enumerations.");
 
         // Handle importing typecodes from BaseImporter
         \DB::table('tellus_typecodes')->truncate();

@@ -42,6 +42,8 @@ class ClaimTransmissionController extends BaseController
         try {
             \DB::beginTransaction();
 
+            $claim->update(['transmission_method' => $service]);
+
             $transmitter = $claim->getTransmitter($service);
 
             if ($reason = $transmitter->prevent($claim)) {

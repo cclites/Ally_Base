@@ -2,6 +2,8 @@
 
 namespace App\Claims;
 
+use App\ClaimInvoiceTellusFile;
+use App\Claims\Contracts\TransmissionFileInterface;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
@@ -72,6 +74,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['modified_at'];
 
     /**
      * The relations to eager load on every query.
@@ -180,6 +189,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     public function hhaFiles()
     {
         return $this->hasMany(ClaimInvoiceHhaFile::class, 'claim_invoice_id', 'id');
+    }
+
+    /**
+     * Get the TellusFiles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tellusFiles()
+    {
+        return $this->hasMany(ClaimInvoiceTellusFile::class, 'claim_invoice_id', 'id');
     }
 
     // **********************************************************
@@ -496,6 +515,32 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return $data->toArray();
+    }
+
+    /**
+     * Get the file record of the last claim transmission, along with
+     * it's results.
+     *
+     * @return TransmissionFileInterface|null
+     */
+    public function getLatestTransmissionFile() : ?TransmissionFileInterface
+    {
+        switch ($this->transmission_method) {
+            case ClaimService::TELLUS():
+                return $this->tellusFiles()
+                    ->with('results')
+                    ->latest()
+                    ->first();
+
+            case ClaimService::HHA():
+                return $this->hhaFiles()
+                    ->with('results')
+                    ->latest()
+                    ->first();
+
+            default:
+                return null;
+        }
     }
 
     // **********************************************************

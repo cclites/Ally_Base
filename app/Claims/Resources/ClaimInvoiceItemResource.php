@@ -57,7 +57,7 @@ class ClaimInvoiceItemResource extends Resource
             'client_id' => $this->resource->client_id,
             'client_first_name' => $this->resource->client_first_name,
             'client_last_name' => $this->resource->client_last_name,
-            'client_dob' => Carbon::parse($this->resource->client_dob)->format('m/d/Y'),
+            'client_dob' => $this->resource->client_dob ? Carbon::parse($this->resource->client_dob)->format('m/d/Y') : '',
             'client_medicaid_id' => $this->resource->client_medicaid_id,
             'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,
             'client_case_manager' => $this->resource->client_case_manager,
@@ -72,7 +72,7 @@ class ClaimInvoiceItemResource extends Resource
             'caregiver_first_name' => $this->resource->caregiver_first_name,
             'caregiver_last_name' => $this->resource->caregiver_last_name,
             'caregiver_gender' => $this->resource->caregiver_gender,
-            'caregiver_dob' => Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y'),
+            'caregiver_dob' => $this->resource->caregiver_dob ? Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y') : '',
             'caregiver_ssn' => filled($this->resource->caregiver_ssn) ? '***-**-****' : '',
             'caregiver_medicaid_id' => $this->resource->caregiver_medicaid_id,
         ];

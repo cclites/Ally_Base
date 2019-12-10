@@ -2,9 +2,11 @@
 
 namespace App\Claims\Transmitters;
 
+use App\ClaimInvoiceTellusFile;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\TellusValidationException;
+use App\TellusFile;
 use Illuminate\Support\Collection;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
@@ -96,8 +98,15 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-            if ($tellus->submitClaim($this->getData($claim))) {
+            if ($filename = $tellus->submitClaim($this->getData($claim))) {
                 // Success
+
+                // create new TellusFile for the Claim
+                $claim->tellusFiles()->create([
+                    'filename' => $filename,
+                    'status'   => ClaimInvoiceTellusFile::STATUS_PENDING,
+                ]);
+
                 return true;
             }
         } catch (TellusValidationException $ex) {
@@ -111,6 +120,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             throw $ex;
         } catch (\Exception $ex) {
             app('sentry')->captureException($ex);
+            \Log::info($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
@@ -133,14 +143,12 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         $claim = $item->claim;
-
         /** @var ClaimableService $service */
         $service = $item->claimable;
-
         /** @var \App\Business $business */
         $business = $claim->business;
 
-        $diagnosisCodes = $this->getDiagnosisCodes($claim);
+        $diagnosisCodes = $this->getDiagnosisCodes($item);
 
         $data = [
             'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
@@ -155,20 +163,20 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy, // OPTIONAL
             'ProviderNPIZipCode' => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
             'ProviderEin' => str_replace('-', '', $business->ein), // REQUIRED
-            'CaregiverFirstName' => $service->caregiver_first_name,
-            'CaregiverLastName' => $service->caregiver_last_name,
-            'CaregiverLicenseNumber' => $service->caregiver_medicaid_id, // OPTIONAL
-            'RecipientMedicaidId' => $claim->client_medicaid_id,
+            'CaregiverFirstName' => $item->caregiver_first_name,
+            'CaregiverLastName' => $item->caregiver_last_name,
+            'CaregiverLicenseNumber' => $item->caregiver_medicaid_id, // OPTIONAL
+            'RecipientMedicaidId' => $item->client_medicaid_id,
             'RecipientMemberId' => '', // OPTIONAL
-            'RecipientFirstName' => $claim->client_first_name,
-            'RecipientLastName' => $claim->client_last_name,
-            'RecipientDob' => Carbon::parse($claim->client_dob)->format('m/d/Y'),
+            'RecipientFirstName' => $item->client_first_name,
+            'RecipientLastName' => $item->client_last_name,
+            'RecipientDob' => $item->client_dob ? Carbon::parse($item->client_dob)->format('m/d/Y') : '',
             'ServiceAddress1' => $service->address1,
             'ServiceAddress2' => $service->address2, // OPTIONAL
             'ServiceCity' => $service->city,
             'ServiceState' => $service->state,
             'ServiceZip' => $service->zip,
-            'VisitId' => $service->id,
+            'VisitId' => optional($service->shift)->id,
             'ServiceCode' => $service->service_code,
             'ServiceCodeMod1' => '', // OPTIONAL
             'ServiceCodeMod2' => '', // OPTIONAL
@@ -182,15 +190,15 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ScheduledEndDateTime' => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime' => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime' => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime' => $service->evv_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime' => $service->evv_end_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
             'ActualEndLongitude' => '',
-            // 'UserField1'             => '', // OPTIONAL
-            // 'UserField2'             => '', // OPTIONAL
-            // 'UserField3'             => '', // OPTIONAL
+            'UserField1' => $claim->id, // OPTIONAL
+            'UserField2' => $item->id, // OPTIONAL
+            'UserField3' => $service->visit_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
             // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO
             // 'ReasonCode2' => '', // OPTIONAL && TODO
             // 'ReasonCode3' => '', // OPTIONAL && TODO
@@ -243,7 +251,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
      */
     public function mapActivities(Collection $activities): string
     {
-        // TODO: re-work this to read from hcpcs_procedure_code field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
+        // TODO: re-work this to read from hcpcs_procedure_code field in DB:
+        // https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if ($activities->isEmpty()) {
             return '';
         }
@@ -373,13 +382,13 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     /**
      * Split client diagnosis codes from databased array.
      *
-     * @param ClaimInvoice $claim
+     * @param ClaimInvoiceItem $item
      * @return array
      */
-    protected function getDiagnosisCodes(ClaimInvoice $claim): array
+    protected function getDiagnosisCodes(ClaimInvoiceItem $item): array
     {
         return array_pad(
-            array_map('trim', explode(',', $claim->client_medicaid_diagnosis_codes)),
+            array_map('trim', explode(',', $item->client_medicaid_diagnosis_codes)),
             4,
             ''
         );

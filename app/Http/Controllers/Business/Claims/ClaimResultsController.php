@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\Resources\ClaimTransmissionFileResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\ClaimInvoice;
 
@@ -17,15 +18,8 @@ class ClaimResultsController extends BaseController
      */
     public function show(ClaimInvoice $claim)
     {
-        $hhaFile = $claim->hhaFiles()
-            ->with('results')
-            ->latest()
-            ->first();
-
-        if (empty($hhaFile)) {
-            return response()->json([]);
-        }
-
-        return response()->json($hhaFile->results);
+        return response()->json(
+            new ClaimTransmissionFileResource($claim->getLatestTransmissionFile())
+        );
     }
 }

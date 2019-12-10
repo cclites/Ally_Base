@@ -163,23 +163,37 @@
                     </div>
                 </template>
                 <template slot="status" scope="row">
-                    {{ resolveOption(row.item.status, claimStatusOptions) }}
-                    <span v-if="row.item.transmission_method == 'HHA' && row.item.status == CLAIM_STATUSES.REJECTED">
-                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle" @click="showHhaResults(row.item)" style="cursor:pointer"></i>
+                    <span v-if="row.item.status == CLAIM_STATUSES.TRANSMITTED">
+                        <span v-if="[CLAIM_SERVICE.FAX,CLAIM_SERVICE.DIRECT_MAIL,CLAIM_SERVICE.EMAIL].includes(row.item.transmission_method)">
+                            Transmitted (Offline)
+                        </span>
+                        <span v-else>
+                            Transmitted (Pending)
+                        </span>
                     </span>
+                    <span v-else-if="row.item.status == CLAIM_STATUSES.REJECTED">
+                        <i class="ml-1 text-danger fa fa-lg fa-exclamation-circle"
+                            @click="showTransmissionResults(row.item)"
+                            style="cursor:pointer"></i>
+                    </span>
+                    <span v-else>{{ resolveOption(row.item.status, claimStatusOptions) }}</span>
                 </template>
                 <template slot="actions" scope="row" class="text-nowrap">
                     <div class="text-nowrap">
                         <!-- EDIT BUTTON -->
                         <b-btn
-                               variant="info"
-                               class="mr-1"
-                               :href="`/business/claims/${row.item.id}/edit`"
-                               size="sm"
+                           variant="info"
+                           class="mr-1"
+                           :href="`/business/claims/${row.item.id}/edit`"
+                           size="sm"
                         >
                             <i class="fa fa-edit" />
                         </b-btn>
-                        <b-dropdown right size="sm" text="..." class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
+                        <b-dropdown right size="sm" class="claim-dropdown" :disabled="busy || [transmittingId, deletingId].includes(row.item.id)">
+                            <template slot="button-content">
+                                <i v-if="[transmittingId, deletingId].includes(row.item.id)" class="fa fa-spin fa-spinner" />
+                                <i v-else class="fa fa-ellipsis-h" />
+                            </template>
                             <b-dropdown-item :href="`/business/claims/${row.item.id}/print?download=1`">
                                 <i class="fa fa-download mr-1" />Download PDF
                             </b-dropdown-item>
@@ -283,19 +297,19 @@
             </div>
         </b-modal>
 
-        <b-modal id="hhaResultsModal"
+        <b-modal id="transmissionResultsModal"
              size="lg"
-             :title="`HHA Results for Claim #${selectedClaim.name}`"
-             v-model="hhaResultsModal"
+             :title="`Transmission Results for Claim #${selectedClaim.name}`"
+             v-model="transmissionResultsModal"
         >
-            <b-row>
-                <b-table bordered striped hover show-empty
-                         :items="hhaResults"
-                         :fields="hhaFields"
-                         sort-by="service_date"
-                >
-                </b-table>
-            </b-row>
+            <div class="mb-3"><strong>Transmission Method:</strong> {{ resolveOption(selectedClaim.transmission_method, claimServiceOptions) }}</div>
+            <div class="mb-3"><strong>Filename:</strong> {{ transmissionResults.filename }}</div>
+            <b-table bordered striped hover show-empty
+                     :items="transmissionResults.results"
+                     :fields="resultFields"
+                     sort-by="service_date"
+            >
+            </b-table>
         </b-modal>
 
         <a href="#" target="_blank" ref="open_test_link" class="d-none"></a>
@@ -370,9 +384,9 @@
                 missingFieldsModal: false,
                 tellusErrorsModal: false,
                 tellusErrors: [],
-                hhaResultsModal: false,
-                hhaResults: [],
-                hhaFields: {
+                transmissionResultsModal: false,
+                transmissionResults: [],
+                resultFields: {
                     service_date: { sortable: true, label: 'Date', formatter: x => this.formatDateTime(x) },
                     service_code: { sortable: true, label: 'Service Code' },
                     status_code: { sortable: true, label: 'Status Code' },
@@ -554,18 +568,18 @@
              * Fetch and show the HHA file results from the transmission.
              * @param claim
              */
-            showHhaResults(claim) {
+            showTransmissionResults(claim) {
                 this.selectedClaim = claim;
 
                 axios.get(`/business/claims/${claim.id}/results`)
                     .then( ({ data }) => {
-                        this.hhaResults = data;
+                        this.transmissionResults = data;
                     })
                     .catch(() => {
 
                     });
                 // claims-ar/hha-results
-                this.hhaResultsModal = true;
+                this.transmissionResultsModal = true;
             },
         },
 

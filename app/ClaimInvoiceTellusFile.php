@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Claims;
+namespace App;
 
-use App\BaseModel;
+use App\Claims\ClaimInvoice;
 use App\Claims\Contracts\TransmissionFileInterface;
 use Carbon\Carbon;
 
-class ClaimInvoiceHhaFile extends BaseModel implements TransmissionFileInterface
+class ClaimInvoiceTellusFile extends AuditableModel implements TransmissionFileInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -40,7 +40,7 @@ class ClaimInvoiceHhaFile extends BaseModel implements TransmissionFileInterface
      */
     public function results()
     {
-        return $this->hasMany(ClaimInvoiceHhaFileResult::class, 'hha_file_id', 'id');
+        return $this->hasMany(ClaimInvoiceTellusFileResult::class, 'tellus_file_id', 'id');
     }
 
     // **********************************************************
