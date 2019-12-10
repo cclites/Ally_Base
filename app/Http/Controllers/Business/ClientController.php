@@ -549,16 +549,19 @@ class ClientController extends BaseController
     private function generateDeactivationPdf( Client $client ) : bool
     {
         $client->load( 'deactivationReason' );
-        $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name ] );
+        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [ 'client' => $client, 'deactivatedBy' => \Auth::user()->name ] );
 
         $filePath = $this->generateUniqueDeactivationPdfFilename( $client );
         try {
-            if ($pdf->save($filePath)) {
-                $caregiver->documents()->create([
-                    'filename' => File::basename($filePath),
-                    'original_filename' => File::basename($filePath),
-                    'description' => 'Caregiver Deactivation Document',
-                    'user_id' => $caregiver->id
+
+            if ( $pdf->save( $filePath ) ) {
+
+                $client->documents()->create([
+
+                    'filename'          => File::basename( $filePath ),
+                    'original_filename' => File::basename( $filePath ),
+                    'description'       => 'Client Deactivation Document',
+                    'user_id'           => $client->id
                 ]);
 
                 return true;
@@ -566,7 +569,8 @@ class ClientController extends BaseController
                 return false;
             }
         } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
+
+            app( 'sentry' )->captureException( $ex );
             return false;
         }
     }
