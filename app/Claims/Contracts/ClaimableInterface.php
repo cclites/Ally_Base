@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 /**
  * Interface ClaimableInterface
- * @package App\Claims
+ * @package App\Claims\Contracts
  */
 interface ClaimableInterface
 {

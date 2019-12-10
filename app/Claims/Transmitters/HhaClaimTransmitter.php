@@ -55,7 +55,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         // required for hha:
         // hha_username
         // hha_password
-        // caregiver ID
+        // caregiver ID (this is not nullable in the database, so no need to validate)
 
         $errors = collect(parent::validateClaim($claim));
 

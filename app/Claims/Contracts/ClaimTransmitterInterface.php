@@ -5,6 +5,10 @@ namespace App\Claims\Contracts;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
+/**
+ * Interface ClaimTransmitterInterface
+ * @package App\Claims\Contracts
+ */
 interface ClaimTransmitterInterface
 {
     /**
