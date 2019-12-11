@@ -30,10 +30,10 @@ class AveryLabelController extends BaseController
 
             $query->where( function ( $q ) use ( $search ) {
 
-                $q->where( 'users.email', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhere('users.firstname', 'LIKE', "%$search%")
-                    ->orWhere('users.lastname', 'LIKE', "%$search%");
+                $q->where( 'users.email', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.id', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.firstname', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.lastname', 'LIKE', "%$search%" );
             });
         }
 
@@ -56,7 +56,7 @@ class AveryLabelController extends BaseController
 
         if ( $request->input( 'active', 1 ) !== null ) {
 
-            $query->where('active', $request->input( 'active', 1 ) );
+            $query->where( 'active', $request->input( 'active', 1 ) );
         }
 
         if( $status = $request->input( 'status' ) ) {

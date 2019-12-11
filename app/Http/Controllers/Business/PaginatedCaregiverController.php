@@ -11,6 +11,8 @@ class PaginatedCaregiverController extends BaseController
 {
     /**
      * Get a list of caregivers using pagination.
+     * 
+     * Also used by the Avery Label Table for displaying paginated Caregivers!! make sure to ensure that still works if you change this.
      *
      * @param Request $request
      * @return \Illuminate\Http\Response

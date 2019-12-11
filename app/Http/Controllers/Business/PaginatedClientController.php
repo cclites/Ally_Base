@@ -11,6 +11,8 @@ class PaginatedClientController extends BaseController
 {
     /**
      * Get a list of clients using pagination.
+     * 
+     * Also used by the Avery Label Table for displaying paginated Clients!! make sure to ensure that still works if you change this.
      *
      * @param Request $request
      * @return \Illuminate\Http\Response
