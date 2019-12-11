@@ -174,7 +174,7 @@
 
             listFilters() {
 
-                // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
+                // &page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}
 
                 let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
@@ -225,9 +225,9 @@
         methods: {
 
 
-            averyLabels(){
+            averyLabels( data ){
 
-                window.open( this.averyEndpoint + this.listFilters );
+                window.open( this.averyEndpoint + this.listFilters + '&leftmargin=' + data.leftmargin + '&topmargin=' + data.topmargin );
             },
             async loadClients() {
 
@@ -236,10 +236,7 @@
                 axios.get( this.paginatedEndpoint + this.listFilters + this.paginationControls )
                     .then( res => {
 
-                        console.log( 'response: ', res );
                         this.totalRows = res.data[ 'total' ];
-
-                        console.log( 'total rows: ', this.totalRows );
 
                         this.clients = res.data[ 'clients' ].map( client => {
 
