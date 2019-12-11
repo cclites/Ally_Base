@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
+use App\Console\Commands\Cron\CronTellusCheckStatusv2;
 use App\Console\Commands\CronChargePaymentNotifications;
 use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronHhaCheckStatusv2;
@@ -39,8 +40,8 @@ class Kernel extends ConsoleKernel
         AchOfflineChargeCommand::class,
         CronChargePaymentNotifications::class,
         GenerateItemizedReconciliationReport::class,
-        CronHhaCheckStatus::class,
         CronHhaCheckStatusv2::class,
+        CronTellusCheckStatusv2::class,
     ];
 
     /**
@@ -75,11 +76,11 @@ class Kernel extends ConsoleKernel
             ->twiceDaily(8, 20)
             ->withoutOverlapping();
 
-        $schedule->command(CronHhaCheckStatus::class)
+        $schedule->command(CronHhaCheckStatusv2::class)
             ->everyThirtyMinutes()
             ->withoutOverlapping();
 
-        $schedule->command(CronHhaCheckStatusv2::class)
+        $schedule->command(CronTellusCheckStatusv2::class)
             ->everyThirtyMinutes()
             ->withoutOverlapping();
 

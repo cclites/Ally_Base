@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
+use App\Claims\Resources\ManageClaimsResource;
+use App\Services\TellusValidationException;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
-use App\Services\TellusValidationException;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ClaimTransmissionController extends BaseController
 {
@@ -32,7 +32,6 @@ class ClaimTransmissionController extends BaseController
         if (!$service = $claim->getTransmissionMethod()) {
             if ($method = $request->input('method', null)) {
                 $service = ClaimService::$method();
-//                $claim->transmission_method = $method;
             }
         }
 
@@ -43,7 +42,14 @@ class ClaimTransmissionController extends BaseController
         try {
             \DB::beginTransaction();
 
+            $claim->update(['transmission_method' => $service]);
+
             $transmitter = $claim->getTransmitter($service);
+
+            if ($reason = $transmitter->prevent($claim)) {
+                return new ErrorResponse(400, "Could not transmit claim: $reason");
+            }
+
             if ($errors = $transmitter->validateClaim($claim)) {
                 return new ErrorResponse(412, 'Required data missing for transmitting claim.', $errors);
             }
@@ -60,7 +66,7 @@ class ClaimTransmissionController extends BaseController
 
             \DB::commit();
 
-            $data = ['invoice' => new ClaimsQueueResource($claim->clientInvoice->fresh())];
+            $data = ['invoice' => new ManageClaimsResource($claim->fresh())];
             if (isset($testFile)) {
                 $data['test_result'] = $testFile;
             }

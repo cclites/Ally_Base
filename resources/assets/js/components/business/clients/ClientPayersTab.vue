@@ -27,7 +27,7 @@
                     </b-btn>
                 </template>
                 <template slot="payer_id" scope="row">
-                    <b-select v-model="row.item.payer_id" class="form-control-sm">
+                    <b-select v-model="row.item.payer_id" class="form-control-sm w-auto">
                         <option :value="0">({{ client.name }})</option>
                         <option v-for="payer in payerOptions" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                         <option :value="1">OFFLINE</option>
@@ -42,8 +42,14 @@
                 <template slot="effective_end" scope="row">
                     <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
+                <template slot="program_number" scope="row">
+                    <b-form-input v-model="row.item.program_number" type="text" class="form-control-sm wider-text" />
+                </template>
+                <template slot="cirts_number" scope="row">
+                    <b-form-input v-model="row.item.cirts_number" type="text" class="form-control-sm wider-text" />
+                </template>
                 <template slot="notes" scope="row">
-                    <b-form-input v-model="row.item.notes" type="text" class="date-input form-control-sm" />
+                    <b-form-input v-model="row.item.notes" type="text" class="form-control-sm wider-text" />
                 </template>
                 <template slot="payment_allocation" scope="row">
                     <b-select v-model="row.item.payment_allocation" class="form-control-sm" >
@@ -137,6 +143,14 @@
                         label: 'Effective End',
                     },
                     {
+                        key: 'program_number',
+                        label: 'Program ID',
+                    },
+                    {
+                        key: 'cirts_number',
+                        label: 'CIRTS ID',
+                    },
+                    {
                         key: 'notes',
                         label: 'Print on Client Invoice',
                     },
@@ -198,6 +212,8 @@
                     split_percentage: '0',
                     client_id: this.client.id,
                     notes: '',
+                    cirts_number: '',
+                    program_number: '',
                     // payer: {},
                 });
                 this.resetPriorities();
@@ -256,5 +272,5 @@
 </script>
 
 <style>
-
+.wider-text { min-width: 150px!important; }
 </style>

@@ -6,9 +6,8 @@ use App\Claims\Requests\CreateClaimAdjustmentRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Http\Controllers\Business\BaseController;
-use App\Claims\Resources\ClaimsQueueResource;
+use App\Claims\Resources\ManageClaimsResource;
 use App\Responses\SuccessResponse;
-use App\Responses\ErrorResponse;
 use App\Claims\ClaimAdjustment;
 use App\Claims\ClaimInvoice;
 
@@ -32,7 +31,7 @@ class ClaimAdjustmentController extends BaseController
 
         return view_component('claim-adjustment-history', 'Claim Adjustment History', compact('init'), [
             'Home' => '/',
-            'Claims Queue' => route('business.claims-queue'),
+            'Manage Claims' => route('business.claims-manager'),
         ]);
     }
 
@@ -62,6 +61,6 @@ class ClaimAdjustmentController extends BaseController
 
         \DB::commit();
 
-        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ClaimsQueueResource($claim->clientInvoice->fresh()));
+        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ManageClaimsResource($claim->fresh()));
     }
 }

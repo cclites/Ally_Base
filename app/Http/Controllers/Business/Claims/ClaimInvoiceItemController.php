@@ -6,8 +6,10 @@ use App\Claims\Requests\UpdateClaimInvoiceItemRequest;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Validation\ValidationException;
 use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceItem;
@@ -75,6 +77,10 @@ class ClaimInvoiceItemController extends BaseController
         try {
             \DB::beginTransaction();
 
+            if ($claim->getType() != ClaimInvoiceType::PAYER() && $item->client_id != $request->client_id) {
+                return new ErrorResponse(412, 'You cannot change the linked client record for a client claim.');
+            }
+
             $item->claimable->update($request->getClaimableData());
             $item->update($request->getClaimItemData());
 
@@ -86,6 +92,7 @@ class ClaimInvoiceItemController extends BaseController
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
+            \Log::info($ex);
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }
@@ -98,10 +105,11 @@ class ClaimInvoiceItemController extends BaseController
      *
      * @param ClaimInvoice $claim
      * @param ClaimInvoiceItem $item
+     * @param ClaimInvoiceFactory $factory
      * @return SuccessResponse|string
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item)
+    public function destroy(ClaimInvoice $claim, ClaimInvoiceItem $item, ClaimInvoiceFactory $factory)
     {
         $this->authorize('update', $claim);
 

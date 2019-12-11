@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Claims\Resources\ClaimsQueueResource;
 use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
+use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
+use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Claims\ClaimInvoiceType;
 use App\Billing\ClientInvoice;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
@@ -22,38 +24,50 @@ class ClaimInvoiceController extends BaseController
      * Get a list of Claim Invoices.
      *
      * @param GetClaimInvoicesRequest $request
+     * @param ClaimInvoiceQuery $claimQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(GetClaimInvoicesRequest $request)
+    public function index(GetClaimInvoicesRequest $request, ClaimInvoiceQuery $claimQuery)
     {
         $filters = $request->filtered();
 
-        $query = ClaimInvoice::with(['items' => function ($q) {
-            $q->orderByRaw('claimable_type desc, date asc');
-        }])->forRequestedBusinesses()
-            ->forPayer($filters['payer_id'])
-            ->forClient($filters['client_id'])
-            ->forClientType($filters['client_type'])
-            ->searchForInvoiceId($filters['invoice_id'])
-            ->whereIn('status', ClaimStatus::transmittedStatuses());
+        $claimQuery->with([
+            'clientInvoices.client',
+            'items' => function ($q) {
+                $q->orderByRaw('claimable_type desc, date asc');
+            },
+            'items.clientInvoice',
+        ])->forRequestedBusinesses()
+            ->withStatus(ClaimStatus::transmittedStatuses())
+            ->when($filters['client_id'], function (ClaimInvoiceQuery $q, $var) {
+                $q->forClient($var);
+            })
+            ->when(filled($filters['payer_id']), function (ClaimInvoiceQuery $q) use ($filters) {
+                $q->forPayer($filters['payer_id']);
+            })
+            ->when($filters['client_type'], function (ClaimInvoiceQuery $q, $var) {
+                $q->forClientType($var);
+            })
+            ->when($filters['invoice_id'], function (ClaimInvoiceQuery $q, $var) {
+                $q->searchForInvoiceId($var);
+            })
+            ->when(!$filters['inactive'], function (ClaimInvoiceQuery $q) {
+                $q->forActiveClientsOnly();
+            })
+            ->when($filters['claim_status'] == 'unpaid', function (ClaimInvoiceQuery $q) {
+                $q->notPaidInFull();
+            })
+            ->when($filters['claim_type'], function (ClaimInvoiceQuery $q, $var) {
+                $q->withType($var);
+            });
 
         if ($request->getDateSearchType() == 'invoice') {
-            $query->whereInvoicedBetween($filters['start_date'], $filters['end_date']);
+            $claimQuery->whereInvoicedBetween($request->filterDateRange());
         } else {
-            $query->whereDatesOfServiceBetween($filters['start_date'], $filters['end_date']);
+            $claimQuery->whereDatesOfServiceBetween($request->filterDateRange());
         }
 
-        if (! $filters['inactive']) {
-            $query->forActiveClientsOnly();
-        }
-
-        if ($request->claim_status == 'unpaid') {
-            $query = $query->hasBalance();
-        }
-
-        $results = $query->get();
-
-        return ClaimInvoiceResource::collection($results);
+        return ClaimInvoiceResource::collection($claimQuery->get());
     }
 
     /**
@@ -79,7 +93,7 @@ class ClaimInvoiceController extends BaseController
                 $message .= "$item\r\n";
             }
         }
-        return new SuccessResponse($message, new ClaimsQueueResource($claim->clientInvoice->fresh()));
+        return new SuccessResponse($message, new ClaimCreatorResource($clientInvoice->fresh()));
     }
 
     /**
@@ -97,7 +111,7 @@ class ClaimInvoiceController extends BaseController
             'claim-editor',
             'Edit Claim #' . $claim->name,
             ['original-claim' => new ClaimInvoiceResource($claim)],
-            ['Home' => '/', 'Claims Queue' => route('business.claims-queue')]
+            ['Home' => '/', 'Manage Claims' => route('business.claims-manager')]
         );
     }
 
@@ -147,19 +161,9 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('delete', $claim);
 
-        if ($claim->adjustments()->count() > 0) {
-            return new ErrorResponse(500, 'Cannot delete Claims that have adjustments applied.');
-        }
-
-        if ($claim->hasBeenTransmitted()) {
-            return new ErrorResponse(500, 'Cannot delete Claims that have been transmitted.');
-        }
-
-        $clientInvoice = $claim->clientInvoice;
-
         try {
             $factory->deleteClaimInvoice($claim);
-            return new SuccessResponse('Claim has been deleted.', new ClaimsQueueResource($clientInvoice->fresh()));
+            return new SuccessResponse('Claim has been deleted.');
         } catch (CannotDeleteClaimInvoiceException $ex) {
             return new ErrorResponse(500, 'Could not delete this Claim: ' . $ex->getMessage());
         }
@@ -179,7 +183,6 @@ class ClaimInvoiceController extends BaseController
         $this->authorize('read', $claim);
 
         $groups = $claim->items->groupBy('type');
-
         if (!isset($groups['Expense'])) {
             $groups['Expense'] = [];
         }
@@ -187,14 +190,20 @@ class ClaimInvoiceController extends BaseController
             $groups['Service'] = [];
         }
 
+        $client = null;
+        if ($claim->getType() != ClaimInvoiceType::PAYER()) {
+            $client = $claim->client ? $claim->client : $service->client;
+        }
+
         $view = view('claims.claim_invoice', [
             'claim' => $claim,
             'sender' => $claim->business,
             'recipient' => $claim->payer,
-            'client' => $claim->client,
+            'client' => $client,
             'itemGroups' => $groups,
-            'clientPayer' => $claim->getClientPayer(),
             'render' => 'html',
+            'notes' => $claim->getInvoiceNotesData(),
+            'clientData' => $claim->getInvoiceClientData(),
         ]);
 
         if ($request->filled('download')) {

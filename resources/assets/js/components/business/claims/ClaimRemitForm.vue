@@ -52,7 +52,7 @@
                 />
 
                 <b-form-group label="Payer" label-for="payer_id">
-                    <payer-dropdown v-model="form.payer_id" :disabled="form.busy" />
+                    <payer-dropdown v-model="form.payer_id" :disabled="form.busy" :show-offline="true" />
                     <input-help :form="form" field="payer_id" text="" />
                 </b-form-group>
 

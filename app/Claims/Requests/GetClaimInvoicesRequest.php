@@ -3,6 +3,8 @@
 namespace App\Claims\Requests;
 
 use App\Http\Requests\FilteredResourceRequest;
+use App\Claims\ClaimInvoiceType;
+use App\Rules\ValidEnum;
 
 class GetClaimInvoicesRequest extends FilteredResourceRequest
 {
@@ -24,6 +26,7 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
             'inactive' => 'nullable|bool',
             'invoice_id' => 'nullable',
             'date_type' => 'nullable',
+            'claim_type' => ['nullable', new ValidEnum(ClaimInvoiceType::class)],
         ];
     }
 
@@ -37,6 +40,10 @@ class GetClaimInvoicesRequest extends FilteredResourceRequest
         $data = $this->validated();
 
         list($data['start_date'], $data['end_date']) = $this->filterDateRange();
+
+        if (filled($data['claim_type'])) {
+            $data['claim_type'] = ClaimInvoiceType::fromValue($data['claim_type']);
+        }
 
         return $data;
     }

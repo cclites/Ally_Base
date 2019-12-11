@@ -3,8 +3,10 @@
 namespace App\Claims;
 
 use App\BaseModel;
+use App\Claims\Contracts\TransmissionFileResultInterface;
+use Carbon\Carbon;
 
-class ClaimInvoiceHhaFileResult extends BaseModel
+class ClaimInvoiceHhaFileResult extends BaseModel implements TransmissionFileResultInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -21,21 +23,45 @@ class ClaimInvoiceHhaFileResult extends BaseModel
      * Get the HhaFile Relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
+     */
     public function hhaFile()
     {
-        return $this->belongsTo(ClaimInvoiceHhaFile::class, 'hha_file_id','id');
+        return $this->belongsTo(ClaimInvoiceHhaFile::class, 'hha_file_id', 'id');
     }
 
     // **********************************************************
-    // MUTATORS
+    // ACCESSORS
     // **********************************************************
 
-    // **********************************************************
-    // QUERY SCOPES
-    // **********************************************************
+    /**
+     * @inheritDoc
+     */
+    public function getServiceCode(): string
+    {
+        return $this->service_code;
+    }
 
-    // **********************************************************
-    // OTHER FUNCTIONS
-    // **********************************************************
+    /**
+     * @inheritDoc
+     */
+    public function getServiceDate(): Carbon
+    {
+        return Carbon::parse($this->service_date);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getStatusCode(): string
+    {
+        return $this->status_code;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getStatus(): string
+    {
+        return $this->import_status;
+    }
 }

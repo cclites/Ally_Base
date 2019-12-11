@@ -2,15 +2,16 @@
 
 namespace App\Claims\Requests;
 
-use App\Caregiver;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Services\GeocodeManager;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimableExpense;
+use Illuminate\Validation\Rule;
 use App\Rules\ValidSSN;
 use Carbon\Carbon;
+use App\Caregiver;
+use App\Client;
 
 class UpdateClaimInvoiceItemRequest extends FormRequest
 {
@@ -81,6 +82,26 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'shift_end_time' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'service_start_date' => 'required_if:claimable_type,' . ClaimableService::class . '|date',
             'service_start_time' => 'required_if:claimable_type,' . ClaimableService::class . '',
+
+            // New service data added 12/2019:
+            'client_reload' => 'nullable|boolean',
+            'client_id' => ['required',
+                Rule::exists('clients', 'id')->where(function ($query) {
+                    $query->whereIn('id', Client::forRequestedBusinesses()->pluck('id'));
+                })
+            ],
+            'client_first_name' => 'required_unless:client_reload,true',
+            'client_last_name' => 'required_unless:client_reload,true',
+            'client_dob' => 'nullable|date',
+            'client_medicaid_id' => 'nullable',
+            'client_medicaid_diagnosis_codes' => 'nullable',
+            'client_case_manager' => 'nullable',
+            'client_program_number' => 'nullable',
+            'client_cirts_number' => 'nullable',
+            'client_ltci_policy_number' => 'nullable',
+            'client_ltci_claim_number' => 'nullable',
+            'client_hic' => 'nullable',
+            'client_invoice_notes' => 'nullable',
         ];
     }
 
@@ -95,8 +116,10 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'service_id.required_if' => 'The :attribute field is required.',
             'name.required_if' => 'The :attribute field is required.',
             'date.required_if' => 'The :attribute field is required.',
-            'caregiver_first_name.required_if' => 'The :attribute field is required.',
-            'caregiver_last_name.required_if' => 'The :attribute field is required.',
+            'caregiver_first_name.*' => 'The :attribute field is required.',
+            'caregiver_last_name.*' => 'The :attribute field is required.',
+            'client_first_name.*' => 'The :attribute field is required.',
+            'client_last_name.*' => 'The :attribute field is required.',
             'service_name.required_if' => 'The :attribute field is required.',
             'shift_start_date.required_if' => 'The :attribute field is required.',
             'shift_end_date.required_if' => 'The :attribute field is required.',
@@ -121,14 +144,6 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             case ClaimableService::class:
                 $data = $data->only([
                     'units',
-                    'caregiver_reload',
-                    'caregiver_id',
-                    'caregiver_first_name',
-                    'caregiver_last_name',
-                    'caregiver_gender',
-                    'caregiver_dob',
-                    'caregiver_ssn',
-                    'caregiver_medicaid_id',
                     'address1',
                     'address2',
                     'city',
@@ -147,22 +162,6 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'service_start_date',
                     'service_start_time',
                 ])->toArray();
-
-                if ($data['caregiver_dob']) {
-                    $data['caregiver_dob'] = filter_date($data['caregiver_dob']);
-                }
-
-                if (isset($data['caregiver_reload']) && $data['caregiver_reload']) {
-                    // Update all caregiver data from the database.
-                    $caregiver = Caregiver::findOrFail($data['caregiver_id']);
-                    $data['caregiver_first_name'] = $caregiver->first_name;
-                    $data['caregiver_last_name'] = $caregiver->last_name;
-                    $data['caregiver_gender'] = $caregiver->gender;
-                    $data['caregiver_dob'] = $caregiver->date_of_birth;
-                    $data['caregiver_ssn'] = $caregiver->ssn;
-                    $data['caregiver_medicaid_id'] = $caregiver->medicaid_id;
-                    unset($data['caregiver_reload']);
-                }
 
                 // convert dates and times
                 $timezone = $this->getTimezone();
@@ -186,22 +185,14 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                 $data['latitude'] = $lat;
                 $data['longitude'] = $lon;
 
-                // Only update SSN if not masked
-                if (substr($data['caregiver_ssn'], 0, 3) == '***') {
-                    unset($data['caregiver_ssn']);
-                }
-
                 break;
-            case ClaimableExpense::class:
-                $data = $data->only(['name', 'notes', 'date', 'caregiver_reload', 'caregiver_id', 'caregiver_first_name', 'caregiver_last_name'])
-                    ->toArray();
 
-                if ($data['caregiver_reload']) {
-                    $caregiver = Caregiver::findOrFail($data['caregiver_id']);
-                    $data['caregiver_first_name'] = $caregiver->first_name;
-                    $data['caregiver_last_name'] = $caregiver->last_name;
-                    unset($data['caregiver_reload']);
-                }
+            case ClaimableExpense::class:
+                $data = $data->only([
+                    'name',
+                    'notes',
+                    'date',
+                ])->toArray();
 
                 $data['date'] = filter_date($data['date']);
                 break;
@@ -221,16 +212,42 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
     {
         $data = collect($this->validated());
 
+        $itemFields = [
+            'caregiver_reload',
+            'caregiver_id',
+            'caregiver_first_name',
+            'caregiver_last_name',
+            'caregiver_gender',
+            'caregiver_dob',
+            'caregiver_ssn',
+            'caregiver_medicaid_id',
+            'client_reload',
+            'client_id',
+            'client_first_name',
+            'client_last_name',
+            'client_dob',
+            'client_medicaid_id',
+            'client_medicaid_diagnosis_codes',
+            'client_case_manager',
+            'client_program_number',
+            'client_cirts_number',
+            'client_ltci_policy_number',
+            'client_ltci_claim_number',
+            'client_hic',
+            'client_invoice_notes',
+        ];
+
         switch ($data['claimable_type']) {
             case ClaimableService::class:
-                $data = $data->only(['rate', 'units', 'service_start_date'])
+                $data = $data->only(array_merge($itemFields, ['rate', 'units', 'service_start_date']))
                     ->toArray();
 
                 $data['date'] = Carbon::parse($data['service_start_date'], $this->getTimezone())->setTimezone('UTC');
                 unset($data['service_start_date']);
                 break;
+
             case ClaimableExpense::class:
-                $data = $data->only(['rate', 'units', 'date'])
+                $data = $data->only(array_merge($itemFields, ['rate', 'units', 'date']))
                     ->toArray();
 
                 $data['date'] = Carbon::parse($data['date'], $this->getTimezone())->setTimezone('UTC');
@@ -240,6 +257,48 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
         }
 
         $data['amount'] = multiply(floatval($data['rate']), floatval($data['units']));
+
+        if ($data['client_dob']) {
+            $data['client_dob'] = filter_date($data['client_dob']);
+        }
+
+        if ($data['caregiver_dob']) {
+            $data['caregiver_dob'] = filter_date($data['caregiver_dob']);
+        }
+
+        // Only update SSN if not masked
+        if (substr($data['caregiver_ssn'], 0, 3) == '***') {
+            unset($data['caregiver_ssn']);
+        }
+
+        if (isset($data['caregiver_reload']) && $data['caregiver_reload']) {
+            // Update all caregiver data from the database.
+            $caregiver = Caregiver::findOrFail($data['caregiver_id']);
+            $data['caregiver_first_name'] = $caregiver->first_name;
+            $data['caregiver_last_name'] = $caregiver->last_name;
+            $data['caregiver_gender'] = $caregiver->gender;
+            $data['caregiver_dob'] = $caregiver->date_of_birth;
+            $data['caregiver_ssn'] = $caregiver->ssn;
+            $data['caregiver_medicaid_id'] = $caregiver->medicaid_id;
+            unset($data['caregiver_reload']);
+        }
+
+        if (isset($data['client_reload']) && $data['client_reload']) {
+            $client = Client::findOrFail($data['client_id']);
+            $data['client_first_name'] = $client->first_name;
+            $data['client_last_name'] = $client->last_name;
+            $data['client_medicaid_id'] = $client->medicaid_id;
+            $data['client_medicaid_diagnosis_codes'] = $client->medicaid_diagnosis_codes;
+            $data['client_case_manager'] = optional($client->caseManager)->name_last_first;
+            // TODO: how would we know to reload the client payer ?
+            // $data['client_program_number'] = $clientPayer->program_number;
+            // $data['client_cirts_number'] = $clientPayer->cirts_number;
+            // $data['client_invoice_notes'] = $clientPayer->notes;
+            $data['client_ltci_policy_number'] = $client->getPolicyNumber();
+            $data['client_ltci_claim_number'] = $client->getClaimNumber();
+            $data['client_hic'] = $client->hic;
+            unset($data['client_reload']);
+        }
 
         return $data;
     }

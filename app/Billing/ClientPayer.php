@@ -393,4 +393,28 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
             'notes' => $faker->sentence,
         ];
     }
+
+    /**
+     * Get the extra data that should be printed on the client invoices.
+     *
+     * @return array
+     */
+    public function getExtraInvoiceData() : array
+    {
+        $data = collect([]);
+
+        if (filled($this->notes)) {
+            $data->push($this->notes);
+        }
+
+        if (filled($this->cirts_number)) {
+            $data->push('CIRTS ID: ' . $this->cirts_number);
+        }
+
+        if (filled($this->program_number)) {
+            $data->push('Program ID: ' . $this->program_number);
+        }
+
+        return $data->toArray();
+    }
 }

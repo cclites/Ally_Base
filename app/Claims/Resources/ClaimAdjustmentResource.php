@@ -55,15 +55,15 @@ class ClaimAdjustmentResource extends Resource
 
         if (! $this->resource->is_interest && filled($this->resource->claim_invoice_id)) {
             $data = array_merge($data, [
-                'claim_invoice' => new ClaimInvoiceResource($this->resource->claimInvoice),
                 'claim_invoice_date' => $this->resource->claimInvoice->getDate()->toDateTimeString(),
                 'claim_invoice_name' => $this->resource->claimInvoice->getName(),
-                'client_invoice_id' => $this->resource->claimInvoice->clientInvoice->id,
-                'client_invoice_name' => $this->resource->claimInvoice->clientInvoice->name,
+                'client_invoice_id' => optional($this->resource->claimInvoiceItem->clientInvoice)->id,
+                'client_invoice_name' => optional($this->resource->claimInvoiceItem->clientInvoice)->name,
+                'client_invoice_date' => optional(optional($this->resource->claimInvoiceItem->clientInvoice)->created_at)->toDateTimeString(),
                 'item' => $this->resource->claimInvoiceItem->getItemSummary(),
                 'item_total' => $this->resource->claimInvoiceItem->amount,
-                'client_id' => $this->resource->claimInvoice->client->id,
-                'client_name' => $this->resource->claimInvoice->client->nameLastFirst,
+                'client_id' => optional($this->resource->claimInvoiceItem)->client_id,
+                'client_name' => optional($this->resource->claimInvoiceItem)->getClientName(),
             ]);
         }
 

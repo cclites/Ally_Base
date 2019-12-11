@@ -106,9 +106,9 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         return $this->hasOne(Claim::class);
     }
 
-    public function claimInvoice()
+    public function claimInvoices()
     {
-        return $this->hasOne( ClaimInvoice::class );
+        return $this->belongsToMany( ClaimInvoice::class );
     }
 
     /**

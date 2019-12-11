@@ -2,6 +2,8 @@
 
 namespace App\Claims\Reports;
 
+use App\Claims\Queries\ClaimInvoiceQuery;
+use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\Reports\BaseReport;
 
@@ -21,9 +23,6 @@ class ClaimTransmissionsReport extends BaseReport
      */
     protected $range = [];
 
-    protected $totalAmount = 0.00;
-    protected $totalDue = 0.00;
-
     /**
      * ClientType filter
      *
@@ -37,13 +36,13 @@ class ClaimTransmissionsReport extends BaseReport
     protected $showInactive = false;
 
     /**
-     * BusinessOfflineArAgingReport constructor.
+     * ClaimTransmissionsReport constructor.
      */
     public function __construct()
     {
-        $this->query = ClaimInvoice::query()
-            ->with('payer', 'business', 'clientInvoice')
-            ->whereNotNull('transmitted_at');
+        $this->query = (new ClaimInvoiceQuery())
+            ->with('payer')
+            ->withStatus(ClaimStatus::transmittedStatuses());
     }
 
     /**
@@ -101,7 +100,7 @@ class ClaimTransmissionsReport extends BaseReport
     /**
      * Return the instance of the query builder for additional manipulation
      *
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     * @return ClaimInvoiceQuery
      */
     public function query()
     {
@@ -117,25 +116,18 @@ class ClaimTransmissionsReport extends BaseReport
     {
         $query = clone $this->query;
 
-        if (filled($this->clientId)) {
-            $query->where('client_id', $this->clientId);
-        }
-
-        if (filled($this->range)) {
-            $query->whereBetween('transmitted_at', $this->range);
-        }
-
-        if (filled($this->clientType) || ! $this->showInactive) {
-            $query->whereHas('client', function ($q) {
-                if (filled($this->clientType)) {
-                    $q->where('client_type', $this->clientType);
-                }
-
-                if (! $this->showInactive) {
-                    $q->active();
-                }
+        $query->when($this->clientId, function (ClaimInvoiceQuery $q) {
+                $q->forClient($this->clientId);
+            })
+            ->when(filled($this->range), function (ClaimInvoiceQuery $q) {
+                $q->whereTransmittedBetween($this->range);
+            })
+            ->when($this->clientType, function (ClaimInvoiceQuery $q) {
+                $q->forClientType($this->clientType);
+            })
+            ->when(! $this->showInactive, function (ClaimInvoiceQuery $q) {
+                $q->forActiveClientsOnly();
             });
-        }
 
         return $query->get()->groupBy('payer_id')
             ->map(function ($payerGroup) {

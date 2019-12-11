@@ -2,9 +2,9 @@
 
 namespace App\Claims\Reports;
 
-use App\Claims\ClaimRemit;
 use App\Claims\Resources\ClaimRemitResource;
 use App\Reports\BaseReport;
+use App\Claims\ClaimRemit;
 
 class ClaimRemitApplicationReport extends BaseReport
 {

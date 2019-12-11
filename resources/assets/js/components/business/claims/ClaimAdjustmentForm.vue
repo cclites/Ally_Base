@@ -3,6 +3,7 @@
         <h2>Claim #{{ claim.name }}</h2>
         <div class="table-responsive claims-table">
             <b-table bordered striped show-empty
+                class="fit-more"
                 :items="items"
                 :fields="fields"
                 empty-text="This claim has no items."
@@ -28,6 +29,7 @@
                         step="0.01"
                         :disabled="form.busy || !row.item.selected"
                         @change="x => itemAmountChanged(row.item, x)"
+                        placeholder="Amount"
                     />
                     <b-select name="adjustment_type"
                         class="mr-1"
@@ -47,6 +49,7 @@
                         :disabled="form.busy || !row.item.selected"
                         maxlength="255"
                         style="max-width: none!important;"
+                        placeholder="Notes..."
                     />
                 </div>
             </template>

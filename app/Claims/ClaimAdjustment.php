@@ -2,11 +2,11 @@
 
 namespace App\Claims;
 
-use App\Traits\ScrubsForSeeding;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\AuditableModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\ScrubsForSeeding;
+use App\AuditableModel;
 
 /**
  * App\Claims\ClaimAdjustment
@@ -101,14 +101,16 @@ class ClaimAdjustment extends AuditableModel
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-    use ScrubsForSeeding { getScrubQuery as parentGetScrubQuery; }
+    use ScrubsForSeeding {
+        getScrubQuery as parentGetScrubQuery;
+    }
 
     /**
      * Get the query used to identify records that will be scrubbed.
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function getScrubQuery() : Builder
+    public static function getScrubQuery(): Builder
     {
         return static::parentGetScrubQuery()->whereNotNull('note');
     }
@@ -121,7 +123,7 @@ class ClaimAdjustment extends AuditableModel
      * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'note' => $faker->sentence,

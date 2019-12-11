@@ -2,14 +2,26 @@
 
 namespace App\Claims\Transmitters;
 
-use App\Claims\ClaimableService;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
+use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
 abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
 {
+    /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string
+    {
+        return null;
+    }
+
     /**
      * Validate a ClaimInvoice has all the required parameters to
      * be transmitted to the service.
@@ -28,10 +40,10 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
         }
 
         if (empty($claim->business->ein)) {
-            $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings').'#medicaid']);
+            $errors->push(['message' => 'Your business EIN # is required.', 'url' => route('business-settings') . '#medicaid']);
         }
 
-        if (empty($claim->client_medicaid_id)) {
+        if (empty($claim->getClientMedicaidId())) {
             $errors->push(['message' => 'Client Medicaid ID is required.', 'url' => $editClaimUrl]);
         }
 
@@ -39,16 +51,22 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
             $errors->push(['message' => 'Payer Code is required.', 'url' => $editClaimUrl]);
         }
 
-        foreach ($claim->items as $item) {
-            /** @var ClaimInvoiceItem $item */
-            if ($item->claimable_type == ClaimableService::class) {
-                /** @var ClaimableService $service */
-                $service = $item->claimable;
-                if (empty($service->service_code)) {
-                    $errors->push(['message' => "Service '{$service->service_name}' on {$item->date->toDateString()} as no Service Code.", 'url' => $editClaimUrl]);
-                }
+        $claim->items->each(function (ClaimInvoiceItem $item) use (&$errors, $editClaimUrl) {
+            if ($item->claimable_type != ClaimableService::class) {
+                // Only services need to be validated.
+                return;
             }
-        }
+
+            /** @var ClaimableService $service */
+            $service = $item->claimable;
+
+            if (empty($service->service_code)) {
+                $errors->push([
+                    'message' => 'Service code is missing for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl
+                ]);
+            }
+        });
 
         return $errors->isEmpty() ? null : $errors->toArray();
     }

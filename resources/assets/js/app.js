@@ -398,7 +398,8 @@ Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'))
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
 /* Claims */
-Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
+Vue.component('business-manage-claims-page', require('./components/business/claims/ManageClaimsPage'));
+Vue.component('business-create-claims-page', require('./components/business/claims/CreateClaimsPage'));
 Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
 Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));

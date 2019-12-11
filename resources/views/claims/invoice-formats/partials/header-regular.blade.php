@@ -3,34 +3,12 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var \App\Client $client The related Client
+ * @var array $clientDate Client print on invoice data
  */
 ?>
 <div class="row print-header">
     <div class="header-left">
-        @include('layouts.partials.print_logo')
-        @if($sender->name())
-            <div class="h4">Associated Home Care Company: {{ $sender->name() }}</div>
-            <br>
-            <div class="sender-address">
-                @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
-            </div>
-        @endif
-
-        <table class="header-left-table">
-            @if($sender->getEinNumber())
-            <tr>
-                <td><strong>Business EIN:</strong></td>
-                <td>{{ $sender->getEinNumber() }}</td>
-            </tr>
-            @endif
-                @if($sender->getNpiNumber())
-                <tr>
-                    <td><strong>NPI Number:</strong></td>
-                    <td>{{ $sender->getNpiNumber() }}</td>
-                </tr>
-                @endif
-        </table>
+        @include('claims.invoice-formats.partials.business-info')
     </div>
     <div class="text-right header-right">
         <div class="h1">C-Invoice #{{ $claim->getName() }}</div>
@@ -46,22 +24,14 @@
                     {{ snake_to_title_case($claim->getStatus()) }}
                 </td>
             </tr>
-            @if($client->getPolicyNumber())
+
+            @foreach($clientData as $data)
             <tr>
-                <td><strong>Policy #: </strong></td>
-                <td>
-                    {{ $client->getPolicyNumber() }}
+                <td colspan="2">
+                    {{ $data }}
                 </td>
             </tr>
-            @endif
-            @if($client->getPolicyNumber())
-            <tr>
-                <td><strong>Claim #: </strong></td>
-                <td>
-                    {{ $client->getClaimNumber() }}
-                </td>
-            </tr>
-            @endif
+            @endforeach
         </table>
     </div>
 </div>
@@ -87,6 +57,7 @@
         </table>
     </div>
     <div style="width: 50%; float:right">
+        @if(filled($client))
         <table class="" style="margin-right: 3rem; margin: auto">
             <tr>
                 <td colspan="2">
@@ -104,5 +75,6 @@
                 </td>
             </tr>
         </table>
+        @endif
     </div>
 </div>

@@ -80,6 +80,16 @@ export default {
             /**
              * Claims
              */
+            CLAIM_INVOICE_TYPES: {
+                SINGLE: 'single',
+                CLIENT: 'client',
+                PAYER: 'payer',
+            },
+            claimInvoiceTypeOptions: [
+                { value: 'single', text: 'Single' },
+                { value: 'client', text: 'Client Group' },
+                { value: 'payer', text: 'Payer Group' },
+            ],
             CLAIM_STATUSES: {
                 NOT_SENT: 'NOT_SENT',
                 CREATED: 'CREATED',

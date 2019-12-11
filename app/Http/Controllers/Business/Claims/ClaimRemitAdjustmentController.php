@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimAdjustment;
-use App\Claims\ClaimRemit;
 use App\Claims\Requests\CreateClaimRemitAdjustmentRequest;
 use App\Claims\Resources\ClaimRemitAdjustmentResource;
-use App\Claims\Resources\ClaimRemitResource;
 use App\Http\Controllers\Business\BaseController;
+use App\Claims\Resources\ClaimRemitResource;
 use App\Claims\ClaimRemitAdjustment;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
+use App\Claims\ClaimRemit;
 
 class ClaimRemitAdjustmentController extends BaseController
 {

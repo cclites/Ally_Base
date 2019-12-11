@@ -30,7 +30,7 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
      */
     public function __construct(OnlineClientInvoiceQuery $query)
     {
-        $this->query = $query->with('client', 'items', 'claimInvoice.items');
+        $this->query = $query->with('client', 'items', 'claimInvoices.items');
     }
 
     /**
@@ -72,17 +72,17 @@ class InvoiceSummaryByClientTypeReport extends BaseReport
 
         return $query->get()
             ->map(function (ClientInvoice $invoice) {
-                if ($this->mode == 'claim') {
-                    /** @var ClaimInvoice $invoice */
-                    $invoice = $invoice->claimInvoice;
-                }
+                /** @var ClaimInvoice $claimInvoice */
+                $claimInvoice = $invoice->claimInvoices->first();
+                $totalsObj = $this->mode == 'claim' ? $claimInvoice : $invoice;
 
                 return [
                     'client_type' => $invoice->client->client_type,
-                    'hours' => $invoice->getTotalHours(),
-                    'hourly_charges' => $invoice->getTotalHourlyCharges(),
-                    'total_charges' => $invoice->getAmount(),
                     'item_count' => $invoice->getItems()->count(),
+
+                    'hours' => $totalsObj->getTotalHours($invoice->id),
+                    'hourly_charges' => $totalsObj->getTotalHourlyCharges($invoice->id),
+                    'total_charges' => ($this->mode == 'claim')?  $claimInvoice->getAmountForInvoice($invoice->id) : $totalsObj->getAmount(),
                 ];
             })
             ->groupBy('client_type')

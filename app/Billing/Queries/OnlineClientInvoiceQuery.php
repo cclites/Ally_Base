@@ -23,7 +23,7 @@ final class OnlineClientInvoiceQuery extends ClientInvoiceQuery
         $this->onlineOnly();
     }
 
-    function paidInFull(): self
+    public function paidInFull(): self
     {
         $this->whereColumn('amount_paid', '=', 'amount');
 

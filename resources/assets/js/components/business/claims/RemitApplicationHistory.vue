@@ -21,7 +21,7 @@
                         <td colspan="3">{{ remit.notes }}</td>
                     </tr><tr>
                         <td><strong>Date</strong></td>
-                        <td>{{ formatDateFromUTC(remit.date) }}</td>
+                        <td>{{ formatDate(remit.date) }}</td>
                         <td><strong>Reference #</strong></td>
                         <td>{{ remit.reference }}</td>
                     </tr><tr>
@@ -42,6 +42,7 @@
         <div class="table-responsive mb-4">
             <h3>Claim Applications</h3>
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="adjustments['applications']"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -53,14 +54,16 @@
                         <i v-else class="fa fa-caret-right" />
                     </b-btn>
                 </template>
-                <template slot="client_name" scope="row">
-                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
-                </template>
-                <template slot="client_invoice_name" scope="row">
-                    <a :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
-                </template>
                 <template slot="name" scope="row">
                     <a :href="`/business/claims/${row.item.id}/print`" target="_blank">{{ row.item.name }}</a>
+                </template>
+                <template slot="client_name" scope="row">
+                    <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                    <span v-else>(Grouped)</span>
+                </template>
+                <template slot="client_invoice_name" scope="row">
+                    <a v-if="row.item.client_invoice_name" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                    <span v-else>-</span>
                 </template>
                 <template slot="row-details" scope="row">
                 <b-card>
@@ -71,7 +74,14 @@
                         sort-by="created_at"
                         :sort-desc="true"
                     >
-                  </b-table>
+                        <template slot="client_name" scope="row">
+                            <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                        </template>
+                        <template slot="client_invoice_name" scope="row">
+                            <a v-if="row.item.client_invoice_name" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                            <span v-else>-</span>
+                        </template>
+                    </b-table>
                   <!---------- /END SUB TABLE --------------->
                 </b-card>
                 </template>
@@ -140,16 +150,20 @@
                 sortDesc: false,
                 fields: {
                     expand: { label: ' ', sortable: false, },
-                    client_invoice_name: { label: 'Invoice #', sortable: true },
                     name: { label: 'Claim #', sortable: true },
-                    client_invoice_date: { label: 'Invoice Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    created_at: { label: 'Claim Date', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    client_invoice_name: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     client_name: { label: 'Client', sortable: true },
                     payer: { sortable: true, formatter: x => x ? x.name : '-' },
                     amount: { label: 'Claim Total', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 subFields: {
+                    client_invoice_name: { label: 'Inv #', sortable: true },
+                    client_invoice_date: { label: 'Inv Date', sortable: true, formatter: x => x ? this.formatDateFromUTC(x) : '-' },
                     item: { label: 'Item', sortable: true },
+                    client_name: { label: 'Client', sortable: true },
                     item_total: { label: 'Total Cost', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_applied: { label: 'Amount Applied', sortable: true, formatter: x => this.moneyFormat(x) },
                     adjustment_type: { label: 'Type', sortable: true, formatter: x => this.resolveOption(x, this.claimAdjustmentTypeOptions) },
@@ -168,19 +182,6 @@
         created() {
             this.$store.commit('claims/setRemit', this.init.remit);
             this.adjustments = this.init.adjustments;
-
-            // this.invoices = _.groupBy(this.adjustments, x => {
-            //     if (! x.claim_invoice_name && x.is_interest) {
-            //         return 'Interest';
-            //     } else if (! x.claim_invoice_id) {
-            //         return 'Adjustments';
-            //     }
-            //     return x.claim_invoice_name;
-            // });
-            //
-            // this.invoices = invoices..map((index, items) => {
-            //     console.log('index: ', index, 'items:', items);
-            // });
         },
     }
 </script>
