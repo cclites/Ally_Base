@@ -13,22 +13,18 @@ class Caregiver1099Query
 {
     protected $filters = [];
     protected $threshold = 600;
-    protected $rows;
-    protected $query;
-
 
     /**
      * query is a function call to serve as a wrapper to make this
      * appear similar to operation to a normal query object.
      *
      * @param array $filters
-     * @return \Illuminate\Support\Collection
+     * @return array
      */
-    public function _query(array $filters): Collection
+    public function generateReport(array $filters): array
     {
         $this->setFilters($filters);
-        $this->generateQuery();
-        return collect($this->query);
+        return $this->generateQuery();
     }
 
     function generateQuery(){
@@ -39,7 +35,8 @@ class Caregiver1099Query
 
         $query = "SELECT c.id as client_id, 
                     u1.firstname as client_fname, 
-                    u1.lastname as client_lname,  
+                    u1.lastname as client_lname,
+                    u1.email as client_email,  
                     c.client_type, 
                     c.ssn as client_ssn, 
                     c.caregiver_1099,
@@ -52,7 +49,8 @@ class Caregiver1099Query
                     b.name as business_name,
                     u2.id as caregiver_id, 
                     u2.firstname as caregiver_fname, 
-                    u2.lastname as caregiver_lname, 
+                    u2.lastname as caregiver_lname,
+                    u2.email as caregiver_email,
                     c2.ssn as caregiver_ssn,
                     a2.address1 as caregiver_address1, 
                     a2.address2 as caregiver_address2,
@@ -78,15 +76,17 @@ class Caregiver1099Query
                     WHERE p.created_at BETWEEN '" . $this->filters['year']['value'] ."-01-01 00:00:00' AND '" . $this->filters['year']['value'] ."-12-31 23:59:59'
                     AND c.business_id = " .  $this->filters['business_id']['value'];
 
-        if(filled($this->filters['client_id']['value'])){
+
+        if( array_key_exists('client_id', $this->filters) && filled($this->filters['client_id']['value'])){
             $query .= " AND u1.id = " . $this->filters['client_id']['value'];
         }
 
-        if($this->filters['caregiver_id']['value']){
+
+        if(array_key_exists('caregiver_id', $this->filters) && filled($this->filters['caregiver_id']['value'])){
             $query .= " AND c2.id =" .  $this->filters['caregiver_id']['value'];
         }
 
-        if( array_key_exists('caregiver_1099', $this->filters)){
+        if( array_key_exists('caregiver_1099', $this->filters) && filled($this->filters['caregiver_1099']['value'])){
             if( $this->filters['caregiver_1099']['value'] && $this->filters['caregiver_1099']['value'] !== 'no'){
                 $query .= " AND c.caregiver_1099 = '" . (string)$this->filters['caregiver_1099']['value'] . "' ";
             }elseif ( $this->filters['caregiver_1099']['value'] && $this->filters['caregiver_1099']['value'] === 'no' ){
@@ -94,7 +94,7 @@ class Caregiver1099Query
             }
         }
 
-        if( array_key_exists('transmitted', $this->filters)) {
+        if( array_key_exists('transmitted', $this->filters) && filled($this->filters['transmitted']['value'])) {
             if ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value'] === 1) {
                 $query .= " AND ct.transmitted_at is not null ";
             } elseif ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value']) {
@@ -102,7 +102,7 @@ class Caregiver1099Query
             }
         }
 
-        if( array_key_exists('created', $this->filters)) {
+        if( array_key_exists('created', $this->filters) && filled($this->filters['created']['value'])) {
             if ($this->filters['created']['value'] && $this->filters['created']['value'] === 1) {
                 $query .= " AND ct.id is not null ";
             } elseif ($this->filters['created']['value'] && $this->filters['created']['value'] === 0) {
@@ -112,9 +112,8 @@ class Caregiver1099Query
 
         $query .= " GROUP BY s.client_id, s.caregiver_id
                               HAVING payment_total > ?";
-        // Get rows
 
-        $this->query =  \DB::select($query, [$this->threshold]);
+        return \DB::select($query, [$this->threshold]);
     }
 
     /**
@@ -128,11 +127,7 @@ class Caregiver1099Query
         foreach ($filters as $filter=>$value){
             $this->filters[$filter] = [ 'name'=> $filter, 'value' => $value];
         }
+
     }
 
-    function getModelInstance(): Model
-    {
-        // TODO: Implement getModelInstance() method.
-        return $this->query;
-    }
 }

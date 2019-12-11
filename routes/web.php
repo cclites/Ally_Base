@@ -625,6 +625,8 @@ Route::group([
 
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
+    Route::get('reports/bad-1099-report', 'Admin\Reports\AdminBad1099ReportController@index')->name('reports.bad_1099_report');
+
 
     /* Caregiver 1099 preview related */
     Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');

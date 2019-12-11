@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use mikehaertl\pdftk\Pdf;
 
 class TestCommand extends Command
 {
@@ -38,8 +37,5 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        $pdf = new Pdf('resources/pdf_forms/caregiver1099s/2019/f1099msc_19.pdf');
-        $pdf->cat([7]) //individual pages
-        ->saveAs('resources/pdf_forms/caregiver1099s/2019/CopyC_1099msc.pdf');
     }
 }

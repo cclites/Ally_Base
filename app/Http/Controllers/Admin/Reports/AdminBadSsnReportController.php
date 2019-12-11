@@ -102,7 +102,7 @@ class AdminBadSsnReportController extends Controller
             ['type' => $type],
             [
                 'Home' => route('home'),
-                'Reports' => route('admin.reports.index')
+                '1099' => route('admin.admin-1099-actions')
             ]
         );
     }

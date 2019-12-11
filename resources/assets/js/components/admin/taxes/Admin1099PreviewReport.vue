@@ -66,19 +66,8 @@
                 </b-form-select>
             </b-form-group>
 
-            <!--b-form-group label="Transmission Status" label-for="transmission_status" class="mr-2">
-                <b-form-select id="transmission_status"
-                               v-model="form.transmitted"
-                >
-                    <option value="">All</option>
-                    <option value="1">Transmitted</option>
-                    <option value="0">Not Transmitted</option>
-                </b-form-select>
-            </b-form-group-->
-
             <b-form-group label="&nbsp;" class="mr-2 mt-1">
                 <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate</b-btn>
-                <!--b-btn variant="info" @click="transmit()">Transmit Selected</b-btn-->
             </b-form-group>
 
         </b-row>

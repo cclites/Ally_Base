@@ -405,7 +405,7 @@ class Caregiver1099Controller extends Controller
             ],
             [
                 'Home' => route('home'),
-                'Reports' => route('admin.admin-1099')
+                '1099' => route('admin.admin-1099-actions')
             ]
         );
     }

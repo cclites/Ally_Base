@@ -61,6 +61,12 @@
                         disabled: false,
                     },
                     {
+                        name: 'Malformed 1099s',
+                        description: 'Display malformed 1099s for Registry',
+                        url: 'reports/bad-1099-report',
+                        disabled: false,
+                    },
+                    {
                         name: 'Missing or Malformed SSN for Clients',
                         description: 'Display missing or malformed SSNs for Clients',
                         url: 'reports/bad-ssn-report/clients',

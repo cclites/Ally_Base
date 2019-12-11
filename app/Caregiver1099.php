@@ -65,6 +65,10 @@ class Caregiver1099 extends BaseModel
             $errors[] = "Client Ssn";
         }
 
+        if(! $cg1099->client_email){
+            $errors[] = "Client Email";
+        }
+
         if($cg1099->caregiver_1099 === 'ally'){
             return $errors;
         }
@@ -95,6 +99,12 @@ class Caregiver1099 extends BaseModel
 
         if(! $cg1099->caregiver_ssn){
             $errors[] = "Caregiver Ssn";
+        }
+
+        if(! $cg1099->caregiver_email){
+            $errors[] = "Caregiver Email";
+        }elseif(strpos($cg1099->caregiver_email, 'noemail') !== false){
+            $errors[] = "Caregiver has no Email";
         }
 
         return $errors;
