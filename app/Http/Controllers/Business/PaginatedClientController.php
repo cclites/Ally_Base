@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Client;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
@@ -10,6 +11,8 @@ class PaginatedClientController extends BaseController
 {
     /**
      * Get a list of clients using pagination.
+     * 
+     * Also used by the Avery Label Table for displaying paginated Clients!! make sure to ensure that still works if you change this.
      *
      * @param Request $request
      * @return \Illuminate\Http\Response
@@ -65,6 +68,19 @@ class PaginatedClientController extends BaseController
                         ->orWhere( 'users.id', 'LIKE', "%$search%" )
                         ->orWhere( 'users.firstname', 'LIKE', "%$search%" )
                         ->orWhere( 'users.lastname', 'LIKE', "%$search%" );
+                });
+            }
+
+
+            $daysSinceShift = $request->input( 'daysPassed', null );
+            if ( filled($daysSinceShift) ) {
+
+                $now = Carbon::now();
+                $daysAgo = Carbon::now()->subdays( $daysSinceShift );
+
+                $query->whereHas( 'shifts', function( $q ) use( $now, $daysAgo ){
+
+                    $q->whereBetween( 'checked_in_time', [ $daysAgo, $now ] );
                 });
             }
 

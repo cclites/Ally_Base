@@ -18,7 +18,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->expectsJson() && $request->has('json')) {
-            $perPage = $request->input('perpage', 20);
+            $perPage = $request->input('perPage', 20);
             $page = $request->input('page', 1);
             $sortBy = $request->input('sort', 'lastname');
             $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';

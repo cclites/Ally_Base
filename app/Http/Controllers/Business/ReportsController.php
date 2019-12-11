@@ -54,6 +54,11 @@ class ReportsController extends BaseController
         return view('business.reports.index', ['data' => json_encode($data)]);
     }
 
+    public function averyLabels()
+    {
+        return view( 'business.reports.avery_report' );
+    }
+
     public function medicaidReport(Request $request)
     {
         return view('business.reports.medicaid', $this->medicaidData($request));

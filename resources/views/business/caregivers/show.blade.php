@@ -150,6 +150,8 @@
             <document-list
                 :initial-documents="{{ $caregiver->user->documents->toJson() }}"
                 :user-id="{{ $caregiver->user->id }}"
+                :active="{{ $caregiver->active }}"
+                type="caregiver"
             ></document-list>
         </div>
         <div class="tab-pane" id="licenses" role="tabpanel">

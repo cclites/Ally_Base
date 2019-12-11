@@ -198,6 +198,7 @@ Route::group([
     Route::put('caregivers/{caregiver}/skills', 'Business\CaregiverController@skills')->name('caregivers.update_skills');
     Route::post('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
+    Route::get('caregivers/discharge-letter/{caregiver}', 'Business\CaregiverController@dischargeLetter');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::post('caregivers/{caregiver}/licenses/saveMany', 'Business\CaregiverLicenseController@saveMany')->name('caregivers.licenses.saveMany');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
@@ -222,6 +223,7 @@ Route::group([
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::get('clients/paginate', 'Business\PaginatedClientController@index');
     Route::get('clients/avery-labels', 'Business\AveryLabelController@index');
+    Route::get('clients/discharge-letter/{client}', 'Business\ClientController@dischargeLetter');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
@@ -296,6 +298,7 @@ Route::group([
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
     Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
+    Route::get('reports/avery-labels', 'Business\ReportsController@averyLabels')->name('reports.avery_labels');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\Report\BusinessCaregiverOvertimeReportController@index')->name('reports.overtime');

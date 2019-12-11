@@ -185,9 +185,9 @@
 
         methods: {
 
-            averyLabels(){
+            averyLabels( data ){
 
-                window.open( this.averyEndpoint + this.listFilters );
+                window.open( this.averyEndpoint + this.listFilters + '&leftmargin=' + data.leftmargin + '&topmargin=' + data.topmargin );
             },
             loadTable() {
                 this.$refs.table.refresh();
@@ -197,7 +197,7 @@
                 this.loading = true;
 
                 let sort = ctx.sortBy == null ? '' : ctx.sortBy;
-                return axios.get( this.paginatedEndpoint + this.listFilters + `&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                return axios.get( this.paginatedEndpoint + this.listFilters + `&page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.results || [];

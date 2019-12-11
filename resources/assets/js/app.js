@@ -235,6 +235,7 @@ Vue.component('caregiver-directory', require('./components/business/reports/Care
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 Vue.component('user-birthday-report', require('./components/business/reports/UserBirthday'));
 Vue.component('caregiver-anniversary-report', require('./components/business/reports/CaregiverAnniversary'));
+Vue.component('avery-labels-report', require('./components/business/reports/AveryLabels'));
 Vue.component('report-column-picker', require('./components/business/reports/ReportColumnPicker'));
 Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));

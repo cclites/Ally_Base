@@ -196,7 +196,7 @@
             itemProvider(ctx) {
                 this.loading = true;
                 let sort = ctx.sortBy == null ? 'lastname' : ctx.sortBy;
-                return this.filters.get(`/business/reports/client-directory?&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                return this.filters.get(`/business/reports/client-directory?&page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.rows || [];
