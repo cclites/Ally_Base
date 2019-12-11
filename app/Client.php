@@ -596,6 +596,15 @@ class Client extends AuditableModel implements
         return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
     }
 
+    /**
+     * Get the caregiver1099 relations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function caregiver1099s(){
+        return $this->hasMany(Caregiver1099::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

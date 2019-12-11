@@ -37,6 +37,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -50,6 +53,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
                 <a class="dropdown-item" data-toggle="tab" href="#contacts" role="tab">Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
             </div>
         </li>
     </ul>
@@ -114,6 +118,9 @@
                     <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
                 </div>
             </div>
+        </div>
+        <div class="tab-pane" id="tax_documents" role="tabpanel">
+            <client-1099s-tab :client="{{ $user->id }}"></client-1099s-tab>
         </div>
     </div>
 @endsection

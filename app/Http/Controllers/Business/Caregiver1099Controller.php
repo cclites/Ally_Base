@@ -49,6 +49,8 @@ class Caregiver1099Controller extends Controller
         $payerAddress = $payerName . "\n" . $caregiver1099->client_address1 . "\n" . $clAddress2 . $caregiver1099->client_address3();
 
         if($caregiver1099->client->caregiver_1099 === 'ally'){
+            $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/B_1_2_1099msc.pdf');
+
             $payerName = $systemSettings->company_name;
             $payerTin = $systemSettings->company_ein;
             $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;

@@ -98,8 +98,7 @@ class Admin1099PreviewReport extends BaseReport
                     LEFT JOIN addresses a2 ON a2.id = (SELECT id FROM addresses WHERE user_id = u2.id ORDER BY `type` LIMIT 1)
                     LEFT JOIN caregiver_1099s ct on ct.client_id = c.id AND ct.caregiver_id = c2.id
                     WHERE p.created_at BETWEEN '" . $this->year ."-01-01 00:00:00' AND '" . $this->year ."-12-31 23:59:59'
-                    AND c.business_id = " .  $this->business_id .
-                    " AND c.caregiver_1099 is not null ";
+                    AND c.business_id = " .  $this->business_id;
 
         if($this->client_id){
             $query .= " AND u1.id = " . $this->client_id;

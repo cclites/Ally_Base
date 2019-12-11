@@ -348,8 +348,6 @@ class Caregiver1099Controller extends Controller
     public function downloadPdf(Caregiver1099 $caregiver1099)
     {
         $caregiver1099->load("client");
-
-        $systemSettings = \DB::table('system_settings')->first();
         $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/B_1_2_1099msc.pdf');
 
         $payerTin = $caregiver1099->client_ssn ? decrypt($caregiver1099->client_ssn) : '';
@@ -359,6 +357,8 @@ class Caregiver1099Controller extends Controller
         $payerAddress = $payerName . "\n" . $caregiver1099->client_address1 . "\n" . $clAddress2 . $caregiver1099->client_address3();
 
         if($caregiver1099->client->caregiver_1099 === 'ally'){
+            $systemSettings = \DB::table('system_settings')->first();
+
             $payerName = $systemSettings->company_name;
             $payerTin = $systemSettings->company_ein;
             $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;
