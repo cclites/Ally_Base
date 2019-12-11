@@ -516,6 +516,30 @@ class CaregiverController extends BaseController
     }
 
     /**
+     * 
+     * generate a discharge letter for the caregiver resource ON THE FLY
+     */
+    public function dischargeLetter( Caregiver $caregiver )
+    {
+        $caregiver->load( 'deactivationReason' );
+
+        $query = \DB::table('shifts')->where('caregiver_id', $caregiver->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
+
+        $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [
+
+            'caregiver'           => $caregiver,
+            'deactivatedBy'       => \Auth::user()->name,
+            'totalLifetimeHours'  => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
+
+        $filePath = $this->generateUniqueDeactivationPdfFilename( $caregiver );
+        return $pdf->stream( $filePath . '.pdf' );
+    }
+
+    /**
      * Generate a Caregiver doc with deactivation information.
      *
      * @param Caregiver $caregiver

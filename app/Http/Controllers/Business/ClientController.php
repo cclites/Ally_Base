@@ -540,6 +540,30 @@ class ClientController extends BaseController
         return new SuccessResponse('Client\'s notification preferences have been saved.');
     }
 
+    /**
+     * 
+     * generate a discharge letter for the client resource ON THE FLY
+     */
+    public function dischargeLetter( Client $client )
+    {
+        $client->load( 'deactivationReason' );
+
+        $query = \DB::table('shifts')->where('client_id', $client->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
+
+        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [
+
+            'client'              => $client,
+            'deactivatedBy'       => \Auth::user()->name,
+            'totalLifetimeHours'  => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
+
+        $filePath = $this->generateUniqueDeactivationPdfFilename( $client );
+        return $pdf->stream( $filePath . '.pdf' );
+    }
+
 
     /**
      * Generate a Client doc with deactivation information.

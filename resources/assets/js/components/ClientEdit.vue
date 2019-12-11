@@ -377,7 +377,7 @@
                     <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
                     <template v-else>
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
-                        <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
+                        <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
                 </b-col>
             </b-row>
@@ -519,6 +519,12 @@
         },
 
         methods: {
+
+            getDischarge(){
+                // this may be named very inappropriately..
+
+                window.open( `/business/clients/discharge-letter/${this.client.id}` );
+            },
             canSendEmails() {
                 if (! this.form.email || this.isEmptyEmail(this.form.email)) {
                     alert('You cannot send any emails to this user because there is no email associated with their account.');
