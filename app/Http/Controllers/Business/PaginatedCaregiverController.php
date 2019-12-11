@@ -58,7 +58,7 @@ class PaginatedCaregiverController extends BaseController
 
         }
 
-        if ( $daysSinceShift !== null || $daysSinceShift !== 0 ) {
+        if ( filled($daysSinceShift) ) {
 
             $now = Carbon::now();
             $daysAgo = Carbon::now()->subdays( $daysSinceShift );

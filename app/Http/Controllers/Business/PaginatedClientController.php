@@ -73,14 +73,13 @@ class PaginatedClientController extends BaseController
 
 
             $daysSinceShift = $request->input( 'daysPassed', null );
+            if ( filled($daysSinceShift) ) {
 
-            if ( $daysSinceShift !== null || $daysSinceShift !== 0 ) {
-    
                 $now = Carbon::now();
                 $daysAgo = Carbon::now()->subdays( $daysSinceShift );
-    
+
                 $query->whereHas( 'shifts', function( $q ) use( $now, $daysAgo ){
-    
+
                     $q->whereBetween( 'checked_in_time', [ $daysAgo, $now ] );
                 });
             }
