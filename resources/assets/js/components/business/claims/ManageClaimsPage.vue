@@ -271,9 +271,10 @@
         <b-modal id="missingFieldsModal"
             title="Missing Data Requirements"
             v-model="missingFieldsModal"
+            size="lg"
         >
-            <div v-for="(item, index) in missingFieldErrors" :key="index">
-                <span class="mr-1">{{ item.message }}</span>
+            <div v-for="(item, index) in missingFieldErrors" :key="index" class="mb-2">
+                <span class="mr-1">&bull; {{ item.message }}</span>
                 <span>(<a :href="item.url">Fix</a>)</span>
             </div>
             <div slot="modal-footer">

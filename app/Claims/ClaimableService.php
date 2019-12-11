@@ -146,6 +146,16 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     // **********************************************************
 
     /**
+     * Get the display name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getDisplayName(): string
+    {
+        return $this->service_name . ' on ' . $this->getStartTime()->format('m/d/Y H:i A');
+    }
+
+    /**
      * Get the name of the Claimable Item.
      *
      * @return string

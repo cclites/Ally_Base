@@ -51,16 +51,22 @@ abstract class BaseClaimTransmitter implements ClaimTransmitterInterface
             $errors->push(['message' => 'Payer Code is required.', 'url' => $editClaimUrl]);
         }
 
-        foreach ($claim->items as $item) {
-            /** @var ClaimInvoiceItem $item */
-            if ($item->claimable_type == ClaimableService::class) {
-                /** @var ClaimableService $service */
-                $service = $item->claimable;
-                if (empty($service->service_code)) {
-                    $errors->push(['message' => "Service '{$service->service_name}' on {$item->date->toDateString()} as no Service Code.", 'url' => $editClaimUrl]);
-                }
+        $claim->items->each(function (ClaimInvoiceItem $item) use (&$errors, $editClaimUrl) {
+            if ($item->claimable_type != ClaimableService::class) {
+                // Only services need to be validated.
+                return;
             }
-        }
+
+            /** @var ClaimableService $service */
+            $service = $item->claimable;
+
+            if (empty($service->service_code)) {
+                $errors->push([
+                    'message' => 'Service code is missing for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl
+                ]);
+            }
+        });
 
         return $errors->isEmpty() ? null : $errors->toArray();
     }

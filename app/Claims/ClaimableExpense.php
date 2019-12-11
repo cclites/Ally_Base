@@ -83,6 +83,16 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
 
     /**
+     * Get the display name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getDisplayName(): string
+    {
+        return $this->getName();
+    }
+
+    /**
      * Get the name of the Claimable Item.
      *
      * @return string

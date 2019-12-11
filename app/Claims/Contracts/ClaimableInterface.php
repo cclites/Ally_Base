@@ -11,6 +11,13 @@ use Carbon\Carbon;
 interface ClaimableInterface
 {
     /**
+     * Get the display name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getDisplayName(): string;
+
+    /**
      * Get the name of the Claimable Item.
      *
      * @return string

@@ -2,16 +2,15 @@
 
 namespace App\Claims\Transmitters;
 
-use App\ClaimInvoiceTellusFile;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\TellusValidationException;
-use App\TellusFile;
 use Illuminate\Support\Collection;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceType;
 use App\Services\TellusService;
+use App\ClaimInvoiceTellusFile;
 use App\Claims\ClaimInvoice;
 use App\TellusTypecode;
 use Carbon\Carbon;
@@ -71,12 +70,57 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         // client evv address
 
         $errors = collect(parent::validateClaim($claim));
+        $editClaimUrl = route('business.claims.edit', ['claim' => $claim]);
 
         if (empty($claim->business->tellus_username) || empty($claim->business->getTellusPassword())) {
-            $errors->push(['message' => 'Your Tellus Credentials have not been setup.', 'url' => route('business-settings') . '#claims']);
+            throw new ClaimTransmissionException('Your Tellus Credentials have not been setup, please contact Ally.');
         }
 
-        // TODO: finish adding validation
+        if (empty($claim->business->zip) || strlen($this->getBusinessZip($claim->business)) < 9) {
+            $errors->push(['message' => 'Your full 9 digit Business zipcode is required.', 'url' => route('business-settings') . '#phone']);
+        }
+
+        if (empty($claim->plan_code)) {
+            $errors->push(['message' => 'Payer Plan Identifier is required.', 'url' => $editClaimUrl]);
+        }
+
+        $claim->items->each(function (ClaimInvoiceItem $item) use (&$errors, $editClaimUrl) {
+            if ($item->claimable_type != ClaimableService::class) {
+                // Only services need to be validated.
+                return;
+            }
+
+            /** @var ClaimableService $service */
+            $service = $item->claimable;
+
+            if (empty($item->caregiver_ssn)) {
+                $errors->push([
+                    'message' => 'Caregiver SSN/EIN is required for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl,
+                ]);
+            }
+
+            if (empty($item->client_dob)) {
+                $errors->push([
+                    'message' => 'Client DOB is required for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl,
+                ]);
+            }
+
+            if (empty($this->getDiagnosisCodes($item)[0])) {
+                $errors->push([
+                    'message' => 'At least one client medical diagnosis code is required for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl,
+                ]);
+            }
+
+            if (empty($service->address1) || empty($service->city) || empty($service->state) || empty($service->zip)) {
+                $errors->push([
+                    'message' => 'A full service address is required for service ' . $service->getDisplayName(),
+                    'url' => $editClaimUrl,
+                ]);
+            }
+        });
 
         return $errors->isEmpty() ? null : $errors->toArray();
     }
@@ -161,7 +205,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ProviderMedicaidId' => $business->medicaid_id,
             'ProviderNPI' => $business->medicaid_npi_number, // OPTIONAL
             'ProviderNPITaxonomy' => $business->medicaid_npi_taxonomy, // OPTIONAL
-            'ProviderNPIZipCode' => str_replace('-', '', $business->zip), // OPTIONAL - 9 digit zipcode, no dashes
+            'ProviderNPIZipCode' => $this->getBusinessZip($business), // OPTIONAL - 9 digit zipcode, no dashes
             'ProviderEin' => str_replace('-', '', $business->ein), // REQUIRED
             'CaregiverFirstName' => $item->caregiver_first_name,
             'CaregiverLastName' => $item->caregiver_last_name,
@@ -176,7 +220,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceCity' => $service->city,
             'ServiceState' => $service->state,
             'ServiceZip' => $service->zip,
-            'VisitId' => optional($service->shift)->id,
+            'VisitId' => $item->id,
             'ServiceCode' => $service->service_code,
             'ServiceCodeMod1' => '', // OPTIONAL
             'ServiceCodeMod2' => '', // OPTIONAL
@@ -377,6 +421,17 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             default:
                 return 'NEWY';
         }
+    }
+
+    /**
+     * Get proper formatted business zipcode.
+     *
+     * @param Business $business
+     * @return string
+     */
+    public function getBusinessZip(Business $business)
+    {
+        return trim(str_replace('-', '', $business->zip));
     }
 
     /**
