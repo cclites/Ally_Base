@@ -169,7 +169,6 @@
 
         mounted() {
             this.loadFiltersData();
-            this.loadItems();
         },
 
         methods: {

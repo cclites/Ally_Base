@@ -2,9 +2,12 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="6">
+
+                <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
             <b-col lg="6" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
+
+                <b-button variant="info" @click=" loadItems() ">Generate Report</b-button>
             </b-col>
         </b-row>
 
@@ -106,7 +109,6 @@
 
         mounted() {
             // this.loadBusinesses();
-            this.loadItems();
         },
 
         methods: {
