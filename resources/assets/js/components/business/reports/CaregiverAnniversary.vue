@@ -1,5 +1,13 @@
 <template>
     <b-card title="Caregiver Anniversary">
+
+        <b-row class="my-3">
+
+            <b-col class="d-flex justify-content-end">
+
+                <b-button @click=" fetchItems() " variant="info">Generate Report</b-button>
+            </b-col>
+        </b-row>
         <loading-card v-show="loading" />
         <div v-show="! loading" class="table-responsive">
             <ally-table id="caregiver-anniversary" :columns="fields" :items="items" sort-by="nameLastFirst">
@@ -15,19 +23,15 @@
     import FormatsDates from '../../../mixins/FormatsDates';
 
     export default {
+
         mixins: [ FormatsDates ],
 
-        props: {
-            users: {
-                type: Array,
-                required: true,
-            },
-        },
-
         data() {
+
             return {
+
                 loading: false,
-                items: this.users,
+                items: [],
                 fields: [
                     {
                         key: 'nameLastFirst',
@@ -45,6 +49,29 @@
                 ],
             };
         },
+
+        methods: {
+
+            fetchItems(){
+
+                this.loading = true;
+                const form = new Form();
+
+                form.get( 'anniversary?json=1' )
+                    .then( res => {
+
+                        this.items = res.data;
+                    })
+                    .catch( err => {
+
+                        console.error( err );
+                    })
+                    .finally( () => {
+
+                        this.loading = false;
+                    })
+            }
+        }
     }
 </script>
 
