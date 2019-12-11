@@ -13,7 +13,7 @@ class SystemSettingsController extends Controller
 {
     public function show(){
         $systemSettings = \DB::table('system_settings')->first();
-        return view_component('admin-system-settings', 'Registry Emails', ['settings'=>$systemSettings]);
+        return view_component('admin-system-settings', 'System Settings', ['settings'=>$systemSettings]);
     }
 
     public function update(UpdateAllyContactInfoRequest $request){
