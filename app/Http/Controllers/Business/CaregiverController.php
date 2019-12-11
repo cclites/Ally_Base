@@ -533,78 +533,7 @@ class CaregiverController extends BaseController
             'totalLifetimeShifts' => $totalLifetimeShifts
         ]);
 
-        $filePath = $this->generateUniqueDeactivationPdfFilename( $caregiver );
+        $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');
         return $pdf->stream( $filePath . '.pdf' );
-    }
-
-    /**
-     * Generate a Caregiver doc with deactivation information.
-     *
-     * @param Caregiver $caregiver
-     * @return bool
-     */
-    private function generateDeactivationPdf(Caregiver $caregiver) : bool
-    {
-        $caregiver->load('deactivationReason');
-
-        $query = \DB::table('shifts')->where('caregiver_id', $caregiver->id);
-        $totalLifetimeShifts = $query->count();
-        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
-
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', [
-            'caregiver' => $caregiver,
-            'deactivatedBy' => \Auth::user()->name,
-            'totalLifetimeHours' => $totalLifetimeHours,
-            'totalLifetimeShifts' => $totalLifetimeShifts
-        ]);
-
-        $filePath = $this->generateUniqueDeactivationPdfFilename($caregiver);
-        try {
-            if ($pdf->save($filePath)) {
-                $caregiver->documents()->create([
-                    'filename' => File::basename($filePath),
-                    'original_filename' => File::basename($filePath),
-                    'description' => 'Caregiver Deactivation Document',
-                    'user_id' => $caregiver->id
-                ]);
-
-                return true;
-            } else {
-                return false;
-            }
-        } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
-            return false;
-        }
-    }
-
-    /**
-     * Generate deactivation PDF file name.
-     *
-     * @param Caregiver $caregiver
-     * @return string
-     */
-    private function generateUniqueDeactivationPdfFilename(Caregiver $caregiver) : string
-    {
-        $dir = storage_path('app/documents/');
-        if (! File::exists($dir)) {
-            File::makeDirectory($dir, 493, true);
-        }
-
-        for ($i = 1; $i < 500; $i ++) {
-            $filename = str_slug($caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y'));
-
-            if ($i > 1) {
-                $filename .= "_$i";
-            }
-
-            $filename .= '.pdf';
-
-            if (! File::exists($dir . $filename)) {
-                break;
-            }
-        }
-
-        return $dir . $filename;
     }
 }
