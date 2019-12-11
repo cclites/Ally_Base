@@ -224,7 +224,7 @@ class Caregiver1099Controller extends Controller
                                 $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
                                 $recipientTin = decrypt($cg1099->caregiver_ssn);
                                 $payerName = $cg1099->client_fname . " " . $cg1099->client_lname;
-                                $payerAddress = $cg1099->client_address1 . "\n" . filled($cg1099->client_address2);
+                                $payerAddress = $cg1099->client_address1 . ($cg1099->client_address2 ? ", " . $cg1099->client_address2 : '');
                                 $payerCity = $cg1099->client_city;
                                 $payerState = $cg1099->client_state;
                                 $payerZip = $cg1099->client_zip;
@@ -236,7 +236,7 @@ class Caregiver1099Controller extends Controller
                                     $payerCity = $systemSettings->company_city;
                                     $payerState = $systemSettings->company_state;
                                     $payerZip = $systemSettings->company_zip;
-                                    $payerAddress = $systemSettings->company_address1 . "\n" . filled($systemSettings->company_address2);
+                                    $payerAddress = $systemSettings->company_address1 . ($systemSettings->company_address2 ? ", " . $systemSettings->company_address2 : '');
                                     $payerPhone = $systemSettings->company_contact_phone;
                                 }
 
@@ -253,7 +253,8 @@ class Caregiver1099Controller extends Controller
                                     'recipient_address' => $cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2),
                                     'recipient_city' => $cg1099->caregiver_city,
                                     'recipient_state' => $cg1099->caregiver_state,
-                                    'recipient_zip' => $cg1099->caregiver_zip
+                                    'recipient_zip' => $cg1099->caregiver_zip,
+                                    'payment_total' => $cg1099->payment_total,
                                 ];
                             });
 
@@ -310,7 +311,7 @@ class Caregiver1099Controller extends Controller
                 null,
                 null,
                 null,
-                null,
+                $row['payment_total'],
                 null,
                 null,
                 null,

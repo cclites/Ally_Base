@@ -27,7 +27,7 @@ class AdminBadSsnReportController extends Controller
 
             $report = collect();
             if ($type === 'clients') {
-                $report = Client::query()->with('user');
+                $report = Client::query()->with(['user', 'addresses']);
 
                 if($request->businesses){
                     $report->forRequestedBusinesses();
@@ -59,7 +59,7 @@ class AdminBadSsnReportController extends Controller
                     ->filter()
                     ->values();
             } elseif ($type == 'caregivers') {
-                $report = Caregiver::query()->with('user');
+                $report = Caregiver::query()->with(['user', 'addresses']);
 
                 if($request->businesses){
                     $report->forRequestedBusinesses();
