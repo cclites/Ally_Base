@@ -135,7 +135,6 @@ class Caregiver1099Controller extends Controller
      */
     public function show($id)
     {
-
     }
 
     /**
@@ -205,7 +204,6 @@ class Caregiver1099Controller extends Controller
 
     /**
      * Creates a csv file of 1099s for transmission
-     * TODO: Convert to IRS format for direct transmission
      *
      * @param Transmit1099Request $request
      * @return Response
@@ -257,12 +255,9 @@ class Caregiver1099Controller extends Controller
                                     'recipient_state' => $cg1099->caregiver_state,
                                     'recipient_zip' => $cg1099->caregiver_zip
                                 ];
-                            })
-                            ->toString();
+                            });
 
         $csv = $this->toCsv($caregiver1099s);
-
-        //\Log::info(json_encode($csv));
 
         return \Response::make(json_encode($csv), 200, [
             'Content-type' => 'application/csv',
@@ -288,8 +283,6 @@ class Caregiver1099Controller extends Controller
 
         // build rows
         foreach ($rows as $row) {
-
-            \Log::info($row);
 
             $data = [
                 0,

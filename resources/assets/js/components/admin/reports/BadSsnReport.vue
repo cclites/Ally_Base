@@ -22,15 +22,16 @@
 
             <b-form-group label="&nbsp;">
                 <b-button-group>
-                    <b-button @click="fetch()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
-                    <b-button @click="printTable()"><i class="fa fa-print mr-1"></i>Print</b-button>
+                    <b-button @click="fetch()" variant="info" :disabled="busy" class="mr-2"><i class="fa fa-file-pdf-o mr-1"></i>Generate Report</b-button>
+                    <b-button @click="printTable()" class="mr-2"><i class="fa fa-print mr-1"></i>Print</b-button>
+                    <b-button variant="info" @click="copy()"><i class="fa fa-copy mr-1"></i>Copy Emails to Clipboard</b-button>
                 </b-button-group>
+                <input id="emailString" v-model="emails">
             </b-form-group>
         </div>
 
         <b-row>
             <b-col lg="12">
-
                 <div class="d-flex justify-content-center" v-if="busy">
                     <div class="my-5">
                         <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
@@ -94,6 +95,7 @@
                 emptyText: 'All Client Types',
                 selectSize: 0,
                 open: false,
+                emails: '',
                 fields: [
                     {
                         key: 'business',
@@ -135,6 +137,8 @@
                     .then( ({ data }) => {
                         this.items = data;
                         this.totalRows = this.items.length;
+                        let emailArray = this.items.map(x => x.email);
+                        this.emails = emailArray.join();
                     })
                     .catch(e => {})
                     .finally(() => {
@@ -152,12 +156,17 @@
                         document.body.appendChild(fileLink);
                         fileLink.click();
                         fileLink.remove();
-                        //console.log(data);
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
                     })
+            },
+            copy(){
+                var copyText = document.querySelector("#emailString");
+                copyText.select();
+                document.execCommand("copy");
+                alerts.addMessage('success', "Emails copied to clipboard");
             },
         },
     }
@@ -165,5 +174,11 @@
 
 <style scoped>
     .custom-multi-select{
+    }
+
+    #emailString{
+        width:0px;
+        height:0px;
+        opacity:0;
     }
 </style>

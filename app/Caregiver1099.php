@@ -33,4 +33,70 @@ class Caregiver1099 extends BaseModel
     public function caregiver_address3(){
         return $this->caregiver_city . ", " . $this->caregiver_state . " " . $this->caregiver_zip;
     }
+
+    public static function getErrors($cg1099){
+        $errors = [];
+
+        if(! $cg1099->client_fname){
+            $errors[] = "Client First Name";
+        }
+
+        if(! $cg1099->client_lname){
+            $errors[] = "Client Last Name";
+        }
+
+        if(! $cg1099->client_address1){
+            $errors[] = "Client Address";
+        }
+
+        if(! $cg1099->client_city){
+            $errors[] = "Client City";
+        }
+
+        if(! $cg1099->client_state){
+            $errors[] = "Client State";
+        }
+
+        if(! $cg1099->client_zip){
+            $errors[] = "Client Zip";
+        }
+
+        if(! $cg1099->client_ssn){
+            $errors[] = "Client Ssn";
+        }
+
+        if($cg1099->caregiver_1099 === 'ally'){
+            return $errors;
+        }
+
+        if(! $cg1099->caregiver_fname){
+            $errors[] = "Caregiver First Name";
+        }
+
+        if(! $cg1099->caregiver_lname){
+            $errors[] = "Caregiver Last Name";
+        }
+
+        if(! $cg1099->caregiver_address1){
+            $errors[] = "Caregiver Address";
+        }
+
+        if(! $cg1099->caregiver_city){
+            $errors[] = "Caregiver City";
+        }
+
+        if(! $cg1099->caregiver_state){
+            $errors[] = "Caregiver State";
+        }
+
+        if(! $cg1099->caregiver_zip){
+            $errors[] = "Caregiver Zip";
+        }
+
+        if(! $cg1099->caregiver_ssn){
+            $errors[] = "Caregiver Ssn";
+        }
+
+        return $errors;
+    }
 }
