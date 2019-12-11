@@ -4,61 +4,82 @@
 
         <b-row class="mb-2">
 
-            <b-col sm="12" class="my-1 d-sm-flex d-block justify-content-end">
-
-
-                <b-link href="#" @click=" averyModal = true " class="btn btn-info">Avery 5160 PDF</b-link>
-            </b-col>
-        </b-row>
-        <b-row class="mb-2">
-
             <b-col lg="12">
 
                 <div class="d-flex flex-column justify-content-center">
 
                     <div class="d-flex my-1">
 
-                        <business-location-select v-model="filters.business" :allow-all="true" :hideable="false" class="f-1 mx-1"></business-location-select>
+                        <b-form-group label="Location" class="f-1 mx-1">
 
-                        <b-form-select v-model="filters.userType" class="f-1 mx-1">
+                            <business-location-select v-model="filters.business" :allow-all="true" :hideable="false"></business-location-select>
+                        </b-form-group>
 
-                            <option value="client">Clients</option>
-                            <option value="caregiver">Caregivers</option>
-                        </b-form-select>
+                        <b-form-group label="User Type" class="f-1 mx-1">
 
-                        <b-form-select v-model="filters.status" class="f-1 mx-1">
+                            <b-form-select v-model="filters.userType">
 
-                            <option value="">All {{ capitalize( filters.userType ) }}s</option>
-                            <option value="active">Active {{ capitalize( filters.userType ) }}s</option>
-                            <option value="inactive">Inactive {{ capitalize( filters.userType ) }}s</option>
-                            <option v-for=" status in statusEntity " :key="status.id" :value="status.id">
+                                <option value="client">Clients</option>
+                                <option value="caregiver">Caregivers</option>
+                            </b-form-select>
+                        </b-form-group>
 
-                                {{ status.name }}
-                            </option>
-                        </b-form-select>
+                        <b-form-group label="User Status" class="f-1 mx-1">
+
+                            <b-form-select v-model="filters.status">
+
+                                <option value="">All {{ capitalize( filters.userType ) }}s</option>
+                                <option value="active">Active {{ capitalize( filters.userType ) }}s</option>
+                                <option value="inactive">Inactive {{ capitalize( filters.userType ) }}s</option>
+                                <option v-for=" status in statusEntity " :key=" status.id " :value=" status.id" >
+
+                                    {{ status.name }}
+                                </option>
+                            </b-form-select>
+                        </b-form-group>
                     </div>
 
                     <div class="d-flex my-1">
 
-                        <client-type-dropdown
-                            :disabled=" filters.userType === 'caregiver' "
-                            v-model="filters.client_type"
-                            class="f-1 mx-1"
-                        />
+                        <b-form-group label="Client Type" class="f-1 mx-1">
 
-                        <b-form-select v-model="filters.caseManager" class="f-1 mx-1" :disabled=" filters.userType === 'caregiver' ">
-                            <template slot="first">
-                                <!-- this slot appears above the options from 'options' prop -->
-                            <option value="">All Service Coordinators</option>
-                            </template>
-                            <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
-                        </b-form-select>
+                            <client-type-dropdown
+                                :disabled=" filters.userType === 'caregiver' "
+                                v-model="filters.client_type"
+                            />
+                        </b-form-group>
 
-                        <b-form-input v-model="filters.daysPassed" placeholder="Has had a shift in the last x days" class="f-1 mx-1" type="number"/>
+                        <b-form-group label="Service Coordinator" class="f-1 mx-1">
+
+                            <b-form-select v-model="filters.caseManager" :disabled=" filters.userType === 'caregiver' ">
+                                <template slot="first">
+                                    <!-- this slot appears above the options from 'options' prop -->
+                                <option value="">All Service Coordinators</option>
+                                </template>
+                                <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
+                            </b-form-select>
+                        </b-form-group>
+
+                        <b-form-group label="Days Since Last Shift" class="f-1 mx-1">
+
+                            <b-form-input v-model="filters.daysPassed" placeholder="Has had a shift in the last x days" type="number"/>
+                        </b-form-group>
                     </div>
 
-                    <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1 mx-1 w-50" />
+                    <b-form-group label="General Search">
+
+                        <b-form-input v-model="filters.search" placeholder="Type to Search" class="f-1 mx-1" />
+                    </b-form-group>
                 </div>
+            </b-col>
+        </b-row>
+        <b-row class="mb-2">
+
+            <b-col sm="12" class="my-1 d-sm-flex d-block justify-content-end">
+
+
+                <b-button @click=" loadUsers() " variant="info" class="mr-3">Generate Report</b-button>
+                <b-link href="#" @click=" averyModal = true " class="btn btn-primary">Generate Avery 5160 Labels</b-link>
             </b-col>
         </b-row>
 
@@ -152,7 +173,7 @@
                     client_type: '',
                     caseManager: '',
                     userType: 'caregiver',
-                    daysPassed : 0
+                    daysPassed : 1
                 }),
                 averyModal : false,
             }
@@ -162,7 +183,6 @@
 
             await this.fetchStatusAliases();
             this.loadOfficeUsers();
-            // this.loadTable();
         },
 
         computed: {
@@ -343,12 +363,14 @@
 
                 window.open( this.averyEndpoint + this.listFilters + '&leftmargin=' + data.leftmargin + '&topmargin=' + data.topmargin );
             },
-            loadTable() {
-
-                this.loadUsers();
-            },
 
             loadUsers() {
+
+                if( this.filters.daysPassed < 0 || this.filters.daysPassed > 999 ){
+
+                    alert( 'please enter a number of days above 0 and below 999' );
+                    return false;
+                }
 
                 this.users = [];
                 this.loading = true;
@@ -455,74 +477,73 @@
 
             paginationControls( oldVal, newVal ) {
 
-                console.log( 'changing pagination: ', oldVal, newVal );
                 if( newVal != oldVal ){
 
                     this.updateSavedFormFilters();
                     this.loadUsers();
                 }
             },
-            'filters.daysPassed'( newVal, oldVal ) {
+            // 'filters.daysPassed'( newVal, oldVal ) {
 
-                if( newVal < 0 || newVal > 999 ){
+            //     if( newVal < 0 || newVal > 999 ){
 
-                    alert( 'value must be within 0 and 999 days' );
-                } else {
+            //         alert( 'value must be within 0 and 999 days' );
+            //     } else {
 
-                    // debounce the reloading of the table to prevent
-                    // unnecessary calls.
-                    _.debounce(() => {
-                        this.updateSavedFormFilters();
-                        this.loadUsers();
-                    }, 350)();
-                }
-            },
-            'filters.caseManager'( newVal, oldVal ) {
+            //         // debounce the reloading of the table to prevent
+            //         // unnecessary calls.
+            //         _.debounce(() => {
+            //             this.updateSavedFormFilters();
+            //             this.loadUsers();
+            //         }, 350)();
+            //     }
+            // },
+            // 'filters.caseManager'( newVal, oldVal ) {
 
-                if ( newVal != oldVal ) {
+            //     if ( newVal != oldVal ) {
 
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }
-            },
-            'filters.userType'( newVal, oldVal ) {
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }
+            // },
+            // 'filters.userType'( newVal, oldVal ) {
 
-                if ( newVal != oldVal ) {
+            //     if ( newVal != oldVal ) {
 
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }
-            },
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }
+            // },
 
-            'filters.client_type'( newVal, oldVal ) {
+            // 'filters.client_type'( newVal, oldVal ) {
 
-                if ( newVal != oldVal ) {
+            //     if ( newVal != oldVal ) {
 
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }
-            },
-            'filters.status'(newVal, oldVal) {
-                if (newVal != oldVal) {
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }
-            },
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }
+            // },
+            // 'filters.status'(newVal, oldVal) {
+            //     if (newVal != oldVal) {
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }
+            // },
 
-            'filters.business'(newVal, oldVal) {
-                if (newVal != oldVal) {
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }
-            },
-            'filters.search'(newVal, oldVal) {
-                // debounce the reloading of the table to prevent
-                // unnecessary calls.
-                _.debounce(() => {
-                    this.updateSavedFormFilters();
-                    this.loadUsers();
-                }, 350)();
-            },
+            // 'filters.business'(newVal, oldVal) {
+            //     if (newVal != oldVal) {
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }
+            // },
+            // 'filters.search'(newVal, oldVal) {
+            //     // debounce the reloading of the table to prevent
+            //     // unnecessary calls.
+            //     _.debounce(() => {
+            //         this.updateSavedFormFilters();
+            //         this.loadUsers();
+            //     }, 350)();
+            // },
 
             sortBy() {
 
