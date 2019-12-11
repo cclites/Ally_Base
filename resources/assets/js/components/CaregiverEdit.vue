@@ -151,7 +151,14 @@
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Photo">
-                        <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                        <image-cropper
+                            v-model="form.avatar"
+                            width="150"
+                            height="150"
+                            cropperPadding="100"
+                            :circle="true"
+                        />
+                        <input-help :form="form" field="avatar"></input-help>
                     </b-form-group>
                     <b-form-group label="Confirmed Service Hours">
                         <div class="mb-2"><strong>Lifetime: </strong>{{ caregiver.hours_total.toLocaleString() }}</div>

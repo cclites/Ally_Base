@@ -1,6 +1,9 @@
 export default {
     data() {
         return {
+            defaultAvatarUrl: '/images/default-avatar.png',
+            defaultInvoiceLogo: '/images/AllyLogo-new-light.png',
+
             PRIVATE_PAY_ID: 0,
             OFFLINE_PAY_ID: 1,
 

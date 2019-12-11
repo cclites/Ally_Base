@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ImageCropperUpload;
 use App\Rules\ValidTimezoneOrOffset;
 use Crypt;
 
@@ -17,7 +18,6 @@ class UpdateBusinessRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'logo' => 'nullable|image|max:4000',
             'scheduling' => 'required|bool',
             'auto_confirm' => 'required|bool',
             'ask_on_confirm' => 'required|bool',
@@ -66,6 +66,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'hha_password' => 'nullable',
             'tellus_username' => 'nullable|string|max:255',
             'tellus_password' => 'nullable',
+            'logo' => ['nullable', new ImageCropperUpload()],
         ];
     }
 
