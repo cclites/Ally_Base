@@ -187,6 +187,8 @@
             <document-list
                 :initial-documents="{{ $client->user->documents->toJson() }}"
                 :user-id="{{ $client->user->id }}"
+                :active="{{ $client->active }}"
+                type="client"
             ></document-list>
         </div>
         <div class="tab-pane" id="client_invoice_history" role="tabpanel">

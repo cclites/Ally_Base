@@ -341,11 +341,6 @@ class ClientController extends BaseController
 
             $client->clearFutureSchedules();
 
-            if ( !$this->generateDeactivationPdf( $client ) ) {
-
-                return new ErrorResponse( 500, 'Error archiving this client: Generating the deactivation document failed. Please try again.' );
-            }
-
             \DB::commit();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }

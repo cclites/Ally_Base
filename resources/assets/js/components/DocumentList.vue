@@ -3,19 +3,24 @@
         header-bg-variant="info"
         header-text-variant="white"
         >
-        <form @submit.prevent="upload()" enctype="multipart/form-data" class="form-inline">
-            <div class="form-group">
-                <input type="file" name="document" @change="setFile($event.target.files[0])" required>
-            </div>
+        <form @submit.prevent="upload()" enctype="multipart/form-data" class="d-flex justify-content-between align-items-center">
 
-            <b-form-group class="ml-2">
+            <div class="d-flex align-items-center">
+
+                <input type="file" name="document" @change="setFile($event.target.files[0])" required>
+
                 <b-form-input
                     v-model="description"
-                    placeholder="File Description...">
+                    placeholder="File Description..."
+                    style="max-width: 200px">
                 </b-form-input>
-            </b-form-group>
+            </div>
+            <div>
 
-            <input type="submit" value="Upload" class="btn btn-success">
+                <input type="submit" value="Upload" class="btn btn-success ml-3">
+
+                <b-button variant="info" @click=" getDischarge() " v-if="!active" class="ml-3"><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
+            </div>
         </form>
         <hr>
         <table class="table">
@@ -50,7 +55,7 @@
     import FormDataForm from '../classes/FormDataForm';
     import _ from 'lodash';
     export default {
-        props: ['initialDocuments', 'userId'],
+        props: ['initialDocuments', 'userId', 'active', 'type'],
 
         data() {
             return {
@@ -62,6 +67,10 @@
 
         methods: {
 
+            getDischarge(){
+
+                window.open( `/business/${ this.type }s/discharge-letter/${this.userId}` );
+            },
             setFile(file) {
                 this.file = file;
             },

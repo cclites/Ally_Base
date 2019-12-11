@@ -235,7 +235,7 @@
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="$refs.deactivateCaregiverModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
                     <template v-else>
-                    <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
+                        <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                         <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
                 </b-col>
