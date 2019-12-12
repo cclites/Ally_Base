@@ -49,7 +49,7 @@ class UpdateClientRequest extends BusinessRequest
             'travel_directions' => 'nullable|string|max:65535',
             'disaster_code_plan' => ['nullable', new ValidEnum(DisasterCode::class)],
             'disaster_planning' => 'nullable|string|max:65535',
-            'caregiver_1099' => 'nullable|string|in:ally,client',
+            'caregiver_1099' => 'nullable|string|in:ally,client,ally_locked',
             'receive_summary_email' => 'boolean',
             'sales_person_id' => 'nullable|int',
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),

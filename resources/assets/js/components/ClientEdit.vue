@@ -36,6 +36,7 @@
                             v-model="form.client_type"
                         />
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
+                        <b-form-text class="additional_help text-right">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
                     </b-form-group>
                     <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
@@ -234,7 +235,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row v-else-if="authRole != 'admin' && client.caregiver_1099 == 'ally'">
+            <b-row v-else-if="authRole != 'admin' && client.caregiver_1099 == 'ally_locked'">
                 <b-col lg="6">
                     <b-form-group label="Caregiver 1099">
                         <label>
@@ -255,7 +256,7 @@
                 <b-col lg="3">
                     <b-form-group label="Payer">
                         <label>
-                            Send on Client's Behalf
+                            Send on {{ payerLabel }}'s Behalf
                         </label>
                     </b-form-group>
                 </b-col>
@@ -545,6 +546,7 @@
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
                 send1099: 0,
+                payerLabel: '',
             }
         },
 
@@ -562,6 +564,8 @@
                 this.send1099 = '0';
             }
 
+            this.payerType();
+
             this.loading = false;
         },
 
@@ -571,7 +575,6 @@
                     alert('You cannot send any emails to this user because there is no email associated with their account.');
                     return false;
                 }
-
                 return true;
             },
 
@@ -726,6 +729,14 @@
                 }
             },
 
+            payerType(){
+                if(this.form.caregiver_1099 === 'client' || this.form.caregiver_1099 === ''){
+                    this.payerLabel = 'Client';
+                }else if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked'){
+                    this.payerLabel = 'Ally';
+                }
+            }
+
         },
 
         computed: {
@@ -776,14 +787,18 @@
             disasterCodes() {
                 return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
+
+
         },
         watch: {
             send1099(val){
                 if(val === '0'){
-                    this.form.caregiver_1099 = null;
+                    this.form.caregiver_1099 = '';
                 }else{
                     this.form.caregiver_1099 = this.client.caregiver_1099 ? this.client.caregiver_1099 : 'client';
                 }
+
+                this.payerType();
             },
         }
     }
@@ -792,5 +807,11 @@
 <style scoped>
     .pad-top {
         padding-top: 16px;
+    }
+
+    .additional_help{
+        position: relative;
+        right: 0px;
+        bottom: 20px;
     }
 </style>

@@ -139,6 +139,7 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
+        $data['caregiver_1099'] = $request->getBusiness()->payer_1099_default;
 
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 

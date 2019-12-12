@@ -152,4 +152,21 @@ class SettingController extends BaseController
         return new SuccessResponse('Payroll Policy successfully saved.');
     }
 
+    public function updateBusiness1099Settings(Business $business, Request $request){
+
+        $this->authorize('update', $business);
+        $business->update([
+            'send_1099_default' => $request->send_1099_default,
+            'payer_1099_default' => $request->payer_1099_default
+        ]);
+
+        if($request->send_1099_default === 'all'){
+            $business->clients()->update(['caregiver_1099'=>$request->payer_1099_default]);
+        }
+
+
+        return new SuccessResponse('Business 1099 settings updated.');
+
+    }
+
 }
