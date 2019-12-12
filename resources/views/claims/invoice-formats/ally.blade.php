@@ -26,8 +26,6 @@
 
         @yield('items')
 
-        @yield('payments')
-
         @yield('notes')
 
         @include('claims.invoice-formats.partials.footer')
