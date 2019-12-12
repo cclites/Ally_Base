@@ -547,6 +547,7 @@
                 sendingWelcomeEmail: false,
                 send1099: 0,
                 payerLabel: '',
+                errors1099: '',
             }
         },
 
@@ -735,6 +736,10 @@
                 }else if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked'){
                     this.payerLabel = 'Ally';
                 }
+            },
+
+            validate1099(){
+
             }
 
         },

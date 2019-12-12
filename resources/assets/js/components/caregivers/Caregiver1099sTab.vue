@@ -3,6 +3,15 @@
                 header-bg-variant="info"
                 header-text-variant="white">
 
+            <div>
+                If you do not see a 1099 listed, your client did not elect provide you with one. This is common and okay.
+                In that case, to report your income, please see your
+                <a href="/caregiver/deposits">Year Summary Report on your Pay Statements Screen</a> and fill out a
+                <a href="https://www.irs.gov/pub/irs-pdf/f1040sc.pdf" target="_blank">Schedule C</a> from the IRS.
+            </div>
+
+            <hr>
+
             <div v-if="fields.length">
                 <div v-for="field in fields" :key="field" class="mb-3">
                     <h4 class="chat-text">{{ field }}</h4>

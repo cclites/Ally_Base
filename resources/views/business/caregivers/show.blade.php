@@ -107,7 +107,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <caregiver-edit :caregiver="{{ $caregiver }}"></caregiver-edit>
+                    <caregiver-edit :caregiver="{{ $caregiver }}" :address="{{ $caregiver->addresses->where('type', 'home')->first() ?? '{}' }}"></caregiver-edit>
                 </div>
             </div>
         </div>

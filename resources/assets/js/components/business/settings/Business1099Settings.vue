@@ -51,7 +51,7 @@
                     this.form.payer_1099_default = '';
                     return false;
                 }
-                
+
                 return true;
             },
         }
