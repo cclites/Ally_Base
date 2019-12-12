@@ -4,9 +4,6 @@
             <b-col sm="6" class="my-1">
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
             </b-col>
-            <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
-                <b-link href="#" @click=" averyModal = true " class="btn btn-info">Avery 5160 PDF</b-link>
-            </b-col>
         </b-row>
         <b-row class="mb-2">
             <b-col lg="12">
@@ -68,8 +65,6 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
-
-        <avery-modal v-model=" averyModal " :callback=" averyLabels "></avery-modal>
     </b-card>
 </template>
 
@@ -145,9 +140,7 @@
                     search: '',
                 }),
                 localStoragePrefix: 'caregiver_list_',
-                paginatedEndpoint : '/business/caregivers/paginate?json=1',
-                averyEndpoint : '/business/caregivers/avery-labels?userType=caregiver',
-                averyModal : false,
+                paginatedEndpoint : '/business/caregivers/paginate?json=1'
             }
         },
 
@@ -185,10 +178,6 @@
 
         methods: {
 
-            averyLabels( data ){
-
-                window.open( this.averyEndpoint + this.listFilters + '&leftmargin=' + data.leftmargin + '&topmargin=' + data.topmargin );
-            },
             loadTable() {
                 this.$refs.table.refresh();
             },
