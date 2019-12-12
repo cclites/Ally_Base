@@ -52,6 +52,7 @@ class Caregiver1099Query
                     u2.lastname as caregiver_lname,
                     u2.email as caregiver_email,
                     c2.ssn as caregiver_ssn,
+                    c2.uses_ein_number,
                     a2.address1 as caregiver_address1, 
                     a2.address2 as caregiver_address2,
                     a2.city as caregiver_city,

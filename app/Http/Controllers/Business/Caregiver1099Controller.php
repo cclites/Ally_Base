@@ -47,6 +47,13 @@ class Caregiver1099Controller extends Controller
         $clAddress2 = $caregiver1099->client_address2 ? $caregiver1099->client_address2 . "\n" : '';
         $caAddress2 = $caregiver1099->caregiver_address2 ? ", " . $caregiver1099->caregiver_address2 : '';
         $payerAddress = $payerName . "\n" . $caregiver1099->client_address1 . "\n" . $clAddress2 . $caregiver1099->client_address3();
+        $paymentTotal = $caregiver1099->caregiver_1099_amount ? $caregiver1099->caregiver_1099_amount : $caregiver1099->payment_total;
+        $caregiverTin = decrypt($caregiver1099->caregiver_ssn);
+
+        if($caregiver1099->uses_ein_number){
+            $caregiverTin = str_replace("-", "", $caregiverTin);
+            $caregiverTin = substr($caregiverTin,0, 2) . "-" . substr($caregiverTin, 2,7);
+        }
 
         if($caregiver1099->client->caregiver_1099 === 'ally'){
             $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/B_1_2_1099msc.pdf');
@@ -62,29 +69,29 @@ class Caregiver1099Controller extends Controller
             /** COPY B **/
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+            'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $paymentTotal,
 
             /** COPY 1 **/
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $caregiver1099->payment_total,
+            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $paymentTotal,
 
             /** COPY 2 **/
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $caregiver1099->payment_total,
+            'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $paymentTotal,
 
 
 
