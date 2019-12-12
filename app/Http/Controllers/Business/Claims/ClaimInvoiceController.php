@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
@@ -204,6 +204,7 @@ class ClaimInvoiceController extends BaseController
             'render' => 'html',
             'notes' => $claim->getInvoiceNotesData(),
             'clientData' => $claim->getInvoiceClientData(),
+            'logo' => $claim->business->logo,
         ]);
 
         if ($request->filled('download')) {
