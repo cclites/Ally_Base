@@ -51,8 +51,7 @@
                     this.form.payer_1099_default = '';
                     return false;
                 }
-
-                this.form.payer_1099_default = 'client';
+                
                 return true;
             },
         }
