@@ -26,8 +26,8 @@ class CreateClaimsController extends BaseController
                 ->when($request->client_id, function (ClientInvoiceQuery $invoiceQuery, $var) {
                     $invoiceQuery->forClient($var, false);
                 })
-                ->when($request->payer_id, function (ClientInvoiceQuery $invoiceQuery, $var) {
-                    $invoiceQuery->forPayer($var);
+                ->when(filled($request->payer_id), function (ClientInvoiceQuery $invoiceQuery, $var) use ($request) {
+                    $invoiceQuery->forPayer($request->payer_id);
                 })
                 ->when($request->client_type, function (ClientInvoiceQuery $invoiceQuery, $var) {
                     $invoiceQuery->forClientType($var);
