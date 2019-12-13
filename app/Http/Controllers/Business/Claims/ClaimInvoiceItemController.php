@@ -24,6 +24,7 @@ class ClaimInvoiceItemController extends BaseController
      * @param UpdateClaimInvoiceItemRequest $request
      * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws ValidationException
      */
     public function store(ClaimInvoice $claim, UpdateClaimInvoiceItemRequest $request)
     {
@@ -52,7 +53,10 @@ class ClaimInvoiceItemController extends BaseController
             $claim->markAsModified();
 
             \DB::commit();
+        } catch (ValidationException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
+            \Log::info($ex);
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to create this item.  Please try again.');
         }
@@ -74,6 +78,8 @@ class ClaimInvoiceItemController extends BaseController
     {
         $this->authorize('update', $claim);
 
+        \DB::enableQueryLog();
+
         try {
             \DB::beginTransaction();
 
@@ -81,7 +87,7 @@ class ClaimInvoiceItemController extends BaseController
                 return new ErrorResponse(412, 'You cannot change the linked client record for a client claim.');
             }
 
-            $item->claimable->update($request->getClaimableData());
+            $item->claimable->update($request->getClaimableData($item));
             $item->update($request->getClaimItemData());
 
             $item->updateBalance();
@@ -96,6 +102,8 @@ class ClaimInvoiceItemController extends BaseController
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }
+
+        \Log::info(\DB::getQueryLog());
 
         return new SuccessResponse('Claim Item has been saved.', new ClaimInvoiceResource($claim->fresh()));
     }
