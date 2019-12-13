@@ -64,7 +64,7 @@ class ClaimInvoiceResource extends Resource
             'modified_at' => optional($this->resource->modified_at)->toDateTimeString(),
             'has_expenses' => $this->resource->getHasExpenses(),
             'client_id' => $this->resource->client_id,
-            'client_name' => $client ? $client->name : '',
+            'client_name' => $client ? $client->name_last_first : '',
             'client_invoice_id' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->id,
             'client_invoice_name' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0])->name,
             'client_invoice_date' => $this->resource->hasMultipleInvoices() ? '' : optional($this->resource->clientInvoices[0]->created_at)->toDateTimeString(),
