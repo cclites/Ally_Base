@@ -296,7 +296,7 @@ class ClientController extends BaseController
         }
 
         //update 1099 options
-        if( ($request->client_type !== $client->client_type) || ($request->save1099 !== $client->save_1099)){
+        if( $request->client_type !== $client->client_type ){
             $options = $this->update1099Options($client);
             $data = array_merge($data, $options);
         }

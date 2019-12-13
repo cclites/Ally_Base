@@ -220,7 +220,7 @@
             <b-row v-if="authRole == 'admin'">
                 <b-col lg="3">
                     <b-form-group label="Caregiver 1099">
-                        <b-form-select v-model="send1099">
+                        <b-form-select v-model="send_1099">
                             <option value="choose">Select an Option</option>
                             <option value="yes">Yes</option>
                             <option value="no">No</option>
@@ -249,7 +249,7 @@
             <b-row v-else>
                 <b-col lg="3">
                     <b-form-group label="Caregiver 1099">
-                        <b-form-select v-model="send1099">
+                        <b-form-select v-model="form.send_1099">
                             <option value="choose">Select an Option</option>
                             <option value="yes">Yes</option>
                             <option value="no">No</option>
@@ -534,7 +534,7 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
-                    send1099: this.client.send_1099,
+                    send_1099: this.client.send_1099,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -549,7 +549,6 @@
                 loading: false,
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
-                send1099: 0,
                 payerLabel: '',
                 errors1099: '',
 
@@ -565,7 +564,6 @@
             await this.loadOfficeUsers();
             await this.fetchStatusAliases();
 
-            this.send1099 = this.client.send_1099;
             this.payerType();
 
             this.loading = false;
@@ -803,18 +801,6 @@
 
         },
         watch: {
-
-            /*
-            send1099(val){
-                if(val === '0'){
-                    this.form.caregiver_1099 = '';
-                }else{
-                    this.form.caregiver_1099 = this.client.caregiver_1099 ? this.client.caregiver_1099 : 'client';
-                }
-
-                this.payerType();
-            },
-             */
         }
     }
 </script>
