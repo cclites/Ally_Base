@@ -5,11 +5,11 @@ namespace App\Claims\Transmitters;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\HhaExchangeService;
+use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\HhaFile;
-use Illuminate\Support\Collection;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -19,6 +19,22 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @var string
      */
     protected $timeFormat = 'Y-m-d H:i';
+
+    /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string
+    {
+        if ($claim->getType() == ClaimInvoiceType::PAYER()) {
+            return 'Transmitting Payer invoices with more than one client to HHA is not currently supported.';
+        }
+
+        return null;
+    }
 
     /**
      * Validate a ClaimInvoice has all the required parameters to
@@ -39,12 +55,12 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         // required for hha:
         // hha_username
         // hha_password
-        // caregiver ID
+        // caregiver ID (this is not nullable in the database, so no need to validate)
 
         $errors = collect(parent::validateClaim($claim));
 
         if (empty($claim->business->hha_username) || empty($claim->business->getHhaPassword())) {
-            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings').'#claims']);
+            $errors->push(['message' => 'Your HHA Credentials have not been setup.', 'url' => route('business-settings') . '#claims']);
         }
 
         return $errors->isEmpty() ? null : $errors->toArray();
@@ -77,7 +93,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
 
             // create new HhaFile for the Claim
             $claim->hhaFiles()->create([
-                'filename' => substr($filename, 0,  strlen($filename) - 4),
+                'filename' => substr($filename, 0, strlen($filename) - 4),
                 'status' => HhaFile::STATUS_PENDING,
             ]);
 
@@ -108,14 +124,14 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
         return [
             $claim->business->ein ? str_replace('-', '', $claim->business->ein) : '', //    "Agency Tax ID", (required)
             $claim->payer_code, //    "Payer ID", (required)
-            $claim->client_medicaid_id, //    "Medicaid Number", (required)
-            $service->caregiver_id, //    "Caregiver Code", (required)
-            $service->caregiver_first_name, //    "Caregiver First Name",
-            $service->caregiver_last_name, //    "Caregiver Last Name",
-            $service->caregiver_gender ? strtoupper($service->caregiver_gender) : '', //    "Caregiver Gender",
-            $service->caregiver_dob ?? '', //    "Caregiver Date of Birth",
-            $this->cleanSsn($service->caregiver_ssn), //    "Caregiver SSN",
-            $claim->id, //    "Schedule ID", (required)
+            $item->client_medicaid_id ?? $claim->getClientMedicaidId(), //    "Medicaid Number", (required)
+            $item->caregiver_id, //    "Caregiver Code", (required)
+            $item->caregiver_first_name, //    "Caregiver First Name",
+            $item->caregiver_last_name, //    "Caregiver Last Name",
+            $item->caregiver_gender ? strtoupper($item->caregiver_gender) : '', //    "Caregiver Gender",
+            $item->caregiver_dob ?? '', //    "Caregiver Date of Birth",
+            $this->cleanSsn($item->caregiver_ssn), //    "Caregiver SSN",
+            $item->id, //    "Schedule ID", (required)
             $service->service_code, //    "Procedure Code", (required)
             $service->scheduled_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule Start Time", (required)
             $service->scheduled_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Schedule End Time", (required)
@@ -137,7 +153,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // TODO: implement reason codes:
             $service->getHasEvv() ? '' : '910', //    "Visit Edit Reason Code",
             $service->getHasEvv() ? '' : '14', //    "Visit Edit Action Taken",
-            '', //    "Notes",
+            $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",
             'N', //    "Missed Visit",
@@ -146,9 +162,9 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "Missed Visit Action Taken Code",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Required",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Approved",
-            '', //    "User Field 1",
-            '', //    "User Field 2",
-            '', //    "User Field 3",
+            $service->shift_id, //    "User Field 1",
+            $item->client_id, //    "User Field 2",
+            $item->caregiver_id, //    "User Field 3",
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
@@ -157,10 +173,10 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
     /**
      * Map claimable service activities to their corresponding duties codes.
      *
-     * @param string $activities
+     * @param null|string $activities
      * @return string
      */
-    public function mapActivities(string $activities): string
+    public function mapActivities(?string $activities): string
     {
         // TODO: re-work this to read from hha_duty_code_id field in DB: https://jtrsolutions.atlassian.net/browse/ALLY-1151
         if (empty($activities)) {
@@ -219,7 +235,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param string|null $ssn
      * @return string
      */
-    private function cleanSsn(?string $ssn) : string
+    private function cleanSsn(?string $ssn): string
     {
         if (empty($ssn)) {
             return '';
@@ -233,7 +249,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $ssn = str_replace('*', '0', $ssn);
         }
 
-        return $ssn[0].$ssn[1].$ssn[2].'-'.$ssn[3].$ssn[4].'-'.$ssn[5].$ssn[6].$ssn[7].$ssn[8];
+        return $ssn[0] . $ssn[1] . $ssn[2] . '-' . $ssn[3] . $ssn[4] . '-' . $ssn[5] . $ssn[6] . $ssn[7] . $ssn[8];
     }
 
     /**
@@ -242,7 +258,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @param ClaimInvoice $claim
      * @return bool
      */
-    public function isTestMode(ClaimInvoice $claim) : bool
+    public function isTestMode(ClaimInvoice $claim): bool
     {
         return $claim->business->hha_username == "test";
     }
@@ -254,7 +270,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
      * @return null|string
      * @throws \Exception
      */
-    public function test(ClaimInvoice $claim) : ?string
+    public function test(ClaimInvoice $claim): ?string
     {
         $hha = new HhaExchangeService(
             $claim->business->hha_username,

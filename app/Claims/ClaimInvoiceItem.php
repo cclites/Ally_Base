@@ -2,7 +2,10 @@
 
 namespace App\Claims;
 
+use App\Billing\ClientInvoice;
 use App\AuditableModel;
+use App\Caregiver;
+use App\Client;
 
 /**
  * App\Claims\ClaimInvoiceItem
@@ -102,9 +105,59 @@ class ClaimInvoiceItem extends AuditableModel
         return $this->hasMany(ClaimAdjustment::class);
     }
 
+    /**
+     * Get the ClientInvoice relationship to the item.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function clientInvoice()
+    {
+        return $this->belongsTo(ClientInvoice::class);
+    }
+
+    /**
+     * Get the related Caregiver.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function caregiver()
+    {
+        return $this->belongsTo(Caregiver::class);
+    }
+
+    /**
+     * Get the related Client.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
+
+    /**
+     * Encrypt Caregiver SSN on entry.
+     *
+     * @param $value
+     */
+    public function setCaregiverSsnAttribute($value)
+    {
+        $this->attributes['caregiver_ssn'] = $value ? \Crypt::encrypt($value) : null;
+    }
+
+    /**
+     * Decrypt Caregiver SSN on retrieval.
+     *
+     * @return null|string
+     */
+    public function getCaregiverSsnAttribute()
+    {
+        return empty($this->attributes['caregiver_ssn']) ? null : \Crypt::decrypt($this->attributes['caregiver_ssn']);
+    }
 
     /**
      * Get the a formatted claimable type string.
@@ -207,9 +260,70 @@ class ClaimInvoiceItem extends AuditableModel
         }
 
         $service = $this->claimable->getName();
-        $caregiver = $this->claimable->getCaregiverName();
+        $caregiver = $this->getCaregiverName();
         $date = $this->date->setTimezone($timezone)->format('m/d/y');
 
         return "$service - $caregiver - $date{$time}";
+    }
+
+    /**
+     * Get the Client's name.
+     *
+     * @return string
+     */
+    public function getClientName(): string
+    {
+        if (empty($this->client_first_name) && empty($this->client_last_name)) {
+            return '';
+        }
+
+        return $this->client_last_name . ', ' . $this->client_first_name;
+    }
+
+    /**
+     * Get the Caregiver's name that performed the service.
+     *
+     * @return string
+     */
+    public function getCaregiverName(): string
+    {
+        if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
+            return '';
+        }
+
+        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
+    }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
+    {
+        return [
+            'client_last_name' => $faker->lastName,
+            'client_dob' => $faker->date('Y-m-d', '-30 years'),
+            'client_medicaid_id' => $faker->randomNumber(8),
+            'client_program_number' => $faker->randomNumber(8),
+            'client_cirts_number' => $faker->randomNumber(8),
+            'client_ltci_policy_number' => $faker->randomNumber(8),
+            'client_ltci_claim_number' => $faker->randomNumber(8),
+            'client_case_manager' => $faker->name(),
+            'client_hic' => $faker->randomNumber(8),
+            'client_invoice_notes' => $faker->sentence,
+
+            'caregiver_last_name' => $faker->lastName,
+            'caregiver_dob' => $faker->date('Y-m-d', '-30 years'),
+            'caregiver_medicaid_id' => $faker->randomNumber(8),
+        ];
     }
 }

@@ -12,6 +12,7 @@ use App\Services\TellusApiException;
 use App\Services\TellusService;
 use App\Services\TellusValidationException;
 use App\Shift;
+use App\TellusFile;
 use App\TellusTypecode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -106,8 +107,15 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         );
 
         try {
-            if ($tellus->submitClaim($this->getData($claim))) {
+            if ( $filename = $tellus->submitClaim($this->getData($claim))) {
                 // Success
+
+                $claim->tellusFiles()->create([
+
+                    'filename' => $filename,
+                    'status'   => TellusFile::STATUS_PENDING,
+                ]);
+
                 return true;
             }
         } catch (TellusValidationException $ex) {
@@ -256,20 +264,20 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime'    => $shift->checked_in_time->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime'      => $shift->checked_out_time->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime'    => $shift->checked_in_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
+            'ActualEndDateTime'      => $shift->checked_out_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
             'ActualEndLongitude' => '',
-            // 'UserField1'             => '', // OPTIONAL
+            'UserField1'             => $claim->id, // OPTIONAL
             // 'UserField2'             => '', // OPTIONAL
             // 'UserField3'             => '', // OPTIONAL
             // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO
             // 'ReasonCode2' => '', // OPTIONAL && TODO
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
-            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone($business) ),
+            'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone( $business ) ),
              'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
              'EndAddress1'            => $address->address1, // OPTIONAL
              'EndAddress2'            => $address->address2, // OPTIONAL

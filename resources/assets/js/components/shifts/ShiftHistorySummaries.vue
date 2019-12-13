@@ -18,7 +18,7 @@
                                 <tr>
                                     <th>Client</th>
                                     <th>Hours</th>
-                                    <th v-if="admin">Pre-Ally</th>
+                                    <th>Pre Ally</th>
                                     <th>Total</th>
                                     <!--<th>Caregiver</th>-->
                                     <!--<th>Registry</th>-->
@@ -30,7 +30,7 @@
                                 <tr v-for="item in clientCharges" :key="item.id">
                                     <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                                     <td>{{ item.hours }}</td>
-                                    <td v-if="admin">{{ moneyFormat(preAllyTotal(item)) }}</td>
+                                    <td>{{ moneyFormat(preAllyTotal(item)) }}</td>
                                     <td>{{ moneyFormat(item.total) }}</td>
                                     <!--<td>{{ item.caregiver_total }}</td>-->
                                     <!--<td>{{ item.provider_total }}</td>-->
@@ -106,7 +106,7 @@
                     </table>
                 </b-card>
             </b-col>
-            <b-col lg="6">
+            <b-col lg="6" v-if=" admin ">
                 <b-card>
                     <table class="table table-bordered">
                         <tr>

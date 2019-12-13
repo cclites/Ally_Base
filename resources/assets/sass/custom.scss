@@ -28,11 +28,15 @@ a.franchisor-navlink {
   }
   /* Reduce table font size */
   table td, table th {
-    font-size: 12px;
+      font-size: 12px;
   }
   .hidden-print {
     display: none;
   }
+}
+
+.table.fit-more:not(.form-check) {
+    font-size: 14px;
 }
 
 /* Navbar bullets */
@@ -445,3 +449,5 @@ label.required::after, legend.required::after {
 .form-group.bold > label {
     font-weight: 800;
 }
+
+.w-auto { width: auto }

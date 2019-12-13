@@ -2,16 +2,19 @@
 /**
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
- * @var \App\Billing\ClientPayer|null $clientPayer The related Client Payer
+ * @var array $notes Client payer notes
  */
 ?>
 <div class="row">
-    <div class="footer-left" style="margin-top: 2rem">
-        @if($clientPayer && $clientPayer->notes)
-            <div>{{ $clientPayer->notes }}</div>
+    <div class="footer-left">
+        @if(filled($notes))
+            <div class="h3">Notes:</div>
+            @foreach($notes as $data)
+                <p>{{ $data }}</p>
+            @endforeach
         @endif
     </div>
-    <div class="footer-right" style="padding-right: 15px;">
+    <div class="footer-right" style="padding-right: 15px; padding-top: 20px;">
         <table class="table">
             <tbody>
             <tr>

@@ -42,25 +42,6 @@ class ClientPayersTest extends TestCase
         $this->actingAs($this->officeUser->user);
     }
 
-    /**
-     * @test
-     * 
-     * testing the output of the Claims & AR report
-     * 
-     * not necessarily runnning many assertions on it, I just like having a CLI method of viewing the results.
-     * Plus setting up the factories helps me understand what data & relationships that the report works with
-     */
-    public function the_claims_and_ar_report_works_soundly()
-    {
-
-        // you have to add  || $request->filled( 'json' ) to the controller
-        factory( ClientInvoice::class, 50 )->create();
-
-        $query_string = '?json=1&businesses=3&start_date=07/09/2019&end_date=08/08/2019&invoiceType=&client_id=&payer_id=';
-        $data = $this->get( route( 'business.claims-ar' ) . $query_string )
-            ->assertSuccessful();
-    }
-
     /** @test */
     public function a_user_can_update_the_client_payers()
     {

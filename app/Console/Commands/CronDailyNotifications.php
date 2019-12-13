@@ -128,6 +128,7 @@ class CronDailyNotifications extends Command
     public function expiringCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
+            ->whereHasValidCaregiver()
             ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(CertificationExpiring::THRESHOLD)])
             ->get();
 
@@ -137,7 +138,7 @@ class CronDailyNotifications extends Command
                 continue;
             }
 
-            if (!  $license->caregiver->active) {
+            if (!$license->caregiver->active ) {
                 // skip inactive caregivers
                 continue;
             }
@@ -166,6 +167,7 @@ class CronDailyNotifications extends Command
     public function expiredCertifications() : void
     {
         $licenses = CaregiverLicense::with('caregiver')
+            ->whereHasValidCaregiver()
             ->whereBetween('expires_at', [Carbon::now()->subDays(30), Carbon::now()])
             ->get();
 
@@ -176,7 +178,7 @@ class CronDailyNotifications extends Command
                 continue;
             }
 
-            if (!  $license->caregiver->active) {
+            if (!$license->caregiver->active) {
                 // skip inactive caregivers
                 continue;
             }

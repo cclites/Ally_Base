@@ -5,8 +5,21 @@ namespace App\Claims\Contracts;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimInvoice;
 
+/**
+ * Interface ClaimTransmitterInterface
+ * @package App\Claims\Contracts
+ */
 interface ClaimTransmitterInterface
 {
+    /**
+     * Indicates the reason a claim should be prevented
+     * from transmission.
+     *
+     * @param \App\Claims\ClaimInvoice $claim
+     * @return null|string
+     */
+    public function prevent(ClaimInvoice $claim): ?string;
+
     /**
      * Validate a ClaimInvoice has all the required parameters to
      * be transmitted to the service.

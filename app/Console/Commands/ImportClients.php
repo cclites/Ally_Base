@@ -8,6 +8,7 @@ use App\Billing\ClientPayer;
 use App\Billing\Payer;
 use App\Business;
 use App\Client;
+use App\ClientContact;
 use App\EmergencyContact;
 use App\StatusAlias;
 use App\User;
@@ -148,11 +149,14 @@ class ImportClients extends BaseImport
     {
         for ($i = 1; $i <= 3; $i++) {
             if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
-                EmergencyContact::create([
-                    'user_id' => $client->id,
+                ClientContact::create([
+                    'client_id' => $client->id,
                     'name' => $emergencyName,
-                    'phone_number' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
-                    'relationship' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
+                    'phone1' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
+                    'relationship' => 'custom',
+                    'relationship_custom' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
+                    'is_emergency' => true,
+                    'emergency_priority' => $i,
                 ]);
             }
         }

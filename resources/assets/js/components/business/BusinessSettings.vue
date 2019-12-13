@@ -229,6 +229,10 @@
                                 <b-form-input v-model="businessSettings.medicaid_id">
                                 </b-form-input>
                             </b-form-group>
+                            <b-form-group label="License #">
+                                <b-form-input v-model="businessSettings.medicaid_license_number">
+                                </b-form-input>
+                            </b-form-group>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="NPI Number">
@@ -690,6 +694,7 @@
                     medicaid_id: business.medicaid_id,
                     medicaid_npi_number: business.medicaid_npi_number,
                     medicaid_npi_taxonomy: business.medicaid_npi_taxonomy,
+                    medicaid_license_number: business.medicaid_license_number,
                     allow_client_confirmations: business.allow_client_confirmations,
                     auto_confirm_modified: business.auto_confirm_modified,
                     shift_confirmation_email: business.shift_confirmation_email,

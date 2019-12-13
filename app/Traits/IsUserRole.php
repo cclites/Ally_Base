@@ -8,6 +8,7 @@ use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 use App\Document;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DeactivationReason;
@@ -273,23 +274,30 @@ trait IsUserRole
         return $this->user ? $this->user->setup_status : null;
     }
 
-    function getHic(): ?string
+    /**
+     * Get the extra data that should be printed on invoices.
+     *
+     * @return array
+     */
+    function getExtraInvoiceData(): array
     {
         if ($this->getRoleType() === 'client') {
-            return $this->hic;
+            $data = collect([]);
+
+            if (filled($this->date_of_birth)) {
+                $data->push('DOB: '.Carbon::parse($this->date_of_birth)->format('m/d/Y'));
+            }
+
+            if (filled($this->hic)) {
+                $data->push('HIC: '.$this->hic);
+            }
+
+            return $data->toArray();
         }
 
-        return null;
+        return [];
     }
 
-    function getBirthdate(): ?string
-    {
-        if ($this->getRoleType() === 'client') {
-            return $this->date_of_birth;
-        }
-
-        return null;
-    }
     ///////////////////////////////////////////
     /// Attribute Input Handling
     ///////////////////////////////////////////

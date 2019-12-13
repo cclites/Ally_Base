@@ -2,8 +2,8 @@
 
 namespace App\Claims\Requests;
 
-use App\Claims\ClaimRemitType;
 use App\Http\Requests\FilteredResourceRequest;
+use App\Claims\ClaimRemitType;
 use App\Rules\ValidEnum;
 
 /**

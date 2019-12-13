@@ -5,10 +5,10 @@ namespace App\Claims\Requests;
 use App\Http\Requests\FilteredResourceRequest;
 
 /**
- * Class ClaimQueueRequest
+ * Class GetClientInvoicesRequest
  * @package App\Claims\Requests
  */
-class ClaimQueueRequest extends FilteredResourceRequest
+class GetClientInvoicesRequest extends FilteredResourceRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -23,7 +23,6 @@ class ClaimQueueRequest extends FilteredResourceRequest
             'client_id' => 'nullable|numeric',
             'businesses' => 'nullable',
             'invoice_type' => 'nullable',
-            'claim_status' => 'nullable',
             'payer_id' => 'nullable',
             'client_type' => 'nullable',
             'inactive' => 'nullable|bool',

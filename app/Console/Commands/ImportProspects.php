@@ -21,7 +21,6 @@ class ImportProspects extends ImportClients
      */
     protected $description = 'Import an excel export of prospects into the system.';
 
-
     /**
      * Import the specified row of data from the sheet and return the related model
      *
@@ -44,6 +43,8 @@ class ImportProspects extends ImportClients
             'zip' => $this->resolve('Zip', $row) ?: $this->resolve('PostalCode', $row),
             'country' => 'US',
             'phone' => $this->resolve('Phone', $row) ?: $this->resolve('Phone1', $row),
+            // New import fields 2019-12-10:
+            'closed_loss' => $this->resolve('ClosedLoss', $row) == 'Y' ? true : false,
         ];
 
         // Format and validate phone number
@@ -59,6 +60,9 @@ class ImportProspects extends ImportClients
             }
         }
 
+        // Attempt to find referral source
+        $data['referral_source_id'] = $this->findOrCreateReferralSource($row);
+
         /** @var Prospect $caregiver */
         $prospect = $this->business()->prospects()->create($data);
         if ($prospect) {
@@ -66,6 +70,42 @@ class ImportProspects extends ImportClients
         }
 
         return false;
+    }
+
+    /**
+     * Look up the referrer by name or create a new entry.
+     *
+     * @param int $row
+     * @return int|null
+     * @throws \PHPExcel_Exception
+     */
+    public function findOrCreateReferralSource(int $row) : ?int
+    {
+        $referrer = $this->resolve('Client Referrer', $row);
+        $sourceType = $this->resolve('Referral Source Type', $row);
+
+        $source = $this->business->chain->referralSources()
+            ->where('contact_name', 'LIKE', $referrer)
+            ->first();
+
+        if (empty($source)) {
+            $source = $this->business->chain->referralSources()
+                ->where('organization', 'LIKE', $referrer)
+                ->first();
+        }
+
+        if (empty($source)) {
+            $source = $this->business->chain->referralSources()->create([
+                'type' => 'client',
+                'organization' => $referrer,
+                'contact_name' => 'Default',
+                'active' => 1,
+                'is_company' => true,
+                'source_type' => $sourceType,
+            ]);
+        }
+
+        return optional($source)->id;
     }
 
     /**

@@ -45,7 +45,7 @@
                         </template>
                     </b-form-select>
 
-                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
+                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :show-offline="true" />
 
                     <b-input
                         v-model="filters.reference"
@@ -77,6 +77,7 @@
         <loading-card v-if="filters.busy" />
         <div v-else class="table-responsive">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="remits"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -141,12 +142,12 @@
 
 <script>
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
+    import ClaimRemitAdjustmentForm from "./ClaimRemitAdjustmentForm";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
     import Constants from '../../../mixins/Constants';
     import ClaimRemitForm from "./ClaimRemitForm";
-    import ClaimRemitAdjustmentForm from "./ClaimRemitAdjustmentForm";
     import { mapGetters } from 'vuex';
 
     export default {
@@ -161,7 +162,7 @@
                 fields: {
                     id: { sortable: true, label: 'ID' },
                     office_location: { sortable: true },
-                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDateFromUTC(x) },
+                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDate(x) },
                     payment_type: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitTypeOptions) },
                     payer_name: { label: 'Payer', sortable: true, formatter: x => x ? x : '-' },
                     reference: { sortable: true, label: 'Reference #' },

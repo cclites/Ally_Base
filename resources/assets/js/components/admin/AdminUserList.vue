@@ -150,7 +150,7 @@
 
             itemProvider(ctx) {
                 this.loading = true;
-                return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.search}`)
+                return axios.get(`/admin/users?json=1&page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${ctx.sortBy}&desc=${ctx.sortDesc}&chain=${this.chainFilter}&search=${this.search}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
                         return data.results || [];

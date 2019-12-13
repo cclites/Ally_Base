@@ -13,7 +13,7 @@
                         :allow-all="true"
                     />
 
-                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" />
+                    <payer-dropdown v-model="form.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :disabled="loading" :show-offline="true" />
 
                     <client-type-dropdown v-model="form.client_type" class="mr-1 mt-1" empty-text="-- All Client Types --" />
 
@@ -50,6 +50,7 @@
 
                         <div v-else class="table-responsive">
                             <b-table bordered striped hover show-empty
+                                class="fit-more"
                                 :busy="busy"
                                 :items="items"
                                 :fields="fields"
@@ -66,11 +67,19 @@
                                         <a :href="`/business/claim-adjustments/${row.item.claim_id}`" target="_blank"><i class="fa fa-comment text-warning ml-1" /></a>
                                     </span>
                                 </template>
-                                <template slot="invoice_name" scope="row">
-                                    <a :href="`/business/client/invoices/${row.item.invoice_id}`" target="_blank">{{ row.item.invoice_name }}</a>
+                                <template slot="client_invoice_name" scope="row">
+                                    <a v-if="row.item.client_invoice_id" :href="`/business/client/invoices/${row.item.client_invoice_id}`" target="_blank">{{ row.item.client_invoice_name }}</a>
+                                    <span v-else>
+                                        <div v-for="invoice in row.item.invoices" key="invoice.id">
+                                            <a :href="`/business/client/invoices/${invoice.id}`" target="_blank">
+                                                #{{ invoice.name }}
+                                            </a>
+                                        </div>
+                                    </span>
                                 </template>
                                 <template slot="client_name" scope="row">
-                                    <a :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                                    <a v-if="row.item.client_id" :href="`/business/clients/${row.item.client_id}`" target="_blank">{{ row.item.client_name }}</a>
+                                    <span v-else>(Grouped)</span>
                                 </template>
 
                                 <template slot="FOOT_claim_name" scope="row">
@@ -158,9 +167,9 @@
                 sortDesc: false,
                 fields: {
                     claim_name: { sortable: true, label: "Claim", class: 'text-nowrap' },
-                    invoice_name: { sortable: true, label: "Invoice", class: 'text-nowrap' },
+                    client_invoice_name: { sortable: true, label: "Invoice(s)", class: 'text-nowrap' },
                     client_name: { sortable: true, label: "Client", class: 'text-nowrap' },
-                    payer: {sortable: true, label: "Payers"},
+                    payer_name: {sortable: true, label: "Payers"},
                     current: { sortable: true, label: 'Current', formatter: x => this.moneyFormat(x) },
                     period_30_45: { sortable: true, label: '30-45', formatter: x => this.moneyFormat(x) },
                     period_46_60: { sortable: true, label: '46-60', formatter: x => this.moneyFormat(x) },

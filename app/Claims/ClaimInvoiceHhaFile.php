@@ -3,8 +3,10 @@
 namespace App\Claims;
 
 use App\BaseModel;
+use App\Claims\Contracts\TransmissionFileInterface;
+use Carbon\Carbon;
 
-class ClaimInvoiceHhaFile extends BaseModel
+class ClaimInvoiceHhaFile extends BaseModel implements TransmissionFileInterface
 {
     /**
      * The attributes that aren't mass assignable.
@@ -42,14 +44,30 @@ class ClaimInvoiceHhaFile extends BaseModel
     }
 
     // **********************************************************
-    // MUTATORS
+    // ACCESSORS
     // **********************************************************
 
-    // **********************************************************
-    // QUERY SCOPES
-    // **********************************************************
+    /**
+     * @inheritDoc
+     */
+    public function getFilename(): string
+    {
+        return $this->filename;
+    }
 
-    // **********************************************************
-    // OTHER FUNCTIONS
-    // **********************************************************
+    /**
+     * @inheritDoc
+     */
+    public function getResults(): ?iterable
+    {
+        return $this->results;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDate(): Carbon
+    {
+        return $this->created_at;
+    }
 }

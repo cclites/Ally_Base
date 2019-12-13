@@ -9,6 +9,9 @@
                 @include('invoices.partials.address', ['address' => $sender->getAddress(), 'phone' => $sender->getPhoneNumber()])
             </div>
         @endif
+        @foreach($sender->getExtraInvoiceData() as $data)
+            <div>{{ $data }}</div>
+        @endforeach
     </div>
     <div class="text-right header-right">
         <div class="h3">Invoice #{{ $invoice->getName() }}</div>
@@ -39,20 +42,13 @@
                         @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                     </td>
                 </tr>
-                @if( filled($recipient->getBirthdate()))
-                <tr>
-                    <td colspan="2">
-                        {{ \Carbon\Carbon::parse($recipient->getBirthdate())->format('m/d/Y') }}
-                    </td>
-                </tr>
-                @endif
-                @if( filled($recipient->getHic()))
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ $recipient->getHic() }}</strong>
-                    </td>
-                </tr>
-                @endif
+                @foreach($recipient->getExtraInvoiceData() as $data)
+                    <tr>
+                        <td colspan="2">
+                            {{ $data }}
+                        </td>
+                    </tr>
+                @endforeach
             @endif
         </table>
     </div>
@@ -96,20 +92,13 @@
                         @include('invoices.partials.address', ['address' => $subject->getAddress(), 'phone' => $subject->getPhoneNumber()])
                     </td>
                 </tr>
-                @if( filled($subject->getBirthdate()))
-                <tr>
-                    <td colspan="2">
-                        {{ \Carbon\Carbon::parse($subject->getBirthdate())->format('m/d/Y') }}
-                    </td>
-                </tr>
-                @endif
-                @if( filled($subject->getHic()))
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ $subject->getHic() }}</strong>
-                    </td>
-                </tr>
-                @endif
+                @foreach($subject->getExtraInvoiceData() as $data)
+                    <tr>
+                        <td colspan="2">
+                            {{ $data }}
+                        </td>
+                    </tr>
+                @endforeach
             </table>
         </div>
     </div>

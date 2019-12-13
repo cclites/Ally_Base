@@ -33,7 +33,7 @@
                         </template>
                     </b-form-select>
 
-                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" />
+                    <payer-dropdown v-model="filters.payer_id" class="mr-1 mt-1" empty-text="-- All Payers --" :show-offline="true" />
 
                     <b-btn variant="info" class="mt-1" :disabled="filters.busy" @click.prevent="fetch()">Generate</b-btn>
                 </b-form>
@@ -54,6 +54,7 @@
         <loading-card v-if="filters.busy" />
         <div v-else class="table-responsive">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="items"
                 :fields="fields"
                 :sort-by.sync="sortBy"
@@ -111,12 +112,11 @@
                 subFields: {
                     id: { sortable: true, label: 'ID' },
                     payment_type: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitTypeOptions) },
-                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDateFromUTC(x) },
+                    date: { sortable: true, label: 'Payment Date', formatter: x => this.formatDate(x) },
                     reference: { sortable: true, label: 'Reference #' },
                     status: { sortable: true, formatter: x => this.resolveOption(x, this.claimRemitStatusOptions) },
                     amount_applied: { sortable: true, formatter: x => this.moneyFormat(x) },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    // amount_available: { sortable: true, formatter: x => this.moneyFormat(x) },
                 },
                 filters: new Form({
                     type: '',

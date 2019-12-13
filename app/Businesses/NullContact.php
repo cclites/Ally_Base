@@ -42,13 +42,13 @@ class NullContact implements ContactableInterface
         return null;
     }
 
-    function getHic(): ?string
+    /**
+     * Get the extra data that should be printed on invoices.
+     *
+     * @return array
+     */
+    function getExtraInvoiceData(): array
     {
-        return null;
-    }
-
-    function getBirthdate(): ?string
-    {
-        return null;
+        return [];
     }
 }

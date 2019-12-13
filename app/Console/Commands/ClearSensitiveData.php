@@ -30,7 +30,7 @@ use App\CarePlan;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimAdjustment;
-use App\Claims\ClaimInvoice;
+use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimRemit;
 use App\Client;
 use App\ClientContact;
@@ -164,7 +164,7 @@ class ClearSensitiveData extends Command
             $this->scrubModel(SmsThread::class);
             $this->scrubModel(SmsThreadReply::class);
             $this->scrubModel(SmsThreadRecipient::class);
-            $this->scrubModel(ClaimInvoice::class);
+            $this->scrubModel(ClaimInvoiceItem::class);
             $this->scrubModel(ClaimableService::class);
             $this->scrubModel(ClaimableExpense::class);
             $this->scrubModel(ClaimRemit::class);
@@ -380,7 +380,7 @@ class ClearSensitiveData extends Command
 
     public function cleanEncryptedClaimsData()
     {
-        $query = ClaimableService::whereNotNull('caregiver_ssn');
+        $query = ClaimInvoiceItem::whereNotNull('caregiver_ssn');
 
         $this->startProgress(
             'Cleaning encrypted claims data...',
@@ -398,7 +398,7 @@ class ClearSensitiveData extends Command
 
         $query->chunk(400, function ($collection) {
             \DB::beginTransaction();
-            $collection->each(function (ClaimableService $item) {
+            $collection->each(function (ClaimInvoiceItem $item) {
                 $item->update([
                     'caregiver_ssn' => $this->faker->ssn,
                 ]);

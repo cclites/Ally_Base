@@ -46,7 +46,7 @@
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
-        <i class="fa fa-building-o" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Billing</span>
+        <i class="fa fa-file-text" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Claims</span>
     </a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.payers.index') }}">Payers</a></li>
@@ -54,34 +54,17 @@
         @if(activeBusiness()->use_rate_codes)
             <li><a href="{{ route('business.rate-codes.index') }}">Rate Codes</a></li>
         @endif
-        <li><a href="{{ route('business.claims-ar') }}">Claims & AR</a></li>
-        <li><a href="{{ route('business.offline-invoice-ar') }}">Offline Invoice AR</a></li>
-        <li><a href="{{ route('business.quickbooks-queue') }}">Quickbooks Queue</a></li>
-        {{-- <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li> --}}
-        {{-- <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li> --}}
-        {{-- @if(app()->environment() === 'demo') --}}
-            {{-- <li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li> --}}
-        {{-- @endif --}}
-    </ul>
-</li>
-@if(
-// ONLY SHOW NEW CLAIMS FOR ADMINS, VIP, AND DEMO BUSINESS
-    (auth()->user()->role_type == 'office_user' && in_array(auth()->user()->role->chain_id, [1, 51]))
-    || auth()->user()->role_type == 'admin'
-)
-<li>
-    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
-        <i class="fa fa-file-text" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Claims</span>
-    </a>
-    <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('business.claims-queue') }}">Claims Queue</a></li>
+
+        <li><a href="{{ route('business.claims-create') }}">Create Claims</a></li>
+        <li><a href="{{ route('business.claims-manager') }}">Manage Claims</a></li>
         <li><a href="{{ route('business.claim-remits.index') }}">Remits</a></li>
         <li><a href="{{ route('business.reports.claims.ar-aging') }}">AR Aging Report</a></li>
         <li><a href="{{ route('business.reports.claims.transmissions') }}">Transmissions Report</a></li>
         <li><a href="{{ route('business.reports.claims.remit-application') }}">Remit Application Report</a></li>
+        <li><a href="{{ route('business.offline-invoice-ar') }}">Offline Invoice AR</a></li>
+        <li><a href="{{ route('business.quickbooks-queue') }}">Quickbooks Queue</a></li>
     </ul>
 </li>
-@endif
 
 @if ( Gate::allows( 'view-reports' ) )
 <li>

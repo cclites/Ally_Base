@@ -46,13 +46,13 @@ class TellusValidationException extends \Exception
                         break;
                 }
 
-            }
+                if ($errors->where('field', '=', $error['field'])
+                    ->where('error', '=', $error['error'])
+                    ->count() > 0
+                ) {
+                    return;
+                }
 
-            if ($errors->where('field', '=', $error['field'])
-                ->where('error', '=', $error['error'])
-                ->count() > 0
-            ) {
-                return;
             }
 
             $errors->push($error);

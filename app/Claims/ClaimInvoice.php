@@ -2,7 +2,8 @@
 
 namespace App\Claims;
 
-use App\Billing\ClientPayer;
+use App\ClaimInvoiceTellusFile;
+use App\Claims\Contracts\TransmissionFileInterface;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Transmitters\HhaClaimTransmitter;
 use App\Claims\Transmitters\ManualClaimTransmitter;
@@ -10,17 +11,15 @@ use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Claims\Transmitters\TellusClaimTransmitter;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use Illuminate\Support\Collection;
 use App\Billing\ClientInvoice;
 use App\Billing\ClaimService;
 use App\Billing\ClaimStatus;
 use App\AuditableModel;
 use App\Billing\Payer;
-use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use App\Business;
 use App\Client;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Claims\ClaimInvoice
@@ -77,6 +76,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     protected $guarded = ['id'];
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['modified_at'];
+
+    /**
      * The relations to eager load on every query.
      *
      * @var array
@@ -116,13 +122,13 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
-     * Get the ClientInvoice relationship.
+     * Get the client invoices relationship.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function clientInvoice()
+    public function clientInvoices()
     {
-        return $this->belongsTo(ClientInvoice::class);
+        return $this->belongsToMany(ClientInvoice::class);
     }
 
     /**
@@ -179,10 +185,20 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the HhaFiles relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
+     */
     public function hhaFiles()
     {
         return $this->hasMany(ClaimInvoiceHhaFile::class, 'claim_invoice_id', 'id');
+    }
+
+    /**
+     * Get the TellusFiles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tellusFiles()
+    {
+        return $this->hasMany(ClaimInvoiceTellusFile::class, 'claim_invoice_id', 'id');
     }
 
     // **********************************************************
@@ -264,7 +280,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasBeenTransmitted(): bool
     {
-        return ! in_array($this->status, ClaimStatus::notTransmittedStatuses());
+        return !in_array($this->status, ClaimStatus::notTransmittedStatuses());
     }
 
     /**
@@ -285,7 +301,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      */
     public function hasAmountMismatch(): bool
     {
-        return $this->amount != $this->clientInvoice->amount;
+        return $this->amount != $this->getTotalInvoicedAmount();
     }
 
     /**
@@ -296,38 +312,22 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     public function getHasExpenses(): bool
     {
         return $this->items->filter(function ($item) {
-            /** @var ClaimInvoiceItem $item */
-            return $item->claimable_type == ClaimableExpense::class;
-        })->count() > 0;
+                /** @var ClaimInvoiceItem $item */
+                return $item->claimable_type == ClaimableExpense::class;
+            })->count() > 0;
     }
-
-    /**
-     * Get the ClientPayer record from the current
-     * client/payer combo.
-     *
-     * WARNING: This has the potential to return null if the
-     * Client's payer list has been modified to remove this payer.
-     *
-     * @return ClientPayer
-     */
-    public function getClientPayer() : ?ClientPayer
-    {
-        return $this->client->payers()
-            ->where('payer_id', $this->payer_id)
-            ->first();
-    }
-
 
     /**
      * Get the total number of hours on the client invoice by
      * adding all the 'units' for shift related items.
      *
+     * @param int|null $clientInvoiceId
      * @return float
      */
-    public function getTotalHours() : float
+    public function getTotalHours(?int $clientInvoiceId = null): float
     {
-        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
-            if ($item->claimable_type == ClaimableService::class) {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId && $item->claimable_type == ClaimableService::class) {
                 return add($carry, floatval($item->units));
             }
 
@@ -340,12 +340,31 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      * Get the total number of 'hourly' charges on the invoice by
      * adding the amounts for shift related items.
      *
+     * @param int|null $clientInvoiceId
      * @return float
      */
-    public function getTotalHourlyCharges() : float
+    public function getTotalHourlyCharges(?int $clientInvoiceId = null): float
     {
-        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) {
-            if ($item->claimable_type == ClaimableService::class) {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId && $item->claimable_type == ClaimableService::class) {
+                return add($carry, floatval($item->amount));
+            }
+
+            return $carry;
+
+        }, floatval(0.00));
+    }
+
+    /**
+     * Get the total amount of the claim.
+     *
+     * @param int $clientInvoiceId
+     * @return float
+     */
+    public function getAmountForInvoice(int $clientInvoiceId): float
+    {
+        return $this->items->reduce(function (float $carry, ClaimInvoiceItem $item) use ($clientInvoiceId) {
+            if ($item->client_invoice_id == $clientInvoiceId) {
                 return add($carry, floatval($item->amount));
             }
 
@@ -361,7 +380,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
      *
      * @return string
      */
-    public function getDateSpan() : string
+    public function getDateSpan(): string
     {
         if (empty($this->items)) {
             return [null, null];
@@ -373,6 +392,157 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             optional(optional($ordered->last())->date)->format('m/d/Y');
     }
 
+    /**
+     * Get the related client model for the claim invoice
+     * if the claim does not represent multiple Clients.
+     *
+     * @return Client|null
+     */
+    public function getSingleClient(): ?Client
+    {
+        if ($this->clientInvoices->unique('client_id')->values()->count() == 1) {
+            return optional($this->clientInvoices[0])->client;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the total amount of all the attached client invoices.
+     *
+     * @return float
+     */
+    public function getTotalInvoicedAmount(): float
+    {
+        return floatval($this->clientInvoices->sum('amount'));
+    }
+
+    /**
+     * Check whether or not the claim has multiple client invoices attached.
+     *
+     * @return bool
+     */
+    public function hasMultipleInvoices(): bool
+    {
+        return $this->clientInvoices->count() > 1;
+    }
+
+    /**
+     * Attempt to get a single value for the client medicaid id
+     * from the first service on the claim has that one filled out.
+     *
+     * @return string|null
+     */
+    public function getClientMedicaidId(): ?string
+    {
+        return $this->items->map(function ($item) {
+            return $item->client_medicaid_id;
+        })
+            ->filter()
+            ->first();
+    }
+
+    /**
+     * Get first instance of a the given field from the items.
+     *
+     * @param string $field
+     * @return string|null
+     */
+    public function getFirstItemData(string $field): ?string
+    {
+        return $this->items->map(function ($item) use ($field) {
+            return $item->$field;
+        })
+            ->filter()
+            ->first();
+    }
+
+    /**
+     * Get the extra data that should be printed on claim invoices.
+     *
+     * @return array
+     */
+    public function getInvoiceClientData(): array
+    {
+        if ($this->claim_invoice_type == ClaimInvoiceType::PAYER()) {
+            return [];
+        }
+
+        $data = collect([]);
+
+        if ($value = $this->getFirstItemData('client_dob')) {
+            $data->push('DOB: ' . Carbon::parse($value)->format('m/d/Y'));
+        }
+
+        if ($value = $this->getFirstItemData('client_ltci_claim_number')) {
+            $data->push("Claim #: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_ltci_policy_number')) {
+            $data->push("Policy Number #: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_hic')) {
+            $data->push("HIC: $value");
+        }
+
+        return $data->toArray();
+    }
+
+    /**
+     * Get the extra data that should be printed on claim invoices.
+     *
+     * @return array
+     */
+    public function getInvoiceNotesData(): array
+    {
+        if ($this->claim_invoice_type == ClaimInvoiceType::PAYER()) {
+            return [];
+        }
+
+        $data = collect([]);
+
+        if ($value = $this->getFirstItemData('client_invoice_notes')) {
+            $data->push($value);
+        }
+
+        if ($value = $this->getFirstItemData('client_cirts_number')) {
+            $data->push("CIRTS ID:: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_program_number')) {
+            $data->push("Program ID: $value");
+        }
+
+        return $data->toArray();
+    }
+
+    /**
+     * Get the file record of the last claim transmission, along with
+     * it's results.
+     *
+     * @return TransmissionFileInterface|null
+     */
+    public function getLatestTransmissionFile() : ?TransmissionFileInterface
+    {
+        switch ($this->transmission_method) {
+            case ClaimService::TELLUS():
+                return $this->tellusFiles()
+                    ->with('results')
+                    ->latest()
+                    ->first();
+
+            case ClaimService::HHA():
+                return $this->hhaFiles()
+                    ->with('results')
+                    ->latest()
+                    ->first();
+
+            default:
+                return null;
+        }
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -380,128 +550,6 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************
-
-    /**
-     * Filter by payer_id (optional).
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param null|int|string $payerId
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForPayer($query, $payerId = null)
-    {
-        if (is_null($payerId)) {
-            return $query;
-        }
-
-        return $query->where('payer_id', $payerId);
-    }
-
-    /**
-     * Filter by client_id (optional).
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param null|int|string $clientId
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForClient($query, $clientId = null)
-    {
-        if (empty($clientId)) {
-            return $query;
-        }
-
-        return $query->where('client_id', $clientId);
-    }
-
-    /**
-     * Filter by client invoiced at between the given date range.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param \Carbon\Carbon $start
-     * @param \Carbon\Carbon $end
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeWhereInvoicedBetween($query, $start, $end)
-    {
-        return $query->whereHas('clientInvoice', function ($q) use ($start, $end) {
-            return $q->whereBetween('created_at', [$start, $end]);
-        });
-    }
-
-    /**
-     * Filter by dates of service between the given date range.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param \Carbon\Carbon $start
-     * @param \Carbon\Carbon $end
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeWhereDatesOfServiceBetween($query, $start, $end)
-    {
-        return $query->whereHas('items', function ($q) use ($start, $end) {
-            return $q->whereBetween('date', [$start, $end]);
-        });
-    }
-
-    /**
-     * Filter to only Claims that have a balance.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeHasBalance($query)
-    {
-        return $query->where('amount_due', '<>', '0');
-    }
-
-    /**
-     * Filter claims by client type.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForClientType($query, $clientType)
-    {
-        if (empty($clientType)) {
-            return $query;
-        }
-
-        return $query->whereHas('client', function ($q) use ($clientType) {
-            $q->where('client_type', $clientType);
-        });
-    }
-
-    /**
-     * Filter claims by active users.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForActiveClientsOnly($query)
-    {
-        return $query->whereHas('client', function ($q) {
-            $q->active();
-        });
-    }
-
-    /**
-     * Search claims for the matching client invoice ID or Name.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param $invoiceIdOrName
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeSearchForInvoiceId($query, $invoiceIdOrName)
-    {
-        if (empty($invoiceIdOrName)) {
-            return $query;
-        }
-
-        return $query->whereHas('clientInvoice', function ($q) use ($invoiceIdOrName) {
-            $q->where('id', $invoiceIdOrName)
-                ->orWhere('name', $invoiceIdOrName);
-        });
-    }
 
     // **********************************************************
     // OTHER FUNCTIONS
@@ -591,6 +639,16 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
     }
 
+    /**
+     * Get the ClaimInvoiceType.
+     *
+     * @return ClaimInvoiceType
+     */
+    public function getType(): ClaimInvoiceType
+    {
+        return ClaimInvoiceType::fromValue($this->claim_invoice_type);
+    }
+
     // **********************************************************
     // STATIC METHODS
     // **********************************************************
@@ -609,7 +667,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             ->value('name');
 
         $minId = 1000;
-        if (! $lastName) {
+        if (!$lastName) {
             $nextId = $minId;
         } else {
             $nextId = (int)substr($lastName, strpos($lastName, '-') + 1) + 1;
@@ -620,27 +678,5 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
         }
 
         return "${businessId}-${nextId}";
-    }
-
-    // **********************************************************
-    // ScrubsForSeeding Methods
-    // **********************************************************
-    use ScrubsForSeeding;
-
-    /**
-     * Get an array of scrubbed data to replace the original.
-     *
-     * @param \Faker\Generator $faker
-     * @param bool $fast
-     * @param null|Model $item
-     * @return array
-     */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
-    {
-        return [
-            'client_last_name' => $faker->lastName,
-            'client_dob' => $faker->date('Y-m-d', '-30 years'),
-            'client_medicaid_id' => $faker->randomNumber(8),
-        ];
     }
 }

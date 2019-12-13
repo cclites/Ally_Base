@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Business;
 
 use App\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class PaginatedCaregiverController extends BaseController
 {
     /**
      * Get a list of caregivers using pagination.
+     * 
+     * Also used by the Avery Label Table for displaying paginated Caregivers!! make sure to ensure that still works if you change this.
      *
      * @param Request $request
      * @return \Illuminate\Http\Response
@@ -17,12 +20,14 @@ class PaginatedCaregiverController extends BaseController
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('perpage', 20);
+        $perPage = $request->input('perPage', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort', 'lastname');
         $sortOrder = $request->input('desc', false) == 'true' ? 'desc' : 'asc';
         $offset = ($page - 1) * $perPage;
         $search = $request->input('search', null);
+
+        $daysSinceShift = $request->input('daysPassed', null);
 
         $query = User::with('caregiver',
             'caregiver.businesses',
@@ -51,6 +56,17 @@ class PaginatedCaregiverController extends BaseController
                     ->orWhere('users.lastname', 'LIKE', "%$search%");
             });
 
+        }
+
+        if ( filled($daysSinceShift) ) {
+
+            $now = Carbon::now();
+            $daysAgo = Carbon::now()->subdays( $daysSinceShift );
+
+            $query->whereHas( 'caregiver.shifts', function( $q ) use( $now, $daysAgo ){
+
+                $q->whereBetween( 'checked_in_time', [ $daysAgo, $now ] );
+            });
         }
 
         // Default to active only, unless active is provided in the query string

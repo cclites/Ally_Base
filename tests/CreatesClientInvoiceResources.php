@@ -8,6 +8,7 @@ use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Payments\Methods\CreditCard;
+use App\Client;
 use App\Shift;
 
 /**
@@ -51,8 +52,12 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null): ClientPayer
+    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31', $payerId = null, Client $client = null): ClientPayer
     {
+        if (empty($client)) {
+            $client = $this->client;
+        }
+
         if ($payerId === null) {
             $payer = factory(Payer::class)->create();
             $payerId = $payer->id;
@@ -64,7 +69,7 @@ trait CreatesClientInvoiceResources
             'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
         ]);
 
-        $this->client->payers()->save($clientPayer);
+        $client->payers()->save($clientPayer);
         return $clientPayer;
     }
 
@@ -80,10 +85,10 @@ trait CreatesClientInvoiceResources
     }
 
 
-    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
+    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null, Client $overrideClient = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
-            'client_id' => $this->client->id,
+            'client_id' => $overrideClient ? $overrideClient->id : $this->client->id,
             'payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',

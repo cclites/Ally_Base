@@ -247,6 +247,7 @@ Vue.component('caregiver-directory', require('./components/business/reports/Care
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 Vue.component('user-birthday-report', require('./components/business/reports/UserBirthday'));
 Vue.component('caregiver-anniversary-report', require('./components/business/reports/CaregiverAnniversary'));
+Vue.component('avery-labels-report', require('./components/business/reports/AveryLabels'));
 Vue.component('report-column-picker', require('./components/business/reports/ReportColumnPicker'));
 Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));
@@ -409,7 +410,8 @@ Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'))
 Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
 /* Claims */
-Vue.component('business-claims-queue', require('./components/business/claims/ClaimsQueue'));
+Vue.component('business-manage-claims-page', require('./components/business/claims/ManageClaimsPage'));
+Vue.component('business-create-claims-page', require('./components/business/claims/CreateClaimsPage'));
 Vue.component('claim-editor', require('./components/business/claims/ClaimEditor'));
 Vue.component('claim-remits', require('./components/business/claims/ClaimRemits'));
 Vue.component('apply-remit-page', require('./components/business/claims/ApplyRemit'));

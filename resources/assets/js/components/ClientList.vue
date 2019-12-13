@@ -4,9 +4,6 @@
             <b-col sm="6" class="my-1">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
             </b-col>
-            <b-col sm="6" class="my-1 d-sm-flex d-block justify-content-end">
-                <b-link href="#" @click=" averyModal = true " class="btn btn-info">Avery 5160 PDF</b-link>
-            </b-col>
         </b-row>
         <b-row class="mb-2">
             <b-col lg="12">
@@ -70,7 +67,6 @@
                 </b-col>
             </b-row>
 
-            <avery-modal v-model=" averyModal " :callback=" averyLabels "></avery-modal>
     </b-card>
 </template>
 
@@ -151,9 +147,7 @@
                 loading: false,
                 statuses: {caregiver: [], client: []},
                 localStoragePrefix: 'client_list_',
-                paginatedEndpoint : '/business/clients/paginate?json=1',
-                averyEndpoint : '/business/clients/avery-labels?userType=client',
-                averyModal : false,
+                paginatedEndpoint : '/business/clients/paginate?json=1'
             }
         },
 
@@ -174,7 +168,7 @@
 
             listFilters() {
 
-                // &page=${ctx.currentPage}&perpage=${ctx.perPage}&sort=${sort}
+                // &page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}
 
                 let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
@@ -224,11 +218,6 @@
 
         methods: {
 
-
-            averyLabels(){
-
-                window.open( this.averyEndpoint + this.listFilters );
-            },
             async loadClients() {
 
                 this.loading = true;
@@ -236,10 +225,7 @@
                 axios.get( this.paginatedEndpoint + this.listFilters + this.paginationControls )
                     .then( res => {
 
-                        console.log( 'response: ', res );
                         this.totalRows = res.data[ 'total' ];
-
-                        console.log( 'total rows: ', this.totalRows );
 
                         this.clients = res.data[ 'clients' ].map( client => {
 

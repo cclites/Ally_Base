@@ -64,7 +64,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
 
     // I want to add this as an attachment, temporarily its own route for now.
-    Route::get( 'knowledge-base/tellus-guide', 'KnowledgeBaseController@tellusGuide' )->name( 'knowledge.tellus' );
+    Route::get('knowledge-base/tellus-guide', 'KnowledgeBaseController@tellusGuide')->name('knowledge.tellus');
 });
 
 Route::group([
@@ -205,6 +205,7 @@ Route::group([
     Route::put('caregivers/{caregiver}/skills', 'Business\CaregiverController@skills')->name('caregivers.update_skills');
     Route::post('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
+    Route::get('caregivers/discharge-letter/{caregiver}', 'Business\CaregiverController@dischargeLetter');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::post('caregivers/{caregiver}/licenses/saveMany', 'Business\CaregiverLicenseController@saveMany')->name('caregivers.licenses.saveMany');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
@@ -229,6 +230,7 @@ Route::group([
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::get('clients/paginate', 'Business\PaginatedClientController@index');
     Route::get('clients/avery-labels', 'Business\AveryLabelController@index');
+    Route::get('clients/discharge-letter/{client}', 'Business\ClientController@dischargeLetter');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
@@ -303,6 +305,7 @@ Route::group([
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
     Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
+    Route::get('reports/avery-labels', 'Business\ReportsController@averyLabels')->name('reports.avery_labels');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\Report\BusinessCaregiverOvertimeReportController@index')->name('reports.overtime');
@@ -377,7 +380,6 @@ Route::group([
     Route::get('reports/disaster-plan-report', 'Business\Report\BusinessDisasterPlanReportController@index')->name('reports.disaster-plan');
     Route::get('reports/medicaid-billing', 'Business\Report\BusinessMedicaidBillingReportController@index')->name('reports.medicaid-billing');
     Route::get('reports/offline-ar-aging', 'Business\Report\BusinessOfflineArAgingReportController@index')->name('reports.offline-ar-aging');
-    Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
     Route::get('reports/account-setup', 'Business\Report\BusinessAccountSetupReportController@index')->name('reports.account-setup');
     Route::get('reports/client-account-setup', 'Business\Report\BusinessAccountSetupReportController@client')->name('reports.client-account-setup');
     Route::get('reports/service-auth-ending', 'Business\Report\BusinessServiceAuthEndingReport@index')->name('reports.service-auth-ending');
@@ -499,15 +501,19 @@ Route::group([
     Route::resource('payers', 'Business\PayerController');
 
     /* Claims & AR */
-    Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
-    Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
-    Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
-    Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
-    Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
-    Route::get('claims-ar/hha-results/{claim}', 'Business\ClaimsController@hhaResults')->name('claims-ar.hha-results');
+    // Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
+    // Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
+    // Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
+    // Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
+    // Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
+    // Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
+    // Route::get('claims-ar/claim-results/{claim}/{service}', 'Business\ClaimsController@claimResults')->name('claims-ar.claim-results');
 
     /* New Claims & AR */
-    Route::get('claims-queue', 'Business\Claims\ClaimsQueueController@index')->name('claims-queue');
+    Route::post('grouped-claims', 'Business\Claims\GroupedClaimsController@store')->name('claims-create-grouped');
+    Route::get('claims-create', 'Business\Claims\CreateClaimsController@index')->name('claims-create');
+//    Route::get('claims-manage', 'Business\Claims\ManageClaimsController@index')->name('claims-manage');
+    Route::get('claims-manager', 'Business\Claims\ManageClaimsController@index')->name('claims-manager');
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
     Route::get('claims/{claim}/print', 'Business\Claims\ClaimInvoiceController@print');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
@@ -591,8 +597,8 @@ Route::group([
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
     Route::get('deposits/import', 'Admin\DepositsController@import')->name('deposits.import');
-    Route::post('deposits/import', 'Admin\DepositsController@processImport')->name( 'deposits.process_import' );
-    Route::post('deposits/finalize-import', 'Admin\DepositsController@finalizeImport')->name( 'deposits.finalize_import' );
+    Route::post('deposits/import', 'Admin\DepositsController@processImport')->name('deposits.process_import');
+    Route::post('deposits/finalize-import', 'Admin\DepositsController@finalizeImport')->name('deposits.finalize_import');
     Route::post('deposits/deposit/{chain}', 'Admin\DepositsController@processDeposits')->name('deposits.deposit');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('deposits/{deposit}/{view?}', 'Admin\DepositsController@show')->name('deposits.show');
@@ -656,7 +662,6 @@ Route::group([
     Route::post('note-import/save', 'Admin\NoteImportController@store')->name('note-import.save');
     Route::post('note-import/map/client', 'Admin\NoteImportController@storeClientMapping')->name('note-import.map.client');
     Route::post('note-import/map/caregiver', 'Admin\NoteImportController@storeCaregiverMapping')->name('note-import.map.caregiver');
-
 
     // shift import
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');

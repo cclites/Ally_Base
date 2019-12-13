@@ -10,6 +10,11 @@ interface ContactableInterface
     function name(): string;
     function getAddress(): ?Address;
     function getPhoneNumber(): ?PhoneNumber;
-    function getHic(): ?string;
-    function getBirthdate(): ?string;
+
+    /**
+     * Get the extra data that should be printed on invoices.
+     *
+     * @return array
+     */
+    function getExtraInvoiceData(): array;
 }

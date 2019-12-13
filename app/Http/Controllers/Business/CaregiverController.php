@@ -31,6 +31,7 @@ use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Actions\CreateCaregiver;
 use App\Notifications\TrainingEmail;
 use App\Notifications\CaregiverWelcomeEmail;
+use App\Shift;
 use File;
 use DB;
 
@@ -289,10 +290,8 @@ class CaregiverController extends BaseController
         ];
 
         if ($caregiver->update($data)) {
+
             $caregiver->unassignFromFutureSchedules();
-            if (! $this->generateDeactivationPdf($caregiver)) {
-                return new ErrorResponse(500, 'Error archiving this caregiver: Generating the deactivation document failed.  Please try again.');
-            }
 
             \DB::commit();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
@@ -515,63 +514,26 @@ class CaregiverController extends BaseController
     }
 
     /**
-     * Generate a Caregiver doc with deactivation information.
-     *
-     * @param Caregiver $caregiver
-     * @return bool
+     * 
+     * generate a discharge letter for the caregiver resource ON THE FLY
      */
-    private function generateDeactivationPdf(Caregiver $caregiver) : bool
+    public function dischargeLetter( Caregiver $caregiver )
     {
-        $caregiver->load('deactivationReason');
-        $pdf = PDF::loadView('business.caregivers.deactivation_reason', ['caregiver' => $caregiver, 'deactivatedBy' => \Auth::user()->name]);
+        $caregiver->load( 'deactivationReason' );
 
-        $filePath = $this->generateUniqueDeactivationPdfFilename($caregiver);
-        try {
-            if ($pdf->save($filePath)) {
-                $caregiver->documents()->create([
-                    'filename' => File::basename($filePath),
-                    'original_filename' => File::basename($filePath),
-                    'description' => 'Caregiver Deactivation Document',
-                    'user_id' => $caregiver->id
-                ]);
+        $query = \DB::table('shifts')->where('caregiver_id', $caregiver->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
-                return true;
-            } else {
-                return false;
-            }
-        } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
-            return false;
-        }
-    }
+        $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [
 
-    /**
-     * Generate deactivation PDF file name.
-     *
-     * @param Caregiver $caregiver
-     * @return string
-     */
-    private function generateUniqueDeactivationPdfFilename(Caregiver $caregiver) : string
-    {
-        $dir = storage_path('app/documents/');
-        if (! File::exists($dir)) {
-            File::makeDirectory($dir, 493, true);
-        }
+            'caregiver'           => $caregiver,
+            'deactivatedBy'       => \Auth::user()->name,
+            'totalLifetimeHours'  => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
 
-        for ($i = 1; $i < 500; $i ++) {
-            $filename = str_slug($caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y'));
-
-            if ($i > 1) {
-                $filename .= "_$i";
-            }
-
-            $filename .= '.pdf';
-
-            if (! File::exists($dir . $filename)) {
-                break;
-            }
-        }
-
-        return $dir . $filename;
+        $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');
+        return $pdf->stream( $filePath . '.pdf' );
     }
 }

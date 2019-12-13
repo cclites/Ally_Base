@@ -26,12 +26,7 @@ class UpdateClaimInvoiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'client_first_name' => 'required',
-            'client_last_name' => 'required',
             'payer_code' => 'nullable',
-            'client_medicaid_id' => 'nullable',
-            'client_dob' => 'nullable|date',
-            'client_medicaid_diagnosis_codes' => 'nullable',
             'plan_code' => 'nullable',
             'transmission_method' => ['nullable', new ValidEnum(ClaimService::class)],
         ];
@@ -45,9 +40,7 @@ class UpdateClaimInvoiceRequest extends FormRequest
     public function filtered()
     {
         $data = $this->validated();
-        if ($data['client_dob']) {
-            $data['client_dob'] = filter_date($data['client_dob']);
-        }
+
         return $data;
     }
 }

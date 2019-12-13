@@ -11,9 +11,31 @@
             2) Select ACTUAL SIZE
         </div>
 
-        <div class="avery-image-container">
+        <div class="my-4 d-flex">
 
-            <img src="/images/avery_help.jpg" />
+            <div class="f-1 avery-image-container mx-auto">
+
+                <img src="/images/avery_help.jpg" />
+            </div>
+            <div class="f-1 px-3">
+
+                <b-form-group label="Top Margin" label-for="topmargin" description="Default is 55px, negative values allowed, too much will push labels onto next page" >
+                    <b-form-input
+                        id="topmargin"
+                        type="number"
+                        v-model="topmargin"
+                    >
+                    </b-form-input>
+                </b-form-group>
+                <b-form-group label="Left Margin" label-for="leftmargn" description="Default is 0px, negative values allowed, too much will distort alignment" >
+                    <b-form-input
+                        id="leftmargn"
+                        type="number"
+                        v-model="leftmargin"
+                    >
+                    </b-form-input>
+                </b-form-group>
+            </div>
         </div>
         <hr/>
 
@@ -93,6 +115,8 @@ export default {
 
         cancelCallback: null,
         noCallback: null,
+        topmargin: 55,
+        leftmargin: 0
     }),
 
     computed: {
@@ -130,7 +154,14 @@ export default {
         onYes() {
             this.show = false;
             if (this.callback) {
-                this.callback();
+
+                const data = {
+
+                    topmargin: this.topmargin,
+                    leftmargin: this.leftmargin
+                };
+
+                this.callback( data );
             }
         },
 
@@ -150,7 +181,6 @@ export default {
 
     .avery-image-container {
 
-        margin: 25px auto;
         height: 450px;
         width: 450px;
     }

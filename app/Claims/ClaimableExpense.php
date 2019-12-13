@@ -3,11 +3,10 @@
 namespace App\Claims;
 
 use App\Claims\Contracts\ClaimableInterface;
-use App\AuditableModel;
-use App\Shift;
-use App\Traits\ScrubsForSeeding;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\AuditableModel;
+use Carbon\Carbon;
+use App\Shift;
 
 /**
  * App\Claims\ClaimableExpense
@@ -57,6 +56,11 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // RELATIONSHIPS
     // **********************************************************
 
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function shift()
     {
         return $this->belongsTo(Shift::class);
@@ -79,6 +83,16 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
 
     /**
+     * Get the display name of the Claimable Item.
+     *
+     * @return string
+     */
+    public function getDisplayName(): string
+    {
+        return $this->getName();
+    }
+
+    /**
      * Get the name of the Claimable Item.
      *
      * @return string
@@ -86,20 +100,6 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     public function getName(): string
     {
         return $this->name;
-    }
-
-    /**
-     * Get the Caregiver's name that performed the service.
-     *
-     * @return string
-     */
-    public function getCaregiverName(): string
-    {
-        if (empty($this->caregiver_first_name) && empty($this->caregiver_last_name)) {
-            return '';
-        }
-
-        return $this->caregiver_last_name . ', ' . $this->caregiver_first_name;
     }
 
     /**
@@ -125,7 +125,19 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
-    use ScrubsForSeeding;
+    use \App\Traits\ScrubsForSeeding {
+        getScrubQuery as parentGetScrubQuery;
+    }
+
+    /**
+     * Get the query used to identify records that will be scrubbed.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function getScrubQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return static::parentGetScrubQuery()->whereNotNull('notes');
+    }
 
     /**
      * Get an array of scrubbed data to replace the original.
@@ -135,10 +147,9 @@ class ClaimableExpense extends AuditableModel implements ClaimableInterface
      * @param null|Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
-            'caregiver_last_name' => $faker->lastName,
             'notes' => $faker->sentence,
         ];
     }

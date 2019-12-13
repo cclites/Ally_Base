@@ -1,6 +1,6 @@
 @extends('layouts.print')
 
-@section('title', 'Payment Details - Print')
+@section('title', 'Deactivation Summary')
 
 @push('head')
     <style>
@@ -22,13 +22,17 @@
 
     <div>
         <div class="row">
-            <strong>Deactivation Reason:</strong> {{ $caregiver->deactivationReason["name"] }}
+            <strong>Deactivation Reason:</strong> {{ $caregiver->deactivationReason["name"] ?? 'unspecified' }}
                 <br>
-            <strong>Deactivation Note:</strong> {{ $caregiver->deactivation_note }}
+            <strong>Deactivation Note:</strong> {{ $caregiver->deactivation_note ?? 'n/a' }}
                 <br>
-            <strong>Date: </strong> {{ $caregiver->in_active_at->format('m-d-Y') }}
+            <strong>Date: </strong> {{ \Carbon\Carbon::parse( $caregiver->in_active_at )->format('m-d-Y') }}
                 <br>
-            <strong>By:</strong>  {{ $deactivatedBy }}
+            <strong>By:</strong>  {{ $deactivatedBy ?? 'n/a' }}
+                <br>
+            <strong>Total Lifetime Hours:</strong> {{ $totalLifetimeHours }}
+                <br>
+            <strong>Total Lifetime Shifts:</strong> {{ $totalLifetimeShifts }}
                 <br>
         </div>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
@@ -29,10 +30,10 @@ class AveryLabelController extends BaseController
 
             $query->where( function ( $q ) use ( $search ) {
 
-                $q->where( 'users.email', 'LIKE', "%$search%")
-                    ->orWhere('users.id', 'LIKE', "%$search%")
-                    ->orWhere('users.firstname', 'LIKE', "%$search%")
-                    ->orWhere('users.lastname', 'LIKE', "%$search%");
+                $q->where( 'users.email', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.id', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.firstname', 'LIKE', "%$search%" )
+                    ->orWhere( 'users.lastname', 'LIKE', "%$search%" );
             });
         }
 
@@ -55,7 +56,7 @@ class AveryLabelController extends BaseController
 
         if ( $request->input( 'active', 1 ) !== null ) {
 
-            $query->where('active', $request->input( 'active', 1 ) );
+            $query->where( 'active', $request->input( 'active', 1 ) );
         }
 
         if( $status = $request->input( 'status' ) ) {
@@ -63,16 +64,29 @@ class AveryLabelController extends BaseController
             $query->where( 'status_alias_id', $status );
         }
 
-        $users = array_chunk( $query->get()->map( function( $u ) use ( $entity ){
+        $daysSinceShift = $request->input( 'daysPassed', null );
+
+        if ( $daysSinceShift !== null || $daysSinceShift !== 0 ) {
+
+            $now = Carbon::now();
+            $daysAgo = Carbon::now()->subdays( $daysSinceShift );
+
+            $query->whereHas( "$entity.shifts", function( $q ) use( $now, $daysAgo ){
+
+                $q->whereBetween( 'checked_in_time', [ $daysAgo, $now ] );
+            });
+        }
+
+        $pages = array_chunk( array_chunk( $query->get()->map( function( $u ) use ( $entity ){
 
             return [
 
                 'name'    => $u->name,
                 'address' => $u->$entity->address
             ];
-        })->toArray(), 3 );
+        })->toArray(), 3 ), 10 );
 
-        $pdf = PDF::loadView( 'avery-labels', compact( 'users' ) );
-        return $pdf->download( 'avery-labels.pdf' );
+        $pdf = PDF::loadView( 'avery-labels', [ 'pages' => $pages, 'leftmargin' => $request->input( 'leftmargin' ), 'topmargin' => $request->input( 'topmargin' ) ] );
+        return $pdf->stream( 'avery-labels.pdf' );
     }
 }

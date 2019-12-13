@@ -30,6 +30,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
+use App\Shift;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Facades\File;
 
 class ClientController extends BaseController
 {
@@ -332,9 +335,14 @@ class ClientController extends BaseController
             $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
         }
 
-        $data['status_alias_id'] = null;
-        if ($client->update($data)) {
+        \DB::beginTransaction();
+
+        $data[ 'status_alias_id' ] = null;
+        if ( $client->update( $data ) ) {
+
             $client->clearFutureSchedules();
+
+            \DB::commit();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
         return new ErrorResponse(500, 'Could not archive the selected client.');
@@ -526,5 +534,29 @@ class ClientController extends BaseController
         $client->user->syncNotificationPreferences($request->validated());
 
         return new SuccessResponse('Client\'s notification preferences have been saved.');
+    }
+
+    /**
+     * 
+     * generate a discharge letter for the client resource ON THE FLY
+     */
+    public function dischargeLetter( Client $client )
+    {
+        $client->load( 'deactivationReason' );
+
+        $query = \DB::table('shifts')->where('client_id', $client->id);
+        $totalLifetimeShifts = $query->count();
+        $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
+
+        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [
+
+            'client'              => $client,
+            'deactivatedBy'       => \Auth::user()->name,
+            'totalLifetimeHours'  => $totalLifetimeHours,
+            'totalLifetimeShifts' => $totalLifetimeShifts
+        ]);
+
+        $filePath = $client->id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' );
+        return $pdf->stream( $filePath . '.pdf' );
     }
 }

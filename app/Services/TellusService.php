@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Services;
 
-use App\Billing\Exceptions\ClaimTransmissionException;
-use DOMDocument;
+use App\Contracts\SFTPReaderWriterInterface;
+use App\ClaimInvoiceTellusFile;
 use SimpleXMLElement;
+use DOMDocument;
 
-class TellusApiException extends \Exception {}
+class TellusApiException extends \Exception{}
+class TellusSftpException extends \Exception{}
 
 /**
  * Tellus XML API v2.0 implementation.
@@ -49,15 +52,37 @@ class TellusService
     }
 
     /**
+     * Log in to the SFTP server.
+     *
+     * @return SFTPReaderWriterInterface|null
+     */
+    public function loginToSftp(): ?SFTPReaderWriterInterface
+    {
+        $sftp = app(SFTPReaderWriterInterface::class, [
+            'host' => config('services.tellus.sftp_host'),
+            'port' => config('services.tellus.sftp_port')
+        ]);
+
+        $key = new \phpseclib\Crypt\RSA();
+        $key->loadKey(file_get_contents(config('services.tellus.pem_path')));
+
+        if ($sftp->login($this->username, $key)) {
+            return $sftp;
+        }
+
+        return null;
+    }
+
+    /**
      * Submit an array of claim records through the
      * Tellus API service using an XML file.
      *
      * @param array $records
-     * @return bool
+     * @return string
      * @throws TellusApiException
      * @throws TellusValidationException
      */
-    public function submitClaim(array $records) : bool
+    public function submitClaim(array $records): string
     {
         $xml = $this->convertArrayToXML($records);
 
@@ -67,13 +92,6 @@ class TellusService
 
         list($httpCode, $response) = $this->sendXml($xml);
 
-        $xml = new SimpleXMLElement($response);
-        if (isset($xml->xsdValidation) && (string) $xml->xsdValidation == 'FAILED') {
-            \Log::error("Tellus API XML Error:\r\n$response");
-            // TODO: add some sort of databased log so we can see other users errors
-            throw new TellusValidationException('Claim file did not pass remote XML validation.');
-        }
-
         if ($httpCode === 401) {
             throw new TellusApiException('Invalid credentials or otherwise not authorized.');
         }
@@ -82,11 +100,20 @@ class TellusService
             throw new TellusApiException("Unexpected response code from Tellus, code: $httpCode.  Please try again.");
         }
 
-        if (! str_contains($response, 'Successfully submitted for processing')) {
+        \Log::info($response);
+        $xml = new SimpleXMLElement($response);
+        if (isset($xml->xsdValidation) && (string)$xml->xsdValidation == 'FAILED') {
+            \Log::error("Tellus API XML Error:\r\n$response");
+            // TODO: add some sort of databased log so we can see other users errors
+            throw new TellusValidationException('Claim file did not pass remote XML validation.');
+        }
+
+        if (!str_contains($response, 'Successfully submitted for processing')) {
             throw new TellusApiException("Unexpected response from Tellus.  Please try again.");
         }
 
-        return true;
+        // any extra error checking? I think the above exception serves as a catch-all and guarantees that this field is populated
+        return $xml->batchId;
     }
 
     /**
@@ -96,7 +123,7 @@ class TellusService
      * @return array
      * @throws TellusApiException
      */
-    protected function sendXml(string $xml) : array
+    protected function sendXml(string $xml): array
     {
         try {
             $process = curl_init($this->endpoint);
@@ -108,7 +135,7 @@ class TellusService
             curl_setopt($process, CURLOPT_POSTFIELDS, $xml);
             curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
 
-            if (! ($result = curl_exec($process))) {
+            if (!($result = curl_exec($process))) {
                 throw new TellusApiException('Invalid response from Tellus API.');
             }
             $responseCode = curl_getinfo($process, CURLINFO_HTTP_CODE);
@@ -131,7 +158,7 @@ class TellusService
      * @return array|null
      * @throws TellusValidationException
      */
-    public function getValidationErrors(string $xml) : ?array
+    public function getValidationErrors(string $xml): ?array
     {
         try {
             $validator = new DomValidator;
@@ -176,11 +203,11 @@ class TellusService
      * @param array $records
      * @return \SimpleXMLElement
      */
-    protected function getSimpleXml(array $records) : SimpleXMLElement
+    protected function getSimpleXml(array $records): SimpleXMLElement
     {
         $xml = new SimpleXMLElement('<RenderedServices xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Rendered Service XML Sample Schema 20180712.xsd" />');
 
-        foreach($records as $record) {
+        foreach ($records as $record) {
             $this->mapRecordToXML($record, $xml);
         }
 
@@ -194,32 +221,29 @@ class TellusService
      * @param \SimpleXMLElement|null $parent
      * @return \SimpleXMLElement
      */
-    protected function mapRecordToXML(array $record, ?SimpleXMLElement $parent = null) : SimpleXMLElement
+    protected function mapRecordToXML(array $record, ?SimpleXMLElement $parent = null): SimpleXMLElement
     {
         if ($parent === null) {
             $service = new SimpleXMLElement('<RenderedService />');
-        }
-        else {
+        } else {
             $service = $parent->addChild('RenderedService');
         }
 
         $tasks = null;
 
-        foreach( $record as $key => $value ) {
+        foreach ($record as $key => $value) {
 
-            if( $key == 'Tasks' ){
+            if ($key == 'Tasks') {
 
-                $tasks = $service->addChild( $key );
-            }
-            else if( $key == 'Task' ){
+                $tasks = $service->addChild($key);
+            } else if ($key == 'Task') {
 
-                $child = $tasks->addChild( $key, $value[0] );
+                $child = $tasks->addChild($key, $value[0]);
                 $child->addAttribute('tc', $value[1]);
-            }
-            else if (is_array($value) && count($value) >= 2) {
+            } else if (is_array($value) && count($value) >= 2) {
                 // Handle adding tc="" attribute
 
-                $child = $service->addChild( $key, $value[0] );
+                $child = $service->addChild($key, $value[0]);
                 $child->addAttribute('tc', $value[1]);
             } else {
                 $service->addChild($key, $value);
@@ -230,11 +254,70 @@ class TellusService
     }
 
     /**
+     * Get the string results from a response xml file.
+     *
+     * @param string $filename
+     * @return array
+     * @throws TellusSftpException
+     */
+    public function getFileResult(string $filename): array
+    {
+        if (!$sftp = $this->loginToSftp()) {
+            throw new TellusSftpException('Could not connect to Tellus SFTP, please check the credentials.');
+        }
+
+        $acceptedFile = $this->getResultFilePath("{$filename}_ACCEPTED.XML");
+        if ($contents = $sftp->get($acceptedFile, false)) {
+            return [$contents, ClaimInvoiceTellusFile::STATUS_ACCEPTED];
+        }
+
+        $rejectedFile = $this->getResultFilePath("{$filename}_REJECTED.XML");
+        if ($contents = $sftp->get($rejectedFile, false)) {
+            return [$contents, ClaimInvoiceTellusFile::STATUS_REJECTED];
+        }
+
+        return [null, null];
+    }
+
+    /**
+     * Get absolute path of filename on the SFTP server using the
+     * config setting to for base directory.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function getResultFilePath(string $filename)
+    {
+        if (str_contains($this->endpoint, 'edi.stg.4tellus.net')) {
+            // using staging server - should check test directory
+            return $this->getSftpPath("local/outbound/test/{$filename}");
+        }
+
+        return $this->getSftpPath("local/outbound/{$filename}");
+    }
+
+    /**
+     * Get absolute path of filename on the SFTP server using the
+     * config setting to for base directory.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function getSftpPath(string $filename)
+    {
+        $root = str_replace('{username}', strtolower($this->username), config('services.tellus.sftp_directory'));
+
+        $root = ends_with($root, '/') ? $root : $root . '/';
+
+        return $root . $filename;
+    }
+
+    /**
      * Download remote resource files and store on public disk.
      *
      * @return bool
      */
-    public static function downloadApiResources() : bool
+    public static function downloadApiResources(): bool
     {
         $dictionary = download_file(
             config('services.tellus.dictionary_file'),

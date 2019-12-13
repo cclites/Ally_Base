@@ -3,7 +3,6 @@
 namespace App\Claims\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
-use Carbon\Carbon;
 
 class ClaimableServiceResource extends Resource
 {
@@ -29,13 +28,6 @@ class ClaimableServiceResource extends Resource
 
         return [
             'shift_id' => $this->resource->shift_id,
-            'caregiver_id' => $this->resource->caregiver_id,
-            'caregiver_first_name' => $this->resource->caregiver_first_name,
-            'caregiver_last_name' => $this->resource->caregiver_last_name,
-            'caregiver_gender' => $this->resource->caregiver_gender,
-            'caregiver_dob' => Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y'),
-            'caregiver_ssn' => filled($this->resource->caregiver_ssn) ? '***-**-****' : '',
-            'caregiver_medicaid_id' => $this->resource->caregiver_medicaid_id,
 
             'address1' => $this->resource->address1,
             'address2' => $this->resource->address2,
@@ -69,6 +61,11 @@ class ClaimableServiceResource extends Resource
             'shift_end_time' => $this->resource->scheduled_end_time->setTimezone($timezone)->format('H:i'),
             'service_start_date' => $this->resource->visit_start_time->setTimezone($timezone)->format('m/d/Y'),
             'service_start_time' => $this->resource->visit_start_time->setTimezone($timezone)->format('H:i'),
+
+            // New service items added 12/2019:
+            'client_signature_id' => $this->resource->client_signature_id,
+            'caregiver_signature_id' => $this->resource->caregiver_signature_id,
+            'is_overtime' => $this->resource->is_overtime,
         ];
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Claims\Requests;
 
+use Illuminate\Foundation\Http\FormRequest;
 use App\Claims\ClaimAdjustmentType;
 use App\Rules\ValidEnum;
-use Illuminate\Foundation\Http\FormRequest;
 
 class CreateClaimRemitAdjustmentRequest extends FormRequest
 {

@@ -10,17 +10,30 @@
                         <td><strong>Claim #</strong></td>
                         <td><a :href="`/business/claims/${claim.id}/print`" target="_blank">{{ claim.name }}</a></td>
                         <td><strong>Related Invoice</strong></td>
-                        <td><a :href="`/business/client/invoices/${claim.client_invoice_id}`" target="_blank">#{{ claim.client_invoice.name }}</a></td>
+                        <td>
+                            <div v-for="invoice in claim.invoices" key="invoice.id">
+                                <label>
+                                    <a :href="`/business/client/invoices/${invoice.id}`" target="_blank">
+                                        #{{ invoice.name }}
+                                    </a>
+                                </label>
+                            </div>
+<!--                            <a :href="`/business/client/invoices/${claim.client_invoice_id}`" target="_blank">#{{ claim.client_invoice.name }}</a>-->
+                        </td>
                     </tr><tr>
                         <td><strong>Client</strong></td>
-                        <td><a :href="`/business/clients/${claim.client_id}`" target="_blank">{{ claim.client.name }}</a></td>
+                        <td>
+                            <label v-if="claim.client_name == ''">(Grouped)</label>
+                            <label v-else><a :href="`/business/clients/${claim.client_id}`" target="_blank">{{ claim.client_name }}</a></label>
+<!--                            <a :href="`/business/clients/${claim.client_id}`" target="_blank">{{ claim.client.name }}</a>-->
+                        </td>
                         <td><strong>Payer</strong></td>
                         <td>{{ claim.payer.name }}</td>
                     </tr><tr>
                         <td><strong>Status</strong></td>
                         <td>{{ snakeToTitleCase(claim.status) }}</td>
-                        <td><strong></strong></td>
-                        <td></td>
+                        <td><strong>Claim Type</strong></td>
+                        <td>{{ resolveOption(claim.type, claimInvoiceTypeOptions) }}</td>
                     </tr><tr>
                         <td><strong>Amount</strong></td>
                         <td>{{ moneyFormat(claim.amount) }}</td>
@@ -33,6 +46,7 @@
 
         <div class="table-responsive claims-table">
             <b-table bordered striped hover show-empty
+                class="fit-more"
                 :items="adjustments"
                 :fields="fields"
                 :sort-by.sync="sortBy"
