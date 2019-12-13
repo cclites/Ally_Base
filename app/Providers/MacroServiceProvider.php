@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Collection;
 
 class MacroServiceProvider extends ServiceProvider
 {
@@ -14,7 +13,19 @@ class MacroServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Collection::macro('bcsum', function ($callback) {
+        $this->addBcSumToCollection();
+    }
+
+    /**
+     * \Illuminate\Support\Collection->bcsum
+     *
+     * This replicates the behavior of the normal sum() method
+     * except it uses our bc math addition helper method to
+     * insure there are no floating point issues.
+     */
+    public function addBcSumToCollection() : void
+    {
+        \Illuminate\Support\Collection::macro('bcsum', function ($callback) {
             if (is_null($callback)) {
                 return $this->reduce(function ($result, $item) {
                     return add($result, floatval($item));
