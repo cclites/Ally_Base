@@ -221,8 +221,9 @@
                 <b-col lg="3">
                     <b-form-group label="Caregiver 1099">
                         <b-form-select v-model="send1099">
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
+                            <option value="choose">Select an Option</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>
@@ -235,11 +236,12 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row v-else-if="authRole != 'admin' && client.caregiver_1099 == 'ally_locked'">
+            <b-row v-else-if="authRole != 'admin' && client.lock_1099 == 0">
                 <b-col lg="6">
                     <b-form-group label="Caregiver 1099">
                         <label>
-                            1099s are being sent on behalf of Ally. Contact Ally if you wish to change this.
+                            {{ client.lock_1099 }}<br>
+                            1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
                         </label>
                     </b-form-group>
                 </b-col>
@@ -248,8 +250,9 @@
                 <b-col lg="3">
                     <b-form-group label="Caregiver 1099">
                         <b-form-select v-model="send1099">
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
+                            <option value="choose">Select an Option</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>
@@ -531,6 +534,7 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
+                    send1099: this.client.send_1099,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -548,6 +552,8 @@
                 send1099: 0,
                 payerLabel: '',
                 errors1099: '',
+
+
             }
         },
 
@@ -559,12 +565,7 @@
             await this.loadOfficeUsers();
             await this.fetchStatusAliases();
 
-            if(this.client.caregiver_1099){
-                this.send1099 = '1';
-            }else{
-                this.send1099 = '0';
-            }
-
+            this.send1099 = this.client.send_1099;
             this.payerType();
 
             this.loading = false;
@@ -802,6 +803,8 @@
 
         },
         watch: {
+
+            /*
             send1099(val){
                 if(val === '0'){
                     this.form.caregiver_1099 = '';
@@ -811,6 +814,7 @@
 
                 this.payerType();
             },
+             */
         }
     }
 </script>

@@ -2,39 +2,39 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Business;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use App\ChainClientTypeSettings;
+use App\Client;
+
 class ChainSettingsController extends Controller
 {
-    public function updateChain1099Settings(Chain $chain, Request $request){
+    public function update(ChainClientTypeSettings $chainClientTypeSettings, Request $request){
 
-        $medicaidDefault = $request->medicaid_1099_default;
-        $medicaidSend = $request->medicaid_1099_send;
-        $medicaidFrom = $request->medicaid_1099_from;
+        $input = $request->all();
+        $chainClientTypeSettings->fill($input)->save();
 
-        $privatePayDefault = $request->private_pay_1099_default;
-        $privatePaySend = $request->private_pay_1099_send;
-        $privatePayFrom = $request->private_pay_1099_from;
+        $chainClientTypeSettings->chain->businesses->each(function(Business $business) use($chainClientTypeSettings){
 
-        $otherDefault = $request->other_1099_default;
-        $otherSend = $request->other_1099_send;
-        $otherFrom = $request->other_1099_from;
+            $business->clients->each(function(Client $client) use($chainClientTypeSettings){
 
-        $data = [
-            'medicaid_1099_default' => $request->medicaid_1099_default,
-            'private_pay_1099_default' => $request->private_pay_1099_default,
-            'other_1099_default' => $request->other_1099_default,
+                if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
+                    $client->caregiver_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_from"]; //ally or client
+                    $client->lock_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_edit"]; //can edit
+                    $client->send_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_default"]; //send by default
+                }else{
+                    $client->caregiver_1099 = $chainClientTypeSettings["other_1099_from"];
+                    $client->lock_1099 = $chainClientTypeSettings["other_1099_edit"];
+                    $client->send_1099 = $chainClientTypeSettings[ "other_1099_default"];
+                }
 
-            'medicaid_1099_send' => $request->medicaid_1099_send,
-            'private_pay_1099_send' => $request->private_pay_1099_send,
-            'other_1099_send' => $request->other_1099_send,
+                $client->save();
 
-            'medicaid_1099_from' => $request->medicaid_1099_from,
-            'private_pay_1099_from' => $request->private_pay_1099_from,
-            'other_1099_from' => $request->other_1099_from,
-        ];
+            });
+        });
 
         return new SuccessResponse("Settings successfully updated");
     }

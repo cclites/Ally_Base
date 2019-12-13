@@ -20,12 +20,13 @@
                     <b-form-select v-model="form.medicaid_1099_default">
                         <option value="">No</option>
                         <option value="yes">Yes</option>
+                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
-                    <b-form-select v-model="form.medicaid_1099_send">
-                        <option value="">No</option>
-                        <option value="yes">Yes</option>
+                    <b-form-select v-model="form.medicaid_1099_edit">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -42,12 +43,13 @@
                     <b-form-select v-model="form.private_pay_1099_default">
                         <option value="">No</option>
                         <option value="yes">Yes</option>
+                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
-                    <b-form-select v-model="form.private_pay_1099_send">
-                        <option value="">No</option>
-                        <option value="yes">Yes</option>
+                    <b-form-select v-model="form.private_pay_1099_edit">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -62,14 +64,15 @@
                 <td>Other</td>
                 <td>
                     <b-form-select v-model="form.other_1099_default">
-                        <option value="">No</option>
+                        <option value="no">No</option>
                         <option value="yes">Yes</option>
+                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
-                    <b-form-select v-model="form.other_1099_send">
-                        <option value="">No</option>
-                        <option value="yes">Yes</option>
+                    <b-form-select v-model="form.other_1099_edit">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -96,26 +99,26 @@
         name: "Chain1099Settings",
         props: {
             chain: '',
-
+            settings: '',
         },
         data(){
             return{
                 form: new Form({
-                    medicaid_1099_default: this.chain.medicaid_1099_default ? this.chain.medicaid_1099_default : '',
-                    private_pay_1099_default: this.chain.private_pay_1099_default ? this.chain.private_pay_1099_default : '',
-                    other_1099_default: this.chain.other_1099_default ? this.chain.other_1099_default : '',
-                    medicaid_1099_send: this.chain.medicaid_1099_send ? this.chain.medicaid_1099_send : '',
-                    private_pay_1099_send: this.chain.private_pay_1099_send ? this.chain.private_pay_1099_send : '',
-                    other_1099_send: this.chain.other_1099_send ? this.chain.other_1099_send : '',
-                    medicaid_1099_from: this.chain.medicaid_1099_from ? this.chain.medicaid_1099_from : '',
-                    private_pay_1099_from: this.chain.private_pay_1099_from ? this.chain.private_pay_1099_from : '',
-                    other_1099_from: this.chain.other_1099_from ? this.chain.other_1099_from : '',
+                    medicaid_1099_default: this.settings.medicaid_1099_default ? this.settings.medicaid_1099_default : 'no',
+                    private_pay_1099_default: this.settings.private_pay_1099_default ? this.settings.private_pay_1099_default : 'no',
+                    other_1099_default: this.settings.other_1099_default ? this.settings.other_1099_default : 'no',
+                    medicaid_1099_edit: this.settings.medicaid_1099_edit ? this.settings.medicaid_1099_edit : 0,
+                    private_pay_1099_edit: this.settings.private_pay_1099_edit ? this.settings.private_pay_1099_edit : 0,
+                    other_1099_edit: this.settings.other_1099_edit ? this.settings.other_1099_edit : 0,
+                    medicaid_1099_from: this.settings.medicaid_1099_from ? this.settings.medicaid_1099_from : '',
+                    private_pay_1099_from: this.settings.private_pay_1099_from ? this.settings.private_pay_1099_from : '',
+                    other_1099_from: this.settings.other_1099_from ? this.settings.other_1099_from : '',
                 }),
             }
         },
         methods: {
             save1099Settings(){
-                let url = 'chain-1099-settings/' + chain.id;
+                let url = '/admin/chain-1099-settings/' + this.settings.id;
                 this.form.patch(url);
             }
         }
