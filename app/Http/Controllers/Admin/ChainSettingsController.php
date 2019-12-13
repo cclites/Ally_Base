@@ -12,14 +12,21 @@ use App\Client;
 
 class ChainSettingsController extends Controller
 {
-    public function update(ChainClientTypeSettings $chainClientTypeSettings, Request $request){
-
+    /**
+     * @param ChainClientTypeSettings $chainClientTypeSettings
+     * @param Request $request
+     * @return SuccessResponse
+     */
+    public function update(ChainClientTypeSettings $chainClientTypeSettings, Request $request): SuccessResponse
+    {
         $input = $request->all();
         $chainClientTypeSettings->fill($input)->save();
 
         $chainClientTypeSettings->chain->businesses->each(function(Business $business) use($chainClientTypeSettings){
 
             $business->clients->each(function(Client $client) use($chainClientTypeSettings){
+
+                $this->authorize('update', $client);
 
                 if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
                     $client->caregiver_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_from"]; //ally or client
@@ -31,8 +38,12 @@ class ChainSettingsController extends Controller
                     $client->send_1099 = $chainClientTypeSettings[ "other_1099_default"];
                 }
 
-                $client->save();
+                if($client->send_1099 === 'choose'){
+                    $client->lock_1099 = 1;
+                    unset($client->caregiver_1099);
+                }
 
+                $client->save();
             });
         });
 

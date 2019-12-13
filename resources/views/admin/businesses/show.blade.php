@@ -27,9 +27,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#sms_settings" role="tab">Text Message Settings</a>
         </li>
-        <li class="nav-item">
+        <!--li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#business_1099_settings" role="tab">1099 Settings</a>
-        </li>
+        </li-->
     </ul>
 
     <div class="tab-content">

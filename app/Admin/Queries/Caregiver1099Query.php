@@ -75,7 +75,7 @@ class Caregiver1099Query
                     LEFT JOIN addresses a2 ON a2.id = (SELECT id FROM addresses WHERE user_id = u2.id ORDER BY `type` LIMIT 1)
                     LEFT JOIN caregiver_1099s ct on ct.client_id = c.id AND ct.caregiver_id = c2.id
                     WHERE p.created_at BETWEEN '" . $this->filters['year']['value'] ."-01-01 00:00:00' AND '" . $this->filters['year']['value'] ."-12-31 23:59:59'
-                    AND c.business_id = " .  $this->filters['business_id']['value'];
+                    AND c.business_id = " .  $this->filters['business_id']['value'] . " AND c.send_1099 = 'yes' ";
 
 
         if( array_key_exists('client_id', $this->filters) && filled($this->filters['client_id']['value'])){

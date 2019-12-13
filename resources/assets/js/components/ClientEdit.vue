@@ -217,49 +217,28 @@
                 </b-col>
             </b-row>
             <!------------------------------------->
-            <b-row v-if="authRole == 'admin'">
-                <b-col lg="3">
-                    <b-form-group label="Caregiver 1099">
-                        <b-form-select v-model="send_1099">
+            <b-row >
+                <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
+                    <b-form-group label="Caregiver 1099" :label-class="required">
+                        <b-form-select v-model="form.send_1099" :required="required">
                             <option value="choose">Select an Option</option>
                             <option value="yes">Yes</option>
                             <option value="no">No</option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>
-                <b-col lg="3">
+                <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
                     <b-form-group label="Payer">
-                        <b-radio-group v-model="form.caregiver_1099" stacked>
+                        <b-radio-group v-model="form.caregiver_1099" stacked :required="required">
                             <b-radio value="client">Send on Client's Behalf</b-radio>
                             <b-radio value="ally">Send on Ally's Behalf</b-radio>
                         </b-radio-group>
                     </b-form-group>
                 </b-col>
-            </b-row>
-            <b-row v-else-if="authRole != 'admin' && client.lock_1099 == 0">
-                <b-col lg="6">
+                <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0 ">
                     <b-form-group label="Caregiver 1099">
                         <label>
-                            {{ client.lock_1099 }}<br>
                             1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
-                        </label>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row v-else>
-                <b-col lg="3">
-                    <b-form-group label="Caregiver 1099">
-                        <b-form-select v-model="form.send_1099">
-                            <option value="choose">Select an Option</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="3">
-                    <b-form-group label="Payer">
-                        <label>
-                            Send on {{ payerLabel }}'s Behalf
                         </label>
                     </b-form-group>
                 </b-col>
@@ -551,8 +530,7 @@
                 sendingWelcomeEmail: false,
                 payerLabel: '',
                 errors1099: '',
-
-
+                required: (this.client_send == 'choose') ? 'required' : false,
             }
         },
 

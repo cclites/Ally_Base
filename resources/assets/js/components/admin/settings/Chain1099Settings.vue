@@ -18,7 +18,7 @@
                 <td>Medicaid</td>
                 <td>
                     <b-form-select v-model="form.medicaid_1099_default">
-                        <option value="">No</option>
+                        <option value="no">No</option>
                         <option value="yes">Yes</option>
                         <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
@@ -41,7 +41,7 @@
                 <td>Private Pay</td>
                 <td>
                     <b-form-select v-model="form.private_pay_1099_default">
-                        <option value="">No</option>
+                        <option value="no">No</option>
                         <option value="yes">Yes</option>
                         <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
@@ -87,7 +87,12 @@
         </table>
         <b-row>
             <b-col lg="12">
-                <b-button variant="success" @click="save1099Settings" class="mt-2">Save 1099 Settings</b-button>
+                <b-button variant="success"
+                          @click="save1099Settings"
+                          class="mt-2">
+                    <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
+                    Save 1099 Settings
+                </b-button>
             </b-col>
         </b-row>
 
@@ -114,25 +119,30 @@
                     private_pay_1099_from: this.settings.private_pay_1099_from ? this.settings.private_pay_1099_from : '',
                     other_1099_from: this.settings.other_1099_from ? this.settings.other_1099_from : '',
                 }),
+                busy: false,
             }
         },
         methods: {
             save1099Settings(){
+
+                this.busy = true;
                 let url = '/admin/chain-1099-settings/' + this.settings.id;
                 this.form.patch(url);
+                this.busy = false;
             }
         }
     }
 </script>
 
 <style scoped>
-    table thead tr th{
-        text-align: center;
+
+    table{
+        border-collapse: separate;
+        border-spacing: 20px 8px;
     }
 
-    table tbody tr td,
     table thead tr th{
-        padding: 4px;
-        margin: 4px;
+        padding: 12px 12px 0px 0px;
     }
+
 </style>

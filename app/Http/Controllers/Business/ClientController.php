@@ -301,8 +301,6 @@ class ClientController extends BaseController
             $data = array_merge($data, $options);
         }
 
-
-
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $client->agreementStatusHistory()->create(['status' => $data['agreement_status']]);
