@@ -393,6 +393,7 @@
                     client_name: { label: 'Client', sortable: true },
                     payer_name: { label: 'Payer', sortable: true },
                     amount: { label: 'Claim Total', sortable: true, formatter: x => this.moneyFormat(x) },
+                    amount_paid: { label: 'Total Posted', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_due: { label: 'Claim Balance', sortable: true, formatter: x => this.moneyFormat(x) },
                     amount_applied: { label: 'Amount to Apply', sortable: false },
                 },
