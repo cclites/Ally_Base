@@ -14,7 +14,7 @@ class AlterTableClientsAdd1099Settings extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('send_1099');
+            $table->string('send_1099')->default('no');
             $table->boolean('lock_1099');
         });
     }
