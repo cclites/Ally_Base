@@ -164,11 +164,11 @@
                 </template>
                 <template slot="status" scope="row">
                     <span v-if="row.item.status == CLAIM_STATUSES.TRANSMITTED">
-                        <span v-if="offlineMethods.includes(row.item.transmission_method)">
-                            Transmitted (Offline)
+                        <span v-if="onlineMethods.includes(row.item.transmission_method)">
+                            Transmitted (Pending)
                         </span>
                         <span v-else>
-                            Transmitted (Pending)
+                            Transmitted (Offline)
                         </span>
                     </span>
                     <span v-else-if="row.item.status == CLAIM_STATUSES.REJECTED">
@@ -403,6 +403,12 @@
                     this.CLAIM_SERVICE.EMAIL,
                     this.CLAIM_SERVICE.FAX,
                     this.CLAIM_SERVICE.DIRECT_MAIL
+                ];
+            },
+            onlineMethods() {
+                return [
+                    this.CLAIM_SERVICE.TELLUS,
+                    this.CLAIM_SERVICE.HHA,
                 ];
             },
         },
