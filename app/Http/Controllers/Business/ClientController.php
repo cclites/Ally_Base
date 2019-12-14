@@ -552,7 +552,8 @@ class ClientController extends BaseController
             'client'              => $client,
             'deactivatedBy'       => \Auth::user()->name,
             'totalLifetimeHours'  => $totalLifetimeHours,
-            'totalLifetimeShifts' => $totalLifetimeShifts
+            'totalLifetimeShifts' => $totalLifetimeShifts,
+            'override_ally_logo' => $client->business->logo,
         ]);
 
         $filePath = $client->id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' );

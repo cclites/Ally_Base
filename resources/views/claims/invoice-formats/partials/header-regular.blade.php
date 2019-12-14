@@ -11,20 +11,13 @@
         @include('claims.invoice-formats.partials.business-info')
     </div>
     <div class="text-right header-right">
-        <div class="h1">C-Invoice #{{ $claim->getName() }}</div>
+        <div class="h2">C-Invoice #{{ $claim->getName() }}</div>
         <br>
         <table class="header-right-table">
             <tr>
-                <td><strong>Claim Date: </strong></td>
+                <td><strong>Invoice Date: </strong></td>
                 <td>{{ $claim->getDate()->format('m/d/Y') }}</td>
             </tr>
-            <tr>
-                <td><strong>Claim Status: </strong></td>
-                <td>
-                    {{ snake_to_title_case($claim->getStatus()) }}
-                </td>
-            </tr>
-
             @foreach($clientData as $data)
             <tr>
                 <td colspan="2">

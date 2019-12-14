@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
@@ -17,6 +17,7 @@ use App\Billing\ClientInvoice;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ClaimInvoiceController extends BaseController
 {
@@ -182,17 +183,39 @@ class ClaimInvoiceController extends BaseController
     {
         $this->authorize('read', $claim);
 
-        $groups = $claim->items->groupBy('type');
-        if (!isset($groups['Expense'])) {
-            $groups['Expense'] = [];
-        }
-        if (!isset($groups['Service'])) {
-            $groups['Service'] = [];
-        }
-
         $client = null;
-        if ($claim->getType() != ClaimInvoiceType::PAYER()) {
+        if ($claim->getType() == ClaimInvoiceType::PAYER()) {
+
+            $groups = $claim->items->sortBy(function ($item) {
+                    return local_date($item->date, 'm/d/Y', auth()->user()->getTimezone())
+                        . ' ' . $item->claimable->getName() . ' ' . $item->getCaregiverName();
+                })
+                ->mapToGroups(function ($item) {
+                    return [$item->getClientName() => $item];
+                })
+                ->map(function ($group) {
+                    return [
+                        'client' => $group->first()->getClientName(),
+                        'items' => $group,
+                        'units' => $group->bcsum('units'),
+                        'amount' => $group->bcsum('amount'),
+                        'amount_due' => $group->bcsum('amount_due'),
+                    ];
+                })
+                ->sortBy(function($value, $key) {
+                    return $key;
+                });;
+
+        } else {
             $client = $claim->client ? $claim->client : $service->client;
+
+            $groups = $claim->items->groupBy('type');
+            if (!isset($groups['Expense'])) {
+                $groups['Expense'] = [];
+            }
+            if (!isset($groups['Service'])) {
+                $groups['Service'] = [];
+            }
         }
 
         $view = view('claims.claim_invoice', [
@@ -204,6 +227,7 @@ class ClaimInvoiceController extends BaseController
             'render' => 'html',
             'notes' => $claim->getInvoiceNotesData(),
             'clientData' => $claim->getInvoiceClientData(),
+            'override_ally_logo' => $claim->business->logo,
         ]);
 
         if ($request->filled('download')) {

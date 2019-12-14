@@ -224,13 +224,13 @@ trait IsUserRole
         if ($this->user->avatar) {
             return \Storage::disk('public')->url($this->user->avatar);
         } else {
-            return '/images/default-avatar.png';
+            return config('ally.avatar.default');
         }
     }
 
     public function setAvatarAttribute($value)
     {
-        if (empty($value) || $value == '/images/default-avatar.png') {
+        if (empty($value) || $value == config('ally.avatar.default')) {
             $this->attributes['avatar'] = null;
             return;
         }

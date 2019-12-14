@@ -149,7 +149,13 @@
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                     </b-form-group>
                     <b-form-group label="Photo">
-                        <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                        <image-cropper
+                            v-model="form.avatar"
+                            width="150"
+                            height="150"
+                            cropperPadding="100"
+                            :circle="true"
+                        />
                         <input-help :form="form" field="avatar"></input-help>
                     </b-form-group>
                     <b-form-group label="HIC" label-for="hic">

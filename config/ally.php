@@ -43,4 +43,12 @@ return [
          */
         'zip_password' => env('DATA_DUMP_ZIP_PASSWORD', ''),
     ],
+
+    'logo' => [
+        'invoice' => '/images/AllyLogo-new-light.png',
+    ],
+
+    'avatar' => [
+        'default' => '/images/default-avatar.png',
+    ],
 ];

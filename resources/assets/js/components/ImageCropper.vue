@@ -1,43 +1,61 @@
 <template>
     <div class="d-block">
-        <div v-if="value && ! isEditing" id="avatar-box" class="avatar mb-2">
+        <div v-if="value && ! isEditing" :class="{
+            avatar: true,
+            'mb-2': true,
+            circle: circle,
+        }" :style="{ width: width+'px', height: height+'px' }">
             <img :src="value" />
         </div>
         <div id="cropbox" class="hidden"></div>
 
         <div v-if="isEditing">
-            <b-btn @click="crop" variant="success">Crop</b-btn>
-            <b-btn @click="cancel" variant="secondary">Cancel</b-btn>
+            <b-btn @click="crop()" variant="success">Crop</b-btn>
+            <b-btn @click="cancel()" variant="secondary">Cancel</b-btn>
         </div>
         <div v-else>
             <b-btn @click="selectFile" variant="success">Upload a Photo</b-btn>
-            <b-btn v-if="value" @click="clear" variant="secondary">Clear</b-btn>
+            <b-btn v-if="value" @click="clear()" variant="secondary">Clear</b-btn>
         </div>
         <input ref="file" type="file" id="upload" class="hidden" value="Choose a file" accept="image/*" />
     </div>
 </template>
 
 <script>
+    import Constants from "../mixins/Constants";
+
     export default {
+        mixins: [ Constants ],
         props: {
+            defaultImage: {
+                type: String,
+                default: '',
+            },
             value: {
                 type: String,
                 default: '',
             },
-            size: {
-                type: Number,
+            height: {
+                default: 150,
+            },
+            width: {
                 default: 150,
             },
             cropperPadding: {
-                type: Number,
                 default: 100,
             },
+            circle: {
+                type: Boolean,
+                default: false,
+            }
         },
 
-        data: () => ({
-            cropBox: null,
-            isEditing: false,
-        }),
+        data() {
+            return {
+                cropBox: null,
+                isEditing: false,
+            }
+        },
 
         methods: {
             selectFile() {
@@ -79,7 +97,7 @@
             },
 
             clear() {
-                this.$emit('input', '/images/default-avatar.png');
+                this.$emit('input', this.defaultImage ? this.defaultImage : this.defaultAvatarUrl);
                 $('#upload').val('');
             },
 
@@ -93,13 +111,13 @@
             this.cropBox = $('#cropbox').croppie({
                 enableExif: true,
                 viewport: {
-                    width: parseInt(this.size),
-                    height: parseInt(this.size),
+                    width: parseInt(this.width),
+                    height: parseInt(this.height),
                     type: 'square'
                 },
                 boundary: {
-                    width: parseInt(this.size) + parseInt(this.cropperPadding),
-                    height: parseInt(this.size) + parseInt(this.cropperPadding),
+                    width: parseInt(this.width) + parseInt(this.cropperPadding),
+                    height: parseInt(this.height) + parseInt(this.cropperPadding),
                 }
             });
 

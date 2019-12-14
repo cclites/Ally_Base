@@ -88,9 +88,10 @@ class ClaimsReportController extends BaseController
         $business = $client->business;
         $timezone = $business->timezone;
         $report_type = $request->report_type == 'notes' ? 'notes' : 'full';
-        
+        $override_ally_logo = $business->logo;
+
         // ============= //
-        $viewData = compact('client', 'business', 'timezone', 'claimNumber', 'policyNumber', 'shifts', 'totalAmount', 'start_date', 'end_date', 'report_type');
+        $viewData = compact('client', 'business', 'timezone', 'claimNumber', 'policyNumber', 'shifts', 'totalAmount', 'start_date', 'end_date', 'report_type', 'override_ally_logo');
 
         switch ($request->export_type) {
             case 'pdf':
