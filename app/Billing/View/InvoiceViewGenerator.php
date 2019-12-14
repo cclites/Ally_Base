@@ -24,9 +24,9 @@ class InvoiceViewGenerator
         $this->strategy = $strategy;
     }
 
-    function generate(ContactableInterface $sender, ContactableInterface $recipient, ContactableInterface $subject, InvoiceInterface $invoice, Collection $payments)
+    function generate(ContactableInterface $sender, ContactableInterface $recipient, ContactableInterface $subject, InvoiceInterface $invoice, Collection $payments, string $override_ally_logo = null)
     {
-        return $this->strategy->generate($invoice, $sender, $recipient, $subject, $payments);
+        return $this->strategy->generate($invoice, $sender, $recipient, $subject, $payments, $override_ally_logo);
     }
 
     function generateClientInvoice(ClientInvoice $clientInvoice)
@@ -67,7 +67,8 @@ class InvoiceViewGenerator
             $recipient,
             $subject,
             $clientInvoice,
-            $payments
+            $payments,
+            $business->logo
         );
     }
 

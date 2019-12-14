@@ -225,7 +225,8 @@ class ClientSetupController extends Controller
 
         $terms = file_get_contents($termsUrl);
 
-        $pdf = \PDF::loadView('business.clients.client_agreement_document', compact('terms', 'client'));
+        $override_ally_logo = $client->business->logo;
+        $pdf = \PDF::loadView('business.clients.client_agreement_document', compact('terms', 'client', 'override_ally_logo'));
 
         $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {

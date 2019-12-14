@@ -530,7 +530,8 @@ class CaregiverController extends BaseController
             'caregiver'           => $caregiver,
             'deactivatedBy'       => \Auth::user()->name,
             'totalLifetimeHours'  => $totalLifetimeHours,
-            'totalLifetimeShifts' => $totalLifetimeShifts
+            'totalLifetimeShifts' => $totalLifetimeShifts,
+            'override_ally_logo' => optional($caregiver->businesses->first())->logo,
         ]);
 
         $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');

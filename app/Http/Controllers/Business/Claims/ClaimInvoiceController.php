@@ -227,7 +227,7 @@ class ClaimInvoiceController extends BaseController
             'render' => 'html',
             'notes' => $claim->getInvoiceNotesData(),
             'clientData' => $claim->getInvoiceClientData(),
-            'logo' => $claim->business->logo,
+            'override_ally_logo' => $claim->business->logo,
         ]);
 
         if ($request->filled('download')) {

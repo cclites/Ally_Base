@@ -2,8 +2,8 @@
 <!-- Logo -->
 <!-- ============================================================== -->
 <div class="logo">
-    @if(isset($logo))
-        <img src="{{ asset($logo) }}" />
+    @if(isset($override_ally_logo))
+        <img src="{{ asset($override_ally_logo) }}" />
     @else
         <img src="{{ asset('images/AllyLogo-new-light.png') }}" />
     @endif

@@ -25,6 +25,7 @@ class PdfPaymentView implements PaymentViewStrategy
      * @param \App\Billing\Payment $payment
      * @param \App\Billing\View\Data\PaymentInvoiceData[] $invoiceObjects
      * @return mixed
+     * @throws \Throwable
      */
     function generate(ContactableInterface $payer, Payment $payment, array $invoiceObjects)
     {

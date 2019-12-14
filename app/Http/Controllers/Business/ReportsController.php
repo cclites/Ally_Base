@@ -454,9 +454,10 @@ class ReportsController extends BaseController
         $end_date = $data['end_date'];
         $business = $request->getBusiness();
         $timezone = $business->timezone;
+        $override_ally_logo = $business->logo;
 
         $client_shift_groups = $this->clientShiftGroups($business, $data);
-        $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
+        $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone', 'override_ally_logo');
 
         switch ($data['export_type']) {
             case 'pdf':

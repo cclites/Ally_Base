@@ -4,28 +4,18 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientAuthorization;
 use App\Billing\ClientPayer;
-use App\Claims\ClaimableExpense;
-use App\Claims\ClaimableService;
 use App\Client;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\ConfirmationResponse;
-use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Schedule;
 use App\Shift;
-use App\ShiftConfirmation;
-use App\ShiftFlag;
-use App\ShiftIssue;
 use App\Shifts\RateFactory;
-use App\Shifts\ServiceAuthCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
-use Illuminate\Support\Arr;
 use App\Events\ShiftFlagsCouldChange;
-use Illuminate\Support\Collection;
 
 class ShiftController extends BaseController
 {
@@ -49,7 +39,7 @@ class ShiftController extends BaseController
         $defaultStatus = Shift::WAITING_FOR_AUTHORIZATION;
         $this->authorize('create', [Shift::class, $request->getShiftArray($defaultStatus)]);
 
-        if (!$this->validateAgainstNegativeRates($request)) {
+        if (! $this->validateAgainstNegativeRates($request)) {
             return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
@@ -60,7 +50,7 @@ class ShiftController extends BaseController
             $shift->syncIssues($request->getIssues());
 
             $duplicate = $shift->duplicatedBy;
-            if ($duplicate && !$request->input('duplicate_confirm')) {
+            if ($duplicate && ! $request->input('duplicate_confirm')) {
                 \DB::rollBack();
                 return new ConfirmationResponse('The shift may have a duplicate.', $duplicate->toArray());
             }
@@ -68,7 +58,7 @@ class ShiftController extends BaseController
             \DB::commit();
 
             event(new ShiftFlagsCouldChange($shift));
-            
+
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -150,11 +140,11 @@ class ShiftController extends BaseController
         // Allow admin overrides on locked shifts
         if (is_admin() && $request->input('override')) {
             $adminOverride = true;
-        } else if ($shift->isReadOnly()) {
+        } elseif ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
-        if (!$this->validateAgainstNegativeRates($request)) {
+        if (! $this->validateAgainstNegativeRates($request)) {
             return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
@@ -163,7 +153,7 @@ class ShiftController extends BaseController
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
             $fields = [];
-            foreach($allQuestions as $q) {
+            foreach ($allQuestions as $q) {
                 if ($q->required == 1) {
                     $fields['questions.' . $q->id] = 'required';
                 }
@@ -208,7 +198,6 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
 
-
     /**
      * @param \App\Http\Requests\UpdateShiftRequest $request
      * @return bool
@@ -219,8 +208,10 @@ class ShiftController extends BaseController
         $services = $request->getServices();
 
         if (count($services)) {
-            foreach($services as $service) {
-                if ($service['client_rate'] === null) continue;
+            foreach ($services as $service) {
+                if ($service['client_rate'] === null) {
+                    continue;
+                }
                 if ($service['caregiver_rate'] === null) {
                     return false;
                 }
@@ -228,7 +219,7 @@ class ShiftController extends BaseController
                     return false;
                 }
             }
-        } else if ($request->client_rate !== null) {
+        } elseif ($request->client_rate !== null) {
             if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
                 return false;
             }
@@ -260,9 +251,8 @@ class ShiftController extends BaseController
         try {
             if ($shift->delete()) {
                 \DB::commit();
-                return new SuccessResponse("This shift has been deleted.");
+                return new SuccessResponse('This shift has been deleted.');
             }
-
         } catch (\Exception $ex) {
             // Handle foreign key exceptions (should not occur and should be handled by isReadOnly())
             app('sentry')->captureException($ex);
@@ -280,7 +270,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->statusManager()->ackConfirmation()) {
-            if (!$shift->isVerified()) {
+            if (! $shift->isVerified()) {
                 event(new UnverifiedShiftConfirmed($shift));
             }
             return new SuccessResponse('The shift has been confirmed.', $shift->toArray());
@@ -296,7 +286,7 @@ class ShiftController extends BaseController
     {
         $this->authorize('update', $shift);
 
-        if (!$shift->statusManager()->isConfirmed()) {
+        if (! $shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift is already unconfirmed.');
         }
 
@@ -312,13 +302,14 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load( 'activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business' );
+        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business');
 
         $timezone = $this->business()->timezone;
+        $override_ally_logo = $this->business()->logo;
 
         if (request()->filled('type') && strtolower(request('type')) == 'pdf') {
             // return pdf
-            $pdf = PDF::loadView('business.shifts.print', compact('shift', 'timezone'));
+            $pdf = PDF::loadView('business.shifts.print', compact('shift', 'timezone', 'override_ally_logo'));
             return $pdf->download('payment_details.pdf');
         }
 
@@ -393,7 +384,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
-            event (new ShiftFlagsCouldChange($shift));
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('Shift was successfully clocked out.');
         }
 
@@ -414,8 +405,8 @@ class ShiftController extends BaseController
             ->with('payer')
             ->groupBy('payer_id')
             ->select('payer_id')->get()
-            ->map(function(ClientPayer $clientPayer) use ($client) {
-                 return [
+            ->map(function (ClientPayer $clientPayer) use ($client) {
+                return [
                      'id' => $clientPayer->payer_id,
                      'name' => $clientPayer->payer_id === 0 ? $client->name : $clientPayer->payer->name,
                  ];
