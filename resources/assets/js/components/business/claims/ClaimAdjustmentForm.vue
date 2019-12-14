@@ -1,135 +1,122 @@
 <template>
     <div>
         <h2>Claim #{{ claim.name }}</h2>
-        <b-tabs>
-            <!-- EDIT LINE ITEMS -->
-            <b-tab title="Adjust Line Items" active>
-                <div class="table-responsive claims-table mt-2">
-                    <b-table bordered striped show-empty
-                        class="fit-more"
-                        :items="items"
-                        :fields="fields"
-                        empty-text="This claim has no items."
+        <div class="d-flex">
+            <div class="ml-auto">
+                <div class="form-inline">
+                    <b-form-checkbox v-model="superAdjust.selected"
+                        :disabled="form.busy"
+                        @change="toggleSuperAdjust()">
+                        Apply Percentage
+                    </b-form-checkbox>
+                    <b-form-input
+                        style="max-width: 100px"
+                        class="mr-1"
+                        v-model="superAdjust.amount_applied"
+                        name="amount_applied"
+                        type="number"
+                        step="0.01"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @input="superAdjustAmountChanged()"
+                        placeholder="Percent"
+                    /><span class="mx-2">%</span>
+                    <b-select name="method"
+                        class="mr-1"
+                        v-model="superAdjust.method"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @change="x => superAdjustMethodChanged(x)"
                     >
-                    <template slot="selected" scope="row">
-                        <b-form-checkbox v-model="row.item.selected"
-                            :disabled="form.busy"
-                            @change="selectItem(row.item.id)"/>
-                    </template>
-                    <template slot="start_time" scope="row">
-                        <span v-if="row.item.start_time">
-                            {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
-                        </span>
-                        <span v-else>-</span>
-                    </template>
-                    <template slot="amount_applied" scope="row">
-                        <div class="d-flex">
-                            <b-form-input
-                                class="mr-1"
-                                v-model="row.item.amount_applied"
-                                name="amount_applied"
-                                type="number"
-                                step="0.01"
-                                :disabled="form.busy || !row.item.selected"
-                                @change="x => itemAmountChanged(row.item, x)"
-                                placeholder="Amount"
-                            />
-                            <b-select name="adjustment_type"
-                                class="mr-1"
-                                v-model="row.item.adjustment_type"
-                                :options="claimAdjustmentTypeOptions"
-                                :disabled="form.busy || !row.item.selected"
-                                @change="x => itemTypeChanged(row.item, x)"
-                            >
-                                <template slot="first">
-                                    <option value="">-- Type --</option>
-                                </template>
-                            </b-select>
-                            <b-form-input
-                                name="note"
-                                v-model="row.item.note"
-                                type="text"
-                                :disabled="form.busy || !row.item.selected"
-                                maxlength="255"
-                                style="max-width: none!important;"
-                                placeholder="Notes..."
-                            />
-                        </div>
-                    </template>
-                  </b-table>
-                <hr />
+                        <option value="amount">Total Amount</option>
+                        <option value="amount_due">Amount Due</option>
+                    </b-select>
+                    <b-select name="adjustment_type"
+                        class="mr-1"
+                        v-model="superAdjust.adjustment_type"
+                        :options="claimAdjustmentTypeOptions"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @change="x => superAdjustTypeChanged(x)"
+                    >
+                        <template slot="first">
+                            <option value="">-- Type --</option>
+                        </template>
+                    </b-select>
+                    <b-form-input
+                        name="note"
+                        v-model="superAdjust.note"
+                        type="text"
+                        :disabled="form.busy || !superAdjust.selected"
+                        maxlength="255"
+                        style="max-width: none!important;"
+                        placeholder="Notes..."
+                        @input="superAdjustNotesChanged()"
+                    />
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive claims-table mt-2">
+            <b-table bordered striped show-empty
+                class="fit-more"
+                :items="items"
+                :fields="fields"
+                empty-text="This claim has no items."
+            >
+            <template slot="selected" scope="row">
+                <b-form-checkbox v-model="row.item.selected"
+                    :disabled="form.busy || superAdjust.selected"
+                    @change="selectItem(row.item.id)"/>
+            </template>
+            <template slot="start_time" scope="row">
+                <span v-if="row.item.start_time">
+                    {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
+                </span>
+                <span v-else>-</span>
+            </template>
+            <template slot="amount_applied" scope="row">
                 <div class="d-flex">
-                    <div class="ml-auto">
-                        <b-btn variant="success" @click="submit()" :disabled="form.busy">
-                            <span v-if="form.busy"><i class="fa fa-spin fa-spinner"></i></span>
-                            <span v-else>Save Adjustment</span>
-                        </b-btn>
-                        <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
-                    </div>
+                    <b-form-input
+                        class="mr-1"
+                        v-model="row.item.amount_applied"
+                        name="amount_applied"
+                        type="number"
+                        step="0.01"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
+                        @change="x => itemAmountChanged(row.item, x)"
+                        placeholder="Amount"
+                    />
+                    <b-select name="adjustment_type"
+                        class="mr-1"
+                        v-model="row.item.adjustment_type"
+                        :options="claimAdjustmentTypeOptions"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
+                        @change="x => itemTypeChanged(row.item, x)"
+                    >
+                        <template slot="first">
+                            <option value="">-- Type --</option>
+                        </template>
+                    </b-select>
+                    <b-form-input
+                        name="note"
+                        v-model="row.item.note"
+                        type="text"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
+                        maxlength="255"
+                        style="max-width: none!important;"
+                        placeholder="Notes..."
+                    />
                 </div>
-
-                </div>
-            </b-tab>
-
-            <!-- PERCENT ADJUSTMENT -->
-            <b-tab title="Adjust Total %">
-                <b-container class="mt-2">
-                    <b-alert show variant="info">This will adjust all line items equally.</b-alert>
-                    <b-form-group label="Amount (Percentage)" label-for="amount_applied" label-class="required">
-                        <div class="d-flex align-items-center">
-                            <b-form-input
-                                name="amount_applied"
-                                type="number"
-                                step="0.01"
-                                min="-100"
-                                max="100.00"
-                                v-model="superForm.amount_applied"
-                                class="money-input f-1"
-                                :disabled="superForm.busy"
-                            />
-                            <span class="ml-auto p-3">%</span>
-                        </div>
-                        <input-help :form="superForm" field="amount_applied" text="" />
-                    </b-form-group>
-
-                    <b-form-group label="Adjustment Type" label-for="adjustment_type" label-class="required">
-                        <b-select name="adjustment_type"
-                            class="mr-1"
-                            v-model="superForm.adjustment_type"
-                            :options="claimAdjustmentTypeOptions"
-                            :disabled="superForm.busy"
-                        >
-                            <template slot="first">
-                                <option value="">-- Type --</option>
-                            </template>
-                        </b-select>
-                    </b-form-group>
-
-                    <b-form-group label="Notes" label-for="note">
-                        <b-textarea
-                            v-model="superForm.note"
-                            id="note"
-                            name="note"
-                            type="text"
-                            :disabled="superForm.busy"
-                            rows="2"
-                        />
-                        <input-help :form="superForm" field="note" text="" />
-                    </b-form-group>
-
-                    <hr />
-                    <div class="d-flex">
-                        <div class="ml-auto">
-                            <b-btn variant="success" @click="submitSuper()" :disabled="superForm.busy">
-                                <span v-if="superForm.busy"><i class="fa fa-spin fa-spinner"></i></span>
-                                <span v-else>Save Adjustment</span>
-                            </b-btn>
-                            <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
-                        </div>
-                    </div>
-                </b-container>
-            </b-tab>
-        </b-tabs>
+            </template>
+          </b-table>
+        </div>
+        <hr />
+        <div class="d-flex">
+            <div class="ml-auto">
+                <b-btn variant="success" @click="submit()" :disabled="form.busy">
+                    <span v-if="form.busy"><i class="fa fa-spin fa-spinner"></i></span>
+                    <span v-else>Save Adjustment</span>
+                </b-btn>
+                <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -146,11 +133,13 @@
 
         data() {
             return {
-                superForm: new Form({
+                superAdjust: {
+                    selected: false,
                     adjustment_type: '',
                     amount_applied: '',
                     note: '',
-                }),
+                    method: 'amount',
+                },
                 form: new Form({
                     adjustments: [],
                 }),
@@ -175,13 +164,65 @@
         },
 
         methods: {
-            submitSuper() {
-                this.form.post(`/business/claim-adjustments/${this.claim.id}/all`)
-                    .then( ({ data }) => {
-                        this.$emit('update', data.data);
-                        this.$emit('close');
-                    })
-                    .catch(() => {});
+            toggleSuperAdjust() {
+                if (this.superAdjust.selected) {
+                    this.initItems(this.claim);
+                    this.superAdjust.amount_applied = '100';
+
+                    this.items.forEach(item => {
+                        this.$set(item, 'selected', true);
+                        return item;
+                    });
+                } else {
+                    this.initItems(this.claim);
+                    this.superAdjust.amount_applied = '';
+                    this.superAdjust.adjustment_type = '';
+                    this.superAdjust.note = '';
+                }
+            },
+
+            superAdjustMethodChanged(val) {
+                this.superAdjust.method = val;
+                // this.$nextTick(() => {
+                    this.superAdjustAmountChanged();
+                // });
+            },
+
+            superAdjustAmountChanged() {
+                let percent = new Decimal(100);
+                try {
+                    percent = new Decimal(this.superAdjust.amount_applied);
+                } catch (e) {
+                    this.superAdjust.amount_applied = 100;
+                    percent = new Decimal(100);
+                }
+
+                if (percent.lt(0) || percent.gt(100)) {
+                    this.superAdjust.amount_applied = 100;
+                    percent = new Decimal(100);
+                }
+
+                percent = percent.dividedBy(100);
+
+                this.items.forEach(item => {
+                    let multiplier = item[this.superAdjust.method ? this.superAdjust.method : 'total'];
+                    item.amount_applied = percent.times(new Decimal(multiplier))
+                        .times(new Decimal(-1)) // Adjustments should be negative
+                        .toFixed(2);
+                });
+            },
+
+            superAdjustTypeChanged(val) {
+                this.items.forEach(item => {
+                    item.adjustment_type = val;
+                    // this.$set(item, 'adjustment_type', val);
+                });
+            },
+
+            superAdjustNotesChanged() {
+                this.items.forEach(item => {
+                    item.note = this.superAdjust.note;
+                });
             },
 
             /**
@@ -334,6 +375,14 @@
         watch: {
             claim(newValue, oldValue) {
                 this.initItems(newValue);
+
+                this.superAdjust = {
+                    selected: false,
+                    adjustment_type: '',
+                    amount_applied: '',
+                    note: '',
+                    method: 'amount',
+                };
             },
         },
     }
