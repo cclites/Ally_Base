@@ -12,22 +12,8 @@
 @endpush
 
 @section('content')
-    <div class="">
-        @if ($claim->getType() == \App\Claims\ClaimInvoiceType::PAYER())
-            @include('claims.invoice-formats.partials.header-payer')
-        @else
-            <!-- All the same Client -->
-            @if ($claim->payer_id == \App\Billing\Payer::PRIVATE_PAY_ID)
-                @include('claims.invoice-formats.partials.header-private-pay')
-            @else
-                @include('claims.invoice-formats.partials.header-regular')
-            @endif
-        @endif
-
-        @yield('items')
-
-        @yield('notes')
-
-        @include('claims.invoice-formats.partials.footer')
-    </div>
+    @yield('header')
+    @yield('items')
+    @yield('notes')
+    @yield('footer')
 @endsection

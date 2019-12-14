@@ -8,8 +8,14 @@
 ?>
 @extends('claims.invoice-formats.ally')
 
-@if ($claim->getType() == \App\Claims\ClaimInvoiceType::PAYER())
-    @include('claims.invoice-formats.partials.items-table-payer')
-@else
+@section('header')
+    @include('claims.invoice-formats.partials.header-private-pay')
+@endsection
+
+@section('items')
     @include('claims.invoice-formats.partials.items-table-client')
-@endif
+@endsection
+
+@section('footer')
+    @include('claims.invoice-formats.partials.footer')
+@endsection
