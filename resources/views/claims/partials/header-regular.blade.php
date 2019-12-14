@@ -3,12 +3,13 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var array $clientDate Client print on invoice data
+ * @var array $clientData Client print on invoice data
+ * @var \App\Client|null $client The client model related to the claim
  */
 ?>
 <div class="row print-header">
     <div class="header-left">
-        @include('claims.invoice-formats.partials.business-info')
+        @include('claims.partials.business-info')
     </div>
     <div class="text-right header-right">
         <div class="h2">C-Invoice #{{ $claim->getName() }}</div>

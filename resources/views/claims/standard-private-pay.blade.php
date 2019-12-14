@@ -6,16 +6,16 @@
  * @var \Illuminate\Support\Collection $itemGroups
  */
 ?>
-@extends('claims.invoice-formats.ally')
+@extends('claims.layouts.ally')
 
 @section('header')
-    @include('claims.invoice-formats.partials.header-private-pay')
+    @include('claims.partials.header-private-pay')
 @endsection
 
 @section('items')
-    @include('claims.invoice-formats.partials.items-table-client')
+    @include('claims.partials.items-table-client')
 @endsection
 
 @section('footer')
-    @include('claims.invoice-formats.partials.footer')
+    @include('claims.partials.footer')
 @endsection

@@ -79,10 +79,53 @@ class PrintClaimInvoiceController extends BaseController
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');
             $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('Claim-Invoice-' . snake_case($claim->name) . '.pdf');
+            return $pdfWrapper->download('C-Invoice-' . snake_case($claim->name) . '.pdf');
         }
 
         return $view;
     }
 
+    /**
+     * Print "full" LTCI claims invoice format.
+     *
+     * @param ClaimInvoice $claim
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
+     */
+    public function full(ClaimInvoice $claim, Request $request)
+    {
+        $this->authorize('read', $claim);
+
+        $client = $claim->client ? $claim->client : $service->client;
+
+        $groups = $claim->items->groupBy('type');
+        if (!isset($groups['Expense'])) {
+            $groups['Expense'] = [];
+        }
+        if (!isset($groups['Service'])) {
+            $groups['Service'] = [];
+        }
+
+        $view = view('claims.full', [
+            'claim' => $claim,
+            'sender' => $claim->business,
+            'recipient' => $claim->payer,
+            'client' => $client,
+            'itemGroups' => $groups,
+            'render' => 'html',
+            'notes' => $claim->getInvoiceNotesData(),
+            'clientData' => $claim->getInvoiceClientData(),
+            'override_ally_logo' => $claim->business->logo,
+        ]);
+
+        if ($request->filled('download')) {
+            $pdfWrapper = app('snappy.pdf.wrapper');
+            $pdfWrapper->loadHTML($view->render());
+            return $pdfWrapper->download('C-Invoice-' . snake_case($claim->name) . '.pdf');
+        }
+
+        return $view;
+    }
 }

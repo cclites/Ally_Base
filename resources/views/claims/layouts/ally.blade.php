@@ -5,7 +5,7 @@
 ?>
 @extends('layouts.print')
 
-@section('title', 'Claim Invoice #' . $claim->getName())
+@section('title', 'C-Invoice #' . $claim->getName())
 
 @push('head')
     @include('invoices.partials.styles')
