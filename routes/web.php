@@ -521,7 +521,6 @@ Route::group([
     Route::get('reports/claims/ar-aging', 'Business\Claims\ClaimInvoiceAgingReportController@index')->name('reports.claims.ar-aging');
     Route::get('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@index');
     Route::post('claim-adjustments/{claim}', 'Business\Claims\ClaimAdjustmentController@store');
-    Route::post('claim-adjustments/{claim}/all', 'Business\Claims\ClaimAdjustmentController@adjustAll');
 
     /** CHAINS **/
     Route::get('expiration-types', 'Business\ExpirationTypesController@index');

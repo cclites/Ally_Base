@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
-use App\Claims\ClaimInvoiceItem;
-use App\Claims\Requests\AdjustAllClaimItemsRequest;
 use App\Claims\Requests\CreateClaimAdjustmentRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimInvoiceResource;
