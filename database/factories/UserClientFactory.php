@@ -21,5 +21,7 @@ $factory->define(Client::class, function(Faker $faker) {
         'hospital_number' => $faker->phoneNumber,
         'inquiry_date' => null,
         'service_start_date' => null,
+        'send_1099' => 'yes',
+        'lock_1099' => false,
     ]);
 });

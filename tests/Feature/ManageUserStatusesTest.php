@@ -109,7 +109,7 @@ class ManageUserStatusTest extends TestCase
         $data['agreement_status'] = Client::NEEDS_AGREEMENT;
 
         $this->patchJson(route('business.clients.update', ['client' => $this->client]), $data)
-            ->assertStatus(200);
+              ->assertStatus(200);
 
         $this->assertEquals($status->id, $this->client->fresh()->status_alias_id);
     }

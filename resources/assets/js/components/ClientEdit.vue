@@ -235,7 +235,7 @@
                         </b-radio-group>
                     </b-form-group>
                 </b-col>
-                <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0 ">
+                <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0">
                     <b-form-group label="Caregiver 1099">
                         <label>
                             1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
@@ -542,7 +542,7 @@
             await this.loadOfficeUsers();
             await this.fetchStatusAliases();
 
-            this.payerType();
+            this.payerTypeLabel();
 
             this.loading = false;
         },
@@ -554,6 +554,7 @@
 
                 window.open( `/business/clients/discharge-letter/${this.client.id}` );
             },
+
             canSendEmails() {
                 if (! this.form.email || this.isEmptyEmail(this.form.email)) {
                     alert('You cannot send any emails to this user because there is no email associated with their account.');
@@ -661,6 +662,12 @@
             },
 
             async saveProfile() {
+
+                if(this.show1099Warning){
+                    let message = "This Client is set to receive a year end 1099 but is missing some required information. Please check their Name, SSN, and Address Fields.";
+                    if (! confirm(message)) { return ; }
+                }
+
                 await this.form.patch('/business/clients/' + this.client.id)
                     .then( ({ data }) => {
                         this.form.avatar = data.data.avatar;
@@ -713,17 +720,13 @@
                 }
             },
 
-            payerType(){
+            payerTypeLabel(){
                 if(this.form.caregiver_1099 === 'client' || this.form.caregiver_1099 === ''){
                     this.payerLabel = 'Client';
                 }else if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked'){
                     this.payerLabel = 'Ally';
                 }
             },
-
-            validate1099(){
-
-            }
 
         },
 
@@ -776,7 +779,17 @@
                 return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
 
+            show1099Warning()
+            {
+                if( this.form.send_1099 === 'yes'){
+                    let address = this.client.addresses[0];
 
+                    if(address.address1 && address.city && address.state && address.zip){
+                        return false;
+                    }
+                }
+                return true;
+            },
         },
         watch: {
         }
