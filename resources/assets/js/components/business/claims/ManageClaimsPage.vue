@@ -164,11 +164,11 @@
                 </template>
                 <template slot="status" scope="row">
                     <span v-if="row.item.status == CLAIM_STATUSES.TRANSMITTED">
-                        <span v-if="[CLAIM_SERVICE.FAX,CLAIM_SERVICE.DIRECT_MAIL,CLAIM_SERVICE.EMAIL].includes(row.item.transmission_method)">
-                            Transmitted (Offline)
+                        <span v-if="onlineMethods.includes(row.item.transmission_method)">
+                            Transmitted (Pending)
                         </span>
                         <span v-else>
-                            Transmitted (Pending)
+                            Transmitted (Offline)
                         </span>
                     </span>
                     <span v-else-if="row.item.status == CLAIM_STATUSES.REJECTED">
@@ -397,6 +397,22 @@
             }
         },
 
+        computed: {
+            offlineMethods() {
+                return [
+                    this.CLAIM_SERVICE.EMAIL,
+                    this.CLAIM_SERVICE.FAX,
+                    this.CLAIM_SERVICE.DIRECT_MAIL
+                ];
+            },
+            onlineMethods() {
+                return [
+                    this.CLAIM_SERVICE.TELLUS,
+                    this.CLAIM_SERVICE.HHA,
+                ];
+            },
+        },
+
         methods: {
             /**
              * Show the Claim adjustment modal.
@@ -459,21 +475,15 @@
              */
             transmit(claim, skipAlert = false) {
                 if (! skipAlert) {
+                    this.selectedTransmissionMethod = '';
                     if (! claim.transmission_method) {
-                        this.selectedTransmissionMethod = '';
                         this.$refs.confirmTransmissionMethod.confirm(() => {
                             this.transmit(claim, true);
                         });
                         return;
                     }
 
-                    let offlineMethods = [
-                        this.CLAIM_SERVICE.EMAIL,
-                        this.CLAIM_SERVICE.FAX,
-                        this.CLAIM_SERVICE.DIRECT_MAIL
-                    ];
-
-                    if (offlineMethods.includes(claim.transmission_method)) {
+                    if (this.offlineMethods.includes(claim.transmission_method)) {
                         this.$refs.confirmManualTransmission.confirm(() => {
                             this.transmit(claim, true);
                         });
@@ -503,18 +513,22 @@
                     .catch(e => {
                         if (e.response.status == 412) {
                             // Required fields are missing.
-                            console.log('wtf');
                             this.showMissingFieldsModal(e.response.data.data, claim);
                         } else if (e.response.status == 420) {
                             // Tellus Validation Errors
-                            console.log('tellus');
                             this.tellusErrors = e.response.data.data.tellus_errors;
                             this.tellusErrorsModal = true;
+                        } else  if (e.response.status == 501) {
+                            // No transmission method selected, update the claim record
+                            // and re-open the confirm modal
+                            let updatedClaim = e.response.data.data.invoice;
+                            this.transmit(updatedClaim);
                         }
                     })
                     .finally(() => {
                         this.busy = false;
                         this.transmittingId = null;
+                        this.selectedTransmissionMethod = '';
                     });
             },
 
