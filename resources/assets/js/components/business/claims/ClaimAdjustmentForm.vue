@@ -1,71 +1,135 @@
 <template>
     <div>
         <h2>Claim #{{ claim.name }}</h2>
-        <div class="table-responsive claims-table">
-            <b-table bordered striped show-empty
-                class="fit-more"
-                :items="items"
-                :fields="fields"
-                empty-text="This claim has no items."
-            >
-            <template slot="selected" scope="row">
-                <b-form-checkbox v-model="row.item.selected"
-                    :disabled="form.busy"
-                    @change="selectItem(row.item.id)"/>
-            </template>
-            <template slot="start_time" scope="row">
-                <span v-if="row.item.start_time">
-                    {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
-                </span>
-                <span v-else>-</span>
-            </template>
-            <template slot="amount_applied" scope="row">
-                <div class="d-flex">
-                    <b-form-input
-                        class="mr-1"
-                        v-model="row.item.amount_applied"
-                        name="amount_applied"
-                        type="number"
-                        step="0.01"
-                        :disabled="form.busy || !row.item.selected"
-                        @change="x => itemAmountChanged(row.item, x)"
-                        placeholder="Amount"
-                    />
-                    <b-select name="adjustment_type"
-                        class="mr-1"
-                        v-model="row.item.adjustment_type"
-                        :options="claimAdjustmentTypeOptions"
-                        :disabled="form.busy || !row.item.selected"
-                        @change="x => itemTypeChanged(row.item, x)"
+        <b-tabs>
+            <!-- EDIT LINE ITEMS -->
+            <b-tab title="Adjust Line Items" active>
+                <div class="table-responsive claims-table mt-2">
+                    <b-table bordered striped show-empty
+                        class="fit-more"
+                        :items="items"
+                        :fields="fields"
+                        empty-text="This claim has no items."
                     >
-                        <template slot="first">
-                            <option value="">-- Type --</option>
-                        </template>
-                    </b-select>
-                    <b-form-input
-                        name="note"
-                        v-model="row.item.note"
-                        type="text"
-                        :disabled="form.busy || !row.item.selected"
-                        maxlength="255"
-                        style="max-width: none!important;"
-                        placeholder="Notes..."
-                    />
+                    <template slot="selected" scope="row">
+                        <b-form-checkbox v-model="row.item.selected"
+                            :disabled="form.busy"
+                            @change="selectItem(row.item.id)"/>
+                    </template>
+                    <template slot="start_time" scope="row">
+                        <span v-if="row.item.start_time">
+                            {{ formatTimeFromUTC(row.item.start_time) }} - {{ formatTimeFromUTC(row.item.end_time) }}
+                        </span>
+                        <span v-else>-</span>
+                    </template>
+                    <template slot="amount_applied" scope="row">
+                        <div class="d-flex">
+                            <b-form-input
+                                class="mr-1"
+                                v-model="row.item.amount_applied"
+                                name="amount_applied"
+                                type="number"
+                                step="0.01"
+                                :disabled="form.busy || !row.item.selected"
+                                @change="x => itemAmountChanged(row.item, x)"
+                                placeholder="Amount"
+                            />
+                            <b-select name="adjustment_type"
+                                class="mr-1"
+                                v-model="row.item.adjustment_type"
+                                :options="claimAdjustmentTypeOptions"
+                                :disabled="form.busy || !row.item.selected"
+                                @change="x => itemTypeChanged(row.item, x)"
+                            >
+                                <template slot="first">
+                                    <option value="">-- Type --</option>
+                                </template>
+                            </b-select>
+                            <b-form-input
+                                name="note"
+                                v-model="row.item.note"
+                                type="text"
+                                :disabled="form.busy || !row.item.selected"
+                                maxlength="255"
+                                style="max-width: none!important;"
+                                placeholder="Notes..."
+                            />
+                        </div>
+                    </template>
+                  </b-table>
+                <hr />
+                <div class="d-flex">
+                    <div class="ml-auto">
+                        <b-btn variant="success" @click="submit()" :disabled="form.busy">
+                            <span v-if="form.busy"><i class="fa fa-spin fa-spinner"></i></span>
+                            <span v-else>Save Adjustment</span>
+                        </b-btn>
+                        <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
+                    </div>
                 </div>
-            </template>
-          </b-table>
-        </div>
 
-        <hr />
-        <div class="d-flex">
-            <div class="ml-auto">
-                <b-btn variant="success" @click="submit()" :disabled="form.busy">
-                    <span v-if="form.busy"><i class="fa fa-spin fa-spinner"></i></span>
-                    <span v-else>Save Adjustment</span>
-                </b-btn>
-                <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
-            </div>
-        </div>
+                </div>
+            </b-tab>
+
+            <!-- PERCENT ADJUSTMENT -->
+            <b-tab title="Adjust Total %">
+                <b-container class="mt-2">
+                    <b-alert show variant="info">This will adjust all line items equally.</b-alert>
+                    <b-form-group label="Amount (Percentage)" label-for="amount_applied" label-class="required">
+                        <div class="d-flex align-items-center">
+                            <b-form-input
+                                name="amount_applied"
+                                type="number"
+                                step="0.01"
+                                min="-100"
+                                max="100.00"
+                                v-model="superForm.amount_applied"
+                                class="money-input f-1"
+                                :disabled="superForm.busy"
+                            />
+                            <span class="ml-auto p-3">%</span>
+                        </div>
+                        <input-help :form="superForm" field="amount_applied" text="" />
+                    </b-form-group>
+
+                    <b-form-group label="Adjustment Type" label-for="adjustment_type" label-class="required">
+                        <b-select name="adjustment_type"
+                            class="mr-1"
+                            v-model="superForm.adjustment_type"
+                            :options="claimAdjustmentTypeOptions"
+                            :disabled="superForm.busy"
+                        >
+                            <template slot="first">
+                                <option value="">-- Type --</option>
+                            </template>
+                        </b-select>
+                    </b-form-group>
+
+                    <b-form-group label="Notes" label-for="note">
+                        <b-textarea
+                            v-model="superForm.note"
+                            id="note"
+                            name="note"
+                            type="text"
+                            :disabled="superForm.busy"
+                            rows="2"
+                        />
+                        <input-help :form="superForm" field="note" text="" />
+                    </b-form-group>
+
+                    <hr />
+                    <div class="d-flex">
+                        <div class="ml-auto">
+                            <b-btn variant="success" @click="submitSuper()" :disabled="superForm.busy">
+                                <span v-if="superForm.busy"><i class="fa fa-spin fa-spinner"></i></span>
+                                <span v-else>Save Adjustment</span>
+                            </b-btn>
+                            <b-btn variant="default" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
+                        </div>
+                    </div>
+                </b-container>
+            </b-tab>
+        </b-tabs>
     </div>
 </template>
 
@@ -82,6 +146,11 @@
 
         data() {
             return {
+                superForm: new Form({
+                    adjustment_type: '',
+                    amount_applied: '',
+                    note: '',
+                }),
                 form: new Form({
                     adjustments: [],
                 }),
@@ -106,6 +175,15 @@
         },
 
         methods: {
+            submitSuper() {
+                this.form.post(`/business/claim-adjustments/${this.claim.id}/all`)
+                    .then( ({ data }) => {
+                        this.$emit('update', data.data);
+                        this.$emit('close');
+                    })
+                    .catch(() => {});
+            },
+
             /**
              * Map items with extra fields required.
              */

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business\Claims;
 
+use App\Claims\ClaimInvoiceItem;
+use App\Claims\Requests\AdjustAllClaimItemsRequest;
 use App\Claims\Requests\CreateClaimAdjustmentRequest;
 use App\Claims\Resources\ClaimAdjustmentResource;
 use App\Claims\Resources\ClaimInvoiceResource;
@@ -58,6 +60,37 @@ class ClaimAdjustmentController extends BaseController
             $adjustment->claimInvoiceItem->updateBalance();
             $adjustment->claimInvoice->updateBalance();
         });
+
+        \DB::commit();
+
+        return new SuccessResponse('An adjustment has been applied to the selected Claim.', new ManageClaimsResource($claim->fresh()));
+    }
+
+    /**
+     * Adjust all items equally based on submitted percentage.
+     *
+     * @param ClaimInvoice $claim
+     * @param AdjustAllClaimItemsRequest $request
+     * @return SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
+     */
+    public function adjustAll(ClaimInvoice $claim, AdjustAllClaimItemsRequest $request)
+    {
+        $this->authorize('update', $claim);
+
+        $data = $request->filtered();
+
+        \DB::beginTransaction();
+
+        $claim->items()->each(function (ClaimInvoiceItem $item) use ($claim, $data) {
+            $percentage = float ()
+            $claim->adjustments()->create([$data]);
+
+            $item->updateBalance();
+        });
+
+        $claim->updateBalance();
 
         \DB::commit();
 
