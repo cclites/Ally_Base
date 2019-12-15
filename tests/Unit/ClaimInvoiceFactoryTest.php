@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Claims\ClaimAdjustment;
-use App\Claims\ClaimAdjustmentType;
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Generators\ClientInvoiceGenerator;
@@ -11,10 +9,12 @@ use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Claims\Factories\ClaimInvoiceFactory;
 use Tests\CreatesClientInvoiceResources;
+use App\Claims\ClaimAdjustmentType;
 use App\Claims\ClaimableExpense;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
+use App\Claims\ClaimAdjustment;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
 use App\Billing\ClaimStatus;
@@ -54,9 +54,10 @@ class ClaimInvoiceFactoryTest extends TestCase
      * Helper to create a client invoice.
      *
      * @param Client|null $client
+     * @param bool $paid
      * @return ClientInvoice
      */
-    public function createClientInvoice(Client $client = null) : ClientInvoice
+    public function createClientInvoice(Client $client = null, bool $paid = false) : ClientInvoice
     {
         if (empty($client)) {
             $client = $this->client;
@@ -70,7 +71,23 @@ class ClaimInvoiceFactoryTest extends TestCase
         }
 
         $this->assertInstanceOf(ClientInvoice::class, $invoice);
+
+        if ($paid === true) {
+            $invoice->update(['amount_paid' => $invoice->amount]);
+        }
+
         return $invoice;
+    }
+
+    /**
+     * Helper to create a client invoice.
+     *
+     * @param Client|null $client
+     * @return ClientInvoice
+     */
+    public function createPayedClientInvoice(Client $client = null) : ClientInvoice
+    {
+        return $this->createClientInvoice($client, true);
     }
 
     /**
@@ -81,7 +98,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         // Expects 3 items a shift_service, a shift and a shift_expense
         $this->assertCount(3, $invoice->items);
@@ -99,11 +116,11 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $otherInvoice = $this->createClientInvoice();
+        $otherInvoice = $this->createPayedClientInvoice();
 
         $invoices = ClientInvoice::all();
         $this->assertCount(2, $invoices);
@@ -121,12 +138,12 @@ class ClaimInvoiceFactoryTest extends TestCase
     public function it_can_create_a_payer_claim_from_multiple_invoices()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $otherClient = factory('App\Client')->create();
         $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', $this->payer->id, $otherClient);
         $this->createService(20.00, '2019-01-15', null, $otherClient);
-        $otherInvoice = $this->createClientInvoice($otherClient);
+        $otherInvoice = $this->createPayedClientInvoice($otherClient);
 
         $this->assertEquals($otherClient->id, $otherInvoice->client_id);
         $this->assertNotEquals($invoice->client_id, $otherInvoice->client_id);
@@ -148,7 +165,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     public function it_can_only_create_one_claim_per_client_invoice()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
         $this->assertInstanceOf(ClaimInvoice::class, $claim);
 
@@ -161,12 +178,12 @@ class ClaimInvoiceFactoryTest extends TestCase
     public function it_cannot_create_a_claim_from_invoices_with_different_payers()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $otherClient = factory('App\Client')->create();
         $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', null, $otherClient);
         $this->createService(20.00, '2019-01-15', null, $otherClient);
-        $otherInvoice = $this->createClientInvoice($otherClient);
+        $otherInvoice = $this->createPayedClientInvoice($otherClient);
 
         $this->assertNotEquals($invoice->clientPayer->payer_id, $otherInvoice->clientPayer->payer_id);
 
@@ -183,12 +200,12 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->createService(20.00);
         $this->clientPayer->delete();
         $this->clientPayer = $this->createBalancePayer('2019-01-01', '2099-01-01', Payer::PRIVATE_PAY_ID);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $otherClient = factory('App\Client')->create();
         $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', Payer::PRIVATE_PAY_ID, $otherClient);
         $this->createService(20.00, '2019-01-15', null, $otherClient);
-        $otherInvoice = $this->createClientInvoice($otherClient);
+        $otherInvoice = $this->createPayedClientInvoice($otherClient);
 
         $this->assertEquals(Payer::PRIVATE_PAY_ID, $invoice->clientPayer->payer_id);
         $this->assertEquals(Payer::PRIVATE_PAY_ID, $otherInvoice->clientPayer->payer_id);
@@ -204,12 +221,12 @@ class ClaimInvoiceFactoryTest extends TestCase
         $this->createService(20.00);
         $this->clientPayer->delete();
         $this->clientPayer = $this->createBalancePayer('2019-01-01', '2099-01-01', Payer::OFFLINE_PAY_ID);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $otherClient = factory('App\Client')->create();
         $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', Payer::OFFLINE_PAY_ID, $otherClient);
         $this->createService(20.00, '2019-01-15', null, $otherClient);
-        $otherInvoice = $this->createClientInvoice($otherClient);
+        $otherInvoice = $this->createPayedClientInvoice($otherClient);
 
         $this->assertEquals(Payer::OFFLINE_PAY_ID, $invoice->clientPayer->payer_id);
         $this->assertEquals(Payer::OFFLINE_PAY_ID, $otherInvoice->clientPayer->payer_id);
@@ -223,13 +240,13 @@ class ClaimInvoiceFactoryTest extends TestCase
     public function it_cannot_create_a_claim_from_invoices_with_different_business_ids()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $otherBusiness = factory(Business::class)->create();
         $otherClient = factory('App\Client')->create(['business_id' => $otherBusiness->id]);
         $otherPayer = $this->createBalancePayer('2019-01-01', '9999-12-31', $this->payer->id, $otherClient);
         $this->createService(20.00, '2019-01-15', null, $otherClient);
-        $otherInvoice = $this->createClientInvoice($otherClient);
+        $otherInvoice = $this->createPayedClientInvoice($otherClient);
 
         $this->assertEquals($invoice->clientPayer->payer_id, $otherInvoice->clientPayer->payer_id);
         $this->assertNotEquals($invoice->client->business_id, $otherInvoice->client->business_id);
@@ -244,11 +261,11 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
 
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $otherInvoice = $this->createClientInvoice();
+        $otherInvoice = $this->createPayedClientInvoice();
 
         $this->assertCount(3, $invoice->items);
         $this->assertCount(3, $otherInvoice->items);
@@ -264,7 +281,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
         $this->assertInstanceOf(ClaimInvoice::class, $claim);
 
@@ -285,7 +302,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     public function it_cannot_delete_a_claim_that_has_already_been_transmitted()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
         $claim->update(['status' => ClaimStatus::TRANSMITTED()]);
 
@@ -299,7 +316,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     function it_cannot_delete_a_claim_that_has_had_adjustments_made()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
 
         ClaimAdjustment::create([
@@ -320,7 +337,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     function if_cannot_delete_a_claim_item_that_has_had_adjuistments_made()
     {
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
 
         ClaimAdjustment::create([
@@ -341,7 +358,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createShiftWithMileage(30.00, 15);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
 
         $this->assertCount(2, ClaimableService::all());
@@ -363,7 +380,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     {
         $this->createService(20.00);
         $this->createService(20.00);
-        $invoice = $this->createClientInvoice();
+        $invoice = $this->createPayedClientInvoice();
         list($claim, $errors) = $this->claimGenerator->createFromClientInvoice($invoice);
 
         $this->assertEquals(40.00, $claim->amount);
@@ -373,5 +390,18 @@ class ClaimInvoiceFactoryTest extends TestCase
 
         $this->assertEquals(20.00, $claim->fresh()->amount);
         $this->assertNotNull($claim->fresh()->modified_at);
+    }
+
+    /** @test */
+    public function it_cannot_create_a_claim_from_unpaid_invoices()
+    {
+        $this->createService(20.00);
+        $invoice = $this->createClientInvoice();
+
+        $this->assertFalse($invoice->is_paid);
+
+        $this->expectException(\InvalidArgumentException::class);
+        list($claim, $errors) = $this->claimGenerator->createFromClientInvoices(ClientInvoice::all());
+        $this->assertNull($claim);
     }
 }

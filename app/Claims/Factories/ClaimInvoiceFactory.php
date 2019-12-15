@@ -155,6 +155,11 @@ class ClaimInvoiceFactory
             if ($invoice->claimInvoices->count() > 0) {
                 throw new \InvalidArgumentException("Invoice #{$invoice->name} is already attached to a claim.");
             }
+
+            // Cannot use invoices that have not been paid
+            if (! $invoice->is_paid) {
+                throw new \InvalidArgumentException("Invoice #{$invoice->name} has not been paid.");
+            }
         }
 
         // Fail if invoices belong to separate business locations
