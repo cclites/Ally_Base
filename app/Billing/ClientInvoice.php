@@ -50,6 +50,13 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['is_paid'];
+
+    /**
      * Get the next invoice name for a client
      *
      * @param int $clientId

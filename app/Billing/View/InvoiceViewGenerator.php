@@ -36,20 +36,7 @@ class InvoiceViewGenerator
         $business = $client->business;
 
         if ($clientInvoice->isOffline()) {
-            // TODO: refactor this into a Payment interface with methods to get these fields
-            $payments = $clientInvoice->OfflinePayments->map(function (OfflineInvoicePayment $payment) {
-                return (object)[
-                    'created_at'=> $payment->payment_date,
-                    'payment_type' => $payment->description.' ('.$payment->type.': '.$payment->reference.')',
-                    'description' => $payment->description,
-                    'amount' => $payment->amount,
-                    'pivot' => [
-                        'invoice_id' => $payment->invoice->id,
-                        'payment_id' => $payment->id,
-                        'amount_applied' => $payment->amount,
-                    ],
-                ];
-            });
+            $payments = $clientInvoice->offlinePayments->sortBy('payment_date');
         } else {
             $payments = $clientInvoice->payments;
         }
