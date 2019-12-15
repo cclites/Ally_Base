@@ -111,8 +111,13 @@ class Caregiver1099Query
             }
         }
 
-        $query .= " GROUP BY s.client_id, s.caregiver_id
-                              HAVING payment_total > ?";
+        if( array_key_exists('report_type', $this->filters) && filled($this->filters['report_type']['value'])){
+            $query .= " GROUP BY s.caregiver_id, s.business_id ";
+        }else{
+            $query .= " GROUP BY s.client_id, s.caregiver_id ";
+        }
+
+        $query .= "HAVING payment_total > ?";
 
         return \DB::select($query, [$this->threshold]);
     }

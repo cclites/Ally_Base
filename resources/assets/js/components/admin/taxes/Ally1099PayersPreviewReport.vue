@@ -118,7 +118,7 @@
         methods: {
             generate(){
                 this.totalRows = 0;
-                this.form.get('/admin/ally-1099-report')
+                this.form.get('/admin/ally-preview-1099-report')
                     .then( ({ data }) => {
                         this.items = data;
                         this.totalRows = this.items.length;

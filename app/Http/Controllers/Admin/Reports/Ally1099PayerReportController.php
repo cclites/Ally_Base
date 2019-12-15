@@ -25,6 +25,7 @@ class Ally1099PayerReportController extends Controller
                                 'year'=>$request->year,
                                 'business_id'=>$request->business_id,
                                 'caregiver_id'=>$request->caregiver_id,
+                                'report_type'=>'payer'
                             ]);
 
             return response()->json($caregiver1099s);
