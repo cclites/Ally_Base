@@ -9,8 +9,8 @@
                 {{ formatDate(data.item.created_at) }}
             </template>
             <template slot="amount_paid" scope="data">
-                <span style="color: darkred;" v-if="data.value < data.item.amount">Unpaid</span>
-                <span style="color: green;" v-else>Paid</span>
+                <span v-if="data.item.is_paid" style="color: green;">Paid</span>
+                <span v-else style="color: darkred;">Unpaid</span>
             </template>
             <template slot="actions" scope="data">
                 <slot name="actions" :item="data.item">
