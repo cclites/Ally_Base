@@ -30,9 +30,10 @@ class AdminBad1099ReportController extends Controller
         return view_component(
             'bad-1099-report',
             'Bad 1099 Report',
+            [],
             [
                 'Home' => route('home'),
-                'Reports' => route('admin.admin-1099-actions')
+                '1099' => route('admin.admin-1099-actions')
             ]
         );
     }

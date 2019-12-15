@@ -91,6 +91,12 @@
                         disabled: false,
                     },
                     {
+                        name: 'ALLY 1099 Payers Preview Report',
+                        description: 'Preview Ally Payers',
+                        url: 'ally-preview-1099-report',
+                        disabled: false,
+                    },
+                    {
                         name: '1099 Creation',
                         description: 'Artisan command to run that will calculate and populate (append to) a 1099 table',
                         url: 'generate-1099',

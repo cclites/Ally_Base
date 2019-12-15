@@ -18,6 +18,11 @@
                 </li>
             </ul>
         </div>
+
+        <b-row v-if="! years.length">
+            {{ emptyText }}
+        </b-row>
+
         <b-modal v-model="emailModal"
                  @cancel="hideModal()"
                  ok-variant="info"
@@ -49,7 +54,8 @@
             return {
                 emailModal: false,
                 modalTitle: '',
-                emails: ''
+                emails: '',
+                emptyText: 'There is no 1099 information in the database.',
             }
         },
         mounted(){

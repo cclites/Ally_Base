@@ -97,14 +97,13 @@ class Admin1099Controller extends BaseController
         $emails = Business::whereNotNull('contact_email')->pluck('contact_email')->toArray();
         $emailString = implode(",", $emails);
 
+
         return view_component('admin-registry-emails',
                                     'Registry Emails',
                                 ['emails' => $emailString],
                                 [
-                                    [
-                                        'Home' => route('home'),
-                                        '1099' => route('admin.admin-1099-actions')
-                                    ]
+                                    'Home' => route('home'),
+                                    '1099' => route('admin.admin-1099-actions')
                                 ]
                             );
     }

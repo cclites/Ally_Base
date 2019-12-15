@@ -637,8 +637,9 @@ Route::group([
     /* Caregiver 1099 preview related */
     Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');
 
-    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list'); //preview-1099-report
+    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list');
     Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
+    Route::get('ally-1099-report', 'Admin\Reports\Ally1099PayerReportController@index')->name('ally-1099-report');
 
     /* Caregiver 1099s */
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');

@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin\Reports;
 
 use App\Caregiver1099;
 use App\Admin\Queries\Caregiver1099Query;
-use App\Reports\Admin1099PreviewReport;
+use App\Reports\Ally1099PayerReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class Admin1099PreviewReportController extends Controller
+class Ally1099PayerReportController extends Controller
 {
-    public function index(Admin1099PreviewReport $report, Request $request){
+    public function index(Ally1099PayerReport $report, Request $request){
 
         if($request->json){
 
@@ -24,19 +24,14 @@ class Admin1099PreviewReportController extends Controller
             $caregiver1099s = $report->applyFilters([
                                 'year'=>$request->year,
                                 'business_id'=>$request->business_id,
-                                'client_id'=>$request->client_id,
                                 'caregiver_id'=>$request->caregiver_id,
-                                'caregiver_1099'=>$request->caregiver_1099,
-                                'status'=>$request->status,
-                                'transmission'=>$request->transmission,
-                                'caregiver_1099_id'=>$request->caregiver_1099_id
                             ]);
 
             return response()->json($caregiver1099s);
         }
 
         return view_component(
-            'admin-1099-preview',
+            'ally-1099-preview',
             '1099 Preview Report',
             [],
             [

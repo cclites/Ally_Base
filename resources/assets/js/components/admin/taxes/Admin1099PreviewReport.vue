@@ -13,14 +13,12 @@
                 </b-form-select>
             </b-form-group>
 
-            <b-form-group label="Business" label-for="business_id" class="mr-2">
-                <b-form-select id="business_id"
-                               v-model="form.business_id"
-                >
-                    <option value="">All Businesses</option>
-                    <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
-                </b-form-select>
-            </b-form-group>
+            <business-location-form-group
+                    v-model="form.business_id"
+                    :allow-all="true"
+                    class="mr-2"
+                    label="Location"
+            />
 
             <b-form-group label="Caregivers" label-for="caregiver_id" class="mr-2">
                 <b-form-select
@@ -178,16 +176,17 @@
 
 
     </b-card>
-</template>b
+</template>
 
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-
-    /****************************/
+    import BusinessLocationSelect from "../../business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../../business/BusinessLocationFormGroup";
 
     export default {
         name: "Admin1099PreviewReport",
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsNumbers, FormatsDates],
         props: {},
         data() {
@@ -205,7 +204,6 @@
                         json: 1,
                 }),
                 transmitSelected: [],
-                businesses: [],
                 caregivers: [],
                 clients: [],
                 items: [],
@@ -236,10 +234,6 @@
             }
         },
         methods: {
-            async loadFilters() {
-                axios.get('/admin/businesses').then(response => this.businesses = response.data);
-            },
-
             generate(){
                 this.totalRows = 0;
                 this.form.get('/admin/preview-1099-report')
@@ -366,9 +360,6 @@
                 return true;
             }
         },
-        async mounted(){
-            this.loadFilters();
-        }
     }
 </script>
 

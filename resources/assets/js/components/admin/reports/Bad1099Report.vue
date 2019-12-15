@@ -11,6 +11,7 @@
                     class="mr-2"
                     label="Location"
             />
+
             <b-form-group label="Year" label-for="year" class="mr-2">
                 <b-form-select id="year" v-model="form.year" :options="years" class="mb-2">
                 </b-form-select>
@@ -49,6 +50,7 @@
                     </b-table>
                 </b-col>
             </b-row>
+
         </div>
 
         <b-row v-if="this.items.length > 0">
@@ -59,6 +61,9 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+        <div v-else class="text-center">
+            {{ emptyText }}
+        </div>
     </b-card>
 </template>
 
@@ -72,6 +77,8 @@
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
         methods: {
             generate(){
+
+                this.busy = true;
                 this.totalRows = 0;
                 this.form.get('/admin/reports/bad-1099-report')
                     .then( ({ data }) => {
@@ -80,6 +87,7 @@
                     })
                     .catch(e => {})
                     .finally(() => {
+                        this.busy = false;
                     })
             },
         },
