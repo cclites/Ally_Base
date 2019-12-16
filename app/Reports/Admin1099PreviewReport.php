@@ -18,6 +18,9 @@ class Admin1099PreviewReport
         $query = new Caregiver1099Query();
         $caregiver1099s = $query->generateReport($filters);
 
+        \Log::info($caregiver1099s);
+
+
         return collect($caregiver1099s)->map(function($caregiver1099){
 
             return[
@@ -32,7 +35,6 @@ class Admin1099PreviewReport
                 'caregiver_1099_id' => $caregiver1099->caregiver_1099_id,
                 'caregiver_id' => $caregiver1099->caregiver_id,
                 'client_id' => $caregiver1099->client_id,
-                'transmitted' => $caregiver1099->transmitted_at,
                 'errors' => Caregiver1099::getErrors($caregiver1099),
             ];
 

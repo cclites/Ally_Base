@@ -59,7 +59,6 @@ class Caregiver1099Query
                     a2.state as caregiver_state,
                     a2.zip as caregiver_zip,
                     ct.id as caregiver_1099_id,
-                    ct.transmitted_at,
                     ct.payment_total as caregiver_1099_amount,
                     ct.business_id as caregiver_1099_location,
                     sum(h.caregiver_shift) as payment_total
@@ -111,12 +110,14 @@ class Caregiver1099Query
             }
         }
 
+        /*
         if( array_key_exists('report_type', $this->filters) && filled($this->filters['report_type']['value'])){
             $query .= " GROUP BY s.caregiver_id, s.business_id ";
         }else{
             $query .= " GROUP BY s.client_id, s.caregiver_id ";
         }
-
+        */
+        $query .= " GROUP BY s.client_id, s.caregiver_id ";
         $query .= "HAVING payment_total > ?";
 
         return \DB::select($query, [$this->threshold]);

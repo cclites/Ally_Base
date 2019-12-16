@@ -100,29 +100,40 @@ class Caregiver1099Controller extends Controller
 
     public function store(StoreCaregiver1099Request $request)
     {
-        $query = new Caregiver1099Query; // ->$records;
-        $records = $query->_query($request->validated());
-
+        $query = new Caregiver1099Query();
+        $records = $query->generateReport($request->validated());
+        
         foreach($records as $record)
         {
             $record = (array)$record;
-            $record['year'] = $request->year;
-            $record['created_by'] = auth()->user()->nameLastFirst();
-            $record['payment_total'] = floatval($record['payment_total']);
+            $data = [
+                'year'=>$request->year,
+                'created_by'=>auth()->user()->nameLastFirst(),
+                'payment_total'=>floatval($record['payment_total']),
+                'client_id'=>$record['client_id'],
+                'client_fname'=>$record['client_fname'],
+                'client_lname'=>$record['client_lname'],
+                'client_address1'=>$record['client_address1'],
+                'client_address2'=>$record['client_address2'],
+                'client_city'=>$record['client_city'],
+                'client_state'=>$record['client_state'],
+                'client_zip'=>$record['client_zip'],
+                'client_ssn'=>$record['client_ssn'],
+                'caregiver_id'=>$record['caregiver_id'],
+                'caregiver_fname'=>$record['caregiver_fname'],
+                'caregiver_lname'=>$record['caregiver_lname'],
+                'caregiver_address1'=>$record['caregiver_address1'],
+                'caregiver_address2'=>$record['caregiver_address2'],
+                'caregiver_city'=>$record['caregiver_city'],
+                'caregiver_state'=>$record['caregiver_state'],
+                'caregiver_zip'=>$record['caregiver_zip'],
+                'caregiver_ssn'=>$record['caregiver_ssn'],
+            ];
 
-            // These fields are used for filtering the 1099 preview report, but are not
-            // actually part of a the caregiver_1099 model
-            unset($record['caregiver_1099']);
-            unset($record['caregiver_1099_id']);
-            unset($record['caregiver_1099_amount']);
-            unset($record['caregiver_1099_location']);
-            unset($record['client_type']);
-            unset($record['business_name']);
-
-
-            $caregiver1099 = new Caregiver1099($record);
+            $caregiver1099 = new Caregiver1099($data);
             $caregiver1099->save();
         }
+
 
         return new SuccessResponse("Caregiver 1099 has been created");
     }
@@ -381,7 +392,7 @@ class Caregiver1099Controller extends Controller
             /** COPY A **/
             'topmostSubform[0].CopyA[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyA[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyA[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
+            'topmostSubform[0].CopyA[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4),  //recipient tin
             'topmostSubform[0].CopyA[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].CopyA[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyA[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
@@ -390,7 +401,7 @@ class Caregiver1099Controller extends Controller
             /** COPY B **/
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4), //recipient tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
@@ -399,7 +410,7 @@ class Caregiver1099Controller extends Controller
             /** COPY 1 **/
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4), //recipient tin
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
@@ -408,7 +419,7 @@ class Caregiver1099Controller extends Controller
             /** COPY 2 **/
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4), //recipient tin
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
@@ -417,7 +428,7 @@ class Caregiver1099Controller extends Controller
             /** COPY C **/
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_3[0]' => decrypt($caregiver1099->caregiver_ssn), //recipient tin
+            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4), //recipient tin
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip

@@ -11,7 +11,7 @@ use App\Business;
 class Caregiver1099 extends BaseModel
 {
     protected $table = 'caregiver_1099s';
-    protected $guarded = ['id'];
+    protected $guarded = [];
 
     // Relations
     public function caregiver(){

@@ -67,8 +67,8 @@ class Caregiver1099Controller extends Controller
         $pdf->fillForm([
             /** COPY C **/
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
+            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_2[0]' => $payerTin,
+            'topmostSubform[0].CopyC[0].LeftColumn[0].f2_3[0]' => "***-**-" . substr($caregiverTin,-4), //recipient tin
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_4[0]' => $caregiver1099->caregiver_fname . " " . $caregiver1099->caregiver_lname, //recipient name
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_5[0]' => $caregiver1099->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyC[0].LeftColumn[0].f2_6[0]' => $caregiver1099->caregiver_address3(), //recipient city, state, zip
