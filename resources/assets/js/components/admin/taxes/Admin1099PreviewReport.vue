@@ -16,7 +16,7 @@
             <business-location-form-group
                     v-model="form.business_id"
                     :allow-all="true"
-                    class="mr-2"
+                    class="mr-2 location_select"
                     label="Location"
             />
 
@@ -122,11 +122,6 @@
                                 <i class="fa fa-print mr-2"></i>
                             </b-btn>
                         </template>
-                        <!--template slot="transmit" scope="row">
-                            <div v-if="row.item.transmitted">
-                                {{ formatDateTimeFromUTC(row.item.transmitted) }}
-                            </div>
-                        </template-->
                     </b-table>
                 </b-col>
             </b-row>
@@ -228,13 +223,13 @@
                     {key: 'business_name', label: 'Location', sortable: true,},
                     {key: 'payment_total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     'actions',
-                    //'transmit'
                 ],
 
             }
         },
         methods: {
             generate(){
+                this.busy = true;
                 this.totalRows = 0;
                 this.form.get('/admin/preview-1099-report')
                     .then( ({ data }) => {
@@ -243,6 +238,7 @@
                     })
                     .catch(e => {})
                     .finally(() => {
+                        this.busy = false;
                     })
             },
 
@@ -278,8 +274,8 @@
                 .finally(() => {});
             },
 
+            /* Unused at this time */
             transmit(){
-
                 let url = '/admin/business-1099/transmit?transmitSelected=' + this.transmitSelected;
 
                 axios.get(url)
@@ -294,14 +290,10 @@
 
                         this.transmitSelected = [];
                         this.generate();
-
                     })
                     .catch( e => {})
                     .finally(() => {
-
-
                     });
-
             },
 
             save(){
@@ -378,5 +370,9 @@
 
     button.btn.btn-secondary{
         padding: 2px;
+    }
+
+    .location_select{
+        margin-top: 5px;
     }
 </style>
