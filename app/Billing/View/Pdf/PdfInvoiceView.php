@@ -28,10 +28,11 @@ class PdfInvoiceView implements InvoiceViewStrategy
         ContactableInterface $sender,
         ContactableInterface $recipient,
         ContactableInterface $subject,
-        Collection $payments
+        Collection $payments,
+        string $override_ally_logo = null
     ) {
         $itemGroups = $invoice->getItemGroups();
-        $view = view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups'));
+        $view = view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups', 'override_ally_logo'));
         $this->pdfWrapper->loadHTML($view->render());
         return $this->pdfWrapper->download($this->filename);
     }

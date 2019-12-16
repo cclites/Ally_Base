@@ -12,13 +12,6 @@
                 <b-tab title="System" href="#system">
                     <b-row>
                         <b-col lg="6">
-                            <!--<div v-if="business.logo" class="mb-3">-->
-                            <!--{{ business.logo }}-->
-                            <!--</div>-->
-                            <!--<b-alert v-else show variant="info">Logo not set.</b-alert>-->
-                            <!--<b-form-group label="Logo">-->
-                            <!--<b-form-file id="logo" v-model="businessSettings.logo" tabindex="0"></b-form-file>-->
-                            <!--</b-form-group>-->
                             <b-form-group label="Mileage Rate" label-for="mileageRate" label-class="required">
                                 <b-form-input type="number"
                                               step="any"
@@ -135,6 +128,16 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
+                            </b-form-group>
+                            <b-form-group label="Logo" label-for="logo">
+                                <image-cropper
+                                    v-model="businessSettings.logo"
+                                    width="190"
+                                    height="80"
+                                    :default-image="defaultInvoiceLogo"
+                                    cropperPadding="100"
+                                />
+                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on invoices, pay statements and claims."></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -574,11 +577,13 @@
     import BusinessLocationSelect from "./BusinessLocationSelect";
     import AuthUser from '../../mixins/AuthUser';
     import {mapGetters, mapState, mapMutations} from 'vuex';
+    import Constants from "../../mixins/Constants";
+
 
     export default {
         components: {BusinessLocationSelect},
         props: {},
-        mixins: [AuthUser],
+        mixins: [AuthUser, Constants],
 
         data() {
             return {
@@ -658,7 +663,6 @@
 
             makeForm(business) {
                 return new Form({
-                    //logo: business.logo,
                     business_id: business.id,
                     scheduling: business.scheduling,
                     mileage_rate: business.mileage_rate,
@@ -708,6 +712,7 @@
                     hha_password: business.hha_password ? '********' : '',
                     tellus_username: business.tellus_username,
                     tellus_password: business.tellus_password ? '********' : '',
+                    logo: business.logo,
                 });
             },
 

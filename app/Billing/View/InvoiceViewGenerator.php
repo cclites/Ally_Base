@@ -24,9 +24,9 @@ class InvoiceViewGenerator
         $this->strategy = $strategy;
     }
 
-    function generate(ContactableInterface $sender, ContactableInterface $recipient, ContactableInterface $subject, InvoiceInterface $invoice, Collection $payments)
+    function generate(ContactableInterface $sender, ContactableInterface $recipient, ContactableInterface $subject, InvoiceInterface $invoice, Collection $payments, string $override_ally_logo = null)
     {
-        return $this->strategy->generate($invoice, $sender, $recipient, $subject, $payments);
+        return $this->strategy->generate($invoice, $sender, $recipient, $subject, $payments, $override_ally_logo);
     }
 
     function generateClientInvoice(ClientInvoice $clientInvoice)
@@ -36,20 +36,7 @@ class InvoiceViewGenerator
         $business = $client->business;
 
         if ($clientInvoice->isOffline()) {
-            // TODO: refactor this into a Payment interface with methods to get these fields
-            $payments = $clientInvoice->OfflinePayments->map(function (OfflineInvoicePayment $payment) {
-                return (object)[
-                    'created_at'=> $payment->payment_date,
-                    'payment_type' => $payment->description.' ('.$payment->type.': '.$payment->reference.')',
-                    'description' => $payment->description,
-                    'amount' => $payment->amount,
-                    'pivot' => [
-                        'invoice_id' => $payment->invoice->id,
-                        'payment_id' => $payment->id,
-                        'amount_applied' => $payment->amount,
-                    ],
-                ];
-            });
+            $payments = $clientInvoice->offlinePayments->sortBy('payment_date');
         } else {
             $payments = $clientInvoice->payments;
         }
@@ -67,7 +54,8 @@ class InvoiceViewGenerator
             $recipient,
             $subject,
             $clientInvoice,
-            $payments
+            $payments,
+            $business->logo
         );
     }
 

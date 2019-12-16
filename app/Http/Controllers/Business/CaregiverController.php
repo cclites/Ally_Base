@@ -25,7 +25,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Rules\Avatar;
+use App\Rules\ImageCropperUpload;
 use App\Http\Requests\UpdateNotificationOptionsRequest;
 use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Actions\CreateCaregiver;
@@ -530,7 +530,8 @@ class CaregiverController extends BaseController
             'caregiver'           => $caregiver,
             'deactivatedBy'       => \Auth::user()->name,
             'totalLifetimeHours'  => $totalLifetimeHours,
-            'totalLifetimeShifts' => $totalLifetimeShifts
+            'totalLifetimeShifts' => $totalLifetimeShifts,
+            'override_ally_logo' => optional($caregiver->businesses->first())->logo,
         ]);
 
         $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');

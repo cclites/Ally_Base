@@ -32,9 +32,7 @@
                 v-model="filters.invoice_type"
                 class="mr-1 mt-1"
             >
-                <option value="">-- Invoice Status --</option>
-                <option value="unpaid">Unpaid Invoices</option>
-                <option value="paid">Paid Invoices</option>
+                <option value="">-- Claim Status --</option>
                 <option value="has_claim">Has Claim</option>
                 <option value="no_claim">Does Not Have Claim</option>
             </b-form-select>
@@ -166,7 +164,6 @@
                     client_name: { sortable: true },
                     payer_name: { sortable: true },
                     amount: { label: 'Invoiced Amt', sortable: true, formatter: (val) => this.moneyFormat(val, '$', true) },
-                    is_paid: { label: 'Paid', sortable: true },
                     claim_name: { label: 'Claim #', sortable: false },
                     actions: { tdClass: 'actions-column', sortable: false },
                 },

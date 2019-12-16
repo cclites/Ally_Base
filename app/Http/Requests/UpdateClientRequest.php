@@ -9,7 +9,7 @@ use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
-use App\Rules\Avatar;
+use App\Rules\ImageCropperUpload;
 use App\Client;
 use When\Valid;
 
@@ -43,7 +43,7 @@ class UpdateClientRequest extends BusinessRequest
             'ambulatory' => 'nullable|boolean',
             'hospital_name' => 'nullable|string|max:100',
             'hospital_number' => 'nullable|string|max:25',
-            'avatar' => ['nullable', new Avatar()],
+            'avatar' => ['nullable', new ImageCropperUpload()],
             'referral_source_id' => 'nullable|exists:referral_sources,id',
             'hic' => 'nullable|string|max:50',
             'travel_directions' => 'nullable|string|max:65535',

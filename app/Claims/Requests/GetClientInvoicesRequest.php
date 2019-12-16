@@ -22,7 +22,7 @@ class GetClientInvoicesRequest extends FilteredResourceRequest
             'end_date' => 'nullable|date',
             'client_id' => 'nullable|numeric',
             'businesses' => 'nullable',
-            'invoice_type' => 'nullable',
+            'invoice_type' => 'nullable|in:has_claim,no_claim',
             'payer_id' => 'nullable',
             'client_type' => 'nullable',
             'inactive' => 'nullable|bool',

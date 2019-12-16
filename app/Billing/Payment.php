@@ -3,6 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Contracts\PaymentInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Business;
 use App\Businesses\Timezone;
@@ -11,6 +12,7 @@ use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\PaymentFailed;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -58,7 +60,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Payment extends AuditableModel implements BelongsToBusinessesInterface
+class Payment extends AuditableModel implements BelongsToBusinessesInterface, PaymentInterface
 {
     use BelongsToOneBusiness;
 
@@ -154,17 +156,37 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @return float
      */
-    function getAmount(): float
+    public function getAmount(): float
     {
         return $this->amount;
     }
 
     /**
-     * Return the amount of the payment that has been applied to invoices
+     * Return the amount of the payment that has been applied a particular invoice.
+     *
+     * @param ClientInvoice $invoice
+     * @return float
+     */
+    public function getAmountAppliedTowardsInvoice(ClientInvoice $invoice) : float
+    {
+        // This will utilize the pivot table if this Payment is loaded from the
+        // ClientInvoice->payments() relationship.
+        if ($this->pivot && $this->pivot->amount_applied && $this->pivot->invoice_id = $invoice->id) {
+            return (float) $this->pivot->amount_applied;
+        }
+
+        return (float) \DB::table('invoice_payments')
+            ->where('payment_id', $this->id)
+            ->where('invoice_id', $invoice->id)
+            ->sum('amount_applied');
+    }
+
+    /**
+     * Return the TOTAL amount of the payment that has been applied to invoices
      *
      * @return float
      */
-    function getAmountApplied(): float
+    public function getAmountApplied(): float
     {
         return (float) \DB::table('invoice_payments')->where('payment_id', $this->id)->sum('amount_applied');
     }
@@ -199,7 +221,6 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         return $this->paymentMethod;
     }
 
-
     /**
      * Mark the payment as failed and emit the domain event
      *
@@ -211,6 +232,30 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
             throw new \Exception('The payment could not be marked as failed.');
         }
         event(new PaymentFailed($this));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDate(): Carbon
+    {
+        return $this->created_at;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getType(): string
+    {
+        return $this->payment_type;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNotes(): ?string
+    {
+        return $this->notes;
     }
 
     // **********************************************************

@@ -2,6 +2,7 @@
 
 namespace App\Claims\Requests;
 
+use App\Claims\ClaimInvoiceItem;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Services\GeocodeManager;
@@ -58,11 +59,11 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'caregiver_ssn' => ['nullable', new ValidSSN()],
             'caregiver_medicaid_id' => 'nullable|string',
 
-            'address1' => 'nullable|string',
+            'address1' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'address2' => 'nullable|string',
-            'city' => 'nullable|string',
-            'state' => 'nullable|string',
-            'zip' => 'nullable|string',
+            'city' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'state' => 'required_if:claimable_type,' . ClaimableService::class . '',
+            'zip' => 'required_if:claimable_type,' . ClaimableService::class . '',
 
             'service_id' => [
                 'required_if:claimable_type,' . ClaimableService::class,
@@ -127,16 +128,23 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'shift_end_time.required_if' => 'The :attribute field is required.',
             'service_start_date.required_if' => 'The :attribute field is required.',
             'service_start_time.required_if' => 'The :attribute field is required.',
+            'address1.required_if' => 'The :attribute field is required.',
+            'city.required_if' => 'The :attribute field is required.',
+            'state.required_if' => 'The :attribute field is required.',
+            'zip.required_if' => 'The :attribute field is required.',
         ];
     }
 
     /**
      * Get the data to update the ClaimInvoiceItem's Claimable object.
+     * NOTE: This method fires an API call to look up addresses which
+     * can produce a lag on the system.  This only occurs when the
+     * address is detected as changed.
      *
      * @return array
      * @throws ValidationException
      */
-    public function getClaimableData(): array
+    public function getClaimableData(?ClaimInvoiceItem $itemRecord = null): array
     {
         $data = collect($this->validated());
 
@@ -172,18 +180,27 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
 
                 unset($data['units'], $data['shift_start_date'], $data['shift_end_date'], $data['shift_start_time'], $data['shift_end_time'], $data['service_start_date'], $data['service_start_time']);
 
-                // Geo lookup on address entered
-                list($lat, $lon) = $this->lookupGeocode(
-                    $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip
-                );
+                // Geo lookup on address entered (only if the service address has changed)
+                if ($this->addressHasChangedSince($itemRecord)) {
+                    list($lat, $lon) = $this->lookupGeocode(
+                        $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->zip
+                    );
 
-                if (empty($lat) || empty($lon)) {
-                    throw_validation_exception([
-                        'address1' => ['This address appears to be invalid.'],
-                    ]);
+                    if (empty($lat) || empty($lon)) {
+                        throw_validation_exception([
+                            'address1' => ['This address appears to be invalid.'],
+                        ]);
+                    }
+                    $data['latitude'] = $lat;
+                    $data['longitude'] = $lon;
+                } else {
+                    unset($data['address1']);
+                    unset($data['city']);
+                    unset($data['state']);
+                    unset($data['zip']);
+                    unset($data['latitude']);
+                    unset($data['longitude']);
                 }
-                $data['latitude'] = $lat;
-                $data['longitude'] = $lon;
 
                 break;
 
@@ -201,6 +218,25 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
         }
 
         return $data;
+    }
+
+    /**
+     * Compare the address given in the request with the specified
+     * ClaimInvoiceItem.
+     *
+     * @param ClaimInvoiceItem|null $item
+     * @return bool
+     */
+    public function addressHasChangedSince(?ClaimInvoiceItem $item) : bool
+    {
+        if (empty($item)) {
+            return true;
+        }
+
+        return $item->claimable->address1 != $this->address1 ||
+            $item->claimable->city != $this->city ||
+            $item->claimable->state != $this->state ||
+            $item->claimable->zip != $this->zip;
     }
 
     /**

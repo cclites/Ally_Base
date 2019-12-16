@@ -639,7 +639,7 @@
             <h5><strong>Service Address</strong></h5>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Address Line 1" label-for="address1">
+                    <b-form-group label="Address Line 1" label-for="address1" label-class="required">
                         <b-form-input
                             name="address1"
                             type="text"
@@ -659,7 +659,7 @@
                         />
                         <input-help :form="form" field="address2" text="" />
                     </b-form-group>
-                    <b-form-group label="City" label-for="city">
+                    <b-form-group label="City" label-for="city" label-class="required">
                         <b-form-input
                             name="city"
                             type="text"
@@ -669,7 +669,7 @@
                         />
                         <input-help :form="form" field="city" text="" />
                     </b-form-group>
-                    <b-form-group label="State" label-for="state">
+                    <b-form-group label="State" label-for="state" label-class="required">
                         <b-form-input
                             name="state"
                             type="text"
@@ -681,7 +681,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Zip Code" label-for="zip">
+                    <b-form-group label="Zip Code" label-for="zip" label-class="required">
                         <b-form-input
                             name="zip"
                             type="text"

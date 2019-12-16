@@ -142,6 +142,28 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     }
 
     /**
+     * Get the ClaimInvoiceItems that are ClaimableServices.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function serviceItems()
+    {
+        return $this->hasMany(ClaimInvoiceItem::class, 'claim_invoice_id', 'id')
+            ->where('claimable_type', ClaimableService::class);
+    }
+
+    /**
+     * Get the ClaimInvoiceItems that are ClaimableExpenses.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function expenseItems()
+    {
+        return $this->hasMany(ClaimInvoiceItem::class, 'claim_invoice_id', 'id')
+            ->where('claimable_type', ClaimableExpense::class);
+    }
+
+    /**
      * Get the Client relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -484,6 +506,10 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
 
         if ($value = $this->getFirstItemData('client_hic')) {
             $data->push("HIC: $value");
+        }
+
+        if ($value = $this->getFirstItemData('client_case_manager')) {
+            $data->push("Case Mgr: $value");
         }
 
         return $data->toArray();

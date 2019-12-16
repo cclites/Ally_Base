@@ -249,6 +249,10 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $ssn = str_replace('*', '0', $ssn);
         }
 
+        if (strlen($ssn) < 9) {
+            $ssn = '000000000';
+        }
+
         return $ssn[0] . $ssn[1] . $ssn[2] . '-' . $ssn[3] . $ssn[4] . '-' . $ssn[5] . $ssn[6] . $ssn[7] . $ssn[8];
     }
 

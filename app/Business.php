@@ -1000,6 +1000,46 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->timezone ? $this->timezone : config('ally.local_timezone');
     }
 
+    /**
+     * Get the business logo filename.
+     *
+     * @return string
+     */
+    public function getLogoAttribute() : string
+    {
+        if (filled($this->attributes['logo'])) {
+            return \Storage::disk('public')->url($this->attributes['logo']);
+        } else {
+            return config('ally.logo.invoice');
+        }
+    }
+
+    /**
+     * Set (and store) the business logo from uploaded image data.
+     *
+     * @param $value
+     */
+    public function setLogoAttribute($value)
+    {
+        if (empty($value) || $value == config('ally.logo.invoice')) {
+            $this->attributes['logo'] = null;
+            return;
+        }
+
+        if (starts_with($value, config('app.url'))) {
+            return;
+        }
+
+        $base64Data = str_replace('data:image/png;base64,', '', $value);
+        $base64Data = str_replace(' ', '+', $base64Data);
+
+        $filename = 'logos/' . $this->id . '_' . str_slug($this->name) . '.png';
+
+        if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
+            $this->attributes['logo'] = $filename;
+        }
+    }
+
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
@@ -1024,7 +1064,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
             'outgoing_sms_number' => $faker->simple_phone,
             'ein' => $faker->randomNumber(9, true),
             'medicaid_id' => $faker->randomNumber(9, true),
-            'medicaid_npi_number' => $faker->randomNumber(9, true),
+            'medicaid_npi_number' => $faker->randomNumber(10, true),
             'medicaid_npi_taxonomy' => $faker->randomNumber(9, true),
             'medicaid_license_number' => $faker->randomNumber(9, true),
         ];

@@ -1,3 +1,9 @@
+<?php
+/**
+ * @var \App\Billing\ClientInvoice $invoice
+ * @var \Illuminate\Support\Collection|App\Billing\Payment[] $payments
+ */
+?>
 <div class="row">
     <div class="col-md-12">
 
@@ -13,22 +19,24 @@
             </tr>
             </thead>
             <tbody>
+            @if(empty($payments) || $payments->count() == 0)
+                <tr>
+                    <td colspan="5" style="padding-left: 15px;">
+                        None
+                    </td>
+                </tr>
+            @endif
             @foreach($payments as $payment)
                 <tr>
-                    <td>{{ local_date($payment->created_at) }}</td>
-                    <td>{{ $payment->payment_type }}</td>
-                    <td>{{ number_format($payment->amount, 2) }}</td>
-
-                    @if(!is_array($payment->pivot))
-                        <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>
-                    @else
-                        <td>{{ number_format($payment->pivot['amount_applied'] ?? '-1', 2) }}</td>
-                    @endif
+                    <td>{{ local_date($payment->getDate()) }}</td>
+                    <td>{{ $payment->getType() }}</td>
+                    <td>{{ number_format($payment->getAmount(), 2) }}</td>
+                    <td>{{ number_format($payment->getAmountAppliedTowardsInvoice($invoice), 2) }}</td>
                 </tr>
-                @if($payment->notes)
+                @if($payment->getNotes())
                     <tr>
                         <td colspan="5" style="padding-left: 15px;">
-                            <strong>Note: </strong> {{ $payment->notes }}
+                            <strong>Note: </strong> {{ $payment->getNotes() }}
                         </td>
                     </tr>
                 @endif

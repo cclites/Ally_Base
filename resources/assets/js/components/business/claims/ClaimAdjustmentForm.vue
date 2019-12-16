@@ -1,7 +1,59 @@
 <template>
     <div>
         <h2>Claim #{{ claim.name }}</h2>
-        <div class="table-responsive claims-table">
+        <div class="d-flex">
+            <div class="ml-auto">
+                <div class="form-inline">
+                    <b-form-checkbox v-model="superAdjust.selected"
+                        :disabled="form.busy"
+                        @change="toggleSuperAdjust()">
+                        Apply Percentage
+                    </b-form-checkbox>
+                    <b-form-input
+                        style="max-width: 100px"
+                        class="mr-1"
+                        v-model="superAdjust.amount_applied"
+                        name="amount_applied"
+                        type="number"
+                        step="0.01"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @input="superAdjustAmountChanged()"
+                        placeholder="Percent"
+                    /><span class="mx-2">%</span>
+                    <b-select name="method"
+                        class="mr-1"
+                        v-model="superAdjust.method"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @change="x => superAdjustMethodChanged(x)"
+                    >
+                        <option value="amount">Total Amount</option>
+                        <option value="amount_due">Amount Due</option>
+                    </b-select>
+                    <b-select name="adjustment_type"
+                        class="mr-1"
+                        v-model="superAdjust.adjustment_type"
+                        :options="claimAdjustmentTypeOptions"
+                        :disabled="form.busy || !superAdjust.selected"
+                        @change="x => superAdjustTypeChanged(x)"
+                    >
+                        <template slot="first">
+                            <option value="">-- Type --</option>
+                        </template>
+                    </b-select>
+                    <b-form-input
+                        name="note"
+                        v-model="superAdjust.note"
+                        type="text"
+                        :disabled="form.busy || !superAdjust.selected"
+                        maxlength="255"
+                        style="max-width: none!important;"
+                        placeholder="Notes..."
+                        @input="superAdjustNotesChanged()"
+                    />
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive claims-table mt-2">
             <b-table bordered striped show-empty
                 class="fit-more"
                 :items="items"
@@ -10,7 +62,7 @@
             >
             <template slot="selected" scope="row">
                 <b-form-checkbox v-model="row.item.selected"
-                    :disabled="form.busy"
+                    :disabled="form.busy || superAdjust.selected"
                     @change="selectItem(row.item.id)"/>
             </template>
             <template slot="start_time" scope="row">
@@ -27,7 +79,7 @@
                         name="amount_applied"
                         type="number"
                         step="0.01"
-                        :disabled="form.busy || !row.item.selected"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
                         @change="x => itemAmountChanged(row.item, x)"
                         placeholder="Amount"
                     />
@@ -35,7 +87,7 @@
                         class="mr-1"
                         v-model="row.item.adjustment_type"
                         :options="claimAdjustmentTypeOptions"
-                        :disabled="form.busy || !row.item.selected"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
                         @change="x => itemTypeChanged(row.item, x)"
                     >
                         <template slot="first">
@@ -46,7 +98,7 @@
                         name="note"
                         v-model="row.item.note"
                         type="text"
-                        :disabled="form.busy || !row.item.selected"
+                        :disabled="form.busy || !row.item.selected || superAdjust.selected"
                         maxlength="255"
                         style="max-width: none!important;"
                         placeholder="Notes..."
@@ -55,7 +107,6 @@
             </template>
           </b-table>
         </div>
-
         <hr />
         <div class="d-flex">
             <div class="ml-auto">
@@ -82,6 +133,13 @@
 
         data() {
             return {
+                superAdjust: {
+                    selected: false,
+                    adjustment_type: '',
+                    amount_applied: '',
+                    note: '',
+                    method: 'amount',
+                },
                 form: new Form({
                     adjustments: [],
                 }),
@@ -106,6 +164,67 @@
         },
 
         methods: {
+            toggleSuperAdjust() {
+                if (this.superAdjust.selected) {
+                    this.initItems(this.claim);
+                    this.superAdjust.amount_applied = '100';
+
+                    this.items.forEach(item => {
+                        this.$set(item, 'selected', true);
+                        return item;
+                    });
+                } else {
+                    this.initItems(this.claim);
+                    this.superAdjust.amount_applied = '';
+                    this.superAdjust.adjustment_type = '';
+                    this.superAdjust.note = '';
+                }
+            },
+
+            superAdjustMethodChanged(val) {
+                this.superAdjust.method = val;
+                // this.$nextTick(() => {
+                    this.superAdjustAmountChanged();
+                // });
+            },
+
+            superAdjustAmountChanged() {
+                let percent = new Decimal(100);
+                try {
+                    percent = new Decimal(this.superAdjust.amount_applied);
+                } catch (e) {
+                    this.superAdjust.amount_applied = 100;
+                    percent = new Decimal(100);
+                }
+
+                if (percent.lt(0) || percent.gt(100)) {
+                    this.superAdjust.amount_applied = 100;
+                    percent = new Decimal(100);
+                }
+
+                percent = percent.dividedBy(100);
+
+                this.items.forEach(item => {
+                    let multiplier = item[this.superAdjust.method ? this.superAdjust.method : 'total'];
+                    item.amount_applied = percent.times(new Decimal(multiplier))
+                        .times(new Decimal(-1)) // Adjustments should be negative
+                        .toFixed(2);
+                });
+            },
+
+            superAdjustTypeChanged(val) {
+                this.items.forEach(item => {
+                    item.adjustment_type = val;
+                    // this.$set(item, 'adjustment_type', val);
+                });
+            },
+
+            superAdjustNotesChanged() {
+                this.items.forEach(item => {
+                    item.note = this.superAdjust.note;
+                });
+            },
+
             /**
              * Map items with extra fields required.
              */
@@ -256,6 +375,14 @@
         watch: {
             claim(newValue, oldValue) {
                 this.initItems(newValue);
+
+                this.superAdjust = {
+                    selected: false,
+                    adjustment_type: '',
+                    amount_applied: '',
+                    note: '',
+                    method: 'amount',
+                };
             },
         },
     }
