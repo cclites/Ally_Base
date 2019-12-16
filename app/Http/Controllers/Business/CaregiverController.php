@@ -285,6 +285,7 @@ class CaregiverController extends BaseController
             'active' => false,
             'inactive_at' => $inactive_at,
             'deactivation_reason_id' => request('deactivation_reason_id'),
+            'deactivated_by' => \Auth::user()->name,
             'deactivation_note' => request('note'),
             'status_alias_id' => null,
         ];
@@ -528,7 +529,7 @@ class CaregiverController extends BaseController
         $pdf = PDF::loadView( 'business.caregivers.deactivation_reason', [
 
             'caregiver'           => $caregiver,
-            'deactivatedBy'       => \Auth::user()->name,
+            'deactivatedBy'       => $caregiver->user->deactivated_by ?? 'Unknown',
             'totalLifetimeHours'  => $totalLifetimeHours,
             'totalLifetimeShifts' => $totalLifetimeShifts
         ]);

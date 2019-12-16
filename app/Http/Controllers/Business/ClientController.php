@@ -337,6 +337,8 @@ class ClientController extends BaseController
         \DB::beginTransaction();
 
         $data[ 'status_alias_id' ] = null;
+        $data[ 'deactivated_by' ] = \Auth::user()->name;
+
         if ( $client->update( $data ) ) {
 
             $client->clearFutureSchedules();
@@ -550,7 +552,7 @@ class ClientController extends BaseController
         $pdf = PDF::loadView( 'business.clients.deactivation_reason', [
 
             'client'              => $client,
-            'deactivatedBy'       => \Auth::user()->name,
+            'deactivatedBy'       => $client->user->deactivated_by ?? 'Unknown',
             'totalLifetimeHours'  => $totalLifetimeHours,
             'totalLifetimeShifts' => $totalLifetimeShifts
         ]);
