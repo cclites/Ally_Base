@@ -92,7 +92,7 @@
                                 </span>
                             </template>
                             <template slot="actions" scope="row">
-                                <a :href="`/business/claims-ar?start_date=${form.start}&end_date=${form.end}&filter=${row.item.invoice_name}`" target="_blank">
+                                <a :href="`/business/reports/claims/ar-aging?filter=${row.item.invoice_name}&autoload=1`" target="_blank">
                                     <b-btn variant="secondary">Go to Claims</b-btn>
                                 </a>
                             </template>

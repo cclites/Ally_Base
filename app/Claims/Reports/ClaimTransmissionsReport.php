@@ -3,7 +3,7 @@
 namespace App\Claims\Reports;
 
 use App\Claims\Queries\ClaimInvoiceQuery;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\Reports\BaseReport;
 

@@ -1,5 +1,5 @@
 <?php
-namespace App\Billing;
+namespace App\Claims;
 
 use App\BaseEnum;
 

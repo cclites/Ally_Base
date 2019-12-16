@@ -4,7 +4,7 @@ namespace App\Claims\Requests;
 
 use App\Http\Requests\FilteredResourceRequest;
 use App\Claims\ClaimInvoiceType;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Rules\ValidEnum;
 
 /**

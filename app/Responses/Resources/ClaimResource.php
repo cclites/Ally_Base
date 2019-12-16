@@ -1,7 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use Carbon\Carbon;
 
 class ClaimResource extends ClientInvoice

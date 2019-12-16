@@ -509,15 +509,6 @@ Route::group([
 
     Route::resource('payers', 'Business\PayerController');
 
-    /* Claims & AR */
-    // Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
-    // Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
-    // Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
-    // Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
-    // Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
-    // Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
-    // Route::get('claims-ar/claim-results/{claim}/{service}', 'Business\ClaimsController@claimResults')->name('claims-ar.claim-results');
-
     /* New Claims & AR */
     Route::post('grouped-claims', 'Business\Claims\GroupedClaimsController@store')->name('claims-create-grouped');
     Route::get('claims-create', 'Business\Claims\CreateClaimsController@index')->name('claims-create');
@@ -727,7 +718,6 @@ Route::group([
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
     Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
-    // Route::get('invoices/claims/{claim}', 'Admin\ClaimInvoiceController@show');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');

@@ -7,18 +7,18 @@ use App\Services\TellusSftpException;
 use Illuminate\Console\Command;
 use App\Services\TellusService;
 use App\ClaimInvoiceTellusFile;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use SimpleXMLElement;
 use Carbon\Carbon;
 
-class CronTellusCheckStatusv2 extends Command
+class CronTellusCheckStatus extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'tellus:check-status-v2';
+    protected $signature = 'tellus:check-status';
 
     /**
      * The console command description.

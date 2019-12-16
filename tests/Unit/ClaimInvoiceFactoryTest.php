@@ -17,7 +17,7 @@ use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimAdjustment;
 use App\Billing\ClientInvoice;
 use App\Claims\ClaimInvoice;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use Tests\CreatesBusinesses;
 use App\Billing\Payer;
 use App\Business;

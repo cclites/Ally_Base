@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Billing\Claim;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Business;
 use App\Claims\ClaimInvoiceStatusHistory;
