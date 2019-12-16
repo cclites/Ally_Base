@@ -2,7 +2,9 @@
 
 namespace App\Shifts;
 
+use App\Business;
 use App\Businesses\SettingsRepository;
+use App\Claims\ClaimableService;
 use App\Shift;
 use Carbon\Carbon;
 
@@ -19,6 +21,12 @@ class DurationCalculator
     {
         $method = $this->getRoundingMethod($shift);
         return (float) $this->$method($shift);
+    }
+
+    public function getDurationForClaimableService(ClaimableService $service)
+    {
+        $hours = $service->visit_start_time->diffInMinutes($service->visit_end_time) / 60;
+        return (float) round(floor(round($hours * 4)) / 4, 2);
     }
 
     function getRoundingMethod(Shift $shift)

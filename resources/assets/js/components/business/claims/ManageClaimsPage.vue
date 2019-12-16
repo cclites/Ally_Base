@@ -195,7 +195,10 @@
                                 <i v-else class="fa fa-ellipsis-h" />
                             </template>
                             <b-dropdown-item :href="`/business/claims/${row.item.id}/print?download=1`">
-                                <i class="fa fa-download mr-1" />Download PDF
+                                <i class="fa fa-download mr-1" />Download Standard PDF
+                            </b-dropdown-item>
+                            <b-dropdown-item v-if="row.item.type != CLAIM_INVOICE_TYPES.PAYER" :href="`/business/claims/${row.item.id}/print/full?download=1`">
+                                <i class="fa fa-download mr-1" />Download Full PDF
                             </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.status == 'CREATED'" @click="transmit(row.item)">
                                 <i class="fa fa-send-o mr-1" />Transmit Claim

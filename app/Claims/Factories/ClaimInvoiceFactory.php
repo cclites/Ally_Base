@@ -424,8 +424,8 @@ class ClaimInvoiceFactory
             // All timestamps stored as UTC
             'scheduled_start_time' => $shift->scheduledStartTime(),
             'scheduled_end_time' => $shift->scheduledEndTime(),
-            'visit_start_time' => $shift->checked_in_time,
-            'visit_end_time' => $shift->checked_out_time,
+            'visit_start_time' => $shift->checked_in_time, // This may get overwritten with pro-rated service times
+            'visit_end_time' => $shift->checked_out_time, // This may get overwritten with pro-rated service times
             'evv_start_time' => $shift->checked_in_time,
             'evv_end_time' => $shift->checked_out_time,
             'checked_in_number' => $shift->checked_in_number,

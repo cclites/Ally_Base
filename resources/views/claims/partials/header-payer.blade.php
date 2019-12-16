@@ -3,12 +3,11 @@
  * @var \App\Claims\ClaimInvoice $claim The ClaimInvoice being printed
  * @var \App\Business $sender The related Business
  * @var \App\Billing\Payer $recipient The related Payer
- * @var array $clientDate Client print on invoice data
  */
 ?>
 <div class="row print-header">
     <div class="header-left">
-        @include('claims.invoice-formats.partials.business-info')
+        @include('claims.partials.business-info')
     </div>
     <div class="text-right header-right">
         <div class="h2">C-Invoice #{{ $claim->getName() }}</div>
@@ -21,21 +20,14 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <strong>{{ $client->name() }}</strong>
+                    <strong>{{ $claim->payer_name }}</strong>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    @include('invoices.partials.address', ['address' => $client->getAddress(), 'phone' => $client->getPhoneNumber()])
+                    @include('invoices.partials.address', ['address' => $recipient->getAddress(), 'phone' => $recipient->getPhoneNumber()])
                 </td>
             </tr>
-            @foreach($clientData as $data)
-            <tr>
-                <td colspan="2">
-                    {{ $data }}
-                </td>
-            </tr>
-            @endforeach
         </table>
     </div>
 </div>
