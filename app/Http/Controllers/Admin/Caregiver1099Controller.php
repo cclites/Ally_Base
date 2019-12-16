@@ -102,7 +102,7 @@ class Caregiver1099Controller extends Controller
     {
         $query = new Caregiver1099Query();
         $records = $query->generateReport($request->validated());
-        
+
         foreach($records as $record)
         {
             $record = (array)$record;
@@ -133,7 +133,6 @@ class Caregiver1099Controller extends Controller
             $caregiver1099 = new Caregiver1099($data);
             $caregiver1099->save();
         }
-
 
         return new SuccessResponse("Caregiver 1099 has been created");
     }

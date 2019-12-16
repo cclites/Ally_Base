@@ -227,14 +227,14 @@
                         </b-form-select>
                     </b-form-group>
                 </b-col>
-                <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
+                <!--b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
                     <b-form-group label="Payer">
                         <b-radio-group v-model="form.caregiver_1099" stacked :required="required">
                             <b-radio value="client">Send on Client's Behalf</b-radio>
                             <b-radio value="ally">Send on Ally's Behalf</b-radio>
                         </b-radio-group>
                     </b-form-group>
-                </b-col>
+                </b-col-->
                 <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0">
                     <b-form-group label="Caregiver 1099">
                         <label>
