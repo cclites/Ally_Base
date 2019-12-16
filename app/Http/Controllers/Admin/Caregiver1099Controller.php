@@ -101,7 +101,7 @@ class Caregiver1099Controller extends Controller
     public function store(StoreCaregiver1099Request $request)
     {
         $query = new Caregiver1099Query; // ->$records;
-        $records = $query->_query($request->all());
+        $records = $query->_query($request->validated());
 
         foreach($records as $record)
         {
@@ -164,7 +164,7 @@ class Caregiver1099Controller extends Controller
      */
     public function update(UpdateCaregiver1099Request $request, Caregiver1099 $caregiver1099)
     {
-        $caregiver1099->fill($request->all());
+        $caregiver1099->fill($request->validated());
 
         if( strpos($caregiver1099->client_ssn, "#") !== false ){
             $this->validate($request, [

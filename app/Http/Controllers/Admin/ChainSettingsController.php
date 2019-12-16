@@ -19,7 +19,7 @@ class ChainSettingsController extends Controller
      */
     public function update(ChainClientTypeSettings $chainClientTypeSettings, Request $request): SuccessResponse
     {
-        $input = $request->all();
+        $input = $request->validated();
         $chainClientTypeSettings->fill($input)->save();
 
         $chainClientTypeSettings->chain->businesses->each(function(Business $business) use($chainClientTypeSettings){
