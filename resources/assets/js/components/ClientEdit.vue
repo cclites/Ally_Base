@@ -528,7 +528,6 @@
                 loading: false,
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
-                payerLabel: '',
                 errors1099: '',
                 required: (this.client_send == 'choose') ? 'required' : false,
             }
@@ -541,9 +540,6 @@
             this.checkForNoUsername();
             await this.loadOfficeUsers();
             await this.fetchStatusAliases();
-
-            this.payerTypeLabel();
-
             this.loading = false;
         },
 
@@ -719,18 +715,17 @@
                     this.form.username = this.form.email;
                 }
             },
-
-            payerTypeLabel(){
-                if(this.form.caregiver_1099 === 'client' || this.form.caregiver_1099 === ''){
-                    this.payerLabel = 'Client';
-                }else if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked'){
-                    this.payerLabel = 'Ally';
-                }
-            },
-
         },
 
         computed: {
+            payerLabel(){
+                if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked') {
+                    return 'Ally';
+                }
+
+                return 'Client';
+            },
+
             business() {
                 return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
             },
