@@ -36,7 +36,7 @@
                             v-model="form.client_type"
                         />
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
-                        <b-form-text class="additional_help text-right">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
+                        <b-form-text class="">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
                     </b-form-group>
                     <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
@@ -799,11 +799,5 @@
 <style scoped>
     .pad-top {
         padding-top: 16px;
-    }
-
-    .additional_help{
-        position: relative;
-        right: 0px;
-        bottom: 20px;
     }
 </style>
