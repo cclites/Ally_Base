@@ -220,8 +220,6 @@ class Caregiver1099Controller extends Controller
                             ->map(function($cg1099) use($systemSettings){
 
                                 if(Caregiver1099::getErrors()){
-                                    \Log::info('1099 has Errors');
-                                    \Log::info(json_encode($cg1099));
                                 }
 
                                 //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);

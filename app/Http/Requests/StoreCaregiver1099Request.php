@@ -27,9 +27,6 @@ class StoreCaregiver1099Request extends FormRequest
      */
     public function rules()
     {
-
-        \Log::info(json_encode($this->all()));
-
         return [
             'year' => 'required|integer',
             'business_id' => 'required|integer',
