@@ -108,6 +108,7 @@
                   'year': '',
                   'business_id': '',
                   'json': 1,
+                  'all': true
               }),
               fields: [
                   {key: 'location', label: 'Location', sortable: true,},

@@ -120,7 +120,7 @@
         },
         computed: {
             url(){
-                return `/admin/reports/bad-ssn-report/${ this.type }?json=1`;
+                return `/admin/reports/bad-ssn-report/${ this.type }?json=1&all=true`;
             },
 
             filterHeight(){

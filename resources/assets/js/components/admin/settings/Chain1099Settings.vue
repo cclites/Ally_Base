@@ -31,7 +31,6 @@
                 </td>
                 <td>
                     <b-form-select v-model="form.medicaid_1099_from">
-                        <option value="">None</option>
                         <option value="client">Client</option>
                         <option value="ally">Ally</option>
                     </b-form-select>
@@ -54,7 +53,6 @@
                 </td>
                 <td>
                     <b-form-select v-model="form.private_pay_1099_from">
-                        <option value="">None</option>
                         <option value="client">Client</option>
                         <option value="ally">Ally</option>
                     </b-form-select>
@@ -77,7 +75,6 @@
                 </td>
                 <td>
                     <b-form-select v-model="form.other_1099_from">
-                        <option value="">None</option>
                         <option value="client">Client</option>
                         <option value="ally">Ally</option>
                     </b-form-select>
@@ -115,16 +112,15 @@
                     medicaid_1099_edit: this.settings.medicaid_1099_edit ? this.settings.medicaid_1099_edit : 0,
                     private_pay_1099_edit: this.settings.private_pay_1099_edit ? this.settings.private_pay_1099_edit : 0,
                     other_1099_edit: this.settings.other_1099_edit ? this.settings.other_1099_edit : 0,
-                    medicaid_1099_from: this.settings.medicaid_1099_from ? this.settings.medicaid_1099_from : '',
-                    private_pay_1099_from: this.settings.private_pay_1099_from ? this.settings.private_pay_1099_from : '',
-                    other_1099_from: this.settings.other_1099_from ? this.settings.other_1099_from : '',
+                    medicaid_1099_from: this.settings.medicaid_1099_from ? this.settings.medicaid_1099_from : 'client',
+                    private_pay_1099_from: this.settings.private_pay_1099_from ? this.settings.private_pay_1099_from : 'client',
+                    other_1099_from: this.settings.other_1099_from ? this.settings.other_1099_from : 'client',
                 }),
                 busy: false,
             }
         },
         methods: {
             save1099Settings(){
-
                 this.busy = true;
                 let url = '/admin/chain-1099-settings/' + this.settings.id;
                 this.form.patch(url);
