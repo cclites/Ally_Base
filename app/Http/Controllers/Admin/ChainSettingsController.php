@@ -6,6 +6,7 @@ use App\Business;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateSystemSettingsRequest;
 
 use App\ChainClientTypeSettings;
 use App\Client;
@@ -17,10 +18,9 @@ class ChainSettingsController extends Controller
      * @param Request $request
      * @return SuccessResponse
      */
-    public function update(ChainClientTypeSettings $chainClientTypeSettings, Request $request): SuccessResponse
+    public function update(UpdateSystemSettingsRequest $request, ChainClientTypeSettings $chainClientTypeSettings )
     {
-        $input = $request->all();
-        $chainClientTypeSettings->fill($input)->save();
+        $chainClientTypeSettings->update($request->validated());
 
         $chainClientTypeSettings->chain->businesses->each(function(Business $business) use($chainClientTypeSettings){
 
