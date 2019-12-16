@@ -214,6 +214,7 @@
                 sortDesc: false,
                 emptyText: "No records to display",
                 selected: '',
+                firstRun: true,
                 fields: [
                     {key: 'client_fname', label: 'Client First Name', sortable: true,},
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
@@ -325,11 +326,14 @@
         },
         watch: {
             'form.business_id'(newVal, oldVal){
-                if(newVal !== oldVal){
-                    axios.get('/admin/clients?json=1&id=' + this.form.business_id + '&active=1').then(response => this.clients = response.data);
-                    axios.get('/admin/caregivers?json=1&id=' + this.form.business_id + '&active=1').then(response => this.caregivers = response.data);
-                    this.client_id='';
-                    this.caregiver_id='';
+
+                if(this.form.business_id !== ''){
+                    if(newVal !== oldVal) {
+                        axios.get('/admin/clients?json=1&id=' + this.form.business_id + '&all=1').then(response => this.clients = response.data);
+                        axios.get('/admin/caregivers?json=1&id=' + this.form.business_id + '&all=1').then(response => this.caregivers = response.data);
+                        this.client_id = '';
+                        this.caregiver_id = '';
+                    }
                 }
             },
         },
