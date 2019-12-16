@@ -6,10 +6,10 @@ use MyCLabs\Enum\Enum;
 /**
  * InvoiceableType Enum
  *
- * @method static ClaimStatus SHIFT()
- * @method static ClaimStatus SHIFT_SERVICE()
- * @method static ClaimStatus SHIFT_ADJUSTMENT()
- * @method static ClaimStatus SHIFT_EXPENSE()
+ * @method static InvoiceableType SHIFT()
+ * @method static InvoiceableType SHIFT_SERVICE()
+ * @method static InvoiceableType SHIFT_ADJUSTMENT()
+ * @method static InvoiceableType SHIFT_EXPENSE()
  */
 class InvoiceableType extends Enum
 {
