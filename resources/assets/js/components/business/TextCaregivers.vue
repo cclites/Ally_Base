@@ -90,7 +90,7 @@
                     <input-help :form="form" field="message" :text=" `${form.message.length}/155 character limit` "></input-help>
                 </b-form-group>
                 <b-form-group>
-                    <b-button variant="info" type="submit" :disabled="submitting">
+                    <b-button variant="info" type="submit" :disabled="submitting || !state">
                         <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send Message
                     </b-button>
                 </b-form-group>
