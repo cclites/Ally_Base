@@ -74,9 +74,20 @@
                                               :form="form"
                                               field="business_id">
                 </business-location-form-group>
-                <b-form-group label="Message" label-class="required">
-                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
-                    <input-help :form="form" field="message" text=""></input-help>
+                <b-form-group
+                    label="Message"
+                    label-class="required"
+                    :invalid-feedback="invalidFeedback"
+                    :valid-feedback="validFeedback"
+                >
+                    <b-textarea
+                        :rows="6"
+                        v-model="form.message"
+                        required
+                        :disabled="submitting"
+                        :state="state"
+                    ></b-textarea>
+                    <input-help :form="form" field="message" :text=" `${form.message.length}/155 character limit` "></input-help>
                 </b-form-group>
                 <b-form-group>
                     <b-button variant="info" type="submit" :disabled="submitting">
@@ -127,6 +138,24 @@ export default {
     },
 
     computed: {
+
+        state(){
+
+            return this.form.message.length >= 0 && this.form.message.length <= 155;
+        },
+        validFeedback(){
+
+            return this.state === true ? '' : '';
+        },
+        invalidFeedback() {
+
+            if ( this.form.message.length >= 155 ) {
+
+                return 'YOUR CAREGIVERS MAY NOT RECEIVE THIS MESSAGE: Please consider limiting your SMS message to 155 characters or less.  You are above that limit and it may make your text message not readable.  The message will be split by many cell phone carriers and run the risk of not being received at all.  This is not an Ally limitation; We just want to ensure your messages are readable and received by all.';
+            }
+
+            return '';
+        },
         businesses() {
             return this.$store.state.business.businesses.filter(item => item.outgoing_sms_number);
         }
