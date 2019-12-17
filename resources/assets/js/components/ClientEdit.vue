@@ -241,7 +241,7 @@
                         </b-radio-group>
                     </b-form-group>
                 </b-col-->
-                <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0">
+                <b-col lg="6">
                     <b-form-group label="Caregiver 1099">
                         <label>
                             1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.

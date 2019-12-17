@@ -75,10 +75,12 @@ class ProfileController extends Controller
 
         switch(auth()->user()->role_type) {
             case 'client':
-                $client_data = request()->validate([
-                    'caregiver_1099' => 'nullable|string|in:ally,client',
-                ]);
-                auth()->user()->role->update($client_data);
+                if (auth()->user()->role->lock_1099 == true) {
+                    $client_data = request()->validate([
+                        'send_1099' => 'nullable|string|in:yes,no',
+                    ]);
+                    auth()->user()->role->update($client_data);
+                }
                 break;
             case 'office_user':
                 $officeUserData = request()->validate([

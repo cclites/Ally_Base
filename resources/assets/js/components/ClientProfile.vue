@@ -60,10 +60,9 @@
                 <b-row>
                     <b-col lg="6">
                         <b-form-group label="Send 1099 to Caregivers">
-                            <b-form-select v-model="form.caregiver_1099" :disabled="form.caregiver_1099 == 'ally'">
-                                <option value="">No</option>
-                                <option value="client">On Client's Behalf</option>
-                                <option value="ally" v-if="form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
+                            <b-form-select v-model="form.send_1099" :disabled="client.lock_1099 == 0">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
@@ -121,7 +120,7 @@
                     lastname: this.user.lastname,
                     email: this.user.email,
                     date_of_birth: (this.user.date_of_birth) ? this.formatDate(this.user.date_of_birth) : '',
-                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
+                    send_1099: this.client.send_1099 ? this.client.send_1099 : '',
                     timezone: this.client.timezone ? this.client.timezone : 'America/New_York',
                     default_business_id: this.client.default_business_id ? this.client.default_business_id : '',
                 })

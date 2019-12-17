@@ -18,9 +18,6 @@ class Admin1099PreviewReport
         $query = new Caregiver1099Query();
         $caregiver1099s = $query->generateReport($filters);
 
-        \Log::info($caregiver1099s);
-
-
         return collect($caregiver1099s)->map(function($caregiver1099){
 
             return[
