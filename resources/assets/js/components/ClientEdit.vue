@@ -225,8 +225,8 @@
             <!------------------------------------->
             <b-row >
                 <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
-                    <b-form-group label="Caregiver 1099" :label-class="required">
-                        <b-form-select v-model="form.send_1099" :required="required">
+                    <b-form-group label="Caregiver 1099" :label-class="this.client_send == 'choose' ? 'required' : null">
+                        <b-form-select v-model="form.send_1099">
                             <option value="choose">Select an Option</option>
                             <option value="yes">Yes</option>
                             <option value="no">No</option>
@@ -535,7 +535,6 @@
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
                 errors1099: '',
-                required: (this.client_send == 'choose') ? 'required' : false,
             }
         },
 
@@ -785,11 +784,11 @@
                 if( this.form.send_1099 === 'yes'){
                     let address = this.client.addresses[0];
 
-                    if(address.address1 && address.city && address.state && address.zip && this.form.ssn){
+                    if(address && address.address1 && address.city && address.state && address.zip && this.form.ssn){
                         return false;
                     }
+                    return true;
                 }
-                return true;
             },
         },
         watch: {
