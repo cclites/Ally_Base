@@ -228,10 +228,6 @@ class Caregiver1099Controller extends Controller
                             ->with('client')
                             ->get()
                             ->map(function($cg1099) use($systemSettings){
-
-                                if(Caregiver1099::getErrors()){
-                                }
-
                                 //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
 
                                 $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
