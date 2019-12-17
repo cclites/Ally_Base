@@ -2245,22 +2245,22 @@
         },
         {
             "name": "owen-it/laravel-auditing",
-            "version": "v8.0.1",
+            "version": "v6.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/owen-it/laravel-auditing.git",
-                "reference": "81becc5ec606fc33581b21ac03ccc7132a49354d"
+                "reference": "ec2e490d77f4e030f296e90b944c07deb10bef2e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/81becc5ec606fc33581b21ac03ccc7132a49354d",
-                "reference": "81becc5ec606fc33581b21ac03ccc7132a49354d",
+                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/ec2e490d77f4e030f296e90b944c07deb10bef2e",
+                "reference": "ec2e490d77f4e030f296e90b944c07deb10bef2e",
                 "shasum": ""
             },
             "require": {
-                "illuminate/console": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.* || 5.7.*",
-                "illuminate/database": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.* || 5.7.*",
-                "illuminate/filesystem": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.* || 5.7.*",
+                "illuminate/console": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.*",
+                "illuminate/database": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.*",
+                "illuminate/filesystem": "5.2.* || 5.3.* || 5.4.* || 5.5.* || 5.6.*",
                 "php": ">=7.0.13"
             },
             "require-dev": {
@@ -2275,7 +2275,7 @@
             "type": "package",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "8.0-dev"
+                    "dev-master": "6.0-dev"
                 },
                 "laravel": {
                     "providers": [
@@ -2324,7 +2324,7 @@
                 "revision",
                 "tracking"
             ],
-            "time": "2018-08-28T10:57:05+00:00"
+            "time": "2018-04-27T10:42:41+00:00"
         },
         {
             "name": "paragonie/random_compat",
