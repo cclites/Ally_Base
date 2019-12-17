@@ -68,9 +68,11 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
         </li>
+        @if(is_admin())
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
         </li>
+        @endif
     </ul>
 
     <!-- Smaller device tabs -->
