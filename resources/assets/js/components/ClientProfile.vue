@@ -61,6 +61,7 @@
                     <b-col lg="6">
                         <b-form-group label="Send 1099 to Caregivers">
                             <b-form-select v-model="form.send_1099" :disabled="client.lock_1099 == 0">
+                                <option value="choose">Select an Option</option>
                                 <option value="yes">Yes</option>
                                 <option value="no">No</option>
                             </b-form-select>
