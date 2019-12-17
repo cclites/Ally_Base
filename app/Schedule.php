@@ -12,6 +12,7 @@ use App\Shifts\RateFactory;
 use App\Shifts\ScheduleConverter;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -126,6 +127,31 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         // Exclude schedules for deleted clients
         static::addGlobalScope('hasClient', function ($builder) {
             $builder->has('client');
+        });
+
+        static::saving( function( $schedule ){
+
+            $original = $schedule->getOriginal();
+            $dirty = $schedule->getDirty();
+
+            if( !empty( $original[ 'caregiver_id' ] ) && array_key_exists( 'caregiver_id', $dirty ) && $dirty[ 'caregiver_id' ] !== $original[ 'caregiver_id' ] ){
+                // this covers a change from cg->cg as well as a change from cg->null
+
+                // check the original caregiver for a request against this schedule, make it denied if so
+                $originalCg = Caregiver::find( $original[ 'caregiver_id' ] );
+
+                // this is apparently more efficient than $model->relationship->contains in eloquent
+                $request = DB::table( 'caregiver_schedule_requests' )
+                    ->where( 'caregiver_id', $originalCg->id )
+                    ->where( 'schedule_id', $schedule->id )
+                    ->first();
+
+                if( $request ){
+
+                    $request->status = CaregiverScheduleRequest::REQUEST_DENIED;
+                    $request->save();
+                }
+            }
         });
     }
 
