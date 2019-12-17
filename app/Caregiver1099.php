@@ -109,4 +109,40 @@ class Caregiver1099 extends BaseModel
 
         return $errors;
     }
+
+    // **********************************************************
+    // ScrubsForSeeding Methods
+    // **********************************************************
+    use \App\Traits\ScrubsForSeeding;
+
+    /**
+     * Get an array of scrubbed data to replace the original.
+     *
+     * @param \Faker\Generator $faker
+     * @param bool $fast
+     * @param null|\Illuminate\Database\Eloquent\Model $item
+     * @return array
+     */
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    {
+        return [
+            'client_fname' => $faker->firstName,
+            'client_lname' => $faker->lastName,
+            //'client_ssn' => '', This will get set via cleanEncrypted1099Data() function
+            'client_address1' => $faker->streetAddress,
+            'client_address2' => '',
+            'client_city' => $faker->city,
+            'client_state' => $faker->stateAbbr,
+            'client_zip' => $faker->postcode,
+            'caregiver_fname' => $faker->firstName,
+            'caregiver_lname' => $faker->lastName,
+            //'caregiver_ssn' => '', This will get set via cleanEncrypted1099Data() function
+            'caregiver_address1' => $faker->streetAddress,
+            'caregiver_address2' => '',
+            'caregiver_city' => $faker->city,
+            'caregiver_state' => $faker->stateAbbr,
+            'caregiver_zip' => $faker->postcode,
+            'created_by' => $faker->name,
+        ];
+    }
 }

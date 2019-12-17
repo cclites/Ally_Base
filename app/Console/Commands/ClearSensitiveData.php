@@ -22,6 +22,7 @@ use App\Business;
 use App\BusinessChain;
 use App\CareDetails;
 use App\Caregiver;
+use App\Caregiver1099;
 use App\CaregiverApplication;
 use App\CaregiverLicense;
 use App\CaregiverMeta;
@@ -144,6 +145,7 @@ class ClearSensitiveData extends Command
         $this->cleanEncryptedCaregiverData();
         $this->cleanEncryptedClaimsData();
         $this->clean3rdPartyCredentials();
+        $this->cleanEncrypted1099Data();
         $this->scrubModel(CaregiverApplication::class);
         $this->scrubModel(ClientMedication::class);
         $this->scrubModel(CreditCard::class);
@@ -211,6 +213,7 @@ class ClearSensitiveData extends Command
             $this->cleanSystemNotifications();
             $this->scrubModel(Task::class);
             $this->scrubModel(TimesheetEntry::class);
+            $this->scrubModel(Caregiver1099::class);
         }
 
         $this->fixDemoAccounts($this->argument('password'));
@@ -402,6 +405,43 @@ class ClearSensitiveData extends Command
                 $item->update([
                     'caregiver_ssn' => $this->faker->ssn,
                 ]);
+                $this->advance();
+            });
+            \DB::commit();
+        });
+
+        $this->finish();
+    }
+
+    public function cleanEncrypted1099Data() : void
+    {
+        $query = Caregiver1099::query();
+
+        $this->startProgress(
+            'Cleaning encrypted 1099 records...',
+            $query->count()
+        );
+
+        if ($this->fastMode) {
+            $query->update([
+                'client_ssn' => Crypt::encrypt($this->faker->ssn),
+                'caregiver_ssn' => Crypt::encrypt($this->faker->ssn),
+            ]);
+
+            $this->finish();
+            return;
+        }
+
+        $query->chunk(400, function ($collection) {
+            \DB::beginTransaction();
+            $collection->each(function (Caregiver1099 $item) {
+                if ($item->getOriginal('client_ssn')) {
+                    $item->client_ssn = encrypt($this->faker->ssn);
+                }
+                if ($item->getOriginal('caregiver_ssn')) {
+                    $item->caregiver_ssn = encrypt($this->faker->ssn);
+                }
+                $item->save();
                 $this->advance();
             });
             \DB::commit();
