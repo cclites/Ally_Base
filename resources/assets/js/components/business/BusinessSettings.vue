@@ -129,16 +129,6 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
-                            <b-form-group label="Logo" label-for="logo">
-                                <image-cropper
-                                    v-model="businessSettings.logo"
-                                    width="190"
-                                    height="80"
-                                    :default-image="defaultInvoiceLogo"
-                                    cropperPadding="100"
-                                />
-                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on reports, invoices and claims."></input-help>
-                            </b-form-group>
                             <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
                                 <b-form-select id="open_shifts_setting"
                                                v-model="businessSettings.open_shifts_setting"
@@ -149,6 +139,16 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="open_shifts_setting"
                                             text="Enable the ability for Caregivers to see and apply for open shifts themselves. Whether for clients they are currently assigned to or optionally for all clients as well."></input-help>
+                            </b-form-group>
+                            <b-form-group label="Logo" label-for="logo">
+                                <image-cropper
+                                    v-model="businessSettings.logo"
+                                    width="190"
+                                    height="80"
+                                    :default-image="defaultInvoiceLogo"
+                                    cropperPadding="100"
+                                />
+                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on invoices, pay statements and claims."></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
