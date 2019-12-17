@@ -30,28 +30,27 @@ class ChainSettingsController extends Controller
             $business->clients()->where('client_type', ClientType::MEDICAID)
                 ->update([
                     'caregiver_1099' => $chainClientTypeSettings->medicaid_1099_from, //ally or client
-                    'lock_1099' => $chainClientTypeSettings->medicaid_1099_edit, //can edit
+                    'can_edit_send_1099' => $chainClientTypeSettings->medicaid_1099_edit, //can edit
                     'send_1099' => $chainClientTypeSettings->medicaid_1099_default, //send by default
                 ]);
 
             $business->clients()->where('client_type', ClientType::PRIVATE_PAY)
                 ->update([
                     'caregiver_1099' => $chainClientTypeSettings->private_pay_1099_from, //ally or client
-                    'lock_1099' => $chainClientTypeSettings->private_pay_1099_edit, //can edit
+                    'can_edit_send_1099' => $chainClientTypeSettings->private_pay_1099_edit, //can edit
                     'send_1099' => $chainClientTypeSettings->private_pay_1099_default, //send by default
                 ]);
 
             $business->clients()->whereNotIn('client_type', [ClientType::PRIVATE_PAY, ClientType::MEDICAID])
                 ->update([
                     'caregiver_1099' => $chainClientTypeSettings->other_1099_from, //ally or client
-                    'lock_1099' => $chainClientTypeSettings->other_1099_edit, //can edit
+                    'can_edit_send_1099' => $chainClientTypeSettings->other_1099_edit, //can edit
                     'send_1099' => $chainClientTypeSettings->other_1099_default, //send by default
                 ]);
 
             $business->clients()->where('send_1099', 'choose')
                 ->update([
-                    'lock_1099' => 1,
-//                    'caregiver_1099' => null,
+                    'can_edit_send_1099' => 1,
                 ]);
         });
 

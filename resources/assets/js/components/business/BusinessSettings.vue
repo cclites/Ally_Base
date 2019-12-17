@@ -137,7 +137,7 @@
                                     :default-image="defaultInvoiceLogo"
                                     cropperPadding="100"
                                 />
-                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on invoices, pay statements and claims."></input-help>
+                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on reports, invoices and claims."></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>

@@ -15,7 +15,7 @@ class AlterTableClientsAdd1099Settings extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->string('send_1099')->default('no');
-            $table->boolean('lock_1099')->default(false);
+            $table->boolean('can_edit_send_1099')->default(false);
         });
     }
 
@@ -29,7 +29,7 @@ class AlterTableClientsAdd1099Settings extends Migration
         Schema::table('clients', function (Blueprint $table) {
             $table->dropColumn([
                 'send_1099',
-                'lock_1099'
+                'can_edit_send_1099'
             ]);
         });
     }

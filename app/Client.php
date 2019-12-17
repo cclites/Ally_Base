@@ -317,7 +317,7 @@ class Client extends AuditableModel implements
         'agreement_status',
         'quickbooks_customer_id',
         'send_1099',
-        'lock_1099',
+        'can_edit_send_1099',
     ];
 
     ///////////////////////////////////////////

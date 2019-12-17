@@ -22,6 +22,6 @@ $factory->define(Client::class, function(Faker $faker) {
         'inquiry_date' => null,
         'service_start_date' => null,
         'send_1099' => 'yes',
-        'lock_1099' => false,
+        'can_edit_send_1099' => false,
     ]);
 });

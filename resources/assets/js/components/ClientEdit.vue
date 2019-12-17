@@ -530,7 +530,7 @@
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
                 errors1099: '',
-                canEdit1099: this.client.lock_1099,
+                canEdit1099: this.client.can_edit_send_1099,
             }
         },
 

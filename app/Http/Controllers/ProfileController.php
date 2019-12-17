@@ -75,7 +75,7 @@ class ProfileController extends Controller
 
         switch(auth()->user()->role_type) {
             case 'client':
-                if (auth()->user()->role->lock_1099 == true) {
+                if (auth()->user()->role->can_edit_send_1099 == true) {
                     $client_data = request()->validate([
                         'send_1099' => 'nullable|string|in:yes,no',
                     ]);

@@ -571,23 +571,29 @@ class ClientController extends BaseController
         return $pdf->stream( $filePath . '.pdf' );
     }
 
+    /**
+     * Get default 1099 client settings from the given client type.
+     *
+     * @param $clientType
+     * @return array
+     */
     public function update1099Options($clientType)
     {
         $settings = $this->businessChain()->clientTypeSettings;
 
         if ($clientType == ClientType::MEDICAID || $clientType == ClientType::PRIVATE_PAY) {
             $caregiver1099 = $settings[$clientType . "_1099_from"]; //ally or client
-            $lock1099 = $settings[$clientType . "_1099_edit"]; //can edit
+            $canEdit1099 = $settings[$clientType . "_1099_edit"]; //can edit
             $send1099 = $settings[$clientType . "_1099_default"]; //send by default
         } else {
             $caregiver1099 = $settings["other_1099_from"];
-            $lock1099 = $settings["other_1099_edit"];
+            $canEdit1099 = $settings["other_1099_edit"];
             $send1099 = $settings["other_1099_default"];
         }
 
         $data = [
             'caregiver_1099' => $caregiver1099,
-            'lock_1099' => $lock1099,
+            'can_edit_send_1099' => $canEdit1099,
             'send_1099' => $send1099
         ];
 
