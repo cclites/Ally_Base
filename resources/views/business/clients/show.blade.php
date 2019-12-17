@@ -106,7 +106,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-edit :client="{{ $client }}" :sales-people="{{ $salesPeople }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
+                    <client-edit :client="{{ $client }}" :sales-people="{{ $salesPeople }}" last-status-date="{{ $lastStatusDate }}" :chain-client-type-settings="{{ $chainClientTypeSettings }}"></client-edit>
                 </div>
             </div>
         </div>

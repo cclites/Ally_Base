@@ -50,8 +50,8 @@ class ChainSettingsController extends Controller
 
             $business->clients()->where('send_1099', 'choose')
                 ->update([
-                    'lock_1099' => 1, //ally or client
-                    'caregiver_1099' => null,
+                    'lock_1099' => 1,
+//                    'caregiver_1099' => null,
                 ]);
         });
 
