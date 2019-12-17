@@ -785,7 +785,7 @@
                 if( this.form.send_1099 === 'yes'){
                     let address = this.client.addresses[0];
 
-                    if(address.address1 && address.city && address.state && address.zip && this.client.ssn){
+                    if(address.address1 && address.city && address.state && address.zip && this.form.ssn){
                         return false;
                     }
                 }
