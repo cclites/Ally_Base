@@ -230,6 +230,7 @@
         },
         methods: {
             generate(){
+                this.items = [];
                 this.busy = true;
                 this.totalRows = 0;
                 this.form.get('/admin/preview-1099-report')
