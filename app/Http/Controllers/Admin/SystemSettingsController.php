@@ -24,10 +24,8 @@ class SystemSettingsController extends Controller
 
     public function update(UpdateAllyContactInfoRequest $request){
 
-        if(\DB::table('system_settings')->update($request->validated())){
-            return new SuccessResponse('System settings have been updated.');
-        }
+        \DB::table('system_settings')->update($request->validated());
 
-        return new ErrorResponse(500, 'Unable to update system settings.');
+        return new SuccessResponse('System settings have been updated.');
     }
 }
