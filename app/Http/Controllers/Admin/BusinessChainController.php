@@ -39,8 +39,9 @@ class BusinessChainController extends Controller
      */
     public function show(BusinessChain $chain)
     {
-        $settings = $chain->chainClientTypeSettings;
-        return view('admin.businesses.show_chain', compact('chain', 'settings'));
+        $chain->load('clientTypeSettings');
+
+        return view('admin.businesses.show_chain', compact('chain'));
     }
 
     /**

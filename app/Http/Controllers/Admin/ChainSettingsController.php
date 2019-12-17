@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\ClientType;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -17,35 +18,44 @@ class ChainSettingsController extends Controller
      * @param ChainClientTypeSettings $chainClientTypeSettings
      * @param Request $request
      * @return SuccessResponse
+     * @throws \Exception
      */
     public function update(UpdateSystemSettingsRequest $request, ChainClientTypeSettings $chainClientTypeSettings )
     {
         $chainClientTypeSettings->update($request->validated());
 
-        $chainClientTypeSettings->chain->businesses->each(function(Business $business) use($chainClientTypeSettings){
+        \DB::beginTransaction();
 
-            $business->clients->each(function(Client $client) use($chainClientTypeSettings){
+        $chainClientTypeSettings->chain->businesses->each(function(Business $business) use ($chainClientTypeSettings){
+            $business->clients()->where('client_type', ClientType::MEDICAID)
+                ->update([
+                    'caregiver_1099' => $chainClientTypeSettings->medicaid_1099_from, //ally or client
+                    'lock_1099' => $chainClientTypeSettings->medicaid_1099_edit, //can edit
+                    'send_1099' => $chainClientTypeSettings->medicaid_1099_default, //send by default
+                ]);
 
-                $this->authorize('update', $client);
+            $business->clients()->where('client_type', ClientType::PRIVATE_PAY)
+                ->update([
+                    'caregiver_1099' => $chainClientTypeSettings->private_pay_1099_from, //ally or client
+                    'lock_1099' => $chainClientTypeSettings->private_pay_1099_edit, //can edit
+                    'send_1099' => $chainClientTypeSettings->private_pay_1099_default, //send by default
+                ]);
 
-                if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
-                    $client->caregiver_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_from"]; //ally or client
-                    $client->lock_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_edit"]; //can edit
-                    $client->send_1099 = $chainClientTypeSettings[ $client->client_type . "_1099_default"]; //send by default
-                }else{
-                    $client->caregiver_1099 = $chainClientTypeSettings["other_1099_from"];
-                    $client->lock_1099 = $chainClientTypeSettings["other_1099_edit"];
-                    $client->send_1099 = $chainClientTypeSettings[ "other_1099_default"];
-                }
+            $business->clients()->whereNotIn('client_type', [ClientType::PRIVATE_PAY, ClientType::MEDICAID])
+                ->update([
+                    'caregiver_1099' => $chainClientTypeSettings->other_1099_from, //ally or client
+                    'lock_1099' => $chainClientTypeSettings->other_1099_edit, //can edit
+                    'send_1099' => $chainClientTypeSettings->other_1099_default, //send by default
+                ]);
 
-                if($client->send_1099 === 'choose'){
-                    $client->lock_1099 = 1;
-                    unset($client->caregiver_1099);
-                }
-
-                $client->save();
-            });
+            $business->clients()->where('send_1099', 'choose')
+                ->update([
+                    'lock_1099' => 1, //ally or client
+                    'caregiver_1099' => null,
+                ]);
         });
+
+        \DB::commit();
 
         return new SuccessResponse("Settings successfully updated");
     }

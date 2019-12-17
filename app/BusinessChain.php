@@ -170,8 +170,8 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(ExpirationType::class, 'chain_id');
     }
 
-    public function chainClientTypeSettings(){
-        return $this->hasOne(ChainClientTypeSettings::class);
+    public function clientTypeSettings(){
+        return $this->hasOne(ChainClientTypeSettings::class, 'business_chain_id', 'id');
     }
 
     ///////////////////////////////////////////

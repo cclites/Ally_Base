@@ -571,7 +571,7 @@ class ClientController extends BaseController
 
     public function update1099Options($client){
 
-        $settings = $this->businessChain()->chainClientTypeSettings;
+        $settings = $this->businessChain()->clientTypeSettings;
 
         if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
             $caregiver1099 = $settings[ $client->client_type . "_1099_from"]; //ally or client

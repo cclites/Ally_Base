@@ -40,7 +40,7 @@
         </div>
 
         <div class="tab-pane" id="chain_1099_settings" role="tabpanel">
-            <chain-1099-settings :chain="{{ $chain }}" :settings="{{ $settings->first() }}"></chain-1099-settings>
+            <chain-1099-settings :chain="{{ $chain }}"></chain-1099-settings>
         </div>
     </div>
 @endsection
