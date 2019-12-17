@@ -9,7 +9,7 @@
                 <tr>
                     <th>Client Type</th>
                     <th>Default Send Option</th>
-                    <th>Send OPTION Editable by User</th>
+                    <th>Send OPTION Editable</th>
                     <th>Default FROM</th>
                 </tr>
             </thead>

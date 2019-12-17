@@ -10,6 +10,7 @@ use App\Business;
 use App\Client;
 use App\CareDetails;
 use App\ClientEthnicityPreference;
+use App\ClientType;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
@@ -299,8 +300,7 @@ class ClientController extends BaseController
 
         //update 1099 options
         if( $request->client_type !== $client->client_type ){
-            $options = $this->update1099Options($client);
-            $data = array_merge($data, $options);
+            $data = array_merge($this->update1099Options($request->client_type), $data);
         }
 
         if ($client->update($data)) {
@@ -571,29 +571,26 @@ class ClientController extends BaseController
         return $pdf->stream( $filePath . '.pdf' );
     }
 
-    public function update1099Options($client){
-
+    public function update1099Options($clientType)
+    {
         $settings = $this->businessChain()->clientTypeSettings;
 
-        if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
-            $caregiver1099 = $settings[ $client->client_type . "_1099_from"]; //ally or client
-            $lock1099 = $settings[ $client->client_type . "_1099_edit"]; //can edit
-            $send1099 = $settings[ $client->client_type . "_1099_default"]; //send by default
-        }else{
+        if ($clientType == ClientType::MEDICAID || $clientType == ClientType::PRIVATE_PAY) {
+            $caregiver1099 = $settings[$clientType . "_1099_from"]; //ally or client
+            $lock1099 = $settings[$clientType . "_1099_edit"]; //can edit
+            $send1099 = $settings[$clientType . "_1099_default"]; //send by default
+        } else {
             $caregiver1099 = $settings["other_1099_from"];
             $lock1099 = $settings["other_1099_edit"];
-            $send1099 = $settings[ "other_1099_default"];
+            $send1099 = $settings["other_1099_default"];
         }
 
         $data = [
-            'caregiver_1099'=>$caregiver1099,
+            'caregiver_1099' => $caregiver1099,
             'lock_1099' => $lock1099,
             'send_1099' => $send1099
         ];
 
-
-
         return $data;
-
     }
 }

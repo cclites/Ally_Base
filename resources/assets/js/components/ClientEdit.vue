@@ -224,7 +224,7 @@
             </b-row>
             <!------------------------------------->
             <b-row >
-                <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
+                <b-col lg="3" v-if="canEdit1099">
                     <b-form-group label="Caregiver 1099" :label-class="this.client.send_1099 == 'choose' ? 'required' : null">
                         <b-form-select v-model="form.send_1099">
                             <option value="choose">Select an Option</option>
@@ -233,14 +233,6 @@
                         </b-form-select>
                     </b-form-group>
                 </b-col>
-                <!--b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
-                    <b-form-group label="Payer">
-                        <b-radio-group v-model="form.caregiver_1099" stacked :required="required">
-                            <b-radio value="client">Send on Client's Behalf</b-radio>
-                            <b-radio value="ally">Send on Ally's Behalf</b-radio>
-                        </b-radio-group>
-                    </b-form-group>
-                </b-col-->
                 <b-col lg="6" v-if="form.send_1099 == 'yes'">
                     <b-form-group label="Caregiver 1099">
                         <label>
@@ -538,6 +530,7 @@
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
                 errors1099: '',
+                canEdit1099: this.client.lock_1099,
             }
         },
 
@@ -800,28 +793,35 @@
                     return;
                 }
 
-                if (newVal == this.client.client_type ) {
+                if (newVal == this.client.client_type) {
                     this.form.caregiver_1099 = this.client.caregiver_1099;
                     this.form.send_1099 = this.client.send_1099;
-                    this.form.lock_1099 = this.client.lock_1099;
-                    return;
+                } else {
+                    switch (newVal) {
+                        case this.CLIENT_TYPES.MEDICAID:
+                            this.form.caregiver_1099 = this.chainClientTypeSettings.medicaid_1099_from;
+                            this.form.send_1099 = this.chainClientTypeSettings.medicaid_1099_default;
+                            break;
+                        case this.CLIENT_TYPES.PRIVATE_PAY:
+                            this.form.caregiver_1099 = this.chainClientTypeSettings.private_pay_1099_from;
+                            this.form.send_1099 = this.chainClientTypeSettings.private_pay_1099_default;
+                            break;
+                        default:
+                            this.form.caregiver_1099 = this.chainClientTypeSettings.other_1099_from;
+                            this.form.send_1099 = this.chainClientTypeSettings.other_1099_default;
+                            break;
+                    }
                 }
 
                 switch (newVal) {
                     case this.CLIENT_TYPES.MEDICAID:
-                        this.form.caregiver_1099 = this.chainClientTypeSettings.medicaid_1099_from;
-                        this.form.send_1099 = this.chainClientTypeSettings.medicaid_1099_default;
-                        this.client.lock_1099 = this.chainClientTypeSettings.medicaid_1099_edit;
+                        this.canEdit1099 = this.chainClientTypeSettings.medicaid_1099_edit;
                         break;
                     case this.CLIENT_TYPES.PRIVATE_PAY:
-                        this.form.caregiver_1099 = this.chainClientTypeSettings.private_pay_1099_from;
-                        this.form.send_1099 = this.chainClientTypeSettings.private_pay_1099_default;
-                        this.client.lock_1099 = this.chainClientTypeSettings.private_pay_1099_edit;
+                        this.canEdit1099 = this.chainClientTypeSettings.private_pay_1099_edit;
                         break;
                     default:
-                        this.form.caregiver_1099 = this.chainClientTypeSettings.other_1099_from;
-                        this.form.send_1099 = this.chainClientTypeSettings.other_1099_default;
-                        this.client.lock_1099 = this.chainClientTypeSettings.other_1099_edit;
+                        this.canEdit1099 = this.chainClientTypeSettings.other_1099_edit;
                         break;
                 }
             },
