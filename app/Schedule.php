@@ -137,31 +137,19 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             if( !empty( $original[ 'caregiver_id' ] ) && array_key_exists( 'caregiver_id', $dirty ) && $dirty[ 'caregiver_id' ] !== $original[ 'caregiver_id' ] ){
                 // this covers a change from cg->cg as well as a change from cg->null
 
-                // check the original caregiver for a request against this schedule, make it denied if so
-                $originalCg = Caregiver::find( $original[ 'caregiver_id' ] );
-
                 // this is apparently more efficient than $model->relationship->contains in eloquent
-                $oldRequest = DB::table( 'caregiver_schedule_requests' )
-                    ->where( 'caregiver_id', $originalCg->id )
-                    ->where( 'schedule_id', $schedule->id )
-                    ->first();
-
-                if( $oldRequest ){
-
-                    $oldRequest->status = CaregiverScheduleRequest::REQUEST_DENIED;
-                    $oldRequest->save();
-                }
-
-                // check the new cg for the same
-                $newRequest = DB::table( 'caregiver_schedule_requests' )
+                DB::table( 'caregiver_schedule_requests' )
                     ->where( 'caregiver_id', $original[ 'caregiver_id' ] )
                     ->where( 'schedule_id', $schedule->id )
-                    ->first();
+                    ->update([ 'status' => CaregiverScheduleRequest::REQUEST_DENIED ]);
 
-                if( $newRequest ){
+                // if theres a new cg, update their request if exists
+                if( !empty( $dirty[ 'caregiver_id' ] ) ){
 
-                    $newRequest->status = CaregiverScheduleRequest::REQUEST_APPROVED;
-                    $newRequest->save();
+                    DB::table( 'caregiver_schedule_requests' )
+                        ->where( 'caregiver_id', $dirty[ 'caregiver_id' ] )
+                        ->where( 'schedule_id', $schedule->id )
+                        ->update([ 'status' => CaregiverScheduleRequest::REQUEST_APPROVED ]);
                 }
             }
         });
